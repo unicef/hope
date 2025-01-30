@@ -63,7 +63,9 @@ class TestCzechRepublicRegistrationService(TestCase):
         cls.data_collecting_type.limit_to.add(cls.business_area)
 
         cls.program = ProgramFactory(
-            status="ACTIVE", data_collecting_type=cls.data_collecting_type, biometric_deduplication_enabled=True
+            status="ACTIVE",
+            data_collecting_type=cls.data_collecting_type,
+            biometric_deduplication_enabled=True,
         )
         cls.organization = OrganizationFactory(business_area=cls.business_area, slug=cls.business_area.slug)
         cls.project = ProjectFactory(name="fake_project", organization=cls.organization, programme=cls.program)
@@ -222,7 +224,8 @@ class TestCzechRepublicRegistrationService(TestCase):
 
         self.records[0].refresh_from_db()
         self.assertEqual(
-            Record.objects.filter(id__in=records_ids, ignored=False, status=Record.STATUS_IMPORTED).count(), 1
+            Record.objects.filter(id__in=records_ids, ignored=False, status=Record.STATUS_IMPORTED).count(),
+            1,
         )
         self.assertEqual(PendingHousehold.objects.count(), 1)
         self.assertEqual(PendingHousehold.objects.filter(program=rdi.program).count(), 1)
@@ -235,7 +238,10 @@ class TestCzechRepublicRegistrationService(TestCase):
         self.assertEqual(household.size, 4)
         self.assertEqual(household.zip_code, "19017")
         self.assertEqual(household.village, "Praha")
-        self.assertEqual(household.head_of_household, PendingIndividual.objects.get(full_name="Ivan Drago"))
+        self.assertEqual(
+            household.head_of_household,
+            PendingIndividual.objects.get(full_name="Ivan Drago"),
+        )
         self.assertEqual(household.rdi_merge_status, "PENDING")
 
         registration_data_import = household.registration_data_import
@@ -283,8 +289,14 @@ class TestCzechRepublicRegistrationService(TestCase):
         self.assertEqual(birth_certificate.document_number, "262873")
         self.assertEqual(PendingDocument.objects.filter(type__key="disability_card").count(), 1)
         self.assertEqual(PendingDocument.objects.filter(type__key="medical_certificate").count(), 1)
-        self.assertEqual(PendingDocument.objects.filter(type__key="temporary_protection_visa").count(), 1)
-        self.assertEqual(PendingDocument.objects.filter(type__key="proof_legal_guardianship").count(), 1)
+        self.assertEqual(
+            PendingDocument.objects.filter(type__key="temporary_protection_visa").count(),
+            1,
+        )
+        self.assertEqual(
+            PendingDocument.objects.filter(type__key="proof_legal_guardianship").count(),
+            1,
+        )
         self.assertEqual(PendingDocument.objects.filter(type__key="national_passport").count(), 2)
         self.assertEqual(birth_certificate.rdi_merge_status, "PENDING")
 
@@ -300,8 +312,14 @@ class TestCzechRepublicRegistrationService(TestCase):
         medical_certificate = PendingDocument.objects.filter(type__key="medical_certificate").first()
         self.assertEqual(medical_certificate.document_number, "2321")
         self.assertEqual(medical_certificate.individual, second_child)
-        self.assertEqual(medical_certificate.expiry_date, datetime.datetime(2023, 5, 17, tzinfo=pytz.UTC))
-        self.assertEqual(medical_certificate.issuance_date, datetime.datetime(2023, 5, 1, tzinfo=pytz.UTC))
+        self.assertEqual(
+            medical_certificate.expiry_date,
+            datetime.datetime(2023, 5, 17, tzinfo=pytz.UTC),
+        )
+        self.assertEqual(
+            medical_certificate.issuance_date,
+            datetime.datetime(2023, 5, 1, tzinfo=pytz.UTC),
+        )
         self.assertEqual(medical_certificate.rdi_merge_status, "PENDING")
 
         temporary_protection_visa = PendingDocument.objects.filter(type__key="temporary_protection_visa").first()

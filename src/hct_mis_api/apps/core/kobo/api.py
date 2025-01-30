@@ -28,7 +28,10 @@ class TokenInvalid(Exception):
 
 
 class KoboRequestsSession(requests.Session):
-    AUTH_DOMAINS = [urlparse(settings.KOBO_KF_URL).hostname, urlparse(settings.KOBO_KC_URL).hostname]
+    AUTH_DOMAINS = [
+        urlparse(settings.KOBO_KF_URL).hostname,
+        urlparse(settings.KOBO_KC_URL).hostname,
+    ]
 
     def should_strip_auth(self, old_url: str, new_url: str) -> bool:
         new_parsed = urlparse(new_url)
@@ -79,7 +82,12 @@ class KoboAPI:
 
     def _get_token(self) -> None:
         self._client = KoboRequestsSession()
-        retries = Retry(total=5, backoff_factor=1, status_forcelist=[502, 503, 504], allowed_methods=False)
+        retries = Retry(
+            total=5,
+            backoff_factor=1,
+            status_forcelist=[502, 503, 504],
+            allowed_methods=False,
+        )
         self._client.mount(self.KPI_URL, HTTPAdapter(max_retries=retries))
 
         if self.business_area is None:
@@ -114,7 +122,10 @@ class KoboAPI:
         return self._client.patch(url=url, data=data, files=files)
 
     def create_template_from_file(
-        self, bytes_io_file: Optional[typing.IO], xlsx_kobo_template_object: XLSXKoboTemplate, template_id: str = ""
+        self,
+        bytes_io_file: Optional[typing.IO],
+        xlsx_kobo_template_object: XLSXKoboTemplate,
+        template_id: str = "",
     ) -> Optional[Tuple[Dict, str]]:
         data = {
             "name": "Untitled",

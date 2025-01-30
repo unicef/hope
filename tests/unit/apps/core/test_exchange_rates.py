@@ -112,7 +112,10 @@ class TestExchangeRatesAPI(TestCase):
 
             if api_url is None and api_key is None:
                 self.assertEqual("TEST_API_KEY", api_client.api_key)
-                self.assertEqual("https://uniapis.unicef.org/biapi/v1/exchangerates", api_client.api_url)
+                self.assertEqual(
+                    "https://uniapis.unicef.org/biapi/v1/exchangerates",
+                    api_client.api_url,
+                )
 
     @parameterized.expand(
         [
@@ -169,7 +172,10 @@ class TestExchangeRates(TestCase):
         self.assertEqual(xeu_second_historical_rate.past_ratio, 1)
 
         # dispersion_date not provided, return current rate
-        self.assertEqual(xeu.get_exchange_rate_by_dispersion_date(dispersion_date=None), xeu.x_rate * xeu.ratio)
+        self.assertEqual(
+            xeu.get_exchange_rate_by_dispersion_date(dispersion_date=None),
+            xeu.x_rate * xeu.ratio,
+        )
         # dispersion_date from current valid date range, return current rate
         self.assertEqual(
             xeu.get_exchange_rate_by_dispersion_date(dispersion_date=datetime(1998, 12, 15, 0, 0)),
@@ -199,7 +205,11 @@ class TestExchangeRates(TestCase):
         ]
     )
     def test_get_exchange_rate_for_currency_code(
-        self, _: Any, currency_code: str, dispersion_date: datetime, expected_result: Any
+        self,
+        _: Any,
+        currency_code: str,
+        dispersion_date: datetime,
+        expected_result: Any,
     ) -> None:
         with requests_mock.Mocker() as adapter:
             adapter.register_uri(

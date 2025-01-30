@@ -50,7 +50,10 @@ def program() -> Program:
         master_detail=True,
     )
     return ProgramFactory(
-        name="Test Program", status=Program.ACTIVE, business_area=business_area, beneficiary_group=beneficiary_group
+        name="Test Program",
+        status=Program.ACTIVE,
+        business_area=business_area,
+        beneficiary_group=beneficiary_group,
     )
 
 
@@ -98,7 +101,11 @@ def date_attribute(program: Program) -> FlexibleAttribute:
 
 
 def create_flexible_attribute(
-    label: str, subtype: str, number_of_rounds: int, rounds_names: list[str], program: Program
+    label: str,
+    subtype: str,
+    number_of_rounds: int,
+    rounds_names: list[str],
+    program: Program,
 ) -> FlexibleAttribute:
     name = field_label_to_field_name(label)
     flexible_attribute = FlexibleAttribute.objects.create(

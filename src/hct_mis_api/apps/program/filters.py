@@ -56,7 +56,15 @@ class ProgramFilter(FilterSet):
         model = Program
 
     order_by = CustomOrderingFilter(
-        fields=(Lower("name"), "status", "start_date", "end_date", "sector", "number_of_households", "budget")
+        fields=(
+            Lower("name"),
+            "status",
+            "start_date",
+            "end_date",
+            "sector",
+            "number_of_households",
+            "budget",
+        )
     )
 
     def filter_number_of_households(self, queryset: QuerySet, name: str, value: Dict) -> QuerySet:
@@ -164,7 +172,11 @@ class ProgramCycleFilter(FilterSet):
             # annotate total_delivered_quantity_usd
             queryset = queryset.annotate(
                 total_delivered_quantity=Coalesce(
-                    Sum("payment_plans__total_delivered_quantity_usd", output_field=DecimalField()), Decimal(0.0)
+                    Sum(
+                        "payment_plans__total_delivered_quantity_usd",
+                        output_field=DecimalField(),
+                    ),
+                    Decimal(0.0),
                 )
             )
             if name == "total_delivered_quantity_usd_from":

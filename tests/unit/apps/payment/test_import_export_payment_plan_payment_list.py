@@ -96,7 +96,12 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         if not Household.objects.all().count():
             for n in range(1, 4):
                 create_household(
-                    {"size": n, "address": "Lorem Ipsum", "country_origin": country_origin, "village": "TEST_VILLAGE"},
+                    {
+                        "size": n,
+                        "address": "Lorem Ipsum",
+                        "country_origin": country_origin,
+                        "village": "TEST_VILLAGE",
+                    },
                 )
 
         if FinancialServiceProvider.objects.count() < 3:
@@ -122,7 +127,10 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         program.households.set(Household.objects.all().values_list("id", flat=True))
         for household in program.households.all():
             PaymentFactory(
-                parent=cls.payment_plan, household=household, financial_service_provider=cls.fsp_1, currency="PLN"
+                parent=cls.payment_plan,
+                household=household,
+                financial_service_provider=cls.fsp_1,
+                currency="PLN",
             )
 
         cls.user = UserFactory()
@@ -151,7 +159,9 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
     def test_import_invalid_file(self) -> None:
         error_msg = [
             XlsxError(
-                "Payment Plan - Payment List", "A2", "This payment id 123123 is not in Payment Plan Payment List"
+                "Payment Plan - Payment List",
+                "A2",
+                "This payment id 123123 is not in Payment Plan Payment List",
             ),
         ]
         service = XlsxPaymentPlanImportService(self.payment_plan, self.xlsx_invalid_file)
@@ -163,7 +173,11 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         self.assertEqual(service.errors, error_msg)
 
     def test_import_invalid_file_with_unexpected_column(self) -> None:
-        error_msg = XlsxError(sheet="Payment Plan - Payment List", coordinates="N3", message="Unexpected value")
+        error_msg = XlsxError(
+            sheet="Payment Plan - Payment List",
+            coordinates="N3",
+            message="Unexpected value",
+        )
         content = Path(
             f"{settings.TESTS_ROOT}/apps/payment/test_file/pp_payment_list_unexpected_column.xlsx"
         ).read_bytes()
@@ -510,7 +524,12 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         self.assertTrue(self.payment_plan.program.is_social_worker_program)
 
         # add core fields
-        fsp_xlsx_template.core_fields = ["age", "zip_code", "household_unicef_id", "individual_unicef_id"]
+        fsp_xlsx_template.core_fields = [
+            "age",
+            "zip_code",
+            "household_unicef_id",
+            "individual_unicef_id",
+        ]
         fsp_xlsx_template.columns = fsp_xlsx_template.DEFAULT_COLUMNS
         fsp_xlsx_template.save()
         fsp_xlsx_template.refresh_from_db()
@@ -527,7 +546,8 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         self.assertIn("individual_id", template_column_list)
         # check core fields
         self.assertListEqual(
-            fsp_xlsx_template.core_fields, ["age", "zip_code", "household_unicef_id", "individual_unicef_id"]
+            fsp_xlsx_template.core_fields,
+            ["age", "zip_code", "household_unicef_id", "individual_unicef_id"],
         )
         self.assertIn("age", template_column_list)
         self.assertIn("zip_code", template_column_list)
@@ -574,7 +594,10 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         self.client.login(username="admin", password="password")
         instance = FinancialServiceProviderXlsxTemplate(flex_fields=[], name="Test FSP XLSX Template")
         instance.save()
-        url = reverse("admin:payment_financialserviceproviderxlsxtemplate_change", args=[instance.pk])
+        url = reverse(
+            "admin:payment_financialserviceproviderxlsxtemplate_change",
+            args=[instance.pk],
+        )
         response: Any = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertIn("flex_fields", response.context["adminform"].form.fields)

@@ -33,14 +33,19 @@ class Migration(migrations.Migration):
             model_name="filetemp",
             name="content_type",
             field=models.ForeignKey(
-                null=True, on_delete=django.db.models.deletion.CASCADE, to="contenttypes.contenttype"
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="contenttypes.contenttype",
             ),
         ),
         migrations.AddField(
             model_name="filetemp",
             name="created_by",
             field=models.ForeignKey(
-                null=True, on_delete=django.db.models.deletion.SET_NULL, related_name="+", to=settings.AUTH_USER_MODEL
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="+",
+                to=settings.AUTH_USER_MODEL,
             ),
         ),
         migrations.AddField(
@@ -51,13 +56,18 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="datacollectingtype",
             name="limit_to",
-            field=models.ManyToManyField(blank=True, related_name="data_collecting_types", to="core.BusinessArea"),
+            field=models.ManyToManyField(
+                blank=True, related_name="data_collecting_types", to="core.BusinessArea"
+            ),
         ),
         migrations.AddField(
             model_name="countrycodemap",
             name="country",
             field=models.OneToOneField(
-                blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to="geo.country"
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                to="geo.country",
             ),
         ),
         migrations.AddField(
@@ -81,12 +91,16 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="businessareapartnerthrough",
             name="roles",
-            field=models.ManyToManyField(related_name="business_area_partner_through", to="account.Role"),
+            field=models.ManyToManyField(
+                related_name="business_area_partner_through", to="account.Role"
+            ),
         ),
         migrations.AddField(
             model_name="businessarea",
             name="countries",
-            field=models.ManyToManyField(related_name="business_areas", to="geo.Country"),
+            field=models.ManyToManyField(
+                related_name="business_areas", to="geo.Country"
+            ),
         ),
         migrations.AddField(
             model_name="businessarea",
@@ -103,7 +117,9 @@ class Migration(migrations.Migration):
             model_name="businessarea",
             name="partners",
             field=models.ManyToManyField(
-                related_name="business_areas", through="core.BusinessAreaPartnerThrough", to="account.Partner"
+                related_name="business_areas",
+                through="core.BusinessAreaPartnerThrough",
+                to="account.Partner",
             ),
         ),
         migrations.AlterUniqueTogether(
@@ -112,17 +128,23 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name="flexibleattribute",
-            constraint=models.UniqueConstraint(fields=("name", "program"), name="unique_name_program"),
+            constraint=models.UniqueConstraint(
+                fields=("name", "program"), name="unique_name_program"
+            ),
         ),
         migrations.AddConstraint(
             model_name="flexibleattribute",
             constraint=models.UniqueConstraint(
-                condition=models.Q(("program__isnull", True)), fields=("name",), name="unique_name_without_program"
+                condition=models.Q(("program__isnull", True)),
+                fields=("name",),
+                name="unique_name_without_program",
             ),
         ),
         migrations.AddConstraint(
             model_name="datacollectingtype",
-            constraint=models.UniqueConstraint(fields=("label", "code"), name="unique_label_code_data_collecting_type"),
+            constraint=models.UniqueConstraint(
+                fields=("label", "code"), name="unique_label_code_data_collecting_type"
+            ),
         ),
         migrations.AddConstraint(
             model_name="businessareapartnerthrough",
@@ -134,13 +156,13 @@ class Migration(migrations.Migration):
             sql="\n            CREATE OR REPLACE FUNCTION payment_plan_business_area_seq() RETURNS trigger \n                LANGUAGE plpgsql\n                AS $$\n            begin\n                execute format('create sequence if not exists payment_plan_business_area_seq_%s', translate(NEW.id::text, '-','_'));\n                return NEW;\n            end\n            $$;\n\n            ",
         ),
         migrations.RunSQL(
-            sql='CREATE TRIGGER payment_plan_business_area_seq AFTER INSERT ON core_businessarea FOR EACH ROW EXECUTE PROCEDURE payment_plan_business_area_seq();',
+            sql="CREATE TRIGGER payment_plan_business_area_seq AFTER INSERT ON core_businessarea FOR EACH ROW EXECUTE PROCEDURE payment_plan_business_area_seq();",
         ),
         migrations.RunSQL(
             sql="\n            CREATE OR REPLACE FUNCTION payment_business_area_seq() RETURNS trigger \n                LANGUAGE plpgsql\n                AS $$\n            begin\n                execute format('create sequence if not exists payment_business_area_seq_%s', translate(NEW.id::text, '-','_'));\n                return NEW;\n            end\n            $$;\n\n            ",
         ),
         migrations.RunSQL(
-            sql='CREATE TRIGGER payment_business_area_seq AFTER INSERT ON core_businessarea FOR EACH ROW EXECUTE PROCEDURE payment_business_area_seq();',
+            sql="CREATE TRIGGER payment_business_area_seq AFTER INSERT ON core_businessarea FOR EACH ROW EXECUTE PROCEDURE payment_business_area_seq();",
         ),
         migrations.RunSQL(
             sql="""

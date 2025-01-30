@@ -12,7 +12,13 @@ class ManagerialPaymentPlanListVersionsKeyBit(BusinessAreaKeyBit):
 
 class PaymentPlanProgramsPermissionsKeyBit(KeyBitBase):
     def get_data(
-        self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
+        self,
+        params: Any,
+        view_instance: Any,
+        view_method: Any,
+        request: Any,
+        args: tuple,
+        kwargs: dict,
     ) -> str:
         business_area = BusinessArea.objects.get(slug=kwargs.get("business_area"))
         program_ids = request.user.partner.get_program_ids_for_business_area(str(business_area.id))

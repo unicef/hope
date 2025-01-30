@@ -59,7 +59,8 @@ class VerificationPlanCrudServices:
             raise GraphQLError("You can only edit PENDING Payment Plan Verification")
 
         payment_records = get_payment_records(
-            payment_verification_plan.payment_plan, payment_verification_plan.verification_channel
+            payment_verification_plan.payment_plan,
+            payment_verification_plan.verification_channel,
         )
         sampling = Sampling(input_data, payment_verification_plan.payment_plan, payment_records)
         pv_plan, payment_records_qs = sampling.process_sampling(payment_verification_plan)

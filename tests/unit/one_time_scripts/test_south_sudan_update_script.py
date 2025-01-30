@@ -35,7 +35,11 @@ class TestSouthSudanUpdateScript(TestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         business_area = create_afghanistan()
-        program = ProgramFactory(name="Test Program for Household", status=Program.ACTIVE, business_area=business_area)
+        program = ProgramFactory(
+            name="Test Program for Household",
+            status=Program.ACTIVE,
+            business_area=business_area,
+        )
         cls.program = program
 
         business_area = create_afghanistan()
@@ -109,7 +113,9 @@ class TestSouthSudanUpdateScript(TestCase):
         )
         with Capturing() as output:
             south_sudan_update_script(
-                f"{settings.TESTS_ROOT}/one_time_scripts/files/update_script_sudan.xlsx", self.program.id, 1
+                f"{settings.TESTS_ROOT}/one_time_scripts/files/update_script_sudan.xlsx",
+                self.program.id,
+                1,
             )
         expected_output = [
             "Validating row 0 to 1 Indivduals",
@@ -147,15 +153,23 @@ class TestSouthSudanUpdateScript(TestCase):
         self.assertEqual(individual.documents.get(type__key="national_id").document_number, "TEST123")
         self.assertEqual(individual.documents.get(type__key="national_id").country.iso_code3, "POL")
 
-        self.assertEqual(individual.documents.get(type__key="birth_certificate").document_number, "OLD")
-        self.assertEqual(individual.documents.get(type__key="birth_certificate").country.iso_code3, "DEU")
+        self.assertEqual(
+            individual.documents.get(type__key="birth_certificate").document_number,
+            "OLD",
+        )
+        self.assertEqual(
+            individual.documents.get(type__key="birth_certificate").country.iso_code3,
+            "DEU",
+        )
         self.assertEqual(individual2.middle_name, "Testowy")
         self.assertEqual(individual2.family_name, "Tesciak")
 
     def test_south_sudan_update_script_validation_fails(self) -> None:
         with Capturing() as output:
             south_sudan_update_script(
-                f"{settings.TESTS_ROOT}/one_time_scripts/files/update_script_sudan.xlsx", self.program.id, 1
+                f"{settings.TESTS_ROOT}/one_time_scripts/files/update_script_sudan.xlsx",
+                self.program.id,
+                1,
             )
         expected_output = [
             "Validating row 0 to 1 Indivduals",

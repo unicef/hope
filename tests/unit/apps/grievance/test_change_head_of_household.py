@@ -81,16 +81,24 @@ class TestChangeHeadOfHousehold(APITestCase):
             ticket=cls.grievance_ticket,
             individual=cls.individual2,
             individual_data={
-                "relationship": {"value": "HEAD", "approve_status": True, "previous_value": "BROTHER_SISTER"}
+                "relationship": {
+                    "value": "HEAD",
+                    "approve_status": True,
+                    "previous_value": "BROTHER_SISTER",
+                }
             },
         )
 
         cls.create_user_role_with_permissions(
-            cls.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], cls.business_area
+            cls.user,
+            [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK],
+            cls.business_area,
         )
         rebuild_search_index()
 
-    def test_close_update_individual_should_throw_error_when_there_is_one_head_of_household(self) -> None:
+    def test_close_update_individual_should_throw_error_when_there_is_one_head_of_household(
+        self,
+    ) -> None:
         self.individual1.relationship = HEAD
         self.individual1.save()
 
@@ -113,7 +121,9 @@ class TestChangeHeadOfHousehold(APITestCase):
         self.assertEqual(self.individual1.relationship, "HEAD")
         self.assertEqual(self.individual2.relationship, "BROTHER_SISTER")
 
-    def test_close_update_individual_should_change_head_of_household_if_there_was_no_one(self) -> None:
+    def test_close_update_individual_should_change_head_of_household_if_there_was_no_one(
+        self,
+    ) -> None:
         self.individual1.relationship = AUNT_UNCLE
         self.individual1.save()
 

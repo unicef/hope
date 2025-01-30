@@ -131,7 +131,11 @@ class TestUpdateProgram(APITestCase):
         cls.pdu_data_to_be_removed = PeriodicFieldDataFactory(
             subtype=PeriodicFieldData.DECIMAL,
             number_of_rounds=3,
-            rounds_names=["Round 1 To Be Removed", "Round 2 To Be Removed", "Round 3 To Be Removed"],
+            rounds_names=[
+                "Round 1 To Be Removed",
+                "Round 2 To Be Removed",
+                "Round 3 To Be Removed",
+            ],
         )
         cls.pdu_field_to_be_removed = FlexibleAttributeForPDUFactory(
             program=cls.program,
@@ -174,7 +178,11 @@ class TestUpdateProgram(APITestCase):
 
     @parameterized.expand(
         [
-            ("with_permissions", [Permissions.PROGRAMME_UPDATE, Permissions.PROGRAMME_ACTIVATE], True),
+            (
+                "with_permissions",
+                [Permissions.PROGRAMME_UPDATE, Permissions.PROGRAMME_ACTIVATE],
+                True,
+            ),
             (
                 "with_partial_permissions",
                 [
@@ -257,7 +265,12 @@ class TestUpdateProgram(APITestCase):
 
     def test_update_program_with_deprecated_dct(self) -> None:
         dct, _ = DataCollectingType.objects.update_or_create(
-            **{"label": "Deprecated", "code": "deprecated", "description": "Deprecated", "deprecated": True}
+            **{
+                "label": "Deprecated",
+                "code": "deprecated",
+                "description": "Deprecated",
+                "deprecated": True,
+            }
         )
         dct.limit_to.add(self.business_area)
 
@@ -277,7 +290,12 @@ class TestUpdateProgram(APITestCase):
 
     def test_update_program_with_inactive_dct(self) -> None:
         dct, _ = DataCollectingType.objects.update_or_create(
-            **{"label": "Inactive", "code": "inactive", "description": "Inactive", "active": False}
+            **{
+                "label": "Inactive",
+                "code": "inactive",
+                "description": "Inactive",
+                "active": False,
+            }
         )
         dct.limit_to.add(self.business_area)
 
@@ -298,7 +316,11 @@ class TestUpdateProgram(APITestCase):
     def test_update_program_with_dct_from_other_ba(self) -> None:
         other_ba = BusinessAreaFactory()
         dct, _ = DataCollectingType.objects.update_or_create(
-            **{"label": "Test Wrong BA", "code": "test_wrong_ba", "description": "Test Wrong BA"}
+            **{
+                "label": "Test Wrong BA",
+                "code": "test_wrong_ba",
+                "description": "Test Wrong BA",
+            }
         )
         dct.limit_to.add(other_ba)
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
@@ -421,7 +443,9 @@ class TestUpdateProgram(APITestCase):
         self.assertIsNotNone(program.programme_code)
         self.assertEqual(len(program.programme_code), 4)
 
-    def test_update_program_with_duplicated_programme_code_among_the_same_business_area(self) -> None:
+    def test_update_program_with_duplicated_programme_code_among_the_same_business_area(
+        self,
+    ) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
 
         ProgramFactory(programme_code="ABC2", business_area=self.business_area)
@@ -447,7 +471,9 @@ class TestUpdateProgram(APITestCase):
 
     def test_update_program_with_pdu_fields(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_UPDATE, Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], self.business_area
+            self.user,
+            [Permissions.PROGRAMME_UPDATE, Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+            self.business_area,
         )
 
         # get details to check the pdu fields
@@ -483,7 +509,11 @@ class TestUpdateProgram(APITestCase):
                         "pduData": {
                             "subtype": "BOOL",
                             "numberOfRounds": 3,
-                            "roundsNames": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
+                            "roundsNames": [
+                                "Round 1 Updated",
+                                "Round 2 Updated",
+                                "Round 3 Updated",
+                            ],
                         },
                     },
                     {
@@ -491,7 +521,12 @@ class TestUpdateProgram(APITestCase):
                         "pduData": {
                             "subtype": "BOOL",
                             "numberOfRounds": 4,
-                            "roundsNames": ["Round 1A", "Round 2B", "Round 3C", "Round 4D"],
+                            "roundsNames": [
+                                "Round 1A",
+                                "Round 2B",
+                                "Round 3C",
+                                "Round 4D",
+                            ],
                         },
                     },
                 ],
@@ -523,7 +558,10 @@ class TestUpdateProgram(APITestCase):
         )
         self.assertIsNone(FlexibleAttribute.objects.filter(name="pdu_field_to_be_removed").first())
         self.assertIsNone(FlexibleAttribute.objects.filter(name="pdu_field_to_be_updated").first())
-        self.assertEqual(FlexibleAttribute.objects.filter(name="pdu_field_updated").first().pdu_data.subtype, "BOOL")
+        self.assertEqual(
+            FlexibleAttribute.objects.filter(name="pdu_field_updated").first().pdu_data.subtype,
+            "BOOL",
+        )
         self.assertIsNotNone(FlexibleAttribute.objects.filter(name="pdu_field_new").first())
         self.assertIsNotNone(FlexibleAttribute.objects.filter(name="pdu_field_to_be_preserved").first())
 
@@ -549,7 +587,11 @@ class TestUpdateProgram(APITestCase):
                         "pduData": {
                             "subtype": "BOOL",
                             "numberOfRounds": 1,
-                            "roundsNames": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
+                            "roundsNames": [
+                                "Round 1 Updated",
+                                "Round 2 Updated",
+                                "Round 3 Updated",
+                            ],
                         },
                     },
                     {
@@ -557,7 +599,12 @@ class TestUpdateProgram(APITestCase):
                         "pduData": {
                             "subtype": "BOOL",
                             "numberOfRounds": 3,
-                            "roundsNames": ["Round 1A", "Round 2B", "Round 3C", "Round 4D"],
+                            "roundsNames": [
+                                "Round 1A",
+                                "Round 2B",
+                                "Round 3C",
+                                "Round 4D",
+                            ],
                         },
                     },
                 ],
@@ -572,7 +619,9 @@ class TestUpdateProgram(APITestCase):
             },
         )
 
-    def test_update_program_with_pdu_fields_duplicated_field_names_in_input(self) -> None:
+    def test_update_program_with_pdu_fields_duplicated_field_names_in_input(
+        self,
+    ) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
         # pdu data with duplicated field names in the input
         update_data = {
@@ -595,7 +644,11 @@ class TestUpdateProgram(APITestCase):
                         "pduData": {
                             "subtype": "BOOL",
                             "numberOfRounds": 3,
-                            "roundsNames": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
+                            "roundsNames": [
+                                "Round 1 Updated",
+                                "Round 2 Updated",
+                                "Round 3 Updated",
+                            ],
                         },
                     },
                     {
@@ -603,7 +656,12 @@ class TestUpdateProgram(APITestCase):
                         "pduData": {
                             "subtype": "BOOL",
                             "numberOfRounds": 4,
-                            "roundsNames": ["Round 1A", "Round 2B", "Round 3C", "Round 4D"],
+                            "roundsNames": [
+                                "Round 1A",
+                                "Round 2B",
+                                "Round 3C",
+                                "Round 4D",
+                            ],
                         },
                     },
                 ],
@@ -618,7 +676,9 @@ class TestUpdateProgram(APITestCase):
             },
         )
 
-    def test_update_program_with_pdu_fields_existing_field_name_for_new_field(self) -> None:
+    def test_update_program_with_pdu_fields_existing_field_name_for_new_field(
+        self,
+    ) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
         # pdu data with NEW field with name that already exists in the database but in different program -> no fail
         pdu_data = PeriodicFieldDataFactory(
@@ -652,7 +712,11 @@ class TestUpdateProgram(APITestCase):
                         "pduData": {
                             "subtype": "BOOL",
                             "numberOfRounds": 3,
-                            "roundsNames": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
+                            "roundsNames": [
+                                "Round 1 Updated",
+                                "Round 2 Updated",
+                                "Round 3 Updated",
+                            ],
                         },
                     },
                     {
@@ -660,7 +724,12 @@ class TestUpdateProgram(APITestCase):
                         "pduData": {
                             "subtype": "BOOL",
                             "numberOfRounds": 4,
-                            "roundsNames": ["Round 1A", "Round 2B", "Round 3C", "Round 4D"],
+                            "roundsNames": [
+                                "Round 1A",
+                                "Round 2B",
+                                "Round 3C",
+                                "Round 4D",
+                            ],
                         },
                     },
                 ],
@@ -675,7 +744,9 @@ class TestUpdateProgram(APITestCase):
             },
         )
 
-    def test_update_program_with_pdu_fields_existing_field_name_for_updated_field(self) -> None:
+    def test_update_program_with_pdu_fields_existing_field_name_for_updated_field(
+        self,
+    ) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
         # pdu data with UPDATED field with name that already exists in the database but in different program -> no fail
         pdu_data = PeriodicFieldDataFactory(
@@ -709,7 +780,11 @@ class TestUpdateProgram(APITestCase):
                         "pduData": {
                             "subtype": "BOOL",
                             "numberOfRounds": 3,
-                            "roundsNames": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
+                            "roundsNames": [
+                                "Round 1 Updated",
+                                "Round 2 Updated",
+                                "Round 3 Updated",
+                            ],
                         },
                     },
                     {
@@ -717,7 +792,12 @@ class TestUpdateProgram(APITestCase):
                         "pduData": {
                             "subtype": "BOOL",
                             "numberOfRounds": 4,
-                            "roundsNames": ["Round 1A", "Round 2B", "Round 3C", "Round 4D"],
+                            "roundsNames": [
+                                "Round 1A",
+                                "Round 2B",
+                                "Round 3C",
+                                "Round 4D",
+                            ],
                         },
                     },
                 ],
@@ -780,7 +860,12 @@ class TestUpdateProgram(APITestCase):
                         "pduData": {
                             "subtype": "BOOL",
                             "numberOfRounds": 4,
-                            "roundsNames": ["Round 1A", "Round 2B", "Round 3C", "Round 4D"],
+                            "roundsNames": [
+                                "Round 1A",
+                                "Round 2B",
+                                "Round 3C",
+                                "Round 4D",
+                            ],
                         },
                     },
                 ],
@@ -795,7 +880,9 @@ class TestUpdateProgram(APITestCase):
             },
         )
 
-    def test_update_program_with_pdu_fields_program_has_RDI_update_pdu_field(self) -> None:
+    def test_update_program_with_pdu_fields_program_has_RDI_update_pdu_field(
+        self,
+    ) -> None:
         # field will NOT be updated, no field will be removed
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
         RegistrationDataImportFactory(program=self.program)
@@ -810,7 +897,10 @@ class TestUpdateProgram(APITestCase):
                         "pduData": {
                             "subtype": "BOOL",
                             "numberOfRounds": 2,
-                            "roundsNames": ["Round 1 To Be Updated", "Round 2 To Be Updated"],
+                            "roundsNames": [
+                                "Round 1 To Be Updated",
+                                "Round 2 To Be Updated",
+                            ],
                         },
                     },
                 ],
@@ -825,7 +915,9 @@ class TestUpdateProgram(APITestCase):
             },
         )
 
-    def test_update_program_with_pdu_fields_program_has_RDI_invalid_data_decrease_rounds(self) -> None:
+    def test_update_program_with_pdu_fields_program_has_RDI_invalid_data_decrease_rounds(
+        self,
+    ) -> None:
         # round number CANNOT be decreased for Program with RDI
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
         RegistrationDataImportFactory(program=self.program)
@@ -855,7 +947,9 @@ class TestUpdateProgram(APITestCase):
             },
         )
 
-    def test_update_program_with_pdu_fields_program_has_RDI_invalid_data_changed_existing_rounds_names(self) -> None:
+    def test_update_program_with_pdu_fields_program_has_RDI_invalid_data_changed_existing_rounds_names(
+        self,
+    ) -> None:
         # names of existing rounds cannot be updated
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
         RegistrationDataImportFactory(program=self.program)
@@ -870,7 +964,11 @@ class TestUpdateProgram(APITestCase):
                         "pduData": {
                             "subtype": self.pdu_field_to_be_updated.pdu_data.subtype,
                             "numberOfRounds": 3,
-                            "roundsNames": ["Round 1 Updated", "Round 2 Updated", "Round 3 New"],
+                            "roundsNames": [
+                                "Round 1 Updated",
+                                "Round 2 Updated",
+                                "Round 3 New",
+                            ],
                         },
                     },
                 ],
@@ -889,7 +987,10 @@ class TestUpdateProgram(APITestCase):
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
         RegistrationDataImportFactory(program=self.program)
         _, individuals = create_household_and_individuals(
-            household_data={"business_area": self.business_area, "program": self.program},
+            household_data={
+                "business_area": self.business_area,
+                "program": self.program,
+            },
             individuals_data=[
                 {
                     "business_area": self.business_area,
@@ -904,7 +1005,11 @@ class TestUpdateProgram(APITestCase):
             individual.flex_fields,
             {
                 "pdu_field_to_be_preserved": {"1": {"value": None}},
-                "pdu_field_to_be_removed": {"1": {"value": None}, "2": {"value": None}, "3": {"value": None}},
+                "pdu_field_to_be_removed": {
+                    "1": {"value": None},
+                    "2": {"value": None},
+                    "3": {"value": None},
+                },
                 "pdu_field_to_be_updated": {"1": {"value": None}, "2": {"value": None}},
             },
         )
@@ -943,7 +1048,11 @@ class TestUpdateProgram(APITestCase):
             individual.flex_fields,
             {
                 "pdu_field_to_be_preserved": {"1": {"value": None}},
-                "pdu_field_to_be_removed": {"1": {"value": None}, "2": {"value": None}, "3": {"value": None}},
+                "pdu_field_to_be_removed": {
+                    "1": {"value": None},
+                    "2": {"value": None},
+                    "3": {"value": None},
+                },
                 "pdu_field_to_be_updated": {
                     "1": {"value": None},
                     "2": {"value": None},
@@ -955,7 +1064,10 @@ class TestUpdateProgram(APITestCase):
 
     @patch.dict(
         "os.environ",
-        {"DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key", "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com"},
+        {
+            "DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key",
+            "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
+        },
     )
     @patch(
         "hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI"
@@ -1008,7 +1120,10 @@ class TestUpdateProgram(APITestCase):
         self.program.save()
         self.program.refresh_from_db()
         self.assertIsNotNone(self.program.end_date)
-        self.assertEqual(str(self.program.deduplication_set_id), "12bc7994-9467-4f27-9954-d75a67d0e909")
+        self.assertEqual(
+            str(self.program.deduplication_set_id),
+            "12bc7994-9467-4f27-9954-d75a67d0e909",
+        )
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
             context={"user": self.user},

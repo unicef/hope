@@ -92,8 +92,14 @@ class TestBuildSnapshot(TestCase):
         self.assertIsNotNone(self.p2.household_snapshot)
         self.assertEqual(str(self.p1.household_snapshot.snapshot_data["id"]), str(self.hh1.id))
         self.assertEqual(str(self.p2.household_snapshot.snapshot_data["id"]), str(self.hh2.id))
-        self.assertEqual(len(self.p1.household_snapshot.snapshot_data["individuals"]), self.hh1.individuals.count())
-        self.assertEqual(len(self.p2.household_snapshot.snapshot_data["individuals"]), self.hh2.individuals.count())
+        self.assertEqual(
+            len(self.p1.household_snapshot.snapshot_data["individuals"]),
+            self.hh1.individuals.count(),
+        )
+        self.assertEqual(
+            len(self.p2.household_snapshot.snapshot_data["individuals"]),
+            self.hh2.individuals.count(),
+        )
         self.assertIsNotNone(self.p1.household_snapshot.snapshot_data["primary_collector"])
         self.assertEqual(
             self.p1.household_snapshot.snapshot_data["primary_collector"].get("delivery_mechanisms_data", {}),
@@ -137,4 +143,7 @@ class TestBuildSnapshot(TestCase):
             )
         self.assertEqual(pp.payment_items.count(), number_of_payments)
         create_payment_plan_snapshot_data(pp)
-        self.assertEqual(pp.payment_items.filter(household_snapshot__isnull=False).count(), number_of_payments)
+        self.assertEqual(
+            pp.payment_items.filter(household_snapshot__isnull=False).count(),
+            number_of_payments,
+        )

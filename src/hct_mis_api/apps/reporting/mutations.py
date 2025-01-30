@@ -41,7 +41,9 @@ class CreateReport(ReportValidator, CommonValidator, PermissionMutation):
         cls.has_permission(info, Permissions.REPORTING_EXPORT, business_area)
 
         cls.validate(
-            start_date=report_data.get("date_from"), end_date=report_data.get("date_to"), report_data=report_data
+            start_date=report_data.get("date_from"),
+            end_date=report_data.get("date_to"),
+            report_data=report_data,
         )
 
         report_vars = {
@@ -63,7 +65,9 @@ class CreateReport(ReportValidator, CommonValidator, PermissionMutation):
 
         if admin_area_1_id and not admin_area_2_ids:
             parent = get_object_or_404(
-                Area, id=decode_id_string(admin_area_1_id), area_type__country__name=business_area.name
+                Area,
+                id=decode_id_string(admin_area_1_id),
+                area_type__country__name=business_area.name,
             )
             admin_area_ids = Area.objects.filter(parent=parent).values_list("id", flat=True)
         if admin_area_2_ids:

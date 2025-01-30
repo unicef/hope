@@ -80,7 +80,10 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
     )
 
     payment_plan = models.ForeignKey(
-        "payment.PaymentPlan", on_delete=models.CASCADE, related_name="payment_verification_plans", null=True
+        "payment.PaymentPlan",
+        on_delete=models.CASCADE,
+        related_name="payment_verification_plans",
+        null=True,
     )
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True)
     verification_channel = models.CharField(max_length=50, choices=VERIFICATION_CHANNEL_CHOICES)
@@ -275,7 +278,11 @@ class PaymentVerificationSummary(TimeStampedUUIDModel):
         (STATUS_PENDING, "Pending"),
     )
     status = models.CharField(
-        max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, verbose_name="Verification status", db_index=True
+        max_length=50,
+        choices=STATUS_CHOICES,
+        default=STATUS_PENDING,
+        verbose_name="Verification status",
+        db_index=True,
     )
     activation_date = models.DateTimeField(null=True)
     completion_date = models.DateTimeField(null=True)

@@ -305,7 +305,9 @@ class PaymentFactory(DjangoModelFactory):
         lambda o: (
             o.household.individuals_and_roles.filter(role=ROLE_PRIMARY).first()
             or IndividualRoleInHouseholdFactory(
-                household=o.household, individual=o.household.head_of_household, role=ROLE_PRIMARY
+                household=o.household,
+                individual=o.household.head_of_household,
+                role=ROLE_PRIMARY,
             )
         ).individual
     )
@@ -814,7 +816,10 @@ def generate_delivery_mechanisms() -> None:
                     "service_provider_code__mobile_money",
                 ],
                 "optional_fields": ["full_name"],
-                "unique_fields": ["delivery_phone_number__mobile_money", "provider__mobile_money"],
+                "unique_fields": [
+                    "delivery_phone_number__mobile_money",
+                    "provider__mobile_money",
+                ],
             },
             "transfer_type": "CASH",
         },
@@ -858,7 +863,10 @@ def generate_delivery_mechanisms() -> None:
             "code": "transfer_to_account",
             "name": "Transfer to Account",
             "requirements": {
-                "required_fields": ["bank_name__transfer_to_account", "bank_account_number__transfer_to_account"],
+                "required_fields": [
+                    "bank_name__transfer_to_account",
+                    "bank_account_number__transfer_to_account",
+                ],
                 "optional_fields": [
                     "full_name",
                 ],
@@ -922,7 +930,10 @@ def generate_delivery_mechanisms() -> None:
                     "blockchain_name__transfer_to_digital_wallet",
                     "wallet_address__transfer_to_digital_wallet",
                 ],
-                "optional_fields": ["full_name", "wallet_name__transfer_to_digital_wallet"],
+                "optional_fields": [
+                    "full_name",
+                    "wallet_name__transfer_to_digital_wallet",
+                ],
                 "unique_fields": [
                     "blockchain_name__transfer_to_digital_wallet",
                     "wallet_address__transfer_to_digital_wallet",

@@ -50,5 +50,6 @@ class TestDCTValidation(TestCase):
         with self.assertRaises(ValidationError) as error:
             dct_full.compatible_types.add(dct_social)
         self.assertEqual(
-            str(error.exception.messages[0]), "DCTs of different types cannot be compatible with each other."
+            str(error.exception.messages[0]),
+            "DCTs of different types cannot be compatible with each other.",
         )

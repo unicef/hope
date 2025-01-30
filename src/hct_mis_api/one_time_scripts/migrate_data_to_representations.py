@@ -41,7 +41,9 @@ def migrate_data_to_representations() -> None:
         migrate_data_to_representations_per_business_area(business_area=business_area)
 
 
-def migrate_data_to_representations_per_business_area(business_area: BusinessArea) -> None:
+def migrate_data_to_representations_per_business_area(
+    business_area: BusinessArea,
+) -> None:
     """
     This function is used to migrate data from old models to new representations per business_area.
     Take TargetPopulations:
@@ -64,7 +66,8 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
     for program in Program.objects.filter(business_area=business_area).order_by("id"):
         logger.info(f"Creating representations for assigned RDIs for program {program}")
         rdis = RegistrationDataImport.objects.filter(
-            program=program, created_at__gte=timezone.make_aware(timezone.datetime(2023, 9, 21))
+            program=program,
+            created_at__gte=timezone.make_aware(timezone.datetime(2023, 9, 21)),
         )
         handle_rdis(rdis, program)
 
@@ -146,7 +149,10 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
     logger.info("Updating is_migration_handled for households")
     # mark programs households as migrated and exclude in rerun
     Household.original_and_repr_objects.filter(
-        business_area=business_area, copied_to__isnull=False, is_original=True, is_migration_handled=False
+        business_area=business_area,
+        copied_to__isnull=False,
+        is_original=True,
+        is_migration_handled=False,
     ).update(is_migration_handled=True, migrated_at=timezone.now())
     logger.info("Handling objects without any representations yet - enrolling to storage programs")
     handle_non_program_objects(business_area, hhs_to_ignore, unknown_unassigned_program)
@@ -161,12 +167,18 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
 
     logger.info("Updating Individuals with migration date")
     Individual.original_and_repr_objects.filter(
-        business_area=business_area, is_original=True, copied_to__isnull=False, is_migration_handled=False
+        business_area=business_area,
+        is_original=True,
+        copied_to__isnull=False,
+        is_migration_handled=False,
     ).update(is_migration_handled=True, migrated_at=timezone.now())
 
     logger.info("Updating IndividualRoleInHouseholds with migration date")
     IndividualRoleInHousehold.original_and_repr_objects.filter(
-        household__business_area=business_area, is_original=True, copied_to__isnull=False, is_migration_handled=False
+        household__business_area=business_area,
+        is_original=True,
+        copied_to__isnull=False,
+        is_migration_handled=False,
     ).update(is_migration_handled=True, migrated_at=timezone.now())
 
     if business_area.name == "Democratic Republic of Congo":
@@ -382,7 +394,12 @@ def copy_individual_fast(individual: Individual, program: Program) -> tuple:
     documents_to_create = copy_document_per_individual_fast(documents, individual)
     identities_to_create = copy_individual_identity_per_individual_fast(identities, individual)
     bank_account_info_to_create = copy_bank_account_info_per_individual_fast(bank_accounts_info, individual)
-    return individual, documents_to_create, identities_to_create, bank_account_info_to_create
+    return (
+        individual,
+        documents_to_create,
+        identities_to_create,
+        bank_account_info_to_create,
+    )
 
 
 def copy_roles(households: QuerySet, program: Program) -> None:
@@ -408,7 +425,11 @@ def copy_roles(households: QuerySet, program: Program) -> None:
         roles_batch = (
             IndividualRoleInHousehold.original_and_repr_objects.filter(id__in=roles_ids[batch_start:batch_end])
             .select_related("individual", "household")
-            .prefetch_related("individual__documents", "individual__identities", "individual__bank_account_info")
+            .prefetch_related(
+                "individual__documents",
+                "individual__identities",
+                "individual__bank_account_info",
+            )
         )
 
         original_individual_ids = [role.individual_id for role in roles_batch]
@@ -608,7 +629,8 @@ def adjust_payments(business_area: BusinessArea) -> None:
 
     payments_ids = list(
         Payment.objects.filter(
-            parent__target_population__program__business_area=business_area, household__is_original=True
+            parent__target_population__program__business_area=business_area,
+            household__is_original=True,
         ).values_list("pk", flat=True)
     )
     payments_count = len(payments_ids)
@@ -648,7 +670,10 @@ def adjust_payments(business_area: BusinessArea) -> None:
                 payment.household = representation_household
                 payment_updates.append(payment)
 
-        Payment.objects.bulk_update(payment_updates, fields=["collector_id", "head_of_household_id", "household_id"])
+        Payment.objects.bulk_update(
+            payment_updates,
+            fields=["collector_id", "head_of_household_id", "household_id"],
+        )
         del payment_updates
 
 
@@ -963,12 +988,15 @@ def get_unknown_unassigned_dict() -> Dict:
     return unknown_unassigned_dict
 
 
-def migrate_data_for_assigned_RDIs_per_business_area(business_area: BusinessArea) -> None:
+def migrate_data_for_assigned_RDIs_per_business_area(
+    business_area: BusinessArea,
+) -> None:
     hhs_before = Household.original_and_repr_objects.count()
     for program in Program.objects.filter(business_area=business_area):
         logger.info(f"Creating representations for assigned RDIs for program {program}")
         rdis = RegistrationDataImport.objects.filter(
-            program=program, created_at__gte=timezone.make_aware(timezone.datetime(2023, 9, 21))
+            program=program,
+            created_at__gte=timezone.make_aware(timezone.datetime(2023, 9, 21)),
         )
         handle_rdis(rdis, program)
     logger.info(

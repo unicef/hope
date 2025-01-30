@@ -58,7 +58,9 @@ class TestEraseRdiMutation(APITestCase):
         self.assertEqual(Household.objects.count(), 0)
         self.assertEqual(Individual.objects.count(), 0)
 
-    def test_erase_registration_data_import_raises_error_when_wrong_status(self) -> None:
+    def test_erase_registration_data_import_raises_error_when_wrong_status(
+        self,
+    ) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.RDI_REFUSE_IMPORT], self.business_area)
 
         imported_household = HouseholdFactory(registration_data_import=self.rdi_2)
@@ -81,7 +83,8 @@ class TestEraseRdiMutation(APITestCase):
 
         self.assertEqual(RegistrationDataImport.objects.filter(erased=True).count(), 0)
         self.assertEqual(
-            RegistrationDataImport.objects.filter(erased=False).count(), RegistrationDataImport.objects.count()
+            RegistrationDataImport.objects.filter(erased=False).count(),
+            RegistrationDataImport.objects.count(),
         )
 
         self.assertEqual(Household.objects.count(), 1)

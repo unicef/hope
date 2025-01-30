@@ -108,7 +108,11 @@ class HouseholdWithdrawFromListMixin:
             if status == GrievanceTicket.STATUS_CLOSED:
                 continue
             GrievanceTicket.objects.filter(id__in=ticket_ids, status=status).update(
-                extras=JSONBSet(F("extras"), Value("{status_before_withdrawn}"), Value(f'"{status}"')),
+                extras=JSONBSet(
+                    F("extras"),
+                    Value("{status_before_withdrawn}"),
+                    Value(f'"{status}"'),
+                ),
                 status=GrievanceTicket.STATUS_CLOSED,
             )
 
@@ -192,7 +196,11 @@ class HouseholdWithdrawFromListMixin:
                 return HttpResponseRedirect(reverse("admin:household_household_changelist"))
 
         context["step"] = "1"
-        return TemplateResponse(request, "admin/household/household/withdraw_households_from_list.html", context)
+        return TemplateResponse(
+            request,
+            "admin/household/household/withdraw_households_from_list.html",
+            context,
+        )
 
 
 @admin.register(Household)
@@ -230,7 +238,10 @@ class HouseholdAdmin(
         QueryStringFilter,
         ("business_area", LinkedAutoCompleteFilter.factory(parent=None)),
         ("program", LinkedAutoCompleteFilter.factory(parent="business_area")),
-        ("registration_data_import", LinkedAutoCompleteFilter.factory(parent="program")),
+        (
+            "registration_data_import",
+            LinkedAutoCompleteFilter.factory(parent="program"),
+        ),
         "registration_method",
         "residence_status",
         "collect_type",
@@ -418,7 +429,11 @@ class HouseholdAdmin(
             try:
                 with transaction.atomic():
                     household.erase()
-                self.message_user(request, f"Household {household.unicef_id} erased.", messages.SUCCESS)
+                self.message_user(
+                    request,
+                    f"Household {household.unicef_id} erased.",
+                    messages.SUCCESS,
+                )
             except Exception as e:
                 self.message_user(request, str(e), messages.ERROR)
             return HttpResponseRedirect(reverse("admin:household_household_change", args=[pk]))
@@ -441,7 +456,11 @@ class HouseholdAdmin(
         if request.method == "POST":
             try:
                 household.delete()
-                self.message_user(request, f"Household {household.unicef_id} was soft removed.", messages.SUCCESS)
+                self.message_user(
+                    request,
+                    f"Household {household.unicef_id} was soft removed.",
+                    messages.SUCCESS,
+                )
             except Exception as e:
                 self.message_user(request, str(e), messages.ERROR)
             return HttpResponseRedirect(reverse("admin:household_household_change", args=[pk]))
@@ -488,7 +507,11 @@ class HouseholdAdmin(
         form = MassEnrollForm(request.POST, business_area_id=business_area_id, households=qs)
         context["form"] = form
         context["action"] = "mass_enroll_to_another_program"
-        return TemplateResponse(request, "admin/household/household/enroll_households_to_program.html", context)
+        return TemplateResponse(
+            request,
+            "admin/household/household/enroll_households_to_program.html",
+            context,
+        )
 
     mass_enroll_to_another_program.short_description = "Mass enroll households to another program"
 

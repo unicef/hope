@@ -38,11 +38,13 @@ class TestHandleRole(TestCase):
         )
 
         self.assertEqual(
-            IndividualRoleInHousehold.objects.filter(household=household, individual=individual).count(), 1
+            IndividualRoleInHousehold.objects.filter(household=household, individual=individual).count(),
+            1,
         )
 
         handle_role(ROLE_NO_ROLE, household, individual)
 
         self.assertEqual(
-            IndividualRoleInHousehold.objects.filter(household=household, individual=individual).count(), 0
+            IndividualRoleInHousehold.objects.filter(household=household, individual=individual).count(),
+            0,
         )

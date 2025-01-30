@@ -96,7 +96,8 @@ def recalculate_population_fields_task(
         for page_number in paginator.page_range:
             page = paginator.page(page_number)
             recalculate_population_fields_chunk_task.delay(
-                households_ids=list(page.object_list.values_list("pk", flat=True)), program_id=program_id
+                households_ids=list(page.object_list.values_list("pk", flat=True)),
+                program_id=program_id,
             )
 
 
@@ -187,7 +188,9 @@ def update_individuals_iban_from_xlsx_task(xlsx_update_file_id: UUID, uploaded_b
     except Exception as e:
         if enable_email_notification:
             IndividualsIBANXlsxUpdate.send_error_email(
-                error_message=str(e), xlsx_update_file_id=str(xlsx_update_file_id), uploaded_by=uploaded_by
+                error_message=str(e),
+                xlsx_update_file_id=str(xlsx_update_file_id),
+                uploaded_by=uploaded_by,
             )
 
 
@@ -200,7 +203,9 @@ def revalidate_phone_number_task(individual_ids: List[UUID]) -> None:
     for individual in individuals:
         individuals_to_update.append(calculate_phone_numbers_validity(individual))
     Individual.objects.bulk_update(
-        individuals_to_update, fields=("phone_no_valid", "phone_no_alternative_valid"), batch_size=1000
+        individuals_to_update,
+        fields=("phone_no_valid", "phone_no_alternative_valid"),
+        batch_size=1000,
     )
 
 
@@ -230,7 +235,8 @@ def enroll_households_to_program_task(households_ids: List, program_for_enroll_i
             get_individual_doc(program_for_enroll.business_area.slug),
         )
         populate_index(
-            Household.objects.filter(copied_from_id__in=households_ids, program=program_for_enroll), HouseholdDocument
+            Household.objects.filter(copied_from_id__in=households_ids, program=program_for_enroll),
+            HouseholdDocument,
         )
     finally:
         cache.delete(cache_key)

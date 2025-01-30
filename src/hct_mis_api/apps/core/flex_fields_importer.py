@@ -84,7 +84,12 @@ class FlexibleAttributeImporter:
         }.get(object_type_to_add)
 
     def _assign_field_values(
-        self, value: Any, header_name: str, object_type_to_add: Any, row: Row, row_number: int
+        self,
+        value: Any,
+        header_name: str,
+        object_type_to_add: Any,
+        row: Row,
+        row_number: int,
     ) -> None:
         if not (model_fields := self._get_model_fields(object_type_to_add)):
             return

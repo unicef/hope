@@ -219,7 +219,10 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
             current_amount = Feedback.objects.count()
             response = self.graphql_request(
                 request_string=self.CREATE_NEW_FEEDBACK_MUTATION,
-                context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+                context={
+                    "user": self.user,
+                    "headers": {"Business-Area": self.business_area.slug},
+                },
                 variables={"input": data},
             )
             assert "errors" in response, response
@@ -329,7 +332,10 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
             variables={"id": encode_id_base64(feedback_id, "Feedback")},
         )
         assert "errors" not in response, response["errors"]
-        self.assertEqual(response["data"]["feedback"]["id"], encode_id_base64(feedback_id, "Feedback"))
+        self.assertEqual(
+            response["data"]["feedback"]["id"],
+            encode_id_base64(feedback_id, "Feedback"),
+        )
 
     def create_linked_grievance_ticket(self, feedback_id: str) -> Dict:
         create_grievance_response = self.graphql_request(

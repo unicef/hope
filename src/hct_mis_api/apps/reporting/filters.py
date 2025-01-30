@@ -21,5 +21,12 @@ class ReportFilter(FilterSet):
         model = Report
 
     order_by = OrderingFilter(
-        fields=("report_type", "status", "created_at", "created_by__first_name", "date_from", "number_of_records")
+        fields=(
+            "report_type",
+            "status",
+            "created_at",
+            "created_by__first_name",
+            "date_from",
+            "number_of_records",
+        )
     )

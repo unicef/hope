@@ -49,7 +49,9 @@ class TestSurveyQueries(APITestCase):
         cls.partner = PartnerFactory(name="TestPartner")
         cls.user = UserFactory(first_name="John", last_name="Wick", partner=cls.partner)
         cls.payment_plan = PaymentPlanFactory(
-            business_area=cls.business_area, created_by=cls.user, program_cycle=cls.program.cycles.first()
+            business_area=cls.business_area,
+            created_by=cls.user,
+            program_cycle=cls.program.cycles.first(),
         )
 
         households = [create_household()[0] for _ in range(14)]
@@ -57,36 +59,59 @@ class TestSurveyQueries(APITestCase):
             PaymentFactory(parent=cls.payment_plan, household=household)
 
         SurveyFactory.create_batch(3, program=cls.program, created_by=cls.user)
-        SurveyFactory(title="Test survey", program=cls.program, payment_plan=cls.payment_plan, created_by=cls.user)
+        SurveyFactory(
+            title="Test survey",
+            program=cls.program,
+            payment_plan=cls.payment_plan,
+            created_by=cls.user,
+        )
 
     def test_query_list_without_permissions(self) -> None:
         self.create_user_role_with_permissions(self.user, [], self.business_area)
 
         self.snapshot_graphql_request(
             request_string=self.QUERY_LIST,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {"Business-Area": self.business_area.slug},
+            },
             variables={"program": self.id_to_base64(self.program.id, "ProgramNode")},
         )
 
     def test_query_list_filter_by_search(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST], self.business_area, self.program
+            self.user,
+            [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST],
+            self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
             request_string=self.QUERY_LIST,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
-            variables={"program": self.id_to_base64(self.program.id, "ProgramNode"), "search": "Test survey"},
+            context={
+                "user": self.user,
+                "headers": {"Business-Area": self.business_area.slug},
+            },
+            variables={
+                "program": self.id_to_base64(self.program.id, "ProgramNode"),
+                "search": "Test survey",
+            },
         )
 
     def test_query_list_filter_by_program(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST], self.business_area, self.program
+            self.user,
+            [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST],
+            self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
             request_string=self.QUERY_LIST,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {"Business-Area": self.business_area.slug},
+            },
             variables={
                 "program": self.id_to_base64(self.program.id, "ProgramNode"),
             },
@@ -94,12 +119,18 @@ class TestSurveyQueries(APITestCase):
 
     def test_query_list_filter_by_target_population(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST], self.business_area, self.program
+            self.user,
+            [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST],
+            self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
             request_string=self.QUERY_LIST,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {"Business-Area": self.business_area.slug},
+            },
             variables={
                 "program": self.id_to_base64(self.program.id, "ProgramNode"),
                 "paymentPlan": self.id_to_base64(self.payment_plan.id, "PaymentPlanNode"),
@@ -108,12 +139,18 @@ class TestSurveyQueries(APITestCase):
 
     def test_query_list_filter_by_created_by(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST], self.business_area, self.program
+            self.user,
+            [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST],
+            self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
             request_string=self.QUERY_LIST,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {"Business-Area": self.business_area.slug},
+            },
             variables={
                 "program": self.id_to_base64(self.program.id, "ProgramNode"),
                 "createdBy": self.id_to_base64(self.user.id, "UserNode"),
@@ -131,10 +168,17 @@ class TestSurveyQueries(APITestCase):
     )
     def test_single_survey(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-        survey = SurveyFactory(title="Test survey single", payment_plan=self.payment_plan, created_by=self.user)
+        survey = SurveyFactory(
+            title="Test survey single",
+            payment_plan=self.payment_plan,
+            created_by=self.user,
+        )
 
         self.snapshot_graphql_request(
             request_string=self.QUERY_SINGLE,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {"Business-Area": self.business_area.slug},
+            },
             variables={"id": self.id_to_base64(survey.id, "SurveyNode")},
         )

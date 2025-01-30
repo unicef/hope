@@ -176,7 +176,12 @@ class TestFlexibles(TestCase):
         self.assertEqual(len(attribs), 1)
 
     def test_flexibles_missing_name(self) -> None:
-        self.assertRaisesMessage(ValidationError, "Name is required", self.load_xls, "flex_field_missing_name.xls")
+        self.assertRaisesMessage(
+            ValidationError,
+            "Name is required",
+            self.load_xls,
+            "flex_field_missing_name.xls",
+        )
         group = FlexibleAttributeGroup.objects.all()
         attribs = FlexibleAttribute.objects.all()
         self.assertEqual(len(group), 0)
@@ -184,7 +189,10 @@ class TestFlexibles(TestCase):
 
     def test_flexibles_missing_english_label(self) -> None:
         self.assertRaisesMessage(
-            ValidationError, "English label cannot be empty", self.load_xls, "flex_field_missing_english_label.xls"
+            ValidationError,
+            "English label cannot be empty",
+            self.load_xls,
+            "flex_field_missing_english_label.xls",
         )
         group = FlexibleAttributeGroup.objects.all()
         attribs = FlexibleAttribute.objects.all()

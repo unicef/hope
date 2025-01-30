@@ -85,7 +85,10 @@ class TestFilterHouseholdsByProgram(APITestCase):
 
     def test_filter_household_query_by_rdi_id(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], self.business_area, self.program1
+            self.user,
+            [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST],
+            self.business_area,
+            self.program1,
         )
         rdi = RegistrationDataImportFactory(imported_by=self.user, business_area=self.business_area)
         # create new HH and IND with new RDI
@@ -95,7 +98,12 @@ class TestFilterHouseholdsByProgram(APITestCase):
                 "program": self.program1,
                 "size": 1,
             },
-            {"full_name": "TEST User", "given_name": "TEST", "family_name": "User", "registration_data_import": rdi},
+            {
+                "full_name": "TEST User",
+                "given_name": "TEST",
+                "family_name": "User",
+                "registration_data_import": rdi,
+            },
         )
         individual = individuals[0]
         self.assertEqual(individual.full_name, "TEST User")

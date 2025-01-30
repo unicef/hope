@@ -148,7 +148,9 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
 
     @classmethod
     def validate_import_data(
-        cls, import_data_id: Optional[str], allow_delivery_mechanisms_validation_errors: bool = False
+        cls,
+        import_data_id: Optional[str],
+        allow_delivery_mechanisms_validation_errors: bool = False,
     ) -> None:
         import_data = get_object_or_404(ImportData, id=decode_id_string(import_data_id))
         if import_data.status != ImportData.STATUS_FINISHED and not (
@@ -170,7 +172,8 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
             "allow_delivery_mechanisms_validation_errors", False
         )
         cls.validate_import_data(
-            registration_data_import_data.import_data_id, allow_delivery_mechanisms_validation_errors
+            registration_data_import_data.import_data_id,
+            allow_delivery_mechanisms_validation_errors,
         )
 
         program_id: str = decode_id_string_required(info.context.headers.get("Program"))
@@ -184,7 +187,10 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
             import_data_obj,
             business_area,
         ) = create_registration_data_import_objects(
-            registration_data_import_data, info.context.user, "XLS", allow_delivery_mechanisms_validation_errors
+            registration_data_import_data,
+            info.context.user,
+            "XLS",
+            allow_delivery_mechanisms_validation_errors,
         )
 
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area)
@@ -313,7 +319,11 @@ class RegistrationDeduplicationMutation(BaseValidator, PermissionMutation):
     @is_authenticated
     @raise_program_status_is(Program.FINISHED)
     def mutate(
-        cls, root: Any, info: Any, registration_data_import_id: Optional[str], **kwargs: Any
+        cls,
+        root: Any,
+        info: Any,
+        registration_data_import_id: Optional[str],
+        **kwargs: Any,
     ) -> "RegistrationDeduplicationMutation":
         registration_data_import_id = decode_id_string(registration_data_import_id)
         old_rdi_obj = RegistrationDataImport.objects.get(id=registration_data_import_id)
@@ -354,7 +364,8 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, Validati
             "allow_delivery_mechanisms_validation_errors", False
         )
         RegistrationXlsxImportMutation.validate_import_data(
-            registration_data_import_data.import_data_id, allow_delivery_mechanisms_validation_errors
+            registration_data_import_data.import_data_id,
+            allow_delivery_mechanisms_validation_errors,
         )
 
         program_id: str = decode_id_string_required(info.context.headers.get("Program"))
@@ -368,7 +379,10 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, Validati
             import_data_obj,
             business_area,
         ) = create_registration_data_import_objects(
-            registration_data_import_data, info.context.user, "KOBO", allow_delivery_mechanisms_validation_errors
+            registration_data_import_data,
+            info.context.user,
+            "KOBO",
+            allow_delivery_mechanisms_validation_errors,
         )
 
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area)
@@ -612,7 +626,12 @@ class DeleteRegistrationDataImport(graphene.Mutation):
         program_id = rdi_obj.program_id
         rdi_obj.delete()
         log_create(
-            RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program_id, rdi_obj, None
+            RegistrationDataImport.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            program_id,
+            rdi_obj,
+            None,
         )
         return cls(ok=True)
 

@@ -75,8 +75,16 @@ class TestXlsxVerificationMarkAsInvalid(APITestCase):
 
     @parameterized.expand(
         [
-            ("with_permission_was_downloaded_false", [Permissions.PAYMENT_VERIFICATION_INVALID], False),
-            ("with_permission_was_downloaded_true", [Permissions.PAYMENT_VERIFICATION_INVALID], True),
+            (
+                "with_permission_was_downloaded_false",
+                [Permissions.PAYMENT_VERIFICATION_INVALID],
+                False,
+            ),
+            (
+                "with_permission_was_downloaded_true",
+                [Permissions.PAYMENT_VERIFICATION_INVALID],
+                True,
+            ),
             ("without_permission", [], True),
         ]
     )

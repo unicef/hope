@@ -40,7 +40,11 @@ class DjangoFastConnectionField(DjangoConnectionField):
 
     @classmethod
     def resolve_connection(
-        cls, connection: Connection, args: Dict, iterable: Union[QuerySet, List], max_limit: Optional[int] = None
+        cls,
+        connection: Connection,
+        args: Dict,
+        iterable: Union[QuerySet, List],
+        max_limit: Optional[int] = None,
     ) -> Connection:
         # Remove the offset parameter and convert it to an after cursor.
         offset = args.pop("offset", None)

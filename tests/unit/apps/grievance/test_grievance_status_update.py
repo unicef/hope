@@ -98,7 +98,10 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         [
             (
                 "with_permission",
-                [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK, Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK],
+                [
+                    Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+                    Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK,
+                ],
             ),
             ("without_permission", []),
         ]

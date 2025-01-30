@@ -128,7 +128,14 @@ class CreateProgram(
         if pdu_fields is not None:
             FlexibleAttributeForPDUService(program, pdu_fields).create_pdu_flex_attributes()
 
-        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, None, program)
+        log_create(
+            Program.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            program.pk,
+            None,
+            program,
+        )
         return CreateProgram(program=program)
 
 
@@ -213,7 +220,14 @@ class UpdateProgram(
             FlexibleAttributeForPDUService(program, pdu_fields).update_pdu_flex_attributes_in_program_update()
             populate_pdu_new_rounds_with_null_values_task.delay(program_id)
 
-        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, old_program, program)
+        log_create(
+            Program.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            program.pk,
+            old_program,
+            program,
+        )
         return UpdateProgram(program=program)
 
 
@@ -261,7 +275,14 @@ class UpdateProgramPartners(
             remove_program_partner_access(partners_data, program)
         program.save()
 
-        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, old_program, program)
+        log_create(
+            Program.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            program.pk,
+            old_program,
+            program,
+        )
         return UpdateProgram(program=program)
 
 
@@ -283,12 +304,23 @@ class DeleteProgram(ProgramDeletionValidator, PermissionMutation):
         cls.validate(program=program)
 
         program.delete()
-        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, old_program, program)
+        log_create(
+            Program.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            program.pk,
+            old_program,
+            program,
+        )
         return cls(ok=True)
 
 
 class CopyProgram(
-    CommonValidator, ProgrammeCodeValidator, PartnersDataValidator, PermissionMutation, ValidationErrorMutationMixin
+    CommonValidator,
+    ProgrammeCodeValidator,
+    PartnersDataValidator,
+    PermissionMutation,
+    ValidationErrorMutationMixin,
 ):
     program = graphene.Field(ProgramNode)
 
@@ -328,14 +360,23 @@ class CopyProgram(
 
         transaction.on_commit(
             lambda: copy_program_task.delay(
-                copy_from_program_id=program_id, new_program_id=program.id, user_id=str(info.context.user.id)
+                copy_from_program_id=program_id,
+                new_program_id=program.id,
+                user_id=str(info.context.user.id),
             )
         )
 
         if pdu_fields is not None:
             FlexibleAttributeForPDUService(program, pdu_fields).create_pdu_flex_attributes()
 
-        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, None, program)
+        log_create(
+            Program.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            program.pk,
+            None,
+            program,
+        )
 
         return CopyProgram(program=program)
 

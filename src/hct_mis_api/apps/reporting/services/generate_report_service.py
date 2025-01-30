@@ -269,7 +269,10 @@ class GenerateReportContentHelpers:
         filter_vars = {
             "payment_verification_plan__payment_plan_id__in": pp_business_area_ids,
             "payment_verification_plan__completion_date__isnull": False,
-            "payment_verification_plan__completion_date__date__range": (report.date_from, report.date_to),
+            "payment_verification_plan__completion_date__date__range": (
+                report.date_from,
+                report.date_to,
+            ),
         }
         if report.program:
             pp_program_ids = list(
@@ -365,12 +368,16 @@ class GenerateReportContentHelpers:
             .annotate(payment_currency=F("household__payment__currency"))
             .annotate(
                 total_delivered_quantity_local=Coalesce(
-                    Sum("household__payment__delivered_quantity"), Value(0), output_field=DecimalField()
+                    Sum("household__payment__delivered_quantity"),
+                    Value(0),
+                    output_field=DecimalField(),
                 )
             )
             .annotate(
                 total_delivered_quantity_usd=Coalesce(
-                    Sum("household__payment__delivered_quantity_usd"), Value(0), output_field=DecimalField()
+                    Sum("household__payment__delivered_quantity_usd"),
+                    Value(0),
+                    output_field=DecimalField(),
                 )
             )
             .order_by("household__id")
@@ -649,8 +656,14 @@ class GenerateReportService:
     }
     OPTIONAL_HEADERS = {Report.HOUSEHOLD_DEMOGRAPHICS: "programme enrolled"}
     TIMEFRAME_CELL_LABELS = {
-        Report.INDIVIDUALS: ("Last Registration Date From", "Last Registration Date To"),
-        Report.HOUSEHOLD_DEMOGRAPHICS: ("Last Registration Date From", "Last Registration Date To"),
+        Report.INDIVIDUALS: (
+            "Last Registration Date From",
+            "Last Registration Date To",
+        ),
+        Report.HOUSEHOLD_DEMOGRAPHICS: (
+            "Last Registration Date From",
+            "Last Registration Date To",
+        ),
         Report.CASH_PLAN_VERIFICATION: ("Completion Date From", "Completion Date To"),
         Report.PAYMENT_VERIFICATION: ("Completion Date From", "Completion Date To"),
         Report.PAYMENTS: ("Delivery Date From", "Delivery Date To"),
@@ -671,7 +684,10 @@ class GenerateReportService:
             GenerateReportContentHelpers.get_cash_plan_verifications,
             GenerateReportContentHelpers.format_cash_plan_verification_row,
         ),
-        Report.PAYMENTS: (GenerateReportContentHelpers.get_payments, GenerateReportContentHelpers.format_payment_row),
+        Report.PAYMENTS: (
+            GenerateReportContentHelpers.get_payments,
+            GenerateReportContentHelpers.format_payment_row,
+        ),
         Report.PAYMENT_VERIFICATION: (
             GenerateReportContentHelpers.get_payment_verifications,
             GenerateReportContentHelpers.format_payment_verification_row,
@@ -707,8 +723,14 @@ class GenerateReportService:
         filter_rows = [
             ("Report type", str(self.report.get_report_type_display())),
             ("Business area", self.business_area.name),
-            (GenerateReportService.TIMEFRAME_CELL_LABELS[self.report.report_type][0], str(self.report.date_from)),
-            (GenerateReportService.TIMEFRAME_CELL_LABELS[self.report.report_type][0], str(self.report.date_to)),
+            (
+                GenerateReportService.TIMEFRAME_CELL_LABELS[self.report.report_type][0],
+                str(self.report.date_from),
+            ),
+            (
+                GenerateReportService.TIMEFRAME_CELL_LABELS[self.report.report_type][0],
+                str(self.report.date_to),
+            ),
         ]
 
         if self.report.admin_area.all().exists():
@@ -786,7 +808,7 @@ class GenerateReportService:
         context = {
             "report_type": self.report.get_report_type_display(),
             "created_at": GenerateReportContentHelpers._format_date(self.report.created_at),
-            "report_url": f'https://{settings.FRONTEND_HOST}/{self.business_area.slug}/programs/all/reporting/{encode_id_base64(self.report.id, "Report")}',
+            "report_url": f"https://{settings.FRONTEND_HOST}/{self.business_area.slug}/programs/all/reporting/{encode_id_base64(self.report.id, 'Report')}",
             "title": "Report",
         }
         text_body = render_to_string("report.txt", context=context)

@@ -162,7 +162,10 @@ class Query(graphene.ObjectType):
         ProgramNode,
         filterset_class=ProgramFilter,
         permission_classes=(
-            hopeOneOfPermissionClass(Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS, *ALL_GRIEVANCES_CREATE_MODIFY),
+            hopeOneOfPermissionClass(
+                Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+                *ALL_GRIEVANCES_CREATE_MODIFY,
+            ),
         ),
     )
     chart_programmes_by_sector = graphene.Field(
@@ -363,7 +366,20 @@ class Query(graphene.ObjectType):
             .order_by("delivery_month")
         )
 
-        months_labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+        months_labels = [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+        ]
         previous_transfers = [0] * 12
         cash_transfers = [0] * 12
         voucher_transfers = [0] * 12

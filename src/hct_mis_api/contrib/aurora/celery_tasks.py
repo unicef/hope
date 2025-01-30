@@ -51,7 +51,9 @@ def extract_records_task(max_records: int = 500) -> None:
 @app.task
 @log_start_and_end
 @sentry_tags
-def fresh_extract_records_task(records_ids: Optional["_QuerySet[Any, Any]"] = None) -> None:
+def fresh_extract_records_task(
+    records_ids: Optional["_QuerySet[Any, Any]"] = None,
+) -> None:
     if not records_ids:
         records_ids = Record.objects.all().only("pk").values_list("pk", flat=True)[:5000]
     extract(records_ids)

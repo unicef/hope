@@ -37,7 +37,10 @@ def standard_program() -> Program:
 @pytest.fixture
 def program_with_three_cycles() -> Program:
     program = get_program_with_dct_type_and_name(
-        "ThreeCyclesProgramme", "cycl", status=Program.ACTIVE, program_cycle_status=ProgramCycle.DRAFT
+        "ThreeCyclesProgramme",
+        "cycl",
+        status=Program.ACTIVE,
+        program_cycle_status=ProgramCycle.DRAFT,
     )
     ProgramCycleFactory(program=program, status=ProgramCycle.DRAFT)
     ProgramCycleFactory(program=program, status=ProgramCycle.DRAFT)
@@ -48,7 +51,10 @@ def program_with_three_cycles() -> Program:
 @pytest.fixture
 def program_with_different_cycles() -> Program:
     program = get_program_with_dct_type_and_name(
-        "ThreeCyclesProgramme", "cycl", status=Program.ACTIVE, program_cycle_status=ProgramCycle.DRAFT
+        "ThreeCyclesProgramme",
+        "cycl",
+        status=Program.ACTIVE,
+        program_cycle_status=ProgramCycle.DRAFT,
     )
     ProgramCycleFactory(
         program=program,
@@ -100,7 +106,10 @@ def get_program_with_dct_type_and_name(
 @pytest.fixture
 def standard_program_with_draft_programme_cycle() -> Program:
     yield get_program_without_cycle_end_date(
-        "Active Programme", "9876", status=Program.ACTIVE, program_cycle_status=ProgramCycle.DRAFT
+        "Active Programme",
+        "9876",
+        status=Program.ACTIVE,
+        program_cycle_status=ProgramCycle.DRAFT,
     )
 
 
@@ -329,7 +338,9 @@ class TestSmokeProgrammeDetails:
 class TestProgrammeDetails:
     @pytest.mark.xfail(reason="UNSTABLE")
     def test_program_details_check_default_cycle(
-        self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails
+        self,
+        pageProgrammeManagement: ProgrammeManagement,
+        pageProgrammeDetails: ProgrammeDetails,
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -361,7 +372,9 @@ class TestProgrammeDetails:
         assert "Default Programme Cycle" in pageProgrammeDetails.getProgramCycleTitle()[0].text
 
     def test_program_details_edit_default_cycle_by_add_new(
-        self, standard_program_with_draft_programme_cycle: Program, pageProgrammeDetails: ProgrammeDetails
+        self,
+        standard_program_with_draft_programme_cycle: Program,
+        pageProgrammeDetails: ProgrammeDetails,
     ) -> None:
         pageProgrammeDetails.selectGlobalProgramFilter("Active Programme")
         assert "ACTIVE" in pageProgrammeDetails.getProgramStatus().text
@@ -501,7 +514,9 @@ class TestProgrammeDetails:
         assert "Test %$ What?" in pageProgrammeDetails.getProgramCycleTitle()[2].text
 
     def test_program_details_edit_programme_cycle(
-        self, standard_active_program_with_draft_program_cycle: Program, pageProgrammeDetails: ProgrammeDetails
+        self,
+        standard_active_program_with_draft_program_cycle: Program,
+        pageProgrammeDetails: ProgrammeDetails,
     ) -> None:
         pageProgrammeDetails.selectGlobalProgramFilter("Active Programme")
         pageProgrammeDetails.getButtonEditProgramCycle()[0].click()
@@ -558,7 +573,9 @@ class TestProgrammeDetails:
             assert program_cycle_3 in pageProgrammeDetails.getProgramCycleTitle()[1].text
 
     def test_program_details_buttons_vs_programme_cycle_status(
-        self, program_with_different_cycles: Program, pageProgrammeDetails: ProgrammeDetails
+        self,
+        program_with_different_cycles: Program,
+        pageProgrammeDetails: ProgrammeDetails,
     ) -> None:
         pageProgrammeDetails.selectGlobalProgramFilter("ThreeCyclesProgramme")
         for _ in range(50):
@@ -580,7 +597,9 @@ class TestProgrammeDetails:
 
     @pytest.mark.skip(reason="Unskip after fix 211823")
     def test_program_details_edit_default_cycle_by_add_new_cancel(
-        self, standard_program_with_draft_programme_cycle: Program, pageProgrammeDetails: ProgrammeDetails
+        self,
+        standard_program_with_draft_programme_cycle: Program,
+        pageProgrammeDetails: ProgrammeDetails,
     ) -> None:
         pageProgrammeDetails.selectGlobalProgramFilter("Active Programme")
         assert "ACTIVE" in pageProgrammeDetails.getProgramStatus().text
@@ -616,7 +635,9 @@ class TestProgrammeDetails:
         assert "Test %$ What?" in pageProgrammeDetails.getProgramCycleTitle()[2].text
 
     def test_program_details_add_new_cycle_with_wrong_date(
-        self, standard_active_program_cycle_draft: Program, pageProgrammeDetails: ProgrammeDetails
+        self,
+        standard_active_program_cycle_draft: Program,
+        pageProgrammeDetails: ProgrammeDetails,
     ) -> None:
         pageProgrammeDetails.selectGlobalProgramFilter("Active Programme")
         assert "ACTIVE" in pageProgrammeDetails.getProgramStatus().text
@@ -687,7 +708,9 @@ class TestProgrammeDetails:
         assert "New cycle with wrong date" in pageProgrammeDetails.getProgramCycleTitle()[1].text
 
     def test_program_details_edit_cycle_with_wrong_date(
-        self, program_with_different_cycles: Program, pageProgrammeDetails: ProgrammeDetails
+        self,
+        program_with_different_cycles: Program,
+        pageProgrammeDetails: ProgrammeDetails,
     ) -> None:
         pageProgrammeDetails.selectGlobalProgramFilter("ThreeCyclesProgramme")
         assert "ACTIVE" in pageProgrammeDetails.getProgramStatus().text
@@ -783,7 +806,9 @@ class TestProgrammeDetails:
             assert "details" in pageProgrammeDetails.wait_for_new_url(programme_creation_url).split("/")
 
     def test_program_details_program_cycle_total_quantities(
-        self, standard_program_with_draft_programme_cycle: Program, pageProgrammeDetails: ProgrammeDetails
+        self,
+        standard_program_with_draft_programme_cycle: Program,
+        pageProgrammeDetails: ProgrammeDetails,
     ) -> None:
         pageProgrammeDetails.selectGlobalProgramFilter("Active Programme")
         assert "ACTIVE" in pageProgrammeDetails.getProgramStatus().text

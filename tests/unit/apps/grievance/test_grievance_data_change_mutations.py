@@ -240,7 +240,10 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    @mock.patch("django.core.files.storage.default_storage.save", lambda filename, file: "test_file_name.jpg")
+    @mock.patch(
+        "django.core.files.storage.default_storage.save",
+        lambda filename, file: "test_file_name.jpg",
+    )
     def test_grievance_create_individual_data_change(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
@@ -299,7 +302,10 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         }
         self.snapshot_graphql_request(
             request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=variables,
         )
 
@@ -312,7 +318,10 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    @mock.patch("django.core.files.storage.default_storage.save", lambda filename, file: "test_file_name.jpg")
+    @mock.patch(
+        "django.core.files.storage.default_storage.save",
+        lambda filename, file: "test_file_name.jpg",
+    )
     def test_grievance_update_individual_data_change(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
@@ -380,7 +389,10 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=variables,
         )
 
@@ -427,7 +439,10 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         }
         self.snapshot_graphql_request(
             request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=variables,
         )
 
@@ -484,7 +499,10 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         }
         self.snapshot_graphql_request(
             request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=variables,
         )
 
@@ -520,7 +538,10 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         }
         self.snapshot_graphql_request(
             request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=variables,
         )
 
@@ -563,7 +584,10 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         }
         self.snapshot_graphql_request(
             request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=variables,
         )
 
@@ -599,7 +623,10 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         }
         self.snapshot_graphql_request(
             request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=variables,
         )
 
@@ -618,7 +645,10 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                     "issueType": {
                         "householdDataUpdateIssueTypeExtras": {
                             "household": self.id_to_base64(self.household_one.id, "HouseholdNode"),
-                            "householdData": {"adminAreaTitle": self.area.p_code, "flexFields": {}},
+                            "householdData": {
+                                "adminAreaTitle": self.area.p_code,
+                                "flexFields": {},
+                            },
                         }
                     }
                 },
@@ -627,6 +657,9 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=variables,
         )

@@ -17,18 +17,35 @@ class TestAcceptanceProcessThreshold(TestCase):
     @parameterized.expand(
         [
             ([[12, 24]], ValidationError, "Ranges need to start from 0"),
-            ([[0, None], [10, 100]], ValidationError, "Provided ranges overlap [0, ∞) [10, 100)"),
-            ([[0, 10], [8, 100]], ValidationError, "Provided ranges overlap [0, 10) [8, 100)"),
+            (
+                [[0, None], [10, 100]],
+                ValidationError,
+                "Provided ranges overlap [0, ∞) [10, 100)",
+            ),
+            (
+                [[0, 10], [8, 100]],
+                ValidationError,
+                "Provided ranges overlap [0, 10) [8, 100)",
+            ),
             (
                 [[0, 10], [20, 100]],
                 ValidationError,
                 "Whole range of [0 , ∞] is not covered, please cover range between [0, 10) [20, 100)",
             ),
-            ([[0, 24], [24, 100]], ValidationError, "Last range should cover ∞ (please leave empty value)"),
+            (
+                [[0, 24], [24, 100]],
+                ValidationError,
+                "Last range should cover ∞ (please leave empty value)",
+            ),
             ([[0, 24], [24, 100], [100, None]], None, ""),
         ]
     )
-    def test_validate_ranges(self, ranges: List[List[Optional[int]]], exc: Optional[Type[Exception]], msg: str) -> None:
+    def test_validate_ranges(
+        self,
+        ranges: List[List[Optional[int]]],
+        exc: Optional[Type[Exception]],
+        msg: str,
+    ) -> None:
         if exc:
             with self.assertRaisesMessage(exc, msg):
                 AcceptanceProcessThresholdFormset.validate_ranges(ranges)
@@ -65,7 +82,8 @@ class TestDataCollectingTypeForm(TestCase):
 
         self.assertFalse(form.is_valid())
         self.assertEqual(
-            form.errors["type"][0], "Household filters cannot be applied for data collecting type with social type"
+            form.errors["type"][0],
+            "Household filters cannot be applied for data collecting type with social type",
         )
 
     def test_type_cannot_be_changed_to_different_than_compatible_types(self) -> None:
@@ -84,7 +102,8 @@ class TestDataCollectingTypeForm(TestCase):
         )
         self.assertFalse(form.is_valid())
         self.assertEqual(
-            form.errors["type"][0], "Type of DCT cannot be changed if it has compatible DCTs of different type"
+            form.errors["type"][0],
+            "Type of DCT cannot be changed if it has compatible DCTs of different type",
         )
         self.assertEqual(
             form.errors["compatible_types"][0],

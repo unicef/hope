@@ -25,7 +25,8 @@ class TestCheckPermissions(TestCase):
         cls.business_area = create_afghanistan()
         cls.program = ProgramFactory(status=Program.DRAFT, business_area=cls.business_area)
         cls.role = RoleFactory(
-            name="POPULATION VIEW INDIVIDUALS DETAILS", permissions=["POPULATION_VIEW_INDIVIDUALS_DETAILS"]
+            name="POPULATION VIEW INDIVIDUALS DETAILS",
+            permissions=["POPULATION_VIEW_INDIVIDUALS_DETAILS"],
         )
         cls.area = AreaFactory(name="POPULATION")
 
@@ -62,7 +63,9 @@ class TestCheckPermissions(TestCase):
         result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
         self.assertFalse(result)
 
-    def test_user_is_not_unicef_and_has_access_to_business_area_without_access_to_program(self) -> None:
+    def test_user_is_not_unicef_and_has_access_to_business_area_without_access_to_program(
+        self,
+    ) -> None:
         partner = PartnerFactory(name="Partner")
         self.user.partner = partner
         self.user.save()
@@ -76,7 +79,9 @@ class TestCheckPermissions(TestCase):
         result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
         self.assertFalse(result)
 
-    def test_user_is_not_unicef_and_has_access_to_business_area_and_program(self) -> None:
+    def test_user_is_not_unicef_and_has_access_to_business_area_and_program(
+        self,
+    ) -> None:
         partner = PartnerFactory(name="Partner")
         program_partner_through = ProgramPartnerThrough.objects.create(program=self.program, partner=partner)
         program_partner_through.areas.set([self.area])
@@ -112,7 +117,9 @@ class TestCheckPermissions(TestCase):
         result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
         self.assertTrue(result)
 
-    def test_user_is_not_unicef_and_dont_have_access_to_business_area_at_all(self) -> None:
+    def test_user_is_not_unicef_and_dont_have_access_to_business_area_at_all(
+        self,
+    ) -> None:
         partner = PartnerFactory(name="Partner")
         program_partner_through = ProgramPartnerThrough.objects.create(program=self.program, partner=partner)
         program_partner_through.areas.set([self.area])

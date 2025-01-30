@@ -73,15 +73,21 @@ class TestIndividualXlsxUpdate(TestCase):
         )
 
         cls.xlsx_invalid_file_no_match = XlsxUpdateFile.objects.create(
-            file=invalid_file_no_match(), business_area=cls.business_area, uploaded_by=cls.user
+            file=invalid_file_no_match(),
+            business_area=cls.business_area,
+            uploaded_by=cls.user,
         )
 
         cls.xlsx_invalid_file_empty_cell = XlsxUpdateFile.objects.create(
-            file=invalid_file_empty_cell(), business_area=cls.business_area, uploaded_by=cls.user
+            file=invalid_file_empty_cell(),
+            business_area=cls.business_area,
+            uploaded_by=cls.user,
         )
 
         cls.xlsx_invalid_file_bad_columns = XlsxUpdateFile.objects.create(
-            file=invalid_file_bad_columns(), business_area=cls.business_area, uploaded_by=cls.user
+            file=invalid_file_bad_columns(),
+            business_area=cls.business_area,
+            uploaded_by=cls.user,
         )
 
         cls.xlsx_invalid_file = XlsxUpdateFile.objects.create(
@@ -260,7 +266,10 @@ class TestIndividualXlsxUpdate(TestCase):
             {
                 "Messages": [
                     {
-                        "From": {"Email": settings.DEFAULT_EMAIL, "Name": settings.DEFAULT_EMAIL_DISPLAY},
+                        "From": {
+                            "Email": settings.DEFAULT_EMAIL,
+                            "Name": settings.DEFAULT_EMAIL_DISPLAY,
+                        },
                         "Subject": f"[test] Individual IBANs xlsx [{context['upload_file_id']}] update result",
                         "To": [
                             {

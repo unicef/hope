@@ -59,7 +59,9 @@ def create_program_cycle(create_test_program: Program) -> ProgramCycle:
 
 
 @pytest.fixture
-def create_program_cycle_without_payment_plan(create_test_program: Program) -> ProgramCycle:
+def create_program_cycle_without_payment_plan(
+    create_test_program: Program,
+) -> ProgramCycle:
     program_cycle = ProgramCycle.objects.create(
         title="Test Programme Cycle 001",
         start_date=datetime.now(),
@@ -107,7 +109,10 @@ class TestSmokeProgramCycle:
         assert "Active" in first_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-status"]').text
         assert (
             "-"
-            in first_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-total-entitled-quantity-usd"]').text
+            in first_cycle.find_element(
+                By.CSS_SELECTOR,
+                'td[data-cy="program-cycle-total-entitled-quantity-usd"]',
+            ).text
         )
         assert (
             "Test Programme Cycle 001"
@@ -117,7 +122,8 @@ class TestSmokeProgramCycle:
         assert (
             "1833.99"
             in second_cycle.find_element(
-                By.CSS_SELECTOR, 'td[data-cy="program-cycle-total-entitled-quantity-usd"]'
+                By.CSS_SELECTOR,
+                'td[data-cy="program-cycle-total-entitled-quantity-usd"]',
             ).text
         )
         assert (
@@ -127,7 +133,10 @@ class TestSmokeProgramCycle:
         assert "Draft" in third_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-status"]').text
         assert (
             "-"
-            in third_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-total-entitled-quantity-usd"]').text
+            in third_cycle.find_element(
+                By.CSS_SELECTOR,
+                'td[data-cy="program-cycle-total-entitled-quantity-usd"]',
+            ).text
         )
 
     def test_smoke_program_cycles_details(

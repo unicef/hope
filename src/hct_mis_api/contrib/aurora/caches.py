@@ -10,7 +10,13 @@ class OrganizationListVersionsKeyBit(KeyBitBase):
     specific_view_cache_key = "aurora_organization_list"
 
     def get_data(
-        self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
+        self,
+        params: Any,
+        view_instance: Any,
+        view_method: Any,
+        request: Any,
+        args: tuple,
+        kwargs: dict,
     ) -> str:
         version_key = f"{Organization.objects.latest('updated_at').updated_at}:{Organization.objects.all().count()}:{self.specific_view_cache_key}"
         version = get_or_create_cache_key(version_key, 1)
@@ -21,7 +27,13 @@ class ProjectListVersionsKeyBit(KeyBitBase):
     specific_view_cache_key = "aurora_project_list"
 
     def get_data(
-        self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
+        self,
+        params: Any,
+        view_instance: Any,
+        view_method: Any,
+        request: Any,
+        args: tuple,
+        kwargs: dict,
     ) -> str:
         version_key = f"{Project.objects.latest('updated_at').updated_at}:{Project.objects.all().count()}:{self.specific_view_cache_key}"
         version = get_or_create_cache_key(version_key, 1)
@@ -32,7 +44,13 @@ class RegistrationListVersionsKeyBit(KeyBitBase):
     specific_view_cache_key = "aurora_registration_list"
 
     def get_data(
-        self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
+        self,
+        params: Any,
+        view_instance: Any,
+        view_method: Any,
+        request: Any,
+        args: tuple,
+        kwargs: dict,
     ) -> str:
         version_key = f"{Registration.objects.latest('updated_at').updated_at}:{Registration.objects.all().count()}:{self.specific_view_cache_key}"
         version = get_or_create_cache_key(version_key, 1)

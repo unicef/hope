@@ -65,7 +65,11 @@ class HouseholdDataUpdateService(DataChangeService):
             household_data_with_approve_status["admin_area_title"] = admin_area_title
 
         flex_fields_with_approve_status = {
-            field: {"value": value, "approve_status": False, "previous_value": household.flex_fields.get(field)}
+            field: {
+                "value": value,
+                "approve_status": False,
+                "previous_value": household.flex_fields.get(field),
+            }
             for field, value in flex_fields.items()
         }
         household_data_with_approve_status["flex_fields"] = flex_fields_with_approve_status
@@ -113,7 +117,11 @@ class HouseholdDataUpdateService(DataChangeService):
             household_data_with_approve_status["admin_area_title"] = admin_area_title
 
         flex_fields_with_approve_status = {
-            field: {"value": value, "approve_status": False, "previous_value": household.flex_fields.get(field)}
+            field: {
+                "value": value,
+                "approve_status": False,
+                "previous_value": household.flex_fields.get(field),
+            }
             for field, value in flex_fields.items()
         }
         household_data_with_approve_status["flex_fields"] = flex_fields_with_approve_status

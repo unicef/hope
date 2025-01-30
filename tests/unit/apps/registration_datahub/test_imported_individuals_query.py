@@ -164,7 +164,11 @@ class TestImportedIndividualQuery(APITestCase):
 
     @parameterized.expand(
         [
-            ("all_with_permission", [Permissions.RDI_VIEW_DETAILS], ALL_IMPORTED_INDIVIDUALS_QUERY),
+            (
+                "all_with_permission",
+                [Permissions.RDI_VIEW_DETAILS],
+                ALL_IMPORTED_INDIVIDUALS_QUERY,
+            ),
             ("all_without_permission", [], ALL_IMPORTED_INDIVIDUALS_QUERY),
             (
                 "order_by_dob_all_with_permission",

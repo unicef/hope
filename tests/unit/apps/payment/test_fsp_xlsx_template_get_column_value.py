@@ -40,7 +40,12 @@ class FinancialServiceProviderXlsxTemplateTest(APITestCase):
             created_by=self.user,
         )
         DocumentTypeFactory(key="registration_token")
-        payment = PaymentFactory(parent=payment_plan, household=household, collector=individual, currency="PLN")
+        payment = PaymentFactory(
+            parent=payment_plan,
+            household=household,
+            collector=individual,
+            currency="PLN",
+        )
         create_payment_plan_snapshot_data(payment_plan)
 
         result = FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(payment, "registration_token")
@@ -61,7 +66,11 @@ class FinancialServiceProviderXlsxTemplateTest(APITestCase):
     def test_get_column_value_from_payment(self, _: Any, field_name: str) -> None:
         household, individuals = create_household(
             household_args={"size": 1, "business_area": self.business_area},
-            individual_args={"full_name": "John Wilson", "given_name": "John", "family_name": "Wilson"},
+            individual_args={
+                "full_name": "John Wilson",
+                "given_name": "John",
+                "family_name": "Wilson",
+            },
         )
         individual = individuals[0]
 
@@ -71,7 +80,12 @@ class FinancialServiceProviderXlsxTemplateTest(APITestCase):
             business_area=self.business_area,
             created_by=self.user,
         )
-        payment = PaymentFactory(parent=payment_plan, household=household, collector=individual, currency="PLN")
+        payment = PaymentFactory(
+            parent=payment_plan,
+            household=household,
+            collector=individual,
+            currency="PLN",
+        )
         primary = IndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).first().individual
         document_type = DocumentTypeFactory(key="registration_token")
         document = DocumentFactory(individual=primary, type=document_type)

@@ -23,7 +23,12 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
             Permissions.RDI_VIEW_LIST,
         ]
         partner = PartnerFactory(name="UNICEF")
-        cls.user = UserFactory(username="Hope_Test_DRF", password="HopePass", partner=partner, is_superuser=True)
+        cls.user = UserFactory(
+            username="Hope_Test_DRF",
+            password="HopePass",
+            partner=partner,
+            is_superuser=True,
+        )
         permission_list = [perm.value for perm in user_permissions]
         role, created = Role.objects.update_or_create(name="TestName", defaults={"permissions": permission_list})
         user_role, _ = UserRole.objects.get_or_create(user=cls.user, role=role, business_area=cls.business_area)
@@ -63,10 +68,17 @@ class WebhookDeduplicationViewTest(HOPEApiTestCase):
 
     @patch("hct_mis_api.apps.registration_datahub.celery_tasks.fetch_biometric_deduplication_results_and_process.delay")
     def test_webhook_deduplication(self, mock_fetch_dedup_results: Mock) -> None:
-        url = reverse("api:registration-data:webhook_deduplication", args=["afghanistan", self.str_program_id])
+        url = reverse(
+            "api:registration-data:webhook_deduplication",
+            args=["afghanistan", self.str_program_id],
+        )
         request = self.factory.get(url)
         view = WebhookDeduplicationView.as_view()
-        response = view(request, business_area=self.program.business_area.id, program_id=self.program.id)
+        response = view(
+            request,
+            business_area=self.program.business_area.id,
+            program_id=self.program.id,
+        )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         mock_fetch_dedup_results.assert_called_once_with(self.program.deduplication_set_id)

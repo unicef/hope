@@ -74,7 +74,11 @@ class UniversalIndividualUpdateScript:
         return errors
 
     def validate_individual_fields(
-        self, row: Tuple[Any, ...], headers: List[str], individual: Individual, row_index: int
+        self,
+        row: Tuple[Any, ...],
+        headers: List[str],
+        individual: Individual,
+        row_index: int,
     ) -> List[str]:
         if self.individual_fields is None:
             return []
@@ -87,7 +91,11 @@ class UniversalIndividualUpdateScript:
         return errors
 
     def validate_individual_flex_fields(
-        self, row: Tuple[Any, ...], headers: List[str], individual: Individual, row_index: int
+        self,
+        row: Tuple[Any, ...],
+        headers: List[str],
+        individual: Individual,
+        row_index: int,
     ) -> List[str]:
         errors = []
         if self.individual_flex_fields is None:
@@ -100,7 +108,11 @@ class UniversalIndividualUpdateScript:
         return errors
 
     def validate_documents(
-        self, row: Tuple[Any, ...], headers: List[str], individual: Individual, row_index: int
+        self,
+        row: Tuple[Any, ...],
+        headers: List[str],
+        individual: Individual,
+        row_index: int,
     ) -> List[str]:
         if self.document_fields is None:
             return []
@@ -131,7 +143,9 @@ class UniversalIndividualUpdateScript:
                 print(f"Validating row {row_index - 2} to {row_index - 2 + self.batch_size} Indivduals")
             unicef_id = row[headers.index("unicef_id")]
             individuals_queryset = Individual.objects.filter(
-                unicef_id=unicef_id, business_area=self.business_area, program=self.program
+                unicef_id=unicef_id,
+                business_area=self.business_area,
+                program=self.program,
             )
             if not individuals_queryset.exists():  # pragma: no cover
                 errors.append(f"Row: {row_index} - Individual with unicef_id {unicef_id} not found")
@@ -222,7 +236,10 @@ class UniversalIndividualUpdateScript:
         if self.deliver_mechanism_data_fields is None:
             return
         individual_delivery_mechanisms_data = individual.delivery_mechanisms_data.all()
-        for delivery_mechanism_code, delivery_mechanism_columns_mapping in self.deliver_mechanism_data_fields.items():
+        for (
+            delivery_mechanism_code,
+            delivery_mechanism_columns_mapping,
+        ) in self.deliver_mechanism_data_fields.items():
             delivery_mechanism = self.delivery_mechanisms.get(delivery_mechanism_code)
             single_data_object = next(
                 (
@@ -250,7 +267,8 @@ class UniversalIndividualUpdateScript:
                     single_data_object.update_unique_field()
                 single_data_object.save()
                 RdiMergeTask()._create_grievance_tickets_for_delivery_mechanisms_errors(
-                    [single_data_object], single_data_object.individual.registration_data_import
+                    [single_data_object],
+                    single_data_object.individual.registration_data_import,
                 )
 
     def handle_update(self, sheet: Worksheet, headers: List[str]) -> List[str]:
@@ -275,7 +293,11 @@ class UniversalIndividualUpdateScript:
             individual = (
                 Individual.objects.select_related("household")
                 .prefetch_related("documents", "delivery_mechanisms_data")
-                .get(unicef_id=unicef_id, business_area=self.business_area, program=self.program)
+                .get(
+                    unicef_id=unicef_id,
+                    business_area=self.business_area,
+                    program=self.program,
+                )
             )
             individual_ids.append(str(individual.id))
             household = individual.household
@@ -328,7 +350,8 @@ class UniversalIndividualUpdateScript:
             get_individual_doc(self.business_area.slug),
         )
         populate_index(
-            Household.objects.filter(id__in=[household.id for household in households_to_update]), HouseholdDocument
+            Household.objects.filter(id__in=[household.id for household in households_to_update]),
+            HouseholdDocument,
         )
         documents_to_update.clear()
         documents_to_create.clear()
@@ -355,7 +378,10 @@ class UniversalIndividualUpdateScript:
         if self.deduplicate_documents:
             print("Deduplicating documents")
             HardDocumentDeduplication().deduplicate(
-                Document.objects.filter(individual__id__in=processed_individuals_ids, status=Document.STATUS_PENDING),
+                Document.objects.filter(
+                    individual__id__in=processed_individuals_ids,
+                    status=Document.STATUS_PENDING,
+                ),
                 program=self.program,
             )
 

@@ -84,7 +84,13 @@ class ValidatorTest(TestCase):
     def test_empty_members(self) -> None:
         data = {
             "households": [
-                {"country": "AF", "collect_individual_data": "N", "residence_status": "IDP", "size": 1, "members": []},
+                {
+                    "country": "AF",
+                    "collect_individual_data": "N",
+                    "residence_status": "IDP",
+                    "size": 1,
+                    "members": [],
+                },
             ],
             "name": "Test1",
         }
@@ -121,7 +127,11 @@ class ValidatorTest(TestCase):
     def test_double_entry_multiple_hh(self) -> None:
         h1 = dict(**HOUSEHOLD)
         h1["members"] = [MEMBER, MEMBER]
-        data = {"collect_individual_data": "N", "name": "Test1", "households": [HOUSEHOLD, HOUSEHOLD, h1]}
+        data = {
+            "collect_individual_data": "N",
+            "name": "Test1",
+            "households": [HOUSEHOLD, HOUSEHOLD, h1],
+        }
         self.assertErrors(
             data,
             {

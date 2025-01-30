@@ -255,7 +255,14 @@ def get_combined_attributes() -> Dict:
     flex_attrs = serialize_flex_attributes()
     return {
         **FieldFactory.from_scopes(
-            [Scope.GLOBAL, Scope.XLSX, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_ID, Scope.COLLECTOR, Scope.DELIVERY_MECHANISM]
+            [
+                Scope.GLOBAL,
+                Scope.XLSX,
+                Scope.KOBO_IMPORT,
+                Scope.HOUSEHOLD_ID,
+                Scope.COLLECTOR,
+                Scope.DELIVERY_MECHANISM,
+            ]
         )
         .apply_business_area()
         .to_dict_by("xlsx_field"),
@@ -271,7 +278,10 @@ def get_attr_value(name: str, obj: Any, default: Optional[Any] = None) -> Any:
 
 
 def to_choice_object(choices: Iterable) -> List[Dict[str, Any]]:
-    return sorted([{"name": name, "value": value} for value, name in choices], key=lambda choice: choice["name"])
+    return sorted(
+        [{"name": name, "value": value} for value, name in choices],
+        key=lambda choice: choice["name"],
+    )
 
 
 def rename_dict_keys(obj: Union[Dict, List, Any], convert_func: Callable) -> Any:
@@ -323,7 +333,9 @@ def encode_ids(results: Any, model_name: str, key: str) -> List[Dict]:
 
 
 def to_dict(
-    instance: "Model", fields: Union[List, Tuple, None] = None, dict_fields: Optional[Dict] = None
+    instance: "Model",
+    fields: Union[List, Tuple, None] = None,
+    dict_fields: Optional[Dict] = None,
 ) -> Dict[str, Any]:
     from django.db.models import Model
     from django.forms import model_to_dict
@@ -657,7 +669,9 @@ def chart_filters_decoder(filters: Dict) -> Dict:
 
 
 def chart_create_filter_query(
-    filters: Dict, program_id_path: str = "id", administrative_area_path: str = "admin_areas"
+    filters: Dict,
+    program_id_path: str = "id",
+    administrative_area_path: str = "admin_areas",
 ) -> Dict:
     filter_query = {}
     if program := filters.get("program"):
@@ -673,7 +687,9 @@ def chart_create_filter_query(
 
 
 def chart_create_filter_query_for_payment_verification_gfk(
-    filters: Dict, program_id_path: str = "id", administrative_area_path: str = "admin_areas"
+    filters: Dict,
+    program_id_path: str = "id",
+    administrative_area_path: str = "admin_areas",
 ) -> Q:
     filter_query = Q()
     if program := filters.get("program"):
@@ -809,7 +825,10 @@ def timezone_datetime(value: Any) -> datetime:
 
 
 def save_data_in_cache(
-    cache_key: str, data_lambda: Callable, timeout: int = 60 * 60 * 24, cache_condition: Optional[Callable] = None
+    cache_key: str,
+    data_lambda: Callable,
+    timeout: int = 60 * 60 * 24,
+    cache_condition: Optional[Callable] = None,
 ) -> Any:
     cache_data = cache.get(cache_key, "NOT_CACHED")
     if cache_data == "NOT_CACHED":
@@ -940,6 +959,13 @@ class JSONBSet(Func):
     function = "jsonb_set"
     template = "%(function)s(%(expressions)s)"
 
-    def __init__(self, expression: Any, path: Any, new_value: Any, create_missing: bool = True, **extra: Any) -> None:
+    def __init__(
+        self,
+        expression: Any,
+        path: Any,
+        new_value: Any,
+        create_missing: bool = True,
+        **extra: Any,
+    ) -> None:
         create_missing = Value("true") if create_missing else Value("false")  # type: ignore
         super().__init__(expression, path, new_value, create_missing, **extra)

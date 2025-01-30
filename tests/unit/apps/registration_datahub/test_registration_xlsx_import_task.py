@@ -21,7 +21,10 @@ class TestRegistrationXlsxImportTask(TestCase):
         cls.business_area = BusinessAreaFactory()
         cls.program = ProgramFactory()
 
-    @patch("hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create.RdiXlsxCreateTask.execute", return_value=None)
+    @patch(
+        "hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create.RdiXlsxCreateTask.execute",
+        return_value=None,
+    )
     def test_task_start_importing(self, _: Any) -> None:
         rdi = self._create_rdi_with_status(RegistrationDataImport.IMPORT_SCHEDULED)
 
@@ -57,7 +60,10 @@ class TestRegistrationXlsxImportTask(TestCase):
         def _mock(*args: Any, **kwargs: Any) -> None:
             raise Exception("something went wrong")
 
-        with patch("hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create.RdiXlsxCreateTask.execute", new=_mock):
+        with patch(
+            "hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create.RdiXlsxCreateTask.execute",
+            new=_mock,
+        ):
             with self.assertRaises(Exception) as context:
                 self._run_task(rdi.id)
 

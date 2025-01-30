@@ -34,13 +34,41 @@ individual_fields: Dict[str, Tuple[str, Any, Any]] = {
 }
 
 individual_flex_fields: Dict[str, Tuple[str, Any, Any]] = {
-    "ss_hw_lot_num_i_f": ("ss_hw_lot_num_i_f", validate_flex_field_string, handle_simple_field),
-    "ss_health_facility_name_i_f": ("ss_health_facility_name_i_f", validate_flex_field_string, handle_simple_field),
-    "ss_hw_title_i_f": ("ss_hw_title_i_f", validate_flex_field_string, handle_simple_field),
-    "ss_hw_work_id_i_f": ("ss_hw_work_id_i_f", validate_flex_field_string, handle_simple_field),
-    "ss_hw_grade_i_f": ("ss_hw_grade_i_f", validate_flex_field_string, handle_simple_field),
-    "ss_hw_qualifications_i_f": ("ss_hw_qualifications_i_f", validate_flex_field_string, handle_simple_field),
-    "ss_hw_cadre_i_f": ("ss_hw_cadre_i_f", validate_flex_field_string, handle_simple_field),
+    "ss_hw_lot_num_i_f": (
+        "ss_hw_lot_num_i_f",
+        validate_flex_field_string,
+        handle_simple_field,
+    ),
+    "ss_health_facility_name_i_f": (
+        "ss_health_facility_name_i_f",
+        validate_flex_field_string,
+        handle_simple_field,
+    ),
+    "ss_hw_title_i_f": (
+        "ss_hw_title_i_f",
+        validate_flex_field_string,
+        handle_simple_field,
+    ),
+    "ss_hw_work_id_i_f": (
+        "ss_hw_work_id_i_f",
+        validate_flex_field_string,
+        handle_simple_field,
+    ),
+    "ss_hw_grade_i_f": (
+        "ss_hw_grade_i_f",
+        validate_flex_field_string,
+        handle_simple_field,
+    ),
+    "ss_hw_qualifications_i_f": (
+        "ss_hw_qualifications_i_f",
+        validate_flex_field_string,
+        handle_simple_field,
+    ),
+    "ss_hw_cadre_i_f": (
+        "ss_hw_cadre_i_f",
+        validate_flex_field_string,
+        handle_simple_field,
+    ),
 }
 
 document_fields: List[Tuple[str, str]] = [

@@ -19,7 +19,14 @@ class ModifiedPaymentFactory(PaymentFactory):
     """
 
     parent = factory.SubFactory(PaymentPlanFactory, status=factory.Iterator(["ACCEPTED", "FINISHED"]))
-    status = factory.Iterator(["Transaction Successful", "Distribution Successful", "Partially Distributed", "Pending"])
+    status = factory.Iterator(
+        [
+            "Transaction Successful",
+            "Distribution Successful",
+            "Partially Distributed",
+            "Pending",
+        ]
+    )
 
 
 @pytest.fixture()
@@ -49,7 +56,11 @@ def populate_dashboard_cache() -> Callable[[BusinessAreaFactory], Household]:
                     "male_age_group_12_17_disabled_count": 2,
                     "male_age_group_18_59_disabled_count": 0,
                     "male_age_group_60_disabled_count": 1,
-                    "admin1": AreaFactory(name="Kabul", area_type__name="Province", area_type__area_level=1),
+                    "admin1": AreaFactory(
+                        name="Kabul",
+                        area_type__name="Province",
+                        area_type__area_level=1,
+                    ),
                 }
             )
             ModifiedPaymentFactory.create_batch(5, household=household)

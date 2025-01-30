@@ -64,7 +64,8 @@ class PushToRDITests(HOPEApiTestCase):
         call_command("loadcountries")
         call_command("loadcountrycodes")
         DocumentType.objects.create(
-            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE], label="--"
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
+            label="--",
         )
         cls.program = ProgramFactory.create(status=Program.DRAFT, business_area=cls.business_area)
         cls.rdi: RegistrationDataImport = RegistrationDataImport.objects.create(

@@ -56,7 +56,11 @@ class ProgramCycleFilter(UpdatedAtFilter):
         if value:
             queryset = queryset.annotate(
                 total_delivered_q_usd=Coalesce(
-                    Sum("payment_plans__total_delivered_quantity_usd", output_field=DecimalField()), Decimal(0.0)
+                    Sum(
+                        "payment_plans__total_delivered_quantity_usd",
+                        output_field=DecimalField(),
+                    ),
+                    Decimal(0.0),
                 )
             )
             filter_dict = {filter_mapping.get(name): value}

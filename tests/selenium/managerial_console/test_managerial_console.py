@@ -93,7 +93,9 @@ def create_payment_plan(create_active_test_program: Program, second_test_program
 class TestSmokeManagerialConsole:
     @pytest.mark.xfail(reason="UNSTABLE")
     def test_managerial_console_smoke_test(
-        self, pageManagerialConsole: ManagerialConsole, create_active_test_program: Program
+        self,
+        pageManagerialConsole: ManagerialConsole,
+        create_active_test_program: Program,
     ) -> None:
         pageManagerialConsole.getNavManagerialConsole().click()
         pageManagerialConsole.getSelectAllApproval()

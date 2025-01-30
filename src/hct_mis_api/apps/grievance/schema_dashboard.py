@@ -175,7 +175,8 @@ class Query(graphene.ObjectType):
             .select_related("admin2")
             .values_list("admin2__name", "category")
             .annotate(
-                category_name=display_value(GrievanceTicket.CATEGORY_CHOICES, "category"), count=Count("category")
+                category_name=display_value(GrievanceTicket.CATEGORY_CHOICES, "category"),
+                count=Count("category"),
             )
             .order_by("admin2__name", "-count")
         )

@@ -243,11 +243,18 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
                 "full_name": {"value": "Test Example", "approve_status": False},
                 "family_name": {"value": "Example", "approve_status": False},
                 "sex": {"value": "MALE", "approve_status": False},
-                "birth_date": {"value": date(year=1980, month=2, day=1).isoformat(), "approve_status": False},
+                "birth_date": {
+                    "value": date(year=1980, month=2, day=1).isoformat(),
+                    "approve_status": False,
+                },
                 "marital_status": {"value": SINGLE, "approve_status": False},
                 "documents": [
                     {
-                        "value": {"country": "POL", "type": IDENTIFICATION_TYPE_NATIONAL_ID, "number": "999-888-777"},
+                        "value": {
+                            "country": "POL",
+                            "type": IDENTIFICATION_TYPE_NATIONAL_ID,
+                            "number": "999-888-777",
+                        },
                         "approve_status": False,
                     },
                 ],
@@ -271,8 +278,14 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
                     }
                 ],
                 "documents_to_remove": [
-                    {"value": cls.id_to_base64(cls.national_id.id, "DocumentNode"), "approve_status": False},
-                    {"value": cls.id_to_base64(cls.birth_certificate.id, "DocumentNode"), "approve_status": False},
+                    {
+                        "value": cls.id_to_base64(cls.national_id.id, "DocumentNode"),
+                        "approve_status": False,
+                    },
+                    {
+                        "value": cls.id_to_base64(cls.birth_certificate.id, "DocumentNode"),
+                        "approve_status": False,
+                    },
                 ],
                 "flex_fields": {},
             },
@@ -333,7 +346,8 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
             context={"user": self.user},
             variables={
                 "grievanceTicketId": self.id_to_base64(
-                    self.individual_data_change_grievance_ticket.id, "GrievanceTicketNode"
+                    self.individual_data_change_grievance_ticket.id,
+                    "GrievanceTicketNode",
                 ),
                 "individualApproveData": json.dumps({"givenName": True, "fullName": True, "familyName": True}),
                 "approvedDocumentsToCreate": [0],
@@ -369,7 +383,8 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
             context={"user": self.user},
             variables={
                 "grievanceTicketId": self.id_to_base64(
-                    self.household_data_change_grievance_ticket.id, "GrievanceTicketNode"
+                    self.household_data_change_grievance_ticket.id,
+                    "GrievanceTicketNode",
                 ),
                 "householdApproveData": json.dumps({"village": True}),
                 "flexFieldsApproveData": json.dumps({}),

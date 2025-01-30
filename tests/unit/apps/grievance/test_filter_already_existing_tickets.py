@@ -86,15 +86,30 @@ class TestAlreadyExistingFilterTickets(APITestCase):
 
         cls.household_1, cls.individuals_1 = create_household(
             {"size": 1, "business_area": cls.business_area},
-            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe",
+            },
         )
         cls.household_2, cls.individuals_2 = create_household(
             {"size": 1, "business_area": cls.business_area},
-            {"given_name": "Frank", "family_name": "Sinatra", "middle_name": "", "full_name": "Frank Sinatra"},
+            {
+                "given_name": "Frank",
+                "family_name": "Sinatra",
+                "middle_name": "",
+                "full_name": "Frank Sinatra",
+            },
         )
         cls.household_3, cls.individuals_3 = create_household(
             {"size": 1, "business_area": cls.business_area},
-            {"given_name": "Jane", "family_name": "XDoe", "middle_name": "", "full_name": "Jane XDoe"},
+            {
+                "given_name": "Jane",
+                "family_name": "XDoe",
+                "middle_name": "",
+                "full_name": "Jane XDoe",
+            },
         )
         program = ProgramFactory(business_area=cls.business_area)
         payment_plan = PaymentPlanFactory(program_cycle=program.cycles.first(), business_area=cls.business_area)
@@ -168,7 +183,9 @@ class TestAlreadyExistingFilterTickets(APITestCase):
 
     def test_filter_existing_tickets_by_payment_record_without_permission(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE], self.business_area
+            self.user,
+            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            self.business_area,
         )
 
         self.snapshot_graphql_request(
@@ -188,7 +205,10 @@ class TestAlreadyExistingFilterTickets(APITestCase):
         [
             (
                 "with_permission",
-                [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+                [
+                    Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                    Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                ],
             ),
             ("without_permission", []),
         ]
@@ -228,7 +248,9 @@ class TestAlreadyExistingFilterTickets(APITestCase):
 
     def test_filter_existing_tickets_by_household_without_permission(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE], self.business_area
+            self.user,
+            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            self.business_area,
         )
 
         self.snapshot_graphql_request(
@@ -263,7 +285,9 @@ class TestAlreadyExistingFilterTickets(APITestCase):
     @flaky(max_runs=3, min_passes=1)
     def test_filter_existing_tickets_by_individual_without_permission(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE], self.business_area
+            self.user,
+            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            self.business_area,
         )
 
         self.snapshot_graphql_request(

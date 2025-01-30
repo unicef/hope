@@ -215,7 +215,9 @@ class TestRegistrationProgramPopulationImportTask(TestCase):
         with self.assertRaises(RegistrationDataImport.DoesNotExist):
             self._run_task(str(rdi_id))
 
-    def test_registration_program_population_import_ba_postpone_deduplication(self) -> None:
+    def test_registration_program_population_import_ba_postpone_deduplication(
+        self,
+    ) -> None:
         self.afghanistan.postpone_deduplication = True
         self.afghanistan.save()
         self.registration_data_import.status = RegistrationDataImport.IMPORT_SCHEDULED

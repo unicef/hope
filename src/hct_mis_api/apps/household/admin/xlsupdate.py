@@ -91,7 +91,12 @@ class XlsxUpdateFileAdmin(HOPEModelAdminBase):
         )
         return TemplateResponse(request, "admin/household/individual/xlsx_update_stage3.html", context)
 
-    def add_view(self, request: HttpRequest, form_url: str = "", extra_context: Optional[Dict] = None) -> Any:
+    def add_view(
+        self,
+        request: HttpRequest,
+        form_url: str = "",
+        extra_context: Optional[Dict] = None,
+    ) -> Any:
         return self.xlsx_update(request)
 
     def xlsx_update(self, request: HttpRequest) -> Any:

@@ -32,7 +32,10 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
 
     @atomic("default")
     def create_rdi(
-        self, imported_by: Optional[Any], rdi_name: str = "rdi_name", is_open: bool = False
+        self,
+        imported_by: Optional[Any],
+        rdi_name: str = "rdi_name",
+        is_open: bool = False,
     ) -> RegistrationDataImport:
         project = self.registration.project
         programme = project.programme

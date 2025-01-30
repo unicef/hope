@@ -32,7 +32,12 @@ def pytest_configure(config: Config) -> None:
     from django.conf import settings
 
     settings.DEBUG = True
-    settings.ALLOWED_HOSTS = ["localhost", "127.0.0.1", "10.0.2.2", os.getenv("DOMAIN", "")]
+    settings.ALLOWED_HOSTS = [
+        "localhost",
+        "127.0.0.1",
+        "10.0.2.2",
+        os.getenv("DOMAIN", ""),
+    ]
     settings.CELERY_TASK_ALWAYS_EAGER = True
 
     settings.ELASTICSEARCH_INDEX_PREFIX = "test_"
@@ -74,7 +79,11 @@ def pytest_configure(config: Config) -> None:
                 "level": "INFO",
                 "propagate": True,
             },
-            "graphql": {"handlers": ["default"], "level": "CRITICAL", "propagate": True},
+            "graphql": {
+                "handlers": ["default"],
+                "level": "CRITICAL",
+                "propagate": True,
+            },
             "elasticsearch": {
                 "handlers": ["default"],
                 "level": "CRITICAL",

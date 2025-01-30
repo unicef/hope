@@ -81,11 +81,17 @@ class TestAllFinancialServiceProviders(APITestCase):
     def test_fetch_count_financial_service_providers(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.QUERY_COUNT_ALL_FSP_QUERY,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {"Business-Area": self.business_area.slug},
+            },
         )
 
     def test_fetch_all_financial_service_providers(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.QUERY_LIST_ALL_FSP_QUERY,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {"Business-Area": self.business_area.slug},
+            },
         )

@@ -77,17 +77,47 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
 
         cls.ghazni = AreaFactory(name="Ghazni", area_type=cls.area_type_level_1, p_code="area1")
 
-        cls.doshi = AreaFactory(name="Doshi", area_type=cls.area_type_level_2, p_code="area2", parent=cls.ghazni)
-        cls.burka = AreaFactory(name="Burka", area_type=cls.area_type_level_2, p_code="area3", parent=cls.ghazni)
+        cls.doshi = AreaFactory(
+            name="Doshi",
+            area_type=cls.area_type_level_2,
+            p_code="area2",
+            parent=cls.ghazni,
+        )
+        cls.burka = AreaFactory(
+            name="Burka",
+            area_type=cls.area_type_level_2,
+            p_code="area3",
+            parent=cls.ghazni,
+        )
 
         _, cls.individuals_1 = create_household(
-            {"size": 1, "business_area": cls.business_area, "admin2": cls.doshi, "program": cls.program},
-            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+            {
+                "size": 1,
+                "business_area": cls.business_area,
+                "admin2": cls.doshi,
+                "program": cls.program,
+            },
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe",
+            },
         )
 
         _, cls.individuals_2 = create_household(
-            {"size": 1, "business_area": cls.business_area, "admin2": cls.burka, "program": cls.program},
-            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+            {
+                "size": 1,
+                "business_area": cls.business_area,
+                "admin2": cls.burka,
+                "program": cls.program,
+            },
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe",
+            },
         )
 
         cls.ticket_details = TicketNeedsAdjudicationDetailsFactory(
@@ -162,7 +192,10 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
                     "Business-Area": self.business_area.slug,
                 },
             },
-            variables={"grievanceTicketId": encode_id_base64(self.grievance.id, "GrievanceTicketNode"), "status": 6},
+            variables={
+                "grievanceTicketId": encode_id_base64(self.grievance.id, "GrievanceTicketNode"),
+                "status": 6,
+            },
         )
 
     def test_select_individual_when_partner_with_permission(self) -> None:
@@ -204,7 +237,9 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
             },
         )
 
-    def test_select_individual_when_partner_with_permission_with_selectedIndividualId(self) -> None:
+    def test_select_individual_when_partner_with_permission_with_selectedIndividualId(
+        self,
+    ) -> None:
         partner = PartnerFactory(name="NOT_UNICEF")
         self.update_partner_access_to_program(partner, self.program, [self.doshi])
 
@@ -243,7 +278,9 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
             },
         )
 
-    def test_select_individual_when_partner_with_permission_with_selectedIndividualId_incorrect(self) -> None:
+    def test_select_individual_when_partner_with_permission_with_selectedIndividualId_incorrect(
+        self,
+    ) -> None:
         partner = PartnerFactory(name="NOT_UNICEF")
         self.update_partner_access_to_program(partner, self.program, [self.doshi])
 
@@ -264,8 +301,18 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
         )
 
         _, individuals = create_household(
-            {"size": 1, "business_area": self.business_area, "admin2": self.doshi, "program": self.program},
-            {"given_name": "Tester", "family_name": "Test", "middle_name": "", "full_name": "Tester Test"},
+            {
+                "size": 1,
+                "business_area": self.business_area,
+                "admin2": self.doshi,
+                "program": self.program,
+            },
+            {
+                "given_name": "Tester",
+                "family_name": "Test",
+                "middle_name": "",
+                "full_name": "Tester Test",
+            },
         )
         individuals[0].unicef_id = "IND-111"
         individuals[0].save()
@@ -331,7 +378,9 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
             },
         )
 
-    def test_select_individual_when_partner_with_permission_and_no_selected_program(self) -> None:
+    def test_select_individual_when_partner_with_permission_and_no_selected_program(
+        self,
+    ) -> None:
         partner = PartnerFactory(name="NOT_UNICEF")
         self.update_partner_access_to_program(partner, self.program, [self.doshi])
 
@@ -398,10 +447,15 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
                     "Business-Area": self.business_area.slug,
                 },
             },
-            variables={"grievanceTicketId": encode_id_base64(self.grievance.id, "GrievanceTicketNode"), "status": 6},
+            variables={
+                "grievanceTicketId": encode_id_base64(self.grievance.id, "GrievanceTicketNode"),
+                "status": 6,
+            },
         )
 
-    def test_close_ticket_when_partner_with_permission_and_no_selected_program(self) -> None:
+    def test_close_ticket_when_partner_with_permission_and_no_selected_program(
+        self,
+    ) -> None:
         partner = PartnerFactory()
         self.update_partner_access_to_program(partner, self.program, [self.doshi])
         self.ticket_details.selected_distinct.add(self.individuals_2[0])
@@ -429,7 +483,10 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
                     "Business-Area": self.business_area.slug,
                 },
             },
-            variables={"grievanceTicketId": encode_id_base64(self.grievance.id, "GrievanceTicketNode"), "status": 6},
+            variables={
+                "grievanceTicketId": encode_id_base64(self.grievance.id, "GrievanceTicketNode"),
+                "status": 6,
+            },
         )
 
     def test_select_individual_when_partner_does_not_have_permission(self) -> None:
@@ -474,7 +531,12 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
 
         _, individuals_3 = create_household(
             {"size": 1, "business_area": self.business_area, "admin2": self.doshi},
-            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe",
+            },
         )
 
         self.ticket_details.selected_individuals.add(self.individuals_1[0], individuals_3[0])  # doshi guy, should fail
@@ -501,5 +563,8 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
                     "Business-Area": self.business_area.slug,
                 },
             },
-            variables={"grievanceTicketId": encode_id_base64(self.grievance.id, "GrievanceTicketNode"), "status": 6},
+            variables={
+                "grievanceTicketId": encode_id_base64(self.grievance.id, "GrievanceTicketNode"),
+                "status": 6,
+            },
         )

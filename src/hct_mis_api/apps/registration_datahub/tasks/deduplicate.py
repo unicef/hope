@@ -429,7 +429,17 @@ class DeduplicateTask:
 
         if not given_name or not family_name:
             # max possible score 7
-            return [{"match": {"full_name": {"query": full_name, "boost": 8.0, "operator": "AND"}}}]
+            return [
+                {
+                    "match": {
+                        "full_name": {
+                            "query": full_name,
+                            "boost": 8.0,
+                            "operator": "AND",
+                        }
+                    }
+                }
+            ]
 
         given_name_complex_query = self._get_complex_query_for_name(given_name, "given_name")
         family_name_complex_query = self._get_complex_query_for_name(family_name, "family_name")
@@ -451,7 +461,12 @@ class DeduplicateTask:
                 "boost": 4,
             }
         }
-        max_from_should_and_must = {"dis_max": {"queries": [names_should_query, names_must_query], "tie_breaker": 0}}
+        max_from_should_and_must = {
+            "dis_max": {
+                "queries": [names_should_query, names_must_query],
+                "tie_breaker": 0,
+            }
+        }
 
         return [max_from_should_and_must]
 
@@ -472,7 +487,12 @@ class DeduplicateTask:
         # choose max from fuzzy and phonetic
         # phonetic score === 0 or 1
         # fuzzy score <=1 changes if there is need make change
-        return {"dis_max": {"queries": [name_fuzzy_query_dict, name_phonetic_query_dict], "tie_breaker": 0}}
+        return {
+            "dis_max": {
+                "queries": [name_fuzzy_query_dict, name_phonetic_query_dict],
+                "tie_breaker": 0,
+            }
+        }
 
     def _prepare_identities_queries_from_fields(self, identities: List) -> List[Dict]:
         queries = []
@@ -815,7 +835,11 @@ class HardDocumentDeduplication:
             )
 
             possible_duplicates_through_dict = defaultdict(set)
-            for ticked_details_id, individual_id, main_individual_id in possible_duplicates_through_existing_list:
+            for (
+                ticked_details_id,
+                individual_id,
+                main_individual_id,
+            ) in possible_duplicates_through_existing_list:
                 possible_duplicates_through_dict[str(ticked_details_id)].add(str(individual_id))
                 possible_duplicates_through_dict[str(ticked_details_id)].add(str(main_individual_id))
 
@@ -836,7 +860,8 @@ class HardDocumentDeduplication:
                 ticket_data_collected.append(prepared_ticket)
                 tickets_programs.append(
                     GrievanceTicketProgramThrough(
-                        grievanceticket=prepared_ticket.ticket, program_id=main_individual.program_id
+                        grievanceticket=prepared_ticket.ticket,
+                        program_id=main_individual.program_id,
                     )
                 )
 
@@ -873,7 +898,10 @@ class HardDocumentDeduplication:
             TicketNeedsAdjudicationDetails,
         )
 
-        new_duplicates_set = {str(main_individual.id), *[str(x.id) for x in possible_duplicates_individuals]}
+        new_duplicates_set = {
+            str(main_individual.id),
+            *[str(x.id) for x in possible_duplicates_individuals],
+        }
         for duplicates_set in possible_duplicates_through_dict.values():
             if new_duplicates_set.issubset(duplicates_set):
                 return None
@@ -901,7 +929,8 @@ class HardDocumentDeduplication:
         for possible_duplicate_individual in set(possible_duplicates_individuals):
             possible_duplicates_throughs.append(
                 PossibleDuplicateThrough(
-                    individual=possible_duplicate_individual, ticketneedsadjudicationdetails=ticket_details
+                    individual=possible_duplicate_individual,
+                    ticketneedsadjudicationdetails=ticket_details,
                 )
             )
         return TicketData(ticket, ticket_details, possible_duplicates_throughs)

@@ -81,7 +81,13 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         PendingIndividualRoleInHousehold.objects.bulk_create(collectors_to_create)
 
     def _create_hh_ind(
-        self, obj_to_create: Any, row: Any, first_row: Any, complex_fields: Dict, complex_types: Dict, sheet_title: str
+        self,
+        obj_to_create: Any,
+        row: Any,
+        first_row: Any,
+        complex_fields: Dict,
+        complex_types: Dict,
+        sheet_title: str,
     ) -> None:
         registration_data_import = obj_to_create.registration_data_import
         excluded = ("pp_age", "pp_index_id")
@@ -147,7 +153,12 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                     if value in (None, ""):
                         continue
 
-                    if header in ("pp_admin1_i_c", "pp_admin2_i_c", "pp_admin3_i_c", "pp_admin4_i_c"):
+                    if header in (
+                        "pp_admin1_i_c",
+                        "pp_admin2_i_c",
+                        "pp_admin3_i_c",
+                        "pp_admin4_i_c",
+                    ):
                         setattr(
                             obj_to_create,
                             current_field["name"],
@@ -272,7 +283,14 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                     obj_to_create = ind_obj()
                     populate_pdu_with_null_values(registration_data_import.program, obj_to_create.flex_fields)
                     self.handle_pdu_fields(row, first_row, obj_to_create)
-                self._create_hh_ind(obj_to_create, row, first_row, complex_fields, complex_types, sheet_title)
+                self._create_hh_ind(
+                    obj_to_create,
+                    row,
+                    first_row,
+                    complex_fields,
+                    complex_types,
+                    sheet_title,
+                )
 
         PendingIndividual.objects.bulk_create(self.individuals)
         PendingHousehold.objects.bulk_update(
@@ -288,7 +306,11 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
 
     @transaction.atomic()
     def execute(
-        self, registration_data_import_id: str, import_data_id: str, business_area_id: str, program_id: str
+        self,
+        registration_data_import_id: str,
+        import_data_id: str,
+        business_area_id: str,
+        program_id: str,
     ) -> None:
         registration_data_import = RegistrationDataImport.objects.select_for_update().get(
             id=registration_data_import_id,

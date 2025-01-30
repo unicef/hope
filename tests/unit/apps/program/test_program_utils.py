@@ -140,7 +140,9 @@ class TestEnrolHouseholdToProgram(TestCase):
         self.assertEqual(hh_count, Household.objects.count())
         self.assertEqual(ind_count, Individual.objects.count())
 
-    def test_enroll_original_household_to_program_representation_already_enrolled(self) -> None:
+    def test_enroll_original_household_to_program_representation_already_enrolled(
+        self,
+    ) -> None:
         hh_count = Household.objects.count()
         ind_count = Individual.objects.count()
 
@@ -246,7 +248,9 @@ class TestEnrolHouseholdToProgram(TestCase):
         head_of_household_already_enrolled_program1.refresh_from_db()
 
         head_of_household_already_enrolled_program2 = IndividualFactory(
-            household=None, program=self.program2, unicef_id=head_of_household_already_enrolled_program1.unicef_id
+            household=None,
+            program=self.program2,
+            unicef_id=head_of_household_already_enrolled_program1.unicef_id,
         )
 
         household_already_with_head_already_enrolled = HouseholdFactory(
@@ -281,7 +285,9 @@ class TestEnrolHouseholdToProgram(TestCase):
         hh_count = Household.objects.count()
         ind_count = Individual.objects.count()
         enroll_households_to_program_task(
-            [str(self.household_already_enrolled.id)], str(self.program2.pk), self.str_user_id
+            [str(self.household_already_enrolled.id)],
+            str(self.program2.pk),
+            self.str_user_id,
         )
         self.assertEqual(hh_count, Household.objects.count())
         self.assertEqual(ind_count, Individual.objects.count())
@@ -315,7 +321,8 @@ class TestEnrolHouseholdToProgram(TestCase):
     def test_generate_rdi_unique_name_when_conflicts(self, mock_randint: Any) -> None:
         mock_randint.side_effect = [1111, 5555]
         RegistrationDataImportFactory(
-            business_area=self.program1.business_area, name="RDI for enroll households to Programme: Program 1"
+            business_area=self.program1.business_area,
+            name="RDI for enroll households to Programme: Program 1",
         )
         result = generate_rdi_unique_name(self.program1)
         expected_name = "RDI for enroll households to Programme: Program 1 (1111)"

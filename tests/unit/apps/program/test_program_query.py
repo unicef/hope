@@ -44,7 +44,11 @@ class TestProgramQuery(APITestCase):
         cls.user = UserFactory.create(partner=cls.partner)
 
         cls.business_area = create_afghanistan()
-        cls.program = ProgramFactory(business_area=cls.business_area, name="Test Program Query", status=Program.ACTIVE)
+        cls.program = ProgramFactory(
+            business_area=cls.business_area,
+            name="Test Program Query",
+            status=Program.ACTIVE,
+        )
         pdu_data1 = PeriodicFieldDataFactory(
             subtype=PeriodicFieldData.DECIMAL,
             number_of_rounds=3,
@@ -87,7 +91,9 @@ class TestProgramQuery(APITestCase):
         )
 
         program_other = ProgramFactory(
-            business_area=cls.business_area, name="Test Program Query Other", status=Program.ACTIVE
+            business_area=cls.business_area,
+            name="Test Program Query Other",
+            status=Program.ACTIVE,
         )
         pdu_data_other = PeriodicFieldDataFactory(
             subtype=PeriodicFieldData.STRING,

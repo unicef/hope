@@ -42,7 +42,11 @@ def add_people(social_worker_program: Program) -> List:
     ba = social_worker_program.business_area
     with transaction.atomic():
         household, individuals = create_household(
-            household_args={"business_area": ba, "program": social_worker_program, "residence_status": HOST},
+            household_args={
+                "business_area": ba,
+                "program": social_worker_program,
+                "residence_status": HOST,
+            },
             individual_args={
                 "full_name": "Stacey Freeman",
                 "given_name": "Stacey",
@@ -82,7 +86,10 @@ def add_people_with_payment_record(add_people: List) -> Payment:
 
 
 def get_program_with_dct_type_and_name(
-    name: str, programme_code: str, dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.DRAFT
+    name: str,
+    programme_code: str,
+    dct_type: str = DataCollectingType.Type.STANDARD,
+    status: str = Program.DRAFT,
 ) -> Program:
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
@@ -99,7 +106,10 @@ def get_program_with_dct_type_and_name(
 
 
 def get_social_program_with_dct_type_and_name(
-    name: str, programme_code: str, dct_type: str = DataCollectingType.Type.SOCIAL, status: str = Program.DRAFT
+    name: str,
+    programme_code: str,
+    dct_type: str = DataCollectingType.Type.SOCIAL,
+    status: str = Program.DRAFT,
 ) -> Program:
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="People").first()

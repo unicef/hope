@@ -56,9 +56,14 @@ class TestRdiXlsxPeople(TestCase):
             number_of_households=0,
             number_of_individuals=4,
         )
-        cls.program = ProgramFactory(status=Program.ACTIVE, data_collecting_type__type=DataCollectingType.Type.SOCIAL)
+        cls.program = ProgramFactory(
+            status=Program.ACTIVE,
+            data_collecting_type__type=DataCollectingType.Type.SOCIAL,
+        )
         cls.registration_data_import = RegistrationDataImportFactory(
-            business_area=cls.business_area, program=cls.program, import_data=cls.import_data
+            business_area=cls.business_area,
+            program=cls.program,
+            import_data=cls.import_data,
         )
         cls.string_attribute = create_pdu_flexible_attribute(
             label="PDU String Attribute",
@@ -73,7 +78,10 @@ class TestRdiXlsxPeople(TestCase):
 
     def test_execute(self) -> None:
         self.RdiXlsxPeopleCreateTask().execute(
-            self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id
+            self.registration_data_import.id,
+            self.import_data.id,
+            self.business_area.id,
+            self.program.id,
         )
         households_count = PendingHousehold.objects.count()
         individuals_count = PendingIndividual.objects.count()
@@ -130,7 +138,10 @@ class TestRdiXlsxPeople(TestCase):
         self.assertEqual(dmd3.rdi_merge_status, MergeStatusModel.PENDING)
         self.assertEqual(
             dmd1.data,
-            {"card_number__atm_card": "164260858", "card_expiry_date__atm_card": "1995-06-03T00:00:00"},
+            {
+                "card_number__atm_card": "164260858",
+                "card_expiry_date__atm_card": "1995-06-03T00:00:00",
+            },
         )
         self.assertEqual(
             dmd2.data,

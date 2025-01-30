@@ -31,15 +31,25 @@ class UserRolesTest(TestCase):
         cls.user = UserFactory()
 
     def test_user_can_be_assigned_role(self) -> None:
-        data = {"role": self.role_1.id, "user": self.user.id, "business_area": self.business_area_afg.id}
+        data = {
+            "role": self.role_1.id,
+            "user": self.user.id,
+            "business_area": self.business_area_afg.id,
+        }
         form = UserRoleAdminForm(data=data)
         self.assertTrue(form.is_valid())
 
-    def test_user_cannot_be_assigned_incompatible_role_in_same_business_area(self) -> None:
+    def test_user_cannot_be_assigned_incompatible_role_in_same_business_area(
+        self,
+    ) -> None:
         IncompatibleRoles.objects.create(role_one=self.role_1, role_two=self.role_2)
         user_role = UserRole.objects.create(role=self.role_1, business_area=self.business_area_afg, user=self.user)
 
-        data = {"role": self.role_2.id, "user": self.user.id, "business_area": self.business_area_afg.id}
+        data = {
+            "role": self.role_2.id,
+            "user": self.user.id,
+            "business_area": self.business_area_afg.id,
+        }
         form = UserRoleAdminForm(data=data)
         self.assertFalse(form.is_valid())
         self.assertIn("role", form.errors.keys())
@@ -67,7 +77,9 @@ class UserRolesTest(TestCase):
         formset = UserRoleFormSet(instance=self.user, data=data)
         self.assertTrue(formset.is_valid())
 
-    def test_assign_multiple_roles_for_user_at_the_same_time_fails_for_incompatible_roles(self) -> None:
+    def test_assign_multiple_roles_for_user_at_the_same_time_fails_for_incompatible_roles(
+        self,
+    ) -> None:
         IncompatibleRoles.objects.create(role_one=self.role_1, role_two=self.role_2)
 
         data = {
@@ -93,11 +105,16 @@ class UserRolesTest(TestCase):
         role_2 = Role.objects.create(name="222", permissions=[Permissions.REPORTING_EXPORT.value])
         # user_role_active
         user_role_1 = UserRole.objects.create(
-            role=role_1, business_area=self.business_area_afg, user=user_not_unicef_partner
+            role=role_1,
+            business_area=self.business_area_afg,
+            user=user_not_unicef_partner,
         )
         # user_role_inactive
         user_role_2 = UserRole.objects.create(
-            role=role_2, business_area=self.business_area_afg, user=user_not_unicef_partner, expiry_date="2024-02-16"
+            role=role_2,
+            business_area=self.business_area_afg,
+            user=user_not_unicef_partner,
+            expiry_date="2024-02-16",
         )
         # user_role_active_but_sharing_same_role_with_user_role_inactive
         UserRole.objects.create(
@@ -138,18 +155,25 @@ class UserRolesTest(TestCase):
             user_not_unicef_partner.permissions_in_business_area(self.business_area_afg.slug),
         )
 
-    def test_unicef_partner_has_permission_from_user_and_default_permission(self) -> None:
+    def test_unicef_partner_has_permission_from_user_and_default_permission(
+        self,
+    ) -> None:
         partner = PartnerFactory(name="UNICEF")
         user = UserFactory(partner=partner)
         role = Role.objects.create(name="111", permissions=[Permissions.GRIEVANCES_CREATE.value])
         UserRole.objects.create(role=role, business_area=self.business_area_afg, user=user)
 
         self.assertIn(
-            Permissions.GRIEVANCES_CREATE.value, user.permissions_in_business_area(self.business_area_afg.slug)
+            Permissions.GRIEVANCES_CREATE.value,
+            user.permissions_in_business_area(self.business_area_afg.slug),
         )
         for permission in DEFAULT_PERMISSIONS_IS_UNICEF_PARTNER:
-            self.assertIn(permission.value, user.permissions_in_business_area(self.business_area_afg.slug))
+            self.assertIn(
+                permission.value,
+                user.permissions_in_business_area(self.business_area_afg.slug),
+            )
 
         self.assertNotIn(
-            Permissions.GRIEVANCES_UPDATE.value, user.permissions_in_business_area(self.business_area_afg.slug)
+            Permissions.GRIEVANCES_UPDATE.value,
+            user.permissions_in_business_area(self.business_area_afg.slug),
         )

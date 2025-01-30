@@ -50,7 +50,9 @@ class TestCreateSurvey(APITestCase):
         cls.user = UserFactory(first_name="John", last_name="Doe", partner=partner)
         cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
         cls.pp = PaymentPlanFactory(
-            business_area=cls.business_area, created_by=cls.user, program_cycle=cls.program.cycles.first()
+            business_area=cls.business_area,
+            created_by=cls.user,
+            program_cycle=cls.program.cycles.first(),
         )
         cls.update_partner_access_to_program(partner, cls.program)
 
@@ -79,7 +81,9 @@ class TestCreateSurvey(APITestCase):
 
     def test_create_survey_without_target_population_and_program(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE], self.business_area
+            self.user,
+            [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE],
+            self.business_area,
         )
 
         self.snapshot_graphql_request(
@@ -103,7 +107,9 @@ class TestCreateSurvey(APITestCase):
 
     def test_create_survey(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE], self.business_area
+            self.user,
+            [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE],
+            self.business_area,
         )
 
         create_household({"size": 3})
@@ -136,7 +142,9 @@ class TestCreateSurvey(APITestCase):
 
     def test_create_survey_and_send_via_rapidpro(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE], self.business_area
+            self.user,
+            [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE],
+            self.business_area,
         )
 
         create_household({"size": 3})
@@ -181,7 +189,10 @@ class TestCreateSurvey(APITestCase):
         phone_number_2 = households[1].head_of_household.phone_no
         phone_number_3 = households[2].head_of_household.phone_no
 
-        with patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)):
+        with patch(
+            "hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__",
+            MagicMock(return_value=None),
+        ):
             start_flow_mock_1 = MagicMock(
                 return_value=(
                     [
@@ -210,7 +221,10 @@ class TestCreateSurvey(APITestCase):
                 self.assertEqual(len(start_flow_mock_1.call_args[0][1]), 3)  # sending only to HOHs, 3 households
                 self.assertEqual(len(survey.successful_rapid_pro_calls), 1)
                 self.assertEqual(survey.successful_rapid_pro_calls[0]["flow_uuid"], "flow123")
-                self.assertEqual(survey.successful_rapid_pro_calls[0]["urns"], [phone_number_1, phone_number_2])
+                self.assertEqual(
+                    survey.successful_rapid_pro_calls[0]["urns"],
+                    [phone_number_1, phone_number_2],
+                )
 
             start_flow_mock_2 = MagicMock(
                 return_value=(
@@ -240,7 +254,9 @@ class TestCreateSurvey(APITestCase):
 
     def test_create_survey_without_recipients(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE], self.business_area
+            self.user,
+            [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE],
+            self.business_area,
         )
 
         self.snapshot_graphql_request(
@@ -268,10 +284,18 @@ class TestCreateSurvey(APITestCase):
 
     def test_getting_available_flows(self) -> None:
         with (
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
+            patch(
+                "hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__",
+                MagicMock(return_value=None),
+            ),
             patch(
                 "hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.get_flows",
-                MagicMock(return_value=[{"uuid": 123, "name": "flow2"}, {"uuid": 234, "name": "flow2"}]),
+                MagicMock(
+                    return_value=[
+                        {"uuid": 123, "name": "flow2"},
+                        {"uuid": 234, "name": "flow2"},
+                    ]
+                ),
             ),
         ):
             self.snapshot_graphql_request(

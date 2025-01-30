@@ -135,7 +135,10 @@ def areas(country: Country) -> None:
 @pytest.mark.usefixtures("login")
 class TestSmokeRegistrationDataImport:
     def test_smoke_registration_data_import(
-        self, create_programs: None, add_rdi: None, pageRegistrationDataImport: RegistrationDataImport
+        self,
+        create_programs: None,
+        add_rdi: None,
+        pageRegistrationDataImport: RegistrationDataImport,
     ) -> None:
         # Go to Registration Data Import
         pageRegistrationDataImport.selectGlobalProgramFilter("Test Programm")
@@ -261,7 +264,11 @@ class TestRegistrationDataImport:
     @pytest.mark.skip(reason="Kobo form is not available. This is a external service, we cannot control it.")
     @pytest.mark.vcr(ignore_localhost=True)
     def test_import_empty_kobo_form(
-        self, login: None, create_programs: None, pageRegistrationDataImport: RegistrationDataImport, kobo_setup: None
+        self,
+        login: None,
+        create_programs: None,
+        pageRegistrationDataImport: RegistrationDataImport,
+        kobo_setup: None,
     ) -> None:
         # Go to Registration Data Import
         pageRegistrationDataImport.selectGlobalProgramFilter("Test Programm")

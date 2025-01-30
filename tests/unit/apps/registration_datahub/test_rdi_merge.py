@@ -110,9 +110,24 @@ class TestRdiMergeTask(TestCase):
             area_level=4,
         )
         cls.area1 = AreaFactory(name="City Test1", area_type=area_type_level_1, p_code="area1")
-        cls.area2 = AreaFactory(name="City Test2", area_type=area_type_level_2, p_code="area2", parent=cls.area1)
-        cls.area3 = AreaFactory(name="City Test3", area_type=area_type_level_3, p_code="area3", parent=cls.area2)
-        cls.area4 = AreaFactory(name="City Test4", area_type=area_type_level_4, p_code="area4", parent=cls.area3)
+        cls.area2 = AreaFactory(
+            name="City Test2",
+            area_type=area_type_level_2,
+            p_code="area2",
+            parent=cls.area1,
+        )
+        cls.area3 = AreaFactory(
+            name="City Test3",
+            area_type=area_type_level_3,
+            p_code="area3",
+            parent=cls.area2,
+        )
+        cls.area4 = AreaFactory(
+            name="City Test4",
+            area_type=area_type_level_4,
+            p_code="area4",
+            parent=cls.area3,
+        )
 
         rebuild_search_index()
 
@@ -267,9 +282,15 @@ class TestRdiMergeTask(TestCase):
         kobo_import_submission_qs = KoboImportedSubmission.objects.all()
         kobo_import_submission = kobo_import_submission_qs.first()
         self.assertEqual(kobo_import_submission_qs.count(), 1)
-        self.assertEqual(str(kobo_import_submission.kobo_submission_uuid), "c09130af-6c9c-4dba-8c7f-1b2ff1970d19")
+        self.assertEqual(
+            str(kobo_import_submission.kobo_submission_uuid),
+            "c09130af-6c9c-4dba-8c7f-1b2ff1970d19",
+        )
         self.assertEqual(kobo_import_submission.kobo_asset_id, "123456123")
-        self.assertEqual(str(kobo_import_submission.kobo_submission_time), "2022-02-22 12:22:22+00:00")
+        self.assertEqual(
+            str(kobo_import_submission.kobo_submission_time),
+            "2022-02-22 12:22:22+00:00",
+        )
         # self.assertEqual(kobo_import_submission.imported_household, None)
 
         individual_with_valid_phone_data = Individual.objects.filter(given_name="Liz").first()
@@ -281,15 +302,26 @@ class TestRdiMergeTask(TestCase):
         self.assertEqual(individual_with_invalid_phone_data.phone_no_valid, False)
         self.assertEqual(individual_with_invalid_phone_data.phone_no_alternative_valid, False)
 
-        self.assertEqual(Individual.objects.filter(full_name="Baz Bush").first().email, "fake_email_5@com")
-        self.assertEqual(Individual.objects.filter(full_name="Benjamin Butler").first().email, "fake_email_1@com")
-        self.assertEqual(Individual.objects.filter(full_name="Bob Jackson").first().email, "")
-        self.assertEqual(Individual.objects.filter(full_name="Benjamin Butler").first().wallet_name, "Wallet Name 1")
         self.assertEqual(
-            Individual.objects.filter(full_name="Benjamin Butler").first().blockchain_name, "Blockchain Name 1"
+            Individual.objects.filter(full_name="Baz Bush").first().email,
+            "fake_email_5@com",
         )
         self.assertEqual(
-            Individual.objects.filter(full_name="Benjamin Butler").first().wallet_address, "Wallet Address 1"
+            Individual.objects.filter(full_name="Benjamin Butler").first().email,
+            "fake_email_1@com",
+        )
+        self.assertEqual(Individual.objects.filter(full_name="Bob Jackson").first().email, "")
+        self.assertEqual(
+            Individual.objects.filter(full_name="Benjamin Butler").first().wallet_name,
+            "Wallet Name 1",
+        )
+        self.assertEqual(
+            Individual.objects.filter(full_name="Benjamin Butler").first().blockchain_name,
+            "Blockchain Name 1",
+        )
+        self.assertEqual(
+            Individual.objects.filter(full_name="Benjamin Butler").first().wallet_address,
+            "Wallet Address 1",
         )
 
         household_data = model_to_dict(
@@ -541,7 +573,10 @@ class TestRdiMergeTask(TestCase):
 
     @patch.dict(
         "os.environ",
-        {"DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key", "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com"},
+        {
+            "DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key",
+            "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
+        },
     )
     @mock.patch(
         "hct_mis_api.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService.create_grievance_tickets_for_duplicates"
@@ -640,20 +675,30 @@ class TestRdiMergeTaskDeliveryMechanismData(TestCase):
                 "delivery_mechanism_data_to_edit": [
                     {
                         "approve_status": False,
-                        "data_fields": [{"name": "card_expiry_date__atm_card", "previous_value": None, "value": None}],
+                        "data_fields": [
+                            {
+                                "name": "card_expiry_date__atm_card",
+                                "previous_value": None,
+                                "value": None,
+                            }
+                        ],
                         "id": str(dmd2.id),
                         "label": "ATM Card",
                     }
                 ]
             },
         )
-        self.assertEqual(data_not_valid_ticket.ticket.comments, f"This is a system generated ticket for RDI {self.rdi}")
+        self.assertEqual(
+            data_not_valid_ticket.ticket.comments,
+            f"This is a system generated ticket for RDI {self.rdi}",
+        )
         self.assertEqual(
             data_not_valid_ticket.ticket.description,
             f"Missing required fields ['card_expiry_date__atm_card'] values for delivery mechanism {dmd2.delivery_mechanism}",
         )
         self.assertEqual(
-            data_not_valid_ticket.ticket.issue_type, GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE
+            data_not_valid_ticket.ticket.issue_type,
+            GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
         )
         self.assertEqual(data_not_valid_ticket.ticket.category, GrievanceTicket.CATEGORY_DATA_CHANGE)
         self.assertEqual(data_not_valid_ticket.ticket.registration_data_import, self.rdi)
@@ -668,9 +713,21 @@ class TestRdiMergeTaskDeliveryMechanismData(TestCase):
                     {
                         "approve_status": False,
                         "data_fields": [
-                            {"name": "card_number__atm_card", "previous_value": "123", "value": None},
-                            {"name": "card_expiry_date__atm_card", "previous_value": "2022-01-01", "value": None},
-                            {"name": "name_of_cardholder__atm_card", "previous_value": "Marek", "value": None},
+                            {
+                                "name": "card_number__atm_card",
+                                "previous_value": "123",
+                                "value": None,
+                            },
+                            {
+                                "name": "card_expiry_date__atm_card",
+                                "previous_value": "2022-01-01",
+                                "value": None,
+                            },
+                            {
+                                "name": "name_of_cardholder__atm_card",
+                                "previous_value": "Marek",
+                                "value": None,
+                            },
                         ],
                         "id": str(dmd3.id),
                         "label": "ATM Card",
@@ -679,7 +736,8 @@ class TestRdiMergeTaskDeliveryMechanismData(TestCase):
             },
         )
         self.assertEqual(
-            data_not_unique_ticket.ticket.comments, f"This is a system generated ticket for RDI {self.rdi}"
+            data_not_unique_ticket.ticket.comments,
+            f"This is a system generated ticket for RDI {self.rdi}",
         )
         self.assertEqual(
             data_not_unique_ticket.ticket.description,
@@ -687,7 +745,8 @@ class TestRdiMergeTaskDeliveryMechanismData(TestCase):
             f" for delivery mechanism {dmd3.delivery_mechanism}, possible duplicate of {dmd}",
         )
         self.assertEqual(
-            data_not_unique_ticket.ticket.issue_type, GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE
+            data_not_unique_ticket.ticket.issue_type,
+            GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
         )
         self.assertEqual(data_not_unique_ticket.ticket.category, GrievanceTicket.CATEGORY_DATA_CHANGE)
         self.assertEqual(data_not_unique_ticket.ticket.registration_data_import, self.rdi)

@@ -148,20 +148,27 @@ class TestFSPRelatedSchema(APITestCase):
 
     def test_query_all_financial_service_provider_xlsx_templates(self) -> None:
         self.snapshot_graphql_request(
-            request_string=QUERY_ALL_FINANCIAL_SERVICE_PROVIDER_XLSX_TEMPLATES, context={"user": self.user}
+            request_string=QUERY_ALL_FINANCIAL_SERVICE_PROVIDER_XLSX_TEMPLATES,
+            context={"user": self.user},
         )
 
     def test_query_all_financial_service_providers(self) -> None:
         self.snapshot_graphql_request(
             request_string=QUERY_ALL_FINANCIAL_SERVICE_PROVIDERS,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {"Business-Area": self.business_area.slug},
+            },
             variables={"orderBy": "name"},
         )
 
     def test_query_single_financial_service_provider(self) -> None:
         self.snapshot_graphql_request(
             request_string=QUERY_FINANCIAL_SERVICE_PROVIDER,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {"Business-Area": self.business_area.slug},
+            },
             variables={"id": self.id_to_base64(self.fsp_1.id, "FinancialServiceProviderNode")},
         )
 
@@ -170,6 +177,9 @@ class TestFSPRelatedSchema(APITestCase):
             request_string=QUERY_FINANCIAL_SERVICE_PROVIDER_XLSX_TEMPLATE,
             context={"user": self.user},
             variables={
-                "id": self.id_to_base64(self.fsp_xlsx_template_1.id, "FinancialServiceProviderXlsxTemplateNode")
+                "id": self.id_to_base64(
+                    self.fsp_xlsx_template_1.id,
+                    "FinancialServiceProviderXlsxTemplateNode",
+                )
             },
         )

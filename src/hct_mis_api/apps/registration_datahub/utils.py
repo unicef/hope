@@ -19,13 +19,20 @@ from hct_mis_api.apps.program.models import Program
 def post_process_dedupe_results(record: Any) -> None:
     max_score = 0
     min_score = sys.maxsize
-    for field in [record.deduplication_batch_results, record.deduplication_golden_record_results]:
+    for field in [
+        record.deduplication_batch_results,
+        record.deduplication_golden_record_results,
+    ]:
         if "duplicates" in field:
             duplicates = field["duplicates"]
             for entry in field["duplicates"]:
                 max_score = max(max_score, entry["score"])
                 min_score = min(min_score, entry["score"])
-            field["score"] = {"max": max_score, "min": min_score, "qty": len(duplicates)}
+            field["score"] = {
+                "max": max_score,
+                "min": min_score,
+                "qty": len(duplicates),
+            }
 
 
 def combine_collections(a: Dict, b: Dict, path: Optional[List] = None, update: bool = True) -> Dict:
@@ -42,7 +49,10 @@ def combine_collections(a: Dict, b: Dict, path: Optional[List] = None, update: b
             elif isinstance(a[key], list) and isinstance(b[key], list):
                 for idx in range(len(b[key])):
                     a[key][idx] = combine_collections(
-                        a[key][idx], b[key][idx], path + [str(key), str(idx)], update=update
+                        a[key][idx],
+                        b[key][idx],
+                        path + [str(key), str(idx)],
+                        update=update,
                     )
             elif update:
                 a[key] = b[key]
@@ -84,7 +94,9 @@ def calculate_hash_for_kobo_submission(submission: Dict) -> str:
 
 
 def get_rdi_program_population(
-    import_from_program_id: str, import_to_program_id: str, import_from_ids: Optional[str]
+    import_from_program_id: str,
+    import_to_program_id: str,
+    import_from_ids: Optional[str],
 ) -> Tuple[QuerySet[Household], QuerySet[Individual]]:
     program = get_object_or_404(Program, pk=import_to_program_id)
 

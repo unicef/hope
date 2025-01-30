@@ -49,7 +49,10 @@ class TestSurveyQueries(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.QUERY_LIST,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {"Business-Area": self.business_area.slug},
+            },
             variables={
                 "survey": self.id_to_base64(survey.id, "SurveyNode"),
             },

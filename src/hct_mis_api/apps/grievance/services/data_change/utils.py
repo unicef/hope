@@ -189,7 +189,10 @@ def handle_edit_document(document_data: Dict) -> Document:
     if photo:
         photo = photoraw
 
-    document = get_object_or_404(Document.objects.select_for_update(), id=(decode_id_string(document_data.get("id"))))
+    document = get_object_or_404(
+        Document.objects.select_for_update(),
+        id=(decode_id_string(document_data.get("id"))),
+    )
     document_type = DocumentType.objects.get(key=document_key)
 
     if (
@@ -258,7 +261,9 @@ def handle_update_payment_channel(payment_channel: Dict) -> Optional[BankAccount
     return None
 
 
-def handle_update_delivery_mechanism_data(delivery_mechanism_datas: List[Dict]) -> List[DeliveryMechanismData]:
+def handle_update_delivery_mechanism_data(
+    delivery_mechanism_datas: List[Dict],
+) -> List[DeliveryMechanismData]:
     delivery_mechanism_datas_to_update = []
     all_fields: dict = FieldFactory(get_core_fields_attributes()).to_dict_by("name")
     for dmd_data in delivery_mechanism_datas:
@@ -299,7 +304,11 @@ def handle_add_identity(identity: Dict, individual: Individual) -> IndividualIde
         raise ValidationError(f"Identity with number {number}, partner: {partner_name} already exists")
 
     return IndividualIdentity(
-        number=number, individual=individual, partner=partner, country=country, rdi_merge_status=MergeStatusModel.MERGED
+        number=number,
+        individual=individual,
+        partner=partner,
+        country=country,
+        rdi_merge_status=MergeStatusModel.MERGED,
     )
 
 
@@ -326,7 +335,9 @@ def handle_edit_identity(identity_data: Dict) -> IndividualIdentity:
     return identity
 
 
-def prepare_previous_documents(documents_to_remove_with_approve_status: List[Dict]) -> Dict[str, Dict]:
+def prepare_previous_documents(
+    documents_to_remove_with_approve_status: List[Dict],
+) -> Dict[str, Dict]:
     previous_documents: Dict[str, Any] = {}
     for document_data in documents_to_remove_with_approve_status:
         document_id = decode_id_string(document_data.get("value"))
@@ -383,7 +394,9 @@ def prepare_edit_documents(documents_to_edit: List[Document]) -> List[Dict]:
     return edited_documents
 
 
-def prepare_previous_identities(identities_to_remove_with_approve_status: List[Dict]) -> Dict[str, Any]:
+def prepare_previous_identities(
+    identities_to_remove_with_approve_status: List[Dict],
+) -> Dict[str, Any]:
     previous_identities: Dict[str, Any] = {}
     for identity_data in identities_to_remove_with_approve_status:
         identity_id = identity_data.get("value")
@@ -400,7 +413,9 @@ def prepare_previous_identities(identities_to_remove_with_approve_status: List[D
     return previous_identities
 
 
-def prepare_previous_payment_channels(payment_channels_to_remove_with_approve_status: List[Dict]) -> Dict[str, Any]:
+def prepare_previous_payment_channels(
+    payment_channels_to_remove_with_approve_status: List[Dict],
+) -> Dict[str, Any]:
     previous_payment_channels = {}
     for payment_channel_data in payment_channels_to_remove_with_approve_status:
         payment_channel_id: str = payment_channel_data.get("value", "")
@@ -465,7 +480,9 @@ def prepare_edit_payment_channel(payment_channels: List[Dict]) -> List[Dict]:
     return items
 
 
-def prepare_edit_delivery_mechanism_data(delivery_mechanism_data: List[Dict]) -> List[Dict]:
+def prepare_edit_delivery_mechanism_data(
+    delivery_mechanism_data: List[Dict],
+) -> List[Dict]:
     items = []
     for dmd in delivery_mechanism_data:
         _id = dmd.get("id")
@@ -569,10 +586,18 @@ def withdraw_individual_and_reassign_roles(ticket_details: Any, individual_to_re
         ticket_details.programs.all(),
         info,
     )
-    withdraw_individual(individual_to_remove, info, old_individual, household, ticket_details.ticket.programs.all())
+    withdraw_individual(
+        individual_to_remove,
+        info,
+        old_individual,
+        household,
+        ticket_details.ticket.programs.all(),
+    )
 
 
-def get_data_from_role_data(role_data: Dict) -> Tuple[Optional[Any], Individual, Individual, Household]:
+def get_data_from_role_data(
+    role_data: Dict,
+) -> Tuple[Optional[Any], Individual, Individual, Household]:
     role_name = role_data.get("role")
 
     individual_id = decode_id_string(role_data.get("individual"))
@@ -585,7 +610,9 @@ def get_data_from_role_data(role_data: Dict) -> Tuple[Optional[Any], Individual,
     return role_name, old_individual, new_individual, household
 
 
-def get_data_from_role_data_new_ticket(role_data: Dict) -> Tuple[Optional[Any], Individual, Individual, Household]:
+def get_data_from_role_data_new_ticket(
+    role_data: Dict,
+) -> Tuple[Optional[Any], Individual, Individual, Household]:
     role_name, old_individual, _, household = get_data_from_role_data(role_data)
     new_individual_id = decode_id_string(role_data.get("new_individual"))
     new_individual = get_object_or_404(Individual, id=new_individual_id)
@@ -681,7 +708,10 @@ def reassign_roles_on_disable_individual(
 
 
 def reassign_roles_on_update(
-    individual: Individual, role_reassign_data: Dict, program_id: "UUID", info: Optional[Any] = None
+    individual: Individual,
+    role_reassign_data: Dict,
+    program_id: "UUID",
+    info: Optional[Any] = None,
 ) -> None:
     roles_to_bulk_update = []
     roles_to_delete = []
@@ -765,7 +795,11 @@ def mark_as_duplicate_individual(
 ) -> None:
     individual_to_remove.mark_as_duplicate(unique_individual)
     log_and_withdraw_household_if_needed(
-        individual_to_remove, info, old_individual_to_remove, removed_individual_household, program_id
+        individual_to_remove,
+        info,
+        old_individual_to_remove,
+        removed_individual_household,
+        program_id,
     )
 
 

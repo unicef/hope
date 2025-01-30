@@ -33,7 +33,11 @@ class SentryFilter:
     }
 
     @staticmethod
-    def filter_exception(exc_info: dict, exc_to_filter: Type[Exception], msg_to_filter: Optional[str] = None) -> bool:
+    def filter_exception(
+        exc_info: dict,
+        exc_to_filter: Type[Exception],
+        msg_to_filter: Optional[str] = None,
+    ) -> bool:
         exc_type, exc_value, tb = exc_info
         if not isinstance(exc_value, exc_to_filter):
             return False

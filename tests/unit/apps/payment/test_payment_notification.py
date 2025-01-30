@@ -192,7 +192,10 @@ class TestPaymentNotification(APITestCase):
 
     def test_prepare_user_recipients_for_approve(self) -> None:
         payment_notification = PaymentNotification(
-            self.payment_plan, PaymentPlan.Action.APPROVE.name, self.user_action_user, f"{timezone.now():%-d %B %Y}"
+            self.payment_plan,
+            PaymentPlan.Action.APPROVE.name,
+            self.user_action_user,
+            f"{timezone.now():%-d %B %Y}",
         )
         self.assertEqual(
             payment_notification.user_recipients.count(),
@@ -213,7 +216,10 @@ class TestPaymentNotification(APITestCase):
 
     def test_prepare_user_recipients_for_authorize(self) -> None:
         payment_notification = PaymentNotification(
-            self.payment_plan, PaymentPlan.Action.AUTHORIZE.name, self.user_action_user, f"{timezone.now():%-d %B %Y}"
+            self.payment_plan,
+            PaymentPlan.Action.AUTHORIZE.name,
+            self.user_action_user,
+            f"{timezone.now():%-d %B %Y}",
         )
         self.assertEqual(
             payment_notification.user_recipients.count(),
@@ -234,7 +240,10 @@ class TestPaymentNotification(APITestCase):
 
     def test_prepare_user_recipients_for_release(self) -> None:
         payment_notification = PaymentNotification(
-            self.payment_plan, PaymentPlan.Action.REVIEW.name, self.user_action_user, f"{timezone.now():%-d %B %Y}"
+            self.payment_plan,
+            PaymentPlan.Action.REVIEW.name,
+            self.user_action_user,
+            f"{timezone.now():%-d %B %Y}",
         )
         self.assertEqual(
             payment_notification.user_recipients.count(),
@@ -294,7 +303,9 @@ class TestPaymentNotification(APITestCase):
 
     @mock.patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
     @override_config(
-        SEND_PAYMENT_PLANS_NOTIFICATION=True, ENABLE_MAILJET=True, MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=1
+        SEND_PAYMENT_PLANS_NOTIFICATION=True,
+        ENABLE_MAILJET=True,
+        MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=1,
     )
     @override_settings(CATCH_ALL_EMAIL=["catchallemail@email.com", "catchallemail2@email.com"])
     def test_send_email_notification_catch_all_email(self, mock_post: Any) -> None:
@@ -321,7 +332,9 @@ class TestPaymentNotification(APITestCase):
 
     @mock.patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
     @override_config(
-        SEND_PAYMENT_PLANS_NOTIFICATION=True, ENABLE_MAILJET=True, MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=1
+        SEND_PAYMENT_PLANS_NOTIFICATION=True,
+        ENABLE_MAILJET=True,
+        MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=1,
     )
     def test_send_email_notification_without_catch_all_email(self, mock_post: Any) -> None:
         payment_notification = PaymentNotification(
@@ -351,7 +364,9 @@ class TestPaymentNotification(APITestCase):
 
     @mock.patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
     @override_config(
-        SEND_PAYMENT_PLANS_NOTIFICATION=True, ENABLE_MAILJET=True, MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=1
+        SEND_PAYMENT_PLANS_NOTIFICATION=True,
+        ENABLE_MAILJET=True,
+        MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=1,
     )
     @override_settings(ENV="prod")
     def test_send_email_notification_exclude_superuser(self, mock_post: Any) -> None:

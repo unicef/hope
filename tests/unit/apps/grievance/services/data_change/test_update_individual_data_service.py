@@ -36,7 +36,9 @@ class TestUpdateIndividualDataService(TestCase):
         cls.household, _ = create_household({"program": cls.program})
 
         cls.individual = IndividualFactory(
-            household=cls.household, business_area=cls.business_area, program=cls.program
+            household=cls.household,
+            business_area=cls.business_area,
+            program=cls.program,
         )
 
         cls.document_type_unique_for_individual = DocumentTypeFactory(
@@ -323,7 +325,13 @@ class TestUpdateIndividualDataService(TestCase):
 
     def test_update_people_individual_hh_fields(self) -> None:
         CountryFactory(name="Poland", iso_code3="POL", iso_code2="PL", iso_num="620")
-        CountryFactory(name="Other Country", short_name="Oth", iso_code2="O", iso_code3="OTH", iso_num="111")
+        CountryFactory(
+            name="Other Country",
+            short_name="Oth",
+            iso_code2="O",
+            iso_code3="OTH",
+            iso_num="111",
+        )
         hh_fields = [
             "consent",
             "residence_status",

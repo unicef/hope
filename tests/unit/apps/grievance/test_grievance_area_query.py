@@ -47,9 +47,24 @@ class TestGrievanceAreaQuery(APITestCase):
         cls.area_type_level_2 = AreaTypeFactory(name="District", area_level=2, parent=cls.area_type_level_1)
 
         cls.ghazni = AreaFactory(name="Ghazni", area_type=cls.area_type_level_1, p_code="area1")
-        cls.doshi = AreaFactory(name="Doshi", area_type=cls.area_type_level_2, p_code="area2", parent=cls.ghazni)
-        cls.burka = AreaFactory(name="Burka", area_type=cls.area_type_level_2, p_code="area3", parent=cls.ghazni)
-        cls.quadis = AreaFactory(name="Quadis", area_type=cls.area_type_level_2, p_code="area3", parent=cls.ghazni)
+        cls.doshi = AreaFactory(
+            name="Doshi",
+            area_type=cls.area_type_level_2,
+            p_code="area2",
+            parent=cls.ghazni,
+        )
+        cls.burka = AreaFactory(
+            name="Burka",
+            area_type=cls.area_type_level_2,
+            p_code="area3",
+            parent=cls.ghazni,
+        )
+        cls.quadis = AreaFactory(
+            name="Quadis",
+            area_type=cls.area_type_level_2,
+            p_code="area3",
+            parent=cls.ghazni,
+        )
 
         cls.grievance_1 = GrievanceTicketFactory(admin2=cls.doshi, description="doshi", business_area=cls.business_area)
         cls.grievance_2 = GrievanceTicketFactory(admin2=cls.burka, description="burka", business_area=cls.business_area)
@@ -67,7 +82,10 @@ class TestGrievanceAreaQuery(APITestCase):
         [
             (
                 "with_permission",
-                [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+                [
+                    Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                    Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                ],
             ),
             ("without_permission", []),
         ]
@@ -93,7 +111,10 @@ class TestGrievanceAreaQuery(APITestCase):
         [
             (
                 "with_permission",
-                [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+                [
+                    Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                    Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                ],
             ),
             ("without_permission", []),
         ]
@@ -119,7 +140,10 @@ class TestGrievanceAreaQuery(APITestCase):
         [
             (
                 "with_permission",
-                [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+                [
+                    Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                    Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                ],
             ),
             ("without_permission", []),
         ]
@@ -146,7 +170,10 @@ class TestGrievanceAreaQuery(APITestCase):
         [
             (
                 "with_permission",
-                [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+                [
+                    Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                    Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                ],
             ),
             ("without_permission", []),
         ]
@@ -172,7 +199,10 @@ class TestGrievanceAreaQuery(APITestCase):
         [
             (
                 "with_permission",
-                [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+                [
+                    Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                    Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                ],
             ),
             ("without_permission", []),
         ]

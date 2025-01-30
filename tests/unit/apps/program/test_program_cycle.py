@@ -130,7 +130,9 @@ class TestProgramCycleMethods(TestCase):
 
         with self.assertRaisesMessage(DjangoValidationError, "End date cannot be before start date."):
             ProgramCycleFactory(
-                program=self.program, start_date=parse_date("2021-01-05"), end_date=parse_date("2021-01-01")
+                program=self.program,
+                start_date=parse_date("2021-01-05"),
+                end_date=parse_date("2021-01-01"),
             )
 
         cycle2 = ProgramCycleFactory(program=self.program)

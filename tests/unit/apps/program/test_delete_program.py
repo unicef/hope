@@ -37,7 +37,11 @@ class TestDeleteProgram(APITestCase):
         [
             ("with_permission_in_draft", [Permissions.PROGRAMME_REMOVE], Program.DRAFT),
             ("without_permission_in_draft", [], Program.DRAFT),
-            ("with_permission_in_active", [Permissions.PROGRAMME_REMOVE], Program.ACTIVE),
+            (
+                "with_permission_in_active",
+                [Permissions.PROGRAMME_REMOVE],
+                Program.ACTIVE,
+            ),
         ]
     )
     def test_delete_program_authenticated(self, _: Any, permissions: List[Permissions], status: str) -> None:

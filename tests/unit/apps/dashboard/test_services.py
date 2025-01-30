@@ -29,7 +29,11 @@ def test_get_cache_key(cache_name: str, cache_class: Any, slug: str) -> None:
 @pytest.mark.django_db(databases=["default", "read_only"])
 def test_get_data_cache_hit(cache_name: str, cache_class: Any, slug: str) -> None:
     """Test get_data when data is found in the cache."""
-    cache.set(f"dashboard_data_{slug}", json.dumps({"test": f"{cache_name}_data"}), 60 * 60 * 24)
+    cache.set(
+        f"dashboard_data_{slug}",
+        json.dumps({"test": f"{cache_name}_data"}),
+        60 * 60 * 24,
+    )
     data: Optional[Dict[str, Any]] = cache_class.get_data(slug)
     assert data == {"test": f"{cache_name}_data"}
 

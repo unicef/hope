@@ -80,7 +80,10 @@ class UserPartnerTest(TestCase):
         self.assertQuerysetEqual(other_partner_areas, Area.objects.filter(id=self.area_1.pk))
 
         unicef_partner_areas = self.unicef_user.partner.get_program_areas(self.program.pk)
-        self.assertQuerysetEqual(unicef_partner_areas, Area.objects.filter(id__in=[self.area_1.pk, self.area_2.pk]))
+        self.assertQuerysetEqual(
+            unicef_partner_areas,
+            Area.objects.filter(id__in=[self.area_1.pk, self.area_2.pk]),
+        )
 
     def test_partner_permissions_in_business_area(self) -> None:
         # two roles without program
@@ -120,19 +123,25 @@ class UserPartnerTest(TestCase):
 
         # empty list because wrong program id
         empty_list = User.permissions_in_business_area(
-            self.other_user, business_area_slug=self.business_area.slug, program_id=self.business_area.pk
+            self.other_user,
+            business_area_slug=self.business_area.slug,
+            program_id=self.business_area.pk,
         )
         self.assertEqual(empty_list, list())
 
         # one role unicef user
         roles_1_for_unicef_user = User.permissions_in_business_area(
-            self.unicef_user, business_area_slug=self.business_area.slug, program_id=self.program.pk
+            self.unicef_user,
+            business_area_slug=self.business_area.slug,
+            program_id=self.program.pk,
         )
         self.assertEqual(roles_1_for_unicef_user.sort(), default_list)
 
         # user with unicef partner but without role in BA
         roles_0_for_unicef_user = User.permissions_in_business_area(
-            self.user_without_role, business_area_slug=self.business_area.slug, program_id=self.program.pk
+            self.user_without_role,
+            business_area_slug=self.business_area.slug,
+            program_id=self.program.pk,
         )
         self.assertEqual(roles_0_for_unicef_user, list())
 
@@ -164,7 +173,10 @@ class UserPartnerTest(TestCase):
 
         # check perms wrong program_id
         user_without_access = User.has_permission(
-            self.other_user, "PROGRAMME_FINISH", self.business_area, self.business_area.pk
+            self.other_user,
+            "PROGRAMME_FINISH",
+            self.business_area,
+            self.business_area.pk,
         )
         self.assertFalse(user_without_access)
 

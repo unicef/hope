@@ -122,5 +122,8 @@ class UserGroupAdmin(GetManyFromRemoteMixin, HOPEModelAdminBase):
         collector.collect(objs)
         serializer = self.get_serializer("json")
         return serializer.serialize(
-            collector.data, use_natural_foreign_keys=True, use_natural_primary_keys=True, indent=3
+            collector.data,
+            use_natural_foreign_keys=True,
+            use_natural_primary_keys=True,
+            indent=3,
         )

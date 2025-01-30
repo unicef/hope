@@ -49,7 +49,12 @@ class Approval(TimeStampedUUIDModel):
         (REJECT, "Reject"),
     )
 
-    type = models.CharField(max_length=50, choices=TYPE_CHOICES, default=APPROVAL, verbose_name=_("Approval type"))
+    type = models.CharField(
+        max_length=50,
+        choices=TYPE_CHOICES,
+        default=APPROVAL,
+        verbose_name=_("Approval type"),
+    )
     comment = models.CharField(max_length=500, null=True, blank=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     approval_process = models.ForeignKey(ApprovalProcess, on_delete=models.CASCADE, related_name="approvals")
@@ -74,7 +79,9 @@ class Approval(TimeStampedUUIDModel):
 
 class AcceptanceProcessThreshold(TimeStampedUUIDModel):
     business_area = models.ForeignKey(
-        "core.BusinessArea", on_delete=models.PROTECT, related_name="acceptance_process_thresholds"
+        "core.BusinessArea",
+        on_delete=models.PROTECT,
+        related_name="acceptance_process_thresholds",
     )
     payments_range_usd = IntegerRangeField(
         default=NumericRange(0, None),

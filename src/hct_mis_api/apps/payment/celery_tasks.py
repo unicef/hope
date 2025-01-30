@@ -142,7 +142,10 @@ def create_payment_plan_payment_list_xlsx(self: Any, payment_plan_id: str, user_
 @log_start_and_end
 @sentry_tags
 def create_payment_plan_payment_list_xlsx_per_fsp(
-    self: Any, payment_plan_id: str, user_id: str, fsp_xlsx_template_id: Optional[str] = None
+    self: Any,
+    payment_plan_id: str,
+    user_id: str,
+    fsp_xlsx_template_id: Optional[str] = None,
 ) -> None:
     try:
         from hct_mis_api.apps.payment.models import PaymentPlan
@@ -315,7 +318,12 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
                 payment.entitlement_date = timezone.now()
                 updates.append(payment)
             Payment.signature_manager.bulk_update_with_signature(
-                updates, ["entitlement_quantity", "entitlement_date", "entitlement_quantity_usd"]
+                updates,
+                [
+                    "entitlement_quantity",
+                    "entitlement_date",
+                    "entitlement_quantity_usd",
+                ],
             )
 
             payment_plan.steficon_applied_date = timezone.now()
@@ -434,7 +442,10 @@ def prepare_follow_up_payment_plan_task(self: Any, payment_plan_id: str) -> bool
 @log_start_and_end
 @sentry_tags
 def payment_plan_exclude_beneficiaries(
-    self: Any, payment_plan_id: str, excluding_hh_or_ind_ids: List[Optional[str]], exclusion_reason: Optional[str] = ""
+    self: Any,
+    payment_plan_id: str,
+    excluding_hh_or_ind_ids: List[Optional[str]],
+    exclusion_reason: Optional[str] = "",
 ) -> None:
     try:
         from django.db.models import Q
@@ -493,7 +504,11 @@ def payment_plan_exclude_beneficiaries(
                 payment_plan.background_action_status_exclude_beneficiaries_error()
                 payment_plan.exclude_household_error = str([*error_msg, *info_msg])
                 payment_plan.save(
-                    update_fields=["exclusion_reason", "exclude_household_error", "background_action_status"]
+                    update_fields=[
+                        "exclusion_reason",
+                        "exclude_household_error",
+                        "background_action_status",
+                    ]
                 )
                 raise ValidationError("Payment Plan Exclude Beneficiaries Validation Error with Beneficiaries List")
 
@@ -509,14 +524,26 @@ def payment_plan_exclude_beneficiaries(
 
             payment_plan.background_action_status_none()
             payment_plan.exclude_household_error = str(info_msg or "")
-            payment_plan.save(update_fields=["exclusion_reason", "background_action_status", "exclude_household_error"])
+            payment_plan.save(
+                update_fields=[
+                    "exclusion_reason",
+                    "background_action_status",
+                    "exclude_household_error",
+                ]
+            )
         except Exception as e:
             logger.exception("Payment Plan Exclude Beneficiaries Error with excluding method. \n" + str(e))
             payment_plan.background_action_status_exclude_beneficiaries_error()
 
             if error_msg:
                 payment_plan.exclude_household_error = str([*error_msg, *info_msg])
-            payment_plan.save(update_fields=["exclusion_reason", "background_action_status", "exclude_household_error"])
+            payment_plan.save(
+                update_fields=[
+                    "exclusion_reason",
+                    "background_action_status",
+                    "exclude_household_error",
+                ]
+            )
 
     except Exception as e:
         logger.exception("Payment Plan Excluding Beneficiaries Error with celery task. \n" + str(e))
@@ -633,7 +660,11 @@ def periodic_sync_payment_gateway_records(self: Any) -> None:
 @log_start_and_end
 @sentry_tags
 def send_payment_notification_emails(
-    self: Any, payment_plan_id: str, action: str, action_user_id: str, action_date_formatted: str
+    self: Any,
+    payment_plan_id: str,
+    action: str,
+    action_user_id: str,
+    action_date_formatted: str,
 ) -> None:
     from hct_mis_api.apps.payment.notifications import PaymentNotification
 

@@ -30,7 +30,9 @@ class TestSampleSizeQuery(APITestCase):
         cls.business_area = create_afghanistan()
 
         cls.pp = PaymentPlanFactory(
-            business_area=cls.business_area, status=PaymentPlan.Status.TP_PROCESSING, created_by=cls.user
+            business_area=cls.business_area,
+            status=PaymentPlan.Status.TP_PROCESSING,
+            created_by=cls.user,
         )
         cls.households = [create_household()[0] for _ in range(4)]
         for household in cls.households:
@@ -86,7 +88,10 @@ class TestSampleSizeQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.QUERY_SAMPLE_SIZE,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {"Business-Area": self.business_area.slug},
+            },
             variables=data,
         )
 
@@ -120,7 +125,10 @@ class TestSampleSizeQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.QUERY_SAMPLE_SIZE,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {"Business-Area": self.business_area.slug},
+            },
             variables=data,
         )
 
@@ -153,6 +161,9 @@ class TestSampleSizeQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.QUERY_SAMPLE_SIZE,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {"Business-Area": self.business_area.slug},
+            },
             variables=data,
         )

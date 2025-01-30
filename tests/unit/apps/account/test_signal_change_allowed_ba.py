@@ -32,10 +32,14 @@ class TestSignalChangeAllowedBusinessAreas(TestCase):
         ukr_partner_through.roles.set([role])
 
         cls.program_afg = ProgramFactory.create(
-            status=Program.DRAFT, business_area=cls.business_area_afg, partner_access=Program.ALL_PARTNERS_ACCESS
+            status=Program.DRAFT,
+            business_area=cls.business_area_afg,
+            partner_access=Program.ALL_PARTNERS_ACCESS,
         )
         cls.program_ukr = ProgramFactory.create(
-            status=Program.DRAFT, business_area=cls.business_area_ukr, partner_access=Program.SELECTED_PARTNERS_ACCESS
+            status=Program.DRAFT,
+            business_area=cls.business_area_ukr,
+            partner_access=Program.SELECTED_PARTNERS_ACCESS,
         )
 
     def test_signal_change_allowed_business_areas(self) -> None:
@@ -56,7 +60,10 @@ class TestSignalChangeAllowedBusinessAreas(TestCase):
         self.assertEqual(self.program_ukr.partners.count(), 2)
         self.assertEqual(self.partner.programs.count(), 2)
 
-        self.assertEqual(self.partner.program_partner_through.get(program=self.program_ukr).full_area_access, False)
+        self.assertEqual(
+            self.partner.program_partner_through.get(program=self.program_ukr).full_area_access,
+            False,
+        )
 
         self.partner.allowed_business_areas.remove(self.business_area_afg)
         # removing from allowed BA -> removing roles in this BA

@@ -152,7 +152,7 @@ class IndividualSerializer(serializers.ModelSerializer):
             return ROLE_PRIMARY
         elif value.upper()[0] == "A":
             return ROLE_ALTERNATE
-        raise ValidationError("Invalid value %s. " "Check values at %s" % (value, reverse("api:role-list")))
+        raise ValidationError("Invalid value %s. Check values at %s" % (value, reverse("api:role-list")))
 
 
 class HouseholdSerializer(CollectDataMixin, serializers.ModelSerializer):

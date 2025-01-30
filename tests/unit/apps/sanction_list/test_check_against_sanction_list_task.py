@@ -86,7 +86,10 @@ class TestSanctionList(TestCase):
             {
                 "Messages": [
                     {
-                        "From": {"Email": settings.DEFAULT_EMAIL, "Name": settings.DEFAULT_EMAIL_DISPLAY},
+                        "From": {
+                            "Email": settings.DEFAULT_EMAIL,
+                            "Name": settings.DEFAULT_EMAIL_DISPLAY,
+                        },
                         "Subject": f"[test] {subject}",
                         "To": [{"Email": "test_email@email.com"}],
                         "Cc": [{"Email": settings.SANCTION_LIST_CC_MAIL}],

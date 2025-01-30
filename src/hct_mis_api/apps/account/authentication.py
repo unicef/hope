@@ -29,7 +29,12 @@ def social_details(backend: Any, details: Dict, response: HttpRequest, *args: An
 
 
 def user_details(
-    strategy: Any, details: Dict, backend: Any, user: Optional[Any] = None, *args: Any, **kwargs: Any
+    strategy: Any,
+    details: Dict,
+    backend: Any,
+    user: Optional[Any] = None,
+    *args: Any,
+    **kwargs: Any,
 ) -> HttpResponse:
     logger.debug(f"user_details for user {user} details:\n{details}")
     # social_core_user.user_details use details dict to override some fields on User instance
@@ -49,7 +54,12 @@ def user_details(
 
 
 def require_email(
-    strategy: Any, details: Dict, user: Optional[User] = None, is_new: bool = False, *args: Any, **kwargs: Any
+    strategy: Any,
+    details: Dict,
+    user: Optional[User] = None,
+    is_new: bool = False,
+    *args: Any,
+    **kwargs: Any,
 ) -> None:
     if user and user.email:
         return
@@ -59,7 +69,12 @@ def require_email(
 
 
 def create_user(
-    strategy: Any, details: Dict, backend: Any, user: Union[bool, User], *args: Any, **kwargs: Any
+    strategy: Any,
+    details: Dict,
+    backend: Any,
+    user: Union[bool, User],
+    *args: Any,
+    **kwargs: Any,
 ) -> Optional[Dict[str, Union[bool, User]]]:
     if user:
         return {"is_new": False}

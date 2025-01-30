@@ -550,9 +550,17 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
         sheet_title = str(sheet.title.lower())
         if sheet_title == "households":
-            obj = partial(PendingHousehold, registration_data_import=rdi, program_id=rdi.program.id)
+            obj = partial(
+                PendingHousehold,
+                registration_data_import=rdi,
+                program_id=rdi.program.id,
+            )
         elif sheet_title == "individuals":
-            obj = partial(PendingIndividual, registration_data_import=rdi, program_id=rdi.program.id)
+            obj = partial(
+                PendingIndividual,
+                registration_data_import=rdi,
+                program_id=rdi.program.id,
+            )
         else:
             raise ValueError(f"Unhandled sheet label '{sheet.title!r}'")  # pragma: no cover
 
@@ -657,7 +665,12 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                                     combined_fields[header]["name"],
                                     GeoCountry.objects.get(iso_code3=value),
                                 )
-                            elif header in ("admin1_h_c", "admin2_h_c", "admin3_h_c", "admin4_h_c"):
+                            elif header in (
+                                "admin1_h_c",
+                                "admin2_h_c",
+                                "admin3_h_c",
+                                "admin4_h_c",
+                            ):
                                 setattr(
                                     obj_to_create,
                                     combined_fields[header]["name"],
@@ -698,7 +711,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                         obj_to_create.relationship = NON_BENEFICIARY
                     obj_to_create = self._validate_birth_date(obj_to_create)
                     obj_to_create.age_at_registration = calculate_age_at_registration(
-                        registration_data_import.created_at, str(obj_to_create.birth_date)
+                        registration_data_import.created_at,
+                        str(obj_to_create.birth_date),
                     )
                     populate_pdu_with_null_values(registration_data_import.program, obj_to_create.flex_fields)
                     self.handle_pdu_fields(row, first_row, obj_to_create)
@@ -734,7 +748,11 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
     @transaction.atomic
     def execute(
-        self, registration_data_import_id: str, import_data_id: str, business_area_id: str, program_id: str
+        self,
+        registration_data_import_id: str,
+        import_data_id: str,
+        business_area_id: str,
+        program_id: str,
     ) -> None:
         try:
             registration_data_import = RegistrationDataImport.objects.select_for_update().get(

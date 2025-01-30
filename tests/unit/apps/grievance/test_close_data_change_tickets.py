@@ -98,7 +98,10 @@ class TestCloseDataChangeTickets(APITestCase):
         admin_area = AreaFactory(name="City Test 1", area_type=area_type1, p_code="sfds")
         cls.admin_area_1 = AreaFactory(name="City Test", area_type=area_type2, p_code="sfds323", parent=admin_area)
         cls.admin_area_2 = AreaFactory(
-            name="City Example", area_type=area_type2, p_code="sfds3dgg23", parent=admin_area
+            name="City Example",
+            area_type=area_type2,
+            p_code="sfds3dgg23",
+            parent=admin_area,
         )
 
         program_one = ProgramFactory(
@@ -169,13 +172,17 @@ class TestCloseDataChangeTickets(APITestCase):
 
         cls.individuals = [
             IndividualFactory(
-                household=household_one, program=program_one, **individual | {"unicef_id": str(uuid.uuid4())}
+                household=household_one,
+                program=program_one,
+                **individual | {"unicef_id": str(uuid.uuid4())},
             )
             for individual in cls.individuals_to_create
         ]
         cls.individuals_household_two = [
             IndividualFactory(
-                household=household_two, program=program_one, **individual | {"unicef_id": str(uuid.uuid4())}
+                household=household_two,
+                program=program_one,
+                **individual | {"unicef_id": str(uuid.uuid4())},
             )
             for individual in cls.individuals_to_create_for_second_household
         ]
@@ -189,10 +196,16 @@ class TestCloseDataChangeTickets(APITestCase):
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE]
         )
         cls.national_id = DocumentFactory(
-            type=national_id_type, document_number="789-789-645", individual=first_individual, country=country_pl
+            type=national_id_type,
+            document_number="789-789-645",
+            individual=first_individual,
+            country=country_pl,
         )
         cls.birth_certificate = DocumentFactory(
-            type=birth_certificate_type, document_number="ITY8456", individual=first_individual, country=country_pl
+            type=birth_certificate_type,
+            document_number="ITY8456",
+            individual=first_individual,
+            country=country_pl,
         )
         household_one.head_of_household = cls.individuals[0]
         household_one.save()
@@ -260,9 +273,15 @@ class TestCloseDataChangeTickets(APITestCase):
                 "given_name": {"value": "Test", "approve_status": True},
                 "full_name": {"value": "Test Example", "approve_status": True},
                 "family_name": {"value": "Example", "approve_status": True},
-                "phone_no_alternative": {"value": "+48602203689", "approve_status": True},
+                "phone_no_alternative": {
+                    "value": "+48602203689",
+                    "approve_status": True,
+                },
                 "sex": {"value": "NOT_ANSWERED", "approve_status": True},
-                "birth_date": {"value": date(year=1980, month=2, day=1).isoformat(), "approve_status": False},
+                "birth_date": {
+                    "value": date(year=1980, month=2, day=1).isoformat(),
+                    "approve_status": False,
+                },
                 "marital_status": {"value": SINGLE, "approve_status": True},
                 "role": {"value": ROLE_PRIMARY, "approve_status": True},
                 "documents": [
@@ -278,8 +297,14 @@ class TestCloseDataChangeTickets(APITestCase):
                     },
                 ],
                 "documents_to_remove": [
-                    {"value": cls.id_to_base64(cls.national_id.id, "DocumentNode"), "approve_status": True},
-                    {"value": cls.id_to_base64(cls.birth_certificate.id, "DocumentNode"), "approve_status": False},
+                    {
+                        "value": cls.id_to_base64(cls.national_id.id, "DocumentNode"),
+                        "approve_status": True,
+                    },
+                    {
+                        "value": cls.id_to_base64(cls.birth_certificate.id, "DocumentNode"),
+                        "approve_status": False,
+                    },
                 ],
             },
         )
@@ -329,8 +354,16 @@ class TestCloseDataChangeTickets(APITestCase):
 
     @parameterized.expand(
         [
-            ("with_permission", [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], True),
-            ("without_permission", [Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK], False),
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK],
+                True,
+            ),
+            (
+                "without_permission",
+                [Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK],
+                False,
+            ),
         ]
     )
     def test_close_add_individual(self, _: Any, permissions: List[Permissions], should_close: bool) -> None:
@@ -338,7 +371,10 @@ class TestCloseDataChangeTickets(APITestCase):
 
         self.graphql_request(
             request_string=self.STATUS_CHANGE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables={
                 "grievanceTicketId": self.id_to_base64(self.add_individual_grievance_ticket.id, "GrievanceTicketNode"),
                 "status": GrievanceTicket.STATUS_CLOSED,
@@ -361,7 +397,9 @@ class TestCloseDataChangeTickets(APITestCase):
             self.assertEqual(document.photo, "test_file_name.jpg")
 
             role = created_individual.households_and_roles.get(
-                role=ROLE_PRIMARY, household=self.household_one, individual=created_individual
+                role=ROLE_PRIMARY,
+                household=self.household_one,
+                individual=created_individual,
             )
             self.assertEqual(str(role.household.id), str(self.household_one.id))
 
@@ -373,8 +411,16 @@ class TestCloseDataChangeTickets(APITestCase):
 
     @parameterized.expand(
         [
-            ("with_permission", [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], True),
-            ("without_permission", [Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK], False),
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK],
+                True,
+            ),
+            (
+                "without_permission",
+                [Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK],
+                False,
+            ),
         ]
     )
     def test_close_update_individual(self, _: Any, permissions: List[Permissions], should_close: bool) -> None:
@@ -382,10 +428,14 @@ class TestCloseDataChangeTickets(APITestCase):
 
         self.graphql_request(
             request_string=self.STATUS_CHANGE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables={
                 "grievanceTicketId": self.id_to_base64(
-                    self.individual_data_change_grievance_ticket.id, "GrievanceTicketNode"
+                    self.individual_data_change_grievance_ticket.id,
+                    "GrievanceTicketNode",
                 ),
                 "status": GrievanceTicket.STATUS_CLOSED,
             },
@@ -410,7 +460,10 @@ class TestCloseDataChangeTickets(APITestCase):
             country_pl = geo_models.Country.objects.get(iso_code2="PL")
 
             self.assertEqual(document.country, country_pl)
-            self.assertEqual(document.type.key, IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID])
+            self.assertEqual(
+                document.type.key,
+                IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
+            )
             self.assertEqual(document.photo, "test_file_name.jpg")
 
             self.assertFalse(Document.objects.filter(id=self.national_id.id).exists())
@@ -422,7 +475,9 @@ class TestCloseDataChangeTickets(APITestCase):
 
     def test_close_update_individual_document_photo(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area
+            self.user,
+            [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK],
+            self.business_area,
         )
         country_pl = geo_models.Country.objects.get(iso_code2="PL")
         national_id_type = DocumentType.objects.get(
@@ -473,7 +528,10 @@ class TestCloseDataChangeTickets(APITestCase):
 
         self.graphql_request(
             request_string=self.STATUS_CHANGE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables={
                 "grievanceTicketId": self.id_to_base64(grievance_ticket.id, "GrievanceTicketNode"),
                 "status": GrievanceTicket.STATUS_CLOSED,
@@ -484,23 +542,38 @@ class TestCloseDataChangeTickets(APITestCase):
 
         document = Document.objects.get(document_number="999-888-777")
         self.assertEqual(document.country, country_pl)
-        self.assertEqual(document.type.key, IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID])
+        self.assertEqual(
+            document.type.key,
+            IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
+        )
         self.assertEqual(document.photo.name, "new_test_file_name.jpg")
 
     @parameterized.expand(
         [
-            ("with_permission", [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], True),
-            ("without_permission", [Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK], False),
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK],
+                True,
+            ),
+            (
+                "without_permission",
+                [Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK],
+                False,
+            ),
         ]
     )
     def test_close_update_household(self, _: Any, permissions: List[Permissions], should_close: bool) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.graphql_request(
             request_string=self.STATUS_CHANGE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables={
                 "grievanceTicketId": self.id_to_base64(
-                    self.household_data_change_grievance_ticket.id, "GrievanceTicketNode"
+                    self.household_data_change_grievance_ticket.id,
+                    "GrievanceTicketNode",
                 ),
                 "status": GrievanceTicket.STATUS_CLOSED,
             },
@@ -511,12 +584,17 @@ class TestCloseDataChangeTickets(APITestCase):
 
     def test_close_individual_delete_with_correct_permissions(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area
+            self.user,
+            [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK],
+            self.business_area,
         )
 
         self.graphql_request(
             request_string=self.STATUS_CHANGE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables={
                 "grievanceTicketId": self.id_to_base64(
                     self.individual_delete_grievance_ticket.id, "GrievanceTicketNode"
@@ -528,7 +606,9 @@ class TestCloseDataChangeTickets(APITestCase):
         ind.refresh_from_db()
         self.assertTrue(ind.withdrawn)
         changed_role_exists = IndividualRoleInHousehold.objects.filter(
-            role=ROLE_PRIMARY, household=self.household_two, individual=self.individuals_household_two[1]
+            role=ROLE_PRIMARY,
+            household=self.household_two,
+            individual=self.individuals_household_two[1],
         ).exists()
         self.assertTrue(changed_role_exists)
 
@@ -537,7 +617,10 @@ class TestCloseDataChangeTickets(APITestCase):
 
         self.graphql_request(
             request_string=self.STATUS_CHANGE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables={
                 "grievanceTicketId": self.id_to_base64(
                     self.individual_delete_grievance_ticket.id, "GrievanceTicketNode"
@@ -549,7 +632,9 @@ class TestCloseDataChangeTickets(APITestCase):
 
     def test_close_household_delete(cls) -> None:
         cls.create_user_role_with_permissions(
-            cls.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], cls.business_area
+            cls.user,
+            [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK],
+            cls.business_area,
         )
 
         grievance_ticket = GrievanceTicketFactory(
@@ -584,12 +669,17 @@ class TestCloseDataChangeTickets(APITestCase):
 
     def test_close_add_individual_create_bank_account(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area
+            self.user,
+            [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK],
+            self.business_area,
         )
 
         self.graphql_request(
             request_string=self.STATUS_CHANGE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables={
                 "grievanceTicketId": self.id_to_base64(self.add_individual_grievance_ticket.id, "GrievanceTicketNode"),
                 "status": GrievanceTicket.STATUS_CLOSED,
@@ -612,7 +702,9 @@ class TestCloseDataChangeTickets(APITestCase):
 
     def test_close_update_individual_create_bank_account(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area
+            self.user,
+            [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK],
+            self.business_area,
         )
 
         ticket = GrievanceTicketFactory(
@@ -642,7 +734,10 @@ class TestCloseDataChangeTickets(APITestCase):
 
         self.graphql_request(
             request_string=self.STATUS_CHANGE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables={
                 "grievanceTicketId": self.id_to_base64(ticket.id, "GrievanceTicketNode"),
                 "status": GrievanceTicket.STATUS_CLOSED,
@@ -657,7 +752,9 @@ class TestCloseDataChangeTickets(APITestCase):
 
     def test_close_update_individual_update_bank_account(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area
+            self.user,
+            [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK],
+            self.business_area,
         )
 
         ticket = GrievanceTicketFactory(
@@ -702,7 +799,10 @@ class TestCloseDataChangeTickets(APITestCase):
 
         self.graphql_request(
             request_string=self.STATUS_CHANGE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables={
                 "grievanceTicketId": self.id_to_base64(ticket.id, "GrievanceTicketNode"),
                 "status": GrievanceTicket.STATUS_CLOSED,
@@ -717,7 +817,9 @@ class TestCloseDataChangeTickets(APITestCase):
 
     def test_close_update_individual_delivery_mechanism_data(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area
+            self.user,
+            [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK],
+            self.business_area,
         )
         dmd = DeliveryMechanismDataFactory(
             individual=self.individuals[0],
@@ -751,7 +853,10 @@ class TestCloseDataChangeTickets(APITestCase):
 
         response = self.graphql_request(
             request_string=self.STATUS_CHANGE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables={
                 "grievanceTicketId": self.id_to_base64(ticket.id, "GrievanceTicketNode"),
                 "status": GrievanceTicket.STATUS_CLOSED,

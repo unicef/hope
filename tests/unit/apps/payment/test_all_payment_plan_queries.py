@@ -290,7 +290,11 @@ class TestPaymentPlanQueries(APITestCase):
         cls.user = UserFactory.create(username="qazxsw321")
         cls.create_user_role_with_permissions(
             cls.user,
-            [Permissions.PM_VIEW_LIST, Permissions.PM_VIEW_DETAILS, Permissions.ACTIVITY_LOG_VIEW],
+            [
+                Permissions.PM_VIEW_LIST,
+                Permissions.PM_VIEW_DETAILS,
+                Permissions.ACTIVITY_LOG_VIEW,
+            ],
             cls.business_area,
         )
 
@@ -379,10 +383,26 @@ class TestPaymentPlanQueries(APITestCase):
                 fsp_auth_code="987",
             )
 
-            IndividualFactory(household=hh1, sex="FEMALE", birth_date=datetime.now().date() - relativedelta(years=5))
-            IndividualFactory(household=hh1, sex="MALE", birth_date=datetime.now().date() - relativedelta(years=5))
-            IndividualFactory(household=hh2, sex="FEMALE", birth_date=datetime.now().date() - relativedelta(years=20))
-            IndividualFactory(household=hh2, sex="MALE", birth_date=datetime.now().date() - relativedelta(years=20))
+            IndividualFactory(
+                household=hh1,
+                sex="FEMALE",
+                birth_date=datetime.now().date() - relativedelta(years=5),
+            )
+            IndividualFactory(
+                household=hh1,
+                sex="MALE",
+                birth_date=datetime.now().date() - relativedelta(years=5),
+            )
+            IndividualFactory(
+                household=hh2,
+                sex="FEMALE",
+                birth_date=datetime.now().date() - relativedelta(years=20),
+            )
+            IndividualFactory(
+                household=hh2,
+                sex="MALE",
+                birth_date=datetime.now().date() - relativedelta(years=20),
+            )
 
             AcceptanceProcessThreshold.objects.create(
                 business_area=cls.business_area,
@@ -417,7 +437,10 @@ class TestPaymentPlanQueries(APITestCase):
                 sent_by=cls.user,
             )
 
-            with patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0):
+            with patch(
+                "hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate",
+                return_value=2.0,
+            ):
                 cls.pp.update_population_count_fields()
                 cls.pp.update_money_fields()
                 cls.pp_conflicted.update_population_count_fields()
@@ -444,7 +467,10 @@ class TestPaymentPlanQueries(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.ALL_PAYMENTS_QUERY,
             context={"user": self.user},
-            variables={"businessArea": "afghanistan", "paymentPlanId": encode_id_base64(self.pp.pk, "PaymentPlan")},
+            variables={
+                "businessArea": "afghanistan",
+                "paymentPlanId": encode_id_base64(self.pp.pk, "PaymentPlan"),
+            },
         )
 
     @freeze_time("2020-10-10")
@@ -611,10 +637,14 @@ class TestPaymentPlanQueries(APITestCase):
             },
         }
         PaymentHouseholdSnapshot.objects.create(
-            payment=payment_new_1, snapshot_data=snapshot_data_hh2, household_id=household_2.id
+            payment=payment_new_1,
+            snapshot_data=snapshot_data_hh2,
+            household_id=household_2.id,
         )
         PaymentHouseholdSnapshot.objects.create(
-            payment=payment_new_2, snapshot_data=snapshot_data_hh3, household_id=household_3.id
+            payment=payment_new_2,
+            snapshot_data=snapshot_data_hh3,
+            household_id=household_3.id,
         )
 
         for payment_id in [payment_legacy.pk, payment_new_1.pk, payment_new_2.pk]:
@@ -783,7 +813,9 @@ class TestPaymentPlanQueries(APITestCase):
             variables={"businessArea": "afghanistan", "totalHouseholdsCountMin": 2},
         )
 
-    def test_payment_plan_filter_total_households_count_with_valid_phone_no_min_2(self) -> None:
+    def test_payment_plan_filter_total_households_count_with_valid_phone_no_min_2(
+        self,
+    ) -> None:
         valid_phone_no = "+48 123 456 987"
         invalid_phone_no = "+48 ABC"
         pp_with_2_valid_numbers = PaymentPlanFactory(
@@ -795,12 +827,25 @@ class TestPaymentPlanQueries(APITestCase):
         )
         hoh_1 = IndividualFactory(household=None, phone_no_valid=True, phone_no_alternative_valid=False)
         hoh_2 = IndividualFactory(
-            household=None, phone_no_valid=False, phone_no_alternative_valid=True, phone_no_alternative=valid_phone_no
+            household=None,
+            phone_no_valid=False,
+            phone_no_alternative_valid=True,
+            phone_no_alternative=valid_phone_no,
         )
         household_1 = HouseholdFactory(head_of_household=hoh_1)
         household_2 = HouseholdFactory(head_of_household=hoh_2)
-        PaymentFactory(parent=pp_with_2_valid_numbers, household=household_1, head_of_household=hoh_1, currency="PLN")
-        PaymentFactory(parent=pp_with_2_valid_numbers, household=household_2, head_of_household=hoh_2, currency="PLN")
+        PaymentFactory(
+            parent=pp_with_2_valid_numbers,
+            household=household_1,
+            head_of_household=hoh_1,
+            currency="PLN",
+        )
+        PaymentFactory(
+            parent=pp_with_2_valid_numbers,
+            household=household_2,
+            head_of_household=hoh_2,
+            currency="PLN",
+        )
         pp_2 = PaymentPlanFactory(
             name="Payment Plan with 2 payments and not valid phone numbers",
             status=PaymentPlan.Status.DRAFT,
@@ -810,23 +855,42 @@ class TestPaymentPlanQueries(APITestCase):
         )
         household11 = HouseholdFactory(
             head_of_household=IndividualFactory(
-                household=None, phone_no_valid=False, phone_no_alternative_valid=False, phone_no=invalid_phone_no
+                household=None,
+                phone_no_valid=False,
+                phone_no_alternative_valid=False,
+                phone_no=invalid_phone_no,
             )
         )
         household22 = HouseholdFactory(
             head_of_household=IndividualFactory(
-                household=None, phone_no_valid=False, phone_no_alternative_valid=False, phone_no=invalid_phone_no
+                household=None,
+                phone_no_valid=False,
+                phone_no_alternative_valid=False,
+                phone_no=invalid_phone_no,
             )
         )
-        PaymentFactory(parent=pp_2, household=household11, head_of_household=household11.head_of_household)
-        PaymentFactory(parent=pp_2, household=household22, head_of_household=household22.head_of_household)
+        PaymentFactory(
+            parent=pp_2,
+            household=household11,
+            head_of_household=household11.head_of_household,
+        )
+        PaymentFactory(
+            parent=pp_2,
+            household=household22,
+            head_of_household=household22.head_of_household,
+        )
         self.snapshot_graphql_request(
             request_string=self.PAYMENT_PLANS_FILTER_QUERY,
             context={"user": self.user},
-            variables={"businessArea": "afghanistan", "totalHouseholdsCountWithValidPhoneNoMin": 2},
+            variables={
+                "businessArea": "afghanistan",
+                "totalHouseholdsCountWithValidPhoneNoMin": 2,
+            },
         )
 
-    def test_payment_plan_filter_total_households_count_with_valid_phone_no_max_2(self) -> None:
+    def test_payment_plan_filter_total_households_count_with_valid_phone_no_max_2(
+        self,
+    ) -> None:
         valid_phone_no = "+48 123 456 777"
         invalid_phone_no = "+48 TEST"
         pp_with_3_valid_numbers = PaymentPlanFactory(
@@ -838,15 +902,33 @@ class TestPaymentPlanQueries(APITestCase):
         )
         hoh_1 = IndividualFactory(household=None, phone_no_valid=True, phone_no_alternative_valid=False)
         hoh_2 = IndividualFactory(
-            household=None, phone_no_valid=False, phone_no_alternative_valid=True, phone_no_alternative=valid_phone_no
+            household=None,
+            phone_no_valid=False,
+            phone_no_alternative_valid=True,
+            phone_no_alternative=valid_phone_no,
         )
         hoh_3 = IndividualFactory(household=None, phone_no_valid=True, phone_no_alternative_valid=False)
         household_1 = HouseholdFactory(head_of_household=hoh_1)
         household_2 = HouseholdFactory(head_of_household=hoh_2)
         household_3 = HouseholdFactory(head_of_household=hoh_3)
-        PaymentFactory(parent=pp_with_3_valid_numbers, household=household_1, head_of_household=hoh_1, currency="PLN")
-        PaymentFactory(parent=pp_with_3_valid_numbers, household=household_2, head_of_household=hoh_2, currency="PLN")
-        PaymentFactory(parent=pp_with_3_valid_numbers, household=household_3, head_of_household=hoh_3, currency="PLN")
+        PaymentFactory(
+            parent=pp_with_3_valid_numbers,
+            household=household_1,
+            head_of_household=hoh_1,
+            currency="PLN",
+        )
+        PaymentFactory(
+            parent=pp_with_3_valid_numbers,
+            household=household_2,
+            head_of_household=hoh_2,
+            currency="PLN",
+        )
+        PaymentFactory(
+            parent=pp_with_3_valid_numbers,
+            household=household_3,
+            head_of_household=hoh_3,
+            currency="PLN",
+        )
         pp_with_2_valid_numbers = PaymentPlanFactory(
             name="Payment Plan with valid 2 phone numbers",
             status=PaymentPlan.Status.TP_LOCKED,
@@ -855,13 +937,26 @@ class TestPaymentPlanQueries(APITestCase):
             created_by=self.user,
         )
         hoh_4 = IndividualFactory(
-            household=None, phone_no_valid=False, phone_no_alternative_valid=True, phone_no_alternative=valid_phone_no
+            household=None,
+            phone_no_valid=False,
+            phone_no_alternative_valid=True,
+            phone_no_alternative=valid_phone_no,
         )
         hoh_5 = IndividualFactory(household=None, phone_no_valid=True, phone_no_alternative_valid=False)
         household_4 = HouseholdFactory(head_of_household=hoh_4)
         household_5 = HouseholdFactory(head_of_household=hoh_5)
-        PaymentFactory(parent=pp_with_2_valid_numbers, household=household_4, head_of_household=hoh_4, currency="PLN")
-        PaymentFactory(parent=pp_with_2_valid_numbers, household=household_5, head_of_household=hoh_5, currency="PLN")
+        PaymentFactory(
+            parent=pp_with_2_valid_numbers,
+            household=household_4,
+            head_of_household=hoh_4,
+            currency="PLN",
+        )
+        PaymentFactory(
+            parent=pp_with_2_valid_numbers,
+            household=household_5,
+            head_of_household=hoh_5,
+            currency="PLN",
+        )
         pp = PaymentPlanFactory(
             name="Payment Plan just random with invalid phone numbers",
             status=PaymentPlan.Status.TP_PROCESSING,
@@ -871,20 +966,37 @@ class TestPaymentPlanQueries(APITestCase):
         )
         household11 = HouseholdFactory(
             head_of_household=IndividualFactory(
-                household=None, phone_no_valid=False, phone_no_alternative_valid=False, phone_no=invalid_phone_no
+                household=None,
+                phone_no_valid=False,
+                phone_no_alternative_valid=False,
+                phone_no=invalid_phone_no,
             )
         )
         household22 = HouseholdFactory(
             head_of_household=IndividualFactory(
-                household=None, phone_no_valid=False, phone_no_alternative_valid=False, phone_no=invalid_phone_no
+                household=None,
+                phone_no_valid=False,
+                phone_no_alternative_valid=False,
+                phone_no=invalid_phone_no,
             )
         )
-        PaymentFactory(parent=pp, household=household11, head_of_household=household11.head_of_household)
-        PaymentFactory(parent=pp, household=household22, head_of_household=household22.head_of_household)
+        PaymentFactory(
+            parent=pp,
+            household=household11,
+            head_of_household=household11.head_of_household,
+        )
+        PaymentFactory(
+            parent=pp,
+            household=household22,
+            head_of_household=household22.head_of_household,
+        )
         self.snapshot_graphql_request(
             request_string=self.PAYMENT_PLANS_FILTER_QUERY,
             context={"user": self.user},
-            variables={"businessArea": "afghanistan", "totalHouseholdsCountWithValidPhoneNoMax": 2},
+            variables={
+                "businessArea": "afghanistan",
+                "totalHouseholdsCountWithValidPhoneNoMax": 2,
+            },
         )
 
     def test_payment_plan_filter_not_status(self) -> None:
@@ -932,16 +1044,30 @@ class TestPaymentPlanQueries(APITestCase):
         [
             (
                 "with_permission_api",
-                [Permissions.PM_DOWNLOAD_FSP_AUTH_CODE, Permissions.PM_SEND_XLSX_PASSWORD],
+                [
+                    Permissions.PM_DOWNLOAD_FSP_AUTH_CODE,
+                    Permissions.PM_SEND_XLSX_PASSWORD,
+                ],
                 FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
             ),
-            ("without_permission_api", [], FinancialServiceProvider.COMMUNICATION_CHANNEL_API),
+            (
+                "without_permission_api",
+                [],
+                FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            ),
             (
                 "with_permission_xlsx",
-                [Permissions.PM_DOWNLOAD_FSP_AUTH_CODE, Permissions.PM_SEND_XLSX_PASSWORD],
+                [
+                    Permissions.PM_DOWNLOAD_FSP_AUTH_CODE,
+                    Permissions.PM_SEND_XLSX_PASSWORD,
+                ],
                 FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
             ),
-            ("without_permission_xlsx", [], FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX),
+            (
+                "without_permission_xlsx",
+                [],
+                FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+            ),
         ]
     )
     @freeze_time("2020-10-10")

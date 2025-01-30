@@ -75,7 +75,10 @@ class RdiBaseCreateTask:
         name = header.replace("pp_", "")
 
         self.delivery_mechanisms_data[f"individual_{row_num}"]["individual"] = individual
-        for delivery_mechanism, required_fields in self.delivery_mechanisms_required_fields_map.items():
+        for (
+            delivery_mechanism,
+            required_fields,
+        ) in self.delivery_mechanisms_required_fields_map.items():
             if name in required_fields:
                 name = name.replace("_i_c", "")
                 if delivery_mechanism not in self.delivery_mechanisms_data[f"individual_{row_num}"]:

@@ -35,7 +35,10 @@ pytestmark = pytest.mark.django_db()
 
 @pytest.fixture
 def add_feedbacks() -> None:
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/accountability/fixtures/data-cypress.json")
+    call_command(
+        "loaddata",
+        f"{settings.PROJECT_ROOT}/apps/accountability/fixtures/data-cypress.json",
+    )
     yield
 
 

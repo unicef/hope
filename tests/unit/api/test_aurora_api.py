@@ -38,10 +38,16 @@ class ProjectListViewTests(HOPEApiTestCase):
             name="Other program",
         )
         self.organization = OrganizationFactory(
-            name="Test Organization", slug="test_organization", business_area=self.business_area, source_id=777
+            name="Test Organization",
+            slug="test_organization",
+            business_area=self.business_area,
+            source_id=777,
         )
         self.organization_2 = OrganizationFactory(
-            name="Test Organization 2", slug="slug123", business_area=self.business_area, source_id=111
+            name="Test Organization 2",
+            slug="slug123",
+            business_area=self.business_area,
+            source_id=111,
         )
         self.prj_1 = ProjectFactory.create(
             name="Test Project 1",

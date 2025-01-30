@@ -71,14 +71,19 @@ pytestmark = pytest.mark.django_db()
 @pytest.fixture
 def sw_program() -> Program:
     yield get_program_with_dct_type_and_name(
-        "Test Programm", dct_type=DataCollectingType.Type.SOCIAL, status=Program.ACTIVE, beneficiary_group_name="People"
+        "Test Programm",
+        dct_type=DataCollectingType.Type.SOCIAL,
+        status=Program.ACTIVE,
+        beneficiary_group_name="People",
     )
 
 
 @pytest.fixture
 def non_sw_program() -> Program:
     yield get_program_with_dct_type_and_name(
-        "Test Programm", dct_type=DataCollectingType.Type.STANDARD, status=Program.ACTIVE
+        "Test Programm",
+        dct_type=DataCollectingType.Type.STANDARD,
+        status=Program.ACTIVE,
     )
 
 
@@ -168,7 +173,11 @@ def decimal_attribute(program: Program) -> FlexibleAttribute:
 
 
 def create_flexible_attribute(
-    label: str, subtype: str, number_of_rounds: int, rounds_names: list[str], program: Program
+    label: str,
+    subtype: str,
+    number_of_rounds: int,
+    rounds_names: list[str],
+    program: Program,
 ) -> FlexibleAttribute:
     name = field_label_to_field_name(label)
     flexible_attribute = FlexibleAttribute.objects.create(
@@ -186,7 +195,10 @@ def create_flexible_attribute(
 
 
 def create_custom_household(
-    observed_disability: list[str], residence_status: str = HOST, unicef_id: str = "HH-00-0000.0442", size: int = 2
+    observed_disability: list[str],
+    residence_status: str = HOST,
+    unicef_id: str = "HH-00-0000.0442",
+    size: int = 2,
 ) -> Household:
     program = Program.objects.get(name="Test Programm")
     household, _ = create_household_with_individual_with_collectors(
@@ -402,7 +414,10 @@ def create_programs() -> None:
 @pytest.mark.usefixtures("login")
 class TestSmokeTargeting:
     def test_smoke_targeting_page(
-        self, create_programs: None, create_targeting: PaymentPlan, pageTargeting: Targeting
+        self,
+        create_programs: None,
+        create_targeting: PaymentPlan,
+        pageTargeting: Targeting,
     ) -> None:
         PaymentPlanFactory(
             program_cycle=ProgramCycle.objects.get(program__name="Test Programm"),
@@ -816,7 +831,8 @@ class TestCreateTargeting:
         assert pageTargetingDetails.getCriteriaContainer().text == expected_criteria_text
         assert Household.objects.count() == 3
         pageTargetingDetails.wait_for_text(
-            individual1.household.unicef_id, pageTargetingDetails.household_table_cell.format(1, 1)
+            individual1.household.unicef_id,
+            pageTargetingDetails.household_table_cell.format(1, 1),
         )
         assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "1"
         assert len(pageTargetingDetails.getHouseholdTableRows()) == 1

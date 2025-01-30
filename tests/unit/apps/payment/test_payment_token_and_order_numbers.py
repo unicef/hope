@@ -30,7 +30,9 @@ class TestPaymentTokenAndOrderNumbers(TestCase):
         program = ProgramFactory(business_area=business_area)
 
         cls.payment_plan = PaymentPlanFactory(
-            program_cycle=program.cycles.first(), status=PaymentPlan.Status.ACCEPTED, business_area=business_area
+            program_cycle=program.cycles.first(),
+            status=PaymentPlan.Status.ACCEPTED,
+            business_area=business_area,
         )
         program.households.set(Household.objects.all().values_list("id", flat=True))
         for household in program.households.all():
@@ -66,7 +68,9 @@ class TestPaymentTokenAndOrderNumbers(TestCase):
         assert check_if_token_or_order_number_exists_per_program(payment, "order_number", 987654321) is True
         assert check_if_token_or_order_number_exists_per_program(payment, "order_number", 123456789) is False
 
-    def test_validation_token_must_not_has_the_same_digit_more_than_three_times(self) -> None:
+    def test_validation_token_must_not_has_the_same_digit_more_than_three_times(
+        self,
+    ) -> None:
         with self.assertRaises(ValidationError):
             payment_token_and_order_number_validator(1111111)
 

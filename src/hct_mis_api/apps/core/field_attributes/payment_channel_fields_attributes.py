@@ -112,6 +112,11 @@ PAYMENT_CHANNEL_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "payment_delivery_phone_no_i_c",
-        "scope": [Scope.XLSX, Scope.INDIVIDUAL_UPDATE, Scope.TARGETING, Scope.XLSX_PEOPLE],
+        "scope": [
+            Scope.XLSX,
+            Scope.INDIVIDUAL_UPDATE,
+            Scope.TARGETING,
+            Scope.XLSX_PEOPLE,
+        ],
     },
 ]

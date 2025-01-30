@@ -143,7 +143,10 @@ class TestCloseGrievanceTicketAndDisableDeduplication(APITestCase):
         )
         rebuild_search_index()
 
-    @mock.patch("django.core.files.storage.default_storage.save", lambda filename, file: "test_file_name.jpg")
+    @mock.patch(
+        "django.core.files.storage.default_storage.save",
+        lambda filename, file: "test_file_name.jpg",
+    )
     def test_add_individual_close_ticket_for_postponed_deduplication(self) -> None:
         permissions = [
             Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
@@ -162,7 +165,8 @@ class TestCloseGrievanceTicketAndDisableDeduplication(APITestCase):
         self.assertFalse("errors" in response)
         self.assertTrue("data" in response)
         self.assertEqual(
-            response["data"]["grievanceStatusChange"]["grievanceTicket"]["status"], GrievanceTicket.STATUS_CLOSED
+            response["data"]["grievanceStatusChange"]["grievanceTicket"]["status"],
+            GrievanceTicket.STATUS_CLOSED,
         )
 
         self.individual.refresh_from_db()

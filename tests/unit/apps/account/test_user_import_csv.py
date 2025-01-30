@@ -35,7 +35,10 @@ class UserImportCSVTest(WebTest):
     def test_import_csv(self) -> None:
         url = reverse("admin:account_user_import_csv")
         res = self.app.get(url, user=self.superuser)
-        res.form["file"] = ("users.csv", (Path(__file__).parent / "users.csv").read_bytes())
+        res.form["file"] = (
+            "users.csv",
+            (Path(__file__).parent / "users.csv").read_bytes(),
+        )
         res.form["business_area"] = self.business_area.id
         res.form["partner"] = self.partner.id
         res.form["role"] = self.role.id
@@ -48,11 +51,19 @@ class UserImportCSVTest(WebTest):
 
     @responses.activate
     def test_import_csv_with_kobo(self) -> None:
-        responses.add(responses.POST, f"{settings.KOBO_KF_URL}/authorized_application/users/", json={}, status=201)
+        responses.add(
+            responses.POST,
+            f"{settings.KOBO_KF_URL}/authorized_application/users/",
+            json={},
+            status=201,
+        )
 
         url = reverse("admin:account_user_import_csv")
         res = self.app.get(url, user=self.superuser)
-        res.form["file"] = ("users.csv", (Path(__file__).parent / "users.csv").read_bytes())
+        res.form["file"] = (
+            "users.csv",
+            (Path(__file__).parent / "users.csv").read_bytes(),
+        )
         res.form["business_area"] = self.business_area.id
         res.form["partner"] = self.partner.id
         res.form["role"] = self.role.id
@@ -70,7 +81,10 @@ class UserImportCSVTest(WebTest):
         UserRoleFactory(user=u, role=self.role_2, business_area=self.business_area)
         url = reverse("admin:account_user_import_csv")
         res = self.app.get(url, user=self.superuser)
-        res.form["file"] = ("users.csv", (Path(__file__).parent / "users.csv").read_bytes())
+        res.form["file"] = (
+            "users.csv",
+            (Path(__file__).parent / "users.csv").read_bytes(),
+        )
         res.form["business_area"] = self.business_area.id
         res.form["partner"] = self.partner.id
         res.form["role"] = self.role.id
@@ -87,7 +101,10 @@ class UserImportCSVTest(WebTest):
 
         url = reverse("admin:account_user_import_csv")
         res = self.app.get(url, user=self.superuser)
-        res.form["file"] = ("users.csv", (Path(__file__).parent / "users.csv").read_bytes())
+        res.form["file"] = (
+            "users.csv",
+            (Path(__file__).parent / "users.csv").read_bytes(),
+        )
         res.form["business_area"] = self.business_area.id
         res.form["partner"] = partner2.id
         res.form["role"] = self.role.id
@@ -100,7 +117,10 @@ class UserImportCSVTest(WebTest):
     def test_import_csv_with_username(self) -> None:
         url = reverse("admin:account_user_import_csv")
         res = self.app.get(url, user=self.superuser)
-        res.form["file"] = ("users2.csv", (Path(__file__).parent / "users2.csv").read_bytes())
+        res.form["file"] = (
+            "users2.csv",
+            (Path(__file__).parent / "users2.csv").read_bytes(),
+        )
         res.form["business_area"] = self.business_area.id
         res.form["partner"] = self.partner.id
         res.form["role"] = self.role.id
@@ -128,7 +148,12 @@ class UserKoboActionsTest(WebTest):
     @responses.activate
     @override_config(KOBO_ADMIN_CREDENTIALS="kobo_admin:pwd")
     def test_create_kobo_user(self) -> None:
-        responses.add(responses.POST, f"{settings.KOBO_KF_URL}/authorized_application/users/", json={}, status=201)
+        responses.add(
+            responses.POST,
+            f"{settings.KOBO_KF_URL}/authorized_application/users/",
+            json={},
+            status=201,
+        )
         responses.add(
             responses.POST,
             f"{settings.KOBO_KF_URL}/admin/login/",

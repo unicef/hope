@@ -56,7 +56,10 @@ class TestSanctionListPreMerge(TestCase):
             business_area=cls.business_area, program=cls.program
         )
         cls.household, cls.individuals = create_household_and_individuals(
-            household_data={"registration_data_import": cls.registration_data_import, "program": cls.program},
+            household_data={
+                "registration_data_import": cls.registration_data_import,
+                "program": cls.program,
+            },
             individuals_data=[
                 {
                     # DUPLICATE
@@ -124,9 +127,16 @@ class TestSanctionListPreMerge(TestCase):
         ind = Individual.objects.get(full_name="Abdul Afghanistan")
         country = geo_models.Country.objects.get(iso_code3="AFG")
         doc_type = DocumentTypeFactory(
-            label="National ID", key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID]
+            label="National ID",
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
         )
-        DocumentFactory(document_number="55130", individual=ind, type=doc_type, country=country, program=ind.program)
+        DocumentFactory(
+            document_number="55130",
+            individual=ind,
+            type=doc_type,
+            country=country,
+            program=ind.program,
+        )
         rebuild_search_index()
 
     def test_execute(self) -> None:
@@ -149,7 +159,10 @@ class TestSanctionListPreMerge(TestCase):
 
     def test_create_system_flag_tickets(self) -> None:
         CheckAgainstSanctionListPreMergeTask.execute()
-        self.assertEqual(GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING).count(), 0)
+        self.assertEqual(
+            GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING).count(),
+            0,
+        )
         for grievance_ticket in GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING):
             self.assertEqual(grievance_ticket.programs.count(), 0)
             self.assertEqual(grievance_ticket.programs.first(), self.program)

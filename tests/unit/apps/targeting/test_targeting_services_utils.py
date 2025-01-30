@@ -115,8 +115,14 @@ class TestPaymentPlanModel(TestCase):
         self.assertEqual(TargetingCriteriaRuleFilter.objects.first().field_name, "size")
         self.assertEqual(TargetingCriteriaRuleFilter.objects.first().arguments, [2])
 
-        self.assertEqual(TargetingIndividualBlockRuleFilter.objects.first().field_name, "age_at_registration")
+        self.assertEqual(
+            TargetingIndividualBlockRuleFilter.objects.first().field_name,
+            "age_at_registration",
+        )
         self.assertEqual(TargetingIndividualBlockRuleFilter.objects.first().arguments, [1, 99])
 
-        self.assertEqual(TargetingCollectorBlockRuleFilter.objects.first().field_name, "mobile_phone_number__test_data")
+        self.assertEqual(
+            TargetingCollectorBlockRuleFilter.objects.first().field_name,
+            "mobile_phone_number__test_data",
+        )
         self.assertEqual(TargetingCollectorBlockRuleFilter.objects.first().arguments, ["Yes"])

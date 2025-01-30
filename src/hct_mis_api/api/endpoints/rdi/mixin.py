@@ -86,7 +86,10 @@ class HouseholdUploadMixin:
                 household_data["country_origin"] = Country.objects.get(iso_code2=country_origin)
 
             hh = PendingHousehold.objects.create(
-                registration_data_import=rdi, program=rdi.program, business_area=rdi.business_area, **household_data
+                registration_data_import=rdi,
+                program=rdi.program,
+                business_area=rdi.business_area,
+                **household_data,
             )
             for member_data in members:
                 self.save_member(rdi, hh, member_data)

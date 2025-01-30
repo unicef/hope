@@ -69,7 +69,8 @@ class TestPaymentVerificationMutations(APITestCase):
         )
         PaymentVerificationSummaryFactory(payment_plan=payment_plan)
         payment_verification_plan = PaymentVerificationPlanFactory(
-            payment_plan=payment_plan, verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
+            payment_plan=payment_plan,
+            verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
         )
         registration_data_import = RegistrationDataImportFactory(
             imported_by=cls.user, business_area=BusinessArea.objects.first()
@@ -127,13 +128,19 @@ class TestPaymentVerificationMutations(APITestCase):
         self.assertEqual(payment_verification.status, PaymentVerification.STATUS_PENDING)
         payment_verification_id = encode_id_base64_required(payment_verification.id, "PaymentVerification")
         UpdatePaymentVerificationReceivedAndReceivedAmount().mutate(
-            None, self.info, payment_verification_id, received_amount=Decimal(received_amount), received=received
+            None,
+            self.info,
+            payment_verification_id,
+            received_amount=Decimal(received_amount),
+            received=received,
         )
         payment_verification.refresh_from_db()
         self.assertEqual(payment_verification.received_amount, Decimal(received_amount))
         self.assertEqual(payment_verification.status, status)
 
-    def test_update_payment_verification_received_and_received_amount_update_time_restricted(self) -> None:
+    def test_update_payment_verification_received_and_received_amount_update_time_restricted(
+        self,
+    ) -> None:
         from hct_mis_api.apps.payment.mutations import (
             UpdatePaymentVerificationReceivedAndReceivedAmount,
         )
@@ -161,7 +168,9 @@ class TestPaymentVerificationMutations(APITestCase):
             received=True,
         )
 
-    def test_update_payment_verification_received_and_received_amount_payment_status(self) -> None:
+    def test_update_payment_verification_received_and_received_amount_payment_status(
+        self,
+    ) -> None:
         from hct_mis_api.apps.payment.mutations import (
             UpdatePaymentVerificationReceivedAndReceivedAmount,
         )
@@ -171,7 +180,8 @@ class TestPaymentVerificationMutations(APITestCase):
         self.verification.status = PaymentVerificationPlan.STATUS_FINISHED
         self.verification.save()
         with self.assertRaisesMessage(
-            GraphQLError, "You can only update status of payment verification for ACTIVE cash plan verification"
+            GraphQLError,
+            "You can only update status of payment verification for ACTIVE cash plan verification",
         ):
             UpdatePaymentVerificationReceivedAndReceivedAmount().mutate(
                 None,
@@ -183,8 +193,16 @@ class TestPaymentVerificationMutations(APITestCase):
 
     @parameterized.expand(
         [
-            ("21.36", False, "If received_amount(21.36) is not 0, you should set received to YES"),
-            ("0", True, "If 'Amount Received' equals to 0, please set status as 'Not Received'"),
+            (
+                "21.36",
+                False,
+                "If received_amount(21.36) is not 0, you should set received to YES",
+            ),
+            (
+                "0",
+                True,
+                "If 'Amount Received' equals to 0, please set status as 'Not Received'",
+            ),
         ]
     )
     def test_update_payment_verification_received_and_received_amount_incorrect_arguments(
@@ -218,7 +236,11 @@ class TestPaymentVerificationMutations(APITestCase):
         payment_verification_id = encode_id_base64_required(payment_verification.id, "PaymentVerification")
         with self.assertRaises(PermissionDenied):
             UpdatePaymentVerificationReceivedAndReceivedAmount().mutate(
-                None, info, payment_verification_id, received_amount=Decimal(21.36), received=True
+                None,
+                info,
+                payment_verification_id,
+                received_amount=Decimal(21.36),
+                received=True,
             )
 
     def test_edit_payment_verification_plan_mutation(self) -> None:

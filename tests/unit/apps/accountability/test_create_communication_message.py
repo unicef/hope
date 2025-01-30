@@ -87,7 +87,9 @@ mutation CreateAccountabilityCommunicationMessage (
             },
         }
 
-    def test_create_accountability_communication_message_without_permission(self) -> None:
+    def test_create_accountability_communication_message_without_permission(
+        self,
+    ) -> None:
         self.create_user_role_with_permissions(self.user, [], self.business_area)
 
         self.snapshot_graphql_request(
@@ -118,12 +120,20 @@ mutation CreateAccountabilityCommunicationMessage (
     )
     def test_create_accountability_communication_message_by_target_population(self, sampling_type: str) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE], self.business_area
+            self.user,
+            [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
+            self.business_area,
         )
         broadcast_message_mock = MagicMock(return_value=None)
         with (
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock),
+            patch(
+                "hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__",
+                MagicMock(return_value=None),
+            ),
+            patch(
+                "hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message",
+                broadcast_message_mock,
+            ),
         ):
             self.snapshot_graphql_request(
                 request_string=self.MUTATION,
@@ -146,7 +156,10 @@ mutation CreateAccountabilityCommunicationMessage (
             )
             self.assertEqual(broadcast_message_mock.call_count, 1)
             if sampling_type == Survey.SAMPLING_FULL_LIST:
-                self.assertEqual(len(broadcast_message_mock.call_args[0][0]), self.payment_plan.payment_items.count())
+                self.assertEqual(
+                    len(broadcast_message_mock.call_args[0][0]),
+                    self.payment_plan.payment_items.count(),
+                )
             self.assertEqual(broadcast_message_mock.call_args[0][1], "Test body")
 
     @parameterized.expand(
@@ -157,12 +170,20 @@ mutation CreateAccountabilityCommunicationMessage (
     )
     def test_create_accountability_communication_message_by_households(self, sampling_type: str) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE], self.business_area
+            self.user,
+            [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
+            self.business_area,
         )
         broadcast_message_mock = MagicMock(return_value=None)
         with (
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock),
+            patch(
+                "hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__",
+                MagicMock(return_value=None),
+            ),
+            patch(
+                "hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message",
+                broadcast_message_mock,
+            ),
         ):
             self.snapshot_graphql_request(
                 request_string=self.MUTATION,

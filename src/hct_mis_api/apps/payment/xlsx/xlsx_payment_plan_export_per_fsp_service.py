@@ -37,7 +37,8 @@ logger = logging.getLogger(__name__)
 
 def check_if_token_or_order_number_exists_per_program(payment: Payment, field_name: str, token: int) -> bool:
     return Payment.objects.filter(
-        parent__program_cycle__program=payment.parent.program_cycle.program, **{field_name: token}
+        parent__program_cycle__program=payment.parent.program_cycle.program,
+        **{field_name: token},
     ).exists()
 
 
@@ -110,14 +111,22 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         """remove columns and return list"""
         if self.is_social_worker_program:
             return list(
-                filter(lambda col_name: col_name not in ["household_id", "household_size"], fsp_template_columns)
+                filter(
+                    lambda col_name: col_name not in ["household_id", "household_size"],
+                    fsp_template_columns,
+                )
             )
         return list(filter(lambda col_name: col_name not in ["individual_id"], fsp_template_columns))
 
     def _remove_core_fields_for_people(self, fsp_template_core_fields: List[str]) -> List[str]:
         """remove columns and return list"""
         if self.is_social_worker_program:
-            return list(filter(lambda col_name: col_name not in ["household_unicef_id"], fsp_template_core_fields))
+            return list(
+                filter(
+                    lambda col_name: col_name not in ["household_unicef_id"],
+                    fsp_template_core_fields,
+                )
+            )
         return list(fsp_template_core_fields)
 
     def prepare_headers(self, fsp_xlsx_template: "FinancialServiceProviderXlsxTemplate") -> List[str]:
@@ -158,7 +167,11 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             for payment in payment_qs:
                 ws.append(self.get_payment_row(payment, fsp_xlsx_template))
 
-    def get_payment_row(self, payment: Payment, fsp_xlsx_template: "FinancialServiceProviderXlsxTemplate") -> List[str]:
+    def get_payment_row(
+        self,
+        payment: Payment,
+        fsp_xlsx_template: "FinancialServiceProviderXlsxTemplate",
+    ) -> List[str]:
         fsp_template_columns = self._remove_column_for_people(fsp_xlsx_template.columns)
         # remove fsp_auth_code if fsp_xlsx_template_id not provided
         if not self.export_fsp_auth_code and "fsp_auth_code" in fsp_template_columns:
@@ -214,7 +227,11 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             return snapshot_data.get("flex_fields", {}).get(name, "")
 
     def save_workbook(
-        self, zip_file: zipfile.ZipFile, wb: "Workbook", filename: str, password: Optional[str] = None
+        self,
+        zip_file: zipfile.ZipFile,
+        wb: "Workbook",
+        filename: str,
+        password: Optional[str] = None,
     ) -> None:
         with NamedTemporaryFile() as tmp:
             wb.save(tmp.name)
@@ -318,9 +335,17 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                     zip_file.setpassword(password.encode("utf-8"))
 
                 if self.payment_plan.splits.exists():
-                    self.create_workbooks_per_split(delivery_mechanism_per_payment_plan_list, zip_file, xlsx_password)
+                    self.create_workbooks_per_split(
+                        delivery_mechanism_per_payment_plan_list,
+                        zip_file,
+                        xlsx_password,
+                    )
                 else:
-                    self.create_workbooks_per_fsp(delivery_mechanism_per_payment_plan_list, zip_file, xlsx_password)
+                    self.create_workbooks_per_fsp(
+                        delivery_mechanism_per_payment_plan_list,
+                        zip_file,
+                        xlsx_password,
+                    )
 
             file_temp_obj = FileTemp(
                 object_id=self.payment_plan.pk,

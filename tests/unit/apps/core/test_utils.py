@@ -23,10 +23,12 @@ class TestCoreUtils(TestCase):
         with self.assertRaisesMessage(Exception, "Invalid delivered quantity"):
             get_payment_delivered_quantity_status_and_value("", Decimal(10.00))
         self.assertEqual(
-            get_payment_delivered_quantity_status_and_value(-1, Decimal(10.00)), (Payment.STATUS_ERROR, None)
+            get_payment_delivered_quantity_status_and_value(-1, Decimal(10.00)),
+            (Payment.STATUS_ERROR, None),
         )
         self.assertEqual(
-            get_payment_delivered_quantity_status_and_value(0, Decimal(10.00)), (Payment.STATUS_NOT_DISTRIBUTED, 0)
+            get_payment_delivered_quantity_status_and_value(0, Decimal(10.00)),
+            (Payment.STATUS_NOT_DISTRIBUTED, 0),
         )
         self.assertEqual(
             get_payment_delivered_quantity_status_and_value(5.00, Decimal(10.00)),

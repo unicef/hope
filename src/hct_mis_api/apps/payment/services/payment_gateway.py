@@ -324,7 +324,10 @@ class PaymentGatewayAPI(BaseAPI):
         return response_data["status"]
 
     def add_records_to_payment_instruction(
-        self, payment_records: List[Payment], remote_id: str, validate_response: bool = True
+        self,
+        payment_records: List[Payment],
+        remote_id: str,
+        validate_response: bool = True,
     ) -> AddRecordsResponseData:
         serializer = PaymentSerializer(payment_records, many=True)
         response_data, _ = self._post(
@@ -377,11 +380,14 @@ class PaymentGatewayService:
             for delivery_mechanism in payment_plan.delivery_mechanisms.filter(sent_to_payment_gateway=False):
                 if delivery_mechanism.financial_service_provider.is_payment_gateway:
                     _create_payment_instruction(
-                        PaymentInstructionFromDeliveryMechanismPerPaymentPlanSerializer, delivery_mechanism
+                        PaymentInstructionFromDeliveryMechanismPerPaymentPlanSerializer,
+                        delivery_mechanism,
                     )
 
     def change_payment_instruction_status(
-        self, new_status: PaymentInstructionStatus, obj: Union[DeliveryMechanismPerPaymentPlan, PaymentPlanSplit]
+        self,
+        new_status: PaymentInstructionStatus,
+        obj: Union[DeliveryMechanismPerPaymentPlan, PaymentPlanSplit],
     ) -> Optional[str]:
         if obj.financial_service_provider.is_payment_gateway:
             response_status = self.api.change_payment_instruction_status(new_status, obj.id)
@@ -402,7 +408,8 @@ class PaymentGatewayService:
             Payment.objects.bulk_update(_payments, ["status"])
 
         def _add_records(
-            _payments: List[Payment], _container: Union[DeliveryMechanismPerPaymentPlan, PaymentPlanSplit]
+            _payments: List[Payment],
+            _container: Union[DeliveryMechanismPerPaymentPlan, PaymentPlanSplit],
         ) -> None:
             add_records_error = False
             for payments_chunk in chunks(_payments, self.ADD_RECORDS_CHUNK_SIZE):
@@ -527,7 +534,9 @@ class PaymentGatewayService:
                 if payment_plan.splits.exists():
                     payment_instructions = payment_plan.splits.filter(sent_to_payment_gateway=True)
 
-                    def get_pending_payments(split: PaymentPlanSplit) -> QuerySet[Payment]:
+                    def get_pending_payments(
+                        split: PaymentPlanSplit,
+                    ) -> QuerySet[Payment]:
                         return split.payments.filter(status__in=self.PENDING_UPDATE_PAYMENT_STATUSES).order_by(
                             "unicef_id"
                         )
@@ -541,7 +550,8 @@ class PaymentGatewayService:
 
                     # Explicitly pass `payment_plan` to avoid late binding issues
                     def get_pending_payments(
-                        dm: DeliveryMechanismPerPaymentPlan, pp: PaymentPlan = payment_plan
+                        dm: DeliveryMechanismPerPaymentPlan,
+                        pp: PaymentPlan = payment_plan,
                     ) -> QuerySet[Payment]:
                         return pp.eligible_payments.filter(
                             financial_service_provider=dm.financial_service_provider,
@@ -553,7 +563,13 @@ class PaymentGatewayService:
                     if pending_payments.exists():
                         pg_payment_records = self.api.get_records_for_payment_instruction(instruction.id)
                         for payment in pending_payments:
-                            self.update_payment(payment, pg_payment_records, instruction, payment_plan, exchange_rate)
+                            self.update_payment(
+                                payment,
+                                pg_payment_records,
+                                instruction,
+                                payment_plan,
+                                exchange_rate,
+                            )
 
                 if payment_plan.is_reconciled:
                     for instruction in payment_instructions:

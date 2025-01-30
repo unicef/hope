@@ -283,8 +283,14 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
                 "individual_data_update_issue_type_extras",
             ],
         },
-        GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: {"required": [], "not_allowed": []},
-        GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD: {"required": [], "not_allowed": []},
+        GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: {
+            "required": [],
+            "not_allowed": [],
+        },
+        GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD: {
+            "required": [],
+            "not_allowed": [],
+        },
         GrievanceTicket.ISSUE_TYPE_DATA_BREACH: {"required": [], "not_allowed": []},
         GrievanceTicket.ISSUE_TYPE_BRIBERY_CORRUPTION_KICKBACK: {
             "required": [],
@@ -544,7 +550,12 @@ class GrievanceStatusChangeMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(
-        cls, root: Any, info: Any, grievance_ticket_id: Optional[str], status: int, **kwargs: Any
+        cls,
+        root: Any,
+        info: Any,
+        grievance_ticket_id: Optional[str],
+        status: int,
+        **kwargs: Any,
     ) -> "GrievanceStatusChangeMutation":
         user = info.context.user
         notifications = []
@@ -585,7 +596,8 @@ class GrievanceStatusChangeMutation(PermissionMutation):
                 if not partner.is_unicef:
                     for selected_individual in grievance_ticket.ticket_details.selected_individuals.all():
                         if not partner.has_area_access(
-                            area_id=selected_individual.household.admin2.id, program_id=selected_individual.program.id
+                            area_id=selected_individual.household.admin2.id,
+                            program_id=selected_individual.program.id,
                         ):
                             raise PermissionDenied("Permission Denied: User does not have access to close ticket")
 
@@ -1050,7 +1062,9 @@ class DeleteHouseholdApproveMutation(PermissionMutation):
         if reason_hh_id:
             # validate reason HH id
             reason_hh_obj = get_object_or_404(
-                Household, unicef_id=reason_hh_id, program=ticket_details.household.program
+                Household,
+                unicef_id=reason_hh_id,
+                program=ticket_details.household.program,
             )
             if reason_hh_obj.withdrawn:
                 raise ValidationError(f"The provided household {reason_hh_obj.unicef_id} has to be active.")

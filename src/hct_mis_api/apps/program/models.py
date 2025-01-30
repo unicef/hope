@@ -80,7 +80,13 @@ class BeneficiaryGroup(TimeStampedUUIDModel):
         return self.name
 
 
-class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel, AdminUrlMixin):
+class Program(
+    SoftDeletableModel,
+    TimeStampedUUIDModel,
+    AbstractSyncable,
+    ConcurrencyModel,
+    AdminUrlMixin,
+):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "name",
@@ -256,7 +262,9 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         return programme_code
 
     @staticmethod
-    def get_total_number_of_households_from_payments(qs: models.QuerySet[PaymentPlan]) -> int:
+    def get_total_number_of_households_from_payments(
+        qs: models.QuerySet[PaymentPlan],
+    ) -> int:
         return (
             qs.filter(**{"payment_items__delivered_quantity__gt": 0})
             .distinct("payment_items__household__unicef_id")
@@ -342,7 +350,13 @@ class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, C
         (ACTIVE, _("Active")),
         (FINISHED, _("Finished")),
     )
-    title = models.CharField(_("Title"), max_length=255, null=True, blank=True, default="Default Programme Cycle")
+    title = models.CharField(
+        _("Title"),
+        max_length=255,
+        null=True,
+        blank=True,
+        default="Default Programme Cycle",
+    )
     program = models.ForeignKey("Program", on_delete=models.CASCADE, related_name="cycles")
     status = models.CharField(max_length=10, choices=STATUS_CHOICE, db_index=True, default=DRAFT)
     start_date = models.DateField()  # first from program

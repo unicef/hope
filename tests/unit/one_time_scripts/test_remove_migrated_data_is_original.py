@@ -84,7 +84,10 @@ class BaseMigrateDataTestCase(TestCase):
         IndividualRoleInHouseholdFactory(is_original=True, household=hh2, individual=ind2, role=ROLE_PRIMARY)
         PendingIndividualRoleInHouseholdFactory(household=pending_hh, individual=pending_ind, role=ROLE_PRIMARY)
         PendingIndividualRoleInHouseholdFactory(
-            is_original=True, household=pending_hh2, individual=pending_ind2, role=ROLE_PRIMARY
+            is_original=True,
+            household=pending_hh2,
+            individual=pending_ind2,
+            role=ROLE_PRIMARY,
         )
 
         EntitlementCardFactory(household=hh)
@@ -160,16 +163,28 @@ class BaseMigrateDataTestCase(TestCase):
         self.assertEqual(PendingIndividual.all_objects.filter(is_original=True).count(), 0)
         self.assertEqual(Household.all_objects.filter(is_original=True).count(), 0)
         self.assertEqual(PendingHousehold.all_objects.filter(is_original=True).count(), 0)
-        self.assertEqual(HouseholdSelection.original_and_repr_objects.filter(is_original=True).count(), 0)
+        self.assertEqual(
+            HouseholdSelection.original_and_repr_objects.filter(is_original=True).count(),
+            0,
+        )
         self.assertEqual(Document.all_objects.filter(is_original=True).count(), 0)
         self.assertEqual(PendingDocument.all_objects.filter(is_original=True).count(), 0)
         self.assertEqual(IndividualIdentity.all_objects.filter(is_original=True).count(), 0)
         self.assertEqual(PendingIndividualIdentity.all_objects.filter(is_original=True).count(), 0)
         self.assertEqual(IndividualRoleInHousehold.all_objects.filter(is_original=True).count(), 0)
-        self.assertEqual(PendingIndividualRoleInHousehold.all_objects.filter(is_original=True).count(), 0)
-        self.assertEqual(EntitlementCard.original_and_repr_objects.filter(is_original=True).count(), 0)
+        self.assertEqual(
+            PendingIndividualRoleInHousehold.all_objects.filter(is_original=True).count(),
+            0,
+        )
+        self.assertEqual(
+            EntitlementCard.original_and_repr_objects.filter(is_original=True).count(),
+            0,
+        )
         self.assertEqual(BankAccountInfo.all_objects.filter(is_original=True).count(), 0)
         self.assertEqual(PendingBankAccountInfo.all_objects.filter(is_original=True).count(), 0)
         self.assertEqual(Message.original_and_repr_objects.filter(is_original=True).count(), 0)
         self.assertEqual(Feedback.original_and_repr_objects.filter(is_original=True).count(), 0)
-        self.assertEqual(GrievanceTicket.default_for_migrations_fix.filter(is_original=True).count(), 0)
+        self.assertEqual(
+            GrievanceTicket.default_for_migrations_fix.filter(is_original=True).count(),
+            0,
+        )

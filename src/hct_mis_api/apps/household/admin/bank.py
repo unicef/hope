@@ -25,7 +25,13 @@ class BankAccountAdmin(AdminFiltersMixin, RdiMergeStatusAdminMixin):
         "account_holder_name",
         "rdi_merge_status",
     )
-    search_fields = ("bank_name", "bank_account_number", "bank_branch_name", "debit_card_number", "account_holder_name")
+    search_fields = (
+        "bank_name",
+        "bank_account_number",
+        "bank_branch_name",
+        "debit_card_number",
+        "account_holder_name",
+    )
     list_filter = (("individual", AutoCompleteFilter),)
 
     def formfield_for_foreignkey(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:

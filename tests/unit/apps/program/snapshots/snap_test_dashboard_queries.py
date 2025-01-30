@@ -7,54 +7,25 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestDashboardQueries::test_chart_programmes_by_sector 1'] = {
-    'data': {
-        'chartProgrammesBySector': {
-            'datasets': [
-                {
-                    'data': [
-                        0.0,
-                        1.0,
-                        1.0,
-                        0.0
-                    ],
-                    'label': 'Programmes'
-                },
-                {
-                    'data': [
-                        1.0,
-                        0.0,
-                        0.0,
-                        1.0
-                    ],
-                    'label': 'Programmes with Cash+'
-                },
-                {
-                    'data': [
-                        1.0,
-                        1.0,
-                        1.0,
-                        1.0
-                    ],
-                    'label': 'Total Programmes'
-                }
+snapshots["TestDashboardQueries::test_chart_programmes_by_sector 1"] = {
+    "data": {
+        "chartProgrammesBySector": {
+            "datasets": [
+                {"data": [0.0, 1.0, 1.0, 0.0], "label": "Programmes"},
+                {"data": [1.0, 0.0, 0.0, 1.0], "label": "Programmes with Cash+"},
+                {"data": [1.0, 1.0, 1.0, 1.0], "label": "Total Programmes"},
             ],
-            'labels': [
-                'Education',
-                'Health',
-                'Nutrition',
-                'WASH'
-            ]
+            "labels": ["Education", "Health", "Nutrition", "WASH"],
         }
     }
 }
 
-snapshots['TestDashboardQueries::test_chart_total_transferred_by_month 1'] = {
-    'data': {
-        'chartTotalTransferredByMonth': {
-            'datasets': [
+snapshots["TestDashboardQueries::test_chart_total_transferred_by_month 1"] = {
+    "data": {
+        "chartTotalTransferredByMonth": {
+            "datasets": [
                 {
-                    'data': [
+                    "data": [
                         0.0,
                         0.0,
                         0.0,
@@ -66,12 +37,12 @@ snapshots['TestDashboardQueries::test_chart_total_transferred_by_month 1'] = {
                         0.0,
                         0.0,
                         316.0,
-                        632.0
+                        632.0,
                     ],
-                    'label': 'Previous Transfers'
+                    "label": "Previous Transfers",
                 },
                 {
-                    'data': [
+                    "data": [
                         0.0,
                         0.0,
                         0.0,
@@ -83,12 +54,12 @@ snapshots['TestDashboardQueries::test_chart_total_transferred_by_month 1'] = {
                         0.0,
                         50.0,
                         50.0,
-                        0.0
+                        0.0,
                     ],
-                    'label': 'Voucher Transferred'
+                    "label": "Voucher Transferred",
                 },
                 {
-                    'data': [
+                    "data": [
                         0.0,
                         0.0,
                         0.0,
@@ -100,25 +71,25 @@ snapshots['TestDashboardQueries::test_chart_total_transferred_by_month 1'] = {
                         0.0,
                         266.0,
                         266.0,
-                        0.0
+                        0.0,
                     ],
-                    'label': 'Cash Transferred'
-                }
+                    "label": "Cash Transferred",
+                },
             ],
-            'labels': [
-                'Jan',
-                'Feb',
-                'Mar',
-                'Apr',
-                'May',
-                'Jun',
-                'Jul',
-                'Aug',
-                'Sep',
-                'Oct',
-                'Nov',
-                'Dec'
-            ]
+            "labels": [
+                "Jan",
+                "Feb",
+                "Mar",
+                "Apr",
+                "May",
+                "Jun",
+                "Jul",
+                "Aug",
+                "Sep",
+                "Oct",
+                "Nov",
+                "Dec",
+            ],
         }
     }
 }

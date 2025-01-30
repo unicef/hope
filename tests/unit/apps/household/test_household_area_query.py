@@ -62,8 +62,16 @@ class TestHouseholdAreaQuery(APITestCase):
         cls.lashkaragh = AreaFactory(name="Lashkaragh", area_type=cls.parish, p_code="area6", parent=cls.abband)
         cls.kandahar = AreaFactory(name="Kandahar", area_type=cls.parish, p_code="area7", parent=cls.abband)
 
-        cls.program = ProgramFactory(name="program", business_area=cls.business_area_afghanistan, status=Program.ACTIVE)
-        cls.program_2 = ProgramFactory(name="program_2", business_area=cls.business_area_ukraine, status=Program.ACTIVE)
+        cls.program = ProgramFactory(
+            name="program",
+            business_area=cls.business_area_afghanistan,
+            status=Program.ACTIVE,
+        )
+        cls.program_2 = ProgramFactory(
+            name="program_2",
+            business_area=cls.business_area_ukraine,
+            status=Program.ACTIVE,
+        )
 
         cls.household_1, _ = create_household({"size": 1, "business_area": cls.business_area_afghanistan})
         cls.household_2, _ = create_household({"size": 2, "business_area": cls.business_area_afghanistan})
@@ -160,7 +168,11 @@ class TestHouseholdAreaQuery(APITestCase):
         user = UserFactory(partner=partner)
         # partner with access to household_5.admin3 in program self.program
         self.create_user_role_with_permissions(
-            user, permissions, self.business_area_afghanistan, program=self.program, areas=[self.household_5.admin3]
+            user,
+            permissions,
+            self.business_area_afghanistan,
+            program=self.program,
+            areas=[self.household_5.admin3],
         )
 
         self.snapshot_graphql_request(
@@ -214,7 +226,11 @@ class TestHouseholdAreaQuery(APITestCase):
         partner = PartnerFactory(name="NOT_UNICEF_4")
         user = UserFactory(partner=partner)
         self.create_user_role_with_permissions(
-            user, permissions, self.business_area_afghanistan, program=self.program, areas=[self.household_3.admin2]
+            user,
+            permissions,
+            self.business_area_afghanistan,
+            program=self.program,
+            areas=[self.household_3.admin2],
         )
 
         self.snapshot_graphql_request(
@@ -272,7 +288,11 @@ class TestHouseholdAreaQuery(APITestCase):
             permissions,
             self.business_area_afghanistan,
             program=self.program,
-            areas=[self.household_1.admin2, self.household_4.admin3, self.household_5.admin3],
+            areas=[
+                self.household_1.admin2,
+                self.household_4.admin3,
+                self.household_5.admin3,
+            ],
         )
 
         self.snapshot_graphql_request(
@@ -297,7 +317,11 @@ class TestHouseholdAreaQuery(APITestCase):
         partner = PartnerFactory(name="NOT_UNICEF_7")
         user = UserFactory(partner=partner)
         self.create_user_role_with_permissions(
-            user, permissions, self.business_area_afghanistan, program=self.program, areas=[self.household_1.admin1]
+            user,
+            permissions,
+            self.business_area_afghanistan,
+            program=self.program,
+            areas=[self.household_1.admin1],
         )
 
         self.snapshot_graphql_request(
@@ -320,7 +344,9 @@ class TestHouseholdAreaQuery(APITestCase):
         partner = PartnerFactory(name="UNICEF")
         user = UserFactory(partner=partner)
         self.create_user_role_with_permissions(
-            user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], self.business_area_afghanistan
+            user,
+            [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST],
+            self.business_area_afghanistan,
         )
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,

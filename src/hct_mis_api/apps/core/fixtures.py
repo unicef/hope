@@ -74,9 +74,21 @@ class StorageFileFactory(DjangoModelFactory):
 
 def generate_data_collecting_types() -> None:
     data_collecting_types = [
-        {"label": "Partial", "code": "partial_individuals", "description": "Partial individuals collected"},
-        {"label": "Full", "code": "full_collection", "description": "Full individual collected"},
-        {"label": "Size only", "code": "size_only", "description": "Size only collected"},
+        {
+            "label": "Partial",
+            "code": "partial_individuals",
+            "description": "Partial individuals collected",
+        },
+        {
+            "label": "Full",
+            "code": "full_collection",
+            "description": "Full individual collected",
+        },
+        {
+            "label": "Size only",
+            "code": "size_only",
+            "description": "Size only collected",
+        },
         {
             "label": "size/age/gender disaggregated",
             "code": "size_age_gender_disaggregated",
@@ -146,7 +158,11 @@ class FlexibleAttributeForPDUFactory(DjangoModelFactory):
 
 
 def create_pdu_flexible_attribute(
-    label: str, subtype: str, number_of_rounds: int, rounds_names: list[str], program: Program
+    label: str,
+    subtype: str,
+    number_of_rounds: int,
+    rounds_names: list[str],
+    program: Program,
 ) -> FlexibleAttribute:
     name = field_label_to_field_name(label)
     flexible_attribute = FlexibleAttribute.objects.create(

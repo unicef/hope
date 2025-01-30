@@ -432,7 +432,9 @@ class TestGrievanceUtils(TestCase):
         assert ind_1.duplicate is False
         assert ind_2.duplicate is True
 
-    def test_close_needs_adjudication_ticket_service_individual_without_household(self) -> None:
+    def test_close_needs_adjudication_ticket_service_individual_without_household(
+        self,
+    ) -> None:
         user = UserFactory()
         ba = BusinessAreaFactory(slug="afghanistan")
         program = ProgramFactory(business_area=ba)

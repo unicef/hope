@@ -30,7 +30,11 @@ class TargetingCriteriaQueryingBase:
     this mixin connects OR blocks
     """
 
-    def __init__(self, rules: Optional[List] = None, excluded_household_ids: Optional[List] = None) -> None:
+    def __init__(
+        self,
+        rules: Optional[List] = None,
+        excluded_household_ids: Optional[List] = None,
+    ) -> None:
         if rules is None:
             return
         self.rules = rules
@@ -165,7 +169,9 @@ class TargetingCriteriaRuleQueryingBase:
 
 class TargetingIndividualRuleFilterBlockBase:
     def __init__(
-        self, individual_block_filters: Optional[Any] = None, target_only_hoh: Optional[List[Household]] = None
+        self,
+        individual_block_filters: Optional[Any] = None,
+        target_only_hoh: Optional[List[Household]] = None,
     ) -> None:
         if individual_block_filters is not None:
             self.individual_block_filters = individual_block_filters
@@ -398,7 +404,9 @@ class TargetingCriteriaFilterBase:
         get_query = core_field_attr.get("get_query")
         if get_query:
             return get_query(
-                self.comparison_method, self.arguments, is_social_worker_query=self.is_social_worker_program
+                self.comparison_method,
+                self.arguments,
+                is_social_worker_query=self.is_social_worker_program,
             )
         lookup = core_field_attr.get("lookup")
         if not lookup:

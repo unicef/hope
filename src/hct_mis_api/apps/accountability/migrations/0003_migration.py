@@ -24,7 +24,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="survey",
             name="recipients",
-            field=models.ManyToManyField(blank=True, related_name="surveys", to="household.Household"),
+            field=models.ManyToManyField(
+                blank=True, related_name="surveys", to="household.Household"
+            ),
         ),
         migrations.AddField(
             model_name="survey",
@@ -40,7 +42,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="message",
             name="business_area",
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="core.businessarea"),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="core.businessarea"
+            ),
         ),
         migrations.AddField(
             model_name="message",
@@ -69,7 +73,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="message",
             name="households",
-            field=models.ManyToManyField(blank=True, related_name="messages", to="household.Household"),
+            field=models.ManyToManyField(
+                blank=True, related_name="messages", to="household.Household"
+            ),
         ),
         migrations.AddField(
             model_name="message",
@@ -128,12 +134,19 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="feedback",
             name="admin2",
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="geo.area"),
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="geo.area",
+            ),
         ),
         migrations.AddField(
             model_name="feedback",
             name="business_area",
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="core.businessarea"),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="core.businessarea"
+            ),
         ),
         migrations.AddField(
             model_name="feedback",
@@ -199,7 +212,10 @@ class Migration(migrations.Migration):
             model_name="feedback",
             name="program",
             field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="program.program"
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="program.program",
             ),
         ),
         # message

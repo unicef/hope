@@ -33,7 +33,8 @@ class TestDelegatePeople(HOPEApiTestCase):
         call_command("loadcountries")
         call_command("loadcountrycodes")
         DocumentType.objects.create(
-            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE], label="--"
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
+            label="--",
         )
         data_collecting_type = DataCollectingTypeFactory(
             label="Full",
@@ -43,7 +44,9 @@ class TestDelegatePeople(HOPEApiTestCase):
             type=DataCollectingType.Type.SOCIAL.value,
         )
         cls.program = ProgramFactory.create(
-            status=Program.DRAFT, business_area=cls.business_area, data_collecting_type=data_collecting_type
+            status=Program.DRAFT,
+            business_area=cls.business_area,
+            data_collecting_type=data_collecting_type,
         )
         cls.rdi: RegistrationDataImport = RegistrationDataImport.objects.create(
             business_area=cls.business_area,

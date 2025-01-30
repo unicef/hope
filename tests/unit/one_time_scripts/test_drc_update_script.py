@@ -31,7 +31,11 @@ class TestSouthSudanUpdateScript(TestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         business_area = create_afghanistan()
-        program = ProgramFactory(name="Test Program for Household", status=Program.ACTIVE, business_area=business_area)
+        program = ProgramFactory(
+            name="Test Program for Household",
+            status=Program.ACTIVE,
+            business_area=business_area,
+        )
         cls.program = program
 
         business_area = create_afghanistan()
@@ -146,7 +150,11 @@ class TestSouthSudanUpdateScript(TestCase):
 
     def test_drc_script(self) -> None:
         with Capturing() as output:
-            drc_update_script(f"{settings.TESTS_ROOT}/one_time_scripts/files/updates_DRC_test.xlsx", self.program.id, 1)
+            drc_update_script(
+                f"{settings.TESTS_ROOT}/one_time_scripts/files/updates_DRC_test.xlsx",
+                self.program.id,
+                1,
+            )
         expected_output = [
             "Validating row 0 to 1 Indivduals",
             "Validating row 1 to 2 Indivduals",

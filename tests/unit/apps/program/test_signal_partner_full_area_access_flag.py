@@ -31,11 +31,15 @@ class TestPartnerFullAreaAccessSignal(TestCase):
         cls.area_in_afg_1 = AreaFactory(name="Area in AFG 1", area_type=area_type_afg, p_code="AREA-IN-AFG1")
         cls.area_in_afg_2 = AreaFactory(name="Area in AFG 2", area_type=area_type_afg, p_code="AREA-IN-AFG2")
         cls.area_not_in_afg = AreaFactory(
-            name="Area not in AFG", area_type=cls.area_type_other, p_code="AREA-NOT-IN-AFG"
+            name="Area not in AFG",
+            area_type=cls.area_type_other,
+            p_code="AREA-NOT-IN-AFG",
         )
 
         cls.program = ProgramFactory.create(
-            status=Program.DRAFT, business_area=cls.business_area, partner_access=Program.SELECTED_PARTNERS_ACCESS
+            status=Program.DRAFT,
+            business_area=cls.business_area,
+            partner_access=Program.SELECTED_PARTNERS_ACCESS,
         )
         program_partner_through = ProgramPartnerThrough.objects.create(
             program=cls.program,
@@ -52,30 +56,43 @@ class TestPartnerFullAreaAccessSignal(TestCase):
         )
 
         self.assertEqual(new_program_partner_through.full_area_access, True)
-        self.assertEqual(self.program.program_partner_through.filter(partner=new_partner).first().areas.count(), 2)
-        self.assertIn(
-            self.area_in_afg_1, self.program.program_partner_through.filter(partner=new_partner).first().areas.all()
+        self.assertEqual(
+            self.program.program_partner_through.filter(partner=new_partner).first().areas.count(),
+            2,
         )
         self.assertIn(
-            self.area_in_afg_2, self.program.program_partner_through.filter(partner=new_partner).first().areas.all()
+            self.area_in_afg_1,
+            self.program.program_partner_through.filter(partner=new_partner).first().areas.all(),
+        )
+        self.assertIn(
+            self.area_in_afg_2,
+            self.program.program_partner_through.filter(partner=new_partner).first().areas.all(),
         )
         self.assertNotIn(
-            self.area_not_in_afg, self.program.program_partner_through.filter(partner=new_partner).first().areas.all()
+            self.area_not_in_afg,
+            self.program.program_partner_through.filter(partner=new_partner).first().areas.all(),
         )
 
     def test_update_program_full_access_area_flag(self) -> None:
         self.assertEqual(
-            self.program.program_partner_through.filter(partner=self.partner).first().full_area_access, False
+            self.program.program_partner_through.filter(partner=self.partner).first().full_area_access,
+            False,
         )
-        self.assertEqual(self.program.program_partner_through.filter(partner=self.partner).first().areas.count(), 1)
+        self.assertEqual(
+            self.program.program_partner_through.filter(partner=self.partner).first().areas.count(),
+            1,
+        )
         self.assertIn(
-            self.area_in_afg_1, self.program.program_partner_through.filter(partner=self.partner).first().areas.all()
+            self.area_in_afg_1,
+            self.program.program_partner_through.filter(partner=self.partner).first().areas.all(),
         )
         self.assertNotIn(
-            self.area_in_afg_2, self.program.program_partner_through.filter(partner=self.partner).first().areas.all()
+            self.area_in_afg_2,
+            self.program.program_partner_through.filter(partner=self.partner).first().areas.all(),
         )
         self.assertNotIn(
-            self.area_not_in_afg, self.program.program_partner_through.filter(partner=self.partner).first().areas.all()
+            self.area_not_in_afg,
+            self.program.program_partner_through.filter(partner=self.partner).first().areas.all(),
         )
 
         program_partner_through = self.program.program_partner_through.filter(partner=self.partner).first()
@@ -83,15 +100,22 @@ class TestPartnerFullAreaAccessSignal(TestCase):
         program_partner_through.save(update_fields=["full_area_access"])
 
         self.assertEqual(
-            self.program.program_partner_through.filter(partner=self.partner).first().full_area_access, True
+            self.program.program_partner_through.filter(partner=self.partner).first().full_area_access,
+            True,
         )
-        self.assertEqual(self.program.program_partner_through.filter(partner=self.partner).first().areas.count(), 2)
-        self.assertIn(
-            self.area_in_afg_1, self.program.program_partner_through.filter(partner=self.partner).first().areas.all()
+        self.assertEqual(
+            self.program.program_partner_through.filter(partner=self.partner).first().areas.count(),
+            2,
         )
         self.assertIn(
-            self.area_in_afg_2, self.program.program_partner_through.filter(partner=self.partner).first().areas.all()
+            self.area_in_afg_1,
+            self.program.program_partner_through.filter(partner=self.partner).first().areas.all(),
+        )
+        self.assertIn(
+            self.area_in_afg_2,
+            self.program.program_partner_through.filter(partner=self.partner).first().areas.all(),
         )
         self.assertNotIn(
-            self.area_not_in_afg, self.program.program_partner_through.filter(partner=self.partner).first().areas.all()
+            self.area_not_in_afg,
+            self.program.program_partner_through.filter(partner=self.partner).first().areas.all(),
         )

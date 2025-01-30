@@ -150,7 +150,12 @@ class TestRdiXlsxCreateTask(TestCase):
 
     def test_execute_xd(self) -> None:
         task = self.RdiXlsxCreateTask()
-        task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
+        task.execute(
+            self.registration_data_import.id,
+            self.import_data.id,
+            self.business_area.id,
+            self.program.id,
+        )
 
         households_count = PendingHousehold.objects.count()
         individuals_count = PendingIndividual.objects.count()
@@ -194,7 +199,12 @@ class TestRdiXlsxCreateTask(TestCase):
         task = self.RdiXlsxCreateTask()
         self.business_area.postpone_deduplication = True
         self.business_area.save()
-        task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
+        task.execute(
+            self.registration_data_import.id,
+            self.import_data.id,
+            self.business_area.id,
+            self.program.id,
+        )
 
         households_count = PendingHousehold.objects.count()
         individuals_count = PendingIndividual.objects.count()
@@ -254,7 +264,12 @@ class TestRdiXlsxCreateTask(TestCase):
         registration_data_import.created_at = datetime.datetime(2021, 3, 7)
         registration_data_import.save()
         task = self.RdiXlsxCreateTask()
-        task.execute(registration_data_import.id, import_data.id, self.business_area.id, self.program.id)
+        task.execute(
+            registration_data_import.id,
+            import_data.id,
+            self.business_area.id,
+            self.program.id,
+        )
 
         households_count = PendingHousehold.objects.count()
         individuals_count = PendingIndividual.objects.count()
@@ -314,13 +329,19 @@ class TestRdiXlsxCreateTask(TestCase):
         self.assertEqual(PendingIndividualIdentity.objects.count(), 2)
         self.assertEqual(
             PendingIndividualIdentity.objects.filter(
-                number="TEST", country__iso_code2="PL", partner__name="WFP", individual__full_name="Some Full Name"
+                number="TEST",
+                country__iso_code2="PL",
+                partner__name="WFP",
+                individual__full_name="Some Full Name",
             ).count(),
             1,
         )
         self.assertEqual(
             PendingIndividualIdentity.objects.filter(
-                number="WTG", country__iso_code2="PL", partner__name="UNHCR", individual__full_name="Some Full Name"
+                number="WTG",
+                country__iso_code2="PL",
+                partner__name="UNHCR",
+                individual__full_name="Some Full Name",
             ).count(),
             1,
         )
@@ -375,7 +396,11 @@ class TestRdiXlsxCreateTask(TestCase):
                 "key": "birth_certificate",
                 "value": value,
             },
-            "individual_14_other_id_i_c": {"individual": individual, "key": "other_id", "value": number},
+            "individual_14_other_id_i_c": {
+                "individual": individual,
+                "key": "other_id",
+                "value": number,
+            },
         }
         self.assertEqual(task.documents, expected)
 
@@ -509,7 +534,12 @@ class TestRdiXlsxCreateTask(TestCase):
 
     def test_store_row_id(self) -> None:
         task = self.RdiXlsxCreateTask()
-        task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
+        task.execute(
+            self.registration_data_import.id,
+            self.import_data.id,
+            self.business_area.id,
+            self.program.id,
+        )
 
         households = PendingHousehold.objects.all()
         for household in households:
@@ -521,7 +551,12 @@ class TestRdiXlsxCreateTask(TestCase):
 
     def test_create_bank_account(self) -> None:
         task = self.RdiXlsxCreateTask()
-        task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
+        task.execute(
+            self.registration_data_import.id,
+            self.import_data.id,
+            self.business_area.id,
+            self.program.id,
+        )
 
         bank_account_info = PendingBankAccountInfo.objects.get(individual__detail_id=7)
         self.assertEqual(bank_account_info.bank_name, "Bank testowy")
@@ -530,15 +565,28 @@ class TestRdiXlsxCreateTask(TestCase):
 
     def test_create_tax_id_document(self) -> None:
         task = self.RdiXlsxCreateTask()
-        task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
+        task.execute(
+            self.registration_data_import.id,
+            self.import_data.id,
+            self.business_area.id,
+            self.program.id,
+        )
 
         document = PendingDocument.objects.filter(individual__detail_id=5).first()
-        self.assertEqual(document.type.key, IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID])
+        self.assertEqual(
+            document.type.key,
+            IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
+        )
         self.assertEqual(document.document_number, "CD1247246Q12W")
 
     def test_import_empty_cell_as_blank_cell(self) -> None:
         task = self.RdiXlsxCreateTask()
-        task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
+        task.execute(
+            self.registration_data_import.id,
+            self.import_data.id,
+            self.business_area.id,
+            self.program.id,
+        )
 
         individual = PendingIndividual.objects.get(detail_id=3)
         self.assertEqual(individual.seeing_disability, "")
@@ -572,7 +620,12 @@ class TestRdiXlsxCreateTask(TestCase):
 
     def test_create_delivery_mechanism_data(self) -> None:
         task = self.RdiXlsxCreateTask()
-        task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
+        task.execute(
+            self.registration_data_import.id,
+            self.import_data.id,
+            self.business_area.id,
+            self.program.id,
+        )
         self.assertEqual(PendingDeliveryMechanismData.objects.count(), 3)
 
         dmd1 = PendingDeliveryMechanismData.objects.get(individual__detail_id=3)
@@ -583,7 +636,10 @@ class TestRdiXlsxCreateTask(TestCase):
         self.assertEqual(dmd3.rdi_merge_status, MergeStatusModel.PENDING)
         self.assertEqual(
             dmd1.data,
-            {"card_number__atm_card": "164260858", "card_expiry_date__atm_card": "1995-06-03T00:00:00"},
+            {
+                "card_number__atm_card": "164260858",
+                "card_expiry_date__atm_card": "1995-06-03T00:00:00",
+            },
         )
         self.assertEqual(
             dmd2.data,

@@ -16,7 +16,7 @@ class TestCoreFields(APITestCase):
 
     def test_all_fields_have_lookup(self) -> None:
         for field in get_core_fields_attributes():
-            self.assertTrue(field.get("lookup"), f'{field.get("name")} does not have a lookup')
+            self.assertTrue(field.get("lookup"), f"{field.get('name')} does not have a lookup")
 
     @patch(
         "hct_mis_api.apps.core.field_attributes.core_fields_attributes.get_core_fields_attributes",
@@ -32,7 +32,13 @@ class TestCoreFields(APITestCase):
                 "choices": [],
                 "associated_with": "individual",
                 "xlsx_field": "given_name_i_c",
-                "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE, Scope.XLSX_PEOPLE],
+                "scope": [
+                    Scope.GLOBAL,
+                    Scope.TARGETING,
+                    Scope.KOBO_IMPORT,
+                    Scope.INDIVIDUAL_UPDATE,
+                    Scope.XLSX_PEOPLE,
+                ],
             },
             {
                 "id": "b1f90314-b8b8-4bcb-9265-9d48d1fce524",
@@ -45,7 +51,12 @@ class TestCoreFields(APITestCase):
                 "choices": [],
                 "associated_with": "individual",
                 "xlsx_field": "given_name1_i_c",
-                "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE],
+                "scope": [
+                    Scope.GLOBAL,
+                    Scope.TARGETING,
+                    Scope.KOBO_IMPORT,
+                    Scope.INDIVIDUAL_UPDATE,
+                ],
             },
             {
                 "id": "36ab3421-6e7a-40d1-b816-ea5cbdcc0b6a",
@@ -80,7 +91,13 @@ class TestCoreFields(APITestCase):
                 "choices": [],
                 "associated_with": "individual",
                 "xlsx_field": "given_name_i_c",
-                "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE, Scope.XLSX_PEOPLE],
+                "scope": [
+                    Scope.GLOBAL,
+                    Scope.TARGETING,
+                    Scope.KOBO_IMPORT,
+                    Scope.INDIVIDUAL_UPDATE,
+                    Scope.XLSX_PEOPLE,
+                ],
             }
         ],
     )

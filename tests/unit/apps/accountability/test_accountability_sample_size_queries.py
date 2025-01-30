@@ -30,7 +30,9 @@ class TestAccountabilitySampleSizeQueries(APITestCase):
         cls.user = UserFactory(first_name="John", last_name="Wick")
         cls.program = ProgramFactory(status=Program.ACTIVE)
         cls.payment_plan = PaymentPlanFactory(
-            business_area=cls.business_area, created_by=cls.user, program_cycle=cls.program.cycles.first()
+            business_area=cls.business_area,
+            created_by=cls.user,
+            program_cycle=cls.program.cycles.first(),
         )
 
         households = [create_household()[0] for _ in range(14)]
@@ -42,7 +44,9 @@ class TestAccountabilitySampleSizeQueries(APITestCase):
         SurveyFactory.create_batch(
             3,
             payment_plan=PaymentPlanFactory(
-                business_area=cls.business_area, created_by=cls.user, program_cycle=cls.program.cycles.first()
+                business_area=cls.business_area,
+                created_by=cls.user,
+                program_cycle=cls.program.cycles.first(),
             ),
             created_by=UserFactory(),
         )
@@ -74,7 +78,10 @@ class TestAccountabilitySampleSizeQueries(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.QUERY,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {"Business-Area": self.business_area.slug},
+            },
             variables={
                 "input": {
                     "paymentPlan": self.id_to_base64(self.payment_plan.id, "PaymentPlanNode"),

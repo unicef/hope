@@ -38,7 +38,10 @@ class TestLoadXML(TestCase):
 
         updated_individual = active_individuals.get(reference_number="KPi.111")
         self.assertEqual(updated_individual.third_name, "TEST")
-        self.assertEqual(updated_individual.listed_on, timezone.make_aware(datetime(year=2016, month=11, day=11)))
+        self.assertEqual(
+            updated_individual.listed_on,
+            timezone.make_aware(datetime(year=2016, month=11, day=11)),
+        )
 
         self.assertEqual(updated_individual.documents.all().count(), 2)
 
@@ -55,4 +58,7 @@ class TestLoadXML(TestCase):
         self.assertEqual(active_individuals.count(), 1)
 
         updated_individual = active_individuals.get(reference_number="KPi.111")
-        self.assertEqual(updated_individual.listed_on, timezone.make_aware(datetime(year=2016, month=11, day=11)))
+        self.assertEqual(
+            updated_individual.listed_on,
+            timezone.make_aware(datetime(year=2016, month=11, day=11)),
+        )

@@ -324,7 +324,9 @@ class TestMigrateDataToRepresentationsPerformance(TestCase):
         # Household4 and its data (without target population)
         self.rdi4_1 = RegistrationDataImportFactory(business_area=self.business_area)
         self.individual4_1 = IndividualFactory(
-            business_area=self.business_area, household=None, registration_data_import=self.rdi4_1
+            business_area=self.business_area,
+            household=None,
+            registration_data_import=self.rdi4_1,
         )
         self.household4 = HouseholdFactory(
             business_area=self.business_area,
@@ -359,7 +361,9 @@ class TestMigrateDataToRepresentationsPerformance(TestCase):
         self.household5.target_populations.set([self.target_population1, self.target_population_paid])
 
         self.collector5_1 = IndividualFactory(
-            business_area=self.business_area, household=None, registration_data_import=self.rdi_with_3_hhs
+            business_area=self.business_area,
+            household=None,
+            registration_data_import=self.rdi_with_3_hhs,
         )
         self.role_primary5 = IndividualRoleInHouseholdFactory(
             individual=self.collector5_1,
@@ -367,7 +371,9 @@ class TestMigrateDataToRepresentationsPerformance(TestCase):
             role=ROLE_PRIMARY,
         )
         self.collector5_2 = IndividualFactory(
-            business_area=self.business_area, household=None, registration_data_import=self.rdi_with_3_hhs
+            business_area=self.business_area,
+            household=None,
+            registration_data_import=self.rdi_with_3_hhs,
         )
         self.role_alternate5 = IndividualRoleInHouseholdFactory(
             individual=self.collector5_2,
@@ -376,7 +382,9 @@ class TestMigrateDataToRepresentationsPerformance(TestCase):
         )
 
         self.individual6_1 = IndividualFactory(
-            business_area=self.business_area, household=None, registration_data_import=self.rdi_with_3_hhs
+            business_area=self.business_area,
+            household=None,
+            registration_data_import=self.rdi_with_3_hhs,
         )
         self.household6 = HouseholdFactory(
             business_area=self.business_area,
@@ -395,7 +403,9 @@ class TestMigrateDataToRepresentationsPerformance(TestCase):
         )
 
         self.individual7_1 = IndividualFactory(
-            business_area=self.business_area, household=None, registration_data_import=self.rdi_with_3_hhs
+            business_area=self.business_area,
+            household=None,
+            registration_data_import=self.rdi_with_3_hhs,
         )
         self.household7 = HouseholdFactory(
             business_area=self.business_area,
@@ -699,7 +709,9 @@ class TestMigrateDataToRepresentationsPerformance(TestCase):
             return context
 
     @unittest.skip("need to adjust to new managers")
-    def test_migrate_data_to_representations_per_business_area_running_number_queries(self) -> None:
+    def test_migrate_data_to_representations_per_business_area_running_number_queries(
+        self,
+    ) -> None:
         self.refresh_objects()
         with self.assertNumQueries(
             336,

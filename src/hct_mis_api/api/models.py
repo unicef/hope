@@ -13,7 +13,9 @@ from hct_mis_api.apps.core.models import BusinessArea
 
 @unique
 class Grant(Enum):
-    def _generate_next_value_(name: str, start: int, count: int, last_values: List[Any]) -> Any:  # type: ignore # FIXME: signature differs from superclass
+    def _generate_next_value_(
+        name: str, start: int, count: int, last_values: List[Any]
+    ) -> Any:  # type: ignore # FIXME: signature differs from superclass
         return name
 
     API_READ_ONLY = auto()

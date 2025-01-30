@@ -48,7 +48,10 @@ def active_program() -> Program:
 
 
 def get_program_with_dct_type_and_name(
-    name: str, programme_code: str, dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.ACTIVE
+    name: str,
+    programme_code: str,
+    dct_type: str = DataCollectingType.Type.STANDARD,
+    status: str = Program.ACTIVE,
 ) -> Program:
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
@@ -96,7 +99,9 @@ def payment_verification_3() -> None:
     payment_verification_multiple_verification_plans(3)
 
 
-def payment_verification_multiple_verification_plans(number_verification_plans: int) -> None:
+def payment_verification_multiple_verification_plans(
+    number_verification_plans: int,
+) -> None:
     registration_data_import = RegistrationDataImportFactory(
         imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
     )
@@ -191,7 +196,9 @@ def add_payment_verification_xlsx() -> PV:
     yield payment_verification_creator(channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX)
 
 
-def payment_verification_creator(channel: str = PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL) -> PV:
+def payment_verification_creator(
+    channel: str = PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
+) -> PV:
     user = User.objects.first()
     business_area = BusinessArea.objects.first()
     registration_data_import = RegistrationDataImportFactory(imported_by=user, business_area=business_area)
@@ -255,7 +262,10 @@ def clear_downloaded_files(download_path: str) -> None:
 @pytest.mark.usefixtures("login")
 class TestSmokePaymentVerification:
     def test_smoke_payment_verification(
-        self, active_program: Program, add_payment_verification: PV, pagePaymentVerification: PaymentVerification
+        self,
+        active_program: Program,
+        add_payment_verification: PV,
+        pagePaymentVerification: PaymentVerification,
     ) -> None:
         pagePaymentVerification.selectGlobalProgramFilter("Active Program")
         pagePaymentVerification.getNavPaymentVerification().click()
@@ -674,14 +684,19 @@ class TestPaymentVerification:
         for cell in ws1["N:N"]:
             if cell.row >= 2:
                 ws1.cell(row=cell.row, column=3, value="YES")
-                ws1.cell(row=cell.row, column=16, value=ws1.cell(row=cell.row, column=15).value)
+                ws1.cell(
+                    row=cell.row,
+                    column=16,
+                    value=ws1.cell(row=cell.row, column=15).value,
+                )
 
         wb1.save(os.path.join(download_path, "new_" + xlsx_file))
         find_file("new_" + xlsx_file, number_of_ties=10, search_in_dir=download_path)
         pagePaymentVerificationDetails.getImportXlsx().click()
 
         pagePaymentVerificationDetails.upload_file(
-            os.path.abspath(os.path.join(download_path, "new_" + xlsx_file)), timeout=120
+            os.path.abspath(os.path.join(download_path, "new_" + xlsx_file)),
+            timeout=120,
         )
         pagePaymentVerificationDetails.getButtonImportEntitlement().click()
 

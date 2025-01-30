@@ -129,7 +129,10 @@ class TestGrievanceQuerySearchFilter(APITestCase):
     def test_grievance_list_filtered_by_ticket_id(self) -> None:
         self.create_user_role_with_permissions(
             self.user,
-            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+            [
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+            ],
             self.business_area,
         )
 
@@ -150,7 +153,10 @@ class TestGrievanceQuerySearchFilter(APITestCase):
     def test_grievance_list_filtered_by_ticket_household_unicef_id(self) -> None:
         self.create_user_role_with_permissions(
             self.user,
-            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+            [
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+            ],
             self.business_area,
         )
 
@@ -171,7 +177,10 @@ class TestGrievanceQuerySearchFilter(APITestCase):
     def test_grievance_list_filtered_by_household_head_full_name(self) -> None:
         self.create_user_role_with_permissions(
             self.user,
-            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+            [
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+            ],
             self.business_area,
         )
 
@@ -189,10 +198,15 @@ class TestGrievanceQuerySearchFilter(APITestCase):
             },
         )
 
-    def test_grievance_list_filtered_by_household_head_national_id_document_number(self) -> None:
+    def test_grievance_list_filtered_by_household_head_national_id_document_number(
+        self,
+    ) -> None:
         self.create_user_role_with_permissions(
             self.user,
-            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+            [
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+            ],
             self.business_area,
         )
 

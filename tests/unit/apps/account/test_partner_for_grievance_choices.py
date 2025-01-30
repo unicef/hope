@@ -26,9 +26,15 @@ class PartnerForGrievanceTest(APITestCase):
         cls.business_area = create_afghanistan()
         cls.program = ProgramFactory(name="Test Program", status=Program.DRAFT, business_area=cls.business_area)
         cls.program_for_household = ProgramFactory(
-            name="Test Program for Household", status=Program.DRAFT, business_area=cls.business_area
+            name="Test Program for Household",
+            status=Program.DRAFT,
+            business_area=cls.business_area,
         )
-        cls.program_any = ProgramFactory(name="Test Program Any", status=Program.DRAFT, business_area=cls.business_area)
+        cls.program_any = ProgramFactory(
+            name="Test Program Any",
+            status=Program.DRAFT,
+            business_area=cls.business_area,
+        )
         cls.household, individuals = create_household_and_individuals(
             household_data={
                 "business_area": cls.business_area,
@@ -84,19 +90,30 @@ class PartnerForGrievanceTest(APITestCase):
     def test_partner_choices_without_program_but_with_household(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.PARTNER_FOR_GRIEVANCE_CHOICES_QUERY,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {"Business-Area": self.business_area.slug},
+            },
             variables={"householdId": self.id_to_base64(self.household.id, "HouseholdNode")},
         )
 
     def test_partner_choices_without_program_but_with_individual(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.PARTNER_FOR_GRIEVANCE_CHOICES_QUERY,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {"Business-Area": self.business_area.slug},
+            },
             variables={"individualId": self.id_to_base64(self.individual.id, "IndividualNode")},
         )
 
-    def test_partner_choices_without_program_and_without_household_and_individual(self) -> None:
+    def test_partner_choices_without_program_and_without_household_and_individual(
+        self,
+    ) -> None:
         self.snapshot_graphql_request(
             request_string=self.PARTNER_FOR_GRIEVANCE_CHOICES_QUERY,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {"Business-Area": self.business_area.slug},
+            },
         )

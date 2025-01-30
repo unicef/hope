@@ -41,7 +41,14 @@ from mptt.forms import TreeNodeMultipleChoiceField
 
 @admin.register(ProgramCycle)
 class ProgramCycleAdmin(LastSyncDateResetMixin, HOPEModelAdminBase):
-    list_display = ("title", "program", "status", "start_date", "end_date", "created_by")
+    list_display = (
+        "title",
+        "program",
+        "status",
+        "start_date",
+        "end_date",
+        "created_by",
+    )
     date_hierarchy = "start_date"
     list_filter = (
         ("program", AutoCompleteFilter),
@@ -73,12 +80,19 @@ class ProgramCycleAdminInline(admin.TabularInline):
 class PartnerAreaForm(forms.Form):
     partner = forms.ModelChoiceField(queryset=Partner.objects.all(), required=True)
     areas = TreeNodeMultipleChoiceField(
-        queryset=Area.objects.filter(area_type__area_level__lte=3), widget=CheckboxSelectMultiple(), required=False
+        queryset=Area.objects.filter(area_type__area_level__lte=3),
+        widget=CheckboxSelectMultiple(),
+        required=False,
     )
 
 
 @admin.register(Program)
-class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCompleteSearchMixin, HOPEModelAdminBase):
+class ProgramAdmin(
+    SoftDeletableAdminMixin,
+    LastSyncDateResetMixin,
+    AdminAutoCompleteSearchMixin,
+    HOPEModelAdminBase,
+):
     list_display = (
         "name",
         "programme_code",
@@ -150,7 +164,7 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
 
         elif "confirm" in request.POST:
             create_tp_from_list.delay(request.POST.dict(), str(request.user.pk), str(program.pk))
-            message = mark_safe(f'Creation of target population <b>{request.POST["name"]}</b> scheduled.')
+            message = mark_safe(f"Creation of target population <b>{request.POST['name']}</b> scheduled.")
             messages.success(request, message)
             url = reverse("admin:targeting_targetpopulation_changelist")
             return HttpResponseRedirect(url)
@@ -159,11 +173,19 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
             targeting_criteria = TargetingCriteria()
             targeting_criteria.save()
             form = CreateTargetPopulationTextForm(
-                initial={"action": "create_tp_from_list", "targeting_criteria": targeting_criteria}, program=program
+                initial={
+                    "action": "create_tp_from_list",
+                    "targeting_criteria": targeting_criteria,
+                },
+                program=program,
             )
 
         context["form"] = form
-        return TemplateResponse(request, "admin/program/program/create_target_population_from_text.html", context)
+        return TemplateResponse(
+            request,
+            "admin/program/program/create_target_population_from_text.html",
+            context,
+        )
 
     @button(permission="account.view_partner")
     def partners(self, request: HttpRequest, pk: int) -> Union[TemplateResponse, HttpResponseRedirect]:
@@ -221,7 +243,11 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
         if is_editable:
             return TemplateResponse(request, "admin/program/program/program_partner_access.html", context)
         else:
-            return TemplateResponse(request, "admin/program/program/program_partner_access_readonly.html", context)
+            return TemplateResponse(
+                request,
+                "admin/program/program/program_partner_access_readonly.html",
+                context,
+            )
 
     @button(permission="account.can_reindex_programs")
     def reindex_program(self, request: HttpRequest, pk: int) -> HttpResponseRedirect:
@@ -230,14 +256,24 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
             Individual.all_merge_status_objects.filter(program=program),
             get_individual_doc(program.business_area.slug),
         )
-        populate_index(Household.all_merge_status_objects.filter(program=program), HouseholdDocument)
+        populate_index(
+            Household.all_merge_status_objects.filter(program=program),
+            HouseholdDocument,
+        )
         messages.success(request, f"Program {program.name} reindexed.")
         return HttpResponseRedirect(reverse("admin:program_program_changelist"))
 
 
 @admin.register(BeneficiaryGroup)
 class BeneficiaryGroupAdmin(LastSyncDateResetMixin, HOPEModelAdminBase):
-    list_display = ("name", "group_label", "group_label_plural", "member_label", "member_label_plural", "master_detail")
+    list_display = (
+        "name",
+        "group_label",
+        "group_label_plural",
+        "member_label",
+        "member_label_plural",
+        "master_detail",
+    )
     search_fields = (
         "name",
         "group_label",

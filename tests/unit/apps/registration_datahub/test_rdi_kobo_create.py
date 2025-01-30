@@ -161,8 +161,14 @@ class TestRdiKoboCreateTask(TestCase):
         self.assertEqual(household_obj_data, expected_hh)
 
         self.assertEqual(pending_household.detail_id, "aPkhoRMrkkDwgsvWuwi39s")
-        self.assertEqual(str(pending_household.kobo_submission_uuid), "c09130af-6c9c-4dba-8c7f-1b2ff1970d19")
-        self.assertEqual(pending_household.kobo_submission_time.isoformat(), "2020-06-03T13:05:10+00:00")
+        self.assertEqual(
+            str(pending_household.kobo_submission_uuid),
+            "c09130af-6c9c-4dba-8c7f-1b2ff1970d19",
+        )
+        self.assertEqual(
+            pending_household.kobo_submission_time.isoformat(),
+            "2020-06-03T13:05:10+00:00",
+        )
 
         self.assertEqual(PendingDeliveryMechanismData.objects.count(), 2)
         dmd = PendingDeliveryMechanismData.objects.get(individual__full_name="Tesa Testowski")
@@ -555,7 +561,11 @@ class TestRdiKoboCreateTask(TestCase):
 
     def test_handle_household_dict(self) -> None:
         bank_accounts_to_create, households_to_create = [], []
-        collectors_to_create, head_of_households_mapping, individuals_ids_hash_dict = dict(), dict(), dict()
+        collectors_to_create, head_of_households_mapping, individuals_ids_hash_dict = (
+            dict(),
+            dict(),
+            dict(),
+        )
         household = {
             "_id": 1111,
             "uuid": "qweqweqweqwe",

@@ -67,7 +67,12 @@ class TestSriLankaRegistrationService(TestCase):
         admin2.save()
         admin3 = geo_models.Area(name="SriLanka admin3", p_code="LK1163", area_type=area_type3, parent=admin2)
         admin3.save()
-        admin4 = geo_models.Area(name="SriLanka admin4", p_code="LK1163020", area_type=area_type4, parent=admin3)
+        admin4 = geo_models.Area(
+            name="SriLanka admin4",
+            p_code="LK1163020",
+            area_type=area_type4,
+            parent=admin3,
+        )
         admin4.save()
         geo_models.Area.objects.rebuild()
 
@@ -156,7 +161,8 @@ class TestSriLankaRegistrationService(TestCase):
 
         self.records[0].refresh_from_db()
         self.assertEqual(
-            Record.objects.filter(id__in=records_ids, ignored=False, status=Record.STATUS_IMPORTED).count(), 2
+            Record.objects.filter(id__in=records_ids, ignored=False, status=Record.STATUS_IMPORTED).count(),
+            2,
         )
 
         self.assertEqual(PendingHousehold.objects.count(), 1)
@@ -183,7 +189,8 @@ class TestSriLankaRegistrationService(TestCase):
         self.assertEqual(registration_data_import.program, self.program)
 
         self.assertEqual(
-            PendingIndividual.objects.filter(relationship="HEAD").first().flex_fields, {"has_nic_number_i_c": "n"}
+            PendingIndividual.objects.filter(relationship="HEAD").first().flex_fields,
+            {"has_nic_number_i_c": "n"},
         )
 
         self.assertEqual(
@@ -196,10 +203,17 @@ class TestSriLankaRegistrationService(TestCase):
                 "does_the_mothercaretaker_have_her_own_active_bank_account_not_samurdhi": "n",
             },
         )
-        self.assertEqual(PendingIndividual.objects.filter(full_name="Dome").first().email, "email999@mail.com")
-        self.assertEqual(PendingIndividual.objects.filter(full_name="Dome").first().age_at_registration, 43)
         self.assertEqual(
-            PendingIndividual.objects.filter(full_name="Dome", program=rdi.program).first().age_at_registration, 43
+            PendingIndividual.objects.filter(full_name="Dome").first().email,
+            "email999@mail.com",
+        )
+        self.assertEqual(
+            PendingIndividual.objects.filter(full_name="Dome").first().age_at_registration,
+            43,
+        )
+        self.assertEqual(
+            PendingIndividual.objects.filter(full_name="Dome", program=rdi.program).first().age_at_registration,
+            43,
         )
 
     def test_import_record_twice(self) -> None:

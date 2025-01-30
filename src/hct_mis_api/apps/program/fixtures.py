@@ -128,7 +128,9 @@ class ProgramFactory(DjangoModelFactory):
 
 
 def get_program_with_dct_type_and_name(
-    dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.ACTIVE, **kwargs: dict
+    dct_type: str = DataCollectingType.Type.STANDARD,
+    status: str = Program.ACTIVE,
+    **kwargs: dict,
 ) -> Program:
     BusinessArea.objects.filter(slug="afghanistan")
     dct = DataCollectingTypeFactory(type=dct_type)

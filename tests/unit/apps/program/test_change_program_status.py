@@ -46,13 +46,48 @@ class TestChangeProgramStatus(APITestCase):
 
     @parameterized.expand(
         [
-            ("draft_to_active_with_permission", [Permissions.PROGRAMME_ACTIVATE], Program.DRAFT, Program.ACTIVE),
-            ("draft_to_active_without_permission", [Permissions.PROGRAMME_FINISH], Program.DRAFT, Program.ACTIVE),
-            ("finish_to_active_with_permission", [Permissions.PROGRAMME_ACTIVATE], Program.FINISHED, Program.ACTIVE),
-            ("finish_to_active_without_permission", [], Program.FINISHED, Program.ACTIVE),
-            ("draft_to_finished_with_permission", [Permissions.PROGRAMME_FINISH], Program.DRAFT, Program.FINISHED),
-            ("draft_to_finished_without_permission", [], Program.DRAFT, Program.FINISHED),
-            ("active_to_finished_with_permission", [Permissions.PROGRAMME_FINISH], Program.ACTIVE, Program.FINISHED),
+            (
+                "draft_to_active_with_permission",
+                [Permissions.PROGRAMME_ACTIVATE],
+                Program.DRAFT,
+                Program.ACTIVE,
+            ),
+            (
+                "draft_to_active_without_permission",
+                [Permissions.PROGRAMME_FINISH],
+                Program.DRAFT,
+                Program.ACTIVE,
+            ),
+            (
+                "finish_to_active_with_permission",
+                [Permissions.PROGRAMME_ACTIVATE],
+                Program.FINISHED,
+                Program.ACTIVE,
+            ),
+            (
+                "finish_to_active_without_permission",
+                [],
+                Program.FINISHED,
+                Program.ACTIVE,
+            ),
+            (
+                "draft_to_finished_with_permission",
+                [Permissions.PROGRAMME_FINISH],
+                Program.DRAFT,
+                Program.FINISHED,
+            ),
+            (
+                "draft_to_finished_without_permission",
+                [],
+                Program.DRAFT,
+                Program.FINISHED,
+            ),
+            (
+                "active_to_finished_with_permission",
+                [Permissions.PROGRAMME_FINISH],
+                Program.ACTIVE,
+                Program.FINISHED,
+            ),
             (
                 "active_to_finished_without_permission",
                 [Permissions.PROGRAMME_ACTIVATE],
@@ -61,20 +96,32 @@ class TestChangeProgramStatus(APITestCase):
             ),
             (
                 "active_to_draft",
-                [Permissions.PROGRAMME_ACTIVATE, Permissions.PROGRAMME_FINISH, Permissions.PROGRAMME_UPDATE],
+                [
+                    Permissions.PROGRAMME_ACTIVATE,
+                    Permissions.PROGRAMME_FINISH,
+                    Permissions.PROGRAMME_UPDATE,
+                ],
                 Program.ACTIVE,
                 Program.DRAFT,
             ),
             (
                 "finished_to_draft",
-                [Permissions.PROGRAMME_ACTIVATE, Permissions.PROGRAMME_FINISH, Permissions.PROGRAMME_UPDATE],
+                [
+                    Permissions.PROGRAMME_ACTIVATE,
+                    Permissions.PROGRAMME_FINISH,
+                    Permissions.PROGRAMME_UPDATE,
+                ],
                 Program.FINISHED,
                 Program.DRAFT,
             ),
         ]
     )
     def test_status_change(
-        self, _: Any, permissions: List[Permissions], initial_status: str, target_status: str
+        self,
+        _: Any,
+        permissions: List[Permissions],
+        initial_status: str,
+        target_status: str,
     ) -> None:
         data_collecting_type, _ = DataCollectingType.objects.update_or_create(
             **{"label": "Full", "code": "full_collection", "description": "Full"}

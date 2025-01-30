@@ -41,6 +41,7 @@ class TestProgramValidators(TestCase):
         PaymentPlanFactory(program_cycle=self.program_cycle, status=PaymentPlan.Status.IN_REVIEW)
 
         with self.assertRaisesMessage(
-            ValidationError, "All Payment Plans and Follow-Up Payment Plans have to be Reconciled."
+            ValidationError,
+            "All Payment Plans and Follow-Up Payment Plans have to be Reconciled.",
         ):
             ProgramValidator.validate_status_change(**data)

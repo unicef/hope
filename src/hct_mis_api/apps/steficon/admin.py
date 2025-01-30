@@ -195,11 +195,15 @@ class TestRuleMixin:
 
 class RuleResource(ModelResource):
     created_by = fields.Field(
-        column_name="created_by", attribute="created_by", widget=ForeignKeyWidget(User, "username")
+        column_name="created_by",
+        attribute="created_by",
+        widget=ForeignKeyWidget(User, "username"),
     )
 
     updated_by = fields.Field(
-        column_name="updated_by", attribute="created_by", widget=ForeignKeyWidget(User, "username")
+        column_name="updated_by",
+        attribute="created_by",
+        widget=ForeignKeyWidget(User, "username"),
     )
 
     class Meta:
@@ -292,7 +296,10 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
                 ),
             },
         ),
-        ("Allowed business areas", {"classes": ("collapse",), "fields": ("allowed_business_areas",)}),
+        (
+            "Allowed business areas",
+            {"classes": ("collapse",), "fields": ("allowed_business_areas",)},
+        ),
     ]
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
@@ -320,7 +327,16 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
         # not editable for is_superuser
         if not is_root(request):
             readonly_fields.extend(
-                ["name", "type", "enabled", "deprecated", "language", "definition", "description", "flags"]
+                [
+                    "name",
+                    "type",
+                    "enabled",
+                    "deprecated",
+                    "language",
+                    "definition",
+                    "description",
+                    "flags",
+                ]
             )
         if not request.user.is_superuser:
             readonly_fields.append("allowed_business_areas")
@@ -339,7 +355,11 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
         return ["history"]
 
     def get_form(
-        self, request: HttpRequest, obj: Optional[Any] = None, change: bool = False, **kwargs: Any
+        self,
+        request: HttpRequest,
+        obj: Optional[Any] = None,
+        change: bool = False,
+        **kwargs: Any,
     ) -> Type["ModelForm[Any]"]:
         return super().get_form(request, obj, change, **kwargs)
 
@@ -441,7 +461,10 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
 
         return TemplateResponse(request, "admin/steficon/rule/file_process.html", context)
 
-    @button(visible=lambda btn: "/changelog/" not in btn.request.path, permission="steficon.changelog")
+    @button(
+        visible=lambda btn: "/changelog/" not in btn.request.path,
+        permission="steficon.changelog",
+    )
     def changelog(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         context = self.get_common_context(request, pk, title="Changelog", state_opts=RuleCommit._meta)
         return TemplateResponse(request, "admin/steficon/rule/changelog.html", context)
@@ -476,7 +499,10 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
             return HttpResponseRedirect(reverse("admin:index"))
 
-    @button(visible=lambda btn: "/change/" in btn.request.path, permission="steficon.check_diff")
+    @button(
+        visible=lambda btn: "/change/" in btn.request.path,
+        permission="steficon.check_diff",
+    )
     def diff(self, request: HttpRequest, pk: UUID) -> Union[HttpResponseRedirect, TemplateResponse]:
         try:
             context = self.get_common_context(request, pk, action="Code history")
@@ -507,12 +533,20 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
             return HttpResponseRedirect(reverse("admin:index"))
 
     def change_view(
-        self, request: HttpRequest, object_id: str, form_url: str = "", extra_context: Optional[Any] = None
+        self,
+        request: HttpRequest,
+        object_id: str,
+        form_url: str = "",
+        extra_context: Optional[Any] = None,
     ) -> HttpResponse:
         return super().change_view(request, object_id, form_url, extra_context)
 
     def _changeform_view(
-        self, request: HttpRequest, object_id: Optional[str], form_url: str = "", extra_context: Optional[Any] = None
+        self,
+        request: HttpRequest,
+        object_id: Optional[str],
+        form_url: str = "",
+        extra_context: Optional[Any] = None,
     ) -> HttpResponse:
         if request.method == "POST" and "_release" in request.POST:
             object_id = None
@@ -520,7 +554,11 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
 
     @atomic()
     def save_model(
-        self, request: HttpRequest, obj: Any, form_url: str = "", extra_context: Optional[Any] = None
+        self,
+        request: HttpRequest,
+        obj: Any,
+        form_url: str = "",
+        extra_context: Optional[Any] = None,
     ) -> None:
         if not obj.pk:
             obj.created_by = request.user
@@ -537,25 +575,46 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
         collector.collect(objs)
         serializer = self.get_serializer("json")
         return serializer.serialize(
-            collector.data, use_natural_foreign_keys=True, use_natural_primary_keys=True, indent=3
+            collector.data,
+            use_natural_foreign_keys=True,
+            use_natural_primary_keys=True,
+            indent=3,
         )
 
 
 class RuleCommitResource(ModelResource):
     rule = fields.Field(column_name="rule", attribute="rule", widget=ForeignKeyWidget(Rule, "name"))
     updated_by = fields.Field(
-        column_name="updated_by", attribute="created_by", widget=ForeignKeyWidget(User, "username")
+        column_name="updated_by",
+        attribute="created_by",
+        widget=ForeignKeyWidget(User, "username"),
     )
 
     class Meta:
         model = RuleCommit
-        fields = ("timestamp", "rule", "version", "updated_by", "affected_fields", "is_release")
+        fields = (
+            "timestamp",
+            "rule",
+            "version",
+            "updated_by",
+            "affected_fields",
+            "is_release",
+        )
         import_id_fields = ("rule", "version")
 
 
 @register(RuleCommit)
 class RuleCommitAdmin(ImportExportMixin, LinkedObjectsMixin, TestRuleMixin, HOPEModelAdminBase):
-    list_display = ("rule", "version", "updated_by", "timestamp", "is_release", "enabled", "deprecated", "language")
+    list_display = (
+        "rule",
+        "version",
+        "updated_by",
+        "timestamp",
+        "is_release",
+        "enabled",
+        "deprecated",
+        "language",
+    )
     list_filter = (
         ("rule", AutoCompleteFilter),
         ("updated_by", AutoCompleteFilter),

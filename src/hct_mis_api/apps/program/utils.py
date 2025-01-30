@@ -196,7 +196,9 @@ class CopyProgramPopulation:
         return roles_in_household
 
     @staticmethod
-    def copy_entitlement_cards_per_household(new_household: Household) -> List[EntitlementCard]:
+    def copy_entitlement_cards_per_household(
+        new_household: Household,
+    ) -> List[EntitlementCard]:
         entitlement_cards_in_household = []
         old_entitlement_cards = new_household.copied_from.entitlement_cards.all()
         for entitlement_card in old_entitlement_cards:
@@ -516,7 +518,12 @@ def copy_individual(individual: Individual, program: Program, rdi: RegistrationD
     bank_account_info_to_create = CopyProgramPopulation.copy_bank_account_info_per_individual(
         bank_accounts_info, individual
     )
-    return individual, documents_to_create, identities_to_create, bank_account_info_to_create
+    return (
+        individual,
+        documents_to_create,
+        identities_to_create,
+        bank_account_info_to_create,
+    )
 
 
 def create_program_partner_access(

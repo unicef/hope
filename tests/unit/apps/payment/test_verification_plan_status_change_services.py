@@ -137,7 +137,10 @@ class TestPhoneNumberVerification(TestCase):
     def test_failing_rapid_pro_during_cash_plan_payment_verification(self) -> None:
         self.assertEqual(self.verification.status, PaymentVerification.STATUS_PENDING)
         self.assertIsNone(self.verification.error)
-        self.assertEqual(self.verification.payment_record_verifications.count(), self.payment_record_amount)
+        self.assertEqual(
+            self.verification.payment_record_verifications.count(),
+            self.payment_record_amount,
+        )
 
         def create_flow_response() -> Dict:
             return {
@@ -148,10 +151,19 @@ class TestPhoneNumberVerification(TestCase):
 
         post_request_mock = MagicMock()
 
-        post_request_mock.side_effect = [first_flow, requests.exceptions.HTTPError("TEST")]  # type: ignore
+        post_request_mock.side_effect = [
+            first_flow,
+            requests.exceptions.HTTPError("TEST"),
+        ]  # type: ignore
         with (
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI._handle_post_request", post_request_mock),
+            patch(
+                "hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__",
+                MagicMock(return_value=None),
+            ),
+            patch(
+                "hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI._handle_post_request",
+                post_request_mock,
+            ),
         ):
             try:
                 VerificationPlanStatusChangeServices(self.verification).activate()
@@ -166,13 +178,15 @@ class TestPhoneNumberVerification(TestCase):
 
         self.assertEqual(
             PaymentVerification.objects.filter(
-                payment_verification_plan=self.verification, status=PaymentVerification.STATUS_PENDING
+                payment_verification_plan=self.verification,
+                status=PaymentVerification.STATUS_PENDING,
             ).count(),
             self.payment_record_amount,
         )
         self.assertEqual(
             PaymentVerification.objects.filter(
-                payment_verification_plan=self.other_verification, status=PaymentVerification.STATUS_PENDING
+                payment_verification_plan=self.other_verification,
+                status=PaymentVerification.STATUS_PENDING,
             ).count(),
             self.payment_record_amount,
         )
@@ -212,8 +226,14 @@ class TestPhoneNumberVerification(TestCase):
         post_request_mock = MagicMock()
         post_request_mock.side_effect = [first_flow, create_flow_response()]
         with (
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
-            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI._handle_post_request", post_request_mock),
+            patch(
+                "hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__",
+                MagicMock(return_value=None),
+            ),
+            patch(
+                "hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI._handle_post_request",
+                post_request_mock,
+            ),
         ):
             VerificationPlanStatusChangeServices(self.verification).activate()
 
@@ -223,13 +243,15 @@ class TestPhoneNumberVerification(TestCase):
 
         self.assertEqual(
             PaymentVerification.objects.filter(
-                payment_verification_plan=self.verification, status=PaymentVerification.STATUS_PENDING
+                payment_verification_plan=self.verification,
+                status=PaymentVerification.STATUS_PENDING,
             ).count(),
             self.payment_record_amount,
         )
         self.assertEqual(
             PaymentVerification.objects.filter(
-                payment_verification_plan=self.other_verification, status=PaymentVerification.STATUS_PENDING
+                payment_verification_plan=self.other_verification,
+                status=PaymentVerification.STATUS_PENDING,
             ).count(),
             self.payment_record_amount,
         )

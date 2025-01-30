@@ -437,7 +437,9 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         return self._linked_tickets.union(self._existing_tickets)
 
     @property
-    def existing_tickets(self) -> QuerySet["GrievanceTicket"]:  # temporarily linked tickets
+    def existing_tickets(
+        self,
+    ) -> QuerySet["GrievanceTicket"]:  # temporarily linked tickets
         all_through_objects = GrievanceTicketThrough.objects.filter(
             Q(linked_ticket=self) | Q(main_ticket=self)
         ).values_list("main_ticket", "linked_ticket")
@@ -506,7 +508,9 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
     def clean(self) -> None:
         issue_types: Optional[Dict[int, str]] = self.ISSUE_TYPES_CHOICES.get(self.category)
         should_contain_issue_types = bool(issue_types)
-        has_invalid_issue_type = should_contain_issue_types is True and self.issue_type not in issue_types  # type: ignore # FIXME: Unsupported right operand type for in ("Optional[Dict[int, str]]")
+        has_invalid_issue_type = (
+            should_contain_issue_types is True and self.issue_type not in issue_types
+        )  # type: ignore # FIXME: Unsupported right operand type for in ("Optional[Dict[int, str]]")
         has_issue_type_for_category_without_issue_types = bool(should_contain_issue_types is False and self.issue_type)
         if has_invalid_issue_type or has_issue_type_for_category_without_issue_types:
             logger.error(f"Invalid issue type {self.issue_type} for selected category {self.category}")
@@ -773,7 +777,9 @@ class TicketDeleteHouseholdDetails(TimeStampedUUIDModel):
     STATUS_FLOW = GENERAL_STATUS_FLOW
 
     ticket = models.OneToOneField(
-        "grievance.GrievanceTicket", related_name="delete_household_ticket_details", on_delete=models.CASCADE
+        "grievance.GrievanceTicket",
+        related_name="delete_household_ticket_details",
+        on_delete=models.CASCADE,
     )
     household = models.ForeignKey(
         "household.Household",
@@ -835,7 +841,9 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
     )
     # probably unique Individual
     golden_records_individual = models.ForeignKey(
-        "household.Individual", related_name="ticket_golden_records", on_delete=models.CASCADE
+        "household.Individual",
+        related_name="ticket_golden_records",
+        on_delete=models.CASCADE,
     )
     # list of possible duplicates in the ticket
     possible_duplicates = models.ManyToManyField("household.Individual", related_name="ticket_duplicates")
@@ -866,7 +874,10 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
             documents2 = [f"{x.document_number}--{x.type_id}" for x in self.possible_duplicate.documents.all()]
             return bool(set(documents1) & set(documents2))
         else:
-            possible_duplicates = [self.golden_records_individual, *self.possible_duplicates.all()]
+            possible_duplicates = [
+                self.golden_records_individual,
+                *self.possible_duplicates.all(),
+            ]
             selected_individuals = self.selected_individuals.all()
 
             unselected_individuals = [
@@ -925,9 +936,17 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
         choices=PaymentVerification.STATUS_CHOICES,
     )
     payment_verification = models.ForeignKey(
-        "payment.PaymentVerification", related_name="ticket_detail", on_delete=models.SET_NULL, null=True
+        "payment.PaymentVerification",
+        related_name="ticket_detail",
+        on_delete=models.SET_NULL,
+        null=True,
     )
-    new_status = models.CharField(max_length=50, choices=PaymentVerification.STATUS_CHOICES, default=None, null=True)
+    new_status = models.CharField(
+        max_length=50,
+        choices=PaymentVerification.STATUS_CHOICES,
+        default=None,
+        null=True,
+    )
     old_received_amount = models.DecimalField(
         decimal_places=2,
         max_digits=12,
@@ -1043,7 +1062,10 @@ class GrievanceDocument(UUIDModel):
     updated_at = models.DateTimeField(auto_now=True)
     name = models.CharField(max_length=100, null=True)
     grievance_ticket = models.ForeignKey(
-        GrievanceTicket, null=True, related_name="support_documents", on_delete=models.SET_NULL
+        GrievanceTicket,
+        null=True,
+        related_name="support_documents",
+        on_delete=models.SET_NULL,
     )
     created_by = models.ForeignKey(get_user_model(), null=True, related_name="+", on_delete=models.SET_NULL)
     file = models.FileField(upload_to="", blank=True, null=True)

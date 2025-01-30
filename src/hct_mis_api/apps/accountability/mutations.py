@@ -63,14 +63,25 @@ class CreateCommunicationMessageMutation(PermissionMutation):
         business_area_slug = info.context.headers.get("Business-Area")
         business_area = BusinessArea.objects.get(slug=business_area_slug)
 
-        cls.has_permission(info, Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE, business_area)
+        cls.has_permission(
+            info,
+            Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE,
+            business_area,
+        )
         message = MessageCrudServices.create(user, business_area, input)
         program_id = None
         if message.payment_plan and message.payment_plan.program_cycle.program:
             program_id = message.payment_plan.program_cycle.program.pk
         elif message.registration_data_import:
             program_id = getattr(message.registration_data_import, "program_id", None)
-        log_create(Message.ACTIVITY_LOG_MAPPING, "business_area", user, program_id, None, message)
+        log_create(
+            Message.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            user,
+            program_id,
+            None,
+            message,
+        )
         return cls(message=message)
 
 
@@ -99,7 +110,12 @@ class CreateFeedbackMutation(PermissionMutation):
 
         feedback = FeedbackCrudServices.create(user, business_area, input)
         log_create(
-            Feedback.ACTIVITY_LOG_MAPPING, "business_area", user, getattr(feedback.program, "pk", None), None, feedback
+            Feedback.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            user,
+            getattr(feedback.program, "pk", None),
+            None,
+            feedback,
         )
         return cls(feedback=feedback)
 
@@ -119,7 +135,11 @@ class UpdateFeedbackMutation(PermissionMutation):
         old_feedback = get_object_or_404(Feedback, id=decode_id_string(input["feedback_id"]))
         feedback = get_object_or_404(Feedback, id=decode_id_string(input["feedback_id"]))
 
-        cls.has_permission(info, Permissions.GRIEVANCES_FEEDBACK_VIEW_UPDATE, feedback.business_area.slug)
+        cls.has_permission(
+            info,
+            Permissions.GRIEVANCES_FEEDBACK_VIEW_UPDATE,
+            feedback.business_area.slug,
+        )
         updated_feedback = FeedbackCrudServices.update(feedback, input)
         log_create(
             Feedback.ACTIVITY_LOG_MAPPING,
@@ -144,10 +164,16 @@ class CreateFeedbackMessageMutation(PermissionMutation):
     @transaction.atomic
     def mutate(cls, root: Any, info: Any, input: Dict[str, Any]) -> "CreateFeedbackMessageMutation":
         feedback = get_object_or_404(Feedback, id=decode_id_string(input["feedback"]))
-        cls.has_permission(info, Permissions.GRIEVANCES_FEEDBACK_MESSAGE_VIEW_CREATE, feedback.business_area.slug)
+        cls.has_permission(
+            info,
+            Permissions.GRIEVANCES_FEEDBACK_MESSAGE_VIEW_CREATE,
+            feedback.business_area.slug,
+        )
 
         feedback_message = FeedbackMessage.objects.create(
-            feedback=feedback, description=input["description"], created_by=info.context.user
+            feedback=feedback,
+            description=input["description"],
+            created_by=info.context.user,
         )
         return cls(feedback_message=feedback_message)
 

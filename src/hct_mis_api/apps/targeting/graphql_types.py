@@ -63,10 +63,12 @@ class TargetingCriteriaRuleFilterNode(DjangoObjectType):
     def resolve_field_attribute(parent, info: Any) -> Optional[Dict]:
         if parent.flex_field_classification == FlexFieldClassification.NOT_FLEX_FIELD:
             field_attribute = get_field_by_name(
-                parent.field_name, parent.targeting_criteria_rule.targeting_criteria.payment_plan
+                parent.field_name,
+                parent.targeting_criteria_rule.targeting_criteria.payment_plan,
             )
             return filter_choices(
-                field_attribute, parent.arguments  # type: ignore # can't convert graphene list to list
+                field_attribute,
+                parent.arguments,  # type: ignore # can't convert graphene list to list
             )
         program = None
         if parent.flex_field_classification == FlexFieldClassification.FLEX_FIELD_PDU:

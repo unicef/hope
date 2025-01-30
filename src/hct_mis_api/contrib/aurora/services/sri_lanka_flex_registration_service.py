@@ -49,7 +49,10 @@ class SriLankaRegistrationService(BaseRegistrationService):
     ]
 
     def _prepare_household_data(
-        self, localization_dict: Dict, record: Any, registration_data_import: RegistrationDataImport
+        self,
+        localization_dict: Dict,
+        record: Any,
+        registration_data_import: RegistrationDataImport,
     ) -> Dict:
         household_data = {
             "registration_data_import": registration_data_import,
@@ -98,7 +101,8 @@ class SriLankaRegistrationService(BaseRegistrationService):
 
         individual_data = dict(
             **build_arg_dict_from_dict_if_exists(
-                head_of_household_info, SriLankaRegistrationService.INDIVIDUAL_MAPPING_DICT
+                head_of_household_info,
+                SriLankaRegistrationService.INDIVIDUAL_MAPPING_DICT,
             ),
             flex_fields=flex_fields_dict,
             program=registration_data_import.program,
@@ -201,7 +205,8 @@ class SriLankaRegistrationService(BaseRegistrationService):
             primary_collector = head_of_household
         else:
             primary_collector = PendingIndividual.objects.create(
-                **base_individual_data_dict, **self._prepare_individual_data(collector_dict, registration_data_import)
+                **base_individual_data_dict,
+                **self._prepare_individual_data(collector_dict, registration_data_import),
             )
             self._prepare_national_id(collector_dict, primary_collector)
         self._prepare_bank_statement_document(collector_dict, primary_collector)

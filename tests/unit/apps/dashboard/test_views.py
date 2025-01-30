@@ -46,7 +46,9 @@ def setup_client(api_client: Callable, afghanistan: BusinessAreaFactory) -> Dict
 
 
 @pytest.mark.django_db(databases=["default", "read_only"])
-def test_dashboard_data_view_permission_denied(setup_client: Dict[str, Optional[object]]) -> None:
+def test_dashboard_data_view_permission_denied(
+    setup_client: Dict[str, Optional[object]],
+) -> None:
     """
     Test that access to the dashboard data is denied for users without permissions.
     """
@@ -99,7 +101,9 @@ def test_create_or_update_dash_report_task_triggered(
 
 
 @pytest.mark.django_db(databases=["default"])
-def test_create_or_update_dash_report_permission_denied(setup_client: Dict[str, Optional[object]]) -> None:
+def test_create_or_update_dash_report_permission_denied(
+    setup_client: Dict[str, Optional[object]],
+) -> None:
     """
     Test that the report creation or update is denied to users without permissions.
     """
@@ -127,7 +131,10 @@ def test_create_or_update_dash_report_business_area_not_found(mock_task_delay: M
 
 
 @pytest.mark.django_db(databases=["default"])
-@patch("hct_mis_api.apps.dashboard.views.generate_dash_report_task.delay", side_effect=Exception("Unexpected error"))
+@patch(
+    "hct_mis_api.apps.dashboard.views.generate_dash_report_task.delay",
+    side_effect=Exception("Unexpected error"),
+)
 def test_create_or_update_dash_report_internal_server_error(
     mock_task_delay: Mock, setup_client: Dict[str, Optional[object]]
 ) -> None:
@@ -182,7 +189,12 @@ def test_dashboard_report_view_context_without_permission(afghanistan: Callable,
 @pytest.mark.parametrize(
     "business_area_slug, expected_url_key, expected_status, permission_granted",
     [
-        ("afghanistan", "list_url", status.HTTP_403_FORBIDDEN, False),  # Without permission
+        (
+            "afghanistan",
+            "list_url",
+            status.HTTP_403_FORBIDDEN,
+            False,
+        ),  # Without permission
         ("afghanistan", "list_url", status.HTTP_200_OK, True),  # With permission
     ],
 )

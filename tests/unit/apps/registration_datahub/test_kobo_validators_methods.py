@@ -587,7 +587,10 @@ class TestKoboSaveValidatorsMethods(TestCase):
 
         # skip image validation
         result = validator.image_validator(
-            "signature-17_10_32.png", "consent_sign_h_c", invalid_attachments, skip_validate_pictures=True
+            "signature-17_10_32.png",
+            "consent_sign_h_c",
+            invalid_attachments,
+            skip_validate_pictures=True,
         )
         self.assertIsNone(result)
 
@@ -624,7 +627,10 @@ class TestKoboSaveValidatorsMethods(TestCase):
 
     def test_date_validator(self) -> None:
         test_data: Tuple = (
-            {"args": ("2020-05-28T17:13:31.590+02:00", "birth_date_i_c"), "expected": None},
+            {
+                "args": ("2020-05-28T17:13:31.590+02:00", "birth_date_i_c"),
+                "expected": None,
+            },
             {"args": ("2020-05-28", "birth_date_i_c"), "expected": None},
             {
                 "args": ("2020-13-32T25:13:31.590+02:00", "birth_date_i_c"),
@@ -691,7 +697,10 @@ class TestKoboSaveValidatorsMethods(TestCase):
             {"args": ("gender_i_c", "MALE", attachments), "expected": None},
             {
                 "args": ("gender_i_c", "YES", attachments),
-                "expected": {"header": "gender_i_c", "message": "Invalid choice YES for field gender_i_c"},
+                "expected": {
+                    "header": "gender_i_c",
+                    "message": "Invalid choice YES for field gender_i_c",
+                },
             },
             # DATE
             {
@@ -712,7 +721,10 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 },
             },
             # GEOPOINT
-            {"args": ("hh_geopoint_h_c", "12.123 13.123", attachments), "expected": None},
+            {
+                "args": ("hh_geopoint_h_c", "12.123 13.123", attachments),
+                "expected": None,
+            },
             {
                 "args": (
                     "hh_geopoint_h_c",
@@ -743,8 +755,14 @@ class TestKoboSaveValidatorsMethods(TestCase):
         result = validator.validate_everything(self.INVALID_JSON, business_area)
         result.sort(key=itemgetter("header"))
         expected = [
-            {"header": "admin1_h_c", "message": "Invalid choice SO25 for field admin1_h_c"},
-            {"header": "admin2_h_c", "message": "Invalid choice SO2502 for field admin2_h_c"},
+            {
+                "header": "admin1_h_c",
+                "message": "Invalid choice SO25 for field admin1_h_c",
+            },
+            {
+                "header": "admin2_h_c",
+                "message": "Invalid choice SO2502 for field admin2_h_c",
+            },
             {
                 "header": "birth_certificate_no_i_c",
                 "message": "Issuing country for birth_certificate_no_i_c is required, when any document data are provided",
@@ -759,7 +777,10 @@ class TestKoboSaveValidatorsMethods(TestCase):
             },
             # TODO: fix this? (rebase issue?)
             # {"header": "preferred_language_i_c", "message": "Invalid choice test for field preferred_language_i_c"},
-            {"header": "role_i_c", "message": "Only one person can be a primary collector"},
+            {
+                "header": "role_i_c",
+                "message": "Only one person can be a primary collector",
+            },
             {
                 "header": "role_i_c",
                 "message": "The same individual cannot be a primary and alternate collector for the same household.",

@@ -61,7 +61,13 @@ def get_or_create_cache_key(key: str, default: Any) -> Any:
 
 class BusinessAreaVersionKeyBit(KeyBitBase):
     def get_data(
-        self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
+        self,
+        params: Any,
+        view_instance: Any,
+        view_method: Any,
+        request: Any,
+        args: tuple,
+        kwargs: dict,
     ) -> str:
         business_area_slug = kwargs.get("business_area")
         business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
@@ -80,7 +86,13 @@ class BusinessAreaKeyBit(KeyBitBase):
     specific_view_cache_key = ""
 
     def get_data(
-        self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
+        self,
+        params: Any,
+        view_instance: Any,
+        view_method: Any,
+        request: Any,
+        args: tuple,
+        kwargs: dict,
     ) -> str:
         business_area_slug = kwargs.get("business_area")
         business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
@@ -94,7 +106,13 @@ class BusinessAreaAndProgramKeyBit(KeyBitBase):
     specific_view_cache_key = ""
 
     def get_data(
-        self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
+        self,
+        params: Any,
+        view_instance: Any,
+        view_method: Any,
+        request: Any,
+        args: tuple,
+        kwargs: dict,
     ) -> str:
         business_area_slug = kwargs.get("business_area")
         business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
@@ -108,7 +126,13 @@ class BusinessAreaAndProgramKeyBit(KeyBitBase):
 
 class ProgramKeyBit(KeyBitBase):
     def get_data(
-        self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
+        self,
+        params: Any,
+        view_instance: Any,
+        view_method: Any,
+        request: Any,
+        args: tuple,
+        kwargs: dict,
     ) -> str:
         program_id = decode_id_string(kwargs.get("program_id"))
         version = get_or_create_cache_key(f"{program_id}:version", 1)

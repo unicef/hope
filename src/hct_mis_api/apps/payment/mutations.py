@@ -115,7 +115,11 @@ class CreateVerificationPlanMutation(PermissionMutation):
 
         check_concurrency_version_in_mutation(kwargs.get("version"), payment_plan_object)
 
-        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_CREATE, payment_plan_object.business_area)
+        cls.has_permission(
+            info,
+            Permissions.PAYMENT_VERIFICATION_CREATE,
+            payment_plan_object.business_area,
+        )
 
         verification_plan = VerificationPlanCrudServices.create(payment_plan_object, input)
         log_create(
@@ -148,7 +152,11 @@ class EditPaymentVerificationMutation(PermissionMutation):
 
         check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification_plan)
 
-        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_UPDATE, payment_verification_plan.business_area)
+        cls.has_permission(
+            info,
+            Permissions.PAYMENT_VERIFICATION_UPDATE,
+            payment_verification_plan.business_area,
+        )
 
         old_payment_verification_plan = copy_model_object(payment_verification_plan)
         payment_verification_plan.verification_channel = input.get("verification_channel")
@@ -179,7 +187,11 @@ class ActivatePaymentVerificationPlan(PermissionMutation, ValidationErrorMutatio
     @is_authenticated
     @transaction.atomic
     def processed_mutate(
-        cls, root: Any, info: Any, payment_verification_plan_id: Optional[str], **kwargs: Any
+        cls,
+        root: Any,
+        info: Any,
+        payment_verification_plan_id: Optional[str],
+        **kwargs: Any,
     ) -> "ActivatePaymentVerificationPlan":
         payment_verification_plan_id = decode_id_string(payment_verification_plan_id)
         payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
@@ -187,7 +199,11 @@ class ActivatePaymentVerificationPlan(PermissionMutation, ValidationErrorMutatio
         check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification_plan)
 
         old_payment_verification_plan = copy_model_object(payment_verification_plan)
-        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_ACTIVATE, payment_verification_plan.business_area)
+        cls.has_permission(
+            info,
+            Permissions.PAYMENT_VERIFICATION_ACTIVATE,
+            payment_verification_plan.business_area,
+        )
 
         payment_verification_plan = VerificationPlanStatusChangeServices(payment_verification_plan).activate()
         log_create(
@@ -218,7 +234,11 @@ class FinishPaymentVerificationPlan(PermissionMutation):
         payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification_plan)
         old_payment_verification_plan = copy_model_object(payment_verification_plan)
-        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_FINISH, payment_verification_plan.business_area)
+        cls.has_permission(
+            info,
+            Permissions.PAYMENT_VERIFICATION_FINISH,
+            payment_verification_plan.business_area,
+        )
 
         if payment_verification_plan.status != PaymentVerificationPlan.STATUS_ACTIVE:
             log_and_raise("You can finish only ACTIVE verification")
@@ -247,7 +267,11 @@ class DiscardPaymentVerificationPlan(PermissionMutation):
     @raise_program_status_is(Program.FINISHED)
     @transaction.atomic
     def mutate(
-        cls, root: Any, info: Any, payment_verification_plan_id: Optional[str], **kwargs: Any
+        cls,
+        root: Any,
+        info: Any,
+        payment_verification_plan_id: Optional[str],
+        **kwargs: Any,
     ) -> "DiscardPaymentVerificationPlan":
         payment_verification_plan_id = decode_id_string(payment_verification_plan_id)
         payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
@@ -256,7 +280,11 @@ class DiscardPaymentVerificationPlan(PermissionMutation):
 
         old_payment_verification_plan = copy_model_object(payment_verification_plan)
 
-        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_DISCARD, payment_verification_plan.business_area)
+        cls.has_permission(
+            info,
+            Permissions.PAYMENT_VERIFICATION_DISCARD,
+            payment_verification_plan.business_area,
+        )
 
         payment_verification_plan = VerificationPlanStatusChangeServices(payment_verification_plan).discard()
         log_create(
@@ -281,7 +309,11 @@ class InvalidPaymentVerificationPlan(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(
-        cls, root: Any, info: Any, payment_verification_plan_id: Optional[str], **kwargs: Any
+        cls,
+        root: Any,
+        info: Any,
+        payment_verification_plan_id: Optional[str],
+        **kwargs: Any,
     ) -> "InvalidPaymentVerificationPlan":
         payment_verification_plan_id = decode_id_string(payment_verification_plan_id)
         payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
@@ -290,7 +322,11 @@ class InvalidPaymentVerificationPlan(PermissionMutation):
 
         old_payment_verification_plan = copy_model_object(payment_verification_plan)
 
-        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_INVALID, payment_verification_plan.business_area)
+        cls.has_permission(
+            info,
+            Permissions.PAYMENT_VERIFICATION_INVALID,
+            payment_verification_plan.business_area,
+        )
 
         payment_verification_plan = VerificationPlanStatusChangeServices(payment_verification_plan).mark_invalid()
         log_create(
@@ -315,7 +351,11 @@ class DeletePaymentVerificationPlan(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(
-        cls, root: Any, info: Any, payment_verification_plan_id: Optional[str], **kwargs: Any
+        cls,
+        root: Any,
+        info: Any,
+        payment_verification_plan_id: Optional[str],
+        **kwargs: Any,
     ) -> "DeletePaymentVerificationPlan":
         payment_verification_plan_id = decode_id_string(payment_verification_plan_id)
         payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
@@ -326,7 +366,11 @@ class DeletePaymentVerificationPlan(PermissionMutation):
 
         old_payment_verification_plan = copy_model_object(payment_verification_plan)
 
-        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_DELETE, payment_verification_plan.business_area)
+        cls.has_permission(
+            info,
+            Permissions.PAYMENT_VERIFICATION_DELETE,
+            payment_verification_plan.business_area,
+        )
 
         VerificationPlanCrudServices.delete(payment_verification_plan)
         log_create(
@@ -369,7 +413,11 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(PermissionMutation):
         payment_verification = get_object_or_404(PaymentVerification, id=decode_id_string(payment_verification_id))
         check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification)
         old_payment_verification = copy_model_object(payment_verification)
-        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_VERIFY, payment_verification.business_area)
+        cls.has_permission(
+            info,
+            Permissions.PAYMENT_VERIFICATION_VERIFY,
+            payment_verification.business_area,
+        )
         if (
             payment_verification.payment_verification_plan.verification_channel
             != PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
@@ -469,7 +517,11 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
         payment_verification = get_object_or_404(PaymentVerification, id=decode_id_string(payment_verification_id))
         check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification)
         old_payment_verification = copy_model_object(payment_verification)
-        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_VERIFY, payment_verification.business_area)
+        cls.has_permission(
+            info,
+            Permissions.PAYMENT_VERIFICATION_VERIFY,
+            payment_verification.business_area,
+        )
         if (
             payment_verification.payment_verification_plan.verification_channel
             != PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
@@ -544,7 +596,11 @@ class ExportXlsxPaymentVerificationPlanFile(PermissionMutation):
         payment_verification_plan_id = decode_id_string_required(payment_verification_plan_id)
         payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
 
-        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_EXPORT, payment_verification_plan.business_area)
+        cls.has_permission(
+            info,
+            Permissions.PAYMENT_VERIFICATION_EXPORT,
+            payment_verification_plan.business_area,
+        )
 
         if payment_verification_plan.status != PaymentVerificationPlan.STATUS_ACTIVE:
             log_and_raise("You can only export verification for active CashPlan verification")
@@ -579,7 +635,11 @@ class ImportXlsxPaymentVerificationPlanFile(PermissionMutation):
             PaymentVerificationPlan, id=decode_id_string(payment_verification_plan_id)
         )
 
-        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_IMPORT, payment_verification_plan.business_area)
+        cls.has_permission(
+            info,
+            Permissions.PAYMENT_VERIFICATION_IMPORT,
+            payment_verification_plan.business_area,
+        )
 
         if payment_verification_plan.status != PaymentVerificationPlan.STATUS_ACTIVE:
             log_and_raise("You can only import verification for active CashPlan verification")
@@ -670,7 +730,12 @@ class ActionPaymentPlanMutation(PermissionMutation):
         if old_payment_plan.export_file_per_fsp:
             old_payment_plan.export_file_per_fsp = copy_model_object(payment_plan.export_file_per_fsp)
 
-        cls.check_permissions(info, payment_plan.business_area, input.get("action", ""), payment_plan.status)
+        cls.check_permissions(
+            info,
+            payment_plan.business_area,
+            input.get("action", ""),
+            payment_plan.status,
+        )
 
         payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
             input_data=input, user=info.context.user
@@ -699,7 +764,10 @@ class ActionPaymentPlanMutation(PermissionMutation):
             PaymentPlan.Action.TP_LOCK.name: Permissions.TARGETING_LOCK,
             PaymentPlan.Action.TP_UNLOCK.name: Permissions.TARGETING_UNLOCK,
             PaymentPlan.Action.TP_REBUILD.name: Permissions.TARGETING_LOCK,
-            PaymentPlan.Action.DRAFT.name: [Permissions.PM_CREATE, Permissions.TARGETING_SEND],
+            PaymentPlan.Action.DRAFT.name: [
+                Permissions.PM_CREATE,
+                Permissions.TARGETING_SEND,
+            ],
             PaymentPlan.Action.LOCK.name: Permissions.PM_LOCK_AND_UNLOCK,
             PaymentPlan.Action.UNLOCK.name: Permissions.PM_LOCK_AND_UNLOCK,
             PaymentPlan.Action.LOCK_FSP.name: Permissions.PM_LOCK_AND_UNLOCK_FSP,
@@ -730,7 +798,9 @@ class CreatePaymentPlanMutation(PermissionMutation):
         cls.has_permission(info, Permissions.PM_CREATE, business_area_slug)
 
         payment_plan = PaymentPlanService.create(
-            input_data=input, user=info.context.user, business_area_slug=business_area_slug
+            input_data=input,
+            user=info.context.user,
+            business_area_slug=business_area_slug,
         )
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
@@ -789,7 +859,11 @@ class UpdatePaymentPlanMutation(PermissionMutation):
         check_concurrency_version_in_mutation(kwargs.get("version"), payment_plan)
         old_payment_plan = copy_model_object(payment_plan)
 
-        cls.has_permission(info, [Permissions.PM_CREATE, Permissions.TARGETING_UPDATE], payment_plan.business_area)
+        cls.has_permission(
+            info,
+            [Permissions.PM_CREATE, Permissions.TARGETING_UPDATE],
+            payment_plan.business_area,
+        )
 
         payment_plan = PaymentPlanService(payment_plan=payment_plan).update(input_data=input)
         log_create(
@@ -842,7 +916,10 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
 
     @classmethod
     def export_action(
-        cls, payment_plan: PaymentPlan, user_id: "UUID", fsp_xlsx_template_id: Optional[str] = None
+        cls,
+        payment_plan: PaymentPlan,
+        user_id: "UUID",
+        fsp_xlsx_template_id: Optional[str] = None,
     ) -> PaymentPlan:
         if payment_plan.status not in [PaymentPlan.Status.LOCKED]:
             msg = "You can only export Payment List for LOCKED Payment Plan"
@@ -854,7 +931,12 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(
-        cls, root: Any, info: Any, payment_plan_id: str, fsp_xlsx_template_id: Optional[str] = None, **kwargs: Any
+        cls,
+        root: Any,
+        info: Any,
+        payment_plan_id: str,
+        fsp_xlsx_template_id: Optional[str] = None,
+        **kwargs: Any,
     ) -> "ExportXLSXPaymentPlanPaymentListMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
         fsp_xlsx_template_id_str: Optional[str] = decode_id_string(fsp_xlsx_template_id)
@@ -880,9 +962,15 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
 class ExportXLSXPaymentPlanPaymentListPerFSPMutation(ExportXLSXPaymentPlanPaymentListMutation):
     @classmethod
     def export_action(
-        cls, payment_plan: PaymentPlan, user_id: "UUID", fsp_xlsx_template_id: Optional[str] = None
+        cls,
+        payment_plan: PaymentPlan,
+        user_id: "UUID",
+        fsp_xlsx_template_id: Optional[str] = None,
     ) -> PaymentPlan:
-        if payment_plan.status not in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
+        if payment_plan.status not in [
+            PaymentPlan.Status.ACCEPTED,
+            PaymentPlan.Status.FINISHED,
+        ]:
             msg = "Payment List Per FSP export is only available for ACCEPTED or FINISHED Payment Plans."
             raise GraphQLError(msg)
 
@@ -1022,7 +1110,11 @@ class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
     ) -> "ImportXLSXPaymentPlanPaymentListMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
 
-        cls.has_permission(info, Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS, payment_plan.business_area)
+        cls.has_permission(
+            info,
+            Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS,
+            payment_plan.business_area,
+        )
 
         if payment_plan.status != PaymentPlan.Status.LOCKED:
             msg = "You can only import for LOCKED Payment Plan"
@@ -1080,9 +1172,16 @@ class ImportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
     ) -> "ImportXLSXPaymentPlanPaymentListPerFSPMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
 
-        cls.has_permission(info, Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION, payment_plan.business_area)
+        cls.has_permission(
+            info,
+            Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION,
+            payment_plan.business_area,
+        )
 
-        if payment_plan.status not in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
+        if payment_plan.status not in (
+            PaymentPlan.Status.ACCEPTED,
+            PaymentPlan.Status.FINISHED,
+        ):
             msg = "You can only import for ACCEPTED or FINISHED Payment Plan"
             raise GraphQLError(msg)
 
@@ -1131,7 +1230,12 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     def mutate(
-        cls, root: Any, info: Any, payment_plan_id: str, steficon_rule_id: str, version: int
+        cls,
+        root: Any,
+        info: Any,
+        payment_plan_id: str,
+        steficon_rule_id: str,
+        version: int,
     ) -> "SetSteficonRuleOnPaymentPlanPaymentListMutation":
         payment_plan_id = decode_id_string_required(payment_plan_id)
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
@@ -1141,7 +1245,9 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
             cls.has_permission(info, Permissions.TARGETING_UPDATE, payment_plan.business_area)
         if payment_plan.status in PaymentPlan.CAN_RUN_ENGINE_FORMULA_FOR_ENTITLEMENT:
             cls.has_permission(
-                info, Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS, payment_plan.business_area
+                info,
+                Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS,
+                payment_plan.business_area,
             )
 
         if payment_plan.status not in PaymentPlan.CAN_RUN_ENGINE_FORMULA:
@@ -1201,9 +1307,16 @@ class ExcludeHouseholdsMutation(PermissionMutation):
     ) -> "ExcludeHouseholdsMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
 
-        cls.has_permission(info, Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP, payment_plan.business_area)
+        cls.has_permission(
+            info,
+            Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP,
+            payment_plan.business_area,
+        )
 
-        if payment_plan.status not in (PaymentPlan.Status.OPEN, PaymentPlan.Status.LOCKED):
+        if payment_plan.status not in (
+            PaymentPlan.Status.OPEN,
+            PaymentPlan.Status.LOCKED,
+        ):
             raise GraphQLError("Beneficiary can be excluded only for 'Open' or 'Locked' status of Payment Plan")
 
         payment_plan_exclude_beneficiaries.delay(
@@ -1283,7 +1396,13 @@ class SplitPaymentPlanMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(
-        cls, root: Any, info: Any, payment_plan_id: str, split_type: str, payments_no: Optional[int], **kwargs: Any
+        cls,
+        root: Any,
+        info: Any,
+        payment_plan_id: str,
+        split_type: str,
+        payments_no: Optional[int],
+        **kwargs: Any,
     ) -> "SplitPaymentPlanMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
         cls.has_permission(info, Permissions.PM_SPLIT, payment_plan.business_area)
@@ -1328,7 +1447,13 @@ class CopyTargetingCriteriaMutation(PermissionMutation):
     @raise_program_status_is(Program.FINISHED)
     @transaction.atomic
     def mutate(
-        cls, root: Any, info: Any, payment_plan_id: str, name: str, program_cycle_id: str, **kwargs: Any
+        cls,
+        root: Any,
+        info: Any,
+        payment_plan_id: str,
+        name: str,
+        program_cycle_id: str,
+        **kwargs: Any,
     ) -> "CopyTargetingCriteriaMutation":
         user = info.context.user
         name = name.strip()

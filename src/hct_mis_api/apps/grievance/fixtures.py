@@ -288,7 +288,8 @@ class TicketPaymentVerificationDetailsFactory(DjangoModelFactory):
 
     ticket = factory.SubFactory(GrievanceTicketFactory, category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION)
     payment_verification = factory.SubFactory(
-        PaymentVerificationFactory, status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
+        PaymentVerificationFactory,
+        status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
     )
 
 

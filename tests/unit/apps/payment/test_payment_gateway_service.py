@@ -51,7 +51,10 @@ from hct_mis_api.apps.payment.services.payment_household_snapshot_service import
 
 @pytest.fixture(autouse=True)
 def mock_payment_gateway_env_vars() -> None:
-    with mock.patch.dict(os.environ, {"PAYMENT_GATEWAY_API_KEY": "TEST", "PAYMENT_GATEWAY_API_URL": "TEST"}):
+    with mock.patch.dict(
+        os.environ,
+        {"PAYMENT_GATEWAY_API_KEY": "TEST", "PAYMENT_GATEWAY_API_URL": "TEST"},
+    ):
         yield
 
 
@@ -114,11 +117,17 @@ class TestPaymentGatewayService(APITestCase):
         "hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
         return_value="FINALIZED",
     )
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch(
+        "hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate",
+        return_value=2.0,
+    )
     @mock.patch(
         "hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction"
     )
-    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.get_quantity_in_usd", return_value=100.00)
+    @mock.patch(
+        "hct_mis_api.apps.payment.services.payment_gateway.get_quantity_in_usd",
+        return_value=100.00,
+    )
     def test_sync_records_for_split(
         self,
         get_quantity_in_usd_mock: Any,
@@ -208,7 +217,10 @@ class TestPaymentGatewayService(APITestCase):
         "hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
         return_value="FINALIZED",
     )
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch(
+        "hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate",
+        return_value=2.0,
+    )
     @mock.patch(
         "hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction"
     )
@@ -317,11 +329,17 @@ class TestPaymentGatewayService(APITestCase):
         "hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
         return_value="FINALIZED",
     )
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch(
+        "hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate",
+        return_value=2.0,
+    )
     @mock.patch(
         "hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction"
     )
-    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.get_quantity_in_usd", return_value=100.00)
+    @mock.patch(
+        "hct_mis_api.apps.payment.services.payment_gateway.get_quantity_in_usd",
+        return_value=100.00,
+    )
     def test_sync_records_error_messages(
         self,
         get_quantity_in_usd_mock: Any,
@@ -434,7 +452,10 @@ class TestPaymentGatewayService(APITestCase):
             payout_amount=float(self.payments[0].entitlement_quantity),
             fsp_code="1",
         )
-        self.assertEqual(p.get_hope_status(self.payments[0].entitlement_quantity), Payment.STATUS_DISTRIBUTION_SUCCESS)
+        self.assertEqual(
+            p.get_hope_status(self.payments[0].entitlement_quantity),
+            Payment.STATUS_DISTRIBUTION_SUCCESS,
+        )
         self.assertEqual(p.get_hope_status(Decimal(1000000.00)), Payment.STATUS_DISTRIBUTION_PARTIAL)
 
         p.payout_amount = None
@@ -449,7 +470,9 @@ class TestPaymentGatewayService(APITestCase):
     )
     @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status")
     def test_add_records_to_payment_instructions_for_split(
-        self, change_payment_instruction_status_mock: Any, add_records_to_payment_instruction_mock: Any
+        self,
+        change_payment_instruction_status_mock: Any,
+        add_records_to_payment_instruction_mock: Any,
     ) -> None:
         pp_split_1 = PaymentPlanSplit.objects.create(
             payment_plan=self.pp,
@@ -542,7 +565,9 @@ class TestPaymentGatewayService(APITestCase):
     )
     @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status")
     def test_add_records_to_payment_instructions(
-        self, change_payment_instruction_status_mock: Any, add_records_to_payment_instruction_mock: Any
+        self,
+        change_payment_instruction_status_mock: Any,
+        add_records_to_payment_instruction_mock: Any,
     ) -> None:
         add_records_to_payment_instruction_mock.return_value = AddRecordsResponseData(
             remote_id="1",
@@ -590,13 +615,16 @@ class TestPaymentGatewayService(APITestCase):
 
     @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
     def test_api_add_records_to_payment_instruction(self, post_mock: Any) -> None:
-        post_mock.return_value = {
-            "remote_id": "123",
-            "records": {
-                "1": self.payments[0].id,
+        post_mock.return_value = (
+            {
+                "remote_id": "123",
+                "records": {
+                    "1": self.payments[0].id,
+                },
+                "errors": None,
             },
-            "errors": None,
-        }, 200
+            200,
+        )
 
         self.dm.delivery_mechanism = self.dm_cash_over_the_counter
         self.dm.save()
@@ -648,13 +676,16 @@ class TestPaymentGatewayService(APITestCase):
 
     @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
     def test_api_add_records_to_payment_instruction_wallet_integration(self, post_mock: Any) -> None:
-        post_mock.return_value = {
-            "remote_id": "123",
-            "records": {
-                "1": self.payments[0].id,
+        post_mock.return_value = (
+            {
+                "remote_id": "123",
+                "records": {
+                    "1": self.payments[0].id,
+                },
+                "errors": None,
             },
-            "errors": None,
-        }, 200
+            200,
+        )
 
         primary_collector = self.payments[0].collector
 
@@ -832,7 +863,10 @@ class TestPaymentGatewayService(APITestCase):
 
         fsp_new = FinancialServiceProvider.objects.get(name="New FSP")
         assert fsp_new.payment_gateway_id == "33"
-        assert list(fsp_new.delivery_mechanisms.values_list("code", flat=True)) == ["cash_over_the_counter", "transfer"]
+        assert list(fsp_new.delivery_mechanisms.values_list("code", flat=True)) == [
+            "cash_over_the_counter",
+            "transfer",
+        ]
 
     @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayService.sync_delivery_mechanisms")
     def test_periodic_sync_payment_gateway_delivery_mechanisms(self, sync_delivery_mechanisms_mock: Any) -> None:

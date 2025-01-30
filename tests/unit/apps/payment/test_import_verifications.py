@@ -90,7 +90,11 @@ class TestXlsxVerificationImport(APITestCase):
             ("from_pending", PaymentVerification.STATUS_PENDING, None),
             ("from_not_received", PaymentVerification.STATUS_NOT_RECEIVED, "NO"),
             ("from_received", PaymentVerification.STATUS_RECEIVED, "YES"),
-            ("from_received_with_issues", PaymentVerification.STATUS_RECEIVED_WITH_ISSUES, "YES"),
+            (
+                "from_received_with_issues",
+                PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
+                "YES",
+            ),
         ]
     )
     def test_export_received_from_pending(self, _: Any, initial_status: str, result: Any) -> None:
@@ -100,7 +104,10 @@ class TestXlsxVerificationImport(APITestCase):
         export_service = XlsxVerificationExportService(self.verification)
 
         wb = export_service.generate_workbook()
-        self.assertEqual(wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"].value, result)
+        self.assertEqual(
+            wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"].value,
+            result,
+        )
 
     def test_validation_valid_not_changed_file(self) -> None:
         export_service = XlsxVerificationExportService(self.verification)

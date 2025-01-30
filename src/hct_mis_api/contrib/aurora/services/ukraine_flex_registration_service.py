@@ -90,7 +90,10 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
             "residence_permit_no_i_c",
             "residence_permit_picture",
         ),
-        IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID]: ("tax_id_no_i_c", "tax_id_picture"),
+        IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID]: (
+            "tax_id_no_i_c",
+            "tax_id_picture",
+        ),
     }
 
     def create_household_for_rdi_household(self, record: Any, registration_data_import: RegistrationDataImport) -> None:
@@ -115,7 +118,16 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
         household.set_admin_areas()
 
         household.detail_id = record.source_id
-        household.save(update_fields=("detail_id", "admin_area", "admin1", "admin2", "admin3", "admin4"))
+        household.save(
+            update_fields=(
+                "detail_id",
+                "admin_area",
+                "admin1",
+                "admin2",
+                "admin3",
+                "admin4",
+            )
+        )
 
         for index, individual_dict in enumerate(individuals_array):
             try:
@@ -163,7 +175,10 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
                 raise ValidationError("There should be only two collectors!")
 
     def _prepare_household_data(
-        self, household_dict: Dict, record: Any, registration_data_import: RegistrationDataImport
+        self,
+        household_dict: Dict,
+        record: Any,
+        registration_data_import: RegistrationDataImport,
     ) -> Dict:
         household_data = dict(
             registration_data_import=registration_data_import,

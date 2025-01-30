@@ -6,21 +6,12 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestCashPlanChoices::test_status_choices_query 1'] = {
-    'data': {
-        'cashPlanStatusChoices': [
-            {
-                'name': 'Active',
-                'value': 'ACTIVE'
-            },
-            {
-                'name': 'Draft',
-                'value': 'DRAFT'
-            },
-            {
-                'name': 'Finished',
-                'value': 'FINISHED'
-            }
+snapshots["TestCashPlanChoices::test_status_choices_query 1"] = {
+    "data": {
+        "cashPlanStatusChoices": [
+            {"name": "Active", "value": "ACTIVE"},
+            {"name": "Draft", "value": "DRAFT"},
+            {"name": "Finished", "value": "FINISHED"},
         ]
     }
 }

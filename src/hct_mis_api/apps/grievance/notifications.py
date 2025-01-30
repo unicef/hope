@@ -45,7 +45,7 @@ class GrievanceNotification:
         context = {
             "first_name": user_recipient.first_name,
             "last_name": user_recipient.last_name,
-            "ticket_url": f'{protocol}://{settings.FRONTEND_HOST}/{self.grievance_ticket.business_area.slug}/programs/all/grievance/tickets/{self.grievance_ticket.grievance_type_to_string()}-generated/{encode_id_base64(self.grievance_ticket.id, "GrievanceTicket")}',
+            "ticket_url": f"{protocol}://{settings.FRONTEND_HOST}/{self.grievance_ticket.business_area.slug}/programs/all/grievance/tickets/{self.grievance_ticket.grievance_type_to_string()}-generated/{encode_id_base64(self.grievance_ticket.id, 'GrievanceTicket')}",
             "ticket_id": self.grievance_ticket.unicef_id,
             "ticket_category": self.grievance_ticket.get_category_display(),
             "title": "Grievance and feedback notification",
@@ -119,14 +119,22 @@ class GrievanceNotification:
         context["hours_ago"] = (timezone.now() - self.grievance_ticket.created_at).days * 24
         text_body = render_to_string("sensitive_reminder_notification_email.txt", context=context)
         html_body = render_to_string("sensitive_reminder_notification_email.html", context=context)
-        return text_body, html_body, f"Overdue Grievance ticket requiring attention {self.grievance_ticket.unicef_id}"
+        return (
+            text_body,
+            html_body,
+            f"Overdue Grievance ticket requiring attention {self.grievance_ticket.unicef_id}",
+        )
 
     def _prepare_overdue_bodies(self, user_recipient: "User") -> Tuple[str, str, str]:
         context = self._prepare_default_context(user_recipient)
         context["days_ago"] = (timezone.now() - self.grievance_ticket.created_at).days
         text_body = render_to_string("overdue_notification_email.txt", context=context)
         html_body = render_to_string("overdue_notification_email.html", context=context)
-        return text_body, html_body, f"Overdue Grievance ticket requiring attention {self.grievance_ticket.unicef_id}"
+        return (
+            text_body,
+            html_body,
+            f"Overdue Grievance ticket requiring attention {self.grievance_ticket.unicef_id}",
+        )
 
     def _prepare_add_note_bodies(self, user_recipient: "User") -> Tuple[str, str, str]:
         context = self._prepare_default_context(user_recipient)
@@ -147,19 +155,31 @@ class GrievanceNotification:
         context["approver"] = f"{approver.first_name} {approver.last_name}"
         text_body = render_to_string("send_back_to_in_progress_notification_email.txt", context=context)
         html_body = render_to_string("send_back_to_in_progress_notification_email.html", context=context)
-        return text_body, html_body, f"Review of Grievance & Feedback ticket {self.grievance_ticket.unicef_id}"
+        return (
+            text_body,
+            html_body,
+            f"Review of Grievance & Feedback ticket {self.grievance_ticket.unicef_id}",
+        )
 
     def _prepare_for_approval_bodies(self, user_recipient: "User") -> Tuple[str, str, str]:
         context = self._prepare_default_context(user_recipient)
         text_body = render_to_string("send_for_approve_notification_email.txt", context=context)
         html_body = render_to_string("send_for_approve_notification_email.html", context=context)
-        return text_body, html_body, f"Grievance ticket requiring approval {self.grievance_ticket.unicef_id}"
+        return (
+            text_body,
+            html_body,
+            f"Grievance ticket requiring approval {self.grievance_ticket.unicef_id}",
+        )
 
     def _prepare_assignment_changed_bodies(self, user_recipient: "User") -> Tuple[str, str, str]:
         context = self._prepare_default_context(user_recipient)
         text_body = render_to_string("assignment_change_notification_email.txt", context=context)
         html_body = render_to_string("assignment_change_notification_email.html", context=context)
-        return text_body, html_body, f"Grievance & Feedback ticket assigned {self.grievance_ticket.id}"
+        return (
+            text_body,
+            html_body,
+            f"Grievance & Feedback ticket assigned {self.grievance_ticket.id}",
+        )
 
     def _prepare_assigned_to_recipient(self) -> "Optional[List[User]]":
         if self.grievance_ticket.assigned_to is None:

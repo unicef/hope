@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('reporting', '0001_migration'),
+        ("reporting", "0001_migration"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='dashboardreport',
-            name='year',
+            model_name="dashboardreport",
+            name="year",
             field=models.PositiveSmallIntegerField(default=2025),
         ),
     ]

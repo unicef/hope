@@ -21,7 +21,13 @@ class JsonWidget(forms.widgets.TextInput):
         json_str = json.dumps(json_object, indent=4, sort_keys=True)
 
         return {
-            "json_pretty": mark_safe(highlight(json_str, JsonLexer(), HtmlFormatter(style="colorful", wrapcode=True))),
+            "json_pretty": mark_safe(
+                highlight(
+                    json_str,
+                    JsonLexer(),
+                    HtmlFormatter(style="colorful", wrapcode=True),
+                )
+            ),
             "widget": {
                 "name": name,
                 "is_hidden": self.is_hidden,

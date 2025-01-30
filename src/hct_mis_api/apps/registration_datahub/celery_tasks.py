@@ -86,7 +86,10 @@ def registration_xlsx_import_task(
                 )
             rdi = RegistrationDataImport.objects.get(id=registration_data_import_id)
             set_sentry_business_area_tag(rdi.business_area.name)
-            if rdi.status not in (RegistrationDataImport.IMPORT_SCHEDULED, RegistrationDataImport.IMPORT_ERROR):
+            if rdi.status not in (
+                RegistrationDataImport.IMPORT_SCHEDULED,
+                RegistrationDataImport.IMPORT_ERROR,
+            ):
                 raise WrongStatusException("Rdi is not in status IMPORT_SCHEDULED while trying to import")
             rdi.status = RegistrationDataImport.IMPORTING
             rdi.save()
@@ -135,7 +138,10 @@ def registration_program_population_import_task(
 
             rdi = RegistrationDataImport.objects.get(id=registration_data_import_id)
             set_sentry_business_area_tag(rdi.business_area.name)
-            if rdi.status not in (RegistrationDataImport.IMPORT_SCHEDULED, RegistrationDataImport.IMPORT_ERROR):
+            if rdi.status not in (
+                RegistrationDataImport.IMPORT_SCHEDULED,
+                RegistrationDataImport.IMPORT_ERROR,
+            ):
                 raise WrongStatusException("Rdi is not in status IMPORT_SCHEDULED while trying to import")
             rdi.status = RegistrationDataImport.IMPORTING
             rdi.save()
@@ -163,7 +169,11 @@ def registration_program_population_import_task(
 @log_start_and_end
 @sentry_tags
 def registration_kobo_import_task(
-    self: Any, registration_data_import_id: str, import_data_id: str, business_area_id: str, program_id: "UUID"
+    self: Any,
+    registration_data_import_id: str,
+    import_data_id: str,
+    business_area_id: str,
+    program_id: "UUID",
 ) -> None:
     try:
         from hct_mis_api.apps.core.models import BusinessArea

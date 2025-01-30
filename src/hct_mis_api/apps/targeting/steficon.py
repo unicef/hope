@@ -40,7 +40,8 @@ try:
 
     class SteficonExecutorMixin:
         @button(
-            visible=lambda o, r: o.status == TargetPopulation.STATUS_STEFICON_ERROR, permission="steficon.rerun_rule"
+            visible=lambda o, r: o.status == TargetPopulation.STATUS_STEFICON_ERROR,
+            permission="steficon.rerun_rule",
         )
         def re_run_steficon(self, request: "HttpRequest", pk: "UUID") -> TemplateResponse:
             context = self.get_common_context(request, pk)
@@ -64,7 +65,11 @@ try:
             if request.method == "GET":
                 context["title"] = "Test Steficon rule"
                 context["form"] = RuleTestForm(
-                    initial={"number_of_records": 100, "dry_run": True, "rule": self.object.steficon_rule}
+                    initial={
+                        "number_of_records": 100,
+                        "dry_run": True,
+                        "rule": self.object.steficon_rule,
+                    }
                 )
             else:
                 form = RuleTestForm(request.POST)
@@ -80,7 +85,12 @@ try:
                         entries = self.object.selections.all()[:records]
                         if entries:
                             for entry in entries:
-                                result = rule.execute({"household": entry.household, "target_population": self.object})
+                                result = rule.execute(
+                                    {
+                                        "household": entry.household,
+                                        "target_population": self.object,
+                                    }
+                                )
                                 entry.vulnerability_score = result.value
                                 elements.append(entry)
                             with atomic():

@@ -29,14 +29,24 @@ class TestTemplateFileGenerator(TestCase):
     def test_create_workbook(self) -> None:
         wb = TemplateFileGeneratorService(self.program).create_workbook()
 
-        expected_sheet_names = ["Households", "Individuals", "Import helper", "People"].sort()
+        expected_sheet_names = [
+            "Households",
+            "Individuals",
+            "Import helper",
+            "People",
+        ].sort()
         result_sheet_names = wb.sheetnames.sort()
 
         self.assertEqual(expected_sheet_names, result_sheet_names)
 
     def test_handle_name_and_label_row(self) -> None:
         fields = {
-            "test": {"label": {"English(EN)": "My Test Label"}, "required": True, "type": "STRING", "choices": []},
+            "test": {
+                "label": {"English(EN)": "My Test Label"},
+                "required": True,
+                "type": "STRING",
+                "choices": [],
+            },
             "test_h_f": {
                 "label": {"English(EN)": "Flex Test Label"},
                 "required": False,

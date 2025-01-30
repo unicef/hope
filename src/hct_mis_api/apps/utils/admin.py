@@ -218,7 +218,9 @@ class PaymentPlanCeleryTasksMixin:
         payment_plan = PaymentPlan.objects.get(pk=pk)
         if payment_plan.status != PaymentPlan.Status.OPEN:
             messages.add_message(
-                request, messages.ERROR, f"The Payment Plan must has the status {PaymentPlan.Status.OPEN}"
+                request,
+                messages.ERROR,
+                f"The Payment Plan must has the status {PaymentPlan.Status.OPEN}",
             )
             return redirect(reverse(self.url, args=[pk]))
         # check if no task in a queue
@@ -230,14 +232,18 @@ class PaymentPlanCeleryTasksMixin:
         )
         if cache.get(cache_key):
             messages.add_message(
-                request, messages.ERROR, f"Task is already running for Payment Plan {payment_plan.unicef_id}."
+                request,
+                messages.ERROR,
+                f"Task is already running for Payment Plan {payment_plan.unicef_id}.",
             )
             return redirect(reverse(self.url, args=[pk]))
 
         if request.method == "POST":
             prepare_payment_plan_task.delay(payment_plan.id)
             messages.add_message(
-                request, messages.SUCCESS, f"Task restarted for Payment Plan: {payment_plan.unicef_id}"
+                request,
+                messages.SUCCESS,
+                f"Task restarted for Payment Plan: {payment_plan.unicef_id}",
             )
 
             return redirect(reverse(self.url, args=[pk]))
@@ -263,17 +269,27 @@ class PaymentPlanCeleryTasksMixin:
         if request.method == "POST":
             task_name = self.create_payment_plan_payment_list_xlsx
             payment_plan = PaymentPlan.objects.get(pk=pk)
-            kwargs = {"payment_plan_id": uuid.UUID(pk), "user_id": uuid.UUID(str(payment_plan.created_by.id))}
+            kwargs = {
+                "payment_plan_id": uuid.UUID(pk),
+                "user_id": uuid.UUID(str(payment_plan.created_by.id)),
+            }
             task_data = get_task_in_queue_or_running(name=task_name, kwargs=kwargs)
             if task_data:
                 task_id = task_data["id"]
                 revoke_with_termination(task_id)
                 create_payment_plan_payment_list_xlsx.apply_async(
-                    kwargs={"payment_plan_id": uuid.UUID(pk), "user_id": uuid.UUID(str(request.user.id))},
+                    kwargs={
+                        "payment_plan_id": uuid.UUID(pk),
+                        "user_id": uuid.UUID(str(request.user.id)),
+                    },
                 )
                 messages.add_message(request, messages.INFO, "Successfully executed.")
             else:
-                messages.add_message(request, messages.ERROR, f"There is no current {task_name} for this payment plan")
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    f"There is no current {task_name} for this payment plan",
+                )
 
             return redirect(reverse(self.url, args=[pk]))
         else:
@@ -306,7 +322,11 @@ class PaymentPlanCeleryTasksMixin:
 
                 messages.add_message(request, messages.INFO, "Successfully executed.")
             else:
-                messages.add_message(request, messages.ERROR, f"There is no current {task_name} for this payment plan")
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    f"There is no current {task_name} for this payment plan",
+                )
 
             return redirect(reverse(self.url, args=[pk]))
         else:
@@ -340,7 +360,11 @@ class PaymentPlanCeleryTasksMixin:
 
                 messages.add_message(request, messages.INFO, "Successfully executed.")
             else:
-                messages.add_message(request, messages.ERROR, f"There is no current {task_name} for this payment plan")
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    f"There is no current {task_name} for this payment plan",
+                )
             return redirect(reverse(self.url, args=[pk]))
         else:
             return confirm_action(
@@ -373,7 +397,11 @@ class PaymentPlanCeleryTasksMixin:
 
                 messages.add_message(request, messages.INFO, "Successfully executed.")
             else:
-                messages.add_message(request, messages.ERROR, f"There is no current {task_name} for this payment plan")
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    f"There is no current {task_name} for this payment plan",
+                )
 
             return redirect(reverse(self.url, args=[pk]))
         else:
@@ -413,7 +441,10 @@ class LinkedObjectsManagerMixin:
         empty = []
         for f in reverse:
             info = self.get_related(
-                context["original"], f, "all_merge_status_objects", max_records=self.linked_objects_max_records
+                context["original"],
+                f,
+                "all_merge_status_objects",
+                max_records=self.linked_objects_max_records,
             )
             if info["count"] == 0 and self.linked_objects_hide_empty:
                 empty.append(info)

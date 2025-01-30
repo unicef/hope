@@ -64,7 +64,10 @@ def get_program_with_dct_type_and_name(
 
 
 def get_social_program_with_dct_type_and_name(
-    name: str, programme_code: str, dct_type: str = DataCollectingType.Type.SOCIAL, status: str = Program.ACTIVE
+    name: str,
+    programme_code: str,
+    dct_type: str = DataCollectingType.Type.SOCIAL,
+    status: str = Program.ACTIVE,
 ) -> Program:
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="People").first()

@@ -282,8 +282,14 @@ class TestProgramPopulationToPendingObjects(APITestCase):
                 pending_household_field,
                 household_field,
             )
-        self.assertNotEqual(pending_household.first_registration_date, self.household.first_registration_date)
-        self.assertNotEqual(pending_household.last_registration_date, self.household.last_registration_date)
+        self.assertNotEqual(
+            pending_household.first_registration_date,
+            self.household.first_registration_date,
+        )
+        self.assertNotEqual(
+            pending_household.last_registration_date,
+            self.household.last_registration_date,
+        )
         self.assertEqual(
             pending_household.program_id,
             self.program_to.id,

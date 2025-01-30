@@ -84,13 +84,20 @@ class OrganizationAdmin(AdminFiltersMixin, admin.ModelAdmin):
 @smart_register(models.Project)
 class ProjectAdmin(AdminFiltersMixin, admin.ModelAdmin):
     list_display = ("name", "organization", "programme")
-    list_filter = (("organization", AutoCompleteFilter), ("programme", AutoCompleteFilter))
+    list_filter = (
+        ("organization", AutoCompleteFilter),
+        ("programme", AutoCompleteFilter),
+    )
     readonly_fields = ("name", "organization")
     search_fields = ("name",)
     raw_id_fields = ("programme",)
 
     def get_form(
-        self, request: HttpRequest, obj: Optional[models.Project] = None, change: bool = False, **kwargs: Any
+        self,
+        request: HttpRequest,
+        obj: Optional[models.Project] = None,
+        change: bool = False,
+        **kwargs: Any,
     ) -> Type[forms.ModelForm]:
         form = super().get_form(request, obj, **kwargs)
         form.base_fields["programme"].queryset = Program.objects.filter(
@@ -156,14 +163,22 @@ class BaseRDIForm(forms.Form):
         filters, excludes = self.cleaned_data["filters"]
         if self.cleaned_data["status"] == Record.STATUS_TO_IMPORT:
             filters["status__isnull"] = True
-        elif self.cleaned_data["status"] in [Record.STATUS_IMPORTED, Record.STATUS_ERROR]:
+        elif self.cleaned_data["status"] in [
+            Record.STATUS_IMPORTED,
+            Record.STATUS_ERROR,
+        ]:
             filters["status"] = self.cleaned_data["status"]
 
         self.cleaned_data["filters"] = filters, excludes
 
 
 class CreateRDIForm(BaseRDIForm):
-    name = forms.CharField(label="RDI name", max_length=100, required=False, help_text="[Business Area] RDI Name")
+    name = forms.CharField(
+        label="RDI name",
+        max_length=100,
+        required=False,
+        help_text="[Business Area] RDI Name",
+    )
     is_open = forms.BooleanField(label="Is open?", help_text="Is the RDI open for amend", required=False)
     field_order = ["name", "registration", "is_open", "filters", "status"]
 
@@ -249,7 +264,11 @@ class RecordAdmin(HOPEModelAdminBase):
         try:
             records_ids = queryset.values_list("id", flat=True)
             fresh_extract_records_task.delay(list(records_ids))
-            self.message_user(request, f"Extracting data for {len(records_ids)} records", messages.SUCCESS)
+            self.message_user(
+                request,
+                f"Extracting data for {len(records_ids)} records",
+                messages.SUCCESS,
+            )
         except Exception as e:
             self.message_user(request, str(e), messages.ERROR)
 
@@ -290,7 +309,10 @@ class RecordAdmin(HOPEModelAdminBase):
                                 is_open=is_open,
                             )
                             create_task_for_processing_records(service, registration.pk, rdi.pk, list(records_ids))
-                            url = reverse("admin:registration_data_registrationdataimport_change", args=[rdi.pk])
+                            url = reverse(
+                                "admin:registration_data_registrationdataimport_change",
+                                args=[rdi.pk],
+                            )
                             self.message_user(
                                 request,
                                 mark_safe("Started RDI Import with name: <a href='{}'>{}</a>").format(url, rdi.name),
@@ -300,7 +322,11 @@ class RecordAdmin(HOPEModelAdminBase):
                             self.message_error_to_user(request, e)
 
                     else:
-                        self.message_user(request, "There are no Records by filtering criteria", messages.ERROR)
+                        self.message_user(
+                            request,
+                            "There are no Records by filtering criteria",
+                            messages.ERROR,
+                        )
                 else:
                     self.message_user(
                         request,
@@ -334,7 +360,10 @@ class RecordAdmin(HOPEModelAdminBase):
                     if records_ids := qs.values_list("id", flat=True):
                         try:
                             create_task_for_processing_records(service, registration.pk, rdi.pk, list(records_ids))
-                            url = reverse("admin:registration_data_registrationdataimport_change", args=[rdi.pk])
+                            url = reverse(
+                                "admin:registration_data_registrationdataimport_change",
+                                args=[rdi.pk],
+                            )
                             self.message_user(
                                 request,
                                 mark_safe(f"Adding to RDI Import with name: <a href='{url}'>{rdi.name}</a>"),
@@ -344,7 +373,11 @@ class RecordAdmin(HOPEModelAdminBase):
                             self.message_error_to_user(request, e)
 
                     else:
-                        self.message_user(request, "There are no Records by filtering criteria", messages.ERROR)
+                        self.message_user(
+                            request,
+                            "There are no Records by filtering criteria",
+                            messages.ERROR,
+                        )
                 else:
                     self.message_user(
                         request,
@@ -377,7 +410,10 @@ class RecordAdmin(HOPEModelAdminBase):
                         Record.objects.update_or_create(
                             source_id=record["id"],
                             registration=2,
-                            defaults={"timestamp": record["timestamp"], "storage": base64.b64decode(record["storage"])},
+                            defaults={
+                                "timestamp": record["timestamp"],
+                                "storage": base64.b64decode(record["storage"]),
+                            },
                         )
         else:
             form = FetchForm(initial=FetchForm.get_saved_config(request))

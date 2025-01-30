@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("household", "0002_migration"),
     ]
@@ -21,13 +20,13 @@ class Migration(migrations.Migration):
             new_name="internal_data",
         ),
         migrations.AlterField(
-            model_name='household',
-            name='internal_data',
+            model_name="household",
+            name="internal_data",
             field=models.JSONField(default=dict),
         ),
         migrations.AlterField(
-            model_name='individual',
-            name='internal_data',
+            model_name="individual",
+            name="internal_data",
             field=models.JSONField(default=dict),
         ),
     ]

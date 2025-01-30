@@ -157,7 +157,9 @@ def map_tp_to_pp(tp: TargetPopulation) -> Dict[str, Any]:
     return payment_plan_data
 
 
-def tc_migrate_hh_ind_ids(tc: TargetingCriteria) -> Tuple[Optional[TargetingCriteriaRule], bool]:
+def tc_migrate_hh_ind_ids(
+    tc: TargetingCriteria,
+) -> Tuple[Optional[TargetingCriteriaRule], bool]:
     """migrate data 'household_ids' & 'individual_ids' from TargetingCriteria into TargetingCriteriaRule"""
     # return TargetingCriteriaRule or None and bool new tcr to create
     # None, False OR first_rule, False
@@ -167,7 +169,9 @@ def tc_migrate_hh_ind_ids(tc: TargetingCriteria) -> Tuple[Optional[TargetingCrit
         if tc.individual_ids or tc.household_ids:
             # print("not found TargetingCriteriaRule for TargetingCriteria. Going to create a new one.")
             new_tcr = TargetingCriteriaRule(
-                targeting_criteria=tc, household_ids=tc.household_ids, individual_ids=tc.individual_ids
+                targeting_criteria=tc,
+                household_ids=tc.household_ids,
+                individual_ids=tc.individual_ids,
             )
             return new_tcr, True
         return None, False
@@ -256,7 +260,9 @@ def migrate_tp(tp: "TargetPopulation") -> None:
     if update_payment_plans:
         print("*** processing update_payment_plans", len(update_payment_plans))
         PaymentPlan.objects.bulk_update(
-            update_payment_plans, list(TP_MIGRATION_MAPPING.values()) + ["internal_data"], 500
+            update_payment_plans,
+            list(TP_MIGRATION_MAPPING.values()) + ["internal_data"],
+            500,
         )
 
     if new_payment_plans:
@@ -318,7 +324,10 @@ def get_statistics(after_migration_status: bool = False) -> None:
             .order_by("business_area")
         )
         if pp_without_targeting_criteria:
-            print("#### Found PaymentPlan without targeting_criteria ", pp_without_targeting_criteria.count())
+            print(
+                "#### Found PaymentPlan without targeting_criteria ",
+                pp_without_targeting_criteria.count(),
+            )
             for pp in pp_without_targeting_criteria:
                 print(
                     pp.unicef_id,
@@ -462,7 +471,10 @@ def create_payments_for_pending_payment_plans(ba_list: List = BA_ORDER_LIST) -> 
                 )
                 if build_payment_plans_ids_list:
                     print(f"\n *** Processing {business_area['name']}.")
-                    print("Create payments for New Created Payment Plans: ", len(build_payment_plans_ids_list))
+                    print(
+                        "Create payments for New Created Payment Plans: ",
+                        len(build_payment_plans_ids_list),
+                    )
                     for payment_plan_id in build_payment_plans_ids_list:
                         payment_plan = PaymentPlan.objects.get(pk=payment_plan_id)
                         print(f".... processing with PP: {payment_plan.unicef_id} - {payment_plan.name}")

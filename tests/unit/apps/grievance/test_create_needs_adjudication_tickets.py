@@ -314,7 +314,10 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
 
         self.create_user_role_with_permissions(
             self.user,
-            [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_BIOMETRIC_RESULTS],
+            [
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_BIOMETRIC_RESULTS,
+            ],
             self.business_area,
         )
         create_needs_adjudication_tickets_for_biometrics(

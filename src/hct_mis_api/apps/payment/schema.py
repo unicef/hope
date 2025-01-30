@@ -1210,7 +1210,11 @@ class Query(graphene.ObjectType):
                 [
                     # This basically checks if FSP can accept ANY additional volume,
                     # more strict validation is performed in AssignFspToDeliveryMechanismMutation
-                    {"id": fsp.id, "name": fsp.name, "configurations": fsp.configurations}
+                    {
+                        "id": fsp.id,
+                        "name": fsp.name,
+                        "configurations": fsp.configurations,
+                    }
                     for fsp in fsps
                     if fsp.can_accept_any_volume()
                 ]
@@ -1219,7 +1223,10 @@ class Query(graphene.ObjectType):
             )
 
         return [
-            {"delivery_mechanism": mechanism, "fsps": get_fsps_for_delivery_mechanism(mechanism)}
+            {
+                "delivery_mechanism": mechanism,
+                "fsps": get_fsps_for_delivery_mechanism(mechanism),
+            }
             for mechanism in delivery_mechanisms
         ]
 
@@ -1261,7 +1268,9 @@ class Query(graphene.ObjectType):
             payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
 
         payment_records = get_payment_records(
-            payment_plan_object, payment_verification_plan, input["verification_channel"]
+            payment_plan_object,
+            payment_verification_plan,
+            input["verification_channel"],
         )
         if not payment_records:
             return {
@@ -1392,7 +1401,10 @@ class Query(graphene.ObjectType):
             }
         ]
 
-        return {"labels": ["Successful Payments", "Unsuccessful Payments"], "datasets": dataset}
+        return {
+            "labels": ["Successful Payments", "Unsuccessful Payments"],
+            "datasets": dataset,
+        }
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     @cached_in_django_cache(24)
@@ -1412,7 +1424,10 @@ class Query(graphene.ObjectType):
         order = kwargs.pop("order", None)
         order_by = kwargs.pop("order_by", None)
         admin_areas = total_cash_transferred_by_administrative_area_table_query(
-            year, business_area_slug, chart_filters_decoder(kwargs), Household.CollectType.STANDARD.value
+            year,
+            business_area_slug,
+            chart_filters_decoder(kwargs),
+            Household.CollectType.STANDARD.value,
         )
 
         if order_by:
@@ -1446,7 +1461,10 @@ class Query(graphene.ObjectType):
         order = kwargs.pop("order", None)
         order_by = kwargs.pop("order_by", None)
         admin_areas = total_cash_transferred_by_administrative_area_table_query(
-            year, business_area_slug, chart_filters_decoder(kwargs), Household.CollectType.SINGLE.value
+            year,
+            business_area_slug,
+            chart_filters_decoder(kwargs),
+            Household.CollectType.SINGLE.value,
         )
 
         if order_by:

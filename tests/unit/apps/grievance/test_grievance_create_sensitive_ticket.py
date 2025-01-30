@@ -65,11 +65,21 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
 
         cls.household1, cls.individuals1 = create_household(
             {"size": 1, "business_area": cls.business_area},
-            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe",
+            },
         )
         cls.household2, cls.individuals2 = create_household(
             {"size": 1, "business_area": cls.business_area},
-            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe Second Individual"},
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe Second Individual",
+            },
         )
         cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
         payment_plan = PaymentPlanFactory(program_cycle=cls.program.cycles.first(), business_area=cls.business_area)
@@ -125,7 +135,10 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=input_data,
         )
 
@@ -164,7 +177,10 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=input_data,
         )
 
@@ -203,7 +219,10 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=input_data,
         )
 
@@ -246,7 +265,10 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=input_data,
         )
 
@@ -285,7 +307,10 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=input_data,
         )
 
@@ -323,7 +348,10 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=input_data,
         )
 
@@ -361,7 +389,10 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=input_data,
         )
 
@@ -392,6 +423,9 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=input_data,
         )

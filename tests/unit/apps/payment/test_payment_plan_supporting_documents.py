@@ -75,7 +75,10 @@ class PaymentPlanSupportingDocumentSerializerTests(TestCase):
         )
         self.assertFalse(serializer.is_valid())
         self.assertIn("non_field_errors", serializer.errors)
-        self.assertEqual(serializer.errors["non_field_errors"][0], "Payment plan must be within status OPEN or LOCKED.")
+        self.assertEqual(
+            serializer.errors["non_field_errors"][0],
+            "Payment plan must be within status OPEN or LOCKED.",
+        )
 
     def test_validate_file_limit_failure(self) -> None:
         # create 10 documents
@@ -110,7 +113,8 @@ class PaymentPlanSupportingDocumentUploadViewTests(TestCase):
         cls.client = APIClient()
         cls.user = UserFactory(username="Hope_USER", password="GoodJod")
         role, created = Role.objects.update_or_create(
-            name="TestName", defaults={"permissions": [Permissions.PM_UPLOAD_SUPPORTING_DOCUMENT.value]}
+            name="TestName",
+            defaults={"permissions": [Permissions.PM_UPLOAD_SUPPORTING_DOCUMENT.value]},
         )
         user_role, _ = UserRole.objects.get_or_create(user=cls.user, role=role, business_area=cls.business_area)
         cls.payment_plan = PaymentPlanFactory(
@@ -177,7 +181,9 @@ class PaymentPlanSupportingDocumentViewTests(TestCase):
             status=PaymentPlan.Status.OPEN,
         )
         cls.document = PaymentPlanSupportingDocument.objects.create(
-            payment_plan=cls.payment_plan, title="Test Document333", file=SimpleUploadedFile("test.pdf", b"aaa")
+            payment_plan=cls.payment_plan,
+            title="Test Document333",
+            file=SimpleUploadedFile("test.pdf", b"aaa"),
         )
         cls.program_id_base64 = base64.b64encode(f"ProgramNode:{str(cls.payment_plan.program.id)}".encode()).decode()
         cls.payment_plan_id_base64 = base64.b64encode(f"PaymentPlanNode:{str(cls.payment_plan.id)}".encode()).decode()
@@ -216,4 +222,7 @@ class PaymentPlanSupportingDocumentViewTests(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response, FileResponse)
-        self.assertEqual(response["Content-Disposition"], f"attachment; filename={self.document.file.name}")
+        self.assertEqual(
+            response["Content-Disposition"],
+            f"attachment; filename={self.document.file.name}",
+        )

@@ -101,7 +101,11 @@ class TestLogEntriesQueries(APITestCase):
     def test_all_logs_queries_without_perms(self) -> None:
         self.snapshot_graphql_request(
             request_string=ALL_LOGS_ENTRIES,
-            variables={"businessArea": "afghanistan", "objectId": str(self.program_1.pk), "first": 5},
+            variables={
+                "businessArea": "afghanistan",
+                "objectId": str(self.program_1.pk),
+                "first": 5,
+            },
             context={"user": self.user_without_perms},
         )
 
@@ -115,7 +119,11 @@ class TestLogEntriesQueries(APITestCase):
     def test_filter_by_object_id(self) -> None:
         self.snapshot_graphql_request(
             request_string=ALL_LOGS_ENTRIES,
-            variables={"businessArea": "afghanistan", "objectId": str(self.program_1.pk), "first": 5},
+            variables={
+                "businessArea": "afghanistan",
+                "objectId": str(self.program_1.pk),
+                "first": 5,
+            },
             context={"user": self.user},
         )
 

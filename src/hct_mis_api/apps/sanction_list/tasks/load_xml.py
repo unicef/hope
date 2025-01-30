@@ -378,7 +378,13 @@ class LoadSanctionListXMLTask:
             if time:
                 hour, minute = time[0].split(":")
             return timezone.make_aware(
-                datetime(year=int(year), month=int(month), day=int(day), hour=int(hour), minute=int(minute)),
+                datetime(
+                    year=int(year),
+                    month=int(month),
+                    day=int(day),
+                    hour=int(hour),
+                    minute=int(minute),
+                ),
             )
         if field.get_internal_type() == "DateField":
             year, month, day, *time = value.split("-")

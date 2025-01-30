@@ -102,9 +102,15 @@ class ModifiedData:
 
 class PaymentPlanSplitPayments(TimeStampedUUIDModel):
     payment_plan_split = models.ForeignKey(
-        "payment.PaymentPlanSplit", on_delete=models.CASCADE, related_name="payment_plan_split"
+        "payment.PaymentPlanSplit",
+        on_delete=models.CASCADE,
+        related_name="payment_plan_split",
     )
-    payment = models.ForeignKey("payment.Payment", on_delete=models.CASCADE, related_name="payment_plan_split_payment")
+    payment = models.ForeignKey(
+        "payment.Payment",
+        on_delete=models.CASCADE,
+        related_name="payment_plan_split_payment",
+    )
 
     class Meta:
         unique_together = ("payment_plan_split", "payment")
@@ -208,7 +214,10 @@ class PaymentPlan(
         TP_STEFICON_ERROR = "STEFICON_ERROR", "Steficon Error"
         DRAFT = "DRAFT", "Draft"  # like ready for PP create
 
-        PREPARING = "PREPARING", "Preparing"  # deprecated will remove it after data migrations
+        PREPARING = (
+            "PREPARING",
+            "Preparing",
+        )  # deprecated will remove it after data migrations
 
         OPEN = "OPEN", "Open"
         LOCKED = "LOCKED", "Locked"
@@ -254,12 +263,27 @@ class PaymentPlan(
         XLSX_EXPORTING = "XLSX_EXPORTING", "Exporting XLSX file"
         XLSX_EXPORT_ERROR = "XLSX_EXPORT_ERROR", "Export XLSX file Error"
         XLSX_IMPORT_ERROR = "XLSX_IMPORT_ERROR", "Import XLSX file Error"
-        XLSX_IMPORTING_ENTITLEMENTS = "XLSX_IMPORTING_ENTITLEMENTS", "Importing Entitlements XLSX file"
-        XLSX_IMPORTING_RECONCILIATION = "XLSX_IMPORTING_RECONCILIATION", "Importing Reconciliation XLSX file"
+        XLSX_IMPORTING_ENTITLEMENTS = (
+            "XLSX_IMPORTING_ENTITLEMENTS",
+            "Importing Entitlements XLSX file",
+        )
+        XLSX_IMPORTING_RECONCILIATION = (
+            "XLSX_IMPORTING_RECONCILIATION",
+            "Importing Reconciliation XLSX file",
+        )
         EXCLUDE_BENEFICIARIES = "EXCLUDE_BENEFICIARIES", "Exclude Beneficiaries Running"
-        EXCLUDE_BENEFICIARIES_ERROR = "EXCLUDE_BENEFICIARIES_ERROR", "Exclude Beneficiaries Error"
-        SEND_TO_PAYMENT_GATEWAY = "SEND_TO_PAYMENT_GATEWAY", "Sending to Payment Gateway"
-        SEND_TO_PAYMENT_GATEWAY_ERROR = "SEND_TO_PAYMENT_GATEWAY_ERROR", "Send to Payment Gateway Error"
+        EXCLUDE_BENEFICIARIES_ERROR = (
+            "EXCLUDE_BENEFICIARIES_ERROR",
+            "Exclude Beneficiaries Error",
+        )
+        SEND_TO_PAYMENT_GATEWAY = (
+            "SEND_TO_PAYMENT_GATEWAY",
+            "Sending to Payment Gateway",
+        )
+        SEND_TO_PAYMENT_GATEWAY_ERROR = (
+            "SEND_TO_PAYMENT_GATEWAY_ERROR",
+            "Send to Payment Gateway Error",
+        )
 
     BACKGROUND_ACTION_ERROR_STATES = [
         BackgroundActionStatus.XLSX_EXPORT_ERROR,
@@ -317,7 +341,11 @@ class PaymentPlan(
         null=True,
     )
     total_entitled_quantity_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0"))], null=True, blank=True
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0"))],
+        null=True,
+        blank=True,
     )
     total_entitled_quantity_revised = models.DecimalField(
         decimal_places=2,
@@ -328,7 +356,11 @@ class PaymentPlan(
         blank=True,
     )
     total_entitled_quantity_revised_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0"))], null=True, blank=True
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0"))],
+        null=True,
+        blank=True,
     )
     total_delivered_quantity = models.DecimalField(
         decimal_places=2,
@@ -339,7 +371,11 @@ class PaymentPlan(
         blank=True,
     )
     total_delivered_quantity_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0"))], null=True, blank=True
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0"))],
+        null=True,
+        blank=True,
     )
     total_undelivered_quantity = models.DecimalField(
         decimal_places=2,
@@ -350,7 +386,11 @@ class PaymentPlan(
         blank=True,
     )
     total_undelivered_quantity_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0"))], null=True, blank=True
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0"))],
+        null=True,
+        blank=True,
     )
 
     created_by = models.ForeignKey(
@@ -368,7 +408,12 @@ class PaymentPlan(
         choices=BackgroundActionStatus.choices,
     )
     build_status = FSMField(
-        choices=BuildStatus.choices, default=None, protected=False, db_index=True, null=True, blank=True
+        choices=BuildStatus.choices,
+        default=None,
+        protected=False,
+        db_index=True,
+        null=True,
+        blank=True,
     )
     built_at = models.DateTimeField(null=True, blank=True)
     # TODO: remove this field after migrations
@@ -425,7 +470,11 @@ class PaymentPlan(
     steficon_targeting_applied_date = models.DateTimeField(blank=True, null=True)
 
     source_payment_plan = models.ForeignKey(
-        "self", null=True, blank=True, on_delete=models.CASCADE, related_name="follow_ups"
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="follow_ups",
     )
     is_follow_up = models.BooleanField(default=False)
 
@@ -466,7 +515,9 @@ class PaymentPlan(
         ordering = ["created_at"]
         constraints = [
             UniqueConstraint(
-                fields=["name", "program", "is_removed"], condition=Q(is_removed=False), name="name_unique_per_program"
+                fields=["name", "program", "is_removed"],
+                condition=Q(is_removed=False),
+                name="name_unique_per_program",
             ),
         ]
 
@@ -632,7 +683,10 @@ class PaymentPlan(
         approval_process = hasattr(self, "approval_process") and self.approval_process.first()
         if approval_process:
             if self.status == PaymentPlan.Status.IN_APPROVAL:
-                return ModifiedData(approval_process.sent_for_approval_date, approval_process.sent_for_approval_by)
+                return ModifiedData(
+                    approval_process.sent_for_approval_date,
+                    approval_process.sent_for_approval_by,
+                )
             if self.status == PaymentPlan.Status.IN_AUTHORIZATION:
                 if approval := approval_process.approvals.filter(type=Approval.APPROVAL).order_by("created_at").last():
                     return ModifiedData(approval.created_at, approval.created_by)
@@ -795,7 +849,10 @@ class PaymentPlan(
         try:
             if self.status == PaymentPlan.Status.LOCKED:
                 return self.export_file_entitlement is not None
-            elif self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
+            elif self.status in (
+                PaymentPlan.Status.ACCEPTED,
+                PaymentPlan.Status.FINISHED,
+            ):
                 return self.export_file_per_fsp is not None
             else:
                 return False
@@ -906,7 +963,11 @@ class PaymentPlan(
         target=BackgroundActionStatus.XLSX_EXPORTING,
         conditions=[
             lambda obj: obj.status
-            in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]
+            in [
+                PaymentPlan.Status.LOCKED,
+                PaymentPlan.Status.ACCEPTED,
+                PaymentPlan.Status.FINISHED,
+            ]
         ],
     )
     def background_action_status_xlsx_exporting(self) -> None:
@@ -914,11 +975,18 @@ class PaymentPlan(
 
     @transition(
         field=background_action_status,
-        source=[BackgroundActionStatus.XLSX_EXPORTING, BackgroundActionStatus.XLSX_EXPORT_ERROR],
+        source=[
+            BackgroundActionStatus.XLSX_EXPORTING,
+            BackgroundActionStatus.XLSX_EXPORT_ERROR,
+        ],
         target=BackgroundActionStatus.XLSX_EXPORT_ERROR,
         conditions=[
             lambda obj: obj.status
-            in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]
+            in [
+                PaymentPlan.Status.LOCKED,
+                PaymentPlan.Status.ACCEPTED,
+                PaymentPlan.Status.FINISHED,
+            ]
         ],
     )
     def background_action_status_xlsx_export_error(self) -> None:
@@ -935,7 +1003,10 @@ class PaymentPlan(
 
     @transition(
         field=background_action_status,
-        source=[BackgroundActionStatus.RULE_ENGINE_RUN, BackgroundActionStatus.RULE_ENGINE_ERROR],
+        source=[
+            BackgroundActionStatus.RULE_ENGINE_RUN,
+            BackgroundActionStatus.RULE_ENGINE_ERROR,
+        ],
         target=BackgroundActionStatus.RULE_ENGINE_ERROR,
         conditions=[lambda obj: obj.status == PaymentPlan.Status.LOCKED],
     )
@@ -957,7 +1028,11 @@ class PaymentPlan(
         target=BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
         conditions=[
             lambda obj: obj.status
-            in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]
+            in [
+                PaymentPlan.Status.LOCKED,
+                PaymentPlan.Status.ACCEPTED,
+                PaymentPlan.Status.FINISHED,
+            ]
         ],
     )
     def background_action_status_xlsx_importing_reconciliation(self) -> None:
@@ -973,7 +1048,11 @@ class PaymentPlan(
         target=BackgroundActionStatus.XLSX_IMPORT_ERROR,
         conditions=[
             lambda obj: obj.status
-            in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]
+            in [
+                PaymentPlan.Status.LOCKED,
+                PaymentPlan.Status.ACCEPTED,
+                PaymentPlan.Status.FINISHED,
+            ]
         ],
     )
     def background_action_status_xlsx_import_error(self) -> None:
@@ -1004,7 +1083,11 @@ class PaymentPlan(
 
     @transition(
         field=build_status,
-        source=[BuildStatus.BUILD_STATUS_PENDING, BuildStatus.BUILD_STATUS_FAILED, BuildStatus.BUILD_STATUS_OK],
+        source=[
+            BuildStatus.BUILD_STATUS_PENDING,
+            BuildStatus.BUILD_STATUS_FAILED,
+            BuildStatus.BUILD_STATUS_OK,
+        ],
         target=BuildStatus.BUILD_STATUS_BUILDING,
         conditions=[
             lambda obj: obj.status
@@ -1073,7 +1156,10 @@ class PaymentPlan(
 
     @transition(
         field=background_action_status,
-        source=[BackgroundActionStatus.EXCLUDE_BENEFICIARIES, BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR],
+        source=[
+            BackgroundActionStatus.EXCLUDE_BENEFICIARIES,
+            BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR,
+        ],
         target=BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR,
         conditions=[lambda obj: obj.status in [PaymentPlan.Status.OPEN, PaymentPlan.Status.LOCKED]],
     )
@@ -1091,7 +1177,10 @@ class PaymentPlan(
 
     @transition(
         field=background_action_status,
-        source=[BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY, BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR],
+        source=[
+            BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY,
+            BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR,
+        ],
         target=BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR,
         conditions=[lambda obj: obj.status in [PaymentPlan.Status.ACCEPTED]],
     )
@@ -1108,7 +1197,11 @@ class PaymentPlan(
 
     @transition(
         field=status,
-        source=[Status.TP_LOCKED, Status.TP_STEFICON_COMPLETED, Status.TP_STEFICON_ERROR],
+        source=[
+            Status.TP_LOCKED,
+            Status.TP_STEFICON_COMPLETED,
+            Status.TP_STEFICON_ERROR,
+        ],
         target=Status.TP_OPEN,
     )
     def status_tp_open(self) -> None:
@@ -1205,7 +1298,12 @@ class PaymentPlan(
 
     @transition(
         field=status,
-        source=[Status.TP_LOCKED, Status.TP_STEFICON_COMPLETED, Status.TP_STEFICON_ERROR, Status.OPEN],
+        source=[
+            Status.TP_LOCKED,
+            Status.TP_STEFICON_COMPLETED,
+            Status.TP_STEFICON_ERROR,
+            Status.OPEN,
+        ],
         target=Status.DRAFT,
     )
     def status_draft(self) -> None:
@@ -1221,7 +1319,12 @@ class PaymentPlan(
 
 
 class FlexFieldArrayField(ArrayField):
-    def formfield(self, form_class: Optional[Any] = ..., choices_form_class: Optional[Any] = ..., **kwargs: Any) -> Any:
+    def formfield(
+        self,
+        form_class: Optional[Any] = ...,
+        choices_form_class: Optional[Any] = ...,
+        **kwargs: Any,
+    ) -> Any:
         widget = FilteredSelectMultiple(self.verbose_name, False)
         # TODO exclude PDU here
         flexible_attributes = FlexibleAttribute.objects.values_list("name", flat=True)
@@ -1246,7 +1349,10 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         ("alternate_collector_given_name", _("Alternate collector Given Name")),
         ("alternate_collector_middle_name", _("Alternate collector Middle Name")),
         ("alternate_collector_phone_no", _("Alternate collector phone number")),
-        ("alternate_collector_document_numbers", _("Alternate collector Document numbers")),
+        (
+            "alternate_collector_document_numbers",
+            _("Alternate collector Document numbers"),
+        ),
         ("alternate_collector_sex", _("Alternate collector Gender")),
         ("payment_channel", _("Payment Channel")),
         ("fsp_name", _("FSP Name")),
@@ -1264,7 +1370,10 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         ("additional_document_number", _("Additional Document Number")),
         ("registration_token", _("Registration Token")),
         ("status", _("Status")),
-        ("transaction_status_blockchain_link", _("Transaction Status on the Blockchain")),
+        (
+            "transaction_status_blockchain_link",
+            _("Transaction Status on the Blockchain"),
+        ),
         ("fsp_auth_code", _("Auth Code")),
     )
 
@@ -1332,7 +1441,13 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
                 country = Country.objects.filter(pk=household_data.get(main_key)).first()
                 return country.iso_code3 if country else None
 
-            if main_key in {"admin1_id", "admin2_id", "admin3_id", "admin4_id", "admin_area_id"}:
+            if main_key in {
+                "admin1_id",
+                "admin2_id",
+                "admin3_id",
+                "admin4_id",
+                "admin_area_id",
+            }:
                 area = Area.objects.filter(pk=household_data.get(main_key)).first()
                 return f"{area.p_code} - {area.name}" if area else "" if area else None
 
@@ -1356,7 +1471,10 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
                 return collector_data.get("bank_account_info", {}).get(bank_account_info_lookup)
 
             if main_key == "documents":
-                doc_type, doc_lookup = snapshot_field_path_split[1], snapshot_field_path_split[2]
+                doc_type, doc_lookup = (
+                    snapshot_field_path_split[1],
+                    snapshot_field_path_split[2],
+                )
                 documents_list = collector_data.get("documents", [])
                 documents_dict = {doc.get("type"): doc for doc in documents_list}
                 return documents_dict.get(doc_type, {}).get(doc_lookup)
@@ -1418,7 +1536,10 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "alternate_collector_middle_name": (alternate_collector, "middle_name"),
             "alternate_collector_sex": (alternate_collector, "sex"),
             "alternate_collector_phone_no": (alternate_collector, "phone_no"),
-            "alternate_collector_document_numbers": (alternate_collector, "document_number"),
+            "alternate_collector_document_numbers": (
+                alternate_collector,
+                "document_number",
+            ),
             "payment_channel": (payment.delivery_type, "name"),
             "fsp_name": (payment.financial_service_provider, "name"),
             "currency": (payment, "currency"),
@@ -1427,7 +1548,10 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "delivered_quantity": (payment, "delivered_quantity"),
             "delivery_date": (payment, "delivery_date"),
             "reference_id": (payment, "transaction_reference_id"),
-            "reason_for_unsuccessful_payment": (payment, "reason_for_unsuccessful_payment"),
+            "reason_for_unsuccessful_payment": (
+                payment,
+                "reason_for_unsuccessful_payment",
+            ),
             "order_number": (payment, "order_number"),
             "token_number": (payment, "token_number"),
             "additional_collector_name": (payment, "additional_collector_name"),
@@ -1609,7 +1733,11 @@ class FinancialServiceProvider(InternalDataFieldModel, LimitBusinessAreaModelMix
         if not self.is_payment_gateway:
             return []
         return [
-            {"key": config.get("key", None), "label": config.get("label", None), "id": config.get("id", None)}
+            {
+                "key": config.get("key", None),
+                "label": config.get("label", None),
+                "id": config.get("id", None),
+            }
             for config in self.data_transfer_configuration
         ]
 
@@ -1652,7 +1780,11 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["payment_plan", "delivery_mechanism", "delivery_mechanism_order"],
+                fields=[
+                    "payment_plan",
+                    "delivery_mechanism",
+                    "delivery_mechanism_order",
+                ],
                 name="unique payment_plan_delivery_mechanism",
             ),
         ]
@@ -1695,7 +1827,10 @@ class Payment(
         (STATUS_SUCCESS, _("Transaction Successful")),  # Delivered Fully
         (STATUS_ERROR, _("Transaction Erroneous")),  # Unsuccessful
         (STATUS_FORCE_FAILED, _("Force failed")),  # Force Failed
-        (STATUS_DISTRIBUTION_PARTIAL, _("Partially Distributed")),  # Delivered Partially
+        (
+            STATUS_DISTRIBUTION_PARTIAL,
+            _("Partially Distributed"),
+        ),  # Delivered Partially
         (STATUS_PENDING, _("Pending")),  # Pending
         (STATUS_SENT_TO_PG, _("Sent to Payment Gateway")),
         (STATUS_SENT_TO_FSP, _("Sent to FSP")),
@@ -1709,7 +1844,11 @@ class Payment(
         STATUS_NOT_DISTRIBUTED,
     )
     PENDING_STATUSES = (STATUS_PENDING, STATUS_SENT_TO_PG, STATUS_SENT_TO_FSP)
-    DELIVERED_STATUSES = (STATUS_SUCCESS, STATUS_DISTRIBUTION_SUCCESS, STATUS_DISTRIBUTION_PARTIAL)
+    DELIVERED_STATUSES = (
+        STATUS_SUCCESS,
+        STATUS_DISTRIBUTION_SUCCESS,
+        STATUS_DISTRIBUTION_PARTIAL,
+    )
 
     ENTITLEMENT_CARD_STATUS_ACTIVE = "ACTIVE"
     ENTITLEMENT_CARD_STATUS_INACTIVE = "INACTIVE"
@@ -1732,9 +1871,17 @@ class Payment(
     financial_service_provider = models.ForeignKey(
         "payment.FinancialServiceProvider", on_delete=models.PROTECT, null=True
     )
-    collector = models.ForeignKey("household.Individual", on_delete=models.CASCADE, related_name="collector_payments")
+    collector = models.ForeignKey(
+        "household.Individual",
+        on_delete=models.CASCADE,
+        related_name="collector_payments",
+    )
     source_payment = models.ForeignKey(
-        "self", null=True, blank=True, on_delete=models.CASCADE, related_name="follow_ups"
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="follow_ups",
     )
     is_follow_up = models.BooleanField(default=False)
     status = models.CharField(
@@ -1749,17 +1896,33 @@ class Payment(
         blank=True,
     )
     entitlement_quantity = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.00"))],
+        null=True,
+        blank=True,
     )
     entitlement_quantity_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.00"))],
+        null=True,
+        blank=True,
     )
     entitlement_date = models.DateTimeField(null=True, blank=True)
     delivered_quantity = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.00"))],
+        null=True,
+        blank=True,
     )
     delivered_quantity_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.00"))],
+        null=True,
+        blank=True,
     )
     delivery_date = models.DateTimeField(null=True, blank=True)
     transaction_reference_id = models.CharField(max_length=255, null=True, blank=True)  # transaction_id
@@ -1779,7 +1942,11 @@ class Payment(
     token_number = models.PositiveIntegerField(
         blank=True,
         null=True,
-        validators=[MinValueValidator(1000000), MaxValueValidator(9999999), payment_token_and_order_number_validator],
+        validators=[
+            MinValueValidator(1000000),
+            MaxValueValidator(9999999),
+            payment_token_and_order_number_validator,
+        ],
     )  # 7 digits
 
     additional_collector_name = models.CharField(
@@ -1789,15 +1956,26 @@ class Payment(
         help_text="Use this field for reconciliation data when funds are collected by someone other than the designated collector or the alternate collector",
     )
     additional_document_type = models.CharField(
-        max_length=128, blank=True, null=True, help_text="Use this field for reconciliation data"
+        max_length=128,
+        blank=True,
+        null=True,
+        help_text="Use this field for reconciliation data",
     )
     additional_document_number = models.CharField(
-        max_length=128, blank=True, null=True, help_text="Use this field for reconciliation data"
+        max_length=128,
+        blank=True,
+        null=True,
+        help_text="Use this field for reconciliation data",
     )
     fsp_auth_code = models.CharField(max_length=128, blank=True, null=True, help_text="FSP Auth Code")
 
     vulnerability_score = models.DecimalField(
-        blank=True, null=True, decimal_places=3, max_digits=6, help_text="Written by Steficon", db_index=True
+        blank=True,
+        null=True,
+        decimal_places=3,
+        max_digits=6,
+        help_text="Written by Steficon",
+        db_index=True,
     )
     is_cash_assist = models.BooleanField(default=False)
 
@@ -1877,7 +2055,10 @@ class Payment(
         if self.status == Payment.STATUS_PENDING:
             status = "Pending"
 
-        elif self.status in (Payment.STATUS_DISTRIBUTION_SUCCESS, Payment.STATUS_SUCCESS):
+        elif self.status in (
+            Payment.STATUS_DISTRIBUTION_SUCCESS,
+            Payment.STATUS_SUCCESS,
+        ):
             status = "Delivered Fully"
 
         elif self.status == Payment.STATUS_DISTRIBUTION_PARTIAL:
@@ -1925,7 +2106,9 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
     VALIDATION_ERROR_MISSING_DATA = _("Missing required payment data")
 
     individual = models.ForeignKey(
-        "household.Individual", on_delete=models.CASCADE, related_name="delivery_mechanisms_data"
+        "household.Individual",
+        on_delete=models.CASCADE,
+        related_name="delivery_mechanisms_data",
     )
     delivery_mechanism = models.ForeignKey("payment.DeliveryMechanism", on_delete=models.PROTECT)
     data = JSONField(default=dict, blank=True, encoder=DjangoJSONEncoder)

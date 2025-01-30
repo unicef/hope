@@ -41,7 +41,10 @@ class TestCrossAreaFilter(APITestCase):
         partner_unicef = PartnerFactory(name="UNICEF")
         cls.user = UserFactory(partner=partner_unicef)
 
-        role = RoleFactory(name="GRIEVANCES CROSS AREA FILTER", permissions=["GRIEVANCES_CROSS_AREA_FILTER"])
+        role = RoleFactory(
+            name="GRIEVANCES CROSS AREA FILTER",
+            permissions=["GRIEVANCES_CROSS_AREA_FILTER"],
+        )
         UserRole.objects.create(business_area=cls.business_area, user=cls.user, role=role)
 
         cls.admin_area1 = AreaFactory(name="Admin Area 1", level=2, p_code="AREA1")
@@ -52,19 +55,25 @@ class TestCrossAreaFilter(APITestCase):
         individual1_from_area1 = IndividualFactory(business_area=cls.business_area, household=None)
         individual2_from_area1 = IndividualFactory(business_area=cls.business_area, household=None)
         household1_from_area1 = HouseholdFactory(
-            business_area=cls.business_area, admin2=cls.admin_area1, head_of_household=individual1_from_area1
+            business_area=cls.business_area,
+            admin2=cls.admin_area1,
+            head_of_household=individual1_from_area1,
         )
         individual1_from_area1.household = household1_from_area1
         individual1_from_area1.save()
         household2_from_area1 = HouseholdFactory(
-            business_area=cls.business_area, admin2=cls.admin_area1, head_of_household=individual2_from_area1
+            business_area=cls.business_area,
+            admin2=cls.admin_area1,
+            head_of_household=individual2_from_area1,
         )
         individual2_from_area1.household = household2_from_area1
         individual2_from_area1.save()
 
         individual_from_area2 = IndividualFactory(business_area=cls.business_area, household=None)
         household_from_area2 = HouseholdFactory(
-            business_area=cls.business_area, admin2=cls.admin_area2, head_of_household=individual_from_area2
+            business_area=cls.business_area,
+            admin2=cls.admin_area2,
+            head_of_household=individual_from_area2,
         )
         individual_from_area2.household = household_from_area2
         individual_from_area2.save()
@@ -116,7 +125,9 @@ class TestCrossAreaFilter(APITestCase):
         program_partner_through_without_area_restrictions.save()
         cls.partner_with_area_restrictions = PartnerFactory(name="Partner with area restrictions")
         cls.update_partner_access_to_program(
-            cls.partner_with_area_restrictions, cls.program, [cls.admin_area1, cls.admin_area2]
+            cls.partner_with_area_restrictions,
+            cls.program,
+            [cls.admin_area1, cls.admin_area2],
         )
 
     def test1_cross_area_filter_true_full_area_access_without_permission(self) -> None:
@@ -124,7 +135,10 @@ class TestCrossAreaFilter(APITestCase):
         user_without_permission = UserFactory(partner=self.partner_without_area_restrictions)
         self.create_user_role_with_permissions(
             user_without_permission,
-            [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            [
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+            ],
             self.business_area,
         )
 
@@ -167,7 +181,10 @@ class TestCrossAreaFilter(APITestCase):
     def test_cross_area_filter_true(self) -> None:
         self.create_user_role_with_permissions(
             self.user,
-            [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            [
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+            ],
             self.business_area,
         )
 
@@ -191,7 +208,10 @@ class TestCrossAreaFilter(APITestCase):
     def test_without_cross_area_filter(self) -> None:
         self.create_user_role_with_permissions(
             self.user,
-            [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            [
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+            ],
             self.business_area,
         )
 

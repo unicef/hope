@@ -506,7 +506,8 @@ class DjangoPermissionFilterFastConnectionField(DjangoFastConnectionField):
             raise PermissionDenied("Permission Denied")
         if "permissions" in filtering_args:
             filter_kwargs["permissions"] = info.context.user.permissions_in_business_area(
-                business_area_slug=filter_kwargs.get("business_area"), program_id=program_id
+                business_area_slug=filter_kwargs.get("business_area"),
+                program_id=program_id,
             )
         qs = super().resolve_queryset(connection, iterable, info, args)
         return filterset_class(data=filter_kwargs, queryset=qs, request=info.context).qs

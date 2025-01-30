@@ -87,7 +87,10 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
         )
         payment_plan.refresh_from_db()
         response = self.client.post(
-            reverse("admin:payment_paymentplan_restart_preparing_payment_plan", args=[payment_plan.id]),
+            reverse(
+                "admin:payment_paymentplan_restart_preparing_payment_plan",
+                args=[payment_plan.id],
+            ),
             HTTP_X_ROOT_TOKEN="test-token123",
         )
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
@@ -107,7 +110,10 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
         )
         payment_plan.refresh_from_db()
         response = self.client.post(
-            reverse("admin:payment_paymentplan_restart_preparing_payment_plan", args=[payment_plan.id]),
+            reverse(
+                "admin:payment_paymentplan_restart_preparing_payment_plan",
+                args=[payment_plan.id],
+            ),
             HTTP_X_ROOT_TOKEN="test-token123",
         )
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
@@ -136,7 +142,10 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
         cache.set(cache_key, True, timeout=600)
 
         response = self.client.post(
-            reverse("admin:payment_paymentplan_restart_preparing_payment_plan", args=[payment_plan.id]),
+            reverse(
+                "admin:payment_paymentplan_restart_preparing_payment_plan",
+                args=[payment_plan.id],
+            ),
             HTTP_X_ROOT_TOKEN="test-token123",
         )
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)

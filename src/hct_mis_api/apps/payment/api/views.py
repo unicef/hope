@@ -156,7 +156,8 @@ class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.L
             old_payment_plan.export_file_per_fsp = copy_model_object(payment_plan.export_file_per_fsp)
 
         payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
-            input_data=input_data, user=request.user  # type: ignore
+            input_data=input_data,
+            user=request.user,  # type: ignore
         )
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
@@ -199,7 +200,9 @@ class PaymentPlanSupportingDocumentViewSet(
     def get_object(self) -> PaymentPlanSupportingDocument:
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(self.kwargs.get("payment_plan_id")))
         return get_object_or_404(
-            PaymentPlanSupportingDocument, id=decode_id_string(self.kwargs.get("file_id")), payment_plan=payment_plan
+            PaymentPlanSupportingDocument,
+            id=decode_id_string(self.kwargs.get("file_id")),
+            payment_plan=payment_plan,
         )
 
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -214,7 +217,9 @@ class PaymentPlanSupportingDocumentViewSet(
         file = document.file
         file_mimetype, _ = mimetypes.guess_type(file.url)
         response = FileResponse(
-            file.open(), as_attachment=True, content_type=file_mimetype or "application/octet-stream"
+            file.open(),
+            as_attachment=True,
+            content_type=file_mimetype or "application/octet-stream",
         )
         response["Content-Disposition"] = f"attachment; filename={file.name.split('/')[-1]}"
         return response

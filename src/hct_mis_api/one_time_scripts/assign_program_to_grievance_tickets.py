@@ -79,7 +79,10 @@ def assign_program_to_grievance_tickets() -> None:
             id__in=grievance_tickets_ids[batch_start:batch_end]
         ).annotate(program=annotation):
             grievance_tickets_programs_to_create.append(
-                GrievanceTicketProgramThrough(grievanceticket=grievance_ticket, program_id=grievance_ticket.program)
+                GrievanceTicketProgramThrough(
+                    grievanceticket=grievance_ticket,
+                    program_id=grievance_ticket.program,
+                )
             )
 
         GrievanceTicketProgramThrough.objects.bulk_create(grievance_tickets_programs_to_create)

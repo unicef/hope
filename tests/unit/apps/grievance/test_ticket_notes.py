@@ -81,7 +81,10 @@ class TestTicketNotes(APITestCase):
         variables = {"ticket": str(self.ticket_1.id)}
         self.snapshot_graphql_request(
             request_string=self.ALL_TICKET_NOTE_QUERY,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=variables,
         )
 
@@ -105,6 +108,9 @@ class TestTicketNotes(APITestCase):
         }
         self.snapshot_graphql_request(
             request_string=self.CREATE_TICKET_NOTE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=input_data,
         )

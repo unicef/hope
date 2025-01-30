@@ -116,7 +116,11 @@ class IndividualDataUpdateService(DataChangeService):
             current_value = getattr(individual, field, None)
             if isinstance(current_value, (datetime, date)):
                 current_value = current_value.isoformat()
-            elif field in ("phone_no", "phone_no_alternative", "payment_delivery_phone_no"):
+            elif field in (
+                "phone_no",
+                "phone_no_alternative",
+                "payment_delivery_phone_no",
+            ):
                 current_value = str(current_value)
             elif field == "role":
                 current_value = individual.role
@@ -143,7 +147,11 @@ class IndividualDataUpdateService(DataChangeService):
             for delivery_mechanism_data_id in delivery_mechanism_data_to_remove
         ]
         flex_fields_with_approve_status = {
-            field: {"value": value, "approve_status": False, "previous_value": individual.flex_fields.get(field)}
+            field: {
+                "value": value,
+                "approve_status": False,
+                "previous_value": individual.flex_fields.get(field),
+            }
             for field, value in flex_fields.items()
         }
         individual_data_with_approve_status["documents"] = documents_with_approve_status
@@ -220,7 +228,11 @@ class IndividualDataUpdateService(DataChangeService):
             current_value = getattr(individual, field, None)
             if isinstance(current_value, (datetime, date)):
                 current_value = current_value.isoformat()
-            elif field in ("phone_no", "phone_no_alternative", "payment_delivery_phone_no"):
+            elif field in (
+                "phone_no",
+                "phone_no_alternative",
+                "payment_delivery_phone_no",
+            ):
                 current_value = str(current_value)
             elif field == "role":
                 current_value = individual.role
@@ -247,7 +259,11 @@ class IndividualDataUpdateService(DataChangeService):
             for delivery_mechanism_data_id in delivery_mechanism_data_to_remove
         ]
         flex_fields_with_approve_status = {
-            field: {"value": value, "approve_status": False, "previous_value": individual.flex_fields.get(field)}
+            field: {
+                "value": value,
+                "approve_status": False,
+                "previous_value": individual.flex_fields.get(field),
+            }
             for field, value in flex_fields.items()
         }
         individual_data_with_approve_status["documents"] = documents_with_approve_status
@@ -387,7 +403,9 @@ class IndividualDataUpdateService(DataChangeService):
             Household.objects.filter(id=household.id).update(**hh_approved_data, updated_at=timezone.now())
         # upd Individual
         Individual.objects.filter(id=new_individual.id).update(
-            flex_fields=merged_flex_fields, **only_approved_data, updated_at=timezone.now()
+            flex_fields=merged_flex_fields,
+            **only_approved_data,
+            updated_at=timezone.now(),
         )
         relationship_to_head_of_household = individual_data.get("relationship")
         if (
@@ -425,7 +443,13 @@ class IndividualDataUpdateService(DataChangeService):
         IndividualIdentity.objects.filter(id__in=identities_to_remove).delete()
         BankAccountInfo.objects.bulk_create(payment_channels_to_create)
         BankAccountInfo.objects.bulk_update(
-            payment_channels_to_update, ["bank_name", "bank_account_number", "account_holder_name", "bank_branch_name"]
+            payment_channels_to_update,
+            [
+                "bank_name",
+                "bank_account_number",
+                "account_holder_name",
+                "bank_branch_name",
+            ],
         )
         BankAccountInfo.objects.filter(id__in=payment_channels_to_remove).delete()
 

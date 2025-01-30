@@ -564,7 +564,11 @@ class TestFSPAssignment(APITestCase):
         assert new_data["deliveryMechanisms"][0]["fsp"] is not None
         assert new_data["deliveryMechanisms"][1]["fsp"] is not None
 
-        for fsp in [self.santander_fsp, self.bank_of_america_fsp, self.bank_of_europe_fsp]:
+        for fsp in [
+            self.santander_fsp,
+            self.bank_of_america_fsp,
+            self.bank_of_europe_fsp,
+        ]:
             fsp.delivery_mechanisms.add(self.dm_mobile_money)
         new_program_mutation_variables = dict(
             input=dict(

@@ -41,7 +41,10 @@ class TestApiToken(TestCase):
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
     @override_config(ENABLE_MAILJET=True)
     def test_send_api_token(
-        self, mocked_requests_init: Any, mocked_requests_user: Any, mocked_requests_post: Any
+        self,
+        mocked_requests_init: Any,
+        mocked_requests_user: Any,
+        mocked_requests_post: Any,
     ) -> None:
         request = HttpRequest()
 
@@ -53,7 +56,10 @@ class TestApiToken(TestCase):
             {
                 "Messages": [
                     {
-                        "From": {"Email": settings.DEFAULT_EMAIL, "Name": settings.DEFAULT_EMAIL_DISPLAY},
+                        "From": {
+                            "Email": settings.DEFAULT_EMAIL,
+                            "Name": settings.DEFAULT_EMAIL_DISPLAY,
+                        },
                         "Subject": f"[test] HOPE API Token {self.token} infos",
                         "To": [
                             {

@@ -36,7 +36,8 @@ class PushLaxToRDITests(HOPEApiTestCase):
         call_command("loadcountries")
         call_command("loadcountrycodes")
         DocumentType.objects.create(
-            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE], label="--"
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
+            label="--",
         )
         cls.program = ProgramFactory.create(status=Program.DRAFT, business_area=cls.business_area)
         cls.rdi = RegistrationDataImport.objects.create(
@@ -269,10 +270,12 @@ class PushLaxToRDITests(HOPEApiTestCase):
             self.assertTrue(PendingHousehold.objects.filter(registration_data_import=rdi, village=valid).exists())
 
         self.assertDictEqual(
-            data["households"][2], {"Household #3": [{"primary_collector": ["Missing Primary Collector"]}]}
+            data["households"][2],
+            {"Household #3": [{"primary_collector": ["Missing Primary Collector"]}]},
         )
         self.assertDictEqual(
-            data["households"][5], {"Household #6": [{"head_of_household": ["Missing Head Of Household"]}]}
+            data["households"][5],
+            {"Household #6": [{"head_of_household": ["Missing Head Of Household"]}]},
         )
         pk1 = list(data["households"][0].values())[0][0]["pk"]
         hh = PendingHousehold.objects.get(pk=pk1)

@@ -141,11 +141,20 @@ class TestPeriodicDataUpdateImportService(TestCase):
         )
         service = PeriodicDataUpdateImportService(periodic_data_update_upload)
         service.import_data()
-        self.assertEqual(periodic_data_update_upload.status, PeriodicDataUpdateUpload.Status.SUCCESSFUL)
+        self.assertEqual(
+            periodic_data_update_upload.status,
+            PeriodicDataUpdateUpload.Status.SUCCESSFUL,
+        )
         self.assertEqual(periodic_data_update_upload.error_message, None)
         self.individual.refresh_from_db()
-        self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["value"], "Test Value")
-        self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"], "2021-05-02")
+        self.assertEqual(
+            self.individual.flex_fields[flexible_attribute.name]["1"]["value"],
+            "Test Value",
+        )
+        self.assertEqual(
+            self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"],
+            "2021-05-02",
+        )
 
     def test_import_data_decimal(self) -> None:
         flexible_attribute = self.decimal_attribute
@@ -162,11 +171,17 @@ class TestPeriodicDataUpdateImportService(TestCase):
         )
         service = PeriodicDataUpdateImportService(periodic_data_update_upload)
         service.import_data()
-        self.assertEqual(periodic_data_update_upload.status, PeriodicDataUpdateUpload.Status.SUCCESSFUL)
+        self.assertEqual(
+            periodic_data_update_upload.status,
+            PeriodicDataUpdateUpload.Status.SUCCESSFUL,
+        )
         self.assertEqual(periodic_data_update_upload.error_message, None)
         self.individual.refresh_from_db()
         self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["value"], 20.456)
-        self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"], "2021-05-02")
+        self.assertEqual(
+            self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"],
+            "2021-05-02",
+        )
 
     def test_import_data_boolean(self) -> None:
         flexible_attribute = self.boolean_attribute
@@ -183,11 +198,17 @@ class TestPeriodicDataUpdateImportService(TestCase):
         )
         service = PeriodicDataUpdateImportService(periodic_data_update_upload)
         service.import_data()
-        self.assertEqual(periodic_data_update_upload.status, PeriodicDataUpdateUpload.Status.SUCCESSFUL)
+        self.assertEqual(
+            periodic_data_update_upload.status,
+            PeriodicDataUpdateUpload.Status.SUCCESSFUL,
+        )
         self.assertEqual(periodic_data_update_upload.error_message, None)
         self.individual.refresh_from_db()
         self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["value"], True)
-        self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"], "2021-05-02")
+        self.assertEqual(
+            self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"],
+            "2021-05-02",
+        )
 
     def test_import_data_boolean_1(self) -> None:
         flexible_attribute = self.boolean_attribute
@@ -204,11 +225,17 @@ class TestPeriodicDataUpdateImportService(TestCase):
         )
         service = PeriodicDataUpdateImportService(periodic_data_update_upload)
         service.import_data()
-        self.assertEqual(periodic_data_update_upload.status, PeriodicDataUpdateUpload.Status.SUCCESSFUL)
+        self.assertEqual(
+            periodic_data_update_upload.status,
+            PeriodicDataUpdateUpload.Status.SUCCESSFUL,
+        )
         self.assertEqual(periodic_data_update_upload.error_message, None)
         self.individual.refresh_from_db()
         self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["value"], False)
-        self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"], "2021-05-02")
+        self.assertEqual(
+            self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"],
+            "2021-05-02",
+        )
 
     def test_import_data_boolean_fail(self) -> None:
         flexible_attribute = self.boolean_attribute
@@ -257,11 +284,20 @@ class TestPeriodicDataUpdateImportService(TestCase):
         )
         service = PeriodicDataUpdateImportService(periodic_data_update_upload)
         service.import_data()
-        self.assertEqual(periodic_data_update_upload.status, PeriodicDataUpdateUpload.Status.SUCCESSFUL)
+        self.assertEqual(
+            periodic_data_update_upload.status,
+            PeriodicDataUpdateUpload.Status.SUCCESSFUL,
+        )
         self.assertEqual(periodic_data_update_upload.error_message, None)
         self.individual.refresh_from_db()
-        self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["value"], "1996-06-21")
-        self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"], "2021-05-02")
+        self.assertEqual(
+            self.individual.flex_fields[flexible_attribute.name]["1"]["value"],
+            "1996-06-21",
+        )
+        self.assertEqual(
+            self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"],
+            "2021-05-02",
+        )
 
     def test_import_data_date_no_collection_date(self) -> None:
         flexible_attribute = self.date_attribute
@@ -280,11 +316,20 @@ class TestPeriodicDataUpdateImportService(TestCase):
         periodic_data_update_template.save()
         service = PeriodicDataUpdateImportService(periodic_data_update_upload)
         service.import_data()
-        self.assertEqual(periodic_data_update_upload.status, PeriodicDataUpdateUpload.Status.SUCCESSFUL)
+        self.assertEqual(
+            periodic_data_update_upload.status,
+            PeriodicDataUpdateUpload.Status.SUCCESSFUL,
+        )
         self.assertEqual(periodic_data_update_upload.error_message, None)
         self.individual.refresh_from_db()
-        self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["value"], "1996-06-21")
-        self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"], "2021-03-07")
+        self.assertEqual(
+            self.individual.flex_fields[flexible_attribute.name]["1"]["value"],
+            "1996-06-21",
+        )
+        self.assertEqual(
+            self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"],
+            "2021-03-07",
+        )
 
     def test_import_data_date_fail_string(self) -> None:
         flexible_attribute = self.date_attribute
@@ -392,11 +437,20 @@ class TestPeriodicDataUpdateImportService(TestCase):
         )
         service = PeriodicDataUpdateImportService(periodic_data_update_upload)
         service.import_data()
-        self.assertEqual(periodic_data_update_upload.status, PeriodicDataUpdateUpload.Status.SUCCESSFUL)
+        self.assertEqual(
+            periodic_data_update_upload.status,
+            PeriodicDataUpdateUpload.Status.SUCCESSFUL,
+        )
         self.assertEqual(periodic_data_update_upload.error_message, None)
         self.individual.refresh_from_db()
-        self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["value"], "2021-05-02")
-        self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"], "2021-05-02")
+        self.assertEqual(
+            self.individual.flex_fields[flexible_attribute.name]["1"]["value"],
+            "2021-05-02",
+        )
+        self.assertEqual(
+            self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"],
+            "2021-05-02",
+        )
 
     def test_read_periodic_data_update_template_object(self) -> None:
         periodic_data_update_template = PeriodicDataUpdateTemplate.objects.create(
@@ -429,7 +483,10 @@ class TestPeriodicDataUpdateImportService(TestCase):
             periodic_data_update_template_from_xlsx = (
                 PeriodicDataUpdateImportService.read_periodic_data_update_template_object(tmp_file)
             )
-            self.assertEqual(periodic_data_update_template_from_xlsx.pk, periodic_data_update_template.pk)
+            self.assertEqual(
+                periodic_data_update_template_from_xlsx.pk,
+                periodic_data_update_template.pk,
+            )
         wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
         del wb.custom_doc_props[PeriodicDataUpdateExportTemplateService.PROPERTY_ID_NAME]
         ws_meta = wb[PeriodicDataUpdateExportTemplateService.META_SHEET]
@@ -437,7 +494,10 @@ class TestPeriodicDataUpdateImportService(TestCase):
         with NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp_file:
             wb.save(tmp_file.name)
             tmp_file.seek(0)
-            with self.assertRaisesMessage(ValidationError, "Periodic Data Update Template ID is missing in the file"):
+            with self.assertRaisesMessage(
+                ValidationError,
+                "Periodic Data Update Template ID is missing in the file",
+            ):
                 PeriodicDataUpdateImportService.read_periodic_data_update_template_object(tmp_file)
 
         wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
@@ -595,8 +655,14 @@ class TestPeriodicDataUpdateImportService(TestCase):
         service._open_workbook()
         service._read_flexible_attributes()
         service.set_round_value(self.individual, flexible_attribute.name, 1, "1996-06-21", "2021-05-02")
-        self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["value"], "1996-06-21")
-        self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"], "2021-05-02")
+        self.assertEqual(
+            self.individual.flex_fields[flexible_attribute.name]["1"]["value"],
+            "1996-06-21",
+        )
+        self.assertEqual(
+            self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"],
+            "2021-05-02",
+        )
 
     def test_get_form_field_for_value(self) -> None:
         flexible_attribute = self.date_attribute

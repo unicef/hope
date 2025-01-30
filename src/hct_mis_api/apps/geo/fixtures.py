@@ -20,7 +20,13 @@ def create_fake_multipolygon() -> MultiPolygon:
 class CountryFactory(DjangoModelFactory):
     class Meta:
         model = Country
-        django_get_or_create = ("name", "short_name", "iso_code2", "iso_code3", "iso_num")
+        django_get_or_create = (
+            "name",
+            "short_name",
+            "iso_code2",
+            "iso_code3",
+            "iso_num",
+        )
 
     name = "Afghanistan"
     short_name = "Afghanistan"

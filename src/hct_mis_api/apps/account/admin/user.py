@@ -94,7 +94,10 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
     extra_fieldsets = (
         (
             _("Custom Fields"),
-            {"classes": ["collapse"], "fields": ("custom_fields", "doap_hash", "ad_uuid")},
+            {
+                "classes": ["collapse"],
+                "fields": ("custom_fields", "doap_hash", "ad_uuid"),
+            },
         ),
         (
             _("Permissions"),
@@ -148,7 +151,14 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
         return self.get_fields(request)
 
     def get_fields(self, request: HttpRequest, obj: Optional[Any] = None) -> List[str]:
-        return ["last_name", "first_name", "email", "username", "job_title", "last_login"]
+        return [
+            "last_name",
+            "first_name",
+            "email",
+            "username",
+            "job_title",
+            "last_login",
+        ]
 
     def get_fieldsets(self, request: HttpRequest, obj: Optional[Any] = None) -> Any:
         fieldsets = self.base_fieldset

@@ -61,7 +61,10 @@ class Rule(LimitBusinessAreaModelMixin):
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
     type = models.CharField(
-        choices=TYPE_CHOICES, max_length=50, default=TYPE_TARGETING, help_text="Use Rule for Targeting or Payment Plan"
+        choices=TYPE_CHOICES,
+        max_length=50,
+        default=TYPE_TARGETING,
+        help_text="Use Rule for Targeting or Payment Plan",
     )
     flags = JSONField(default=dict, blank=True)
 
@@ -183,7 +186,12 @@ class Rule(LimitBusinessAreaModelMixin):
         func: Type[Interpreter] = mapping[self.language]
         return func(self.definition)
 
-    def execute(self, context: Optional[Dict] = None, only_release: bool = True, only_enabled: bool = True) -> Result:
+    def execute(
+        self,
+        context: Optional[Dict] = None,
+        only_release: bool = True,
+        only_enabled: bool = True,
+    ) -> Result:
         if self.pk:
             qs = self.history
             if only_release:
@@ -211,7 +219,9 @@ class RuleCommit(models.Model):
     is_release = models.BooleanField(default=False)
     enabled = models.BooleanField(default=False)
     deprecated = models.BooleanField(default=False)
-    language = models.CharField(max_length=10, default=Rule.LANGUAGES[0][0], choices=Rule.LANGUAGES)  # type: ignore # FIXME
+    language = models.CharField(
+        max_length=10, default=Rule.LANGUAGES[0][0], choices=Rule.LANGUAGES
+    )  # type: ignore # FIXME
 
     affected_fields = ArrayField(models.CharField(max_length=100))
     before = JSONField(help_text="The record before change", editable=False, default=dict)

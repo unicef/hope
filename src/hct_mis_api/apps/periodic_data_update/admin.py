@@ -28,7 +28,14 @@ class PeriodicDataUpdateUploadInline(admin.TabularInline):
 
 @admin.register(PeriodicDataUpdateTemplate)
 class PeriodicDataUpdateTemplateAdmin(HOPEModelAdminBase):
-    list_display = ("id", "status", "business_area", "program", "created_by", "created_at")
+    list_display = (
+        "id",
+        "status",
+        "business_area",
+        "program",
+        "created_by",
+        "created_at",
+    )
     list_filter = (
         ("business_area", LinkedAutoCompleteFilter.factory(parent=None)),
         ("program", LinkedAutoCompleteFilter.factory(parent="business_area")),

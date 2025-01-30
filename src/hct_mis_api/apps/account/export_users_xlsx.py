@@ -61,7 +61,10 @@ class ExportUsersXlsx:
         users = (
             User.objects.prefetch_related("user_roles")
             .select_related("partner")
-            .filter(is_superuser=False, user_roles__business_area__slug=self.business_area_slug)
+            .filter(
+                is_superuser=False,
+                user_roles__business_area__slug=self.business_area_slug,
+            )
         )
         if users.exists() is False:
             return None

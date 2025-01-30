@@ -29,7 +29,10 @@ logger = logging.getLogger(__name__)
 
 def get_individual(individual_id: str) -> Individual:
     decoded_selected_individual_id = decode_id_string(individual_id)
-    individual = get_object_or_404(Individual.objects.select_related("household"), id=decoded_selected_individual_id)
+    individual = get_object_or_404(
+        Individual.objects.select_related("household"),
+        id=decoded_selected_individual_id,
+    )
     return individual
 
 
@@ -73,7 +76,11 @@ def clear_cache(
 
     if isinstance(
         ticket_details,
-        (TicketAddIndividualDetails, TicketIndividualDataUpdateDetails, TicketDeleteIndividualDetails),
+        (
+            TicketAddIndividualDetails,
+            TicketIndividualDataUpdateDetails,
+            TicketDeleteIndividualDetails,
+        ),
     ):
         cache.delete_pattern(f"count_{business_area_slug}_IndividualNodeConnection_*")
 
@@ -114,7 +121,8 @@ def update_grievance_documents(documents: List[Dict]) -> None:
 
 def delete_grievance_documents(ticket_id: str, ids_to_delete: List[str]) -> None:
     documents_to_delete = GrievanceDocument.objects.filter(
-        grievance_ticket_id=ticket_id, id__in=[decode_id_string(document_id) for document_id in ids_to_delete]
+        grievance_ticket_id=ticket_id,
+        id__in=[decode_id_string(document_id) for document_id in ids_to_delete],
     )
 
     for document in documents_to_delete:
@@ -192,7 +200,9 @@ def filter_based_on_partner_areas_2(
 
 
 def validate_individual_for_need_adjudication(
-    partner: Partner, individual: Individual, ticket_details: TicketNeedsAdjudicationDetails
+    partner: Partner,
+    individual: Individual,
+    ticket_details: TicketNeedsAdjudicationDetails,
 ) -> None:
     # Validate partner's permission
     if not partner.is_unicef:
@@ -212,7 +222,9 @@ def validate_individual_for_need_adjudication(
         raise ValidationError(f"The selected individual {individual.unicef_id} is not valid, must be not withdrawn")
 
 
-def validate_all_individuals_before_close_needs_adjudication(ticket_details: TicketNeedsAdjudicationDetails) -> None:
+def validate_all_individuals_before_close_needs_adjudication(
+    ticket_details: TicketNeedsAdjudicationDetails,
+) -> None:
     duplicates_qs = ticket_details.selected_individuals.filter(withdrawn=False)
     distinct_qs = ticket_details.selected_distinct.filter(withdrawn=False)
     all_possible_duplicates = list(ticket_details.possible_duplicates.all()) + [

@@ -93,13 +93,17 @@ class TestGrievanceApproveAutomaticMutation(TestCase):
             all_documents = GrievanceTicketDocument.search().query("match_all").execute()
             grievance_tickets_documents_dict = {document.meta.id: document for document in all_documents}
             self.assertEqual(
-                grievance_tickets_documents_dict[str(self.grievance_ticket1.id)].assigned_to.id, str(self.user.id)
+                grievance_tickets_documents_dict[str(self.grievance_ticket1.id)].assigned_to.id,
+                str(self.user.id),
             )
             self.assertEqual(
-                grievance_tickets_documents_dict[str(self.grievance_ticket2.id)].assigned_to.id, str(self.user.id)
+                grievance_tickets_documents_dict[str(self.grievance_ticket2.id)].assigned_to.id,
+                str(self.user.id),
             )
             BulkActionService().bulk_assign(
-                [self.grievance_ticket1.id, self.grievance_ticket2.id], self.user_two.id, self.business_area.slug
+                [self.grievance_ticket1.id, self.grievance_ticket2.id],
+                self.user_two.id,
+                self.business_area.slug,
             )
             self.assertEqual(mock_bulk.call_count, 2)
 
@@ -116,7 +120,8 @@ class TestGrievanceApproveAutomaticMutation(TestCase):
             grievance_tickets_documents_dict = {document.meta.id: document for document in all_documents}
 
             self.assertEqual(
-                grievance_tickets_documents_dict[str(self.grievance_ticket1.id)].assigned_to.id, str(self.user_two.id)
+                grievance_tickets_documents_dict[str(self.grievance_ticket1.id)].assigned_to.id,
+                str(self.user_two.id),
             )
             self.assertEqual(
                 grievance_tickets_documents_dict[str(self.grievance_ticket1.id)].status,
@@ -124,10 +129,12 @@ class TestGrievanceApproveAutomaticMutation(TestCase):
             )
 
             self.assertEqual(
-                grievance_tickets_documents_dict[str(self.grievance_ticket2.id)].assigned_to.id, str(self.user_two.id)
+                grievance_tickets_documents_dict[str(self.grievance_ticket2.id)].assigned_to.id,
+                str(self.user_two.id),
             )
             self.assertEqual(
-                grievance_tickets_documents_dict[str(self.grievance_ticket2.id)].status, GrievanceTicket.STATUS_ASSIGNED
+                grievance_tickets_documents_dict[str(self.grievance_ticket2.id)].status,
+                GrievanceTicket.STATUS_ASSIGNED,
             )
 
     @flaky(max_runs=5, min_passes=1)
@@ -141,13 +148,17 @@ class TestGrievanceApproveAutomaticMutation(TestCase):
             all_documents = GrievanceTicketDocument.search().query("match_all").execute()
             grievance_tickets_documents_dict = {document.meta.id: document for document in all_documents}
             self.assertEqual(
-                grievance_tickets_documents_dict[str(self.grievance_ticket1.id)].priority, PRIORITY_NOT_SET
+                grievance_tickets_documents_dict[str(self.grievance_ticket1.id)].priority,
+                PRIORITY_NOT_SET,
             )
             self.assertEqual(
-                grievance_tickets_documents_dict[str(self.grievance_ticket2.id)].priority, PRIORITY_NOT_SET
+                grievance_tickets_documents_dict[str(self.grievance_ticket2.id)].priority,
+                PRIORITY_NOT_SET,
             )
             BulkActionService().bulk_set_priority(
-                [self.grievance_ticket1.id, self.grievance_ticket2.id], PRIORITY_HIGH, self.business_area.slug
+                [self.grievance_ticket1.id, self.grievance_ticket2.id],
+                PRIORITY_HIGH,
+                self.business_area.slug,
             )
             self.grievance_ticket1.refresh_from_db()
             self.grievance_ticket2.refresh_from_db()
@@ -155,8 +166,14 @@ class TestGrievanceApproveAutomaticMutation(TestCase):
             self.assertEqual(self.grievance_ticket2.priority, PRIORITY_HIGH)
             all_documents = GrievanceTicketDocument.search().query("match_all").execute()
             grievance_tickets_documents_dict = {document.meta.id: document for document in all_documents}
-            self.assertEqual(grievance_tickets_documents_dict[str(self.grievance_ticket1.id)].priority, PRIORITY_HIGH)
-            self.assertEqual(grievance_tickets_documents_dict[str(self.grievance_ticket2.id)].priority, PRIORITY_HIGH)
+            self.assertEqual(
+                grievance_tickets_documents_dict[str(self.grievance_ticket1.id)].priority,
+                PRIORITY_HIGH,
+            )
+            self.assertEqual(
+                grievance_tickets_documents_dict[str(self.grievance_ticket2.id)].priority,
+                PRIORITY_HIGH,
+            )
 
     @flaky(max_runs=5, min_passes=1)
     def test_bulk_update_urgency(self) -> None:
@@ -168,10 +185,18 @@ class TestGrievanceApproveAutomaticMutation(TestCase):
             self.assertEqual(self.grievance_ticket2.urgency, URGENCY_NOT_SET)
             all_documents = GrievanceTicketDocument.search().query("match_all").execute()
             grievance_tickets_documents_dict = {document.meta.id: document for document in all_documents}
-            self.assertEqual(grievance_tickets_documents_dict[str(self.grievance_ticket1.id)].urgency, URGENCY_NOT_SET)
-            self.assertEqual(grievance_tickets_documents_dict[str(self.grievance_ticket2.id)].urgency, URGENCY_NOT_SET)
+            self.assertEqual(
+                grievance_tickets_documents_dict[str(self.grievance_ticket1.id)].urgency,
+                URGENCY_NOT_SET,
+            )
+            self.assertEqual(
+                grievance_tickets_documents_dict[str(self.grievance_ticket2.id)].urgency,
+                URGENCY_NOT_SET,
+            )
             BulkActionService().bulk_set_urgency(
-                [self.grievance_ticket1.id, self.grievance_ticket2.id], URGENCY_VERY_URGENT, self.business_area.slug
+                [self.grievance_ticket1.id, self.grievance_ticket2.id],
+                URGENCY_VERY_URGENT,
+                self.business_area.slug,
             )
             self.grievance_ticket1.refresh_from_db()
             self.grievance_ticket2.refresh_from_db()
@@ -180,10 +205,12 @@ class TestGrievanceApproveAutomaticMutation(TestCase):
             all_documents = GrievanceTicketDocument.search().query("match_all").execute()
             grievance_tickets_documents_dict = {document.meta.id: document for document in all_documents}
             self.assertEqual(
-                grievance_tickets_documents_dict[str(self.grievance_ticket1.id)].urgency, URGENCY_VERY_URGENT
+                grievance_tickets_documents_dict[str(self.grievance_ticket1.id)].urgency,
+                URGENCY_VERY_URGENT,
             )
             self.assertEqual(
-                grievance_tickets_documents_dict[str(self.grievance_ticket2.id)].urgency, URGENCY_VERY_URGENT
+                grievance_tickets_documents_dict[str(self.grievance_ticket2.id)].urgency,
+                URGENCY_VERY_URGENT,
             )
 
     @flaky(max_runs=3, min_passes=1)
@@ -191,7 +218,10 @@ class TestGrievanceApproveAutomaticMutation(TestCase):
         self.assertEqual(self.grievance_ticket1.ticket_notes.count(), 0)
         self.assertEqual(self.grievance_ticket2.ticket_notes.count(), 0)
         BulkActionService().bulk_add_note(
-            self.user, [self.grievance_ticket1.id, self.grievance_ticket2.id], "Test note", self.business_area.slug
+            self.user,
+            [self.grievance_ticket1.id, self.grievance_ticket2.id],
+            "Test note",
+            self.business_area.slug,
         )
         self.grievance_ticket1.refresh_from_db()
         self.grievance_ticket2.refresh_from_db()

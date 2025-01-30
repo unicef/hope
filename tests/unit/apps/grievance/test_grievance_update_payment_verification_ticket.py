@@ -137,12 +137,18 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
     ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
-        extras = {"newReceivedAmount": 1234.99, "newStatus": PaymentVerification.STATUS_RECEIVED}
+        extras = {
+            "newReceivedAmount": 1234.99,
+            "newStatus": PaymentVerification.STATUS_RECEIVED,
+        }
         input_data = self._prepare_input(extras)
 
         self.snapshot_graphql_request(
             request_string=self.QUERY,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=input_data,
         )
 
@@ -168,7 +174,10 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.APPROVE_QUERY,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=input_data,
         )
 

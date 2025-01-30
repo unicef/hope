@@ -103,7 +103,14 @@ class IndividualAdmin(
         ("business_area__name", "business area"),
     )
 
-    search_fields = ("family_name", "unicef_id", "household__unicef_id", "given_name", "family_name", "full_name")
+    search_fields = (
+        "family_name",
+        "unicef_id",
+        "household__unicef_id",
+        "given_name",
+        "family_name",
+        "full_name",
+    )
     readonly_fields = ("created_at", "updated_at", "registration_data_import")
     exclude = ("created_at", "updated_at")
     list_filter = (
@@ -113,7 +120,10 @@ class IndividualAdmin(
         ("deduplication_batch_status", ChoicesFieldComboFilter),
         ("business_area", LinkedAutoCompleteFilter.factory(parent=None)),
         ("program", LinkedAutoCompleteFilter.factory(parent="business_area")),
-        ("registration_data_import", LinkedAutoCompleteFilter.factory(parent="program")),
+        (
+            "registration_data_import",
+            LinkedAutoCompleteFilter.factory(parent="program"),
+        ),
         "sex",
         "relationship",
         "marital_status",
@@ -173,7 +183,11 @@ class IndividualAdmin(
         ),
         ("Others", {"classes": ("collapse",), "fields": ("__others__",)}),
     ]
-    actions = ["count_queryset", "revalidate_phone_number_sync", "revalidate_phone_number_async"]
+    actions = [
+        "count_queryset",
+        "revalidate_phone_number_sync",
+        "revalidate_phone_number_async",
+    ]
     inlines = [IndividualDeliveryMechanismDataInline]
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
@@ -181,7 +195,11 @@ class IndividualAdmin(
             super()
             .get_queryset(request)
             .select_related(
-                "household", "registration_data_import", "individual_collection", "program", "business_area"
+                "household",
+                "registration_data_import",
+                "individual_collection",
+                "program",
+                "business_area",
             )
         )
 
@@ -215,7 +233,10 @@ class IndividualAdmin(
 
         return TemplateResponse(request, "admin/household/individual/sanity_check.html", context)
 
-    @button(label="Add/Update Individual IBAN by xlsx", permission="household.update_individual_iban")
+    @button(
+        label="Add/Update Individual IBAN by xlsx",
+        permission="household.update_individual_iban",
+    )
     def add_update_individual_iban_from_xlsx(self, request: HttpRequest) -> Any:
         if request.method == "GET":
             form = UpdateIndividualsIBANFromXlsxForm()
@@ -296,7 +317,10 @@ class BusinessAreaSlugFilter(InputFilter):
 
 @admin.register(IndividualRoleInHousehold)
 class IndividualRoleInHouseholdAdmin(
-    SoftDeletableAdminMixin, LastSyncDateResetMixin, HOPEModelAdminBase, RdiMergeStatusAdminMixin
+    SoftDeletableAdminMixin,
+    LastSyncDateResetMixin,
+    HOPEModelAdminBase,
+    RdiMergeStatusAdminMixin,
 ):
     search_fields = ("individual__unicef_id", "household__unicef_id")
     list_display = ("individual", "household", "role", "copied_from", "is_removed")

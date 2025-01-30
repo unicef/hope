@@ -91,12 +91,20 @@ class PushToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIView):
             raise Http404
 
     @atomic()
-    def post(self, request: Request, business_area: "BusinessArea", rdi: RegistrationDataImport) -> Response:
+    def post(
+        self,
+        request: Request,
+        business_area: "BusinessArea",
+        rdi: RegistrationDataImport,
+    ) -> Response:
         serializer = HouseholdSerializer(data=request.data, many=True)
 
         if serializer.is_valid():
             totals = self.save_households(self.selected_rdi, serializer.validated_data)
-            return Response({"id": self.selected_rdi.id, **asdict(totals)}, status=status.HTTP_201_CREATED)
+            return Response(
+                {"id": self.selected_rdi.id, **asdict(totals)},
+                status=status.HTTP_201_CREATED,
+            )
         return Response(humanize_errors(serializer.errors), status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -116,7 +124,12 @@ class PushLaxToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIVie
         except RegistrationDataImport.DoesNotExist:
             raise Http404
 
-    def post(self, request: Request, business_area: "BusinessArea", rdi: RegistrationDataImport) -> Response:
+    def post(
+        self,
+        request: Request,
+        business_area: "BusinessArea",
+        rdi: RegistrationDataImport,
+    ) -> Response:
         # The initial serializer
         total_households = 0
         total_errors = 0

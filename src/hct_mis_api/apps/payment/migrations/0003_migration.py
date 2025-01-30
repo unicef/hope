@@ -4,7 +4,6 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("payment", "0002_migration"),
         ("household", "0003_migration"),
@@ -77,36 +76,45 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.AlterField(
-            model_name='paymentverification',
-            name='payment_content_type',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE,
-                                    to='contenttypes.contenttype'),
+            model_name="paymentverification",
+            name="payment_content_type",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="contenttypes.contenttype",
+            ),
         ),
         migrations.AlterField(
-            model_name='paymentverification',
-            name='payment_object_id',
+            model_name="paymentverification",
+            name="payment_object_id",
             field=models.UUIDField(null=True),
         ),
         migrations.AlterField(
-            model_name='paymentverificationplan',
-            name='payment_plan_content_type',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE,
-                                    to='contenttypes.contenttype'),
+            model_name="paymentverificationplan",
+            name="payment_plan_content_type",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="contenttypes.contenttype",
+            ),
         ),
         migrations.AlterField(
-            model_name='paymentverificationplan',
-            name='payment_plan_object_id',
+            model_name="paymentverificationplan",
+            name="payment_plan_object_id",
             field=models.UUIDField(null=True),
         ),
         migrations.AlterField(
-            model_name='paymentverificationsummary',
-            name='payment_plan_content_type',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE,
-                                    to='contenttypes.contenttype'),
+            model_name="paymentverificationsummary",
+            name="payment_plan_content_type",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="contenttypes.contenttype",
+            ),
         ),
         migrations.AlterField(
-            model_name='paymentverificationsummary',
-            name='payment_plan_object_id',
+            model_name="paymentverificationsummary",
+            name="payment_plan_object_id",
             field=models.UUIDField(null=True),
         ),
     ]

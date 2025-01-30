@@ -33,7 +33,9 @@ class PartnerAccessChangeSignal(TestCase):
         cls.area_in_afg_2 = AreaFactory(name="Area in AFG 2", area_type=cls.area_type_afg, p_code="AREA-IN-AFG2")
 
         cls.program = ProgramFactory.create(
-            status=Program.DRAFT, business_area=cls.business_area, partner_access=Program.SELECTED_PARTNERS_ACCESS
+            status=Program.DRAFT,
+            business_area=cls.business_area,
+            partner_access=Program.SELECTED_PARTNERS_ACCESS,
         )
         cls.program_partner_through, _ = ProgramPartnerThrough.objects.get_or_create(
             program=cls.program, partner=cls.partner
@@ -50,7 +52,9 @@ class PartnerAccessChangeSignal(TestCase):
 
         other_ba = BusinessAreaFactory(name="Other Business Area")
         cls.program_other = ProgramFactory.create(
-            status=Program.DRAFT, business_area=other_ba, partner_access=Program.NONE_PARTNERS_ACCESS
+            status=Program.DRAFT,
+            business_area=other_ba,
+            partner_access=Program.NONE_PARTNERS_ACCESS,
         )
         cls.program_other_unicef_through = ProgramPartnerThrough.objects.get(
             program=cls.program_other, partner=cls.unicef_partner
@@ -67,7 +71,9 @@ class PartnerAccessChangeSignal(TestCase):
 
         self.new_area_in_afg = AreaFactory(name="Area in AFG", area_type=self.area_type_afg, p_code="AREA-IN-AFG")
         self.new_area_not_in_afg = AreaFactory(
-            name="Area not in AFG", area_type=self.area_type_other, p_code="AREA-NOT-IN-AFG"
+            name="Area not in AFG",
+            area_type=self.area_type_other,
+            p_code="AREA-NOT-IN-AFG",
         )
 
         self.assertEqual(self.program_partner_through.areas.count(), 2)

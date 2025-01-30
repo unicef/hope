@@ -125,7 +125,10 @@ class TestPaymentPlanMutation(APITestCase):
         cls.household_2.refresh_from_db()
 
         cls.data_collecting_type = DataCollectingType.objects.create(
-            code="full", description="Full individual collected", active=True, type="STANDARD"
+            code="full",
+            description="Full individual collected",
+            active=True,
+            type="STANDARD",
         )
         cls.data_collecting_type.limit_to.add(cls.business_area)
         generate_delivery_mechanisms()
@@ -136,14 +139,20 @@ class TestPaymentPlanMutation(APITestCase):
             ("with_permission", [Permissions.PM_CREATE]),
         ]
     )
-    @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @patch(
+        "hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate",
+        return_value=2.0,
+    )
     def test_create_targeting_mutation(
         self, _: Any, permissions: List[Permissions], mock_get_exchange_rate: Any
     ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
             request_string=CREATE_PAYMENT_PLAN_MUTATION,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {"Business-Area": self.business_area.slug},
+            },
             variables={
                 "input": {
                     "name": "paymentPlanName",
@@ -173,17 +182,26 @@ class TestPaymentPlanMutation(APITestCase):
             ("with_tp_permission", [Permissions.TARGETING_UPDATE]),
         ]
     )
-    @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @patch(
+        "hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate",
+        return_value=2.0,
+    )
     def test_update_targeting_mutation(
         self, name: Any, permissions: List[Permissions], mock_get_exchange_rate: Any
     ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         payment_plan = PaymentPlanFactory(
-            name="OldName", status=PaymentPlan.Status.TP_OPEN, program_cycle=self.cycle, created_by=self.user
+            name="OldName",
+            status=PaymentPlan.Status.TP_OPEN,
+            program_cycle=self.cycle,
+            created_by=self.user,
         )
         self.snapshot_graphql_request(
             request_string=UPDATE_PAYMENT_PLAN_MUTATION,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {"Business-Area": self.business_area.slug},
+            },
             variables={
                 "input": {
                     "paymentPlanId": self.id_to_base64(payment_plan.id, "PaymentPlanNode"),
@@ -221,7 +239,10 @@ class TestPaymentPlanMutation(APITestCase):
         )
         self.snapshot_graphql_request(
             request_string=DELETE_PAYMENT_PLAN_MUTATION,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {"Business-Area": self.business_area.slug},
+            },
             variables={
                 "paymentPlanId": self.id_to_base64(payment_plan.id, "PaymentPlanNode"),
             },
@@ -247,7 +268,10 @@ class TestPaymentPlanMutation(APITestCase):
         rule_commit_id = self.id_to_base64(rule_for_tp.rule.id, "RuleCommitNode")
         self.snapshot_graphql_request(
             request_string=SET_STEFICON_RULE_ON_TP_MUTATION,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {"Business-Area": self.business_area.slug},
+            },
             variables={
                 "paymentPlanId": self.id_to_base64(payment_plan.id, "PaymentPlanNode"),
                 "steficonRuleId": rule_commit_id,
@@ -306,7 +330,10 @@ class TestPaymentPlanMutation(APITestCase):
         # invalid cycle status
         self.snapshot_graphql_request(
             request_string=COPY_TARGETING_CRITERIA,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {"Business-Area": self.business_area.slug},
+            },
             variables={
                 "paymentPlanId": self.id_to_base64(payment_plan.id, "PaymentPlanNode"),
                 "programCycleId": self.id_to_base64(self.cycle.id, "CycleNode"),
@@ -320,7 +347,10 @@ class TestPaymentPlanMutation(APITestCase):
             # name duplicated
             self.snapshot_graphql_request(
                 request_string=COPY_TARGETING_CRITERIA,
-                context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+                context={
+                    "user": self.user,
+                    "headers": {"Business-Area": self.business_area.slug},
+                },
                 variables={
                     "paymentPlanId": self.id_to_base64(payment_plan.id, "PaymentPlanNode"),
                     "programCycleId": self.id_to_base64(self.cycle.id, "CycleNode"),
@@ -335,7 +365,10 @@ class TestPaymentPlanMutation(APITestCase):
 
             self.snapshot_graphql_request(
                 request_string=COPY_TARGETING_CRITERIA,
-                context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+                context={
+                    "user": self.user,
+                    "headers": {"Business-Area": self.business_area.slug},
+                },
                 variables={
                     "paymentPlanId": self.id_to_base64(payment_plan.id, "PaymentPlanNode"),
                     "programCycleId": self.id_to_base64(self.cycle.id, "CycleNode"),

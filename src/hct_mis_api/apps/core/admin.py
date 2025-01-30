@@ -195,7 +195,10 @@ class AcceptanceProcessThresholdInline(TabularInline):
 
 @admin.register(BusinessArea)
 class BusinessAreaAdmin(
-    GetManyFromRemoteMixin, LastSyncDateResetMixin, AdminAutoCompleteSearchMixin, HOPEModelAdminBase
+    GetManyFromRemoteMixin,
+    LastSyncDateResetMixin,
+    AdminAutoCompleteSearchMixin,
+    HOPEModelAdminBase,
 ):
     inlines = [
         AcceptanceProcessThresholdInline,
@@ -245,7 +248,12 @@ class BusinessAreaAdmin(
 
     @choice(label="DOAP", change_list=False)
     def doap(self, button: button) -> None:
-        button.choices = [self.force_sync_doap, self.send_doap, self.export_doap, self.view_ca_doap]
+        button.choices = [
+            self.force_sync_doap,
+            self.send_doap,
+            self.export_doap,
+            self.view_ca_doap,
+        ]
 
     @button(label="Create Business Office", permission="core.can_split")
     def split_business_area(self, request: HttpRequest, pk: "UUID") -> Union[HttpResponseRedirect, TemplateResponse]:
@@ -285,7 +293,15 @@ class BusinessAreaAdmin(
     def _get_doap_matrix(self, obj: Any) -> List[Any]:
         matrix = []
         ca_roles = Role.objects.filter(subsystem=Role.CA).order_by("name").values_list("name", flat=True)
-        fields = ["org", "Last Name", "First Name", "Email", "Business Unit", "Partner Instance ID", "Action"]
+        fields = [
+            "org",
+            "Last Name",
+            "First Name",
+            "Email",
+            "Business Unit",
+            "Partner Instance ID",
+            "Action",
+        ]
         fields += list(ca_roles)
         matrix.append(fields)
         all_user_data = {}
@@ -351,7 +367,7 @@ class BusinessAreaAdmin(
             for row in matrix[1:]:
                 writer.writerow(row)
             recipients = [request.user.email] + config.CASHASSIST_DOAP_RECIPIENT.split(";")
-            self.log_change(request, obj, f'DOAP sent to {", ".join(recipients)}')
+            self.log_change(request, obj, f"DOAP sent to {', '.join(recipients)}")
             buffer.seek(0)
             environment = Site.objects.first().name
             mail = EmailMessage(
@@ -371,7 +387,7 @@ UNICEF HOPE""",
                     User.objects.filter(email=row["Email"]).update(doap_hash=row["signature"])
             obj.custom_fields.update({"hope": {"last_doap_sync": str(timezone.now())}})
             obj.save()
-            self.message_user(request, f'Email sent to {", ".join(recipients)}', messages.SUCCESS)
+            self.message_user(request, f"Email sent to {', '.join(recipients)}", messages.SUCCESS)
         except Exception as e:
             logger.exception(e)
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
@@ -578,7 +594,13 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
             obj.status,
         )
 
-    def get_form(self, request: HttpRequest, obj: Optional[Any] = None, change: bool = False, **kwargs: Any) -> Any:
+    def get_form(
+        self,
+        request: HttpRequest,
+        obj: Optional[Any] = None,
+        change: bool = False,
+        **kwargs: Any,
+    ) -> Any:
         if obj is None:
             return XLSImportForm
         return super().get_form(request, obj, change, **kwargs)
@@ -610,7 +632,10 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         return redirect(".")
 
     def add_view(
-        self, request: HttpRequest, form_url: str = "", extra_context: Optional[Dict] = None
+        self,
+        request: HttpRequest,
+        form_url: str = "",
+        extra_context: Optional[Dict] = None,
     ) -> Union[HttpResponsePermanentRedirect, TemplateResponse]:
         if not self.has_add_permission(request):
             logger.error("The user did not have permission to do that")
@@ -672,7 +697,11 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         return TemplateResponse(request, "core/xls_form.html", payload)
 
     def change_view(
-        self, request: HttpRequest, object_id: str, form_url: str = "", extra_context: Optional[Dict[str, Any]] = None
+        self,
+        request: HttpRequest,
+        object_id: str,
+        form_url: str = "",
+        extra_context: Optional[Dict[str, Any]] = None,
     ) -> HttpResponse:
         extra_context = dict(show_save=False, show_save_and_continue=False, show_delete=True)
         has_add_permission: Callable = self.has_add_permission
@@ -707,7 +736,14 @@ class CountryCodeMapAdmin(HOPEModelAdminBase):
 
 @admin.register(StorageFile)
 class StorageFileAdmin(ExtraButtonsMixin, admin.ModelAdmin):
-    list_display = ("file_name", "file", "business_area", "file_size", "created_by", "created_at")
+    list_display = (
+        "file_name",
+        "file",
+        "business_area",
+        "file_size",
+        "created_by",
+        "created_at",
+    )
 
     def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return request.user.can_download_storage_files()

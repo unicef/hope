@@ -154,12 +154,21 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
     @parameterized.expand(
         [
             ("with_permission", [Permissions.RDI_IMPORT_DATA], True, True),
-            ("with_permission_invalid_file", [Permissions.RDI_IMPORT_DATA], True, False),
+            (
+                "with_permission_invalid_file",
+                [Permissions.RDI_IMPORT_DATA],
+                True,
+                False,
+            ),
             ("without_permission", [], False, False),
         ]
     )
     def test_registration_data_import_datahub_upload(
-        self, _: Any, permissions: List[Permissions], should_have_import_data: bool, file_valid: bool
+        self,
+        _: Any,
+        permissions: List[Permissions],
+        should_have_import_data: bool,
+        file_valid: bool,
     ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         if file_valid:
@@ -210,7 +219,10 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
         self.update_partner_access_to_program(self.user.partner, program)
         self.snapshot_graphql_request(
             request_string=self.CREATE_REGISTRATION_DATA_IMPORT,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(program.id, "ProgramNode")},
+            },
             variables={
                 "registrationDataImportData": {
                     "importDataId": self.id_to_base64(import_data_obj.id, "ImportDataNode"),
@@ -233,7 +245,10 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
         self.update_partner_access_to_program(self.user.partner, program)
         self.snapshot_graphql_request(
             request_string=self.CREATE_REGISTRATION_DATA_IMPORT,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(program.id, "ProgramNode")},
+            },
             variables={
                 "registrationDataImportData": {
                     "importDataId": self.id_to_base64(import_data_obj.id, "ImportDataNode"),

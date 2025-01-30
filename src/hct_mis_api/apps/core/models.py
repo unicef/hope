@@ -85,7 +85,9 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
         blank=True,
     )
     partners = models.ManyToManyField(
-        to="account.Partner", through=BusinessAreaPartnerThrough, related_name="business_areas"
+        to="account.Partner",
+        through=BusinessAreaPartnerThrough,
+        related_name="business_areas",
     )
     countries = models.ManyToManyField("geo.Country", related_name="business_areas")
 
@@ -230,7 +232,11 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
 
     name = models.CharField(max_length=255)
     group = models.ForeignKey(
-        "core.FlexibleAttributeGroup", on_delete=models.CASCADE, related_name="flex_attributes", null=True, blank=True
+        "core.FlexibleAttributeGroup",
+        on_delete=models.CASCADE,
+        related_name="flex_attributes",
+        null=True,
+        blank=True,
     )
     type = models.CharField(max_length=16, choices=TYPE_CHOICE)
     associated_with = models.SmallIntegerField(choices=ASSOCIATED_WITH_CHOICES)
@@ -256,7 +262,9 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
         constraints = [
             models.UniqueConstraint(fields=("name", "program"), name="unique_name_program"),
             models.UniqueConstraint(
-                fields=("name",), condition=Q(program__isnull=True), name="unique_name_without_program"
+                fields=("name",),
+                condition=Q(program__isnull=True),
+                name="unique_name_without_program",
             ),
         ]
 
@@ -541,7 +549,8 @@ class DataCollectingType(TimeStampedModel):
     description = models.TextField(blank=True)
     active = models.BooleanField(default=True)
     deprecated = models.BooleanField(
-        default=False, help_text="Cannot be used in new programs, totally hidden in UI, only admin have access"
+        default=False,
+        help_text="Cannot be used in new programs, totally hidden in UI, only admin have access",
     )
     individual_filters_available = models.BooleanField(default=False)
     household_filters_available = models.BooleanField(default=True)

@@ -109,21 +109,51 @@ class TestAssignProgramToGrievanceTickets(TestCase):
         assign_program_to_grievance_tickets()
 
         self.assertEqual(self.ticket_complaint_details.ticket.programs.first(), self.program)
-        self.assertEqual(self.ticket_complaint_details_household_only.ticket.programs.first(), self.program)
-        self.assertEqual(self.ticket_complaint_details_individual_only.ticket.programs.first(), self.program)
-        self.assertEqual(self.ticket_sensitive_details_individual_only.ticket.programs.first(), self.program)
-        self.assertEqual(self.ticket_sensitive_details_household_only.ticket.programs.first(), self.program)
-        self.assertEqual(self.ticket_household_data_update_details.ticket.programs.first(), self.program)
+        self.assertEqual(
+            self.ticket_complaint_details_household_only.ticket.programs.first(),
+            self.program,
+        )
+        self.assertEqual(
+            self.ticket_complaint_details_individual_only.ticket.programs.first(),
+            self.program,
+        )
+        self.assertEqual(
+            self.ticket_sensitive_details_individual_only.ticket.programs.first(),
+            self.program,
+        )
+        self.assertEqual(
+            self.ticket_sensitive_details_household_only.ticket.programs.first(),
+            self.program,
+        )
+        self.assertEqual(
+            self.ticket_household_data_update_details.ticket.programs.first(),
+            self.program,
+        )
         self.assertEqual(self.ticket_add_individual_details.ticket.programs.first(), self.program)
-        self.assertEqual(self.ticket_delete_household_ticket_details.ticket.programs.first(), self.program)
-        self.assertEqual(self.ticket_individual_data_update_ticket_details.ticket.programs.first(), self.program)
-        self.assertEqual(self.ticket_delete_individual_ticket_details.ticket.programs.first(), self.program)
+        self.assertEqual(
+            self.ticket_delete_household_ticket_details.ticket.programs.first(),
+            self.program,
+        )
+        self.assertEqual(
+            self.ticket_individual_data_update_ticket_details.ticket.programs.first(),
+            self.program,
+        )
+        self.assertEqual(
+            self.ticket_delete_individual_ticket_details.ticket.programs.first(),
+            self.program,
+        )
         self.assertEqual(self.ticket_referral_details_household.ticket.programs.first(), self.program)
-        self.assertEqual(self.ticket_referral_details_individual.ticket.programs.first(), self.program)
+        self.assertEqual(
+            self.ticket_referral_details_individual.ticket.programs.first(),
+            self.program,
+        )
 
         self.assertEqual(self.ticket_complaint_details_no_program.ticket.programs.count(), 0)
 
-        self.assertEqual(self.ticket_complaint_details_with_program.ticket.programs.first(), self.program2)
+        self.assertEqual(
+            self.ticket_complaint_details_with_program.ticket.programs.first(),
+            self.program2,
+        )
         self.assertEqual(self.ticket_complaint_details_with_program.ticket.programs.count(), 1)
 
 
@@ -158,7 +188,9 @@ class TestAssignProgramToFeedback(TestCase):
 
         cls.program2 = ProgramFactory(business_area=business_area)
         cls.feedback_with_program = FeedbackFactory(
-            program=cls.program2, household_lookup=cls.household, individual_lookup=cls.individuals[0]
+            program=cls.program2,
+            household_lookup=cls.household,
+            individual_lookup=cls.individuals[0],
         )
 
     def test_fill_empty_programs(self) -> None:

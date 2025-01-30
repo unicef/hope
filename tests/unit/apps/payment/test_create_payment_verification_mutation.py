@@ -164,7 +164,9 @@ class TestCreatePaymentVerificationMutation(APITestCase):
             },
         )
 
-    def test_can_t_create_cash_plan_payment_verification_when_there_are_not_available_payment_record(self) -> None:
+    def test_can_t_create_cash_plan_payment_verification_when_there_are_not_available_payment_record(
+        self,
+    ) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PAYMENT_VERIFICATION_CREATE], self.business_area)
 
         self.snapshot_graphql_request(
@@ -188,7 +190,9 @@ class TestCreatePaymentVerificationMutation(APITestCase):
             },
         )
 
-    def test_create_cash_plan_payment_verification_when_program_is_finished(self) -> None:
+    def test_create_cash_plan_payment_verification_when_program_is_finished(
+        self,
+    ) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PAYMENT_VERIFICATION_CREATE], self.business_area)
 
         self.snapshot_graphql_request(

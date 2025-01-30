@@ -39,7 +39,10 @@ def execute_test_es_query(query_dict: Dict) -> List[str]:
 
 
 @disabled_locally_test
-@patch("hct_mis_api.apps.core.es_filters.ElasticSearchFilterSet.USE_ALL_FIELDS_AS_POSTGRES_DB", False)
+@patch(
+    "hct_mis_api.apps.core.es_filters.ElasticSearchFilterSet.USE_ALL_FIELDS_AS_POSTGRES_DB",
+    False,
+)
 class TestGrievanceQueryElasticSearch(APITestCase):
     PERMISSION = (
         Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
@@ -476,7 +479,9 @@ class TestGrievanceQueryElasticSearch(APITestCase):
     @staticmethod
     def create_es_db() -> Elasticsearch:
         grievance_es_index = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)), "tests", "grievance_es_index.json"
+            os.path.dirname(os.path.dirname(__file__)),
+            "tests",
+            "grievance_es_index.json",
         )
 
         with open(grievance_es_index) as f:
@@ -502,7 +507,10 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         es.indices.delete(index="test_es_db", ignore=[400, 404])
         super().tearDownClass()
 
-    @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
+    @patch(
+        "hct_mis_api.apps.grievance.filters.execute_es_query",
+        side_effect=execute_test_es_query,
+    )
     def test_grievance_query_es_search_by_unicef_id(self, mock_execute_test_es_query: Any) -> None:
         self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
 
@@ -518,7 +526,10 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             variables={"search": f"ticket_id {self.grievance_ticket_1.unicef_id}"},
         )
 
-    @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
+    @patch(
+        "hct_mis_api.apps.grievance.filters.execute_es_query",
+        side_effect=execute_test_es_query,
+    )
     def test_grievance_query_es_search_by_household_unicef_id(self, mock_execute_test_es_query: Any) -> None:
         self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
 
@@ -534,7 +545,10 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             variables={"search": "ticket_hh_id HH-20-0000.0003"},
         )
 
-    @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
+    @patch(
+        "hct_mis_api.apps.grievance.filters.execute_es_query",
+        side_effect=execute_test_es_query,
+    )
     def test_grievance_query_es_search_by_head_of_household_family_name(self, mock_execute_test_es_query: Any) -> None:
         self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
 
@@ -550,7 +564,10 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             variables={"search": "family_name Kowalska_1"},
         )
 
-    @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
+    @patch(
+        "hct_mis_api.apps.grievance.filters.execute_es_query",
+        side_effect=execute_test_es_query,
+    )
     def test_grievance_query_es_search_by_category(self, mock_execute_test_es_query: Any) -> None:
         self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
 
@@ -566,7 +583,10 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             variables={"category": GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK},
         )
 
-    @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
+    @patch(
+        "hct_mis_api.apps.grievance.filters.execute_es_query",
+        side_effect=execute_test_es_query,
+    )
     def test_grievance_query_es_search_by_status(self, mock_execute_test_es_query: Any) -> None:
         self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
 
@@ -582,7 +602,10 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             variables={"status": [GrievanceTicket.STATUS_NEW]},
         )
 
-    @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
+    @patch(
+        "hct_mis_api.apps.grievance.filters.execute_es_query",
+        side_effect=execute_test_es_query,
+    )
     def test_grievance_query_es_search_by_multiple_statuses(self, mock_execute_test_es_query: Any) -> None:
         self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
 
@@ -595,10 +618,18 @@ class TestGrievanceQueryElasticSearch(APITestCase):
                     "Business-Area": self.business_area.slug,
                 },
             },
-            variables={"status": [GrievanceTicket.STATUS_ON_HOLD, GrievanceTicket.STATUS_IN_PROGRESS]},
+            variables={
+                "status": [
+                    GrievanceTicket.STATUS_ON_HOLD,
+                    GrievanceTicket.STATUS_IN_PROGRESS,
+                ]
+            },
         )
 
-    @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
+    @patch(
+        "hct_mis_api.apps.grievance.filters.execute_es_query",
+        side_effect=execute_test_es_query,
+    )
     def test_grievance_query_es_search_by_min_date_range(self, mock_execute_test_es_query: Any) -> None:
         self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
 
@@ -614,7 +645,10 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             variables={"createdAtRange": '{"max":"2022-05-01"}'},
         )
 
-    @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
+    @patch(
+        "hct_mis_api.apps.grievance.filters.execute_es_query",
+        side_effect=execute_test_es_query,
+    )
     def test_grievance_query_es_search_by_max_date_range(self, mock_execute_test_es_query: Any) -> None:
         self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
 
@@ -630,7 +664,10 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             variables={"createdAtRange": '{"min":"2022-05-10"}'},
         )
 
-    @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
+    @patch(
+        "hct_mis_api.apps.grievance.filters.execute_es_query",
+        side_effect=execute_test_es_query,
+    )
     def test_grievance_query_es_search_by_min_and_max_date_range(self, mock_execute_test_es_query: Any) -> None:
         self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
 
@@ -646,7 +683,10 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             variables={"createdAtRange": '{"min":"2022-05-01","max":"2022-05-10"}'},
         )
 
-    @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
+    @patch(
+        "hct_mis_api.apps.grievance.filters.execute_es_query",
+        side_effect=execute_test_es_query,
+    )
     def test_grievance_query_es_search_by_admin(self, mock_execute_test_es_query: Any) -> None:
         self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
 
@@ -662,7 +702,10 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             variables={"admin": self.id_to_base64(self.admin_area_1.id, "GrievanceTicketNode")},
         )
 
-    @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
+    @patch(
+        "hct_mis_api.apps.grievance.filters.execute_es_query",
+        side_effect=execute_test_es_query,
+    )
     def test_grievance_query_es_search_by_issue_type(self, mock_execute_test_es_query: Any) -> None:
         self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
 
@@ -678,7 +721,10 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             variables={"issueType": GrievanceTicket.ISSUE_TYPE_FRAUD_FORGERY},
         )
 
-    @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
+    @patch(
+        "hct_mis_api.apps.grievance.filters.execute_es_query",
+        side_effect=execute_test_es_query,
+    )
     def test_grievance_query_es_search_by_priority(self, mock_execute_test_es_query: Any) -> None:
         self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
 
@@ -694,7 +740,10 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             variables={"priority": PRIORITY_LOW},
         )
 
-    @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
+    @patch(
+        "hct_mis_api.apps.grievance.filters.execute_es_query",
+        side_effect=execute_test_es_query,
+    )
     def test_grievance_query_es_search_by_urgency(self, mock_execute_test_es_query: Any) -> None:
         self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
 
@@ -710,7 +759,10 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             variables={"urgency": URGENCY_VERY_URGENT},
         )
 
-    @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
+    @patch(
+        "hct_mis_api.apps.grievance.filters.execute_es_query",
+        side_effect=execute_test_es_query,
+    )
     def test_grievance_query_es_search_by_assigned_to(self, mock_execute_test_es_query: Any) -> None:
         self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
 
@@ -726,7 +778,10 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             variables={"assignedTo": self.id_to_base64(self.user2.id, "UserNode")},
         )
 
-    @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
+    @patch(
+        "hct_mis_api.apps.grievance.filters.execute_es_query",
+        side_effect=execute_test_es_query,
+    )
     def test_grievance_query_es_search_by_registration_data_import(self, mock_execute_test_es_query: Any) -> None:
         self.maxDiff = None
         self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
@@ -747,7 +802,10 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             },
         )
 
-    @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
+    @patch(
+        "hct_mis_api.apps.grievance.filters.execute_es_query",
+        side_effect=execute_test_es_query,
+    )
     def test_grievance_query_es_search_grievance_type(self, mock_execute_test_es_query: Any) -> None:
         self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
 
@@ -763,7 +821,10 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             variables={"grievanceType": "system"},
         )
 
-    @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
+    @patch(
+        "hct_mis_api.apps.grievance.filters.execute_es_query",
+        side_effect=execute_test_es_query,
+    )
     def test_multiple_filters_should_return_grievance_1(self, mock_execute_test_es_query: Any) -> None:
         self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
 
@@ -784,7 +845,10 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             },
         )
 
-    @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
+    @patch(
+        "hct_mis_api.apps.grievance.filters.execute_es_query",
+        side_effect=execute_test_es_query,
+    )
     def test_program_filter_returns_grievance_3(self, mock_execute_test_es_query: Any) -> None:
         self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
 

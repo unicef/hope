@@ -146,13 +146,19 @@ class TestDashboardQueries(APITestCase):
                 area_level=2,
             )
             admin_area1 = AreaFactory(
-                name=f"{business_area_slug} city 1", area_type=area_type, p_code=f"{business_area_slug} 1"
+                name=f"{business_area_slug} city 1",
+                area_type=area_type,
+                p_code=f"{business_area_slug} 1",
             )
             admin_area2 = AreaFactory(
-                name=f"{business_area_slug} city 2", area_type=area_type, p_code=f"{business_area_slug} 2"
+                name=f"{business_area_slug} city 2",
+                area_type=area_type,
+                p_code=f"{business_area_slug} 2",
             )
             admin_area3 = AreaFactory(
-                name=f"{business_area_slug} city 3", area_type=area_type, p_code=f"{business_area_slug} 3"
+                name=f"{business_area_slug} city 3",
+                area_type=area_type,
+                p_code=f"{business_area_slug} 3",
             )
 
             business_area = BusinessArea.objects.get(slug=business_area_slug)
@@ -415,11 +421,17 @@ class TestDashboardQueries(APITestCase):
     def test_table_total_cash_transferred_by_administrative_area(self, order_by: str) -> None:
         self.snapshot_graphql_request(
             request_string=self.QUERY_TABLE_TOTAL_CASH_TRANSFERRED_BY_ADMINISTRATIVE_AREA,
-            variables={"businessAreaSlug": "afghanistan", "year": 2021, "orderBy": order_by},
+            variables={
+                "businessAreaSlug": "afghanistan",
+                "year": 2021,
+                "orderBy": order_by,
+            },
             context={"user": self.user},
         )
 
-    def test_table_total_cash_transferred_by_administrative_area_for_global_business_area(self) -> None:
+    def test_table_total_cash_transferred_by_administrative_area_for_global_business_area(
+        self,
+    ) -> None:
         self.snapshot_graphql_request(
             request_string=self.QUERY_TABLE_TOTAL_CASH_TRANSFERRED_BY_ADMINISTRATIVE_AREA,
             variables={"businessAreaSlug": "global", "year": 2021},
@@ -436,11 +448,17 @@ class TestDashboardQueries(APITestCase):
     def test_table_total_cash_transferred_by_administrative_area_for_people(self, order_by: str) -> None:
         self.snapshot_graphql_request(
             request_string=self.QUERY_TABLE_TOTAL_CASH_TRANSFERRED_BY_ADMINISTRATIVE_AREA_FOR_PEOPLE,
-            variables={"businessAreaSlug": "afghanistan", "year": 2021, "orderBy": order_by},
+            variables={
+                "businessAreaSlug": "afghanistan",
+                "year": 2021,
+                "orderBy": order_by,
+            },
             context={"user": self.user},
         )
 
-    def test_table_total_cash_transferred_by_administrative_area_for_people_for_global_business_area(self) -> None:
+    def test_table_total_cash_transferred_by_administrative_area_for_people_for_global_business_area(
+        self,
+    ) -> None:
         self.snapshot_graphql_request(
             request_string=self.QUERY_TABLE_TOTAL_CASH_TRANSFERRED_BY_ADMINISTRATIVE_AREA_FOR_PEOPLE,
             variables={"businessAreaSlug": "global", "year": 2021},

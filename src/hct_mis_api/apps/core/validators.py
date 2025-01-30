@@ -186,7 +186,10 @@ class KoboTemplateValidator:
 
     @classmethod
     def _get_core_fields_from_file(
-        cls, survey_sheet: "Worksheet", choices_mapping: Dict, columns_names_and_numbers_mapping: Dict
+        cls,
+        survey_sheet: "Worksheet",
+        choices_mapping: Dict,
+        columns_names_and_numbers_mapping: Dict,
     ) -> Dict:
         core_fields_in_file = {}
         for row in xlrd_rows_iterator(survey_sheet):

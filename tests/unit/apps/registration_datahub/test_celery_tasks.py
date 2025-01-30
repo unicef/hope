@@ -481,7 +481,10 @@ def create_record(fields: Dict, registration: int, status: str, files: Optional[
 
 
 def create_imported_document_types() -> None:
-    for document_key_string, _ in UkraineBaseRegistrationService.DOCUMENT_MAPPING_KEY_DICT.items():
+    for (
+        document_key_string,
+        _,
+    ) in UkraineBaseRegistrationService.DOCUMENT_MAPPING_KEY_DICT.items():
         DocumentType.objects.create(key=document_key_string)
 
 
@@ -573,7 +576,11 @@ class TestAutomatingRDICreationTask(TestCase):
     def test_not_running_with_record_status_not_to_import(self, mock_validate_data_collection_type: Any) -> None:
         create_ukraine_business_area()
         create_imported_document_types()
-        record = create_record(fields=UKRAINE_FIELDS, registration=self.registration.id, status=Record.STATUS_ERROR)
+        record = create_record(
+            fields=UKRAINE_FIELDS,
+            registration=self.registration.id,
+            status=Record.STATUS_ERROR,
+        )
 
         page_size = 1
         assert RegistrationDataImport.objects.count() == 0
@@ -590,14 +597,20 @@ class TestAutomatingRDICreationTask(TestCase):
         amount_of_records = 10
         page_size = 3
         for _ in range(amount_of_records):
-            create_record(fields=UKRAINE_FIELDS, registration=self.registration.id, status=Record.STATUS_TO_IMPORT)
+            create_record(
+                fields=UKRAINE_FIELDS,
+                registration=self.registration.id,
+                status=Record.STATUS_TO_IMPORT,
+            )
 
         assert Record.objects.count() == amount_of_records
         assert RegistrationDataImport.objects.count() == 0
         assert PendingIndividual.objects.count() == 0
 
         result = run_automate_rdi_creation_task(
-            registration_id=self.registration.id, page_size=page_size, template="some template {date} {records}"
+            registration_id=self.registration.id,
+            page_size=page_size,
+            template="some template {date} {records}",
         )
 
         assert RegistrationDataImport.objects.count() == 4  # or math.ceil(amount_of_records / page_size)
@@ -615,7 +628,11 @@ class TestAutomatingRDICreationTask(TestCase):
         amount_of_records = 10
         page_size = 3
         for _ in range(amount_of_records):
-            create_record(fields=UKRAINE_FIELDS, registration=self.registration.id, status=Record.STATUS_TO_IMPORT)
+            create_record(
+                fields=UKRAINE_FIELDS,
+                registration=self.registration.id,
+                status=Record.STATUS_TO_IMPORT,
+            )
 
         assert Record.objects.count() == amount_of_records
         assert RegistrationDataImport.objects.count() == 0
@@ -641,7 +658,11 @@ class TestAutomatingRDICreationTask(TestCase):
         page_size = 3
 
         for _ in range(amount_of_records):
-            create_record(fields=UKRAINE_FIELDS, registration=self.registration.id, status=Record.STATUS_TO_IMPORT)
+            create_record(
+                fields=UKRAINE_FIELDS,
+                registration=self.registration.id,
+                status=Record.STATUS_TO_IMPORT,
+            )
 
         assert Record.objects.count() == amount_of_records
         assert RegistrationDataImport.objects.count() == 0
@@ -707,7 +728,12 @@ class TestAutomatingRDICreationTask(TestCase):
                 else:
                     data = UKRAINE_FIELDS
 
-                create_record(fields=data, registration=registration_id, status=Record.STATUS_TO_IMPORT, files=files)
+                create_record(
+                    fields=data,
+                    registration=registration_id,
+                    status=Record.STATUS_TO_IMPORT,
+                    files=files,
+                )
 
             assert Record.objects.count() == records_count
             assert RegistrationDataImport.objects.count() == rdi_count
@@ -1072,7 +1098,10 @@ class DeduplicationEngineCeleryTasksTests(TestCase):
 
     @patch.dict(
         "os.environ",
-        {"DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key", "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com"},
+        {
+            "DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key",
+            "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
+        },
     )
     @patch(
         "hct_mis_api.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService"
@@ -1089,7 +1118,10 @@ class DeduplicationEngineCeleryTasksTests(TestCase):
 
     @patch.dict(
         "os.environ",
-        {"DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key", "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com"},
+        {
+            "DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key",
+            "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
+        },
     )
     @patch(
         "hct_mis_api.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService"

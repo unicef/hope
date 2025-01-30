@@ -7,7 +7,11 @@ from hct_mis_api.apps.payment.api.views import PaymentPlanSupportingDocumentView
 app_name = "payment_plan"
 
 router = DefaultRouter()
-router.register("supporting-documents", PaymentPlanSupportingDocumentViewSet, basename="supporting_documents")
+router.register(
+    "supporting-documents",
+    PaymentPlanSupportingDocumentViewSet,
+    basename="supporting_documents",
+)
 
 urlpatterns = [
     path("", include(router.urls)),

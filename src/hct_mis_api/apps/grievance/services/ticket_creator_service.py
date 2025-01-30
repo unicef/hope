@@ -126,7 +126,12 @@ class TicketCreatorService:
     def _create_details(self, extras: Dict, grievance_ticket: GrievanceTicket) -> List[GrievanceTicket]:
         return self._details_creator.create(grievance_ticket, extras)
 
-    def _create_documents(self, documents: List[Dict], grievance_ticket: GrievanceTicket, user: AbstractUser) -> None:
+    def _create_documents(
+        self,
+        documents: List[Dict],
+        grievance_ticket: GrievanceTicket,
+        user: AbstractUser,
+    ) -> None:
         if not documents:
             return
         validate_grievance_documents_size(grievance_ticket.id, documents)

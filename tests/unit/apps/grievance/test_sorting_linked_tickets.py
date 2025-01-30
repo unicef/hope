@@ -121,7 +121,10 @@ class TestGrievanceQuery(APITestCase):
         [
             (
                 "with_permission",
-                [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+                [
+                    Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                    Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                ],
             ),
             ("without_permission", []),
         ]
@@ -143,7 +146,10 @@ class TestGrievanceQuery(APITestCase):
         [
             (
                 "with_permission",
-                [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+                [
+                    Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                    Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                ],
             ),
             ("without_permission", []),
         ]

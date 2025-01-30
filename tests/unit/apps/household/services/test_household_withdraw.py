@@ -33,7 +33,10 @@ class TestHouseholdWithdraw(TestCase):
 
         self.assertEqual(Household.objects.filter(withdrawn=True).count(), 0)
         self.assertEqual(Individual.objects.filter(withdrawn=True).count(), 0)
-        self.assertEqual(Document.objects.filter(status=Document.STATUS_NEED_INVESTIGATION).count(), 30)
+        self.assertEqual(
+            Document.objects.filter(status=Document.STATUS_NEED_INVESTIGATION).count(),
+            30,
+        )
 
         service = HouseholdWithdraw(household)
         service.withdraw()

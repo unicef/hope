@@ -157,7 +157,10 @@ class Command(BaseCommand):
                     switch_dict: Dict[str, Callable[[], GrievanceTicket]] = {
                         "feedback": partial(
                             GrievanceTicketFactory,
-                            admin2=Area.objects.filter(area_type__business_area=business_area, area_type__area_level=2)
+                            admin2=Area.objects.filter(
+                                area_type__business_area=business_area,
+                                area_type__area_level=2,
+                            )
                             .order_by("?")
                             .first()
                             .name,

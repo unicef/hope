@@ -141,7 +141,11 @@ class APITokenAdmin(SmartModelAdmin):
             )
             self.message_user(request, f"Email sent to {obj.user.email}", messages.SUCCESS)
         except OSError:
-            self.message_user(request, f"Unable to send notification email to {obj.user.email}", messages.ERROR)
+            self.message_user(
+                request,
+                f"Unable to send notification email to {obj.user.email}",
+                messages.ERROR,
+            )
 
     @button(permission=is_root)
     def resend_email(self, request: HttpRequest, pk: "UUID") -> None:
@@ -158,8 +162,14 @@ class APITokenAdmin(SmartModelAdmin):
         try:
             return super().changeform_view(request, object_id, form_url, extra_context)
         except NoBusinessAreaAvailable:
-            self.message_user(request, "User do not have any Business Areas assigned to him", messages.ERROR)
-            return HttpResponseRedirect(reverse(admin_urlname(APIToken._meta, "changelist")))  # type: ignore # str vs SafeString
+            self.message_user(
+                request,
+                "User do not have any Business Areas assigned to him",
+                messages.ERROR,
+            )
+            return HttpResponseRedirect(
+                reverse(admin_urlname(APIToken._meta, "changelist"))
+            )  # type: ignore # str vs SafeString
 
     def log_addition(self, request: HttpRequest, object: Any, message: str) -> LogEntry:
         return super().log_addition(request, object, message)

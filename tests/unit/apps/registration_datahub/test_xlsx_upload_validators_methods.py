@@ -463,14 +463,20 @@ class TestXLSXValidatorsMethods(APITestCase):
 
     def test_validate_file_extension(self) -> None:
         file_path, expected_values = (
-            f"{self.FILES_DIR_PATH}/" f"image.png",
+            f"{self.FILES_DIR_PATH}/image.png",
             [{"row_number": 1, "message": "Only .xlsx files are accepted for import"}],
         )
         with open(file_path, "rb") as file:
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
             upload_xlsx_instance_validator.validate_file_extension(file)
-            self.assertEqual(upload_xlsx_instance_validator.errors[0]["row_number"], expected_values[0]["row_number"])
-            self.assertEqual(upload_xlsx_instance_validator.errors[0]["message"], expected_values[0]["message"])
+            self.assertEqual(
+                upload_xlsx_instance_validator.errors[0]["row_number"],
+                expected_values[0]["row_number"],
+            )
+            self.assertEqual(
+                upload_xlsx_instance_validator.errors[0]["message"],
+                expected_values[0]["message"],
+            )
 
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
             errors, delivery_mechanisms_errors = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
@@ -480,7 +486,7 @@ class TestXLSXValidatorsMethods(APITestCase):
 
     def test_validate_file_content_as_xlsx(self) -> None:
         file_path, expected_values = (
-            f"{self.FILES_DIR_PATH}/" f"not_excel_file.xlsx",
+            f"{self.FILES_DIR_PATH}/not_excel_file.xlsx",
             [{"row_number": 1, "message": "Invalid .xlsx file"}],
         )
         with open(file_path, "rb") as file:
@@ -790,7 +796,10 @@ class TestXLSXValidatorsMethods(APITestCase):
             rounds_names=["May"],
             program=self.program,
         )
-        header_row = ["pdu_flex_attribute_round_1_value", "pdu_flex_attribute_round_1_collection_date"]
+        header_row = [
+            "pdu_flex_attribute_round_1_value",
+            "pdu_flex_attribute_round_1_collection_date",
+        ]
         workbook = openpyxl.Workbook()
         sheet = workbook.active
         sheet.append(header_row)
@@ -814,7 +823,10 @@ class TestXLSXValidatorsMethods(APITestCase):
             rounds_names=["May"],
             program=self.program,
         )
-        header_row = ["pdu_flex_attribute_round_1_value", "pdu_flex_attribute_round_1_collection_date"]
+        header_row = [
+            "pdu_flex_attribute_round_1_value",
+            "pdu_flex_attribute_round_1_collection_date",
+        ]
         workbook = openpyxl.Workbook()
         sheet = workbook.active
         sheet.append(header_row)
@@ -841,7 +853,10 @@ class TestXLSXValidatorsMethods(APITestCase):
             rounds_names=["May"],
             program=self.program,
         )
-        header_row = ["pdu_flex_attribute_round_1_value", "pdu_flex_attribute_round_1_collection_date"]
+        header_row = [
+            "pdu_flex_attribute_round_1_value",
+            "pdu_flex_attribute_round_1_collection_date",
+        ]
         workbook = openpyxl.Workbook()
         sheet = workbook.active
         sheet.append(header_row)

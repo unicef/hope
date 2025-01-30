@@ -43,7 +43,12 @@ class TestDeduplicateAndCheckAgainstSanctionsListTask(TestCase):
             },
         ]
         cls.individuals = [
-            IndividualFactory(household=None, program=program_one, business_area=cls.business_area, **individual)
+            IndividualFactory(
+                household=None,
+                program=program_one,
+                business_area=cls.business_area,
+                **individual,
+            )
             for individual in cls.individuals_to_create
         ]
         household_one = HouseholdFactory(

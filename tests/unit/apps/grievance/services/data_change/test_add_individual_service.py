@@ -124,5 +124,8 @@ class TestAddIndividualService(TestCase):
             service.close(UserFactory())
         except ValidationError:
             self.fail("ValidationError should not be raised")
-        self.assertEqual(Document.objects.filter(document_number="123456", status=Document.STATUS_VALID).count(), 0)
+        self.assertEqual(
+            Document.objects.filter(document_number="123456", status=Document.STATUS_VALID).count(),
+            0,
+        )
         self.assertEqual(Document.objects.filter(document_number="123456").count(), 2)

@@ -135,11 +135,14 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
 
     def get_program_areas(self, program_id: Union[str, UUID]) -> QuerySet[Area]:
         return Area.objects.filter(
-            program_partner_through__partner=self, program_partner_through__program_id=program_id
+            program_partner_through__partner=self,
+            program_partner_through__program_id=program_id,
         )
 
     def get_roles_for_business_area(
-        self, business_area_slug: Optional[str] = None, business_area_id: Optional["UUID"] = None
+        self,
+        business_area_slug: Optional[str] = None,
+        business_area_id: Optional["UUID"] = None,
     ) -> QuerySet["Role"]:
         if not business_area_slug and not business_area_id:
             return Role.objects.none()
@@ -239,7 +242,11 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         ).distinct()
 
     def has_permission(
-        self, permission: str, business_area: BusinessArea, program_id: Optional[UUID] = None, write: bool = False
+        self,
+        permission: str,
+        business_area: BusinessArea,
+        program_id: Optional[UUID] = None,
+        write: bool = False,
     ) -> bool:
         return permission in self.permissions_in_business_area(business_area.slug, program_id)
 
@@ -255,7 +262,10 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
 
     def can_change_fsp(self) -> bool:
         return any(
-            self.has_permission(Permissions.PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE.name, role.business_area)
+            self.has_permission(
+                Permissions.PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE.name,
+                role.business_area,
+            )
             for role in self.cached_user_roles()
         )
 
@@ -310,7 +320,12 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
 
 
 class HorizontalChoiceArrayField(ArrayField):
-    def formfield(self, form_class: Optional[Any] = ..., choices_form_class: Optional[Any] = ..., **kwargs: Any) -> Any:
+    def formfield(
+        self,
+        form_class: Optional[Any] = ...,
+        choices_form_class: Optional[Any] = ...,
+        **kwargs: Any,
+    ) -> Any:
         widget = FilteredSelectMultiple(self.verbose_name, False)
         defaults = {
             "form_class": forms.MultipleChoiceField,
@@ -326,7 +341,9 @@ class UserRole(NaturalKeyModel, TimeStampedUUIDModel):
     role = models.ForeignKey("account.Role", related_name="user_roles", on_delete=models.CASCADE)
     business_area = models.ForeignKey("core.BusinessArea", related_name="user_roles", on_delete=models.CASCADE)
     expiry_date = models.DateField(
-        blank=True, null=True, help_text="After expiry date this User Role will be inactive."
+        blank=True,
+        null=True,
+        help_text="After expiry date this User Role will be inactive.",
     )
 
     class Meta:
@@ -444,7 +461,10 @@ class IncompatibleRoles(NaturalKeyModel, TimeStampedUUIDModel):
             raise ValidationError(_("Choose two different roles."))
         failing_users = set()
 
-        for role_pair in ((self.role_one, self.role_two), (self.role_two, self.role_one)):
+        for role_pair in (
+            (self.role_one, self.role_two),
+            (self.role_two, self.role_one),
+        ):
             for userrole in UserRole.objects.filter(role=role_pair[0]):
                 if UserRole.objects.filter(
                     user=userrole.user,

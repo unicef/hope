@@ -16,7 +16,7 @@ def migrate_onetoone_to_foreignkey(apps, schema_editor):
     ts = TicketComplaintDetails.objects.filter(
         payment_object_id__isnull=False,
         payment__isnull=True,
-        payment_content_type=ct_pr
+        payment_content_type=ct_pr,
     )
     for t in ts:
         pr = PaymentRecord.objects.get(id=t.payment_object_id)
@@ -25,73 +25,87 @@ def migrate_onetoone_to_foreignkey(apps, schema_editor):
         t.save()
 
     TicketSensitiveDetails.objects.filter(
-        payment__isnull=False,
-        payment_fk__isnull=True
+        payment__isnull=False, payment_fk__isnull=True
     ).update(payment_fk=models.F("payment"))
     TicketComplaintDetails.objects.filter(
-        payment__isnull=False,
-        payment_fk__isnull=True
+        payment__isnull=False, payment_fk__isnull=True
     ).update(payment_fk=models.F("payment"))
     TicketSensitiveDetails.objects.filter(
         payment_content_type=ct_p,
         payment_object_id__isnull=False,
-        payment_fk__isnull=True
+        payment_fk__isnull=True,
     ).update(payment_fk=models.F("payment_object_id"))
     TicketComplaintDetails.objects.filter(
         payment_content_type=ct_p,
         payment_object_id__isnull=False,
-        payment_fk__isnull=True
+        payment_fk__isnull=True,
     ).update(payment_fk=models.F("payment_object_id"))
 
 
 class Migration(migrations.Migration):
-
-
     dependencies = [
-        ('grievance', '0004_migration'),
-        ('payment', '0001_migration'),
+        ("grievance", "0004_migration"),
+        ("payment", "0001_migration"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='ticketcomplaintdetails',
-            name='payment_fk',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='payment.payment'),
+            model_name="ticketcomplaintdetails",
+            name="payment_fk",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="payment.payment",
+            ),
         ),
         migrations.AddField(
-            model_name='ticketsensitivedetails',
-            name='payment_fk',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='payment.payment'),
+            model_name="ticketsensitivedetails",
+            name="payment_fk",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="payment.payment",
+            ),
         ),
-        migrations.RunPython(migrate_onetoone_to_foreignkey, reverse_code=migrations.RunPython.noop),
-        migrations.RemoveField(
-            model_name='ticketcomplaintdetails',
-            name='payment',
+        migrations.RunPython(
+            migrate_onetoone_to_foreignkey, reverse_code=migrations.RunPython.noop
         ),
         migrations.RemoveField(
-            model_name='ticketsensitivedetails',
-            name='payment',
+            model_name="ticketcomplaintdetails",
+            name="payment",
+        ),
+        migrations.RemoveField(
+            model_name="ticketsensitivedetails",
+            name="payment",
         ),
         migrations.RenameField(
-            model_name='ticketcomplaintdetails',
-            old_name='payment_fk',
-            new_name='payment',
+            model_name="ticketcomplaintdetails",
+            old_name="payment_fk",
+            new_name="payment",
         ),
         migrations.RenameField(
-            model_name='ticketsensitivedetails',
-            old_name='payment_fk',
-            new_name='payment',
+            model_name="ticketsensitivedetails",
+            old_name="payment_fk",
+            new_name="payment",
         ),
         migrations.AlterField(
-            model_name='ticketcomplaintdetails',
-            name='payment',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE,
-                                    related_name='ticket_complaint_details', to='payment.payment'),
+            model_name="ticketcomplaintdetails",
+            name="payment",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="ticket_complaint_details",
+                to="payment.payment",
+            ),
         ),
         migrations.AlterField(
-            model_name='ticketsensitivedetails',
-            name='payment',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE,
-                                    related_name='ticket_sensitive_details', to='payment.payment'),
+            model_name="ticketsensitivedetails",
+            name="payment",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="ticket_sensitive_details",
+                to="payment.payment",
+            ),
         ),
     ]

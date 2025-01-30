@@ -88,7 +88,10 @@ class TestFspXlsxTemplatePerDeliveryMechanismValidation(TestCase):
 
     def test_admin_form_clean(self) -> None:
         fsp_xls_template = FinancialServiceProviderXlsxTemplateFactory(
-            core_fields=["bank_name__transfer_to_account", "bank_account_number__transfer_to_account"]
+            core_fields=[
+                "bank_name__transfer_to_account",
+                "bank_account_number__transfer_to_account",
+            ]
         )
 
         fsp = FinancialServiceProviderFactory(
@@ -131,7 +134,10 @@ class TestFspXlsxTemplatePerDeliveryMechanismValidation(TestCase):
         ):
             form.clean()
 
-        fsp_xls_template.core_fields = ["bank_name__transfer_to_account", "bank_account_number__transfer_to_account"]
+        fsp_xls_template.core_fields = [
+            "bank_name__transfer_to_account",
+            "bank_account_number__transfer_to_account",
+        ]
         fsp_xls_template.save()
 
         # test delivery mechanism not supported

@@ -45,16 +45,27 @@ class TestDataCollectionTypeSchema(APITestCase):
             type=DataCollectingType.Type.SOCIAL,
         )
         cls.data_collecting_type_size_only = DataCollectingTypeFactory(
-            label="Size Only", code="size_only", weight=3, business_areas=[cls.business_area]
+            label="Size Only",
+            code="size_only",
+            weight=3,
+            business_areas=[cls.business_area],
         )
         cls.data_collecting_type_unknown = DataCollectingTypeFactory(
-            label="Unknown", code="unknown", weight=4, business_areas=[cls.business_area]
+            label="Unknown",
+            code="unknown",
+            weight=4,
+            business_areas=[cls.business_area],
         )
 
-    def test_dct_with_unknown_code_is_not_in_list(self) -> None:  # also checks weight sorting
+    def test_dct_with_unknown_code_is_not_in_list(
+        self,
+    ) -> None:  # also checks weight sorting
         self.snapshot_graphql_request(
             request_string=self.QUERY_DATA_COLLECTING_TYPE_CHOICES,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {"Business-Area": self.business_area.slug},
+            },
         )
 
 
@@ -77,7 +88,10 @@ class TestPDUSubtypeChoices(APITestCase):
     def test_pdu_subtype_choices_data(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.QUERY_PDU_SUBTYPE_CHOICES,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {"Business-Area": self.business_area.slug},
+            },
         )
 
 
@@ -102,7 +116,9 @@ class TestAllPduFields(APITestCase):
         super().setUpTestData()
         cls.business_area = create_afghanistan()
         cls.program = ProgramFactory(
-            business_area=cls.business_area, status=Program.ACTIVE, name="Test Program For PDU Fields"
+            business_area=cls.business_area,
+            status=Program.ACTIVE,
+            name="Test Program For PDU Fields",
         )
         cls.user = UserFactory()
 
@@ -153,7 +169,10 @@ class TestAllPduFields(APITestCase):
                 "businessAreaSlug": "afghanistan",
                 "programId": encode_id_base64_required(self.program.id, "Program"),
             },
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {"Business-Area": self.business_area.slug},
+            },
         )
 
 
@@ -183,5 +202,8 @@ class TestAllCollectorsFields(APITestCase):
             variables={
                 "businessAreaSlug": "afghanistan",
             },
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {"Business-Area": self.business_area.slug},
+            },
         )

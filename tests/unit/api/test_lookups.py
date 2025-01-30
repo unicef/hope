@@ -85,7 +85,10 @@ class APICountriesTests(HOPEApiTestCase):
         for filter_data, expected_result in [
             ({"valid_from_before": "2019-01-02"}, [self.country_afghanistan]),
             ({"valid_from_after": "2019-01-02"}, [self.country_poland]),
-            ({"valid_until_before": "2022-01-01"}, [self.country_poland, self.country_afghanistan]),
+            (
+                {"valid_until_before": "2022-01-01"},
+                [self.country_poland, self.country_afghanistan],
+            ),
             ({"valid_until_after": "2021-12-30"}, [self.country_afghanistan]),
         ]:
             with token_grant_permission(self.token, Grant.API_READ_ONLY):

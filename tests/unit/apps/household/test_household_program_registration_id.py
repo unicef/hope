@@ -62,7 +62,9 @@ class TestHouseholdRegistrationId(APITestCase):
     )
     def test_household_program_registration_id(self, program_registration_id: str) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS], self.business_area
+            self.user,
+            [Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS],
+            self.business_area,
         )
 
         self.household.program_registration_id = program_registration_id
@@ -106,5 +108,10 @@ class TestHouseholdRegistrationId(APITestCase):
             .order_by("program_registration_id")
             .values_list("program_registration_id", flat=True)
         )
-        expected_program_registrations_ids = ["ABCD-111222#0", "ABCD-123123#0", "ABCD-123123#1", "ABCD-123123#2"]
+        expected_program_registrations_ids = [
+            "ABCD-111222#0",
+            "ABCD-123123#0",
+            "ABCD-123123#1",
+            "ABCD-123123#2",
+        ]
         self.assertEqual(registrations_ids, expected_program_registrations_ids)

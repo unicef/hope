@@ -49,7 +49,11 @@ class ActiveRecordFilter(ListFilter):
     parameter_name = "active"
 
     def __init__(
-        self, request: "HttpRequest", params: Dict[str, str], model: Type[Model], model_admin: ModelAdmin
+        self,
+        request: "HttpRequest",
+        params: Dict[str, str],
+        model: Type[Model],
+        model_admin: ModelAdmin,
     ) -> None:
         super().__init__(request, params, model, model_admin)
         for p in self.expected_parameters():
@@ -116,7 +120,7 @@ class CountryAdmin(ValidityManagerMixin, SyncMixin, FieldsetMixin, HOPEModelAdmi
 
     def get_list_display(
         self, request: "HttpRequest"
-    ) -> Union[List[Union[str, Callable[[Any], str]]], Tuple[Union[str, Callable[[Any], str]], ...]]:
+    ) -> Union[List[Union[str, Callable[[Any], str]]], Tuple[Union[str, Callable[[Any], str]], ...],]:
         ret = super().get_list_display(request)
         return ret
 
@@ -230,18 +234,27 @@ class AreaAdmin(ValidityManagerMixin, FieldsetMixin, SyncMixin, HOPEModelAdminBa
                         country = country or Country.objects.get(short_name=row["Country"])
                         for area_level, area_type_name in enumerate(area_types[1:], 1):
                             area_type, _ = AreaType.objects.get_or_create(
-                                name=area_type_name, country=country, area_level=area_level
+                                name=area_type_name,
+                                country=country,
+                                area_level=area_level,
                             )
                             area, _ = Area.objects.get_or_create(
-                                name=row[area_type_name], p_code=row[admin_area[area_level]], area_type=area_type
+                                name=row[area_type_name],
+                                p_code=row[admin_area[area_level]],
+                                area_type=area_type,
                             )
                             ids = area_level - 1
                             if ids > 0:
                                 area_type.parent = AreaType.objects.get(
-                                    country=country, area_level=ids, name=area_types[ids]
+                                    country=country,
+                                    area_level=ids,
+                                    name=area_types[ids],
                                 )
                                 area_type.save()
-                                area.parent = Area.objects.get(p_code=row[admin_area[ids]], name=row[area_types[ids]])
+                                area.parent = Area.objects.get(
+                                    p_code=row[admin_area[ids]],
+                                    name=row[area_types[ids]],
+                                )
                                 area.save()
                     self.message_user(request, f"Updated all areas for {country}")
                     return redirect("admin:geo_area_changelist")
@@ -249,11 +262,17 @@ class AreaAdmin(ValidityManagerMixin, FieldsetMixin, SyncMixin, HOPEModelAdminBa
                     logger.error(f"Integrity error: {e}")
                     if p_code := str(e).split("p_code)=(")[-1].split(")")[0]:
                         self.message_user(
-                            request, f"Area with p_code {p_code} already exists but with different data", messages.ERROR
+                            request,
+                            f"Area with p_code {p_code} already exists but with different data",
+                            messages.ERROR,
                         )
                 except Exception as e:
                     logger.error(e)
-                    self.message_user(request, "Unable to load areas, please check the format", messages.ERROR)
+                    self.message_user(
+                        request,
+                        "Unable to load areas, please check the format",
+                        messages.ERROR,
+                    )
         else:
             form = ImportCSVForm()
         context["form"] = form

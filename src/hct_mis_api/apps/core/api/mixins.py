@@ -34,7 +34,12 @@ class BaseAPI:
             raise self.API_MISSING_CREDENTIALS_EXCEPTION_CLASS(f"Missing {self.__class__.__name__} Key/URL")
 
         self._client = session()
-        retries = Retry(total=3, backoff_factor=1, status_forcelist=[502, 503, 504], allowed_methods=None)
+        retries = Retry(
+            total=3,
+            backoff_factor=1,
+            status_forcelist=[502, 503, 504],
+            allowed_methods=None,
+        )
         self._client.mount(self.api_url, HTTPAdapter(max_retries=retries))
         self._client.headers.update({"Authorization": f"Token {self.api_key}"})
 
@@ -47,7 +52,10 @@ class BaseAPI:
         return response
 
     def _post(
-        self, endpoint: str, data: Optional[Union[Dict, List]] = None, validate_response: bool = True
+        self,
+        endpoint: str,
+        data: Optional[Union[Dict, List]] = None,
+        validate_response: bool = True,
     ) -> Tuple[Dict, int]:
         response = self._client.post(f"{self.api_url}{endpoint}", json=data)
         if validate_response:

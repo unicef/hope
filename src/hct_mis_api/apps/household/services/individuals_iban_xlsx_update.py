@@ -184,10 +184,12 @@ class IndividualsIBANXlsxUpdate:
     @staticmethod
     def _prepare_email(context: Dict) -> MailjetClient:
         text_body = render_to_string(
-            "admin/household/individual/individuals_iban_xlsx_update_email.txt", context=context
+            "admin/household/individual/individuals_iban_xlsx_update_email.txt",
+            context=context,
         )
         html_body = render_to_string(
-            "admin/household/individual/individuals_iban_xlsx_update_email.txt", context=context
+            "admin/household/individual/individuals_iban_xlsx_update_email.txt",
+            context=context,
         )
 
         email = MailjetClient(

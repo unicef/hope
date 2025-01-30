@@ -178,7 +178,10 @@ class PaymentPlanService:
         return self.payment_plan
 
     def tp_rebuild(self) -> PaymentPlan:
-        if self.payment_plan.status not in [PaymentPlan.Status.TP_OPEN, PaymentPlan.Status.TP_LOCKED]:
+        if self.payment_plan.status not in [
+            PaymentPlan.Status.TP_OPEN,
+            PaymentPlan.Status.TP_LOCKED,
+        ]:
             raise GraphQLError("Can only Rebuild Population for Locked or Open Population status")
 
         self.payment_plan.build_status_pending()
@@ -202,7 +205,13 @@ class PaymentPlanService:
         self.payment_plan.dispersion_end_date = dispersion_end_date
 
         self.payment_plan.save(
-            update_fields=("status_date", "status", "currency", "dispersion_start_date", "dispersion_end_date")
+            update_fields=(
+                "status_date",
+                "status",
+                "currency",
+                "dispersion_start_date",
+                "dispersion_end_date",
+            )
         )
         self.payment_plan.program_cycle.set_active()
 
@@ -373,7 +382,10 @@ class PaymentPlanService:
 
             if notification_action:
                 send_payment_notification_emails.delay(
-                    self.payment_plan.id, notification_action.value, self.user.id, f"{timezone.now():%-d %B %Y}"
+                    self.payment_plan.id,
+                    notification_action.value,
+                    self.user.id,
+                    f"{timezone.now():%-d %B %Y}",
                 )
 
             self.payment_plan.save()
@@ -501,7 +513,10 @@ class PaymentPlanService:
 
         if any(
             [dispersion_start_date, dispersion_end_date, input_data.get("currency")]
-        ) and self.payment_plan.status not in [PaymentPlan.Status.OPEN, PaymentPlan.Status.DRAFT]:
+        ) and self.payment_plan.status not in [
+            PaymentPlan.Status.OPEN,
+            PaymentPlan.Status.DRAFT,
+        ]:
             raise GraphQLError(f"Not Allow edit Payment Plan within status {self.payment_plan.status}")
 
         if name:
@@ -569,13 +584,19 @@ class PaymentPlanService:
         # prevent race between commit transaction and using in task
         transaction.on_commit(
             lambda: PaymentPlanService.rebuild_payment_plan_population(
-                should_rebuild_list, should_update_money_stats, vulnerability_filter, self.payment_plan
+                should_rebuild_list,
+                should_update_money_stats,
+                vulnerability_filter,
+                self.payment_plan,
             )
         )
         return self.payment_plan
 
     def delete(self) -> PaymentPlan:
-        if self.payment_plan.status not in [PaymentPlan.Status.OPEN, PaymentPlan.Status.TP_OPEN]:
+        if self.payment_plan.status not in [
+            PaymentPlan.Status.OPEN,
+            PaymentPlan.Status.TP_OPEN,
+        ]:
             raise GraphQLError("Deletion is only allowed when the status is 'Open'")
 
         if self.payment_plan.status == PaymentPlan.Status.OPEN:
@@ -635,7 +656,10 @@ class PaymentPlanService:
         return self.payment_plan
 
     def validate_fsps_per_delivery_mechanisms(
-        self, dm_to_fsp_mapping: List[Dict], update_dms: bool = False, update_payments: bool = False
+        self,
+        dm_to_fsp_mapping: List[Dict],
+        update_dms: bool = False,
+        update_payments: bool = False,
     ) -> None:
         processed_payments = []
         with transaction.atomic():
@@ -722,7 +746,10 @@ class PaymentPlanService:
 
     @transaction.atomic
     def create_follow_up(
-        self, user: "User", dispersion_start_date: datetime.date, dispersion_end_date: datetime.date
+        self,
+        user: "User",
+        dispersion_start_date: datetime.date,
+        dispersion_end_date: datetime.date,
     ) -> PaymentPlan:
         source_pp = self.payment_plan
 
@@ -780,7 +807,12 @@ class PaymentPlanService:
                 raise GraphQLError(
                     f"Payment Parts number should be between {PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK} and total number of payments"
                 )
-            payments_chunks = list(chunks(list(payments.order_by("unicef_id").values_list("id", flat=True)), chunks_no))
+            payments_chunks = list(
+                chunks(
+                    list(payments.order_by("unicef_id").values_list("id", flat=True)),
+                    chunks_no,
+                )
+            )
 
         elif split_type in [
             PaymentPlanSplit.SplitType.BY_ADMIN_AREA1,
@@ -794,7 +826,10 @@ class PaymentPlanService:
                 )
             )
             payments_chunks = []
-            for _, payments in groupby(grouped_payments, key=lambda x: getattr(x.household, f"admin{area_level}")):  # type: ignore
+            for _, payments in groupby(
+                grouped_payments,
+                key=lambda x: getattr(x.household, f"admin{area_level}"),
+            ):  # type: ignore
                 payments_chunks.append([payment.id for payment in payments])
 
         elif split_type == PaymentPlanSplit.SplitType.BY_COLLECTOR:
@@ -842,7 +877,10 @@ class PaymentPlanService:
 
     @staticmethod
     def rebuild_payment_plan_population(
-        rebuild_list: bool, should_update_money_stats: bool, vulnerability_filter: bool, payment_plan: PaymentPlan
+        rebuild_list: bool,
+        should_update_money_stats: bool,
+        vulnerability_filter: bool,
+        payment_plan: PaymentPlan,
     ) -> None:
         rebuild_full_list = payment_plan.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES and rebuild_list
         payment_plan.build_status_pending()
@@ -866,7 +904,9 @@ class PaymentPlanService:
             payment_plan_rebuild_stats.delay(str(payment_plan.id))
 
     @staticmethod
-    def copy_target_criteria(targeting_criteria: TargetingCriteria) -> TargetingCriteria:
+    def copy_target_criteria(
+        targeting_criteria: TargetingCriteria,
+    ) -> TargetingCriteria:
         targeting_criteria_copy = TargetingCriteria()
         targeting_criteria_copy.save()
         for rule in targeting_criteria.rules.all():
@@ -882,7 +922,8 @@ class PaymentPlanService:
                 hh_filter.save()
             for ind_filter_block in rule.individuals_filters_blocks.all():
                 ind_filter_block_copy = TargetingIndividualRuleFilterBlock(
-                    targeting_criteria_rule=rule_copy, target_only_hoh=ind_filter_block.target_only_hoh
+                    targeting_criteria_rule=rule_copy,
+                    target_only_hoh=ind_filter_block.target_only_hoh,
                 )
                 ind_filter_block_copy.save()
                 for ind_filter in ind_filter_block.individual_block_filters.all():

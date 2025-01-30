@@ -41,7 +41,10 @@ class XlsxVerificationImportService(XlsxImportBaseService):
     @staticmethod
     def get_columns_from_worksheet(ws: Worksheet) -> Dict:
         return {
-            cell.value: {"letter": get_column_letter(cell.column), "number": cell.column - 1}
+            cell.value: {
+                "letter": get_column_letter(cell.column),
+                "number": cell.column - 1,
+            }
             for cell in ws[1]
             if cell.value
         }

@@ -95,7 +95,10 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         meta_sheet = wb[service.META_SHEET]
         pdu_sheet = wb[service.PDU_SHEET]
         self.assertEqual(meta_sheet["b1"].value, self.periodic_data_update_template.pk)
-        self.assertEqual(wb.custom_doc_props["pdu_template_id"].value, str(self.periodic_data_update_template.pk))
+        self.assertEqual(
+            wb.custom_doc_props["pdu_template_id"].value,
+            str(self.periodic_data_update_template.pk),
+        )
         self.assertEqual(pdu_sheet.max_row, 3)
 
     def test_save_xlsx_file(self) -> None:
@@ -293,9 +296,19 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
             area_level=2,
         )
         area1a = AreaFactory(name="City Test1", area_type=area_type_level_1, p_code="area1a")
-        area2a = AreaFactory(name="City Test2", area_type=area_type_level_2, p_code="area2a", parent=area1a)
+        area2a = AreaFactory(
+            name="City Test2",
+            area_type=area_type_level_2,
+            p_code="area2a",
+            parent=area1a,
+        )
         area1b = AreaFactory(name="City Test1b", area_type=area_type_level_1, p_code="area1b")
-        area2b = AreaFactory(name="City Test2b", area_type=area_type_level_2, p_code="area2b", parent=area1b)
+        area2b = AreaFactory(
+            name="City Test2b",
+            area_type=area_type_level_2,
+            p_code="area2b",
+            parent=area1b,
+        )
         create_household_and_individuals(
             household_data={
                 "business_area": self.business_area,
@@ -335,7 +348,9 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         self.assertEqual(queryset.count(), 2)
         self.assertEqual(set(queryset), set(self.individuals))
 
-    def test_get_individuals_queryset_has_grievance_ticket_referral_filter(self) -> None:
+    def test_get_individuals_queryset_has_grievance_ticket_referral_filter(
+        self,
+    ) -> None:
         individual_with_ticket = self.individuals[0]
         grievance = GrievanceTicketFactory(
             business_area=self.business_area,
@@ -352,7 +367,9 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         self.assertEqual(queryset.count(), 1)
         self.assertEqual(queryset.first(), individual_with_ticket)
 
-    def test_get_individuals_queryset_has_grievance_ticket_referral_exclude_filter(self) -> None:
+    def test_get_individuals_queryset_has_grievance_ticket_referral_exclude_filter(
+        self,
+    ) -> None:
         individual_with_ticket = self.individuals[0]
         individual_without_ticket = self.individuals[1]
         grievance = GrievanceTicketFactory(
@@ -370,7 +387,9 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         self.assertEqual(queryset.count(), 1)
         self.assertEqual(queryset.first(), individual_without_ticket)
 
-    def test_get_individuals_queryset_has_grievance_ticket_negative_feedback_filter(self) -> None:
+    def test_get_individuals_queryset_has_grievance_ticket_negative_feedback_filter(
+        self,
+    ) -> None:
         individual_with_ticket = self.individuals[0]
         grievance = GrievanceTicketFactory(
             business_area=self.business_area,
@@ -387,7 +406,9 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         self.assertEqual(queryset.count(), 1)
         self.assertEqual(queryset.first(), individual_with_ticket)
 
-    def test_get_individuals_queryset_has_grievance_ticket_positive_feedback_filter(self) -> None:
+    def test_get_individuals_queryset_has_grievance_ticket_positive_feedback_filter(
+        self,
+    ) -> None:
         individual_with_ticket = self.individuals[0]
         grievance = GrievanceTicketFactory(
             business_area=self.business_area,
@@ -404,7 +425,9 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         self.assertEqual(queryset.count(), 1)
         self.assertEqual(queryset.first(), individual_with_ticket)
 
-    def test_get_individuals_queryset_has_grievance_ticket_needs_adjudication_filter(self) -> None:
+    def test_get_individuals_queryset_has_grievance_ticket_needs_adjudication_filter(
+        self,
+    ) -> None:
         create_household_and_individuals(
             household_data={
                 "business_area": self.business_area,
@@ -445,7 +468,9 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         self.assertEqual(queryset.count(), 2)
         self.assertEqual(set(queryset), {individual_with_ticket, possible_duplicate})
 
-    def test_get_individuals_queryset_has_grievance_ticket_system_flagging_filter(self) -> None:
+    def test_get_individuals_queryset_has_grievance_ticket_system_flagging_filter(
+        self,
+    ) -> None:
         individual_with_ticket = self.individuals[0]
         grievance = GrievanceTicketFactory(
             business_area=self.business_area,
@@ -467,7 +492,9 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         self.assertEqual(queryset.count(), 1)
         self.assertEqual(queryset.first(), individual_with_ticket)
 
-    def test_get_individuals_queryset_has_grievance_ticket_delete_individual_filter(self) -> None:
+    def test_get_individuals_queryset_has_grievance_ticket_delete_individual_filter(
+        self,
+    ) -> None:
         individual_with_ticket = self.individuals[0]
         grievance = GrievanceTicketFactory(
             business_area=self.business_area,
@@ -485,7 +512,9 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         self.assertEqual(queryset.count(), 1)
         self.assertEqual(queryset.first(), individual_with_ticket)
 
-    def test_get_individuals_queryset_has_grievance_ticket_individual_data_update_filter(self) -> None:
+    def test_get_individuals_queryset_has_grievance_ticket_individual_data_update_filter(
+        self,
+    ) -> None:
         individual_with_ticket = self.individuals[0]
         grievance = GrievanceTicketFactory(
             business_area=self.business_area,
@@ -503,7 +532,9 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         self.assertEqual(queryset.count(), 1)
         self.assertEqual(queryset.first(), individual_with_ticket)
 
-    def test_get_individuals_queryset_has_grievance_ticket_sensitive_filter(self) -> None:
+    def test_get_individuals_queryset_has_grievance_ticket_sensitive_filter(
+        self,
+    ) -> None:
         individual_with_ticket = self.individuals[0]
         grievance = GrievanceTicketFactory(
             business_area=self.business_area,
@@ -521,7 +552,9 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         self.assertEqual(queryset.count(), 1)
         self.assertEqual(queryset.first(), individual_with_ticket)
 
-    def test_get_individuals_queryset_has_grievance_ticket_complaint_filter(self) -> None:
+    def test_get_individuals_queryset_has_grievance_ticket_complaint_filter(
+        self,
+    ) -> None:
         individual_with_ticket = self.individuals[0]
         grievance = GrievanceTicketFactory(
             business_area=self.business_area,

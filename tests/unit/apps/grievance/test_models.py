@@ -110,13 +110,17 @@ class TestDeliveryMechanismDataModel(TestCase):
         ]
 
         dmd_1 = DeliveryMechanismDataFactory(
-            data={"name_of_cardholder__atm_card": "test"}, individual=self.ind, is_valid=True
+            data={"name_of_cardholder__atm_card": "test"},
+            individual=self.ind,
+            is_valid=True,
         )
         dmd_1.individual.seeing_disability = LOT_DIFFICULTY
         dmd_1.individual.save()
 
         dmd_2 = DeliveryMechanismDataFactory(
-            data={"name_of_cardholder__atm_card": "test2"}, individual=self.ind2, is_valid=True
+            data={"name_of_cardholder__atm_card": "test2"},
+            individual=self.ind2,
+            is_valid=True,
         )
         dmd_2.individual.seeing_disability = LOT_DIFFICULTY
         dmd_2.individual.save()
@@ -169,7 +173,12 @@ class TestDeliveryMechanismDataModel(TestCase):
         dmd = DeliveryMechanismDataFactory(individual=self.ind, delivery_mechanism=self.dm_atm_card)
         self.assertEqual(
             dmd.all_fields,
-            ["card_number__atm_card", "card_expiry_date__atm_card", "name_of_cardholder__atm_card", "full_name"],
+            [
+                "card_number__atm_card",
+                "card_expiry_date__atm_card",
+                "name_of_cardholder__atm_card",
+                "full_name",
+            ],
         )
 
     def test_required_fields(self) -> None:

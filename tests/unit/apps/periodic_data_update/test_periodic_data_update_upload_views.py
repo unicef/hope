@@ -42,7 +42,12 @@ pytestmark = pytest.mark.django_db
 
 @freezegun.freeze_time("2022-01-01")
 class TestPeriodicDataUpdateUploadViews:
-    def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory, id_to_base64: Callable) -> None:
+    def set_up(
+        self,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        id_to_base64: Callable,
+    ) -> None:
         self.partner = PartnerFactory(name="TestPartner")
         self.user = UserFactory(partner=self.partner)
         self.client = api_client(self.user)
@@ -89,8 +94,18 @@ class TestPeriodicDataUpdateUploadViews:
                 status.HTTP_200_OK,
             ),
             ([], [], False, status.HTTP_403_FORBIDDEN),
-            ([Permissions.PDU_VIEW_LIST_AND_DETAILS], [], False, status.HTTP_403_FORBIDDEN),
-            ([], [Permissions.PDU_VIEW_LIST_AND_DETAILS], False, status.HTTP_403_FORBIDDEN),
+            (
+                [Permissions.PDU_VIEW_LIST_AND_DETAILS],
+                [],
+                False,
+                status.HTTP_403_FORBIDDEN,
+            ),
+            (
+                [],
+                [Permissions.PDU_VIEW_LIST_AND_DETAILS],
+                False,
+                status.HTTP_403_FORBIDDEN,
+            ),
             (
                 [Permissions.PDU_VIEW_LIST_AND_DETAILS],
                 [Permissions.PDU_VIEW_LIST_AND_DETAILS],

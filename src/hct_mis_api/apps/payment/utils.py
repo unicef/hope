@@ -26,7 +26,9 @@ if TYPE_CHECKING:
 
 
 def get_number_of_samples(
-    payment_records_sample_count: int, confidence_interval: int, margin_of_error: Union[int, float]
+    payment_records_sample_count: int,
+    confidence_interval: int,
+    margin_of_error: Union[int, float],
 ) -> int:
     from statistics import NormalDist
 
@@ -42,7 +44,9 @@ def get_number_of_samples(
 
 
 def from_received_to_status(
-    received: bool, received_amount: Union[Decimal, float], delivered_amount: Union[Decimal, float]
+    received: bool,
+    received_amount: Union[Decimal, float],
+    delivered_amount: Union[Decimal, float],
 ) -> str:
     received_amount_dec = to_decimal(received_amount)
     if received is None:
@@ -58,7 +62,9 @@ def from_received_to_status(
         return PaymentVerification.STATUS_NOT_RECEIVED
 
 
-def to_decimal(received_amount: Optional[Union[Decimal, float, int, str]]) -> Optional[Decimal]:
+def to_decimal(
+    received_amount: Optional[Union[Decimal, float, int, str]],
+) -> Optional[Decimal]:
     if received_amount is None or str(received_amount).strip() == "":
         return None
 
@@ -96,7 +102,10 @@ def calculate_counts(payment_verification_plan: PaymentVerificationPlan) -> None
 
 
 def get_payment_items_for_dashboard(
-    year: int, business_area_slug: str, filters: Dict, only_with_delivered_quantity: bool = False
+    year: int,
+    business_area_slug: str,
+    filters: Dict,
+    only_with_delivered_quantity: bool = False,
 ) -> "QuerySet":
     additional_filters = {}
     if only_with_delivered_quantity:

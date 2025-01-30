@@ -41,13 +41,21 @@ def validate_admin(
 
 
 def validate_string(
-    value: Any, name: str, modified_object: Any, business_area: BusinessArea, program: Program
+    value: Any,
+    name: str,
+    modified_object: Any,
+    business_area: BusinessArea,
+    program: Program,
 ) -> Optional[str]:
     return None
 
 
 def validate_date(
-    value: Any, name: str, modified_object: Any, business_area: BusinessArea, program: Program
+    value: Any,
+    name: str,
+    modified_object: Any,
+    business_area: BusinessArea,
+    program: Program,
 ) -> Optional[str]:
     if value is None or value == "":
         return None
@@ -59,7 +67,11 @@ def validate_date(
 
 
 def validate_phone_number(
-    value: Any, name: str, modified_object: Any, business_area: BusinessArea, program: Program
+    value: Any,
+    name: str,
+    modified_object: Any,
+    business_area: BusinessArea,
+    program: Program,
 ) -> Optional[str]:
     if value is None or value == "":
         return None
@@ -70,7 +82,11 @@ def validate_phone_number(
 
 
 def validate_sex(
-    value: Any, name: str, modified_object: Any, business_area: BusinessArea, program: Program
+    value: Any,
+    name: str,
+    modified_object: Any,
+    business_area: BusinessArea,
+    program: Program,
 ) -> Optional[str]:
     if value is None or value == "":
         return None
@@ -81,6 +97,10 @@ def validate_sex(
 
 
 def validate_flex_field_string(
-    value: Any, name: str, modified_object: Any, business_area: BusinessArea, program: Program
+    value: Any,
+    name: str,
+    modified_object: Any,
+    business_area: BusinessArea,
+    program: Program,
 ) -> Optional[str]:
     return None

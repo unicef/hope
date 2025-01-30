@@ -230,7 +230,10 @@ class TestGrievanceQuery(APITestCase):
         cls.partner = PartnerFactory(name="Partner1")
         cls.partner_2 = PartnerFactory(name="Partner2")
         # update partner perms
-        role = RoleFactory(name="Partner Role", permissions=[Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS])
+        role = RoleFactory(
+            name="Partner Role",
+            permissions=[Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+        )
         cls.update_partner_access_to_program(
             cls.partner,
             cls.program,
@@ -424,7 +427,8 @@ class TestGrievanceQuery(APITestCase):
             [cls.admin_area_1],
         )
         cls.user_with_admin_area_1_access = UserFactory(
-            partner=partner_with_admin_area1_access, username="user_with_admin_area_1_access"
+            partner=partner_with_admin_area1_access,
+            username="user_with_admin_area_1_access",
         )
 
         # user with access to admin area 2
@@ -435,14 +439,18 @@ class TestGrievanceQuery(APITestCase):
             [cls.admin_area_2],
         )
         cls.user_with_admin_area_2_access = UserFactory(
-            partner=partner_with_admin_area2_access, username="user_with_admin_area_2_access"
+            partner=partner_with_admin_area2_access,
+            username="user_with_admin_area_2_access",
         )
 
     @parameterized.expand(
         [
             (
                 "with_permission",
-                [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+                [
+                    Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                    Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                ],
             ),
             ("without_permission", []),
         ]
@@ -463,7 +471,10 @@ class TestGrievanceQuery(APITestCase):
 
     @parameterized.expand(
         [
-            ("with_permission", [Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR]),
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR],
+            ),
             ("without_permission", []),
         ]
     )
@@ -483,33 +494,47 @@ class TestGrievanceQuery(APITestCase):
             variables={"id": self.id_to_base64(gt_id, "GrievanceTicketNode")},
         )
 
-    def test_grievance_ticket_query_partner_access_detail_partner_unicef_for_program(self) -> None:
+    def test_grievance_ticket_query_partner_access_detail_partner_unicef_for_program(
+        self,
+    ) -> None:
         # access to ticket detail of every program-related ticket in this BA (through specific Program)
         self._test_grievance_ticket_query_partner_access_detail_for_user_for_program(self.user_with_unicef_partner)
 
-    def test_grievance_ticket_query_partner_access_detail_partner_unicef_for_all_programs(self) -> None:
+    def test_grievance_ticket_query_partner_access_detail_partner_unicef_for_all_programs(
+        self,
+    ) -> None:
         # access to ticket detail of every ticket in this BA (through All Programs)
         self._test_grievance_ticket_query_partner_access_detail_for_user_for_all_programs(self.user_with_unicef_partner)
 
-    def test_grievance_ticket_query_partner_access_detail_partner_without_program_for_program(self) -> None:
+    def test_grievance_ticket_query_partner_access_detail_partner_without_program_for_program(
+        self,
+    ) -> None:
         # no access to any ticket detail (through specific Program)
         self._test_grievance_ticket_query_partner_access_detail_for_user_for_program(self.user_without_program)
 
-    def test_grievance_ticket_query_partner_access_detail_partner_without_program_for_all_programs(self) -> None:
+    def test_grievance_ticket_query_partner_access_detail_partner_without_program_for_all_programs(
+        self,
+    ) -> None:
         # access to ticket detail of non-program tickets (through All Programs)
         self._test_grievance_ticket_query_partner_access_detail_for_user_for_all_programs(self.user_without_program)
 
-    def test_grievance_ticket_query_partner_access_detail_partner_with_full_area_access_for_program(self) -> None:
+    def test_grievance_ticket_query_partner_access_detail_partner_with_full_area_access_for_program(
+        self,
+    ) -> None:
         # access to program-related ticket detail of tickets in this BA (through specific Program)
         self._test_grievance_ticket_query_partner_access_detail_for_user_for_program(self.user_with_full_area_access)
 
-    def test_grievance_ticket_query_partner_access_detail_partner_with_full_area_access_for_all_programs(self) -> None:
+    def test_grievance_ticket_query_partner_access_detail_partner_with_full_area_access_for_all_programs(
+        self,
+    ) -> None:
         # access to ticket detail of every ticket in this BA (through All Programs)
         self._test_grievance_ticket_query_partner_access_detail_for_user_for_all_programs(
             self.user_with_full_area_access
         )
 
-    def test_grievance_ticket_query_partner_access_detail_partner_with_admin_area_1_access_for_program(self) -> None:
+    def test_grievance_ticket_query_partner_access_detail_partner_with_admin_area_1_access_for_program(
+        self,
+    ) -> None:
         # access to program-related ticket detail of tickets without admin area or with admin_area_1
         # (through specific Program)
         self._test_grievance_ticket_query_partner_access_detail_for_user_for_program(self.user_with_admin_area_1_access)
@@ -523,7 +548,9 @@ class TestGrievanceQuery(APITestCase):
             self.user_with_admin_area_1_access
         )
 
-    def test_grievance_ticket_query_partner_access_detail_partner_with_admin_area_2_access_for_program(self) -> None:
+    def test_grievance_ticket_query_partner_access_detail_partner_with_admin_area_2_access_for_program(
+        self,
+    ) -> None:
         # access to program-related ticket detail of tickets without admin area or with admin_area_1
         # (through specific Program)
         self._test_grievance_ticket_query_partner_access_detail_for_user_for_program(self.user_with_admin_area_2_access)
@@ -576,47 +603,67 @@ class TestGrievanceQuery(APITestCase):
             )
 
     @pytest.mark.skip(reason="This test has never worked with pytest")
-    def test_grievance_ticket_query_partner_access_list_partner_unicef_for_program(self) -> None:
+    def test_grievance_ticket_query_partner_access_list_partner_unicef_for_program(
+        self,
+    ) -> None:
         # list of all program-related tickets in this BA (through specific Program)
         self._test_grievance_ticket_query_partner_access_list_for_user_for_program(self.user_with_unicef_partner)
 
-    def test_grievance_ticket_query_partner_access_list_partner_unicef_for_all_programs(self) -> None:
+    def test_grievance_ticket_query_partner_access_list_partner_unicef_for_all_programs(
+        self,
+    ) -> None:
         # list of all tickets in this BA (through All Programs)
         self._test_grievance_ticket_query_partner_access_list_for_user_for_all_programs(self.user_with_unicef_partner)
 
-    def test_grievance_ticket_query_partner_access_list_partner_without_program_for_program(self) -> None:
+    def test_grievance_ticket_query_partner_access_list_partner_without_program_for_program(
+        self,
+    ) -> None:
         # permission denied (through specific Program)
         self._test_grievance_ticket_query_partner_access_list_for_user_for_program(self.user_without_program)
 
-    def test_grievance_ticket_query_partner_access_list_partner_without_program_for_all_programs(self) -> None:
+    def test_grievance_ticket_query_partner_access_list_partner_without_program_for_all_programs(
+        self,
+    ) -> None:
         # list of non-program tickets (through All Programs)
         self._test_grievance_ticket_query_partner_access_list_for_user_for_all_programs(self.user_without_program)
 
     @pytest.mark.skip(reason="This test has never worked with pytest")
-    def test_grievance_ticket_query_partner_access_list_partner_with_full_area_access_for_program(self) -> None:
+    def test_grievance_ticket_query_partner_access_list_partner_with_full_area_access_for_program(
+        self,
+    ) -> None:
         # list of all program-related tickets in this BA (through specific Program)
         self._test_grievance_ticket_query_partner_access_list_for_user_for_program(self.user_with_full_area_access)
 
-    def test_grievance_ticket_query_partner_access_list_partner_with_full_area_access_for_all_programs(self) -> None:
+    def test_grievance_ticket_query_partner_access_list_partner_with_full_area_access_for_all_programs(
+        self,
+    ) -> None:
         # list of all tickets in this BA (through All Programs)
         self._test_grievance_ticket_query_partner_access_list_for_user_for_all_programs(self.user_with_full_area_access)
 
-    def test_grievance_ticket_query_partner_access_list_partner_with_admin_area_1_access_for_program(self) -> None:
+    def test_grievance_ticket_query_partner_access_list_partner_with_admin_area_1_access_for_program(
+        self,
+    ) -> None:
         # list of program-related tickets without admin area or with admin_area_1 (through specific Program)
         self._test_grievance_ticket_query_partner_access_list_for_user_for_program(self.user_with_admin_area_1_access)
 
-    def test_grievance_ticket_query_partner_access_list_partner_with_admin_area_1_access_for_all_programs(self) -> None:
+    def test_grievance_ticket_query_partner_access_list_partner_with_admin_area_1_access_for_all_programs(
+        self,
+    ) -> None:
         # list of tickets without program and tickets without admin area or with admin_area_1 (through All Programs)
         self._test_grievance_ticket_query_partner_access_list_for_user_for_all_programs(
             self.user_with_admin_area_1_access
         )
 
     @pytest.mark.skip(reason="This test has never worked with pytest")
-    def test_grievance_ticket_query_partner_access_list_partner_with_admin_area_2_access_for_program(self) -> None:
+    def test_grievance_ticket_query_partner_access_list_partner_with_admin_area_2_access_for_program(
+        self,
+    ) -> None:
         # list of program-related tickets without admin area or with admin_area_2 (through specific Program)
         self._test_grievance_ticket_query_partner_access_list_for_user_for_program(self.user_with_admin_area_2_access)
 
-    def test_grievance_ticket_query_partner_access_list_partner_with_admin_area_2_access_for_all_programs(self) -> None:
+    def test_grievance_ticket_query_partner_access_list_partner_with_admin_area_2_access_for_all_programs(
+        self,
+    ) -> None:
         # list of tickets without program and tickets without admin area or with admin_area_2 (through All Programs)
         self._test_grievance_ticket_query_partner_access_list_for_user_for_all_programs(
             self.user_with_admin_area_2_access
@@ -661,7 +708,10 @@ class TestGrievanceQuery(APITestCase):
     def test_grievance_list_filtered_by_admin2(self) -> None:
         self.create_user_role_with_permissions(
             self.user,
-            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+            [
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+            ],
             self.business_area,
             self.program,
         )
@@ -681,7 +731,10 @@ class TestGrievanceQuery(APITestCase):
     def test_grievance_list_filtered_by_created_at(self) -> None:
         self.create_user_role_with_permissions(
             self.user,
-            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+            [
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+            ],
             self.business_area,
             self.program,
         )
@@ -701,7 +754,10 @@ class TestGrievanceQuery(APITestCase):
     def test_grievance_list_filtered_by_status(self) -> None:
         self.create_user_role_with_permissions(
             self.user,
-            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+            [
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+            ],
             self.business_area,
             self.program,
         )
@@ -733,7 +789,10 @@ class TestGrievanceQuery(APITestCase):
     def test_grievance_list_filtered_by_category(self, _: Any, category: str) -> None:
         self.create_user_role_with_permissions(
             self.user,
-            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+            [
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+            ],
             self.business_area,
             self.program,
         )
@@ -753,7 +812,10 @@ class TestGrievanceQuery(APITestCase):
     def test_grievance_list_filtered_by_assigned_to_correct_user(self) -> None:
         self.create_user_role_with_permissions(
             self.user,
-            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+            [
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+            ],
             self.business_area,
             self.program,
         )
@@ -773,7 +835,10 @@ class TestGrievanceQuery(APITestCase):
     def test_grievance_list_filtered_by_assigned_to_incorrect_user(self) -> None:
         self.create_user_role_with_permissions(
             self.user,
-            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+            [
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+            ],
             self.business_area,
             self.program,
         )
@@ -793,7 +858,10 @@ class TestGrievanceQuery(APITestCase):
     def test_grievance_list_filtered_by_score(self) -> None:
         self.create_user_role_with_permissions(
             self.user,
-            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+            [
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+            ],
             self.business_area,
             self.program,
         )
@@ -854,7 +922,8 @@ class TestGrievanceNode(TestCase):
         )
 
         TicketNeedsAdjudicationDetailsFactory(
-            golden_records_individual=self.individual_1, ticket=self.grievance_sw_without_ind_in_details
+            golden_records_individual=self.individual_1,
+            ticket=self.grievance_sw_without_ind_in_details,
         )
         self.grievance_non_sw_program.refresh_from_db()
         self.grievance_sw_with_ind_in_details.refresh_from_db()
@@ -864,4 +933,7 @@ class TestGrievanceNode(TestCase):
         self.assertEqual(self.grievance_non_sw_program.target_id, "HH-001-001")
         # return Ind_id
         self.assertEqual(self.grievance_sw_with_ind_in_details.target_id, self.individual_1.unicef_id)
-        self.assertEqual(self.grievance_sw_without_ind_in_details.target_id, self.individual_1.unicef_id)
+        self.assertEqual(
+            self.grievance_sw_without_ind_in_details.target_id,
+            self.individual_1.unicef_id,
+        )

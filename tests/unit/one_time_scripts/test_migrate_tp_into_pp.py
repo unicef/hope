@@ -85,7 +85,9 @@ class MigrationTPIntoPPTest(TestCase):
         # tp_2
         cls.targeting_criteria_2_with_rule = TargetingCriteriaFactory(household_ids="HH-22", individual_ids="IND-22")
         TargetingCriteriaRuleFactory(
-            targeting_criteria=cls.targeting_criteria_2_with_rule, household_ids="", individual_ids=""
+            targeting_criteria=cls.targeting_criteria_2_with_rule,
+            household_ids="",
+            individual_ids="",
         )
         cls.tp_2 = TargetPopulationFactory(
             name="TP with rule",
@@ -200,7 +202,10 @@ class MigrationTPIntoPPTest(TestCase):
 
         migrate_tp_into_pp()
 
-        self.assertEqual(PaymentPlan.all_objects.filter(status=PaymentPlan.Status.MIGRATION_BLOCKED).count(), 10)
+        self.assertEqual(
+            PaymentPlan.all_objects.filter(status=PaymentPlan.Status.MIGRATION_BLOCKED).count(),
+            10,
+        )
 
         create_payments_for_pending_payment_plans()
 
@@ -216,19 +221,31 @@ class MigrationTPIntoPPTest(TestCase):
 
         self.preparing_payment_plan.refresh_from_db()
         self.assertEqual(self.preparing_payment_plan.status, PaymentPlan.Status.OPEN)
-        self.assertEqual(self.preparing_payment_plan.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_OK)
+        self.assertEqual(
+            self.preparing_payment_plan.build_status,
+            PaymentPlan.BuildStatus.BUILD_STATUS_OK,
+        )
         self.assertEqual(self.preparing_payment_plan.name, "TP for Preparing PP")
         self.assertEqual(
-            str(self.preparing_payment_plan.targeting_criteria_id), str(self.targeting_criteria_for_preparing_pp.pk)
+            str(self.preparing_payment_plan.targeting_criteria_id),
+            str(self.targeting_criteria_for_preparing_pp.pk),
         )
         # check internal data json
         self.assertEqual(
-            self.preparing_payment_plan.internal_data.get("target_population_id"), str(self.tp_for_preparing.pk)
+            self.preparing_payment_plan.internal_data.get("target_population_id"),
+            str(self.tp_for_preparing.pk),
         )
-        self.assertEqual(self.preparing_payment_plan.internal_data.get("ca_id"), self.tp_for_preparing.ca_id)
-        self.assertEqual(self.preparing_payment_plan.internal_data.get("ca_hash_id"), self.tp_for_preparing.ca_hash_id)
         self.assertEqual(
-            self.preparing_payment_plan.internal_data.get("sent_to_datahub"), str(self.tp_for_preparing.sent_to_datahub)
+            self.preparing_payment_plan.internal_data.get("ca_id"),
+            self.tp_for_preparing.ca_id,
+        )
+        self.assertEqual(
+            self.preparing_payment_plan.internal_data.get("ca_hash_id"),
+            self.tp_for_preparing.ca_hash_id,
+        )
+        self.assertEqual(
+            self.preparing_payment_plan.internal_data.get("sent_to_datahub"),
+            str(self.tp_for_preparing.sent_to_datahub),
         )
 
         first_rule_for_targeting_criteria_1_without_rule = self.targeting_criteria_1_without_rule.get_rules().first()
@@ -261,8 +278,14 @@ class MigrationTPIntoPPTest(TestCase):
         self.payment_plan_3.refresh_from_db()
         self.survey_without_pp.refresh_from_db()
         self.assertEqual(self.message_1.payment_plan, self.payment_plan_2)
-        self.assertEqual(self.message_2.payment_plan.internal_data["target_population_id"], str(self.tp_1.pk))
+        self.assertEqual(
+            self.message_2.payment_plan.internal_data["target_population_id"],
+            str(self.tp_1.pk),
+        )
         self.assertEqual(self.survey_1.payment_plan, self.payment_plan_3)
         self.assertIsNotNone(self.payment_plan_3.targeting_criteria_id)
-        self.assertEqual(self.survey_2.payment_plan.internal_data["target_population_id"], str(self.tp_2.pk))
+        self.assertEqual(
+            self.survey_2.payment_plan.internal_data["target_population_id"],
+            str(self.tp_2.pk),
+        )
         self.assertIsNone(self.survey_without_pp.payment_plan)

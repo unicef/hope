@@ -59,12 +59,16 @@ def handle_partner_access_change(sender: Any, instance: Program, created: bool, 
 @receiver(pre_save, sender=ProgramPartnerThrough)
 def track_old_full_area_access_flag(sender: Any, instance: ProgramPartnerThrough, **kwargs: Any) -> None:
     old_full_area_access_flag = getattr(
-        ProgramPartnerThrough.objects.filter(pk=instance.pk).first(), "full_area_access", None
+        ProgramPartnerThrough.objects.filter(pk=instance.pk).first(),
+        "full_area_access",
+        None,
     )
 
     instance.old_full_area_access_flag = old_full_area_access_flag
     pre_save_full_area_access_flag_change.send(
-        sender=sender, instance=instance, old_full_area_access_flag=old_full_area_access_flag
+        sender=sender,
+        instance=instance,
+        old_full_area_access_flag=old_full_area_access_flag,
     )
 
 

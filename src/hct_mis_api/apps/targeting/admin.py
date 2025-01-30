@@ -80,7 +80,10 @@ class TargetPopulationAdmin(
 
         return TemplateResponse(request, "admin/targeting/targetpopulation/payments.html", context)
 
-    @button(enabled=lambda b: b.context["original"].steficon_rule, permission="steficon.rerun_rule")
+    @button(
+        enabled=lambda b: b.context["original"].steficon_rule,
+        permission="steficon.rerun_rule",
+    )
     def rerun_steficon(self, request: "HttpRequest", pk: "UUID") -> TemplateResponse:
         def _rerun(request: "HttpRequest") -> TemplateResponse:
             context = self.get_common_context(request, pk)

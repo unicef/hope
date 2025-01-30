@@ -32,7 +32,10 @@ def get_individual(tax_id: str, business_area_code: Optional[str]) -> PendingInd
         else PendingDocument.objects.filter(
             individual__household__registration_data_import__business_area__code=business_area_code
         )
-    ).filter(type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID], document_number=tax_id)
+    ).filter(
+        type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
+        document_number=tax_id,
+    )
     if pending_documents.count() > 1:
         raise Exception(f"Multiple imported documents ({pending_documents.count()}) with given tax_id found")
     if pending_documents.count() == 1:
@@ -74,7 +77,9 @@ def get_household(registration_id: str, business_area_code: Optional[str]) -> Un
 
 
 def get_household_or_individual(
-    tax_id: Optional[str], registration_id: Optional[str], business_area_code: Optional[str]
+    tax_id: Optional[str],
+    registration_id: Optional[str],
+    business_area_code: Optional[str],
 ) -> Dict:
     if tax_id and registration_id:
         raise Exception("tax_id and registration_id are mutually exclusive")
@@ -105,6 +110,9 @@ class HouseholdStatusView(APIView):
             data = get_household_or_individual(tax_id, registration_id, business_area_code)
         except Exception as e:  # pragma: no cover
             logger.exception(e)
-            return Response({"status": "not found", "error_message": "Household not Found"}, status=404)
+            return Response(
+                {"status": "not found", "error_message": "Household not Found"},
+                status=404,
+            )
 
         return Response(data, status=200)

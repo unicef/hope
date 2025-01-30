@@ -60,7 +60,12 @@ class TestGrievanceUpdatePositiveFeedbackTicketQuery(APITestCase):
 
         cls.household, cls.individuals = create_household(
             {"size": 1, "business_area": cls.business_area},
-            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe",
+            },
         )
         cls.ticket = PositiveFeedbackTicketWithoutExtrasFactory()
         cls.ticket.ticket.status = GrievanceTicket.STATUS_NEW
@@ -82,7 +87,10 @@ class TestGrievanceUpdatePositiveFeedbackTicketQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.QUERY,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables={
                 "input": {
                     "description": "Test Feedback",

@@ -46,7 +46,11 @@ class DashboardDataView(APIView):
         business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
         data_cache: Type[DashboardDataCache] = DashboardGlobalDataCache if is_global else DashboardDataCache
 
-        if not check_permissions(request.user, [Permissions.DASHBOARD_VIEW_COUNTRY], business_area=business_area):
+        if not check_permissions(
+            request.user,
+            [Permissions.DASHBOARD_VIEW_COUNTRY],
+            business_area=business_area,
+        ):
             return Response(
                 {
                     "detail": _(
@@ -91,7 +95,8 @@ class CreateOrUpdateDashReportView(APIView):
             cache.delete(cache_key)
 
             return Response(
-                {"detail": _("DashReport generation task has been triggered.")}, status=status.HTTP_202_ACCEPTED
+                {"detail": _("DashReport generation task has been triggered.")},
+                status=status.HTTP_202_ACCEPTED,
             )
 
         except BusinessArea.DoesNotExist:
@@ -112,7 +117,11 @@ class DashboardReportView(LoginRequiredMixin, TemplateView):
         business_area_slug = kwargs.get("business_area_slug")
         business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
 
-        if not check_permissions(self.request.user, [Permissions.DASHBOARD_VIEW_COUNTRY], business_area=business_area):
+        if not check_permissions(
+            self.request.user,
+            [Permissions.DASHBOARD_VIEW_COUNTRY],
+            business_area=business_area,
+        ):
             context["error_message"] = _("You do not have permission to view this dashboard.")
             context["has_permission"] = False
         else:

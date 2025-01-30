@@ -127,5 +127,8 @@ class TestAddPDUFields(TestCase):
         ):
             self.assertEqual(
                 individual.flex_fields,
-                {"valid_for_payment": rounds_data, **individuals_flex_fields_before[individual]},
+                {
+                    "valid_for_payment": rounds_data,
+                    **individuals_flex_fields_before[individual],
+                },
             )

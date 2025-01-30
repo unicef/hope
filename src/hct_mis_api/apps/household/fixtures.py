@@ -361,7 +361,10 @@ def create_household(
         2, household=None, program=household.program, relationship="NON_BENEFICIARY"
     )
     primary_collector_irh = IndividualRoleInHousehold(
-        individual=primary_collector, household=household, role=ROLE_PRIMARY, rdi_merge_status=MergeStatusModel.MERGED
+        individual=primary_collector,
+        household=household,
+        role=ROLE_PRIMARY,
+        rdi_merge_status=MergeStatusModel.MERGED,
     )
     primary_collector_irh.save()
     alternate_collector_irh = IndividualRoleInHousehold(
@@ -423,7 +426,10 @@ def create_household_with_individual_with_collectors(
         alternate_collector = None
 
     primary_collector_irh = IndividualRoleInHousehold(
-        individual=primary_collector, household=household, role=ROLE_PRIMARY, rdi_merge_status=MergeStatusModel.MERGED
+        individual=primary_collector,
+        household=household,
+        role=ROLE_PRIMARY,
+        rdi_merge_status=MergeStatusModel.MERGED,
     )
     primary_collector_irh.save()
     if alternate_collector:
@@ -470,7 +476,10 @@ def create_household_for_fixtures(
 
     if random.choice([True, False]) and len(individuals) >= 2:
         IndividualRoleInHousehold.objects.create(
-            individual=individuals[0], household=household, role=ROLE_PRIMARY, rdi_merge_status=MergeStatusModel.MERGED
+            individual=individuals[0],
+            household=household,
+            role=ROLE_PRIMARY,
+            rdi_merge_status=MergeStatusModel.MERGED,
         )
         IndividualRoleInHousehold.objects.create(
             individual=individuals[1],
@@ -501,7 +510,9 @@ def create_household_for_fixtures(
 
 
 def create_household_and_individuals(
-    household_data: Optional[Dict] = None, individuals_data: Optional[List[Dict]] = None, imported: bool = False
+    household_data: Optional[Dict] = None,
+    individuals_data: Optional[List[Dict]] = None,
+    imported: bool = False,
 ) -> Tuple[Household, List[Individual]]:
     if household_data is None:
         household_data = {}

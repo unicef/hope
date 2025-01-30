@@ -149,7 +149,10 @@ def flush_redis(worker_id: str) -> None:
 
 
 def pytest_configure(config) -> None:  # type: ignore
-    config.addinivalue_line("markers", "night: This marker is intended for e2e tests conducted during the night on CI")
+    config.addinivalue_line(
+        "markers",
+        "night: This marker is intended for e2e tests conducted during the night on CI",
+    )
     # delete all old screenshots
 
     env = Env()
@@ -164,7 +167,12 @@ def pytest_configure(config) -> None:  # type: ignore
         os.remove(os.path.join(settings.SCREENSHOT_DIRECTORY, file))
 
     settings.DEBUG = True
-    settings.ALLOWED_HOSTS = ["localhost", "127.0.0.1", "10.0.2.2", os.getenv("DOMAIN", "")]
+    settings.ALLOWED_HOSTS = [
+        "localhost",
+        "127.0.0.1",
+        "10.0.2.2",
+        os.getenv("DOMAIN", ""),
+    ]
     settings.CELERY_TASK_ALWAYS_EAGER = True
 
     settings.ELASTICSEARCH_INDEX_PREFIX = "test_"
@@ -196,7 +204,11 @@ def pytest_configure(config) -> None:  # type: ignore
                 "level": "INFO",
                 "propagate": True,
             },
-            "graphql": {"handlers": ["default"], "level": "CRITICAL", "propagate": True},
+            "graphql": {
+                "handlers": ["default"],
+                "level": "CRITICAL",
+                "propagate": True,
+            },
             "elasticsearch": {
                 "handlers": ["default"],
                 "level": "CRITICAL",
@@ -548,7 +560,12 @@ def business_area() -> BusinessArea:
         },
     )
     FlagState.objects.get_or_create(
-        **{"name": "ALLOW_ACCOUNTABILITY_MODULE", "condition": "boolean", "value": "True", "required": False}
+        **{
+            "name": "ALLOW_ACCOUNTABILITY_MODULE",
+            "condition": "boolean",
+            "value": "True",
+            "required": False,
+        }
     )
     yield business_area
 
@@ -600,7 +617,11 @@ def create_super_user(business_area: BusinessArea) -> User:
     permission_list = [role.value for role in Permissions]
 
     role, _ = Role.objects.update_or_create(name="Role", defaults={"permissions": permission_list})
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data_small.json", verbosity=0)
+    call_command(
+        "loaddata",
+        f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data_small.json",
+        verbosity=0,
+    )
     country = Country.objects.get(name="Afghanistan")
     business_area.countries.add(country)
 
@@ -729,7 +750,7 @@ def test_failed_check(request: FixtureRequest, browser: Chrome) -> None:
 def screenshot(driver: Chrome, node_id: str) -> None:
     if not os.path.exists(settings.SCREENSHOT_DIRECTORY):
         os.makedirs(settings.SCREENSHOT_DIRECTORY)
-    file_name = f'{node_id.split("::")[-1]}_{datetime.today().strftime("%Y-%m-%d_%H.%M")}.png'.replace(
+    file_name = f"{node_id.split('::')[-1]}_{datetime.today().strftime('%Y-%m-%d_%H.%M')}.png".replace(
         "/", "_"
     ).replace("::", "__")
     file_path = os.path.join(settings.SCREENSHOT_DIRECTORY, file_name)

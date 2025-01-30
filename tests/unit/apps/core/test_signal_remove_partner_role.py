@@ -32,10 +32,14 @@ class TestSignalRemovePartnerRole(TestCase):
         ukr_partner_through.roles.set([role])
 
         cls.program_afg = ProgramFactory.create(
-            status=Program.DRAFT, business_area=cls.business_area_afg, partner_access=Program.ALL_PARTNERS_ACCESS
+            status=Program.DRAFT,
+            business_area=cls.business_area_afg,
+            partner_access=Program.ALL_PARTNERS_ACCESS,
         )
         cls.program_ukr = ProgramFactory.create(
-            status=Program.DRAFT, business_area=cls.business_area_ukr, partner_access=Program.SELECTED_PARTNERS_ACCESS
+            status=Program.DRAFT,
+            business_area=cls.business_area_ukr,
+            partner_access=Program.SELECTED_PARTNERS_ACCESS,
         )
 
     def test_signal_remove_partner_role(self) -> None:

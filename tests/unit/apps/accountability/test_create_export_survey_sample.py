@@ -73,7 +73,9 @@ mutation ExportSurveySample($surveyId: ID!) {
     )
     def test_create_export_survey_sample_with_valid_survey_id(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS], self.business_area
+            self.user,
+            [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS],
+            self.business_area,
         )
 
         self.snapshot_graphql_request(
@@ -96,7 +98,9 @@ mutation ExportSurveySample($surveyId: ID!) {
     )
     def test_create_export_survey_sample_with_invalid_survey_id(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS], self.business_area
+            self.user,
+            [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS],
+            self.business_area,
         )
 
         self.snapshot_graphql_request(

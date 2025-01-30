@@ -65,7 +65,9 @@ class TestListQueryMessage(APITestCase):
         cls.business_area = create_afghanistan()
         cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
         cls.pp = PaymentPlanFactory(
-            business_area=cls.business_area, created_by=cls.user, program_cycle=cls.program.cycles.first()
+            business_area=cls.business_area,
+            created_by=cls.user,
+            program_cycle=cls.program.cycles.first(),
         )
         households = [create_household()[0] for _ in range(14)]
         cls.household = households[0]
@@ -125,7 +127,11 @@ class TestListQueryMessage(APITestCase):
                     "createdBy": encode_id_base64(u.id, "User"),
                 },
             ),
-            ("with_view_details_permission", [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS], {}),
+            (
+                "with_view_details_permission",
+                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS],
+                {},
+            ),
             (
                 "with_view_details_as_creator_permission",
                 [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR],
@@ -135,13 +141,19 @@ class TestListQueryMessage(APITestCase):
         )
     )
     def test_list_communication_messages(
-        self, _: str, permissions: Sequence[str], extra_filters: Union[Callable[[User], dict], dict]
+        self,
+        _: str,
+        permissions: Sequence[str],
+        extra_filters: Union[Callable[[User], dict], dict],
     ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
             request_string=self.QUERY,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {"Business-Area": self.business_area.slug},
+            },
             variables={
                 **(extra_filters(self.user) if callable(extra_filters) else extra_filters),
             },
@@ -175,7 +187,10 @@ class TestListQueryMessage(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.QUERY_RECIPIENTS,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {"Business-Area": self.business_area.slug},
+            },
             variables={
                 "messageId": encode_id_base64(Message.objects.values("id")[0]["id"], "Message"),
                 **variables,

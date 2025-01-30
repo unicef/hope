@@ -94,7 +94,10 @@ class TestDeliveryDate(APITestCase):
             currency="PLN",
         )
 
-    @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @patch(
+        "hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate",
+        return_value=2.0,
+    )
     @patch(
         "hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service.timezone.now",
         return_value=datetime(2023, 10, 23).replace(tzinfo=utc),
@@ -124,7 +127,10 @@ class TestDeliveryDate(APITestCase):
         self.assertEqual(self.payment_2.delivery_date, old_delivery_date2)
         self.assertEqual(self.payment_3.delivery_date, old_delivery_date3)
 
-    @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @patch(
+        "hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate",
+        return_value=2.0,
+    )
     def test_uploading_xlsx_file_with_existing_dates_throws_error(self, mock_exchange_rate: Any) -> None:
         self.payment_1.delivery_date = datetime(2023, 10, 23).replace(tzinfo=utc)
         self.payment_2.delivery_date = datetime(2023, 10, 23).replace(tzinfo=utc)
@@ -151,7 +157,10 @@ class TestDeliveryDate(APITestCase):
             ],
         )
 
-    @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @patch(
+        "hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate",
+        return_value=2.0,
+    )
     def test_uploading_xlsx_file_with_one_record_not_overrides_other_payments_dates(
         self, mock_exchange_rate: Any
     ) -> None:
@@ -177,7 +186,10 @@ class TestDeliveryDate(APITestCase):
         self.assertEqual(self.payment_2.delivery_date, datetime(2023, 12, 24).replace(tzinfo=utc))
         self.assertEqual(self.payment_3.delivery_date, datetime(2023, 12, 24).replace(tzinfo=utc))
 
-    @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @patch(
+        "hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate",
+        return_value=2.0,
+    )
     def test_upload_reference_id(self, mock_exchange_rate: Any) -> None:
         pp = PaymentPlanFactory(
             dispersion_start_date=datetime(2024, 2, 10).date(),
@@ -208,7 +220,10 @@ class TestDeliveryDate(APITestCase):
         self.assertEqual(payment_1.transaction_reference_id, "ref1")
         self.assertEqual(payment_2.transaction_reference_id, "ref2")
 
-    @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=1.0)
+    @patch(
+        "hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate",
+        return_value=1.0,
+    )
     def test_upload_transaction_status_blockchain_link(self, mock_exchange_rate: Any) -> None:
         pp = PaymentPlanFactory(
             dispersion_start_date=datetime(2024, 2, 10).date(),
@@ -236,5 +251,8 @@ class TestDeliveryDate(APITestCase):
         payment_1.refresh_from_db(fields=["transaction_status_blockchain_link"])
         payment_2.refresh_from_db(fields=["transaction_status_blockchain_link"])
 
-        self.assertEqual(payment_1.transaction_status_blockchain_link, "transaction_status_blockchain_link_111")
+        self.assertEqual(
+            payment_1.transaction_status_blockchain_link,
+            "transaction_status_blockchain_link_111",
+        )
         self.assertEqual(payment_2.transaction_status_blockchain_link, "www_link")

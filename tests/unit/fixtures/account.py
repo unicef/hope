@@ -50,7 +50,9 @@ def create_partner_role_with_permissions() -> Callable:
 
 
 @pytest.fixture()
-def create_user_role_with_permissions(update_partner_access_to_program: Any) -> Callable:
+def create_user_role_with_permissions(
+    update_partner_access_to_program: Any,
+) -> Callable:
     def _create_user_role_with_permissions(
         user: User,
         permissions: Iterable,

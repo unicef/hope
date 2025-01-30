@@ -59,7 +59,9 @@ def from_input_to_targeting_criteria(targeting_criteria_input: Dict, program: "P
             individual_ids = get_unicef_ids(individual_ids, "individual", program)
 
         tc_rule = TargetingCriteriaRule(
-            targeting_criteria=targeting_criteria, household_ids=household_ids, individual_ids=individual_ids
+            targeting_criteria=targeting_criteria,
+            household_ids=household_ids,
+            individual_ids=individual_ids,
         )
         tc_rule.save()
         for hh_filter in households_filters_blocks:

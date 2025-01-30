@@ -23,10 +23,14 @@ class TestEnrollHouseholdsToProgramTask(TestCase):
         user = UserFactory()
         cls.str_user_id = str(user.pk)
         cls.program_source = ProgramFactory(
-            status=Program.ACTIVE, name="Program source", business_area=cls.business_area
+            status=Program.ACTIVE,
+            name="Program source",
+            business_area=cls.business_area,
         )
         cls.program_target = ProgramFactory(
-            status=Program.ACTIVE, name="Program target", business_area=cls.business_area
+            status=Program.ACTIVE,
+            name="Program target",
+            business_area=cls.business_area,
         )
 
         cls.household1, individuals1 = create_household_and_individuals(

@@ -139,14 +139,16 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
             GrievanceTicket.STATUS_CLOSED,
         )
         self.assertEqual(
-            self.grievance_ticket.extras["status_before_withdrawn"], str(GrievanceTicket.STATUS_IN_PROGRESS)
+            self.grievance_ticket.extras["status_before_withdrawn"],
+            str(GrievanceTicket.STATUS_IN_PROGRESS),
         )
         self.assertEqual(
             self.grievance_ticket2.status,
             GrievanceTicket.STATUS_CLOSED,
         )
         self.assertEqual(
-            self.grievance_ticket2.extras["status_before_withdrawn"], str(GrievanceTicket.STATUS_IN_PROGRESS)
+            self.grievance_ticket2.extras["status_before_withdrawn"],
+            str(GrievanceTicket.STATUS_IN_PROGRESS),
         )
 
         self.assertEqual(
@@ -173,7 +175,8 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
             GrievanceTicket.STATUS_CLOSED,
         )
         self.assertEqual(
-            self.grievance_ticket_household2.extras["status_before_withdrawn"], str(GrievanceTicket.STATUS_IN_PROGRESS)
+            self.grievance_ticket_household2.extras["status_before_withdrawn"],
+            str(GrievanceTicket.STATUS_IN_PROGRESS),
         )
 
         # household from another program is not withdrawn

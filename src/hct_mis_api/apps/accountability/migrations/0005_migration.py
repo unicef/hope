@@ -4,26 +4,25 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('accountability', '0004_migration'),
+        ("accountability", "0004_migration"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='feedback',
-            name='is_migration_handled',
+            model_name="feedback",
+            name="is_migration_handled",
         ),
         migrations.RemoveField(
-            model_name='feedback',
-            name='migrated_at',
+            model_name="feedback",
+            name="migrated_at",
         ),
         migrations.RemoveField(
-            model_name='message',
-            name='is_migration_handled',
+            model_name="message",
+            name="is_migration_handled",
         ),
         migrations.RemoveField(
-            model_name='message',
-            name='migrated_at',
+            model_name="message",
+            name="migrated_at",
         ),
     ]

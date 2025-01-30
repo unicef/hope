@@ -29,7 +29,9 @@ class TestSoftDeleteOriginalObjects(TestCase):
             program=None, business_area=cls.business_area, head_of_household=individual1
         )
         cls.household = HouseholdFactory(
-            program=program, business_area=cls.business_area, head_of_household=individual2
+            program=program,
+            business_area=cls.business_area,
+            head_of_household=individual2,
         )
 
         cls.individual_tbd = IndividualFactory(program=None, business_area=cls.business_area, household=None)

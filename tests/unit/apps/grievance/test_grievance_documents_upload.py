@@ -83,7 +83,12 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
 
         cls.household, cls.individuals = create_household(
             {"size": 1, "business_area": cls.business_area},
-            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe",
+            },
         )
 
         cls.ticket = ReferralTicketWithoutExtrasFactory()
@@ -115,7 +120,10 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
 
     @parameterized.expand(
         [
-            ("with_permission", [Permissions.GRIEVANCES_CREATE, Permissions.GRIEVANCE_DOCUMENTS_UPLOAD]),
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_CREATE, Permissions.GRIEVANCE_DOCUMENTS_UPLOAD],
+            ),
             ("without_permission", []),
         ]
     )
@@ -123,7 +131,10 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables={
                 "input": {
                     **self.grievance_data_to_create,
@@ -131,13 +142,17 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                         {
                             "name": "scanned_document1",
                             "file": self.create_fixture_file(
-                                name="scanned_document_1.jpg", size=100, content_type="image/jpeg"
+                                name="scanned_document_1.jpg",
+                                size=100,
+                                content_type="image/jpeg",
                             ),
                         },
                         {
                             "name": "scanned_document2",
                             "file": self.create_fixture_file(
-                                name="scanned_document_2.jpg", size=200, content_type="image/jpeg"
+                                name="scanned_document_2.jpg",
+                                size=200,
+                                content_type="image/jpeg",
                             ),
                         },
                     ],
@@ -155,11 +170,16 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
     )
     def test_mutation_creates_file_for_allowed_types(self, name: str, content_type: str) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_CREATE, Permissions.GRIEVANCE_DOCUMENTS_UPLOAD], self.business_area
+            self.user,
+            [Permissions.GRIEVANCES_CREATE, Permissions.GRIEVANCE_DOCUMENTS_UPLOAD],
+            self.business_area,
         )
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables={
                 "input": {
                     **self.grievance_data_to_create,
@@ -176,11 +196,16 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
     @parameterized.expand([("some_document.css", "text/css"), ("some_document.html", "text/html")])
     def test_mutation_raises_error_when_not_allowed_type_file_is_uploaded(self, name: str, content_type: str) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_CREATE, Permissions.GRIEVANCE_DOCUMENTS_UPLOAD], self.business_area
+            self.user,
+            [Permissions.GRIEVANCES_CREATE, Permissions.GRIEVANCE_DOCUMENTS_UPLOAD],
+            self.business_area,
         )
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables={
                 "input": {
                     **self.grievance_data_to_create,
@@ -196,7 +221,10 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
 
     @parameterized.expand(
         [
-            ("with_permission", [Permissions.GRIEVANCES_CREATE, Permissions.GRIEVANCE_DOCUMENTS_UPLOAD]),
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_CREATE, Permissions.GRIEVANCE_DOCUMENTS_UPLOAD],
+            ),
             ("without_permission", []),
         ]
     )
@@ -206,7 +234,10 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables={
                 "input": {
                     **self.grievance_data_to_create,
@@ -214,7 +245,9 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                         {
                             "name": "scanned_document1",
                             "file": self.create_fixture_file(
-                                name="some_big_file.jpg", size=5 * 1024 * 1024, content_type="image/jpeg"
+                                name="some_big_file.jpg",
+                                size=5 * 1024 * 1024,
+                                content_type="image/jpeg",
                             ),
                         }
                     ],
@@ -224,7 +257,10 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
 
     @parameterized.expand(
         [
-            ("with_permission", [Permissions.GRIEVANCES_CREATE, Permissions.GRIEVANCE_DOCUMENTS_UPLOAD]),
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_CREATE, Permissions.GRIEVANCE_DOCUMENTS_UPLOAD],
+            ),
             ("without_permission", []),
         ]
     )
@@ -234,7 +270,10 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables={
                 "input": {
                     **self.grievance_data_to_create,
@@ -242,7 +281,9 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                         {
                             "name": "scanned_document1",
                             "file": self.create_fixture_file(
-                                name="some_file.jpg", size=2 * 1024 * 1024, content_type="image/jpeg"
+                                name="some_file.jpg",
+                                size=2 * 1024 * 1024,
+                                content_type="image/jpeg",
                             ),
                         }
                         for _ in range(15)
@@ -264,7 +305,10 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables={
                 "input": {
                     **self.grievance_data_to_update,
@@ -272,7 +316,9 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                         {
                             "name": "scanned_document1",
                             "file": self.create_fixture_file(
-                                name="scanned_document_1.jpg", size=2048, content_type="image/jpeg"
+                                name="scanned_document_1.jpg",
+                                size=2048,
+                                content_type="image/jpeg",
                             ),
                         }
                     ],
@@ -295,7 +341,10 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables={
                 "input": {
                     **self.grievance_data_to_update,
@@ -304,7 +353,9 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                             "id": self.id_to_base64(grievance_document.id, "GrievanceDocumentNode"),
                             "name": "updated_document.jpg",
                             "file": self.create_fixture_file(
-                                name="scanned_document_update.jpg", size=1024 * 1024, content_type="image/jpeg"
+                                name="scanned_document_update.jpg",
+                                size=1024 * 1024,
+                                content_type="image/jpeg",
                             ),
                         }
                     ],
@@ -326,7 +377,10 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables={
                 "input": {
                     **self.grievance_data_to_update,
@@ -349,7 +403,10 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables={
                 "input": {
                     **self.grievance_data_to_update,
@@ -357,7 +414,9 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                         {
                             "name": "created_scanned_document1",
                             "file": self.create_fixture_file(
-                                name="created_scanned_document1.jpg", size=2048, content_type="image/jpeg"
+                                name="created_scanned_document1.jpg",
+                                size=2048,
+                                content_type="image/jpeg",
                             ),
                         }
                     ],
@@ -380,7 +439,10 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables={
                 "input": {
                     **self.grievance_data_to_update,
@@ -388,7 +450,9 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                         {
                             "name": "created_scanned_document1",
                             "file": self.create_fixture_file(
-                                name="created_scanned_document1.jpg", size=666, content_type="image/jpeg"
+                                name="created_scanned_document1.jpg",
+                                size=666,
+                                content_type="image/jpeg",
                             ),
                         }
                     ],
@@ -397,7 +461,9 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                             "id": self.id_to_base64(grievance_document.id, "GrievanceDocumentNode"),
                             "name": "updated_document.jpg",
                             "file": self.create_fixture_file(
-                                name="scanned_document_update.jpg", size=1024 * 1024, content_type="image/jpeg"
+                                name="scanned_document_update.jpg",
+                                size=1024 * 1024,
+                                content_type="image/jpeg",
                             ),
                         }
                     ],
@@ -418,7 +484,10 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables={
                 "input": {
                     **self.grievance_data_to_update,
@@ -440,7 +509,10 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables={
                 "input": {
                     **self.grievance_data_to_update,
@@ -449,7 +521,9 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                             "id": self.id_to_base64(str(uuid.uuid4()), "GrievanceDocumentNode"),
                             "name": "updated_document.jpg",
                             "file": self.create_fixture_file(
-                                name="scanned_document_update.jpg", size=1024 * 1024, content_type="image/jpeg"
+                                name="scanned_document_update.jpg",
+                                size=1024 * 1024,
+                                content_type="image/jpeg",
                             ),
                         }
                     ],
@@ -468,12 +542,16 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
         grievance_document_to_update = GrievanceDocumentFactory(grievance_ticket=self.ticket_2.ticket)
 
         grievance_document_to_delete = GrievanceDocumentFactory(
-            grievance_ticket=self.ticket_2.ticket, name="this_document_should_be_deleted"
+            grievance_ticket=self.ticket_2.ticket,
+            name="this_document_should_be_deleted",
         )
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables={
                 "input": {
                     **self.grievance_data_to_update,
@@ -481,7 +559,9 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                         {
                             "name": "created_scanned_document1",
                             "file": self.create_fixture_file(
-                                name="created_scanned_document1.jpg", size=666, content_type="image/jpeg"
+                                name="created_scanned_document1.jpg",
+                                size=666,
+                                content_type="image/jpeg",
                             ),
                         }
                     ],
@@ -490,7 +570,9 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                             "id": self.id_to_base64(grievance_document_to_update.id, "GrievanceDocumentNode"),
                             "name": "updated_document.jpg",
                             "file": self.create_fixture_file(
-                                name="scanned_document_update.jpg", size=1024 * 1024, content_type="image/jpeg"
+                                name="scanned_document_update.jpg",
+                                size=1024 * 1024,
+                                content_type="image/jpeg",
                             ),
                         }
                     ],
@@ -515,7 +597,10 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables={
                 "input": {
                     **self.grievance_data_to_update,
@@ -523,7 +608,9 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                         {
                             "name": "created_scanned_document1",
                             "file": self.create_fixture_file(
-                                name="created_scanned_document1.jpg", size=3 * 1024 * 1024, content_type="image/jpeg"
+                                name="created_scanned_document1.jpg",
+                                size=3 * 1024 * 1024,
+                                content_type="image/jpeg",
                             ),
                         }
                     ],
@@ -532,7 +619,9 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                             "id": self.id_to_base64(grievance_document.id, "GrievanceDocumentNode"),
                             "name": "updated_document.jpg",
                             "file": self.create_fixture_file(
-                                name="scanned_document_update.jpg", size=30 * 1024 * 1024, content_type="image/jpeg"
+                                name="scanned_document_update.jpg",
+                                size=30 * 1024 * 1024,
+                                content_type="image/jpeg",
                             ),
                         }
                     ],
@@ -554,7 +643,10 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables={
                 "input": {
                     **self.grievance_data_to_update,
@@ -562,7 +654,9 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                         {
                             "name": "created_scanned_document1",
                             "file": self.create_fixture_file(
-                                name="created_scanned_document1.jpg", size=3 * 1024 * 1024, content_type="image/jpeg"
+                                name="created_scanned_document1.jpg",
+                                size=3 * 1024 * 1024,
+                                content_type="image/jpeg",
                             ),
                         }
                     ],
@@ -571,7 +665,9 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                             "id": self.id_to_base64(grievance_document.id, "GrievanceDocumentNode"),
                             "name": "updated_document.jpg",
                             "file": self.create_fixture_file(
-                                name="scanned_document_update.jpg", size=5 * 1024 * 1024, content_type="image/jpeg"
+                                name="scanned_document_update.jpg",
+                                size=5 * 1024 * 1024,
+                                content_type="image/jpeg",
                             ),
                         }
                     ],

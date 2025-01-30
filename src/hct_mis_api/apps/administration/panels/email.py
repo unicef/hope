@@ -60,7 +60,11 @@ def email(self: Any, request: HttpRequest, extra_context: Optional[Dict] = None)
                     return_value = future.result()
                     logs.append([timezone.now(), f"Thread completed {return_value}"])
                     if return_value == 1:
-                        messages.add_message(request, messages.SUCCESS, f"Email sent to {request.user.email}")
+                        messages.add_message(
+                            request,
+                            messages.SUCCESS,
+                            f"Email sent to {request.user.email}",
+                        )
         except Exception as e:
             logger.exception(e)
             messages.add_message(request, messages.ERROR, f"{e.__class__.__name__}: {e}")

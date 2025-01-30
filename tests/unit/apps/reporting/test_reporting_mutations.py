@@ -85,7 +85,9 @@ class TestReportingMutation(APITestCase):
             )
         report_updated_at = timezone.now() - timedelta(minutes=31)
         cls.report = ReportFactory(
-            business_area=cls.business_area, status=Report.IN_PROGRESS, report_type=Report.INDIVIDUALS
+            business_area=cls.business_area,
+            status=Report.IN_PROGRESS,
+            report_type=Report.INDIVIDUALS,
         )
         cls.report.update_at = report_updated_at
         cls.report.save()
@@ -116,7 +118,12 @@ class TestReportingMutation(APITestCase):
                 Report.HOUSEHOLD_DEMOGRAPHICS,
                 "2022-01-02",
             ),
-            ("without_permission_individuals_report", [], Report.INDIVIDUALS, "2022-01-02"),
+            (
+                "without_permission_individuals_report",
+                [],
+                Report.INDIVIDUALS,
+                "2022-01-02",
+            ),
         ]
     )
     def test_create_report_with_no_extra_filters(

@@ -86,7 +86,10 @@ class RegistrationDataImportNode(BaseNodePermissionMixin, AdminUrlNodeMixin, Dja
         ]
         if parent.biometric_deduplication_enabled:
             result.append(
-                get_count_and_percentage(parent.dedup_engine_golden_record_duplicates, parent.number_of_individuals)
+                get_count_and_percentage(
+                    parent.dedup_engine_golden_record_duplicates,
+                    parent.number_of_individuals,
+                )
             )
         return result
 

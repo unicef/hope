@@ -187,7 +187,8 @@ class TestChangeIndividualRole(TestCase):
             service = IndividualDataUpdateService(self.ticket, self.ticket.individual_data_update_ticket_details)
             service.close(UserFactory())
         self.assertEqual(
-            e.exception.messages[0], "Ticket cannot be closed, primary collector role has to be reassigned"
+            e.exception.messages[0],
+            "Ticket cannot be closed, primary collector role has to be reassigned",
         )
 
         role = IndividualRoleInHousehold.objects.get(
@@ -205,7 +206,8 @@ class TestChangeIndividualRole(TestCase):
             service = IndividualDataUpdateService(self.ticket, self.ticket.individual_data_update_ticket_details)
             service.close(UserFactory())
         self.assertEqual(
-            e.exception.messages[0], "Ticket cannot be closed, primary collector role has to be reassigned"
+            e.exception.messages[0],
+            "Ticket cannot be closed, primary collector role has to be reassigned",
         )
 
         role = IndividualRoleInHousehold.objects.get(

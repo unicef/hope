@@ -41,7 +41,9 @@ class TestExcludeHouseholds(APITestCase):
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.create_user_role_with_permissions(
-            cls.user, [Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP], cls.business_area
+            cls.user,
+            [Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP],
+            cls.business_area,
         )
         cls.program = RealProgramFactory()
         cls.program_cycle = cls.program.cycles.first()
@@ -68,19 +70,28 @@ class TestExcludeHouseholds(APITestCase):
         hoh1 = IndividualFactory(household=None)
         cls.household_1 = HouseholdFactory(head_of_household=hoh1)
         cls.payment_1 = PaymentFactory(
-            parent=cls.payment_plan, household=cls.household_1, excluded=False, currency="PLN"
+            parent=cls.payment_plan,
+            household=cls.household_1,
+            excluded=False,
+            currency="PLN",
         )
 
         hoh2 = IndividualFactory(household=None)
         cls.household_2 = HouseholdFactory(head_of_household=hoh2)
         cls.payment_2 = PaymentFactory(
-            parent=cls.payment_plan, household=cls.household_2, excluded=False, currency="PLN"
+            parent=cls.payment_plan,
+            household=cls.household_2,
+            excluded=False,
+            currency="PLN",
         )
 
         hoh3 = IndividualFactory(household=None)
         cls.household_3 = HouseholdFactory(head_of_household=hoh3)
         cls.payment_3 = PaymentFactory(
-            parent=cls.payment_plan, household=cls.household_3, excluded=False, currency="PLN"
+            parent=cls.payment_plan,
+            household=cls.household_3,
+            excluded=False,
+            currency="PLN",
         )
         cls.individual_1 = IndividualFactory(household=cls.household_1, program=cls.program)
         cls.individual_2 = IndividualFactory(household=cls.household_2, program=cls.program)
@@ -89,7 +100,10 @@ class TestExcludeHouseholds(APITestCase):
         hoh4 = IndividualFactory(household=None)
         cls.household_4 = HouseholdFactory(head_of_household=hoh4)
         cls.payment_4 = PaymentFactory(
-            parent=cls.another_payment_plan, household=cls.household_4, excluded=False, currency="PLN"
+            parent=cls.another_payment_plan,
+            household=cls.household_4,
+            excluded=False,
+            currency="PLN",
         )
 
     def test_payment_plan_within_not_status_open_or_lock(self) -> None:
@@ -145,11 +159,15 @@ class TestExcludeHouseholds(APITestCase):
         self.payment_plan.refresh_from_db()
 
         self.assertEqual(
-            self.payment_plan.background_action_status, PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES
+            self.payment_plan.background_action_status,
+            PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES,
         )
         self.assertEqual(self.payment_plan.exclude_household_error, "")
 
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch(
+        "hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate",
+        return_value=2.0,
+    )
     def test_exclude_payment_with_wrong_hh_ids(self, get_exchange_rate_mock: Any) -> None:
         self.payment_1.excluded = True
         self.payment_2.excluded = True
@@ -199,7 +217,8 @@ class TestExcludeHouseholds(APITestCase):
 
         self.assertEqual(self.payment_plan.exclusion_reason, "reason exclude_all_households")
         self.assertEqual(
-            self.payment_plan.background_action_status, PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR
+            self.payment_plan.background_action_status,
+            PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR,
         )
         self.assertEqual(self.payment_plan.exclude_household_error, error_msg)
 
@@ -210,7 +229,12 @@ class TestExcludeHouseholds(APITestCase):
             program_cycle=self.program_cycle,
             created_by=self.user,
         )
-        PaymentFactory(parent=finished_payment_plan, household=self.household_1, excluded=False, currency="PLN")
+        PaymentFactory(
+            parent=finished_payment_plan,
+            household=self.household_1,
+            excluded=False,
+            currency="PLN",
+        )
 
         self.payment_1.excluded = True
         self.payment_1.save()
@@ -221,21 +245,30 @@ class TestExcludeHouseholds(APITestCase):
         self.assertEqual(self.payment_plan.exclusion_reason, "")
 
         payment_plan_exclude_beneficiaries(
-            payment_plan_id=self.payment_plan.pk, excluding_hh_or_ind_ids=[], exclusion_reason="Undo HH_1"
+            payment_plan_id=self.payment_plan.pk,
+            excluding_hh_or_ind_ids=[],
+            exclusion_reason="Undo HH_1",
         )
 
-        self.assertEqual(set(self.payment_plan.excluded_beneficiaries_ids), {self.payment_1.household.unicef_id})
+        self.assertEqual(
+            set(self.payment_plan.excluded_beneficiaries_ids),
+            {self.payment_1.household.unicef_id},
+        )
         self.payment_plan.refresh_from_db()
 
         self.assertEqual(self.payment_plan.exclusion_reason, "Undo HH_1")
         self.assertEqual(
-            self.payment_plan.background_action_status, PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR
+            self.payment_plan.background_action_status,
+            PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR,
         )
 
         error_msg = f"['It is not possible to undo exclude Beneficiary with ID {self.household_1.unicef_id} because of hard conflict(s) with other Follow-up Payment Plan(s).']"
         self.assertEqual(self.payment_plan.exclude_household_error, error_msg)
 
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch(
+        "hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate",
+        return_value=2.0,
+    )
     def test_exclude_successfully(self, get_exchange_rate_mock: Any) -> None:
         self.payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES
         self.payment_plan.save(update_fields=["background_action_status"])
@@ -258,9 +291,15 @@ class TestExcludeHouseholds(APITestCase):
         self.assertEqual(self.payment_plan.background_action_status, None)
 
         # excluded hh_1, hh_2
-        self.assertEqual(set(self.payment_plan.excluded_beneficiaries_ids), {hh_unicef_id_1, hh_unicef_id_2})
+        self.assertEqual(
+            set(self.payment_plan.excluded_beneficiaries_ids),
+            {hh_unicef_id_1, hh_unicef_id_2},
+        )
 
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch(
+        "hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate",
+        return_value=2.0,
+    )
     def test_exclude_individuals_people_program(self, get_exchange_rate_mock: Any) -> None:
         people_dct = DataCollectingTypeFactory(label="Social DCT", type=DataCollectingType.Type.SOCIAL)
         beneficiary_group = BeneficiaryGroupFactory(name="People", master_detail=False)
@@ -289,4 +328,7 @@ class TestExcludeHouseholds(APITestCase):
         self.assertEqual(self.payment_plan.background_action_status, None)
 
         # excluded ind_1, ind_2
-        self.assertEqual(set(self.payment_plan.excluded_beneficiaries_ids), {ind_unicef_id_1, ind_unicef_id_2})
+        self.assertEqual(
+            set(self.payment_plan.excluded_beneficiaries_ids),
+            {ind_unicef_id_1, ind_unicef_id_2},
+        )

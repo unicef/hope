@@ -187,7 +187,11 @@ class TestAllProgramsQuery(APITestCase):
                     "Program": self.id_to_base64(program.id, "ProgramNode"),
                 },
             },
-            variables={"businessArea": self.business_area.slug, "orderBy": "name", "compatibleDct": True},
+            variables={
+                "businessArea": self.business_area.slug,
+                "orderBy": "name",
+                "compatibleDct": True,
+            },
         )
 
     def test_all_programs_query_filter_beneficiary_group(self) -> None:
@@ -223,7 +227,11 @@ class TestAllProgramsQuery(APITestCase):
                     "Program": self.id_to_base64(program1.id, "ProgramNode"),
                 },
             },
-            variables={"businessArea": self.business_area.slug, "orderBy": "name", "beneficiaryGroupMatch": True},
+            variables={
+                "businessArea": self.business_area.slug,
+                "orderBy": "name",
+                "beneficiaryGroupMatch": True,
+            },
         )
 
         self.snapshot_graphql_request(
@@ -235,10 +243,17 @@ class TestAllProgramsQuery(APITestCase):
                     "Program": self.id_to_base64(program1.id, "ProgramNode"),
                 },
             },
-            variables={"businessArea": self.business_area.slug, "orderBy": "name", "beneficiaryGroupMatch": False},
+            variables={
+                "businessArea": self.business_area.slug,
+                "orderBy": "name",
+                "beneficiaryGroupMatch": False,
+            },
         )
 
-    @patch("django.contrib.auth.models.AnonymousUser.is_authenticated", new_callable=lambda: False)
+    @patch(
+        "django.contrib.auth.models.AnonymousUser.is_authenticated",
+        new_callable=lambda: False,
+    )
     def test_all_programs_query_user_not_authenticated(self, mock_is_authenticated: Any) -> None:
         self.snapshot_graphql_request(
             request_string=self.ALL_PROGRAMS_QUERY,

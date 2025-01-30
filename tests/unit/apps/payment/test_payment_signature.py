@@ -106,7 +106,10 @@ class TestPaymentSignature(APITestCase):
         self.assertEqual(payment.signature_hash, self.calculate_hash_manually(payment))
 
     @freeze_time("2020-10-10")
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch(
+        "hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate",
+        return_value=2.0,
+    )
     def test_signature_after_prepare_payment_plan(self, get_exchange_rate_mock: Any) -> None:
         program = ProgramFactory(
             status=Program.ACTIVE,
@@ -151,7 +154,9 @@ class TestPaymentSignature(APITestCase):
 
         with mock.patch("hct_mis_api.apps.payment.services.payment_plan_services.prepare_payment_plan_task"):
             pp = PaymentPlanService.create(
-                input_data=input_data, user=self.user, business_area_slug=self.business_area.slug
+                input_data=input_data,
+                user=self.user,
+                business_area_slug=self.business_area.slug,
             )
 
         pp.refresh_from_db()

@@ -162,19 +162,28 @@ class BaseTestUkrainianRegistrationService(TestCase):
             Record(
                 **defaults,
                 source_id=2,
-                fields={"household": cls.household, "individuals": [individual_wit_bank_account_and_tax]},
+                fields={
+                    "household": cls.household,
+                    "individuals": [individual_wit_bank_account_and_tax],
+                },
                 files=json.dumps({}).encode(),
             ),
             Record(
                 **defaults,
                 source_id=3,
-                fields={"household": cls.household, "individuals": [individual_with_no_tax]},
+                fields={
+                    "household": cls.household,
+                    "individuals": [individual_with_no_tax],
+                },
                 files=json.dumps(files).encode(),
             ),
             Record(
                 **defaults,
                 source_id=4,
-                fields={"household": cls.household, "individuals": [individual_without_bank_account]},
+                fields={
+                    "household": cls.household,
+                    "individuals": [individual_without_bank_account],
+                },
                 files=json.dumps(files).encode(),
             ),
         ]
@@ -182,7 +191,10 @@ class BaseTestUkrainianRegistrationService(TestCase):
             Record(
                 **defaults,
                 source_id=1,
-                fields={"household": cls.household, "individuals": [individual_with_tax_id_which_is_too_long]},
+                fields={
+                    "household": cls.household,
+                    "individuals": [individual_with_tax_id_which_is_too_long],
+                },
                 files=json.dumps(files).encode(),
             ),
         ]
@@ -212,7 +224,8 @@ class TestUkrainianRegistrationService(BaseTestUkrainianRegistrationService):
         self.assertEqual(bank_acc_info.bank_branch_name, "Branch Name 333")
         self.assertEqual(
             PendingDocument.objects.filter(
-                document_number="TESTID", type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID]
+                document_number="TESTID",
+                type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
             ).count(),
             1,
         )

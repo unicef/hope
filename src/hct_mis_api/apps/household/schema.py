@@ -542,7 +542,11 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
                 raise PermissionDenied("Permission Denied")
             if object_instance.admin_area_id:
                 areas_from_partner = user.partner.get_program_areas(object_instance.program_id)
-                areas_from_household = [object_instance.admin1_id, object_instance.admin2_id, object_instance.admin3_id]
+                areas_from_household = [
+                    object_instance.admin1_id,
+                    object_instance.admin2_id,
+                    object_instance.admin3_id,
+                ]
                 if not areas_from_partner.filter(id__in=areas_from_household).exists():
                     raise PermissionDenied("Permission Denied")
 
@@ -607,7 +611,9 @@ class Query(graphene.ObjectType):
         filterset_class=HouseholdFilter,
         permission_classes=(
             hopeOneOfPermissionClass(
-                Permissions.RDI_VIEW_DETAILS, Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST, *ALL_GRIEVANCES_CREATE_MODIFY
+                Permissions.RDI_VIEW_DETAILS,
+                Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST,
+                *ALL_GRIEVANCES_CREATE_MODIFY,
             ),
         ),
     )
@@ -758,14 +764,19 @@ class Query(graphene.ObjectType):
         return queryset
 
     def resolve_all_households_flex_fields_attributes(self, info: Any, **kwargs: Any) -> Iterable:
-        yield from FlexibleAttribute.objects.filter(
-            associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD
-        ).prefetch_related("choices").order_by("created_at")
+        yield from (
+            FlexibleAttribute.objects.filter(associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD)
+            .prefetch_related("choices")
+            .order_by("created_at")
+        )
 
     def resolve_all_individuals_flex_fields_attributes(self, info: Any, **kwargs: Any) -> Iterable:
-        yield from FlexibleAttribute.objects.filter(
-            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
-        ).exclude(type=FlexibleAttribute.PDU).prefetch_related("choices").order_by("created_at")
+        yield from (
+            FlexibleAttribute.objects.filter(associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL)
+            .exclude(type=FlexibleAttribute.PDU)
+            .prefetch_related("choices")
+            .order_by("created_at")
+        )
 
     def resolve_all_households(self, info: Any, **kwargs: Any) -> QuerySet:
         user = info.context.user
@@ -815,7 +826,10 @@ class Query(graphene.ObjectType):
             queryset = queryset.select_related("program")
         if does_path_exist_in_query("edges.node.hasDuplicates", info):
             subquery = Subquery(
-                Individual.objects.filter(household_id=OuterRef("pk"), deduplication_golden_record_status="DUPLICATE")
+                Individual.objects.filter(
+                    household_id=OuterRef("pk"),
+                    deduplication_golden_record_status="DUPLICATE",
+                )
                 .annotate(count=Func(F("id"), function="Count"))
                 .values("count")
             )

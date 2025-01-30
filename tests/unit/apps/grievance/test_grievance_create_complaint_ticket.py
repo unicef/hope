@@ -64,11 +64,21 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
 
         cls.household, cls.individuals = create_household(
             {"size": 1, "business_area": cls.business_area},
-            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe",
+            },
         )
         cls.household2, cls.individuals2 = create_household(
             {"size": 1, "business_area": cls.business_area},
-            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe second Individual"},
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe second Individual",
+            },
         )
         cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
         cls.update_partner_access_to_program(partner, cls.program)
@@ -110,7 +120,10 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=input_data,
         )
 
@@ -128,7 +141,10 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
 
         self.graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=input_data,
         )
         self.assertEqual(GrievanceTicket.objects.count(), 2)
@@ -153,7 +169,10 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=input_data,
         )
 
@@ -180,7 +199,10 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=input_data,
         )
 
@@ -203,7 +225,10 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=input_data,
         )
 
@@ -226,7 +251,10 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=input_data,
         )
 
@@ -246,7 +274,10 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=input_data,
         )
 

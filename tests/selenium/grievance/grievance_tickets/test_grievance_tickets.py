@@ -124,7 +124,11 @@ def find_text_of_label(element: WebElement) -> str:
 
 @pytest.fixture
 def social_worker_program() -> Program:
-    yield create_program("Social Program", dct_type=DataCollectingType.Type.SOCIAL, beneficiary_group="People")
+    yield create_program(
+        "Social Program",
+        dct_type=DataCollectingType.Type.SOCIAL,
+        beneficiary_group="People",
+    )
 
 
 def create_program(
@@ -154,7 +158,10 @@ def create_custom_household(
     beneficiary_group_name: str = "Main Menu",
 ) -> Household:
     program = get_program_with_dct_type_and_name(
-        program_name, "1234", dct_type=dct_type, beneficiary_group_name=beneficiary_group_name
+        program_name,
+        "1234",
+        dct_type=dct_type,
+        beneficiary_group_name=beneficiary_group_name,
     )
     household, _ = create_household_and_individuals(
         household_data={
@@ -354,7 +361,8 @@ def create_grievance_referral(
     from hct_mis_api.apps.grievance.models import TicketReferralDetails
 
     TicketReferralDetails.objects.create(
-        ticket=grievance_ticket, individual=Individual.objects.filter(unicef_id="IND-00-0000.0011").first()
+        ticket=grievance_ticket,
+        individual=Individual.objects.filter(unicef_id="IND-00-0000.0011").first(),
     )
 
     return grievance_ticket
@@ -568,17 +576,22 @@ class TestGrievanceTickets:
         "test_data",
         [
             pytest.param(
-                {"category": "Sensitive Grievance", "type": "Miscellaneous"}, id="Sensitive Grievance Miscellaneous"
+                {"category": "Sensitive Grievance", "type": "Miscellaneous"},
+                id="Sensitive Grievance Miscellaneous",
             ),
             pytest.param(
                 {"category": "Sensitive Grievance", "type": "Personal disputes"},
                 id="Sensitive Grievance Personal disputes",
             ),
             pytest.param(
-                {"category": "Grievance Complaint", "type": "Other Complaint"}, id="Grievance Complaint Other Complaint"
+                {"category": "Grievance Complaint", "type": "Other Complaint"},
+                id="Grievance Complaint Other Complaint",
             ),
             pytest.param(
-                {"category": "Grievance Complaint", "type": "Registration Related Complaint"},
+                {
+                    "category": "Grievance Complaint",
+                    "type": "Registration Related Complaint",
+                },
                 id="Grievance Complaint Registration Related Complaint",
             ),
             pytest.param(
@@ -586,10 +599,12 @@ class TestGrievanceTickets:
                 id="Grievance Complaint FSP Related Complaint",
             ),
             pytest.param(
-                {"category": "Data Change", "type": "Withdraw Individual"}, id="Data Change Withdraw Individual"
+                {"category": "Data Change", "type": "Withdraw Individual"},
+                id="Data Change Withdraw Individual",
             ),
             pytest.param(
-                {"category": "Data Change", "type": "Withdraw Household"}, id="Data Change Withdraw Household"
+                {"category": "Data Change", "type": "Withdraw Household"},
+                id="Data Change Withdraw Household",
             ),
         ],
     )
@@ -613,7 +628,11 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getButtonNext().click()
         pageGrievanceNewTicket.getHouseholdTab()
         pageGrievanceNewTicket.getHouseholdTableRows(0).click()
-        if test_data["type"] not in ["Withdraw Household", "Household Data Update", "Add Individual"]:
+        if test_data["type"] not in [
+            "Withdraw Household",
+            "Household Data Update",
+            "Add Individual",
+        ]:
             pageGrievanceNewTicket.getIndividualTab().click()
             pageGrievanceNewTicket.getIndividualTableRows(0).click()
         pageGrievanceNewTicket.getButtonNext().click()
@@ -795,7 +814,10 @@ class TestGrievanceTickets:
     @pytest.mark.parametrize(
         "test_data",
         [
-            pytest.param({"category": "Data Change", "type": "Group Data Update"}, id="Data Change Group Data Update"),
+            pytest.param(
+                {"category": "Data Change", "type": "Group Data Update"},
+                id="Data Change Group Data Update",
+            ),
         ],
     )
     def test_hh_grievance_tickets_create_new_ticket(

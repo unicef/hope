@@ -154,7 +154,9 @@ def get_individual_snapshot(individual: Individual) -> dict:
         }
 
     is_hh_collector = IndividualRoleInHousehold.objects.filter(
-        role__in=[ROLE_PRIMARY, ROLE_ALTERNATE], household=individual.household, individual=individual
+        role__in=[ROLE_PRIMARY, ROLE_ALTERNATE],
+        household=individual.household,
+        individual=individual,
     ).exists()
 
     if is_hh_collector:

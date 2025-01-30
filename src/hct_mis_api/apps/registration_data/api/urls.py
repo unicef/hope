@@ -18,5 +18,9 @@ router.register(
 
 urlpatterns = [
     path("", include(router.urls)),
-    path("webhookdeduplication/", WebhookDeduplicationView.as_view(), name="webhook_deduplication"),
+    path(
+        "webhookdeduplication/",
+        WebhookDeduplicationView.as_view(),
+        name="webhook_deduplication",
+    ),
 ]

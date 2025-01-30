@@ -137,7 +137,11 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
             self.message_user(request, "RDI Merge task has started")
         except Exception as e:
             logger.exception(e)
-            self.message_user(request, "An error occurred while processing RDI Merge task", messages.ERROR)
+            self.message_user(
+                request,
+                "An error occurred while processing RDI Merge task",
+                messages.ERROR,
+            )
 
     @staticmethod
     def _delete_rdi(rdi: RegistrationDataImport) -> None:
@@ -308,12 +312,22 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         context["form"] = form
         context["action"] = "mass_enroll_to_another_program"
         context["enroll_from"] = "RDI"
-        return TemplateResponse(request, "admin/household/household/enroll_households_to_program.html", context)
+        return TemplateResponse(
+            request,
+            "admin/household/household/enroll_households_to_program.html",
+            context,
+        )
 
 
 @admin.register(ImportData)
 class ImportDataAdmin(HOPEModelAdminBase):
-    list_display = ("business_area_slug", "status", "data_type", "number_of_households", "number_of_individuals")
+    list_display = (
+        "business_area_slug",
+        "status",
+        "data_type",
+        "number_of_households",
+        "number_of_individuals",
+    )
     list_filter = (
         "status",
         "data_type",

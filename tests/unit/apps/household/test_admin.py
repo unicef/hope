@@ -18,7 +18,9 @@ class BaseTest(WebTest):
         registration_data_import = RegistrationDataImportFactory()
 
         cls.household = HouseholdFactory.build(
-            registration_data_import=registration_data_import, business_area=business_area, program=program
+            registration_data_import=registration_data_import,
+            business_area=business_area,
+            program=program,
         )
         cls.household.household_collection.save()
         cls.individual = IndividualFactory(

@@ -67,7 +67,11 @@ class TestGenericRegistrationService(TestCase):
                 "disability_id_i_c": "document.disability_certificate-document_number",
                 "disability_id_photo_i_c": "document.disability_certificate-photo",
             },
-            "flex_fields": ["marketing.can_unicef_contact_you", "enumerators", "macioce"],
+            "flex_fields": [
+                "marketing.can_unicef_contact_you",
+                "enumerators",
+                "macioce",
+            ],
         }
         cls.registration = RegistrationFactory(name="fake_registration", project=cls.project, mapping=mapping)
 
@@ -198,19 +202,28 @@ class TestGenericRegistrationService(TestCase):
             Record(
                 **self.defaults,
                 source_id=2,
-                fields={"household": self.household, "individuals": [self.individual_with_bank_account_and_tax]},
+                fields={
+                    "household": self.household,
+                    "individuals": [self.individual_with_bank_account_and_tax],
+                },
                 files=json.dumps({}).encode(),
             ),
             Record(
                 **self.defaults,
                 source_id=3,
-                fields={"household": self.household, "individuals": [self.individual_with_no_tax]},
+                fields={
+                    "household": self.household,
+                    "individuals": [self.individual_with_no_tax],
+                },
                 files=json.dumps(self.files).encode(),
             ),
             Record(
                 **self.defaults,
                 source_id=4,
-                fields={"household": self.household, "individuals": [self.individual_without_bank_account]},
+                fields={
+                    "household": self.household,
+                    "individuals": [self.individual_without_bank_account],
+                },
                 files=json.dumps(self.files).encode(),
             ),
         ]
@@ -218,7 +231,10 @@ class TestGenericRegistrationService(TestCase):
             Record(
                 **self.defaults,
                 source_id=1,
-                fields={"household": self.household, "individuals": [self.individual_with_tax_id_which_is_too_long]},
+                fields={
+                    "household": self.household,
+                    "individuals": [self.individual_with_tax_id_which_is_too_long],
+                },
                 files=json.dumps(self.files).encode(),
             ),
         ]
@@ -235,7 +251,8 @@ class TestGenericRegistrationService(TestCase):
         self.assertEqual(PendingHousehold.objects.filter(program=rdi.program).count(), 4)
         self.assertEqual(
             PendingDocument.objects.filter(
-                document_number="TESTID", type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID]
+                document_number="TESTID",
+                type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
             ).count(),
             1,
         )
@@ -254,8 +271,14 @@ class TestGenericRegistrationService(TestCase):
         self.assertIn("ff", pending_household.flex_fields.keys())
         self.assertEqual(registration_data_import.program, self.program)
 
-        self.assertEqual(PendingIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).count(), 1)
-        self.assertEqual(PendingIndividualRoleInHousehold.objects.filter(role=ROLE_ALTERNATE).count(), 1)
+        self.assertEqual(
+            PendingIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).count(),
+            1,
+        )
+        self.assertEqual(
+            PendingIndividualRoleInHousehold.objects.filter(role=ROLE_ALTERNATE).count(),
+            1,
+        )
 
     def test_import_data_to_datahub_household_individual(self) -> None:
         records = [
@@ -297,4 +320,7 @@ class TestGenericRegistrationService(TestCase):
                 "phone_no": "+393892781511",
             }
         )
-        self.assertEqual(PendingIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).count(), 1)
+        self.assertEqual(
+            PendingIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).count(),
+            1,
+        )

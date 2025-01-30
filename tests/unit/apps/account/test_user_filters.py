@@ -139,7 +139,8 @@ class TestUserFilter(APITestCase):
 
         # user with partner with role in BA and access to program
         role_management = RoleFactory(
-            name="User Management View Role", permissions=[Permissions.USER_MANAGEMENT_VIEW_LIST.value]
+            name="User Management View Role",
+            permissions=[Permissions.USER_MANAGEMENT_VIEW_LIST.value],
         )
         partner_with_test_role = PartnerFactory(name="Partner With Test Role")
         cls.add_partner_role_in_business_area(
@@ -174,6 +175,10 @@ class TestUserFilter(APITestCase):
     def test_users_by_roles(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.ALL_USERS_QUERY_FILTER_BY_ROLES,
-            variables={"businessArea": "afghanistan", "roles": [str(self.role.id)], "orderBy": "partner"},
+            variables={
+                "businessArea": "afghanistan",
+                "roles": [str(self.role.id)],
+                "orderBy": "partner",
+            },
             context={"user": self.user},
         )

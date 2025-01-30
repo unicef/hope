@@ -85,13 +85,33 @@ class TestDashboardQueries(APITestCase):
         payment_plan1 = PaymentPlanFactory(program_cycle=program1.cycles.first())
         payment_plan2 = PaymentPlanFactory(program_cycle=program2.cycles.first())
         delivery_date = timezone.datetime(2021, 10, 10, tzinfo=utc)
-        PaymentFactory(parent=payment_plan1, delivery_date=delivery_date, household=household, currency="PLN")
-        PaymentFactory(parent=payment_plan2, delivery_date=delivery_date, household=household, currency="PLN")
+        PaymentFactory(
+            parent=payment_plan1,
+            delivery_date=delivery_date,
+            household=household,
+            currency="PLN",
+        )
+        PaymentFactory(
+            parent=payment_plan2,
+            delivery_date=delivery_date,
+            household=household,
+            currency="PLN",
+        )
 
         payment_plan3 = PaymentPlanFactory(program_cycle=program3.cycles.first())
         payment_plan4 = PaymentPlanFactory(program_cycle=program4.cycles.first())
-        PaymentFactory(parent=payment_plan3, delivery_date=delivery_date, household=household, currency="PLN")
-        PaymentFactory(parent=payment_plan4, delivery_date=delivery_date, household=household, currency="PLN")
+        PaymentFactory(
+            parent=payment_plan3,
+            delivery_date=delivery_date,
+            household=household,
+            currency="PLN",
+        )
+        PaymentFactory(
+            parent=payment_plan4,
+            delivery_date=delivery_date,
+            household=household,
+            currency="PLN",
+        )
 
         self.snapshot_graphql_request(
             request_string=QUERY_CHART_PROGRAMMES_BY_SECTOR,

@@ -30,7 +30,12 @@ pytestmark = pytest.mark.django_db
 
 
 class PaymentPlanTestMixin:
-    def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory, id_to_base64: Callable) -> None:
+    def set_up(
+        self,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        id_to_base64: Callable,
+    ) -> None:
         self.partner = PartnerFactory(name="TestPartner")
         self.user = UserFactory(partner=self.partner)
         self.client = api_client(self.user)
@@ -61,10 +66,16 @@ class PaymentPlanTestMixin:
 
 
 class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
-    def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory, id_to_base64: Callable) -> None:
+    def set_up(
+        self,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        id_to_base64: Callable,
+    ) -> None:
         super().set_up(api_client, afghanistan, id_to_base64)
         self.url = reverse(
-            "api:payments:payment-plans-managerial-list", kwargs={"business_area": self.afghanistan.slug}
+            "api:payments:payment-plans-managerial-list",
+            kwargs={"business_area": self.afghanistan.slug},
         )
 
     @pytest.mark.parametrize(
@@ -72,7 +83,10 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         [
             ([], status.HTTP_403_FORBIDDEN),
             ([Permissions.PM_VIEW_LIST], status.HTTP_403_FORBIDDEN),
-            ([Permissions.PM_VIEW_LIST, Permissions.PAYMENT_VIEW_LIST_MANAGERIAL], status.HTTP_200_OK),
+            (
+                [Permissions.PM_VIEW_LIST, Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
+                status.HTTP_200_OK,
+            ),
         ],
     )
     def test_list_payment_plans_permission(
@@ -111,9 +125,18 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
             assert response.status_code == status.HTTP_200_OK
             response_json = response.json()["results"]
             assert len(response_json) == 2
-            assert self.payment_plan1.unicef_id in [response_json[0]["unicef_id"], response_json[1]["unicef_id"]]
-            assert self.payment_plan2.unicef_id in [response_json[0]["unicef_id"], response_json[1]["unicef_id"]]
-            assert self.payment_plan3.unicef_id not in [response_json[0]["unicef_id"], response_json[1]["unicef_id"]]
+            assert self.payment_plan1.unicef_id in [
+                response_json[0]["unicef_id"],
+                response_json[1]["unicef_id"],
+            ]
+            assert self.payment_plan2.unicef_id in [
+                response_json[0]["unicef_id"],
+                response_json[1]["unicef_id"],
+            ]
+            assert self.payment_plan3.unicef_id not in [
+                response_json[0]["unicef_id"],
+                response_json[1]["unicef_id"],
+            ]
             return response
 
         self.set_up(api_client, afghanistan, id_to_base64)
@@ -215,7 +238,8 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         ApprovalProcessFactory(payment_plan=self.payment_plan2)
         response = self.client.post(
             reverse(
-                "api:payments:payment-plans-managerial-bulk-action", kwargs={"business_area": self.afghanistan.slug}
+                "api:payments:payment-plans-managerial-bulk-action",
+                kwargs={"business_area": self.afghanistan.slug},
             ),
             data={
                 "ids": [
@@ -281,9 +305,18 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
     @pytest.mark.parametrize(
         "action_name, result",
         (
-            (PaymentPlan.Action.APPROVE.name, Permissions.PM_ACCEPTANCE_PROCESS_APPROVE.name),
-            (PaymentPlan.Action.AUTHORIZE.name, Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE.name),
-            (PaymentPlan.Action.REVIEW.name, Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW.name),
+            (
+                PaymentPlan.Action.APPROVE.name,
+                Permissions.PM_ACCEPTANCE_PROCESS_APPROVE.name,
+            ),
+            (
+                PaymentPlan.Action.AUTHORIZE.name,
+                Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE.name,
+            ),
+            (
+                PaymentPlan.Action.REVIEW.name,
+                Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW.name,
+            ),
             ("Some other action name", None),
         ),
     )

@@ -74,7 +74,12 @@ class BusinessAreaNode(DjangoObjectType):
     is_accountability_applicable = graphene.Boolean()
 
     def resolve_is_accountability_applicable(self, info: Any) -> bool:
-        return all([bool(flag_state("ALLOW_ACCOUNTABILITY_MODULE")), self.is_accountability_applicable])
+        return all(
+            [
+                bool(flag_state("ALLOW_ACCOUNTABILITY_MODULE")),
+                self.is_accountability_applicable,
+            ]
+        )
 
     @classmethod
     def get_queryset(cls, queryset: "QuerySet", info: Any) -> "QuerySet":
@@ -290,7 +295,9 @@ class LanguageObjectConnection(ObjectConnection):
 
 
 def get_fields_attr_generators(
-    flex_field: Optional[bool] = None, business_area_slug: Optional[str] = None, program_id: Optional[str] = None
+    flex_field: Optional[bool] = None,
+    business_area_slug: Optional[str] = None,
+    program_id: Optional[str] = None,
 ) -> Generator:
     if flex_field is not False:
         yield from FlexibleAttribute.objects.filter(Q(program__isnull=True) | Q(program__id=program_id)).order_by(
@@ -298,12 +305,16 @@ def get_fields_attr_generators(
         )
     if flex_field is not True:
         if program_id and Program.objects.get(id=program_id).is_social_worker_program:
-            yield from FieldFactory.from_only_scopes([Scope.XLSX_PEOPLE, Scope.TARGETING]).filtered_by_types(
-                FILTERABLE_TYPES
-            ).apply_business_area(business_area_slug=business_area_slug, program_id=program_id)
+            yield from (
+                FieldFactory.from_only_scopes([Scope.XLSX_PEOPLE, Scope.TARGETING])
+                .filtered_by_types(FILTERABLE_TYPES)
+                .apply_business_area(business_area_slug=business_area_slug, program_id=program_id)
+            )
         else:
-            yield from FieldFactory.from_scope(Scope.TARGETING).filtered_by_types(FILTERABLE_TYPES).apply_business_area(
-                business_area_slug=business_area_slug, program_id=program_id
+            yield from (
+                FieldFactory.from_scope(Scope.TARGETING)
+                .filtered_by_types(FILTERABLE_TYPES)
+                .apply_business_area(business_area_slug=business_area_slug, program_id=program_id)
             )
 
 
@@ -391,7 +402,9 @@ class Query(graphene.ObjectType):
     )
     cash_assist_url_prefix = graphene.String()
     all_languages = ConnectionField(
-        LanguageObjectConnection, code=graphene.String(required=False), description="All available languages"
+        LanguageObjectConnection,
+        code=graphene.String(required=False),
+        description="All available languages",
     )
     data_collecting_type = relay.Node.Field(DataCollectingTypeNode)
     data_collection_type_choices = graphene.List(DataCollectingTypeChoiceObject)

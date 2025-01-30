@@ -107,7 +107,9 @@ class TestCrossAreaFilterAvailable(APITestCase):
             },
         )
 
-    def test_cross_area_filter_not_available_no_permission_and_area_restrictions(self) -> None:
+    def test_cross_area_filter_not_available_no_permission_and_area_restrictions(
+        self,
+    ) -> None:
         user = UserFactory(partner=self.partner_with_area_restrictions)
 
         self.snapshot_graphql_request(

@@ -141,7 +141,11 @@ class Area(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
 
     @classmethod
     def get_admin_areas_as_choices(
-        cls, admin_level: Optional[int] = None, business_area_slug: Optional[str] = None, *args: Any, **kwargs: Any
+        cls,
+        admin_level: Optional[int] = None,
+        business_area_slug: Optional[str] = None,
+        *args: Any,
+        **kwargs: Any,
     ) -> List[Dict[str, Any]]:
         params: Dict[str, Any] = {}
         if admin_level:

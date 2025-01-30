@@ -114,7 +114,9 @@ class TestUpdateGrievanceTickets(APITestCase):
         cls.admin_area_2 = AreaFactory(name="City Example", area_type=area_type, p_code="2343123")
 
         cls.program = ProgramFactory(
-            name="Test program ONE", business_area=BusinessArea.objects.first(), status=Program.ACTIVE
+            name="Test program ONE",
+            business_area=BusinessArea.objects.first(),
+            status=Program.ACTIVE,
         )
         cls.update_partner_access_to_program(partner, cls.program)
 
@@ -226,7 +228,10 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "relationship": RELATIONSHIP_UNKNOWN,
                 "estimated_birth_date": False,
                 "sex": {"value": "MALE", "approve_status": False},
-                "birth_date": {"value": date(year=1980, month=2, day=1).isoformat(), "approve_status": False},
+                "birth_date": {
+                    "value": date(year=1980, month=2, day=1).isoformat(),
+                    "approve_status": False,
+                },
                 "marital_status": {"value": SINGLE, "approve_status": True},
                 "role": {"value": ROLE_PRIMARY, "approve_status": True},
                 "documents": [
@@ -240,8 +245,14 @@ class TestUpdateGrievanceTickets(APITestCase):
                     },
                 ],
                 "documents_to_remove": [
-                    {"value": cls.id_to_base64(cls.national_id.id, "DocumentNode"), "approve_status": True},
-                    {"value": cls.id_to_base64(cls.birth_certificate.id, "DocumentNode"), "approve_status": False},
+                    {
+                        "value": cls.id_to_base64(cls.national_id.id, "DocumentNode"),
+                        "approve_status": True,
+                    },
+                    {
+                        "value": cls.id_to_base64(cls.birth_certificate.id, "DocumentNode"),
+                        "approve_status": False,
+                    },
                 ],
             },
         )
@@ -302,7 +313,10 @@ class TestUpdateGrievanceTickets(APITestCase):
         [
             (
                 "with_permission",
-                [Permissions.GRIEVANCES_UPDATE, Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE],
+                [
+                    Permissions.GRIEVANCES_UPDATE,
+                    Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE,
+                ],
             ),
             (
                 "with_partial_permission",
@@ -311,7 +325,10 @@ class TestUpdateGrievanceTickets(APITestCase):
             ("without_permission", []),
         ]
     )
-    @mock.patch("django.core.files.storage.default_storage.save", lambda filename, file: "test_file_name.jpg")
+    @mock.patch(
+        "django.core.files.storage.default_storage.save",
+        lambda filename, file: "test_file_name.jpg",
+    )
     def test_update_add_individual(self, name: str, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.add_individual_grievance_ticket.status = GrievanceTicket.STATUS_FOR_APPROVAL
@@ -367,7 +384,10 @@ class TestUpdateGrievanceTickets(APITestCase):
         }
         self.graphql_request(
             request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=input_data,
         )
         self.add_individual_grievance_ticket.refresh_from_db()
@@ -424,15 +444,24 @@ class TestUpdateGrievanceTickets(APITestCase):
 
         self.assertEqual(result, expected_result)
         if name == "without_permission":
-            self.assertEqual(self.add_individual_grievance_ticket.status, GrievanceTicket.STATUS_FOR_APPROVAL)
+            self.assertEqual(
+                self.add_individual_grievance_ticket.status,
+                GrievanceTicket.STATUS_FOR_APPROVAL,
+            )
         else:
-            self.assertEqual(self.add_individual_grievance_ticket.status, GrievanceTicket.STATUS_IN_PROGRESS)
+            self.assertEqual(
+                self.add_individual_grievance_ticket.status,
+                GrievanceTicket.STATUS_IN_PROGRESS,
+            )
 
     @parameterized.expand(
         [
             (
                 "with_permission",
-                [Permissions.GRIEVANCES_UPDATE, Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE],
+                [
+                    Permissions.GRIEVANCES_UPDATE,
+                    Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE,
+                ],
             ),
             (
                 "with_partial_permission",
@@ -441,7 +470,10 @@ class TestUpdateGrievanceTickets(APITestCase):
             ("without_permission", []),
         ]
     )
-    @mock.patch("django.core.files.storage.default_storage.save", lambda filename, file: "test_file_name.jpg")
+    @mock.patch(
+        "django.core.files.storage.default_storage.save",
+        lambda filename, file: "test_file_name.jpg",
+    )
     def test_update_change_individual(self, name: str, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.individual_data_change_grievance_ticket.status = GrievanceTicket.STATUS_FOR_APPROVAL
@@ -450,12 +482,16 @@ class TestUpdateGrievanceTickets(APITestCase):
             "input": {
                 "description": self.individual_data_change_grievance_ticket.description,
                 "assignedTo": self.id_to_base64(
-                    self.individual_data_change_grievance_ticket.assigned_to.id, "UserNode"
+                    self.individual_data_change_grievance_ticket.assigned_to.id,
+                    "UserNode",
                 ),
                 "admin": encode_id_base64(str(self.individual_data_change_grievance_ticket.admin2.id), "Area"),
                 "language": self.individual_data_change_grievance_ticket.language,
                 "area": self.individual_data_change_grievance_ticket.area,
-                "ticketId": self.id_to_base64(self.individual_data_change_grievance_ticket.id, "GrievanceTicketNode"),
+                "ticketId": self.id_to_base64(
+                    self.individual_data_change_grievance_ticket.id,
+                    "GrievanceTicketNode",
+                ),
                 "extras": {
                     "individualDataUpdateIssueTypeExtras": {
                         "individualData": {
@@ -484,7 +520,10 @@ class TestUpdateGrievanceTickets(APITestCase):
                             ],
                             "identitiesToEdit": [
                                 {
-                                    "id": self.id_to_base64(self.identity_to_update.id, "IndividualIdentityNode"),
+                                    "id": self.id_to_base64(
+                                        self.identity_to_update.id,
+                                        "IndividualIdentityNode",
+                                    ),
                                     "partner": UNHCR,
                                     "country": "POL",
                                     "number": "3333",
@@ -496,7 +535,10 @@ class TestUpdateGrievanceTickets(APITestCase):
                                     "label": DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD,
                                     "approveStatus": False,
                                     "dataFields": [
-                                        {"name": "phone_number", "value": "+1234567890"},
+                                        {
+                                            "name": "phone_number",
+                                            "value": "+1234567890",
+                                        },
                                     ],
                                 },
                             ],
@@ -507,7 +549,10 @@ class TestUpdateGrievanceTickets(APITestCase):
         }
         self.graphql_request(
             request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=input_data,
         )
         self.individual_data_change_grievance_ticket.refresh_from_db()
@@ -516,8 +561,16 @@ class TestUpdateGrievanceTickets(APITestCase):
         # TODO: test shouldn't use conditional logic
         if name == "with_permission":
             expected_result = {
-                "sex": {"value": "MALE", "approve_status": False, "previous_value": "FEMALE"},
-                "role": {"value": "PRIMARY", "approve_status": False, "previous_value": "NO_ROLE"},
+                "sex": {
+                    "value": "MALE",
+                    "approve_status": False,
+                    "previous_value": "FEMALE",
+                },
+                "role": {
+                    "value": "PRIMARY",
+                    "approve_status": False,
+                    "previous_value": "NO_ROLE",
+                },
                 "documents": [
                     {
                         "value": {
@@ -532,7 +585,11 @@ class TestUpdateGrievanceTickets(APITestCase):
                 ],
                 "identities": [
                     {
-                        "value": {"partner": "UNHCR", "number": "2222", "country": "POL"},
+                        "value": {
+                            "partner": "UNHCR",
+                            "number": "2222",
+                            "country": "POL",
+                        },
                         "approve_status": False,
                     },
                 ],
@@ -555,12 +612,32 @@ class TestUpdateGrievanceTickets(APITestCase):
                         "approve_status": False,
                     },
                 ],
-                "full_name": {"value": "John Example", "approve_status": False, "previous_value": "Benjamin Butler"},
-                "birth_date": {"value": "1962-12-21", "approve_status": False, "previous_value": "1943-07-30"},
-                "given_name": {"value": "John", "approve_status": False, "previous_value": "Benjamin"},
-                "family_name": {"value": "Example", "approve_status": False, "previous_value": "Butler"},
+                "full_name": {
+                    "value": "John Example",
+                    "approve_status": False,
+                    "previous_value": "Benjamin Butler",
+                },
+                "birth_date": {
+                    "value": "1962-12-21",
+                    "approve_status": False,
+                    "previous_value": "1943-07-30",
+                },
+                "given_name": {
+                    "value": "John",
+                    "approve_status": False,
+                    "previous_value": "Benjamin",
+                },
+                "family_name": {
+                    "value": "Example",
+                    "approve_status": False,
+                    "previous_value": "Butler",
+                },
                 "flex_fields": {},
-                "marital_status": {"value": "SINGLE", "approve_status": False, "previous_value": "DIVORCED"},
+                "marital_status": {
+                    "value": "SINGLE",
+                    "approve_status": False,
+                    "previous_value": "DIVORCED",
+                },
                 "payment_channels": [],
                 "payment_channels_to_edit": [],
                 "payment_channels_to_remove": [],
@@ -594,7 +671,11 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "role": {"value": "PRIMARY", "approve_status": True},
                 "documents": [
                     {
-                        "value": {"key": "national_id", "number": "999-888-777", "country": "POL"},
+                        "value": {
+                            "key": "national_id",
+                            "number": "999-888-777",
+                            "country": "POL",
+                        },
                         "approve_status": True,
                     }
                 ],
@@ -605,21 +686,36 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "relationship": "UNKNOWN",
                 "marital_status": {"value": "SINGLE", "approve_status": True},
                 "documents_to_remove": [
-                    {"value": self.id_to_base64(self.national_id.id, "DocumentNode"), "approve_status": True},
-                    {"value": self.id_to_base64(self.birth_certificate.id, "DocumentNode"), "approve_status": False},
+                    {
+                        "value": self.id_to_base64(self.national_id.id, "DocumentNode"),
+                        "approve_status": True,
+                    },
+                    {
+                        "value": self.id_to_base64(self.birth_certificate.id, "DocumentNode"),
+                        "approve_status": False,
+                    },
                 ],
                 "estimated_birth_date": False,
             }
         self.assertEqual(result, expected_result)
         if name == "without_permission":
-            self.assertEqual(self.individual_data_change_grievance_ticket.status, GrievanceTicket.STATUS_FOR_APPROVAL)
+            self.assertEqual(
+                self.individual_data_change_grievance_ticket.status,
+                GrievanceTicket.STATUS_FOR_APPROVAL,
+            )
         else:
-            self.assertEqual(self.individual_data_change_grievance_ticket.status, GrievanceTicket.STATUS_IN_PROGRESS)
+            self.assertEqual(
+                self.individual_data_change_grievance_ticket.status,
+                GrievanceTicket.STATUS_IN_PROGRESS,
+            )
 
     def test_update_change_household_with_permission(self) -> None:
         self.create_user_role_with_permissions(
             self.user,
-            [Permissions.GRIEVANCES_UPDATE, Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE],
+            [
+                Permissions.GRIEVANCES_UPDATE,
+                Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE,
+            ],
             self.business_area,
         )
 
@@ -630,7 +726,10 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "admin": encode_id_base64(str(self.household_data_change_grievance_ticket.admin2.id), "Area"),
                 "language": self.household_data_change_grievance_ticket.language,
                 "area": self.household_data_change_grievance_ticket.area,
-                "ticketId": self.id_to_base64(self.household_data_change_grievance_ticket.id, "GrievanceTicketNode"),
+                "ticketId": self.id_to_base64(
+                    self.household_data_change_grievance_ticket.id,
+                    "GrievanceTicketNode",
+                ),
                 "extras": {
                     "householdDataUpdateIssueTypeExtras": {
                         "householdData": {
@@ -644,7 +743,10 @@ class TestUpdateGrievanceTickets(APITestCase):
         }
         self.graphql_request(
             request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=input_data,
         )
         self.household_data_change_grievance_ticket.refresh_from_db()
@@ -656,13 +758,26 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "approve_status": False,
                 "previous_value": self.household_one.country.iso_code3,
             },
-            "village": {"value": "Test Town", "approve_status": False, "previous_value": "Example"},
+            "village": {
+                "value": "Test Town",
+                "approve_status": False,
+                "previous_value": "Example",
+            },
             "flex_fields": {},
         }
         self.assertEqual(result, expected_result)
-        self.assertEqual(str(self.household_data_change_grievance_ticket.assigned_to.id), self.user_two.id)
-        self.assertNotEqual(self.household_data_change_grievance_ticket.description, "this is new description")
-        self.assertEqual(self.household_data_change_grievance_ticket.status, GrievanceTicket.STATUS_IN_PROGRESS)
+        self.assertEqual(
+            str(self.household_data_change_grievance_ticket.assigned_to.id),
+            self.user_two.id,
+        )
+        self.assertNotEqual(
+            self.household_data_change_grievance_ticket.description,
+            "this is new description",
+        )
+        self.assertEqual(
+            self.household_data_change_grievance_ticket.status,
+            GrievanceTicket.STATUS_IN_PROGRESS,
+        )
 
     def test_update_change_household_with_partial_permission(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.business_area)
@@ -674,7 +789,10 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "admin": encode_id_base64(str(self.household_data_change_grievance_ticket.admin2.id), "Area"),
                 "language": self.household_data_change_grievance_ticket.language,
                 "area": self.household_data_change_grievance_ticket.area,
-                "ticketId": self.id_to_base64(self.household_data_change_grievance_ticket.id, "GrievanceTicketNode"),
+                "ticketId": self.id_to_base64(
+                    self.household_data_change_grievance_ticket.id,
+                    "GrievanceTicketNode",
+                ),
                 "extras": {
                     "householdDataUpdateIssueTypeExtras": {
                         "householdData": {
@@ -688,7 +806,10 @@ class TestUpdateGrievanceTickets(APITestCase):
         }
         self.graphql_request(
             request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=input_data,
         )
         self.household_data_change_grievance_ticket.refresh_from_db()
@@ -699,9 +820,18 @@ class TestUpdateGrievanceTickets(APITestCase):
             "country": "AFG",
         }
         self.assertEqual(result, expected_result)
-        self.assertEqual(str(self.household_data_change_grievance_ticket.assigned_to.id), self.user_two.id)
-        self.assertNotEqual(self.household_data_change_grievance_ticket.description, "this is new description")
-        self.assertEqual(self.household_data_change_grievance_ticket.status, GrievanceTicket.STATUS_IN_PROGRESS)
+        self.assertEqual(
+            str(self.household_data_change_grievance_ticket.assigned_to.id),
+            self.user_two.id,
+        )
+        self.assertNotEqual(
+            self.household_data_change_grievance_ticket.description,
+            "this is new description",
+        )
+        self.assertEqual(
+            self.household_data_change_grievance_ticket.status,
+            GrievanceTicket.STATUS_IN_PROGRESS,
+        )
 
     def test_update_change_household_without_permission(self) -> None:
         self.create_user_role_with_permissions(self.user, [], self.business_area)
@@ -713,7 +843,10 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "admin": encode_id_base64(str(self.household_data_change_grievance_ticket.admin2.id), "Area"),
                 "language": self.household_data_change_grievance_ticket.language,
                 "area": self.household_data_change_grievance_ticket.area,
-                "ticketId": self.id_to_base64(self.household_data_change_grievance_ticket.id, "GrievanceTicketNode"),
+                "ticketId": self.id_to_base64(
+                    self.household_data_change_grievance_ticket.id,
+                    "GrievanceTicketNode",
+                ),
                 "extras": {
                     "householdDataUpdateIssueTypeExtras": {
                         "householdData": {
@@ -727,7 +860,10 @@ class TestUpdateGrievanceTickets(APITestCase):
         }
         self.graphql_request(
             request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=input_data,
         )
         self.household_data_change_grievance_ticket.refresh_from_db()
@@ -738,9 +874,18 @@ class TestUpdateGrievanceTickets(APITestCase):
             "country": "AFG",
         }
         self.assertEqual(result, expected_result)
-        self.assertNotEqual(str(self.household_data_change_grievance_ticket.assigned_to.id), self.user_two.id)
-        self.assertNotEqual(self.household_data_change_grievance_ticket.description, "this is new description")
-        self.assertEqual(self.household_data_change_grievance_ticket.status, GrievanceTicket.STATUS_FOR_APPROVAL)
+        self.assertNotEqual(
+            str(self.household_data_change_grievance_ticket.assigned_to.id),
+            self.user_two.id,
+        )
+        self.assertNotEqual(
+            self.household_data_change_grievance_ticket.description,
+            "this is new description",
+        )
+        self.assertEqual(
+            self.household_data_change_grievance_ticket.status,
+            GrievanceTicket.STATUS_FOR_APPROVAL,
+        )
 
     @parameterized.expand(
         [
@@ -766,7 +911,10 @@ class TestUpdateGrievanceTickets(APITestCase):
         }
         self.snapshot_graphql_request(
             request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=input_data,
         )
 
@@ -794,7 +942,10 @@ class TestUpdateGrievanceTickets(APITestCase):
 
         self.graphql_request(
             request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=self._prepare_input_data(ticket_id, household_id),
         )
         ticket.refresh_from_db()
@@ -825,7 +976,10 @@ class TestUpdateGrievanceTickets(APITestCase):
 
         self.graphql_request(
             request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=self._prepare_input_data(ticket_id, individual_id=individual_id),
         )
         ticket.refresh_from_db()
@@ -856,7 +1010,10 @@ class TestUpdateGrievanceTickets(APITestCase):
 
         response = self.graphql_request(
             request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=self._prepare_input_data(ticket_id, household_id),
         )
         ticket.refresh_from_db()
@@ -887,7 +1044,10 @@ class TestUpdateGrievanceTickets(APITestCase):
 
         response = self.graphql_request(
             request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")},
+            },
             variables=self._prepare_input_data(ticket_id, individual_id=individual_id),
         )
         ticket.refresh_from_db()
@@ -895,7 +1055,10 @@ class TestUpdateGrievanceTickets(APITestCase):
         self.assertTrue("Cannot change individual" in response["errors"][0]["message"])
 
     def _prepare_input_data(
-        self, ticket_id: str, household_id: Optional[str] = None, individual_id: Optional[str] = None
+        self,
+        ticket_id: str,
+        household_id: Optional[str] = None,
+        individual_id: Optional[str] = None,
     ) -> Dict:
         return {
             "input": {

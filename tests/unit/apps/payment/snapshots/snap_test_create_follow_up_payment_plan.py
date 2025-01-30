@@ -7,14 +7,14 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestCreateFollowUpPaymentPlan::test_create_follow_up_pp_mutation 1'] = {
-    'data': {
-        'createFollowUpPaymentPlan': {
-            'paymentPlan': {
-                'canCreateFollowUp': False,
-                'isFollowUp': True,
-                'status': 'OPEN',
-                'totalWithdrawnHouseholdsCount': 0
+snapshots["TestCreateFollowUpPaymentPlan::test_create_follow_up_pp_mutation 1"] = {
+    "data": {
+        "createFollowUpPaymentPlan": {
+            "paymentPlan": {
+                "canCreateFollowUp": False,
+                "isFollowUp": True,
+                "status": "OPEN",
+                "totalWithdrawnHouseholdsCount": 0,
             }
         }
     }

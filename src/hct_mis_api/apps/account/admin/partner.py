@@ -82,7 +82,11 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
         return list(super().get_readonly_fields(request, obj)) + additional_fields
 
     def get_form(
-        self, request: HttpRequest, obj: Optional[account_models.Partner] = None, change: bool = False, **kwargs: Any
+        self,
+        request: HttpRequest,
+        obj: Optional[account_models.Partner] = None,
+        change: bool = False,
+        **kwargs: Any,
     ) -> Type[ModelForm]:
         form = super().get_form(request, obj, **kwargs)
 
@@ -114,7 +118,10 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
             for permission in permissions_list:
                 if permission.roles:
                     business_area_role_data.append(
-                        {"business_area": permission.business_area_id, "roles": permission.roles.all()}
+                        {
+                            "business_area": permission.business_area_id,
+                            "roles": permission.roles.all(),
+                        }
                     )
             business_area_role_form_set = BusinessAreaRoleFormSet(
                 initial=business_area_role_data, prefix="business_area_role"
@@ -154,7 +161,9 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
             if incompatible_roles:
                 for business_area, roles in incompatible_roles.items():
                     self.message_user(
-                        request, f"Roles in {business_area} are incompatible: {', '.join(roles)}", messages.ERROR
+                        request,
+                        f"Roles in {business_area} are incompatible: {', '.join(roles)}",
+                        messages.ERROR,
                     )
 
             if business_area_role_form_set_is_valid and not incompatible_roles:

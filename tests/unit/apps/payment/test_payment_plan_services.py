@@ -70,13 +70,17 @@ class TestPaymentPlanServices(APITestCase):
         cls.cycle = cls.program.cycles.first()
 
         cls.payment_plan = PaymentPlanFactory(
-            program_cycle=cls.cycle, created_by=cls.user, status=PaymentPlan.Status.TP_LOCKED
+            program_cycle=cls.cycle,
+            created_by=cls.user,
+            status=PaymentPlan.Status.TP_LOCKED,
         )
 
     def test_delete_tp_open(self) -> None:
         program = ProgramFactory(status=Program.ACTIVE)
         pp: PaymentPlan = PaymentPlanFactory(
-            status=PaymentPlan.Status.TP_OPEN, program_cycle=program.cycles.first(), created_by=self.user
+            status=PaymentPlan.Status.TP_OPEN,
+            program_cycle=program.cycles.first(),
+            created_by=self.user,
         )
 
         pp = PaymentPlanService(payment_plan=pp).delete()
@@ -86,7 +90,9 @@ class TestPaymentPlanServices(APITestCase):
     def test_delete_open(self) -> None:
         program = ProgramFactory(status=Program.ACTIVE)
         pp: PaymentPlan = PaymentPlanFactory(
-            status=PaymentPlan.Status.OPEN, program_cycle=program.cycles.first(), created_by=self.user
+            status=PaymentPlan.Status.OPEN,
+            program_cycle=program.cycles.first(),
+            created_by=self.user,
         )
 
         pp = PaymentPlanService(payment_plan=pp).delete()
@@ -106,7 +112,9 @@ class TestPaymentPlanServices(APITestCase):
     def test_delete_when_its_one_pp_in_cycle(self) -> None:
         program = ProgramFactory(status=Program.ACTIVE)
         pp: PaymentPlan = PaymentPlanFactory(
-            status=PaymentPlan.Status.OPEN, program_cycle=program.cycles.first(), created_by=self.user
+            status=PaymentPlan.Status.OPEN,
+            program_cycle=program.cycles.first(),
+            created_by=self.user,
         )
         program_cycle = ProgramCycleFactory(status=ProgramCycle.ACTIVE, program=pp.program)
         pp.program_cycle = program_cycle
@@ -125,9 +133,15 @@ class TestPaymentPlanServices(APITestCase):
         program = ProgramFactory(status=Program.ACTIVE)
         program_cycle = ProgramCycleFactory(status=ProgramCycle.ACTIVE, program=program)
         pp_1: PaymentPlan = PaymentPlanFactory(
-            status=PaymentPlan.Status.OPEN, program_cycle=program_cycle, created_by=self.user
+            status=PaymentPlan.Status.OPEN,
+            program_cycle=program_cycle,
+            created_by=self.user,
         )
-        PaymentPlanFactory(status=PaymentPlan.Status.OPEN, program_cycle=program_cycle, created_by=self.user)
+        PaymentPlanFactory(
+            status=PaymentPlan.Status.OPEN,
+            program_cycle=program_cycle,
+            created_by=self.user,
+        )
 
         self.assertEqual(pp_1.program_cycle.status, ProgramCycle.ACTIVE)
 
@@ -173,28 +187,37 @@ class TestPaymentPlanServices(APITestCase):
         )
 
         with self.assertRaisesMessage(
-            GraphQLError, f"Payment Plan with name: TEST_123 and program: {program.name} already exists."
+            GraphQLError,
+            f"Payment Plan with name: TEST_123 and program: {program.name} already exists.",
         ):
             PaymentPlanFactory(program_cycle=program_cycle, name="TEST_123", created_by=self.user)
             PaymentPlanService.create(
-                input_data=create_input_data, user=self.user, business_area_slug=self.business_area.slug
+                input_data=create_input_data,
+                user=self.user,
+                business_area_slug=self.business_area.slug,
             )
         with self.assertRaisesMessage(
-            GraphQLError, "Impossible to create Payment Plan for Programme within not Active status"
+            GraphQLError,
+            "Impossible to create Payment Plan for Programme within not Active status",
         ):
             program.status = Program.FINISHED
             program.save()
             program.refresh_from_db()
             PaymentPlanService.create(
-                input_data=create_input_data, user=self.user, business_area_slug=self.business_area.slug
+                input_data=create_input_data,
+                user=self.user,
+                business_area_slug=self.business_area.slug,
             )
         with self.assertRaisesMessage(
-            GraphQLError, "Impossible to create Payment Plan for Programme Cycle within Finished status"
+            GraphQLError,
+            "Impossible to create Payment Plan for Programme Cycle within Finished status",
         ):
             program_cycle.status = ProgramCycle.FINISHED
             program_cycle.save()
             PaymentPlanService.create(
-                input_data=create_input_data, user=self.user, business_area_slug=self.business_area.slug
+                input_data=create_input_data,
+                user=self.user,
+                business_area_slug=self.business_area.slug,
             )
         program_cycle.status = ProgramCycle.ACTIVE
         program_cycle.save()
@@ -203,7 +226,9 @@ class TestPaymentPlanServices(APITestCase):
         # create PP
         create_input_data["name"] = "TEST"
         pp = PaymentPlanService.create(
-            input_data=create_input_data, user=self.user, business_area_slug=self.business_area.slug
+            input_data=create_input_data,
+            user=self.user,
+            business_area_slug=self.business_area.slug,
         )
         pp.status = PaymentPlan.Status.TP_OPEN
         pp.save()
@@ -224,7 +249,8 @@ class TestPaymentPlanServices(APITestCase):
         pp.status = PaymentPlan.Status.DRAFT
         pp.save()
         with self.assertRaisesMessage(
-            GraphQLError, f"Dispersion End Date [{open_input_data['dispersion_end_date']}] cannot be a past date"
+            GraphQLError,
+            f"Dispersion End Date [{open_input_data['dispersion_end_date']}] cannot be a past date",
         ):
             PaymentPlanService(payment_plan=pp).open(input_data=open_input_data)
         open_input_data["dispersion_end_date"] = parse_date("2020-11-11")
@@ -235,7 +261,10 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp.status, PaymentPlan.Status.OPEN)
 
     @freeze_time("2020-10-10")
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch(
+        "hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate",
+        return_value=2.0,
+    )
     def test_create(self, get_exchange_rate_mock: Any) -> None:
         program = ProgramFactory(
             status=Program.ACTIVE,
@@ -276,7 +305,9 @@ class TestPaymentPlanServices(APITestCase):
         ) as mock_prepare_payment_plan_task:
             with self.assertNumQueries(11):
                 pp = PaymentPlanService.create(
-                    input_data=input_data, user=self.user, business_area_slug=self.business_area.slug
+                    input_data=input_data,
+                    user=self.user,
+                    business_area_slug=self.business_area.slug,
                 )
             assert mock_prepare_payment_plan_task.on_commit.call_count == 1
 
@@ -293,7 +324,10 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp.payment_items.count(), 2)
 
     @freeze_time("2020-10-10")
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch(
+        "hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate",
+        return_value=2.0,
+    )
     def test_update_validation_errors(self, get_exchange_rate_mock: Any) -> None:
         pp = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED, created_by=self.user)
 
@@ -317,12 +351,16 @@ class TestPaymentPlanServices(APITestCase):
         pp.save()
 
         with self.assertRaisesMessage(
-            GraphQLError, f"Dispersion End Date [{input_data['dispersion_end_date']}] cannot be a past date"
+            GraphQLError,
+            f"Dispersion End Date [{input_data['dispersion_end_date']}] cannot be a past date",
         ):
             PaymentPlanService(payment_plan=pp).update(input_data=input_data)
 
     @freeze_time("2023-10-10")
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch(
+        "hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate",
+        return_value=2.0,
+    )
     def test_create_follow_up_pp(self, get_exchange_rate_mock: Any) -> None:
         tc = TargetingCriteriaFactory()
         pp = PaymentPlanFactory(
@@ -338,7 +376,10 @@ class TestPaymentPlanServices(APITestCase):
             IndividualRoleInHouseholdFactory(household=hh, individual=hoh, role=ROLE_PRIMARY)
             IndividualFactory.create_batch(2, household=hh)
             payment = PaymentFactory(
-                parent=pp, household=hh, status=Payment.STATUS_DISTRIBUTION_SUCCESS, currency="PLN"
+                parent=pp,
+                household=hh,
+                status=Payment.STATUS_DISTRIBUTION_SUCCESS,
+                currency="PLN",
             )
             payments.append(payment)
 
@@ -346,13 +387,19 @@ class TestPaymentPlanServices(APITestCase):
         dispersion_end_date = (pp.dispersion_end_date + timedelta(days=1)).date()
 
         with self.assertRaisesMessage(
-            GraphQLError, "Cannot create a follow-up for a payment plan with no unsuccessful payments"
+            GraphQLError,
+            "Cannot create a follow-up for a payment plan with no unsuccessful payments",
         ):
             PaymentPlanService(pp).create_follow_up(self.user, dispersion_start_date, dispersion_end_date)
 
         # do not create follow-up payments for STATUS_ERROR, STATUS_NOT_DISTRIBUTED, STATUS_FORCE_FAILED,
         for payment, status in zip(
-            payments[:3], [Payment.STATUS_ERROR, Payment.STATUS_NOT_DISTRIBUTED, Payment.STATUS_FORCE_FAILED]
+            payments[:3],
+            [
+                Payment.STATUS_ERROR,
+                Payment.STATUS_NOT_DISTRIBUTED,
+                Payment.STATUS_FORCE_FAILED,
+            ],
         ):
             payment.status = status
             payment.save()
@@ -405,9 +452,15 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(follow_up_payment.parent, follow_up_pp)
         self.assertIsNotNone(follow_up_payment.source_payment)
         self.assertEqual(follow_up_payment.is_follow_up, True)
-        self.assertEqual(follow_up_payment.business_area, follow_up_payment.source_payment.business_area)
+        self.assertEqual(
+            follow_up_payment.business_area,
+            follow_up_payment.source_payment.business_area,
+        )
         self.assertEqual(follow_up_payment.household, follow_up_payment.source_payment.household)
-        self.assertEqual(follow_up_payment.head_of_household, follow_up_payment.source_payment.head_of_household)
+        self.assertEqual(
+            follow_up_payment.head_of_household,
+            follow_up_payment.source_payment.head_of_household,
+        )
         self.assertEqual(follow_up_payment.collector, follow_up_payment.source_payment.collector)
         self.assertEqual(follow_up_payment.currency, follow_up_payment.source_payment.currency)
 
@@ -470,7 +523,10 @@ class TestPaymentPlanServices(APITestCase):
 
     @flaky(max_runs=5, min_passes=1)
     @freeze_time("2023-10-10")
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch(
+        "hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate",
+        return_value=2.0,
+    )
     @patch("hct_mis_api.apps.payment.models.PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK")
     def test_split(self, min_no_of_payments_in_chunk_mock: Any, get_exchange_rate_mock: Any) -> None:
         min_no_of_payments_in_chunk_mock.__get__ = mock.Mock(return_value=2)
@@ -491,7 +547,11 @@ class TestPaymentPlanServices(APITestCase):
             IndividualRoleInHouseholdFactory(household=hh, individual=hoh, role=ROLE_PRIMARY)
             IndividualFactory.create_batch(2, household=hh)
             payment = PaymentFactory(
-                parent=pp, household=hh, status=Payment.STATUS_DISTRIBUTION_SUCCESS, currency="PLN", collector=collector
+                parent=pp,
+                household=hh,
+                status=Payment.STATUS_DISTRIBUTION_SUCCESS,
+                currency="PLN",
+                collector=collector,
             )
             payments.append(payment)
 
@@ -506,7 +566,11 @@ class TestPaymentPlanServices(APITestCase):
             IndividualRoleInHouseholdFactory(household=hh, individual=hoh, role=ROLE_PRIMARY)
             IndividualFactory.create_batch(2, household=hh)
             payment = PaymentFactory(
-                parent=pp, household=hh, status=Payment.STATUS_DISTRIBUTION_SUCCESS, currency="PLN", collector=collector
+                parent=pp,
+                household=hh,
+                status=Payment.STATUS_DISTRIBUTION_SUCCESS,
+                currency="PLN",
+                collector=collector,
             )
             payments.append(payment)
 
@@ -517,7 +581,11 @@ class TestPaymentPlanServices(APITestCase):
             IndividualRoleInHouseholdFactory(household=hh, individual=hoh, role=ROLE_PRIMARY)
             IndividualFactory.create_batch(2, household=hh)
             payment = PaymentFactory(
-                parent=pp, household=hh, status=Payment.STATUS_DISTRIBUTION_SUCCESS, currency="PLN", collector=collector
+                parent=pp,
+                household=hh,
+                status=Payment.STATUS_DISTRIBUTION_SUCCESS,
+                currency="PLN",
+                collector=collector,
             )
             payments.append(payment)
 
@@ -525,7 +593,8 @@ class TestPaymentPlanServices(APITestCase):
             PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_RECORDS, chunks_no=None)
 
         with self.assertRaisesMessage(
-            GraphQLError, "Payment Parts number should be between 2 and total number of payments"
+            GraphQLError,
+            "Payment Parts number should be between 2 and total number of payments",
         ):
             PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_RECORDS, chunks_no=669)
 
@@ -578,7 +647,10 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp_splits[1].payments.count(), 8)
 
     @freeze_time("2023-10-10")
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch(
+        "hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate",
+        return_value=2.0,
+    )
     def test_send_to_payment_gateway(self, get_exchange_rate_mock: Any) -> None:
         pp = PaymentPlanFactory(
             status=PaymentPlan.Status.ACCEPTED,
@@ -663,18 +735,29 @@ class TestPaymentPlanServices(APITestCase):
         ):
             cycle.status = ProgramCycle.FINISHED
             cycle.save()
-            PaymentPlanService.create(input_data=input_data, user=self.user, business_area_slug=self.business_area.slug)
+            PaymentPlanService.create(
+                input_data=input_data,
+                user=self.user,
+                business_area_slug=self.business_area.slug,
+            )
 
         cycle.status = ProgramCycle.DRAFT
         cycle.end_date = None
         cycle.save()
-        PaymentPlanService.create(input_data=input_data, user=self.user, business_area_slug=self.business_area.slug)
+        PaymentPlanService.create(
+            input_data=input_data,
+            user=self.user,
+            business_area_slug=self.business_area.slug,
+        )
         cycle.refresh_from_db()
         # open PP will update cycle' status into Active
         assert cycle.status == ProgramCycle.DRAFT
 
     @freeze_time("2022-12-12")
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch(
+        "hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate",
+        return_value=2.0,
+    )
     def test_full_rebuild(self, get_exchange_rate_mock: Any) -> None:
         program = ProgramFactory(
             status=Program.ACTIVE,
@@ -714,7 +797,9 @@ class TestPaymentPlanServices(APITestCase):
         ) as mock_prepare_payment_plan_task:
             with self.assertNumQueries(11):
                 pp = PaymentPlanService.create(
-                    input_data=input_data, user=self.user, business_area_slug=self.business_area.slug
+                    input_data=input_data,
+                    user=self.user,
+                    business_area_slug=self.business_area.slug,
                 )
             assert mock_prepare_payment_plan_task.on_commit.call_count == 1
 
@@ -782,7 +867,9 @@ class TestPaymentPlanServices(APITestCase):
 
     def test_tp_lock_invalid_pp_status(self) -> None:
         payment_plan = PaymentPlanFactory(
-            program_cycle=self.cycle, created_by=self.user, status=PaymentPlan.Status.DRAFT
+            program_cycle=self.cycle,
+            created_by=self.user,
+            status=PaymentPlan.Status.DRAFT,
         )
         with self.assertRaises(TransitionNotAllowed) as e:
             PaymentPlanService(payment_plan).tp_lock()
@@ -793,7 +880,9 @@ class TestPaymentPlanServices(APITestCase):
 
     def test_tp_unlock(self) -> None:
         payment_plan = PaymentPlanFactory(
-            program_cycle=self.cycle, created_by=self.user, status=PaymentPlan.Status.DRAFT
+            program_cycle=self.cycle,
+            created_by=self.user,
+            status=PaymentPlan.Status.DRAFT,
         )
         with self.assertRaises(TransitionNotAllowed) as e:
             PaymentPlanService(payment_plan).tp_unlock()
@@ -924,13 +1013,22 @@ class TestPaymentPlanServices(APITestCase):
         )
 
         PaymentPlanService.rebuild_payment_plan_population(
-            rebuild_list=False, should_update_money_stats=True, vulnerability_filter=False, payment_plan=pp
+            rebuild_list=False,
+            should_update_money_stats=True,
+            vulnerability_filter=False,
+            payment_plan=pp,
         )
         PaymentPlanService.rebuild_payment_plan_population(
-            rebuild_list=True, should_update_money_stats=False, vulnerability_filter=False, payment_plan=pp
+            rebuild_list=True,
+            should_update_money_stats=False,
+            vulnerability_filter=False,
+            payment_plan=pp,
         )
         PaymentPlanService.rebuild_payment_plan_population(
-            rebuild_list=False, should_update_money_stats=False, vulnerability_filter=True, payment_plan=pp
+            rebuild_list=False,
+            should_update_money_stats=False,
+            vulnerability_filter=True,
+            payment_plan=pp,
         )
 
         self.payment_plan.refresh_from_db(fields=("build_status",))
@@ -959,7 +1057,10 @@ class TestPaymentPlanServices(APITestCase):
 
     def test_update_pp_vulnerability_score(self) -> None:
         PaymentPlanService(self.payment_plan).update(
-            {"vulnerability_score_min": "11.229222", "vulnerability_score_max": "77.889777"}
+            {
+                "vulnerability_score_min": "11.229222",
+                "vulnerability_score_max": "77.889777",
+            }
         )
         self.payment_plan.refresh_from_db(fields=("vulnerability_score_min", "vulnerability_score_max"))
         self.assertEqual(self.payment_plan.vulnerability_score_min, Decimal("11.229"))
@@ -1000,7 +1101,9 @@ class TestPaymentPlanServices(APITestCase):
 
     def test_export_xlsx(self) -> None:
         payment_plan = PaymentPlanFactory(
-            program_cycle=self.cycle, created_by=self.user, status=PaymentPlan.Status.LOCKED
+            program_cycle=self.cycle,
+            created_by=self.user,
+            status=PaymentPlan.Status.LOCKED,
         )
         self.assertEqual(FileTemp.objects.all().count(), 0)
 
@@ -1017,7 +1120,10 @@ class TestPaymentPlanServices(APITestCase):
             },
         )
         targeting_criteria = TargetingCriteriaFactory()
-        TargetingCriteriaRuleFactory(household_ids=f"{household.unicef_id}", targeting_criteria=targeting_criteria)
+        TargetingCriteriaRuleFactory(
+            household_ids=f"{household.unicef_id}",
+            targeting_criteria=targeting_criteria,
+        )
         payment_plan = PaymentPlanFactory(
             created_by=self.user,
             status=PaymentPlan.Status.PREPARING,
@@ -1043,5 +1149,6 @@ class TestPaymentPlanServices(APITestCase):
             PaymentPlanService.create_payments(payment_plan)
 
         self.assertIn(
-            'duplicate key value violates unique constraint "payment_plan_and_household"', str(error.exception)
+            'duplicate key value violates unique constraint "payment_plan_and_household"',
+            str(error.exception),
         )

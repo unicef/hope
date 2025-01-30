@@ -64,7 +64,8 @@ class TestDiscardVerificationMutation(APITestCase):
         )
         PaymentVerificationSummaryFactory(payment_plan=payment_plan)
         payment_verification_plan = PaymentVerificationPlanFactory(
-            payment_plan=payment_plan, verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
+            payment_plan=payment_plan,
+            verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
         )
         payment_verification_plan.status = PaymentVerificationPlan.STATUS_ACTIVE
         payment_verification_plan.save()

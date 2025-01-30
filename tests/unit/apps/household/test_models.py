@@ -54,9 +54,24 @@ class TestHousehold(TestCase):
             area_level=4,
         )
         cls.area1 = AreaFactory(name="City Test1", area_type=area_type_level_1, p_code="area1")
-        cls.area2 = AreaFactory(name="City Test2", area_type=area_type_level_2, p_code="area2", parent=cls.area1)
-        cls.area3 = AreaFactory(name="City Test3", area_type=area_type_level_3, p_code="area3", parent=cls.area2)
-        cls.area4 = AreaFactory(name="City Test4", area_type=area_type_level_4, p_code="area4", parent=cls.area3)
+        cls.area2 = AreaFactory(
+            name="City Test2",
+            area_type=area_type_level_2,
+            p_code="area2",
+            parent=cls.area1,
+        )
+        cls.area3 = AreaFactory(
+            name="City Test3",
+            area_type=area_type_level_3,
+            p_code="area3",
+            parent=cls.area2,
+        )
+        cls.area4 = AreaFactory(
+            name="City Test4",
+            area_type=area_type_level_4,
+            p_code="area4",
+            parent=cls.area3,
+        )
 
     def test_household_admin_areas_set(self) -> None:
         household, (individual) = create_household(household_args={"size": 1, "business_area": self.business_area})
@@ -91,7 +106,9 @@ class TestHousehold(TestCase):
         self.assertEqual(household.admin3, self.area3)
         self.assertEqual(household.admin4, None)
 
-    def test_household_set_admin_area_none_clears_all_admin_fields_when_area_is_none(self) -> None:
+    def test_household_set_admin_area_none_clears_all_admin_fields_when_area_is_none(
+        self,
+    ) -> None:
         household, _ = create_household(household_args={"size": 1, "business_area": self.business_area})
         household.admin_area = None
         household.admin1 = self.area1
@@ -110,10 +127,18 @@ class TestHousehold(TestCase):
 
     def test_remove_household(self) -> None:
         household1, _ = create_household(
-            household_args={"size": 1, "business_area": self.business_area, "unicef_id": "HH-9090"}
+            household_args={
+                "size": 1,
+                "business_area": self.business_area,
+                "unicef_id": "HH-9090",
+            }
         )
         household2, _ = create_household(
-            household_args={"size": 1, "business_area": self.business_area, "unicef_id": "HH-9191"}
+            household_args={
+                "size": 1,
+                "business_area": self.business_area,
+                "unicef_id": "HH-9191",
+            }
         )
         household1.delete()
         self.assertEqual(Household.all_objects.filter(unicef_id="HH-9090").first().is_removed, True)
@@ -140,7 +165,9 @@ class TestDocument(TestCase):
         cls.individual = individual
         cls.program = ProgramFactory()
 
-    def test_raise_error_on_creating_duplicated_documents_with_the_same_number_not_unique_for_individual(self) -> None:
+    def test_raise_error_on_creating_duplicated_documents_with_the_same_number_not_unique_for_individual(
+        self,
+    ) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_OTHER],
             defaults=dict(
@@ -221,7 +248,11 @@ class TestDocument(TestCase):
 
         # don't allow to create representations with the same document number and programs
         _, (individual,) = create_household(
-            household_args={"size": 1, "business_area": self.business_area, "program": program_1}
+            household_args={
+                "size": 1,
+                "business_area": self.business_area,
+                "program": program_1,
+            }
         )
         with self.assertRaises(IntegrityError):
             with transaction.atomic():
@@ -244,19 +275,23 @@ class TestDocument(TestCase):
         with self.assertRaises(IntegrityError):
             with transaction.atomic():
                 # regular create
-                Document.objects.create(
-                    document_number="213123",
-                    individual=individual,
-                    country=self.country,
-                    type=document_type,
-                    status=Document.STATUS_VALID,
-                    program=self.individual.program,
-                    is_original=False,
-                    copied_from=original_document,
-                    rdi_merge_status=MergeStatusModel.MERGED,
-                ),
+                (
+                    Document.objects.create(
+                        document_number="213123",
+                        individual=individual,
+                        country=self.country,
+                        type=document_type,
+                        status=Document.STATUS_VALID,
+                        program=self.individual.program,
+                        is_original=False,
+                        copied_from=original_document,
+                        rdi_merge_status=MergeStatusModel.MERGED,
+                    ),
+                )
 
-    def test_create_duplicated_documents_with_different_numbers_and_not_unique_for_individual(self) -> None:
+    def test_create_duplicated_documents_with_different_numbers_and_not_unique_for_individual(
+        self,
+    ) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_OTHER],
             defaults=dict(
@@ -288,7 +323,9 @@ class TestDocument(TestCase):
         except IntegrityError:
             self.fail("Shouldn't raise any errors!")
 
-    def test_raise_error_on_creating_duplicated_documents_with_the_same_number_unique_for_individual(self) -> None:
+    def test_raise_error_on_creating_duplicated_documents_with_the_same_number_unique_for_individual(
+        self,
+    ) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
             defaults=dict(
@@ -318,7 +355,9 @@ class TestDocument(TestCase):
                 rdi_merge_status=MergeStatusModel.MERGED,
             )
 
-    def test_create_document_of_the_same_type_for_individual_not_unique_for_individual(self) -> None:
+    def test_create_document_of_the_same_type_for_individual_not_unique_for_individual(
+        self,
+    ) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
             defaults=dict(
@@ -348,7 +387,9 @@ class TestDocument(TestCase):
         except IntegrityError:
             self.fail("Shouldn't raise any errors!")
 
-    def test_raise_error_on_creating_document_of_the_same_type_for_individual_unique_for_individual(self) -> None:
+    def test_raise_error_on_creating_document_of_the_same_type_for_individual_unique_for_individual(
+        self,
+    ) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
             defaults=dict(
@@ -444,35 +485,41 @@ class TestDocument(TestCase):
         # make representation with different number
         (individual_to_create, _, _, _) = copy_individual_fast(self.individual, program_3)
         (program_3_individual_representation,) = Individual.objects.bulk_create([individual_to_create])
-        Document.objects.create(
-            document_number="456",
-            individual=program_3_individual_representation,
-            country=self.country,
-            type=document_type,
-            status=Document.STATUS_VALID,
-            program=program_3,
-            is_original=False,
-            copied_from=original_document,
-            rdi_merge_status=MergeStatusModel.MERGED,
-        ),
+        (
+            Document.objects.create(
+                document_number="456",
+                individual=program_3_individual_representation,
+                country=self.country,
+                type=document_type,
+                status=Document.STATUS_VALID,
+                program=program_3,
+                is_original=False,
+                copied_from=original_document,
+                rdi_merge_status=MergeStatusModel.MERGED,
+            ),
+        )
 
         # don't allow to create more than 1 representation within the same program and individual
         with self.assertRaises(IntegrityError):
             with transaction.atomic():
                 # regular create
-                Document.objects.create(
-                    document_number="789",
-                    individual=program_3_individual_representation,
-                    country=self.country,
-                    type=document_type,
-                    status=Document.STATUS_VALID,
-                    program=program_3,
-                    is_original=False,
-                    copied_from=original_document,
-                    rdi_merge_status=MergeStatusModel.MERGED,
-                ),
+                (
+                    Document.objects.create(
+                        document_number="789",
+                        individual=program_3_individual_representation,
+                        country=self.country,
+                        type=document_type,
+                        status=Document.STATUS_VALID,
+                        program=program_3,
+                        is_original=False,
+                        copied_from=original_document,
+                        rdi_merge_status=MergeStatusModel.MERGED,
+                    ),
+                )
 
-    def test_create_duplicated_documents_with_different_numbers_and_types_and_unique_for_individual(self) -> None:
+    def test_create_duplicated_documents_with_different_numbers_and_types_and_unique_for_individual(
+        self,
+    ) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
             defaults=dict(

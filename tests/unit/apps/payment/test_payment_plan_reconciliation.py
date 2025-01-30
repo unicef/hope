@@ -325,12 +325,18 @@ class TestPaymentPlanReconciliation(APITestCase):
         cls.household_3.refresh_from_db()
 
         cls.data_collecting_type = DataCollectingType.objects.create(
-            code="full", description="Full individual collected", active=True, type="STANDARD"
+            code="full",
+            description="Full individual collected",
+            active=True,
+            type="STANDARD",
         )
         cls.data_collecting_type.limit_to.add(cls.business_area)
         generate_delivery_mechanisms()
 
-    @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @patch(
+        "hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate",
+        return_value=2.0,
+    )
     def test_receiving_reconciliations_from_fsp(self, mock_get_exchange_rate: Any) -> None:
         beneficiary_group = BeneficiaryGroupFactory()
         create_programme_response = self.graphql_request(
@@ -385,7 +391,10 @@ class TestPaymentPlanReconciliation(APITestCase):
         ) as mock_prepare_payment_plan_task:
             create_payment_plan_response = self.graphql_request(
                 request_string=CREATE_PAYMENT_PLAN_MUTATION,
-                context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+                context={
+                    "user": self.user,
+                    "headers": {"Business-Area": self.business_area.slug},
+                },
                 variables={
                     "input": {
                         "name": "paymentPlanName",
@@ -427,7 +436,10 @@ class TestPaymentPlanReconciliation(APITestCase):
                 }
             },
         )
-        self.assertEqual(locked_pp_response["data"]["actionPaymentPlanMutation"]["paymentPlan"]["status"], "TP_LOCKED")
+        self.assertEqual(
+            locked_pp_response["data"]["actionPaymentPlanMutation"]["paymentPlan"]["status"],
+            "TP_LOCKED",
+        )
 
         finalize_pp_response = self.graphql_request(
             request_string=PAYMENT_PLAN_ACTION_MUTATION,
@@ -439,17 +451,24 @@ class TestPaymentPlanReconciliation(APITestCase):
                 }
             },
         )
-        self.assertEqual(finalize_pp_response["data"]["actionPaymentPlanMutation"]["paymentPlan"]["status"], "DRAFT")
+        self.assertEqual(
+            finalize_pp_response["data"]["actionPaymentPlanMutation"]["paymentPlan"]["status"],
+            "DRAFT",
+        )
 
         # all cycles should have end_date before creation new one
         ProgramCycle.objects.filter(program_id=decode_id_string(program_id)).update(
-            end_date=timezone.datetime(2022, 8, 25, tzinfo=utc).date(), title="NEW NEW NAME"
+            end_date=timezone.datetime(2022, 8, 25, tzinfo=utc).date(),
+            title="NEW NEW NAME",
         )
 
         # OPEN PP
         open_payment_plan_response = self.graphql_request(
             request_string=OPEN_PAYMENT_PLAN_MUTATION,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {"Business-Area": self.business_area.slug},
+            },
             variables={
                 "input": {
                     "paymentPlanId": encoded_payment_plan_id,
@@ -742,14 +761,20 @@ class TestPaymentPlanReconciliation(APITestCase):
             self.assertEqual(sheet.cell(row=2, column=7).value, None)
             self.assertEqual(sheet.cell(row=1, column=8).value, "alternate_collector_phone_no")
             self.assertEqual(sheet.cell(row=2, column=8).value, None)
-            self.assertEqual(sheet.cell(row=1, column=9).value, "alternate_collector_document_numbers")
+            self.assertEqual(
+                sheet.cell(row=1, column=9).value,
+                "alternate_collector_document_numbers",
+            )
             self.assertEqual(sheet.cell(row=2, column=9).value, None)
             self.assertEqual(sheet.cell(row=1, column=10).value, "alternate_collector_sex")
             self.assertEqual(sheet.cell(row=2, column=10).value, None)
             self.assertEqual(sheet.cell(row=1, column=11).value, "payment_channel")
             self.assertEqual(sheet.cell(row=2, column=11).value, "Cash")
             self.assertEqual(sheet.cell(row=1, column=12).value, "fsp_name")
-            self.assertEqual(sheet.cell(row=2, column=12).value, payment.financial_service_provider.name)
+            self.assertEqual(
+                sheet.cell(row=2, column=12).value,
+                payment.financial_service_provider.name,
+            )
             self.assertEqual(sheet.cell(row=1, column=13).value, "currency")
             self.assertEqual(sheet.cell(row=2, column=13).value, payment.currency)
             self.assertEqual(sheet.cell(row=1, column=14).value, "entitlement_quantity")
@@ -772,7 +797,8 @@ class TestPaymentPlanReconciliation(APITestCase):
 
             # update xls, delivered_quantity != entitlement_quantity
             sheet.cell(
-                row=2, column=FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS.index("delivered_quantity")
+                row=2,
+                column=FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS.index("delivered_quantity"),
             ).value = 666
             workbook.save(filled_file_path)
 
@@ -799,7 +825,8 @@ class TestPaymentPlanReconciliation(APITestCase):
 
             # update xls, delivered_quantity == entitlement_quantity
             sheet.cell(
-                row=2, column=FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS.index("delivered_quantity")
+                row=2,
+                column=FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS.index("delivered_quantity"),
             ).value = payment.entitlement_quantity
             workbook.save(filled_file_path)
 
@@ -827,7 +854,10 @@ class TestPaymentPlanReconciliation(APITestCase):
             self.assertEqual(payment.status, Payment.STATUS_DISTRIBUTION_SUCCESS)
             self.assertEqual(payment.household.total_cash_received, 500)
             self.assertEqual(payment.household.total_cash_received_usd, 250)
-            self.assertEqual(payment_plan.eligible_payments.exclude(status__in=Payment.PENDING_STATUSES).count(), 1)
+            self.assertEqual(
+                payment_plan.eligible_payments.exclude(status__in=Payment.PENDING_STATUSES).count(),
+                1,
+            )
             self.assertEqual(payment_plan.eligible_payments.count(), 4)
             self.assertFalse(payment_plan.is_reconciled)
 
@@ -984,7 +1014,11 @@ class TestPaymentPlanReconciliation(APITestCase):
             received_amount=None,
         )
         import_xlsx_service = XlsxPaymentPlanImportPerFspService(pp, io.BytesIO())
-        import_xlsx_service.xlsx_headers = ["payment_id", "delivered_quantity", "delivery_date"]
+        import_xlsx_service.xlsx_headers = [
+            "payment_id",
+            "delivered_quantity",
+            "delivery_date",
+        ]
 
         import_xlsx_service.payments_dict[str(payment_1.pk)] = payment_1
         import_xlsx_service.payments_dict[str(payment_2.pk)] = payment_2
@@ -997,13 +1031,28 @@ class TestPaymentPlanReconciliation(APITestCase):
         )
 
         import_xlsx_service._import_row(
-            [row(str(payment_1.id)), row(999), row(pytz.utc.localize(datetime.datetime(2023, 5, 12)))], 1
+            [
+                row(str(payment_1.id)),
+                row(999),
+                row(pytz.utc.localize(datetime.datetime(2023, 5, 12))),
+            ],
+            1,
         )
         import_xlsx_service._import_row(
-            [row(str(payment_2.id)), row(100), row(pytz.utc.localize(datetime.datetime(2022, 12, 14)))], 1
+            [
+                row(str(payment_2.id)),
+                row(100),
+                row(pytz.utc.localize(datetime.datetime(2022, 12, 14))),
+            ],
+            1,
         )
         import_xlsx_service._import_row(
-            [row(str(payment_3.id)), row(2999), row(pytz.utc.localize(datetime.datetime(2021, 7, 25)))], 1
+            [
+                row(str(payment_3.id)),
+                row(2999),
+                row(pytz.utc.localize(datetime.datetime(2021, 7, 25))),
+            ],
+            1,
         )
         payment_1.save()
         payment_2.save()
@@ -1111,7 +1160,10 @@ class TestPaymentPlanReconciliation(APITestCase):
         payment_plan.refresh_from_db(fields=["status", "background_action_status"])
 
         self.assertEqual(payment_plan.status, PaymentPlan.Status.LOCKED)
-        self.assertEqual(payment_plan.background_action_status, PaymentPlan.BackgroundActionStatus.RULE_ENGINE_RUN)
+        self.assertEqual(
+            payment_plan.background_action_status,
+            PaymentPlan.BackgroundActionStatus.RULE_ENGINE_RUN,
+        )
         self.snapshot_graphql_request(
             request_string=SET_STEFICON_RULE_MUTATION,
             context={"user": self.user},
@@ -1222,7 +1274,8 @@ class TestPaymentPlanReconciliation(APITestCase):
         payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.FINISHED, created_by=self.user)
         payment_1 = PaymentFactory(parent=payment_plan, fsp_auth_code="TestAuthCode")
         fsp = FinancialServiceProviderFactory(
-            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API, payment_gateway_id="ABC_333"
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            payment_gateway_id="ABC_333",
         )
         xlsx_template = FinancialServiceProviderXlsxTemplateFactory()
         DeliveryMechanismPerPaymentPlanFactory(
@@ -1236,25 +1289,31 @@ class TestPaymentPlanReconciliation(APITestCase):
             ),
         }
         self.snapshot_graphql_request(
-            request_string=EXPORT_XLSX_PER_FSP_MUTATION_AUTH_CODE, context={"user": self.user}, variables=variables
+            request_string=EXPORT_XLSX_PER_FSP_MUTATION_AUTH_CODE,
+            context={"user": self.user},
+            variables=variables,
         )
         # upd payment status
         payment_1.status = Payment.STATUS_SENT_TO_FSP
         payment_1.save()
         self.snapshot_graphql_request(
-            request_string=EXPORT_XLSX_PER_FSP_MUTATION_AUTH_CODE, context={"user": self.user}, variables=variables
+            request_string=EXPORT_XLSX_PER_FSP_MUTATION_AUTH_CODE,
+            context={"user": self.user},
+            variables=variables,
         )
         payment_plan.refresh_from_db()
         self.assertEqual(FileTemp.objects.filter(object_id=payment_plan.id).count(), 1)
         self.assertIsNotNone(payment_plan.export_file_per_fsp)
         self.assertEqual(
-            payment_plan.export_file_per_fsp_id, FileTemp.objects.filter(object_id=payment_plan.id).first().pk
+            payment_plan.export_file_per_fsp_id,
+            FileTemp.objects.filter(object_id=payment_plan.id).first().pk,
         )
 
     def test_export_xlsx_per_fsp_error_msg(self) -> None:
         payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED, created_by=self.user)
         fsp = FinancialServiceProviderFactory(
-            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API, payment_gateway_id="ABC_aaa"
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            payment_gateway_id="ABC_aaa",
         )
         xlsx_template = FinancialServiceProviderXlsxTemplateFactory()
         DeliveryMechanismPerPaymentPlanFactory(
@@ -1269,14 +1328,18 @@ class TestPaymentPlanReconciliation(APITestCase):
         }
         # wrong Payment Plan status
         self.snapshot_graphql_request(
-            request_string=EXPORT_XLSX_PER_FSP_MUTATION_AUTH_CODE, context={"user": self.user}, variables=variables
+            request_string=EXPORT_XLSX_PER_FSP_MUTATION_AUTH_CODE,
+            context={"user": self.user},
+            variables=variables,
         )
         # upd payment plan status
         payment_plan.status = PaymentPlan.Status.ACCEPTED
         payment_plan.save()
         # no eligible payments
         self.snapshot_graphql_request(
-            request_string=EXPORT_XLSX_PER_FSP_MUTATION_AUTH_CODE, context={"user": self.user}, variables=variables
+            request_string=EXPORT_XLSX_PER_FSP_MUTATION_AUTH_CODE,
+            context={"user": self.user},
+            variables=variables,
         )
         # create temp file
         file = FileTemp.objects.create(
@@ -1285,10 +1348,16 @@ class TestPaymentPlanReconciliation(APITestCase):
             created=timezone.now(),
             file=ContentFile(b"Aaa", f"Test_File_ABC{payment_plan.pk}.xlsx"),
         )
-        PaymentFactory(parent=payment_plan, fsp_auth_code="TestAuthCode", status=Payment.STATUS_SENT_TO_FSP)
+        PaymentFactory(
+            parent=payment_plan,
+            fsp_auth_code="TestAuthCode",
+            status=Payment.STATUS_SENT_TO_FSP,
+        )
         payment_plan.export_file_per_fsp = file
         payment_plan.save()
         # Payment Plan already has created exported file
         self.snapshot_graphql_request(
-            request_string=EXPORT_XLSX_PER_FSP_MUTATION_AUTH_CODE, context={"user": self.user}, variables=variables
+            request_string=EXPORT_XLSX_PER_FSP_MUTATION_AUTH_CODE,
+            context={"user": self.user},
+            variables=variables,
         )

@@ -64,8 +64,18 @@ class TestIndividualPermissionsQuery(APITestCase):
             area_level=2,
         )
         area1 = AreaFactory(name="City Test1", area_type=area_type_level_1, p_code="TEST01")
-        cls.area2 = AreaFactory(name="City Test2", area_type=area_type_level_2, p_code="TEST0101", parent=area1)
-        cls.area3 = AreaFactory(name="City Test3", area_type=area_type_level_2, p_code="TEST0102", parent=area1)
+        cls.area2 = AreaFactory(
+            name="City Test2",
+            area_type=area_type_level_2,
+            p_code="TEST0101",
+            parent=area1,
+        )
+        cls.area3 = AreaFactory(
+            name="City Test3",
+            area_type=area_type_level_2,
+            p_code="TEST0102",
+            parent=area1,
+        )
         cls.household, cls.individuals = create_household(
             {"size": 2, "address": "Lorem Ipsum 2", "country_origin": country_origin},
         )
@@ -101,12 +111,16 @@ class TestIndividualPermissionsQuery(APITestCase):
             variables={"id": self.id_to_base64(self.individuals[0].id, "IndividualNode")},
         )
 
-    def test_not_unicef_partner_with_program_and_with_full_admin_area_has_access_for_program(self) -> None:
+    def test_not_unicef_partner_with_program_and_with_full_admin_area_has_access_for_program(
+        self,
+    ) -> None:
         self._test_not_unicef_partner_with_program_and_with_full_admin_area_has_access(
             self.id_to_base64(self.program_one.id, "ProgramNode")
         )
 
-    def test_not_unicef_partner_with_program_and_with_full_admin_area_has_access_query_all_programs(self) -> None:
+    def test_not_unicef_partner_with_program_and_with_full_admin_area_has_access_query_all_programs(
+        self,
+    ) -> None:
         self._test_not_unicef_partner_with_program_and_with_full_admin_area_has_access("all")
 
     def _test_not_unicef_partner_with_program_and_with_full_admin_area_has_access(self, program: str) -> None:
@@ -126,12 +140,16 @@ class TestIndividualPermissionsQuery(APITestCase):
             variables={"id": self.id_to_base64(self.individuals[0].id, "IndividualNode")},
         )
 
-    def test_not_unicef_partner_with_program_and_with_correct_admin_area_has_access_for_program(self) -> None:
+    def test_not_unicef_partner_with_program_and_with_correct_admin_area_has_access_for_program(
+        self,
+    ) -> None:
         self._test_not_unicef_partner_with_program_and_with_correct_admin_area_has_access(
             self.id_to_base64(self.program_one.id, "ProgramNode")
         )
 
-    def test_not_unicef_partner_with_program_and_with_correct_admin_area_has_access_query_all_programs(self) -> None:
+    def test_not_unicef_partner_with_program_and_with_correct_admin_area_has_access_query_all_programs(
+        self,
+    ) -> None:
         self._test_not_unicef_partner_with_program_and_with_correct_admin_area_has_access("all")
 
     def _test_not_unicef_partner_with_program_and_with_correct_admin_area_has_access(self, program: str) -> None:
@@ -151,7 +169,9 @@ class TestIndividualPermissionsQuery(APITestCase):
             variables={"id": self.id_to_base64(self.individuals[0].id, "IndividualNode")},
         )
 
-    def test_not_unicef_partner_with_program_and_with_wrong_admin_area_doesnt_have_access_for_program(self) -> None:
+    def test_not_unicef_partner_with_program_and_with_wrong_admin_area_doesnt_have_access_for_program(
+        self,
+    ) -> None:
         self._test_not_unicef_partner_with_program_and_with_wrong_admin_area_doesnt_have_access(
             self.id_to_base64(self.program_one.id, "ProgramNode")
         )
@@ -178,12 +198,16 @@ class TestIndividualPermissionsQuery(APITestCase):
             variables={"id": self.id_to_base64(self.individuals[0].id, "IndividualNode")},
         )
 
-    def test_not_unicef_partner_without_program_doesnt_have_access_for_program(self) -> None:
+    def test_not_unicef_partner_without_program_doesnt_have_access_for_program(
+        self,
+    ) -> None:
         self._test_not_unicef_partner_without_program_doesnt_have_access(
             self.id_to_base64(self.program_one.id, "ProgramNode")
         )
 
-    def test_not_unicef_partner_without_program_doesnt_have_access_query_all_programs(self) -> None:
+    def test_not_unicef_partner_without_program_doesnt_have_access_query_all_programs(
+        self,
+    ) -> None:
         self._test_not_unicef_partner_without_program_doesnt_have_access("all")
 
     def _test_not_unicef_partner_without_program_doesnt_have_access(self, program: str) -> None:

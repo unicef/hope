@@ -40,20 +40,34 @@ class MessagesFilter(FilterSet):
         }
 
     order_by = CustomOrderingFilter(
-        fields=(Lower("title"), "number_of_recipients", "sampling_type", "created_by", "id", "created_at")
+        fields=(
+            Lower("title"),
+            "number_of_recipients",
+            "sampling_type",
+            "created_by",
+            "id",
+            "created_at",
+        )
     )
 
 
 class MessageRecipientsMapFilter(FilterSet):
     message_id = CharFilter(method="filter_message_id", required=True)
     recipient_id = CharFilter(method="filter_recipient_id")
-    full_name = CharFilter(field_name="head_of_household__full_name", lookup_expr=["exact", "icontains", "istartswith"])
-    phone_no = CharFilter(field_name="head_of_household__phone_no", lookup_expr=["exact", "icontains", "istartswith"])
+    full_name = CharFilter(
+        field_name="head_of_household__full_name",
+        lookup_expr=["exact", "icontains", "istartswith"],
+    )
+    phone_no = CharFilter(
+        field_name="head_of_household__phone_no",
+        lookup_expr=["exact", "icontains", "istartswith"],
+    )
     sex = CharFilter(field_name="head_of_household__sex")
 
     def filter_queryset(self, queryset: QuerySet) -> QuerySet:
         queryset = queryset.exclude(
-            head_of_household__phone_no_valid=False, head_of_household__phone_no_alternative_valid=False
+            head_of_household__phone_no_valid=False,
+            head_of_household__phone_no_alternative_valid=False,
         )
         return super().filter_queryset(queryset)
 

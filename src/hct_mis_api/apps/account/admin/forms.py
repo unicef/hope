@@ -165,7 +165,10 @@ class ImportCSVForm(forms.Form):
         ),
         (
             _("Options"),
-            {"classes": ["collapse"], "fields": (("delimiter", "quotechar", "quoting", "escapechar"),)},
+            {
+                "classes": ["collapse"],
+                "fields": (("delimiter", "quotechar", "quoting", "escapechar"),),
+            },
         ),
     )
     # row_attrs = {'one': {'style': 'display: none'}}

@@ -88,13 +88,15 @@ class RegistrationDataXlsxImportCeleryManager(BaseCeleryTaskManager):
     @property
     def pending_queryset(self) -> QuerySet:
         return RegistrationDataImport.objects.filter(
-            status=RegistrationDataImport.IMPORT_SCHEDULED, data_source=RegistrationDataImport.XLS
+            status=RegistrationDataImport.IMPORT_SCHEDULED,
+            data_source=RegistrationDataImport.XLS,
         )
 
     @property
     def in_progress_queryset(self) -> QuerySet:
         return RegistrationDataImport.objects.filter(
-            status=RegistrationDataImport.IMPORTING, data_source=RegistrationDataImport.XLS
+            status=RegistrationDataImport.IMPORTING,
+            data_source=RegistrationDataImport.XLS,
         )
 
     @cached_property

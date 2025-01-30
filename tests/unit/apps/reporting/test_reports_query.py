@@ -73,16 +73,31 @@ class TestReportsQuery(APITestCase):
             status=Report.IN_PROGRESS,
         )
         cls.report_2 = ReportFactory.create(
-            created_by=cls.user, business_area=cls.business_area, report_type=Report.PAYMENTS, status=Report.COMPLETED
+            created_by=cls.user,
+            business_area=cls.business_area,
+            report_type=Report.PAYMENTS,
+            status=Report.COMPLETED,
         )
 
     @parameterized.expand(
         [
             ("all_with_permissions", [Permissions.REPORTING_EXPORT], ALL_REPORTS_QUERY),
             ("all_without_permissions", [], ALL_REPORTS_QUERY),
-            ("filter_by_status_with_permissions", [Permissions.REPORTING_EXPORT], ALL_REPORTS_FILTER_STATUS_QUERY),
-            ("filter_by_status_without_permissions", [], ALL_REPORTS_FILTER_STATUS_QUERY),
-            ("filter_by_type_with_permissions", [Permissions.REPORTING_EXPORT], ALL_REPORTS_FILTER_TYPE_QUERY),
+            (
+                "filter_by_status_with_permissions",
+                [Permissions.REPORTING_EXPORT],
+                ALL_REPORTS_FILTER_STATUS_QUERY,
+            ),
+            (
+                "filter_by_status_without_permissions",
+                [],
+                ALL_REPORTS_FILTER_STATUS_QUERY,
+            ),
+            (
+                "filter_by_type_with_permissions",
+                [Permissions.REPORTING_EXPORT],
+                ALL_REPORTS_FILTER_TYPE_QUERY,
+            ),
         ]
     )
     def test_reports_query_all(self, _: Any, permissions: List[Permissions], query_string: str) -> None:

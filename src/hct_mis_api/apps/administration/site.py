@@ -40,7 +40,12 @@ def get_bookmarks(request: Any) -> List:
                     elif len(parts) == 4:
                         parts.reverse()
                     if args:
-                        quick_links.append(format_html('<li><a target="{}" class="{}" href="{}">{}</a></li>', *args))
+                        quick_links.append(
+                            format_html(
+                                '<li><a target="{}" class="{}" href="{}">{}</a></li>',
+                                *args,
+                            )
+                        )
             except ValueError:
                 pass
     return quick_links
@@ -70,10 +75,18 @@ def clear_cache_view(request: "HttpRequest") -> "HttpResponse":
                         dj_cache.delete(k)
 
                     ctx["cache_keys"] = [key for key in dj_cache.keys("*") if key[0].isalpha()]
-                    add_message(request, messages.SUCCESS, f"Finished remove cache for: {selected_keys}")
+                    add_message(
+                        request,
+                        messages.SUCCESS,
+                        f"Finished remove cache for: {selected_keys}",
+                    )
             return render(request, template, ctx)
         else:
-            add_message(request, messages.ERROR, "Access Not Allowed. Only superuser have access to clear cache")
+            add_message(
+                request,
+                messages.ERROR,
+                "Access Not Allowed. Only superuser have access to clear cache",
+            )
             return render(request, template, ctx)
     else:
         add_message(request, messages.ERROR, "Not Possible Clear Cache For Test Settings")

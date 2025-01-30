@@ -174,7 +174,10 @@ class SoftDeletableRepresentationMergeStatusModel(MergeStatusModel):
 class AdminUrlMixin:
     @property
     def admin_url(self) -> str:
-        return reverse("admin:%s_%s_change" % (self._meta.app_label, self._meta.model_name), args=[self.id])
+        return reverse(
+            "admin:%s_%s_change" % (self._meta.app_label, self._meta.model_name),
+            args=[self.id],
+        )
 
 
 class TimeStampedModel(models.Model):
@@ -208,7 +211,12 @@ class SoftDeletableRepresentationMergeStatusModelWithDate(SoftDeletableRepresent
         abstract = True
 
     def delete(  # type: ignore
-        self, using: Any = None, keep_parents: bool = False, soft: bool = True, *args: Any, **kwargs: Any
+        self,
+        using: Any = None,
+        keep_parents: bool = False,
+        soft: bool = True,
+        *args: Any,
+        **kwargs: Any,
     ) -> Tuple[int, Dict[str, int]]:
         """
         Soft delete object (set its ``is_removed`` field to True).
@@ -361,7 +369,12 @@ class SoftDeletableDefaultManagerModel(models.Model):
     objects = models.Manager()
 
     def delete(
-        self, using: Any = None, keep_parents: bool = False, soft: bool = True, *args: Any, **kwargs: Any
+        self,
+        using: Any = None,
+        keep_parents: bool = False,
+        soft: bool = True,
+        *args: Any,
+        **kwargs: Any,
     ) -> Tuple[int, dict[str, int]]:
         """
         Soft delete object (set its ``is_removed`` field to True).
@@ -474,7 +487,10 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
     CELERY_STATUS_REVOKED = states.REVOKED
 
     curr_async_result_id = models.CharField(
-        max_length=36, blank=True, null=True, help_text="Current (active) AsyncResult is"
+        max_length=36,
+        blank=True,
+        null=True,
+        help_text="Current (active) AsyncResult is",
     )
 
     celery_task_name: str = "<define `celery_task_name`>"
@@ -508,7 +524,12 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
             for rem in revoked:
                 if rem not in pending_tasks:
                     conn.default_channel.client.srem(settings.CELERY_TASK_REVOKED_QUEUE, rem)
-            return {"size": len(tasks), "pending": pending, "canceled": canceled, "revoked": len(revoked)}
+            return {
+                "size": len(tasks),
+                "pending": pending,
+                "canceled": canceled,
+                "revoked": len(revoked),
+            }
 
     @cached_property
     def async_result(self) -> "AbortableAsyncResult|None":
@@ -616,7 +637,9 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
         if self.celery_status in ["QUEUED", "PENDING"]:
             with app.pool.acquire(block=True) as conn:
                 conn.default_channel.client.sadd(
-                    settings.CELERY_TASK_REVOKED_QUEUE, self.curr_async_result_id, self.curr_async_result_id
+                    settings.CELERY_TASK_REVOKED_QUEUE,
+                    self.curr_async_result_id,
+                    self.curr_async_result_id,
                 )
         else:
             app.control.revoke(self.curr_async_result_id, terminate=True)

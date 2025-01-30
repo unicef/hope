@@ -74,7 +74,11 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
             unique_individual = None
             household = individual_to_remove.household
             mark_as_duplicate_individual(
-                individual_to_remove, unique_individual, household, user, ticket_details.ticket.programs.all()
+                individual_to_remove,
+                unique_individual,
+                household,
+                user,
+                ticket_details.ticket.programs.all(),
             )
         _clear_deduplication_individuals_fields(duplicate_individuals)
         reassign_roles_on_marking_as_duplicate_individual_service(
@@ -238,14 +242,16 @@ def create_needs_adjudication_tickets(
 
     # Sometimes we have an old records in the Elasticsearch, this will resolve false positive signals if the individual is indeed unique
     Individual.objects.filter(id__in=unique_individuals).update(
-        deduplication_golden_record_status=UNIQUE, deduplication_golden_record_results={}
+        deduplication_golden_record_status=UNIQUE,
+        deduplication_golden_record_results={},
     )
     doc = get_individual_doc(business_area.slug)
     remove_elasticsearch_documents_by_matching_ids(list(individuals_to_remove_from_es), doc)
 
 
 def create_needs_adjudication_tickets_for_biometrics(
-    deduplication_pairs: QuerySet[DeduplicationEngineSimilarityPair], rdi: RegistrationDataImport
+    deduplication_pairs: QuerySet[DeduplicationEngineSimilarityPair],
+    rdi: RegistrationDataImport,
 ) -> None:
     # if both individuals are from the same rdi mark second as duplicate
     # if one of individuals is in already merged population mark it as original

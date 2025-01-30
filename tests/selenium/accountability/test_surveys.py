@@ -30,7 +30,11 @@ def add_household() -> Household:
     program = Program.objects.first()
     with transaction.atomic():
         household, individuals = create_household_and_individuals(
-            household_data={"business_area": program.business_area, "program": program, "residence_status": REFUGEE},
+            household_data={
+                "business_area": program.business_area,
+                "program": program,
+                "residence_status": REFUGEE,
+            },
             individuals_data=[
                 {"business_area": program.business_area, "observed_disability": []},
             ],

@@ -169,7 +169,10 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     business_area = models.ForeignKey("core.BusinessArea", null=True, on_delete=models.CASCADE)
     status = models.CharField(max_length=256, choices=STATUS_CHOICES, default=STATUS_OPEN, db_index=True)
     build_status = models.CharField(
-        max_length=256, choices=BUILD_STATUS_CHOICES, default=BUILD_STATUS_PENDING, db_index=True
+        max_length=256,
+        choices=BUILD_STATUS_CHOICES,
+        default=BUILD_STATUS_PENDING,
+        db_index=True,
     )
     built_at = models.DateTimeField(null=True, blank=True)
     households = models.ManyToManyField(
@@ -184,7 +187,9 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         on_delete=models.PROTECT,
     )
     program_cycle = models.ForeignKey(
-        "program.ProgramCycle", on_delete=models.CASCADE, related_name="target_populations"
+        "program.ProgramCycle",
+        on_delete=models.CASCADE,
+        related_name="target_populations",
     )
     targeting_criteria = models.OneToOneField(
         "TargetingCriteria",
@@ -298,7 +303,12 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
                 program=self.program,
                 steficon_rule__isnull=False,
             )
-            .filter(status__in=(TargetPopulation.STATUS_PROCESSING, TargetPopulation.STATUS_READY_FOR_CASH_ASSIST))
+            .filter(
+                status__in=(
+                    TargetPopulation.STATUS_PROCESSING,
+                    TargetPopulation.STATUS_READY_FOR_CASH_ASSIST,
+                )
+            )
             .order_by("-created_at")
             .distinct()
             .first()
@@ -312,7 +322,10 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         self.sent_to_datahub = True
 
     def is_finalized(self) -> bool:
-        return self.status in (self.STATUS_PROCESSING, self.STATUS_READY_FOR_CASH_ASSIST)
+        return self.status in (
+            self.STATUS_PROCESSING,
+            self.STATUS_READY_FOR_CASH_ASSIST,
+        )
 
     def is_locked(self) -> bool:
         return self.status in (
@@ -351,7 +364,12 @@ class HouseholdSelection(TimeStampedUUIDModel):
     )
     target_population = models.ForeignKey("TargetPopulation", on_delete=models.CASCADE, related_name="selections")
     vulnerability_score = models.DecimalField(
-        blank=True, null=True, decimal_places=3, max_digits=6, help_text="Written by Steficon", db_index=True
+        blank=True,
+        null=True,
+        decimal_places=3,
+        max_digits=6,
+        help_text="Written by Steficon",
+        db_index=True,
     )
     is_original = models.BooleanField(db_index=True, default=False)
     is_migration_handled = models.BooleanField(default=False)

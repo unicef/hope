@@ -50,11 +50,15 @@ class TestPartnerAccessChangeSignal(TestCase):
         cls.area_in_afg_1 = AreaFactory(name="Area in AFG 1", area_type=area_type_afg, p_code="AREA-IN-AFG1")
         cls.area_in_afg_2 = AreaFactory(name="Area in AFG 2", area_type=area_type_afg, p_code="AREA-IN-AFG2")
         cls.area_not_in_afg = AreaFactory(
-            name="Area not in AFG", area_type=cls.area_type_other, p_code="AREA-NOT-IN-AFG"
+            name="Area not in AFG",
+            area_type=cls.area_type_other,
+            p_code="AREA-NOT-IN-AFG",
         )
 
         cls.program = ProgramFactory.create(
-            status=Program.DRAFT, business_area=cls.business_area, partner_access=Program.NONE_PARTNERS_ACCESS
+            status=Program.DRAFT,
+            business_area=cls.business_area,
+            partner_access=Program.NONE_PARTNERS_ACCESS,
         )
 
     def test_none_partners_access(self) -> None:
@@ -85,7 +89,11 @@ class TestPartnerAccessChangeSignal(TestCase):
         self.assertEqual(self.program.partners.count(), 3)
         self.assertSetEqual(
             set(self.program.partners.all()),
-            {self.unicef_partner, self.partner_with_role_in_afg_1, self.partner_with_role_in_afg_2},
+            {
+                self.unicef_partner,
+                self.partner_with_role_in_afg_1,
+                self.partner_with_role_in_afg_2,
+            },
         )
         for program_partner_through in self.program.program_partner_through.all():
             self.assertEqual(program_partner_through.areas.count(), 2)
@@ -113,7 +121,11 @@ class TestPartnerAccessChangeSignal(TestCase):
         self.assertEqual(self.program.partners.count(), 3)
         self.assertSetEqual(
             set(self.program.partners.all()),
-            {self.unicef_partner, self.partner_with_role_in_afg_1, self.partner_with_role_in_afg_2},
+            {
+                self.unicef_partner,
+                self.partner_with_role_in_afg_1,
+                self.partner_with_role_in_afg_2,
+            },
         )
         for program_partner_through in self.program.program_partner_through.all():
             self.assertEqual(program_partner_through.areas.count(), 2)

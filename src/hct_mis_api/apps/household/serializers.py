@@ -37,7 +37,9 @@ def get_individual_info(individual: "Individual", tax_id: Optional[str]) -> Dict
 
 
 def get_household_info(
-    household: Household, individual: Optional["Individual"] = None, tax_id: Optional[str] = None
+    household: Household,
+    individual: Optional["Individual"] = None,
+    tax_id: Optional[str] = None,
 ) -> Dict:
     status, date = get_household_status(household)
     output = {"status": status, "date": date}

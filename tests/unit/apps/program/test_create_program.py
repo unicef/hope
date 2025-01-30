@@ -145,7 +145,9 @@ class TestCreateProgram(APITestCase):
         cls.area_in_afg_1 = AreaFactory(name="Area in AFG 1", area_type=area_type_afg, p_code="AREA-IN-AFG1")
         cls.area_in_afg_2 = AreaFactory(name="Area in AFG 2", area_type=area_type_afg, p_code="AREA-IN-AFG2")
         cls.area_not_in_afg = AreaFactory(
-            name="Area not in AFG", area_type=cls.area_type_other, p_code="AREA-NOT-IN-AFG"
+            name="Area not in AFG",
+            area_type=cls.area_type_other,
+            p_code="AREA-NOT-IN-AFG",
         )
 
     def test_create_program_not_authenticated(self) -> None:
@@ -167,7 +169,9 @@ class TestCreateProgram(APITestCase):
             self.program_data["programData"]["endDate"] = "2018-12-20"
 
         self.snapshot_graphql_request(
-            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
+            request_string=self.CREATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables=self.program_data,
         )
 
     def test_create_program_without_dct(self) -> None:
@@ -177,7 +181,9 @@ class TestCreateProgram(APITestCase):
         program_data["programData"]["dataCollectingTypeCode"] = None
 
         self.snapshot_graphql_request(
-            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=program_data
+            request_string=self.CREATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables=program_data,
         )
 
     def test_create_program_without_beneficiary_group(self) -> None:
@@ -187,10 +193,14 @@ class TestCreateProgram(APITestCase):
         program_data["programData"]["beneficiaryGroup"] = None
 
         self.snapshot_graphql_request(
-            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=program_data
+            request_string=self.CREATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables=program_data,
         )
 
-    def test_create_program_with_dct_social_not_compatible_with_beneficiary_group(self) -> None:
+    def test_create_program_with_dct_social_not_compatible_with_beneficiary_group(
+        self,
+    ) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
 
         data_collecting_type = DataCollectingType.objects.create(
@@ -205,10 +215,14 @@ class TestCreateProgram(APITestCase):
         program_data["programData"]["dataCollectingTypeCode"] = data_collecting_type.code
 
         self.snapshot_graphql_request(
-            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=program_data
+            request_string=self.CREATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables=program_data,
         )
 
-    def test_create_program_with_dct_standard_not_compatible_with_beneficiary_group(self) -> None:
+    def test_create_program_with_dct_standard_not_compatible_with_beneficiary_group(
+        self,
+    ) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
         beneficiary_group = BeneficiaryGroupFactory(name="Social", master_detail=False)
 
@@ -216,12 +230,19 @@ class TestCreateProgram(APITestCase):
         program_data["programData"]["beneficiaryGroup"] = str(beneficiary_group.id)
 
         self.snapshot_graphql_request(
-            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=program_data
+            request_string=self.CREATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables=program_data,
         )
 
     def test_create_program_with_deprecated_dct(self) -> None:
         dct, _ = DataCollectingType.objects.update_or_create(
-            **{"label": "Deprecated", "code": "deprecated", "description": "Deprecated", "deprecated": True}
+            **{
+                "label": "Deprecated",
+                "code": "deprecated",
+                "description": "Deprecated",
+                "deprecated": True,
+            }
         )
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
 
@@ -229,12 +250,19 @@ class TestCreateProgram(APITestCase):
         program_data["programData"]["dataCollectingTypeCode"] = "deprecated"
 
         self.snapshot_graphql_request(
-            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=program_data
+            request_string=self.CREATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables=program_data,
         )
 
     def test_create_program_with_inactive_dct(self) -> None:
         dct, _ = DataCollectingType.objects.update_or_create(
-            **{"label": "Inactive", "code": "inactive", "description": "Inactive", "active": False}
+            **{
+                "label": "Inactive",
+                "code": "inactive",
+                "description": "Inactive",
+                "active": False,
+            }
         )
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
 
@@ -242,13 +270,20 @@ class TestCreateProgram(APITestCase):
         program_data["programData"]["dataCollectingTypeCode"] = "inactive"
 
         self.snapshot_graphql_request(
-            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=program_data
+            request_string=self.CREATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables=program_data,
         )
 
     def test_create_program_with_dct_from_other_ba(self) -> None:
         other_ba = BusinessAreaFactory()
         dct, _ = DataCollectingType.objects.update_or_create(
-            **{"label": "Test Wrong BA", "code": "test_wrong_ba", "description": "Test Wrong BA", "active": True}
+            **{
+                "label": "Test Wrong BA",
+                "code": "test_wrong_ba",
+                "description": "Test Wrong BA",
+                "active": True,
+            }
         )
         dct.limit_to.add(other_ba)
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
@@ -257,7 +292,9 @@ class TestCreateProgram(APITestCase):
         program_data["programData"]["dataCollectingTypeCode"] = "test_wrong_ba"
 
         self.snapshot_graphql_request(
-            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=program_data
+            request_string=self.CREATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables=program_data,
         )
 
     def test_program_unique_constraints(self) -> None:
@@ -304,7 +341,9 @@ class TestCreateProgram(APITestCase):
         self.program_data["programData"]["programmeCode"] = "ABC2"
 
         self.graphql_request(
-            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
+            request_string=self.CREATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables=self.program_data,
         )
         program = Program.objects.get(name="Test")
         self.assertEqual(program.programme_code, "ABC2")
@@ -334,7 +373,9 @@ class TestCreateProgram(APITestCase):
         self.program_data["programData"]["partnerAccess"] = partner_access
 
         self.snapshot_graphql_request(
-            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
+            request_string=self.CREATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables=self.program_data,
         )
 
     def test_create_program_with_partners_all_partners_access(self) -> None:
@@ -342,7 +383,9 @@ class TestCreateProgram(APITestCase):
         self.program_data["programData"]["partnerAccess"] = Program.ALL_PARTNERS_ACCESS
 
         self.snapshot_graphql_request(
-            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
+            request_string=self.CREATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables=self.program_data,
         )
         for program_partner_through in Program.objects.get(name="Test").program_partner_through.all():
             self.assertEqual(program_partner_through.full_area_access, True)
@@ -352,7 +395,9 @@ class TestCreateProgram(APITestCase):
         self.program_data["programData"]["partnerAccess"] = Program.NONE_PARTNERS_ACCESS
 
         self.snapshot_graphql_request(
-            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
+            request_string=self.CREATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables=self.program_data,
         )
 
     def test_programme_code_should_be_unique_among_the_same_business_area(self) -> None:
@@ -362,7 +407,9 @@ class TestCreateProgram(APITestCase):
         self.program_data["programData"]["programmeCode"] = "ABC2"
 
         self.snapshot_graphql_request(
-            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
+            request_string=self.CREATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables=self.program_data,
         )
 
         program_count = Program.objects.filter(programme_code="ABC2").count()
@@ -375,7 +422,9 @@ class TestCreateProgram(APITestCase):
         self.program_data["programData"]["programmeCode"] = "AB.2"
 
         self.graphql_request(
-            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
+            request_string=self.CREATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables=self.program_data,
         )
 
         program_count = Program.objects.filter(programme_code="AB.2").count()
@@ -385,7 +434,9 @@ class TestCreateProgram(APITestCase):
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
 
         self.graphql_request(
-            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
+            request_string=self.CREATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables=self.program_data,
         )
 
         program = Program.objects.get(name="Test")
@@ -397,7 +448,9 @@ class TestCreateProgram(APITestCase):
         self.program_data["programData"]["programmeCode"] = ""
 
         self.graphql_request(
-            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
+            request_string=self.CREATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables=self.program_data,
         )
 
         program = Program.objects.get(name="Test")
@@ -409,7 +462,9 @@ class TestCreateProgram(APITestCase):
         self.program_data["programData"]["programmeCode"] = "ab2-"
 
         self.graphql_request(
-            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
+            request_string=self.CREATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables=self.program_data,
         )
 
         program = Program.objects.get(name="Test")
@@ -417,12 +472,16 @@ class TestCreateProgram(APITestCase):
         self.assertEqual(len(program.programme_code), 4)
         self.assertEqual(program.programme_code, "AB2-")
 
-    def test_create_program_with_programme_code_not_within_allowed_characters(self) -> None:
+    def test_create_program_with_programme_code_not_within_allowed_characters(
+        self,
+    ) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
         self.program_data["programData"]["programmeCode"] = "A@C2"
 
         self.snapshot_graphql_request(
-            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
+            request_string=self.CREATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables=self.program_data,
         )
 
     def test_create_program_with_programme_code_less_than_4_chars(self) -> None:
@@ -430,7 +489,9 @@ class TestCreateProgram(APITestCase):
         self.program_data["programData"]["programmeCode"] = "Ab2"
 
         self.snapshot_graphql_request(
-            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
+            request_string=self.CREATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables=self.program_data,
         )
 
     def test_create_program_with_programme_code_greater_than_4_chars(self) -> None:
@@ -438,7 +499,9 @@ class TestCreateProgram(APITestCase):
         self.program_data["programData"]["programmeCode"] = "AbCd2"
 
         self.snapshot_graphql_request(
-            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
+            request_string=self.CREATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables=self.program_data,
         )
 
     def test_create_program_with_pdu_fields(self) -> None:
@@ -479,7 +542,9 @@ class TestCreateProgram(APITestCase):
         ]
 
         self.snapshot_graphql_request(
-            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
+            request_string=self.CREATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables=self.program_data,
         )
 
     def test_create_program_with_pdu_fields_invalid_data(self) -> None:
@@ -505,10 +570,14 @@ class TestCreateProgram(APITestCase):
         ]
 
         self.snapshot_graphql_request(
-            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
+            request_string=self.CREATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables=self.program_data,
         )
 
-    def test_create_program_with_pdu_fields_duplicated_field_names_in_input(self) -> None:
+    def test_create_program_with_pdu_fields_duplicated_field_names_in_input(
+        self,
+    ) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
         # pdu data with duplicated field names in the input
         self.program_data["programData"]["pduFields"] = [
@@ -531,10 +600,14 @@ class TestCreateProgram(APITestCase):
         ]
 
         self.snapshot_graphql_request(
-            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
+            request_string=self.CREATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables=self.program_data,
         )
 
-    def test_create_program_with_pdu_fields_existing_field_name_in_different_program(self) -> None:
+    def test_create_program_with_pdu_fields_existing_field_name_in_different_program(
+        self,
+    ) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
         # pdu data with field name that already exists in the database but in different program -> no fail
         pdu_data = PeriodicFieldDataFactory(
@@ -560,5 +633,7 @@ class TestCreateProgram(APITestCase):
         ]
 
         self.snapshot_graphql_request(
-            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
+            request_string=self.CREATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables=self.program_data,
         )

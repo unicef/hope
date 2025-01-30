@@ -93,7 +93,9 @@ class TestUpdateProgramPartners(APITestCase):
         cls.area_in_afg_1 = AreaFactory(name="Area in AFG 1", area_type=area_type_afg, p_code="AREA-IN-AFG1")
         cls.area_in_afg_2 = AreaFactory(name="Area in AFG 2", area_type=area_type_afg, p_code="AREA-IN-AFG2")
         cls.area_not_in_afg = AreaFactory(
-            name="Area not in AFG", area_type=cls.area_type_other, p_code="AREA-NOT-IN-AFG2"
+            name="Area not in AFG",
+            area_type=cls.area_type_other,
+            p_code="AREA-NOT-IN-AFG2",
         )
 
         unicef_program.areas.set([cls.area_in_afg_1, cls.area_in_afg_2])
@@ -146,7 +148,9 @@ class TestUpdateProgramPartners(APITestCase):
         area1 = AreaFactory(name="Area1", area_type=self.area_type_other, p_code="AREA1")
         area2 = AreaFactory(name="Area2", area_type=self.area_type_other, p_code="AREA2")
         area_to_be_unselected = AreaFactory(
-            name="AreaToBeUnselected", area_type=self.area_type_other, p_code="AREA-TO-BE-UNSELECTED"
+            name="AreaToBeUnselected",
+            area_type=self.area_type_other,
+            p_code="AREA-TO-BE-UNSELECTED",
         )
         program_partner = ProgramPartnerThrough.objects.create(
             program=self.program,
@@ -190,7 +194,9 @@ class TestUpdateProgramPartners(APITestCase):
         area1 = AreaFactory(name="Area1", area_type=self.area_type_other, p_code="AREA1")
         area2 = AreaFactory(name="Area2", area_type=self.area_type_other, p_code="AREA2")
         area_to_be_unselected = AreaFactory(
-            name="AreaToBeUnselected", area_type=self.area_type_other, p_code="AREA-TO-BE-UNSELECTED"
+            name="AreaToBeUnselected",
+            area_type=self.area_type_other,
+            p_code="AREA-TO-BE-UNSELECTED",
         )
         program_partner = ProgramPartnerThrough.objects.create(
             program=self.program,
@@ -294,7 +300,8 @@ class TestUpdateProgramPartners(APITestCase):
         )
 
         self.assertEqual(
-            ProgramPartnerThrough.objects.get(partner=self.partner, program__name="initial name").full_area_access, True
+            ProgramPartnerThrough.objects.get(partner=self.partner, program__name="initial name").full_area_access,
+            True,
         )
         self.assertEqual(
             ProgramPartnerThrough.objects.get(
@@ -333,7 +340,9 @@ class TestUpdateProgramPartners(APITestCase):
             },
         )
 
-    def test_update_program_partners_all_partners_access_refresh_partners_after_update(self) -> None:
+    def test_update_program_partners_all_partners_access_refresh_partners_after_update(
+        self,
+    ) -> None:
         self.create_user_role_with_permissions(
             self.user,
             [Permissions.PROGRAMME_UPDATE],

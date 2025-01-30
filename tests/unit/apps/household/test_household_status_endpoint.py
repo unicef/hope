@@ -186,7 +186,10 @@ class TestDetails(TestCase):
         document = PendingDocumentFactory(individual=individual, type=document_type)
         tax_id = document.document_number
         payment = PaymentFactory(
-            household=household, currency="PLN", delivery_date=datetime.date.today(), delivered_quantity=1
+            household=household,
+            currency="PLN",
+            delivery_date=datetime.date.today(),
+            delivered_quantity=1,
         )
 
         response = self.api_client.get(f"/api/hh-status?tax_id={tax_id}")
@@ -195,7 +198,10 @@ class TestDetails(TestCase):
         self.assertIsNotNone(data["info"])
         info = data["info"]
         self.assertEqual(info["status"], "paid")
-        self.assertEqual(datetime.datetime.fromisoformat(info["date"].replace("Z", "")).date(), payment.delivery_date)
+        self.assertEqual(
+            datetime.datetime.fromisoformat(info["date"].replace("Z", "")).date(),
+            payment.delivery_date,
+        )
 
     def test_getting_non_existent_household(self) -> None:
         response = self.api_client.get("/api/hh-status?registration_id=non-existent")

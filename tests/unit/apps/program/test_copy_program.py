@@ -82,7 +82,12 @@ class TestCopyProgram(APITestCase):
         data_collecting_type = DataCollectingTypeFactory(
             label="Full", code="full", weight=1, business_areas=[cls.business_area]
         )
-        DataCollectingTypeFactory(label="Partial", code="partial", weight=1, business_areas=[cls.business_area])
+        DataCollectingTypeFactory(
+            label="Partial",
+            code="partial",
+            weight=1,
+            business_areas=[cls.business_area],
+        )
         cls.program = ProgramFactory.create(
             name="initial name",
             status=Program.ACTIVE,
@@ -227,7 +232,9 @@ class TestCopyProgram(APITestCase):
         cls.area_in_afg_1 = AreaFactory(name="Area in AFG 1", area_type=area_type_afg, p_code="AREA-IN-AFG1")
         cls.area_in_afg_2 = AreaFactory(name="Area in AFG 2", area_type=area_type_afg, p_code="AREA-IN-AFG2")
         cls.area_not_in_afg = AreaFactory(
-            name="Area not in AFG", area_type=cls.area_type_other, p_code="AREA-NOT-IN-AFG"
+            name="Area not in AFG",
+            area_type=cls.area_type_other,
+            p_code="AREA-NOT-IN-AFG",
         )
 
         # PDU data - on original Program - SHOULD NOT BE COPIED into new Program
@@ -464,7 +471,9 @@ class TestCopyProgram(APITestCase):
         self.copy_data["programData"]["partnerAccess"] = Program.ALL_PARTNERS_ACCESS
 
         self.snapshot_graphql_request(
-            request_string=self.COPY_PROGRAM_MUTATION, context={"user": self.user}, variables=self.copy_data
+            request_string=self.COPY_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables=self.copy_data,
         )
 
     def test_copy_program_with_partners_none_partners_access(self) -> None:
@@ -472,7 +481,9 @@ class TestCopyProgram(APITestCase):
         self.copy_data["programData"]["partnerAccess"] = Program.NONE_PARTNERS_ACCESS
 
         self.snapshot_graphql_request(
-            request_string=self.COPY_PROGRAM_MUTATION, context={"user": self.user}, variables=self.copy_data
+            request_string=self.COPY_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables=self.copy_data,
         )
 
     def test_copy_program_with_pdu_fields(self) -> None:
@@ -513,7 +524,9 @@ class TestCopyProgram(APITestCase):
         ]
 
         self.snapshot_graphql_request(
-            request_string=self.COPY_PROGRAM_MUTATION, context={"user": self.user}, variables=self.copy_data
+            request_string=self.COPY_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables=self.copy_data,
         )
         self.assertEqual(Program.objects.get(name="copied name").pdu_fields.count(), 4)
 
@@ -540,7 +553,9 @@ class TestCopyProgram(APITestCase):
         ]
 
         self.snapshot_graphql_request(
-            request_string=self.COPY_PROGRAM_MUTATION, context={"user": self.user}, variables=self.copy_data
+            request_string=self.COPY_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables=self.copy_data,
         )
 
     def test_copy_program_with_pdu_fields_duplicated_field_names_in_input(self) -> None:
@@ -566,10 +581,14 @@ class TestCopyProgram(APITestCase):
         ]
 
         self.snapshot_graphql_request(
-            request_string=self.COPY_PROGRAM_MUTATION, context={"user": self.user}, variables=self.copy_data
+            request_string=self.COPY_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables=self.copy_data,
         )
 
-    def test_copy_program_with_pdu_fields_existing_field_name_in_different_program(self) -> None:
+    def test_copy_program_with_pdu_fields_existing_field_name_in_different_program(
+        self,
+    ) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
         # pdu data with field name that already exists in the database but in different program -> no fail
         pdu_data = PeriodicFieldDataFactory(
@@ -595,5 +614,7 @@ class TestCopyProgram(APITestCase):
         ]
 
         self.snapshot_graphql_request(
-            request_string=self.COPY_PROGRAM_MUTATION, context={"user": self.user}, variables=self.copy_data
+            request_string=self.COPY_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables=self.copy_data,
         )

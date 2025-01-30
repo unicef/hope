@@ -66,7 +66,10 @@ class DjAdminManager:
         return self.form_errors
 
     def assert_response(
-        self, status: Union[int, List[int]], location: Optional[str] = None, custom_error: str = ""
+        self,
+        status: Union[int, List[int]],
+        location: Optional[str] = None,
+        custom_error: str = "",
     ) -> None:
         if not isinstance(status, (list, tuple)):
             status = [status]
@@ -163,7 +166,10 @@ class DjAdminManager:
 
     def delete_user(self, username: str, pk: UUID) -> None:
         self.login()
-        for url in (f"{self.admin_url_kc}auth/user/{pk}/delete/", f"{self.admin_url}auth/user/{pk}/delete/"):
+        for url in (
+            f"{self.admin_url_kc}auth/user/{pk}/delete/",
+            f"{self.admin_url}auth/user/{pk}/delete/",
+        ):
             self._get(url)
             self.assert_response([200, 404, 302], custom_error=url)
             if self._last_response.status_code == 302 and "/login/" in self._last_response.headers["Location"]:

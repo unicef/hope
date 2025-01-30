@@ -19,7 +19,14 @@ class SanctionListIndividualDateOfBirthAdmin(admin.StackedInline):
 
 @admin.register(SanctionListIndividual)
 class SanctionListIndividualAdmin(HOPEModelAdminBase):
-    list_display = ("full_name", "listed_on", "un_list_type", "reference_number", "country_of_birth", "active")
+    list_display = (
+        "full_name",
+        "listed_on",
+        "un_list_type",
+        "reference_number",
+        "country_of_birth",
+        "active",
+    )
     search_fields = (
         "full_name",
         "first_name",
@@ -36,7 +43,12 @@ class SanctionListIndividualAdmin(HOPEModelAdminBase):
 
 @admin.register(SanctionListIndividualDocument)
 class SanctionListIndividualDocumentAdmin(HOPEModelAdminBase):
-    list_display = ("document_number", "type_of_document", "date_of_issue", "issuing_country")
+    list_display = (
+        "document_number",
+        "type_of_document",
+        "date_of_issue",
+        "issuing_country",
+    )
     raw_id_fields = ("individual", "issuing_country")
     list_filter = (("issuing_country", AutoCompleteFilter), "type_of_document")
     search_fields = ("document_number",)

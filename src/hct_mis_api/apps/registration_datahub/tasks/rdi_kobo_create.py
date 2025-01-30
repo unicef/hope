@@ -118,7 +118,10 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         return float(value)
 
     def _cast_and_assign(
-        self, value: Union[str, list], field: str, obj: Union[PendingIndividual, PendingHousehold]
+        self,
+        value: Union[str, list],
+        field: str,
+        obj: Union[PendingIndividual, PendingHousehold],
     ) -> None:
         complex_fields = {
             "IMAGE": self._handle_image_field,
@@ -260,7 +263,11 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     delivery_mechanism_xlsx_fields,
                     household_count,
                 )
-            self.bulk_creates(bank_accounts_to_create, head_of_households_mapping, households_to_create)
+            self.bulk_creates(
+                bank_accounts_to_create,
+                head_of_households_mapping,
+                households_to_create,
+            )
             bank_accounts_to_create = []
             head_of_households_mapping = {}
             households_to_create = []
@@ -367,7 +374,10 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                                 self._handle_exception("Household", i_field, e)
                         elif i_field in delivery_mechanism_xlsx_fields:
                             self._handle_delivery_mechanism_fields(
-                                i_value, i_field, int(f"{household_count}{ind_count}"), individual_obj
+                                i_value,
+                                i_field,
+                                int(f"{household_count}{ind_count}"),
+                                individual_obj,
                             )
                         else:
                             try:
@@ -379,9 +389,13 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     individual_obj.program = self.registration_data_import.program
                     individual_obj.business_area = self.business_area
                     individual_obj.age_at_registration = calculate_age_at_registration(
-                        self.registration_data_import.created_at, str(individual_obj.birth_date)
+                        self.registration_data_import.created_at,
+                        str(individual_obj.birth_date),
                     )
-                    populate_pdu_with_null_values(self.registration_data_import.program, individual_obj.flex_fields)
+                    populate_pdu_with_null_values(
+                        self.registration_data_import.program,
+                        individual_obj.flex_fields,
+                    )
 
                     if individual_obj.relationship == HEAD:
                         head_of_households_mapping[household_obj] = individual_obj

@@ -26,7 +26,12 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
@@ -35,13 +40,25 @@ class Migration(migrations.Migration):
                 ("long_name", models.CharField(max_length=255)),
                 ("region_code", models.CharField(max_length=8)),
                 ("region_name", models.CharField(max_length=8)),
-                ("kobo_username", models.CharField(blank=True, max_length=255, null=True)),
+                (
+                    "kobo_username",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
                 ("kobo_token", models.CharField(blank=True, max_length=255, null=True)),
                 ("kobo_url", models.URLField(blank=True, max_length=255, null=True)),
                 ("rapid_pro_host", models.URLField(blank=True, null=True)),
-                ("rapid_pro_payment_verification_token", models.CharField(blank=True, max_length=40, null=True)),
-                ("rapid_pro_messages_token", models.CharField(blank=True, max_length=40, null=True)),
-                ("rapid_pro_survey_token", models.CharField(blank=True, max_length=40, null=True)),
+                (
+                    "rapid_pro_payment_verification_token",
+                    models.CharField(blank=True, max_length=40, null=True),
+                ),
+                (
+                    "rapid_pro_messages_token",
+                    models.CharField(blank=True, max_length=40, null=True),
+                ),
+                (
+                    "rapid_pro_survey_token",
+                    models.CharField(blank=True, max_length=40, null=True),
+                ),
                 ("slug", models.CharField(db_index=True, max_length=250, unique=True)),
                 ("custom_fields", models.JSONField(blank=True, default=dict)),
                 ("has_data_sharing_agreement", models.BooleanField(default=False)),
@@ -93,7 +110,10 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "screen_beneficiary",
-                    models.BooleanField(default=False, help_text="Enable screen beneficiary against sanction list"),
+                    models.BooleanField(
+                        default=False,
+                        help_text="Enable screen beneficiary against sanction list",
+                    ),
                 ),
                 ("deduplication_ignore_withdraw", models.BooleanField(default=False)),
                 (
@@ -112,7 +132,10 @@ class Migration(migrations.Migration):
                 ("active", models.BooleanField(default=False)),
                 (
                     "enable_email_notification",
-                    models.BooleanField(default=True, verbose_name="Automatic Email notifications enabled"),
+                    models.BooleanField(
+                        default=True,
+                        verbose_name="Automatic Email notifications enabled",
+                    ),
                 ),
             ],
             options={
@@ -130,7 +153,12 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
@@ -139,7 +167,15 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="CountryCodeMap",
             fields=[
-                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
                 ("ca_code", models.CharField(max_length=5, unique=True)),
             ],
             options={
@@ -149,17 +185,29 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="DataCollectingType",
             fields=[
-                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
                 (
                     "created",
                     model_utils.fields.AutoCreatedField(
-                        default=django.utils.timezone.now, editable=False, verbose_name="created"
+                        default=django.utils.timezone.now,
+                        editable=False,
+                        verbose_name="created",
                     ),
                 ),
                 (
                     "modified",
                     model_utils.fields.AutoLastModifiedField(
-                        default=django.utils.timezone.now, editable=False, verbose_name="modified"
+                        default=django.utils.timezone.now,
+                        editable=False,
+                        verbose_name="modified",
                     ),
                 ),
                 ("label", models.CharField(blank=True, max_length=32)),
@@ -168,7 +216,10 @@ class Migration(migrations.Migration):
                     "type",
                     models.CharField(
                         blank=True,
-                        choices=[("STANDARD", "Standard"), ("SOCIAL", "Social Workers")],
+                        choices=[
+                            ("STANDARD", "Standard"),
+                            ("SOCIAL", "Social Workers"),
+                        ],
                         max_length=32,
                         null=True,
                     ),
@@ -194,17 +245,29 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="FileTemp",
             fields=[
-                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
                 (
                     "created",
                     model_utils.fields.AutoCreatedField(
-                        default=django.utils.timezone.now, editable=False, verbose_name="created"
+                        default=django.utils.timezone.now,
+                        editable=False,
+                        verbose_name="created",
                     ),
                 ),
                 (
                     "modified",
                     model_utils.fields.AutoLastModifiedField(
-                        default=django.utils.timezone.now, editable=False, verbose_name="modified"
+                        default=django.utils.timezone.now,
+                        editable=False,
+                        verbose_name="modified",
                     ),
                 ),
                 ("object_id", models.CharField(max_length=120, null=True)),
@@ -221,7 +284,12 @@ class Migration(migrations.Migration):
                 ("is_removed", models.BooleanField(default=False)),
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
@@ -247,27 +315,47 @@ class Migration(migrations.Migration):
                 (
                     "label",
                     models.JSONField(
-                        default=dict, validators=[hct_mis_api.apps.core.models.label_contains_english_en_validator]
+                        default=dict,
+                        validators=[
+                            hct_mis_api.apps.core.models.label_contains_english_en_validator
+                        ],
                     ),
                 ),
                 ("hint", models.JSONField(default=dict)),
-                ("associated_with", models.SmallIntegerField(choices=[(0, "Household"), (1, "Individual")])),
+                (
+                    "associated_with",
+                    models.SmallIntegerField(
+                        choices=[(0, "Household"), (1, "Individual")]
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
             name="MigrationStatus",
             fields=[
-                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
                 (
                     "created",
                     model_utils.fields.AutoCreatedField(
-                        default=django.utils.timezone.now, editable=False, verbose_name="created"
+                        default=django.utils.timezone.now,
+                        editable=False,
+                        verbose_name="created",
                     ),
                 ),
                 (
                     "modified",
                     model_utils.fields.AutoLastModifiedField(
-                        default=django.utils.timezone.now, editable=False, verbose_name="modified"
+                        default=django.utils.timezone.now,
+                        editable=False,
+                        verbose_name="modified",
                     ),
                 ),
                 ("is_running", models.BooleanField()),
@@ -279,7 +367,15 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="PeriodicFieldData",
             fields=[
-                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
                 (
                     "subtype",
                     models.CharField(
@@ -296,7 +392,9 @@ class Migration(migrations.Migration):
                 (
                     "rounds_names",
                     django.contrib.postgres.fields.ArrayField(
-                        base_field=models.CharField(max_length=255), default=list, size=None
+                        base_field=models.CharField(max_length=255),
+                        default=list,
+                        size=None,
                     ),
                 ),
             ],
@@ -311,7 +409,12 @@ class Migration(migrations.Migration):
                 ("is_removed", models.BooleanField(default=False)),
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
@@ -332,11 +435,16 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("template_id", models.CharField(blank=True, max_length=200)),
-                ("first_connection_failed_time", models.DateTimeField(blank=True, null=True)),
+                (
+                    "first_connection_failed_time",
+                    models.DateTimeField(blank=True, null=True),
+                ),
                 (
                     "uploaded_by",
                     models.ForeignKey(
-                        null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
                     ),
                 ),
             ],
@@ -347,7 +455,15 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="StorageFile",
             fields=[
-                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("file", models.FileField(upload_to="files")),
                 (
@@ -365,7 +481,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "business_area",
-                    models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to="core.businessarea"),
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="core.businessarea",
+                    ),
                 ),
                 (
                     "created_by",
@@ -384,7 +504,12 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
@@ -419,14 +544,24 @@ class Migration(migrations.Migration):
                 ("is_removed", models.BooleanField(default=False)),
                 (
                     "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
                 ("list_name", models.CharField(max_length=255)),
                 ("name", models.CharField(max_length=255)),
                 ("label", models.JSONField(default=dict)),
-                ("flex_attributes", models.ManyToManyField(related_name="choices", to="core.FlexibleAttribute")),
+                (
+                    "flex_attributes",
+                    models.ManyToManyField(
+                        related_name="choices", to="core.FlexibleAttribute"
+                    ),
+                ),
             ],
             options={
                 "ordering": ("name",),

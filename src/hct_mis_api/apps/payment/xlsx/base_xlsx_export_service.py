@@ -57,7 +57,10 @@ class XlsxExportBaseService:
         ws.column_dimensions = dim_holder
 
     def _add_col_bgcolor(
-        self, col: Optional[List] = None, hex_code: str = "A0FDB0", no_of_columns: Optional[int] = None
+        self,
+        col: Optional[List] = None,
+        hex_code: str = "A0FDB0",
+        no_of_columns: Optional[int] = None,
     ) -> None:
         for row_index in col or []:
             fill = PatternFill(bgColor=hex_code, fgColor=hex_code, fill_type="lightUp")

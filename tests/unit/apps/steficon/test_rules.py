@@ -42,7 +42,13 @@ class TestBasicRule(TestCase):
         r = Rule(definition="result.value=1.0")
         self.assertEqual(
             r.as_dict(),
-            {"definition": "result.value=1.0", "deprecated": False, "enabled": False, "language": "python", "name": ""},
+            {
+                "definition": "result.value=1.0",
+                "deprecated": False,
+                "enabled": False,
+                "language": "python",
+                "name": "",
+            },
         )
 
     def test_execution(self) -> None:
@@ -80,7 +86,8 @@ class TestBasicRule(TestCase):
         self.assertEqual(history[1].before, {})
         self.assertEqual(history[1].after["definition"], "result.value=1")
         self.assertListEqual(
-            sorted(history[1].affected_fields), ["definition", "deprecated", "enabled", "language", "name"]
+            sorted(history[1].affected_fields),
+            ["definition", "deprecated", "enabled", "language", "name"],
         )
 
     def test_revert(self) -> None:
@@ -120,7 +127,9 @@ class TestBasicRule(TestCase):
     def test_nested_rule(self) -> None:
         rule1 = Rule.objects.create(name="Rule1", definition="result.value=101", enabled=True)
         rule2 = Rule.objects.create(
-            name="Rule2", definition=f"result.value=invoke({rule1.pk}, context).value", enabled=True
+            name="Rule2",
+            definition=f"result.value=invoke({rule1.pk}, context).value",
+            enabled=True,
         )
         rule1.release()
         rule2.release()
@@ -130,7 +139,9 @@ class TestBasicRule(TestCase):
 
     def test_modules(self) -> None:
         rule = Rule.objects.create(
-            name="Rule1", definition="age1=dateutil.relativedelta.relativedelta(years=17)", enabled=True
+            name="Rule1",
+            definition="age1=dateutil.relativedelta.relativedelta(years=17)",
+            enabled=True,
         )
         is_valid = rule.interpreter.validate()
         self.assertTrue(is_valid)

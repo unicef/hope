@@ -213,7 +213,12 @@ class TestHouseholdQuery(APITestCase):
                 area_level=2,
             )
             cls.area1 = AreaFactory(name="City Test1", area_type=area_type_level_1, p_code="area1")
-            cls.area2 = AreaFactory(name="City Test2", area_type=area_type_level_2, p_code="area2", parent=cls.area1)
+            cls.area2 = AreaFactory(
+                name="City Test2",
+                area_type=area_type_level_2,
+                p_code="area2",
+                parent=cls.area1,
+            )
             household.set_admin_areas(cls.area2)
 
             cls.households.append(household)
@@ -270,7 +275,11 @@ class TestHouseholdQuery(APITestCase):
 
     @parameterized.expand(
         [
-            ("all_with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], ALL_HOUSEHOLD_QUERY),
+            (
+                "all_with_permission",
+                [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST],
+                ALL_HOUSEHOLD_QUERY,
+            ),
             ("all_without_permission", [], ALL_HOUSEHOLD_QUERY),
             (
                 "all_range_with_permission",
@@ -278,8 +287,16 @@ class TestHouseholdQuery(APITestCase):
                 ALL_HOUSEHOLD_QUERY_RANGE,
             ),
             ("all_range_without_permission", [], ALL_HOUSEHOLD_QUERY_RANGE),
-            ("all_min_with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], ALL_HOUSEHOLD_QUERY_MIN),
-            ("all_max_with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], ALL_HOUSEHOLD_QUERY_MAX),
+            (
+                "all_min_with_permission",
+                [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST],
+                ALL_HOUSEHOLD_QUERY_MIN,
+            ),
+            (
+                "all_max_with_permission",
+                [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST],
+                ALL_HOUSEHOLD_QUERY_MAX,
+            ),
         ]
     )
     def test_household_query_all(self, _: Any, permissions: List[Permissions], query_string: str) -> None:
@@ -327,7 +344,9 @@ class TestHouseholdQuery(APITestCase):
     )
     def test_household_query_single_import_id(self, field_name: str, field_value: str) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS], self.business_area
+            self.user,
+            [Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS],
+            self.business_area,
         )
         household = self.households[0]
 
@@ -359,7 +378,9 @@ class TestHouseholdQuery(APITestCase):
 
     def test_household_query_single_different_program_in_header(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS], self.business_area
+            self.user,
+            [Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS],
+            self.business_area,
         )
 
         self.snapshot_graphql_request(
@@ -560,9 +581,13 @@ class TestHouseholdQuery(APITestCase):
             },
         )
 
-    def test_household_query_all_for_all_programs_user_with_no_program_access(self) -> None:
+    def test_household_query_all_for_all_programs_user_with_no_program_access(
+        self,
+    ) -> None:
         self.create_user_role_with_permissions(
-            self.user_with_no_access, [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], self.business_area
+            self.user_with_no_access,
+            [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST],
+            self.business_area,
         )
 
         self.snapshot_graphql_request(

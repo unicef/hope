@@ -18,22 +18,34 @@ class TestCalculatingAgeAtRegistrationMigration(TestCase):
         cls.registration_2 = RegistrationDataImportFactory(created_at="2021-04-12 17:25:32.112983+00:00")
 
         cls.individual_1 = IndividualFactory(
-            household=None, birth_date="2007-12-12", registration_data_import=cls.registration_1
+            household=None,
+            birth_date="2007-12-12",
+            registration_data_import=cls.registration_1,
         )
         cls.individual_2 = IndividualFactory(
-            household=None, birth_date="2000-01-01", registration_data_import=cls.registration_1
+            household=None,
+            birth_date="2000-01-01",
+            registration_data_import=cls.registration_1,
         )
         cls.individual_3 = IndividualFactory(
-            household=None, birth_date="2010-11-11", registration_data_import=cls.registration_1
+            household=None,
+            birth_date="2010-11-11",
+            registration_data_import=cls.registration_1,
         )
         cls.individual_4 = IndividualFactory(
-            household=None, birth_date="1991-05-05", registration_data_import=cls.registration_2
+            household=None,
+            birth_date="1991-05-05",
+            registration_data_import=cls.registration_2,
         )
         cls.individual_5 = IndividualFactory(
-            household=None, birth_date="2012-12-24", registration_data_import=cls.registration_2
+            household=None,
+            birth_date="2012-12-24",
+            registration_data_import=cls.registration_2,
         )
         cls.individual_6 = IndividualFactory(
-            household=None, birth_date="1988-10-26", registration_data_import=cls.registration_2
+            household=None,
+            birth_date="1988-10-26",
+            registration_data_import=cls.registration_2,
         )
 
     def test_calculating_age_at_registration(self) -> None:

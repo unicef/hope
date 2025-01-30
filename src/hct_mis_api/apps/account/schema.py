@@ -86,7 +86,12 @@ class UserBusinessAreaNode(DjangoObjectType):
         return info.context.user.permissions_in_business_area(self.slug)
 
     def resolve_is_accountability_applicable(self, info: Any) -> bool:
-        return all([bool(flag_state("ALLOW_ACCOUNTABILITY_MODULE")), self.is_accountability_applicable])
+        return all(
+            [
+                bool(flag_state("ALLOW_ACCOUNTABILITY_MODULE")),
+                self.is_accountability_applicable,
+            ]
+        )
 
     class Meta:
         model = BusinessArea
@@ -216,7 +221,10 @@ class Query(graphene.ObjectType):
         )
 
     def resolve_partner_for_grievance_choices(
-        self, info: Any, household_id: Optional[str] = None, individual_id: Optional[str] = None
+        self,
+        info: Any,
+        household_id: Optional[str] = None,
+        individual_id: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         business_area_id = str(BusinessArea.objects.get(slug=info.context.headers.get("Business-Area")).id)
         encoded_program_id = info.context.headers.get("Program")
@@ -234,6 +242,10 @@ class Query(graphene.ObjectType):
         return (
             get_user_model()
             .objects.prefetch_related("user_roles")
-            .filter(available_for_export=True, is_superuser=False, user_roles__business_area__slug=business_area_slug)
+            .filter(
+                available_for_export=True,
+                is_superuser=False,
+                user_roles__business_area__slug=business_area_slug,
+            )
             .exists()
         )

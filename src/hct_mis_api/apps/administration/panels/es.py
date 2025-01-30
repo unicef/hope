@@ -34,7 +34,12 @@ class ElasticsearchPanel:
     def rebuild_search_index(self, request: HttpRequest) -> None:
         rebuild_search_index()
 
-    def __call__(self, model_admin: Any, request: HttpRequest, extra_context: Optional[Dict] = None) -> HttpResponse:
+    def __call__(
+        self,
+        model_admin: Any,
+        request: HttpRequest,
+        extra_context: Optional[Dict] = None,
+    ) -> HttpResponse:
         context = model_admin.each_context(request)
         context["config"] = {
             "ELASTICSEARCH_HOST": settings.ELASTICSEARCH_HOST,

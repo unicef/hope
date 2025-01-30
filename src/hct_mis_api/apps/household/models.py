@@ -117,7 +117,7 @@ OBSERVED_DISABILITY_CHOICE = (
     (SELF_CARE, _("Difficulty with self care (washing, dressing)")),
     (
         COMMUNICATING,
-        _("Difficulty communicating " "(e.g understanding or being understood)"),
+        _("Difficulty communicating (e.g understanding or being understood)"),
     ),
 )
 NON_BENEFICIARY = "NON_BENEFICIARY"
@@ -497,7 +497,10 @@ class Household(
     first_registration_date = models.DateTimeField()
     last_registration_date = models.DateTimeField()
     head_of_household = models.OneToOneField(
-        "Individual", related_name="heading_household", on_delete=models.CASCADE, null=True
+        "Individual",
+        related_name="heading_household",
+        on_delete=models.CASCADE,
+        null=True,
     )
     fchild_hoh = models.BooleanField(null=True)
     child_hoh = models.BooleanField(null=True)
@@ -515,7 +518,10 @@ class Household(
     currency = models.CharField(max_length=250, choices=CURRENCY_CHOICES, default=BLANK)
     unhcr_id = models.CharField(max_length=250, blank=True, default=BLANK, db_index=True)
     detail_id = models.CharField(
-        max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora source ID"
+        max_length=150,
+        blank=True,
+        null=True,
+        help_text="Kobo asset ID, Xlsx row ID, Aurora source ID",
     )
     registration_id = CICharField(
         max_length=100,
@@ -548,7 +554,11 @@ class Household(
     family_id = models.CharField(max_length=100, blank=True, null=True)  # eDopomoga household id
     storage_obj = models.ForeignKey(StorageFile, on_delete=models.SET_NULL, blank=True, null=True)
     program = models.ForeignKey(
-        "program.Program", null=True, blank=True, db_index=True, on_delete=models.SET_NULL
+        "program.Program",
+        null=True,
+        blank=True,
+        db_index=True,
+        on_delete=models.SET_NULL,
     )  # TODO Add later related name, when no clash with programs, set null=False after migration
     copied_from = models.ForeignKey(
         "self",
@@ -1048,7 +1058,10 @@ class Individual(
     fchild_hoh = models.BooleanField(default=False)
     child_hoh = models.BooleanField(default=False)
     detail_id = models.CharField(
-        max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora source ID"
+        max_length=150,
+        blank=True,
+        null=True,
+        help_text="Kobo asset ID, Xlsx row ID, Aurora source ID",
     )
     registration_id = CICharField(
         max_length=100,
@@ -1057,7 +1070,10 @@ class Individual(
         verbose_name=_("Aurora Registration Id"),
     )
     program_registration_id = CICharField(
-        max_length=100, blank=True, null=True, verbose_name=_("Beneficiary Program Registration Id")
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name=_("Beneficiary Program Registration Id"),
     )
     preferred_language = models.CharField(max_length=6, choices=Languages.get_tuple(), null=True, blank=True)
     relationship_confirmed = models.BooleanField(default=False)
@@ -1067,7 +1083,12 @@ class Individual(
     wallet_address = models.CharField(max_length=128, blank=True, default="")
 
     program = models.ForeignKey(
-        "program.Program", null=True, blank=True, db_index=True, related_name="individuals", on_delete=models.SET_NULL
+        "program.Program",
+        null=True,
+        blank=True,
+        db_index=True,
+        related_name="individuals",
+        on_delete=models.SET_NULL,
     )  # TODO set null=False after migration
     copied_from = models.ForeignKey(
         "self",
@@ -1329,7 +1350,11 @@ class XlsxUpdateFile(TimeStampedUUIDModel):
     program = models.ForeignKey("program.Program", null=True, on_delete=models.CASCADE)
 
 
-class BankAccountInfo(SoftDeletableRepresentationMergeStatusModelWithDate, TimeStampedUUIDModel, AbstractSyncable):
+class BankAccountInfo(
+    SoftDeletableRepresentationMergeStatusModelWithDate,
+    TimeStampedUUIDModel,
+    AbstractSyncable,
+):
     individual = models.ForeignKey(
         "household.Individual",
         related_name="bank_account_info",

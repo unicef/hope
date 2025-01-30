@@ -178,7 +178,8 @@ class PaymentPlanFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug", required=True)
     search = CharFilter(method="search_filter")
     status = MultipleChoiceFilter(
-        method="filter_by_status", choices=PaymentPlan.Status.choices + [("ASSIGNED", "Assigned")]
+        method="filter_by_status",
+        choices=PaymentPlan.Status.choices + [("ASSIGNED", "Assigned")],
     )
     status_not = ChoiceFilter(method="filter_status_not", choices=PaymentPlan.Status.choices)
     total_entitled_quantity_from = NumberFilter(field_name="total_entitled_quantity", lookup_expr="gte")
@@ -382,7 +383,10 @@ def payment_plan_filter(queryset: QuerySet[PaymentPlan], **kwargs: Any) -> Query
     service_provider = kwargs.get("service_provider")
     delivery_types = kwargs.get("delivery_type")
     verification_status = kwargs.get("verification_status")
-    start_date_gte, end_date_lte = kwargs.get("start_date_gte"), kwargs.get("end_date_lte")
+    start_date_gte, end_date_lte = (
+        kwargs.get("start_date_gte"),
+        kwargs.get("end_date_lte"),
+    )
     search = kwargs.get("search")
 
     if business_area:
@@ -460,7 +464,12 @@ def payment_ordering(queryset: QuerySet[Payment], order_by: str) -> QuerySet[Pay
 
     if order_by == "ca_id":
         qs = queryset.order_by(reverse + "unicef_id")
-    elif order_by in ("head_of_household", "entitlement_quantity", "delivered_quantity", "delivery_date"):
+    elif order_by in (
+        "head_of_household",
+        "entitlement_quantity",
+        "delivered_quantity",
+        "delivery_date",
+    ):
         order_by_dict = {f"{order_by}__isnull": True}
         qs_null = queryset.filter(**order_by_dict)
         qs_non_null = queryset.exclude(**order_by_dict)

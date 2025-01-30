@@ -64,7 +64,10 @@ class TestPaymentPlanPDFExportService(TestCase):
     def test_generate_pdf_summary(self, get_link_mock: Any) -> None:
         pdf1, filename1 = self.pdf_export_service.generate_pdf_summary()
 
-        self.assertEqual(self.payment_plan.program.data_collecting_type.type, DataCollectingType.Type.STANDARD)
+        self.assertEqual(
+            self.payment_plan.program.data_collecting_type.type,
+            DataCollectingType.Type.STANDARD,
+        )
 
         self.assertTrue(isinstance(pdf1, bytes))
         self.assertEqual(filename1, "PaymentPlanSummary-PP-0060-24-00000007.pdf")
@@ -73,7 +76,10 @@ class TestPaymentPlanPDFExportService(TestCase):
         self.payment_plan.program.data_collecting_type.save()
         self.payment_plan.program.data_collecting_type.refresh_from_db(fields=["type"])
 
-        self.assertEqual(self.payment_plan.program.data_collecting_type.type, DataCollectingType.Type.SOCIAL)
+        self.assertEqual(
+            self.payment_plan.program.data_collecting_type.type,
+            DataCollectingType.Type.SOCIAL,
+        )
         pdf2, filename2 = self.pdf_export_service.generate_pdf_summary()
         self.assertTrue(isinstance(pdf2, bytes))
         self.assertEqual(filename2, "PaymentPlanSummary-PP-0060-24-00000007.pdf")

@@ -57,7 +57,10 @@ class APITestCase(SnapshotTestTestCase):
         super().tearDown()
 
     def snapshot_graphql_request(
-        self, request_string: str, context: Optional[Dict] = None, variables: Optional[Dict] = None
+        self,
+        request_string: str,
+        context: Optional[Dict] = None,
+        variables: Optional[Dict] = None,
     ) -> None:
         if context is None:
             context = {}
@@ -71,7 +74,10 @@ class APITestCase(SnapshotTestTestCase):
         )
 
     def graphql_request(
-        self, request_string: str, context: Optional[Dict] = None, variables: Optional[Dict] = None
+        self,
+        request_string: str,
+        context: Optional[Dict] = None,
+        variables: Optional[Dict] = None,
     ) -> Dict:
         if context is None:
             context = {}
@@ -83,11 +89,17 @@ class APITestCase(SnapshotTestTestCase):
         )
 
     def generate_context(
-        self, user: Optional["User"] = None, files: Optional[Dict] = None, headers: Optional[Dict[str, str]] = None
+        self,
+        user: Optional["User"] = None,
+        files: Optional[Dict] = None,
+        headers: Optional[Dict[str, str]] = None,
     ) -> WSGIRequest:
         request = RequestFactory()
         prepared_headers: Dict = reduce(
-            lambda prev_headers, curr_header: {**prev_headers, f"HTTP_{curr_header[0]}": curr_header[1]},
+            lambda prev_headers, curr_header: {
+                **prev_headers,
+                f"HTTP_{curr_header[0]}": curr_header[1],
+            },
             (headers or {}).items(),
             {},
         )
@@ -188,7 +200,12 @@ class UploadDocumentsBase(APITestCase):
     @staticmethod
     def create_fixture_file(name: str, size: int, content_type: str) -> InMemoryUploadedFile:
         return InMemoryUploadedFile(
-            name=name, file=BytesIO(b"xxxxxxxxxxx"), charset=None, field_name="0", size=size, content_type=content_type
+            name=name,
+            file=BytesIO(b"xxxxxxxxxxx"),
+            charset=None,
+            field_name="0",
+            size=size,
+            content_type=content_type,
         )
 
     @classmethod

@@ -31,7 +31,14 @@ class ReportAdmin(AdminFiltersMixin, admin.ModelAdmin):
 
 @admin.register(DashboardReport)
 class DashboardReportAdmin(AdminFiltersMixin, admin.ModelAdmin):
-    list_display = ("report_type", "business_area", "program", "status", "created_at", "year")
+    list_display = (
+        "report_type",
+        "business_area",
+        "program",
+        "status",
+        "created_at",
+        "year",
+    )
     raw_id_fields = ("created_by", "program", "admin_area", "business_area")
     list_filter = (
         ("business_area", AutoCompleteFilter),

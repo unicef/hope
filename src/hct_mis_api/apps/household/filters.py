@@ -144,11 +144,13 @@ class HouseholdFilter(FilterSet):
         """
         if value is True:
             return qs.exclude(
-                head_of_household__phone_no_valid=False, head_of_household__phone_no_alternative_valid=False
+                head_of_household__phone_no_valid=False,
+                head_of_household__phone_no_alternative_valid=False,
             )
         elif value is False:
             return qs.filter(
-                head_of_household__phone_no_valid=False, head_of_household__phone_no_alternative_valid=False
+                head_of_household__phone_no_valid=False,
+                head_of_household__phone_no_alternative_valid=False,
             )
         return qs
 
@@ -412,7 +414,10 @@ class IndividualFilter(FilterSet):
         if search_type == "bank_account_number":
             return qs.filter(bank_account_info__bank_account_number__icontains=search)
         if DocumentType.objects.filter(key=search_type).exists():
-            return qs.filter(documents__type__key=search_type, documents__document_number__icontains=search)
+            return qs.filter(
+                documents__type__key=search_type,
+                documents__document_number__icontains=search,
+            )
         raise SearchException(f"Invalid search key '{search_type}'")
 
     def document_type_filter(self, qs: QuerySet[Individual], name: str, value: str) -> QuerySet[Individual]:
@@ -421,7 +426,10 @@ class IndividualFilter(FilterSet):
     def document_number_filter(self, qs: QuerySet[Household], name: str, value: str) -> QuerySet[Household]:
         document_number = value.strip()
         document_type = self.data.get("document_type")
-        return qs.filter(documents__type__key=document_type, documents__document_number__icontains=document_number)
+        return qs.filter(
+            documents__type__key=document_type,
+            documents__document_number__icontains=document_number,
+        )
 
     def status_filter(self, qs: QuerySet, name: str, value: List[str]) -> QuerySet:
         q_obj = Q()

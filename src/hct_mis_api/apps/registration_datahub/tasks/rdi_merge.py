@@ -160,7 +160,10 @@ class RdiMergeTask:
     #             household_data["enumerator_rec_id"] = enumerator_rec_id
 
     def _create_grievance_ticket_for_delivery_mechanisms_errors(
-        self, delivery_mechanism_data: DeliveryMechanismData, obj_hct: RegistrationDataImport, description: str
+        self,
+        delivery_mechanism_data: DeliveryMechanismData,
+        obj_hct: RegistrationDataImport,
+        description: str,
     ) -> Tuple[GrievanceTicket, TicketIndividualDataUpdateDetails]:
         comments = f"This is a system generated ticket for RDI {obj_hct}"
         grievance_ticket = GrievanceTicket(
@@ -182,7 +185,9 @@ class RdiMergeTask:
         return grievance_ticket, individual_data_update_ticket
 
     def _create_grievance_tickets_for_delivery_mechanisms_errors(
-        self, delivery_mechanisms_data: Iterable[PendingDeliveryMechanismData], obj_hct: RegistrationDataImport
+        self,
+        delivery_mechanisms_data: Iterable[PendingDeliveryMechanismData],
+        obj_hct: RegistrationDataImport,
     ) -> None:
         grievance_tickets_to_create = []
         individual_data_update_tickets_to_create = []
@@ -314,7 +319,8 @@ class RdiMergeTask:
                         ).deduplicate_individuals_against_population(individuals)
                         logger.info(f"RDI:{registration_data_import_id} Deduplicated {len(individual_ids)} individuals")
                         golden_record_duplicates = Individual.objects.filter(
-                            registration_data_import=obj_hct, deduplication_golden_record_status=DUPLICATE
+                            registration_data_import=obj_hct,
+                            deduplication_golden_record_status=DUPLICATE,
                         )
                         logger.info(
                             f"RDI:{registration_data_import_id} Found {len(golden_record_duplicates)} duplicates"
@@ -332,7 +338,8 @@ class RdiMergeTask:
                         )
 
                         needs_adjudication = Individual.objects.filter(
-                            registration_data_import=obj_hct, deduplication_golden_record_status=NEEDS_ADJUDICATION
+                            registration_data_import=obj_hct,
+                            deduplication_golden_record_status=NEEDS_ADJUDICATION,
                         )
                         logger.info(
                             f"RDI:{registration_data_import_id} Found {len(needs_adjudication)} needs adjudication"
@@ -375,7 +382,10 @@ class RdiMergeTask:
                     logger.info(
                         f"RDI:{registration_data_import_id} Populated index for {len(individual_ids)} individuals"
                     )
-                    populate_index(Household.objects.filter(registration_data_import=obj_hct), HouseholdDocument)
+                    populate_index(
+                        Household.objects.filter(registration_data_import=obj_hct),
+                        HouseholdDocument,
+                    )
                     logger.info(f"RDI:{registration_data_import_id} Saved registration data import")
 
                     rdi_merged.send(sender=obj_hct.__class__, instance=obj_hct)
