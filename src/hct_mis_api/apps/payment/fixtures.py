@@ -661,7 +661,6 @@ def generate_payment_plan() -> None:
         name="Test FSP API",
         communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
         vision_vendor_number=554433,
-        payment_gateway_id="test_pg_id",
     )[0]
     fsp_api.delivery_mechanisms.add(delivery_mechanism_cash)
 

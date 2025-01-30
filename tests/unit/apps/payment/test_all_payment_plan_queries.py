@@ -413,8 +413,6 @@ class TestPaymentPlanQueries(APITestCase):
                 payment_plan=cls.pp_conflicted,
                 financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
                 financial_service_provider__payment_gateway_id="test123",
-                created_by=cls.user,
-                sent_by=cls.user,
             )
 
             with patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0):
@@ -965,8 +963,6 @@ class TestPaymentPlanQueries(APITestCase):
             payment_plan=payment_plan,
             financial_service_provider__communication_channel=communication_channel,
             financial_service_provider__payment_gateway_id="1243",
-            created_by=user,
-            sent_by=user,
         )
         PaymentFactory(
             parent=payment_plan,

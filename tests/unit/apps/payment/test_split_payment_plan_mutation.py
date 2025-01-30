@@ -76,14 +76,11 @@ class TestSplitPaymentPlan(APITestCase):
             payment_plan=pp,
             financial_service_provider=fsp_1,
             delivery_mechanism=dm_cash,
-            delivery_mechanism_order=1,
-            sent_to_payment_gateway=True,
         )
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=pp,
             financial_service_provider=fsp_2,
             delivery_mechanism=dm_cash,
-            delivery_mechanism_order=2,
         )
         # check delivery mechanisms count
         self.snapshot_graphql_request(

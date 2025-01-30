@@ -40,7 +40,6 @@ class TestPaymentPlanPDFExportService(TestCase):
             payment_plan=self.payment_plan,
             delivery_mechanism=self.dm_cash,
             financial_service_provider=financial_service_provider1,
-            delivery_mechanism_order=1,
         )
         approval_process = ApprovalProcessFactory(
             payment_plan=self.payment_plan,

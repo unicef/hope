@@ -244,8 +244,6 @@ class TestPaymentCeleryTask(TestCase):
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=payment_plan,
             financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-            created_by=self.user,
-            sent_by=self.user,
         )
         fsp_template = FinancialServiceProviderXlsxTemplateFactory()
         # create zip file with passwords
@@ -274,8 +272,6 @@ class TestPaymentCeleryTask(TestCase):
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=payment_plan,
             financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-            created_by=self.user,
-            sent_by=self.user,
         )
         fsp_template = FinancialServiceProviderXlsxTemplateFactory()
         # create zip file with passwords

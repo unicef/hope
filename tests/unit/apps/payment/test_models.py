@@ -33,7 +33,6 @@ from hct_mis_api.apps.payment.fixtures import (
     ApprovalProcessFactory,
     DeliveryMechanismDataFactory,
     DeliveryMechanismPerPaymentPlanFactory,
-    FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
     PaymentPlanSplitFactory,
@@ -43,7 +42,6 @@ from hct_mis_api.apps.payment.fixtures import (
 from hct_mis_api.apps.payment.models import (
     Approval,
     DeliveryMechanism,
-    FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     Payment,
     PaymentPlan,
@@ -703,26 +701,6 @@ class TestFinancialServiceProviderModel(TestCase):
         super().setUpTestData()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-
-    def test_properties(self) -> None:
-        fsp1 = FinancialServiceProviderFactory(
-            data_transfer_configuration=[
-                {"key": "key1", "label": "label1", "id": 1, "random_key": "random"},
-                {"key": "key2", "label": "label2", "id": 2, "random_key": "random"},
-            ],
-            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-            payment_gateway_id=123,
-        )
-        fsp2 = FinancialServiceProviderFactory(
-            data_transfer_configuration=[
-                {"key": "key1", "label": "label1", "id": 1, "random_key": "random"},
-                {"key": "key2", "label": "label2", "id": 2, "random_key": "random"},
-            ],
-            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
-        )
-
-        self.assertEqual(fsp1.configurations, [])
-        self.assertEqual(fsp2.configurations, [])
 
     def test_fsp_template_get_column_from_core_field(self) -> None:
         household, individuals = create_household(

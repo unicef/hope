@@ -430,9 +430,9 @@ class PaymentPlan(
     )
     is_follow_up = models.BooleanField(default=False)
 
-    excluded_ids = models.TextField(blank=True, help_text="Targeting level exclusion")
-    exclusion_reason = models.TextField(blank=True)
-    exclude_household_error = models.TextField(blank=True)
+    excluded_ids = models.TextField(blank=True, null=True, help_text="Targeting level exclusion")
+    exclusion_reason = models.TextField(blank=True, null=True)
+    exclude_household_error = models.TextField(blank=True, null=True)
     name = models.CharField(
         max_length=255,
         validators=[
@@ -876,18 +876,11 @@ class PaymentPlan(
     @property
     def can_send_to_payment_gateway(self) -> bool:
         status_accepted = self.status == PaymentPlan.Status.ACCEPTED
-        if self.splits.exists():
-            has_payment_gateway_fsp = self.delivery_mechanism.financial_service_provider.is_payment_gateway
-            has_not_sent_to_payment_gateway_splits = self.splits.filter(
-                sent_to_payment_gateway=False,
-            ).exists()
-            return status_accepted and has_payment_gateway_fsp and has_not_sent_to_payment_gateway_splits
-        else:
-            return (
-                status_accepted
-                and not self.sent_to_payment_gateway
-                and self.delivery_mechanism.financial_service_provider.is_payment_gateway
-            )
+        has_payment_gateway_fsp = self.delivery_mechanism.financial_service_provider.is_payment_gateway
+        has_not_sent_to_payment_gateway_splits = self.splits.filter(
+            sent_to_payment_gateway=False,
+        ).exists()
+        return status_accepted and has_payment_gateway_fsp and has_not_sent_to_payment_gateway_splits
 
     # @transitions #####################################################################
 

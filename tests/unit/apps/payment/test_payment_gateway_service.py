@@ -80,7 +80,6 @@ class TestPaymentGatewayService(APITestCase):
             payment_plan=cls.pp,
             financial_service_provider=cls.pg_fsp,
             delivery_mechanism=cls.dm_cash_over_the_counter,
-            sent_to_payment_gateway=False,
         )
         cls.payments = []
         for _ in range(2):
@@ -143,8 +142,8 @@ class TestPaymentGatewayService(APITestCase):
             order=1,
             sent_to_payment_gateway=True,
         )
-        pp_split_1.payments.add(self.payments[0])
-        pp_split_2.payments.add(self.payments[1])
+        pp_split_1.split_payment_items.add(self.payments[0])
+        pp_split_2.split_payment_items.add(self.payments[1])
 
         get_records_for_payment_instruction_mock.return_value = [
             PaymentRecordData(
@@ -465,8 +464,8 @@ class TestPaymentGatewayService(APITestCase):
             order=1,
             sent_to_payment_gateway=False,
         )
-        pp_split_1.payments.add(self.payments[0])
-        pp_split_2.payments.add(self.payments[1])
+        pp_split_1.split_payment_items.add(self.payments[0])
+        pp_split_2.split_payment_items.add(self.payments[1])
         add_records_to_payment_instruction_mock.return_value = AddRecordsResponseData(
             remote_id="1",
             records={"1": self.payments[0].id, "2": self.payments[1].id},
@@ -561,7 +560,7 @@ class TestPaymentGatewayService(APITestCase):
         self.payments[0].refresh_from_db()
         self.payments[1].refresh_from_db()
 
-        self.assertEqual(self.pp.delivery_mechanisms.first().sent_to_payment_gateway, True)
+        self.assertEqual(self.pp.delivery_mechanism.sent_to_payment_gateway, True)
         self.assertEqual(change_payment_instruction_status_mock.call_count, 2)
         self.assertEqual(self.payments[0].status, Payment.STATUS_SENT_TO_PG)
         self.assertEqual(self.payments[1].status, Payment.STATUS_SENT_TO_PG)

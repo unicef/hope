@@ -72,6 +72,9 @@ class TestPaymentPlanServices(APITestCase):
         cls.payment_plan = PaymentPlanFactory(
             program_cycle=cls.cycle, created_by=cls.user, status=PaymentPlan.Status.TP_LOCKED
         )
+        cls.dmppp = DeliveryMechanismPerPaymentPlanFactory(
+            payment_plan=cls.payment_plan, delivery_mechanism=cls.dm_transfer_to_account
+        )
 
     def test_delete_tp_open(self) -> None:
         program = ProgramFactory(status=Program.ACTIVE)
@@ -602,7 +605,6 @@ class TestPaymentPlanServices(APITestCase):
             payment_plan=pp,
             financial_service_provider=pg_fsp,
             delivery_mechanism=self.dm_transfer_to_account,
-            sent_to_payment_gateway=True,
         )
 
         with self.assertRaisesMessage(GraphQLError, "Already sent to Payment Gateway"):
@@ -983,6 +985,7 @@ class TestPaymentPlanServices(APITestCase):
             status=PaymentPlan.Status.OPEN,
             currency="AMD",
         )
+        DeliveryMechanismPerPaymentPlanFactory(payment_plan=payment_plan)
         PaymentPlanService(payment_plan).update({"currency": "PLN"})
         payment_plan.refresh_from_db()
         self.assertEqual(payment_plan.currency, "PLN")
@@ -1025,6 +1028,7 @@ class TestPaymentPlanServices(APITestCase):
             program_cycle=self.cycle,
             targeting_criteria=targeting_criteria,
         )
+        DeliveryMechanismPerPaymentPlanFactory(payment_plan=payment_plan)
         PaymentFactory(
             parent=payment_plan,
             program_id=self.program.id,

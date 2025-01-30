@@ -390,6 +390,8 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingBase):
         return self.rules.all()
 
     def get_excluded_household_ids(self) -> List[str]:
+        if not self.payment_plan.excluded_ids:
+            return []
         hh_ids_list = []
         hh_ids_list.extend(hh_id.strip() for hh_id in self.payment_plan.excluded_ids.split(",") if hh_id.strip())
         return hh_ids_list

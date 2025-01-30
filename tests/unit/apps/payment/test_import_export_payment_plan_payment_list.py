@@ -117,7 +117,6 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             payment_plan=cls.payment_plan,
             financial_service_provider=cls.fsp_1,
             delivery_mechanism=cls.dm_cash,
-            delivery_mechanism_order=1,
         )
         program.households.set(Household.objects.all().values_list("id", flat=True))
         for household in program.households.all():
@@ -248,14 +247,12 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             payment_plan=self.payment_plan,
             delivery_mechanism=self.dm_cash,
             financial_service_provider=financial_service_provider1,
-            delivery_mechanism_order=2,
         )
 
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=self.payment_plan,
             delivery_mechanism=self.dm_transfer,
             financial_service_provider=financial_service_provider2,
-            delivery_mechanism_order=3,
         )
         self.payment_plan.status = PaymentPlan.Status.ACCEPTED
         self.payment_plan.save()
@@ -298,19 +295,6 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
     @patch("hct_mis_api.apps.payment.models.PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK")
     def test_export_payment_plan_payment_list_per_split(self, min_no_of_payments_in_chunk_mock: Any) -> None:
         min_no_of_payments_in_chunk_mock.__get__ = mock.Mock(return_value=2)
-
-        financial_service_provider1 = FinancialServiceProviderFactory()
-        financial_service_provider1.delivery_mechanisms.add(self.dm_cash)
-        FspXlsxTemplatePerDeliveryMechanismFactory(
-            financial_service_provider=financial_service_provider1,
-            delivery_mechanism=self.dm_cash,
-        )
-        DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=self.payment_plan,
-            delivery_mechanism=self.dm_cash,
-            financial_service_provider=financial_service_provider1,
-            delivery_mechanism_order=2,
-        )
 
         self.payment_plan.status = PaymentPlan.Status.ACCEPTED
         self.payment_plan.save()
@@ -446,35 +430,6 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         self.assertEqual(payment_row[decimal_flexible_attribute_index], 123.45)
         self.assertEqual(payment_row[date_flexible_attribute_index], "2021-01-01")
 
-    def test_export_per_fsp_if_no_fsp_assigned_to_payment_plan(self) -> None:
-        self.payment_plan.status = PaymentPlan.Status.ACCEPTED
-        self.payment_plan.save()
-        self.payment_plan.delivery_mechanisms.all().delete()
-
-        self.assertEqual(self.payment_plan.delivery_mechanisms.count(), 0)
-
-        export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
-        with self.assertRaises(GraphQLError) as e:
-            export_service.export_per_fsp(self.user)
-        self.assertEqual(
-            e.exception.message,
-            f"Not possible to generate export file. "
-            f"There aren't any FSP(s) assigned to Payment Plan {self.payment_plan.unicef_id}.",
-        )
-
-        DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=self.payment_plan,
-            financial_service_provider=self.fsp_1,
-            delivery_mechanism=self.dm_cash,
-            delivery_mechanism_order=1,
-        )
-        # set generate_token_and_order_numbers to False
-        export_service.payment_generate_token_and_order_numbers = False
-        export_service.export_per_fsp(self.user)
-        self.payment_plan.refresh_from_db()
-        self.assertTrue(self.payment_plan.has_export_file)
-        self.assertIsNotNone(self.payment_plan.payment_list_export_file_link)
-
     def test_export_payment_plan_per_fsp_with_people_program(self) -> None:
         # check with default program
         self.payment_plan.status = PaymentPlan.Status.ACCEPTED
@@ -483,7 +438,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         export_service.export_per_fsp(self.user)
         self.assertFalse(self.payment_plan.program.is_social_worker_program)
 
-        delivery_mechanism_per_payment_plan = self.payment_plan.delivery_mechanisms.first()
+        delivery_mechanism_per_payment_plan = self.payment_plan.delivery_mechanism
         fsp = delivery_mechanism_per_payment_plan.financial_service_provider
         _, ws_fsp = export_service.open_workbook(fsp.name)
         fsp_xlsx_template = export_service.get_template(fsp, delivery_mechanism_per_payment_plan.delivery_mechanism)
