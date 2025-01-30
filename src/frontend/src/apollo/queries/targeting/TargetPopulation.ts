@@ -9,6 +9,7 @@ export const TARGET_POPULATION_QUERY = gql`
       status
       buildStatus
       adminUrl
+      failedWalletValidationCollectorsIds
       totalHouseholdsCount
       totalIndividualsCount
       femaleChildrenCount

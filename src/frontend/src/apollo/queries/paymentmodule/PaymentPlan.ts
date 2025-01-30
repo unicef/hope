@@ -10,6 +10,7 @@ export const PAYMENT_PLAN_QUERY = gql`
       status
       buildStatus
       canCreateFollowUp
+      failedWalletValidationCollectorsIds
       backgroundActionStatus
       canCreatePaymentVerificationPlan
       availablePaymentRecordsCount

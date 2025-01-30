@@ -52,50 +52,6 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
             </div>
           </div>
         </div>
-        <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
-        >
-          <div>
-            <span
-              class="sc-fAUdSK goVbUg"
-              color="textSecondary"
-            >
-              In Kind
-            </span>
-            <div
-              data-cy="label-In Kind"
-            >
-              <span
-                class="sc-dntaoT dIDHTF"
-                color="textSecondary"
-              >
-                Frazier-Watson
-              </span>
-            </div>
-          </div>
-        </div>
-        <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
-        >
-          <div>
-            <span
-              class="sc-fAUdSK goVbUg"
-              color="textSecondary"
-            >
-              Transfer
-            </span>
-            <div
-              data-cy="label-Transfer"
-            >
-              <span
-                class="sc-dntaoT dIDHTF"
-                color="textSecondary"
-              >
-                Bray Group
-              </span>
-            </div>
-          </div>
-        </div>
       </div>
       <div
         class="sc-gtLWhw VFxTS"
@@ -139,60 +95,6 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
                   </span>
                   <div
                     data-cy="label-Cash (Miranda Ltd)"
-                  >
-                    <span
-                      class="sc-dntaoT dIDHTF"
-                      color="textSecondary"
-                    >
-                      0 PLN (0 USD)
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
-            >
-              <div
-                class="sc-ivxoEo bA-DRh"
-                color=" #d8d8d8"
-              >
-                <div>
-                  <span
-                    class="sc-fAUdSK goVbUg"
-                    color="textSecondary"
-                  >
-                    In Kind (Frazier-Watson)
-                  </span>
-                  <div
-                    data-cy="label-In Kind (Frazier-Watson)"
-                  >
-                    <span
-                      class="sc-dntaoT dIDHTF"
-                      color="textSecondary"
-                    >
-                      0 PLN (0 USD)
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
-            >
-              <div
-                class="sc-ivxoEo eiTvYj"
-                color="#003C8F"
-              >
-                <div>
-                  <span
-                    class="sc-fAUdSK goVbUg"
-                    color="textSecondary"
-                  >
-                    Transfer (Bray Group)
-                  </span>
-                  <div
-                    data-cy="label-Transfer (Bray Group)"
                   >
                     <span
                       class="sc-dntaoT dIDHTF"

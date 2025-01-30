@@ -8,7 +8,7 @@ describe('components/paymentmodule/PaymentPlanDetails/FspSection', () => {
     const { container } = render(
       <FspSection
         baseUrl={fakeBaseUrl}
-        paymentPlan={{ ...fakeApolloPaymentPlan, deliveryMechanisms: [] }}
+        paymentPlan={{ ...fakeApolloPaymentPlan, deliveryMechanism: null }}
       />,
     );
     expect(container).toMatchSnapshot();

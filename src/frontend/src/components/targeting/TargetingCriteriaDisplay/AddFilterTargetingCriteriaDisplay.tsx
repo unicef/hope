@@ -104,7 +104,7 @@ export const AddFilterTargetingCriteriaDisplay = ({
     });
 
   const [isOpen, setOpen] = useState(false);
-  const [criteriaIndex, setIndex] = useState(null);
+  const [criteriaIndex, setIndex] = useState(0);
   const [criteriaObject, setCriteria] = useState({});
   const [allDataChoicesDict, setAllDataChoicesDict] = useState(null);
   const [allCollectorDataChoicesDict, setAllCollectorDataChoicesDict] =

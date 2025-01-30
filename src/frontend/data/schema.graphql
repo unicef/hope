@@ -2581,9 +2581,9 @@ type PaymentPlanNode implements Node {
   steficonTargetingAppliedDate: DateTime
   sourcePaymentPlan: PaymentPlanNode
   isFollowUp: Boolean!
-  excludedIds: String!
-  exclusionReason: String!
-  excludeHouseholdError: String!
+  excludedIds: String
+  exclusionReason: String
+  excludeHouseholdError: String
   name: String
   vulnerabilityScoreMin: Float
   vulnerabilityScoreMax: Float

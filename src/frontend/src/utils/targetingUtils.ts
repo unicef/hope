@@ -254,7 +254,7 @@ export function mapCriteriaToInitialValues(criteria, targetPopulation) {
   const individualIds = criteria.individualIds || '';
   const householdIds = criteria.householdIds || '';
   const deliveryMechanism = targetPopulation?.deliveryMechanism?.code || '';
-  const fsp = targetPopulation.deliveryMechanism?.fsp?.id || '';
+  const fsp = targetPopulation?.deliveryMechanism?.fsp?.id || '';
   const householdsFiltersBlocks = criteria.householdsFiltersBlocks || [];
   const individualsFiltersBlocks = criteria.individualsFiltersBlocks || [];
   const collectorsFiltersBlocks = criteria.collectorsFiltersBlocks || [];

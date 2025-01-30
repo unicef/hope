@@ -18,9 +18,7 @@ import { LabelizedField } from '@core/LabelizedField';
 import { PaperContainer } from './PaperContainer';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement, useState } from 'react';
-import { Missing } from '@components/core/Missing';
-import { BlackLink } from '@components/core/BlackLink';
-import { useBaseUrl } from '@hooks/useBaseUrl';
+import { Pointer } from '@components/core/Pointer';
 
 const colors = {
   femaleChildren: '#5F02CF',
@@ -53,12 +51,6 @@ const SummaryValue = styled.div`
   margin-top: ${({ theme }) => theme.spacing(2)};
 `;
 
-// const ChartContainer = styled.div`
-//   width: 100px;
-//   height: 100px;
-//   margin: 0 auto;
-// `;
-
 interface ResultsProps {
   targetPopulation: PaymentPlanQuery['paymentPlan'];
 }
@@ -68,7 +60,6 @@ export function ResultsForHouseholds({
 }: ResultsProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
-  const { baseUrl } = useBaseUrl();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const [openDialog, setOpenDialog] = useState(false);
   const handleOpen = () => setOpenDialog(true);
@@ -141,21 +132,20 @@ export function ResultsForHouseholds({
                           onClick={() => handleOpen()}
                           data-cy="total-collectors-failed-count"
                         >
-                          <Missing />
+                          <Pointer>
+                            {targetPopulation
+                              ?.failedWalletValidationCollectorsIds?.length ||
+                              '-'}
+                          </Pointer>
                         </SummaryValue>
                       </LabelizedField>
                       <Dialog open={openDialog} onClose={handleClose}>
                         <DialogTitle>View IDs</DialogTitle>
                         <DialogContent>
                           <List>
-                            {/* TODO: add real ids */}
-                            {['HH-123', 'HH-456', 'HH-789', 'HH-101112'].map(
+                            {targetPopulation?.failedWalletValidationCollectorsIds?.map(
                               (id, index) => (
-                                <ListItem key={index}>
-                                  <BlackLink
-                                    to={`/${baseUrl}/population/individuals/${id}`}
-                                  />
-                                </ListItem>
+                                <ListItem key={index}>{id}</ListItem>
                               ),
                             )}
                           </List>
