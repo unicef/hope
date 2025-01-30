@@ -89,7 +89,7 @@ class RoleAssignmentFactory(DjangoModelFactory):
         django_get_or_create = ("user", "partner", "role")
 
     @classmethod
-    def _create(cls, model_class, *args, **kwargs):
+    def _create(cls, model_class: Any, *args: Any, **kwargs: Any) -> RoleAssignment:
         partner = kwargs.get("partner")
         user = kwargs.get("user")
         if not user and not partner:
