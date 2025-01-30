@@ -52,7 +52,7 @@ logger = logging.getLogger(__name__)
 
 class CaseInsensitiveTuple(tuple):
     def __contains__(  # type: ignore # FIXME Signature of "__contains__" incompatible with supertype tuple
-        self, key: str, *args: Any, **kwargs: Any
+            self, key: str, *args: Any, **kwargs: Any
     ) -> bool:
         return key.casefold() in (element.casefold() for element in self)
 
@@ -92,11 +92,11 @@ def get_program_id_from_headers(headers: Union[Dict, "HttpHeaders"]) -> Optional
 
 
 def unique_slugify(
-    instance: "Model",
-    value: Any,
-    slug_field_name: str = "slug",
-    queryset: Optional["QuerySet"] = None,
-    slug_separator: str = "-",
+        instance: "Model",
+        value: Any,
+        slug_field_name: str = "slug",
+        queryset: Optional["QuerySet"] = None,
+        slug_separator: str = "-",
 ) -> None:
     """
     Calculates and stores a unique slug of ``value`` for an instance.
@@ -323,7 +323,7 @@ def encode_ids(results: Any, model_name: str, key: str) -> List[Dict]:
 
 
 def to_dict(
-    instance: "Model", fields: Union[List, Tuple, None] = None, dict_fields: Optional[Dict] = None
+        instance: "Model", fields: Union[List, Tuple, None] = None, dict_fields: Optional[Dict] = None
 ) -> Dict[str, Any]:
     from django.db.models import Model
     from django.forms import model_to_dict
@@ -590,11 +590,11 @@ def xlrd_rows_iterator(sheet: "Worksheet") -> Generator:
 
 
 def chart_get_filtered_qs(
-    qs: Any,
-    year: int,
-    business_area_slug_filter: Optional[Dict] = None,
-    additional_filters: Optional[Dict] = None,
-    year_filter_path: Optional[str] = None,
+        qs: Any,
+        year: int,
+        business_area_slug_filter: Optional[Dict] = None,
+        additional_filters: Optional[Dict] = None,
+        year_filter_path: Optional[str] = None,
 ) -> "QuerySet":
     if additional_filters is None:
         additional_filters = {}
@@ -626,7 +626,7 @@ def sum_lists_with_values(qs_values: Iterable, list_len: int) -> List[int]:
 
 
 def chart_permission_decorator(
-    chart_resolve: Optional[Callable] = None, permissions: Optional[List] = None
+        chart_resolve: Optional[Callable] = None, permissions: Optional[List] = None
 ) -> Callable:
     if chart_resolve is None:
         return functools.partial(chart_permission_decorator, permissions=permissions)
@@ -641,7 +641,7 @@ def chart_permission_decorator(
             business_area = BusinessArea.objects.filter(slug=business_area_slug).first()
             program_id = get_program_id_from_headers(resolve_info.context.headers)
             if any(
-                resolve_info.context.user.has_permission(per.name, business_area, program_id) for per in permissions
+                    resolve_info.context.user.has_permission(per.name, business_area, program_id) for per in permissions
             ):
                 return chart_resolve(*args, **kwargs)
             log_and_raise("Permission Denied")
@@ -657,7 +657,7 @@ def chart_filters_decoder(filters: Dict) -> Dict:
 
 
 def chart_create_filter_query(
-    filters: Dict, program_id_path: str = "id", administrative_area_path: str = "admin_areas"
+        filters: Dict, program_id_path: str = "id", administrative_area_path: str = "admin_areas"
 ) -> Dict:
     filter_query = {}
     if program := filters.get("program"):
@@ -673,7 +673,7 @@ def chart_create_filter_query(
 
 
 def chart_create_filter_query_for_payment_verification_gfk(
-    filters: Dict, program_id_path: str = "id", administrative_area_path: str = "admin_areas"
+        filters: Dict, program_id_path: str = "id", administrative_area_path: str = "admin_areas"
 ) -> Q:
     filter_query = Q()
     if program := filters.get("program"):
@@ -809,7 +809,7 @@ def timezone_datetime(value: Any) -> datetime:
 
 
 def save_data_in_cache(
-    cache_key: str, data_lambda: Callable, timeout: int = 60 * 60 * 24, cache_condition: Optional[Callable] = None
+        cache_key: str, data_lambda: Callable, timeout: int = 60 * 60 * 24, cache_condition: Optional[Callable] = None
 ) -> Any:
     cache_data = cache.get(cache_key, "NOT_CACHED")
     if cache_data == "NOT_CACHED":
@@ -882,7 +882,7 @@ IDENTIFICATION_TYPE_TO_KEY_MAPPING = {
 def chunks(lst: list, n: int) -> list:
     """Yield successive n-sized chunks from lst."""
     for i in range(0, len(lst), n):
-        yield lst[i : i + n]
+        yield lst[i: i + n]
 
 
 def send_email_notification_on_commit(service: Any, user: "User") -> None:
@@ -897,9 +897,9 @@ def send_email_notification_on_commit(service: Any, user: "User") -> None:
 
 
 def send_email_notification(
-    service: Any,
-    user: Optional["User"] = None,
-    context_kwargs: Optional[Dict] = None,
+        service: Any,
+        user: Optional["User"] = None,
+        context_kwargs: Optional[Dict] = None,
 ) -> None:
     if context_kwargs:
         context = service.get_email_context(**context_kwargs)
@@ -943,3 +943,12 @@ class JSONBSet(Func):
     def __init__(self, expression: Any, path: Any, new_value: Any, create_missing: bool = True, **extra: Any) -> None:
         create_missing = Value("true") if create_missing else Value("false")  # type: ignore
         super().__init__(expression, path, new_value, create_missing, **extra)
+
+
+def get_lowest_admin_area(household: "Household") -> Optional["Area"]:
+    fields = ["admin1", "admin2", "admin3"]
+    for field in fields:
+        admin_area = getattr(household, field)
+        if admin_area:
+            return admin_area
+    return None

@@ -46,7 +46,7 @@ from hct_mis_api.apps.core.utils import (
     get_program_id_from_headers,
     resolve_flex_fields_choices_to_string,
     sum_lists_with_values,
-    to_choice_object,
+    to_choice_object, get_lowest_admin_area,
 )
 from hct_mis_api.apps.geo.schema import AreaNode
 from hct_mis_api.apps.grievance.models import GrievanceTicket
@@ -345,9 +345,9 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
     def resolve_delivery_mechanisms_data(parent, info: Any) -> QuerySet[DeliveryMechanismData]:
         program_id = get_program_id_from_headers(info.context.headers)
         if not info.context.user.has_permission(
-            Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION.value,
-            parent.business_area,
-            program_id,
+                Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION.value,
+                parent.business_area,
+                program_id,
         ):
             return parent.delivery_mechanisms_data.none()
 
@@ -364,7 +364,8 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
                 raise PermissionDenied("Permission Denied")
             if not user.partner.has_program_access(object_instance.program_id):
                 raise PermissionDenied("Permission Denied")
-            if object_instance.household_id and object_instance.household.admin_area_id:
+            household_admin_area = get_lowest_admin_area(object_instance.household)
+            if object_instance.household_id and household_admin_area:
                 areas_from_partner = user.partner.get_program_areas(object_instance.program_id)
                 household = object_instance.household
                 areas_from_household = [
@@ -377,9 +378,9 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
 
         # if user can't simply view all individuals, we check if they can do it because of grievance or rdi details
         if not user.has_permission(
-            Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS.value,
-            object_instance.business_area,
-            object_instance.program_id,
+                Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS.value,
+                object_instance.business_area,
+                object_instance.program_id,
         ) and not user.has_permission(
             Permissions.RDI_VIEW_DETAILS.value,
             object_instance.business_area,
@@ -468,9 +469,14 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
         return parent.sanction_list_confirmed_match
 
     @staticmethod
+    def resolve_admin_area(self, info: Any) -> AreaNode:
+        return get_lowest_admin_area(self)
+
+    @staticmethod
     def resolve_admin_area_title(parent: Household, info: Any) -> str:
-        if parent.admin_area:
-            return f"{parent.admin_area.name} - {parent.admin_area.p_code}"
+        admin_area = get_lowest_admin_area(parent)
+        if admin_area:
+            return f"{admin_area.name} - {admin_area.p_code}"
         return ""
 
     @staticmethod
@@ -540,7 +546,8 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
                 raise PermissionDenied("Permission Denied")
             if not user.partner.has_program_access(object_instance.program_id):
                 raise PermissionDenied("Permission Denied")
-            if object_instance.admin_area_id:
+            admin_area = get_lowest_admin_area(object_instance)
+            if admin_area:
                 areas_from_partner = user.partner.get_program_areas(object_instance.program_id)
                 areas_from_household = [object_instance.admin1_id, object_instance.admin2_id, object_instance.admin3_id]
                 if not areas_from_partner.filter(id__in=areas_from_household).exists():
@@ -548,9 +555,9 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
 
         # if user doesn't have permission to view all households or RDI details, we check based on their grievance tickets
         if not user.has_permission(
-            Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS.value,
-            object_instance.business_area,
-            object_instance.program_id,
+                Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS.value,
+                object_instance.business_area,
+                object_instance.program_id,
         ) and not user.has_permission(
             Permissions.RDI_VIEW_DETAILS.value,
             object_instance.business_area,
@@ -750,7 +757,9 @@ class Query(graphene.ObjectType):
                     Q(household__admin1__in=areas_ids)
                     | Q(household__admin2__in=areas_ids)
                     | Q(household__admin3__in=areas_ids)
-                    | Q(household__admin_area__isnull=True)
+                    | Q(household__admin1__isnull=True)
+                    | Q(household__admin2__isnull=True)
+                    | Q(household__admin3__isnull=True)
                 )
                 filter_q |= Q(Q(program_id=program_id) & areas_query)
 
@@ -799,15 +808,26 @@ class Query(graphene.ObjectType):
                     Q(admin1__in=areas_ids)
                     | Q(admin2__in=areas_ids)
                     | Q(admin3__in=areas_ids)
-                    | Q(admin_area__isnull=True)
+                    | Q(household__admin1__isnull=True)
+                    | Q(household__admin2__isnull=True)
+                    | Q(household__admin3__isnull=True)
                 )
                 filter_q |= Q(Q(program_id=program_id) & areas_query)
 
             queryset = queryset.filter(filter_q)
 
-        if does_path_exist_in_query("edges.node.admin2", info):
-            queryset = queryset.select_related("admin_area")
-            queryset = queryset.select_related("admin_area__area_type")
+        if does_path_exist_in_query("edges.node.admin1", info) or does_path_exist_in_query("edges.node.admin_area",
+                                                                                           info):
+            queryset = queryset.select_related("admin1")
+            queryset = queryset.select_related("admin1__area_type")
+        if does_path_exist_in_query("edges.node.admin2", info) or does_path_exist_in_query("edges.node.admin_area",
+                                                                                           info):
+            queryset = queryset.select_related("admin2")
+            queryset = queryset.select_related("admin2__area_type")
+        if does_path_exist_in_query("edges.node.admin3", info) or does_path_exist_in_query("edges.node.admin_area",
+                                                                                           info):
+            queryset = queryset.select_related("admin3")
+            queryset = queryset.select_related("admin3__area_type")
 
         if does_path_exist_in_query("edges.node.headOfHousehold", info):
             queryset = queryset.select_related("head_of_household")
@@ -879,7 +899,7 @@ class Query(graphene.ObjectType):
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     @cached_in_django_cache(24)
     def resolve_section_households_reached(
-        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+            self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict[str, int]:
         payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
@@ -889,7 +909,7 @@ class Query(graphene.ObjectType):
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     @cached_in_django_cache(24)
     def resolve_section_individuals_reached(
-        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+            self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict[str, int]:
         payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
@@ -900,7 +920,7 @@ class Query(graphene.ObjectType):
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     @cached_in_django_cache(24)
     def resolve_section_people_reached(
-        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+            self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict[str, int]:
         payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
@@ -911,7 +931,7 @@ class Query(graphene.ObjectType):
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     @cached_in_django_cache(24)
     def resolve_section_child_reached(
-        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+            self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict[str, int]:
         households_child_params = [
             "female_age_group_0_5_count",
@@ -931,7 +951,7 @@ class Query(graphene.ObjectType):
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     @cached_in_django_cache(24)
     def resolve_chart_individuals_reached_by_age_and_gender(
-        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+            self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict:
         households_params = [
             "female_age_group_0_5_count",
@@ -959,7 +979,7 @@ class Query(graphene.ObjectType):
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     @cached_in_django_cache(24)
     def resolve_chart_people_reached_by_age_and_gender(
-        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+            self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict:
         households_params = [
             "female_age_group_0_5_count",
@@ -987,7 +1007,7 @@ class Query(graphene.ObjectType):
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     @cached_in_django_cache(24)
     def resolve_chart_individuals_with_disability_reached_by_age(
-        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+            self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict:
         households_params_with_disability = [
             "female_age_group_0_5_disabled_count",
@@ -1049,7 +1069,7 @@ class Query(graphene.ObjectType):
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     @cached_in_django_cache(24)
     def resolve_chart_people_with_disability_reached_by_age(
-        self, info: Any, business_area_slug: str, year: int, **kwargs: Any
+            self, info: Any, business_area_slug: str, year: int, **kwargs: Any
     ) -> Dict:
         households_params_with_disability = [
             "female_age_group_0_5_disabled_count",
