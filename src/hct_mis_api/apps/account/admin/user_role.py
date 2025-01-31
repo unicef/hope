@@ -26,7 +26,6 @@ class RoleAssignmentInline(admin.TabularInline):
     fields = ["business_area", "program", "role", "expiry_date"]
     extra = 0
     formset = RoleAssignmentInlineFormSet
-    raw_id_fields = ("business_area", "role")
 
     def formfield_for_foreignkey(self, db_field: Any, request: Any = None, **kwargs: Any) -> Any:
         partner_id = request.resolver_match.kwargs.get("object_id")
