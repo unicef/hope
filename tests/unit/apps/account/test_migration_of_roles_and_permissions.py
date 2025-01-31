@@ -4,6 +4,8 @@ from django.apps import apps
 from django.test import TestCase
 from django.utils import timezone
 
+import pytest
+
 from hct_mis_api.apps.account.fixtures import (
     BusinessAreaFactory,
     PartnerFactory,
@@ -20,7 +22,7 @@ from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryF
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import ProgramPartnerThrough
 
-data_migration = import_module("hct_mis_api.apps.account.migrations.0006_migration")
+data_migration = import_module("hct_mis_api.apps.account.migrations.0008_migration")
 
 
 # TODO: remove this file after removal of BusinessAreaPartnerThrough and ProgramPartnerThrough - see the comment below
@@ -225,6 +227,10 @@ class MigrateUserRolesTest(TestCase):
             user=cls.user_default_empty_partner,
             role=cls.role_1,
         )
+
+    @pytest.fixture(autouse=True)  # Override fixture because the initial data has old format that is invalid now
+    def create_unicef_partner(self) -> None:
+        return
 
     def test_user_roles_migration(self) -> None:
         # call all 3 functions to check the final result
