@@ -168,6 +168,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
         household_one = HouseholdFactory.build(
             registration_data_import__imported_by__partner=partner,
             program=program_one,
+            admin2=cls.admin_area_1,
         )
         household_one.household_collection.save()
         household_one.registration_data_import.imported_by.save()
