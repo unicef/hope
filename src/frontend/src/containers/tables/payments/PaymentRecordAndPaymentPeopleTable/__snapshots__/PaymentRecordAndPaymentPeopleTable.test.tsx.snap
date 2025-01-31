@@ -3,16 +3,16 @@
 exports[`containers/tables/payments/PaymentRecordAndPaymentPeopleTable should render loading 1`] = `
 <div>
   <div
-    class="sc-kLhKbu blzheD"
+    class="sc-kuACkN eXzApe"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-ixGGxD bQEzZz css-1ps6pg7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-hWWBcw cdtEkP css-1ps6pg7-MuiPaper-root"
     >
       <div
-        class="MuiTableContainer-root sc-dpBQxM css-rorn0c-MuiTableContainer-root"
+        class="MuiTableContainer-root sc-cZztgT css-rorn0c-MuiTableContainer-root"
       >
         <div
-          class="sc-jwIPbr gFzJhR MuiBox-root css-0"
+          class="sc-jMLmsk jOlpvw MuiBox-root css-0"
         >
           <div
             class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1w02pvu-MuiToolbar-root"
@@ -25,11 +25,11 @@ exports[`containers/tables/payments/PaymentRecordAndPaymentPeopleTable should re
             </h6>
           </div>
           <div
-            class="sc-jwIPbr gFzJhR MuiBox-root css-1ruxp1v"
+            class="sc-jMLmsk jOlpvw MuiBox-root css-1ruxp1v"
           />
         </div>
         <table
-          class="MuiTable-root sc-khLCKb sc-cHqXqK kpTumY jRUhWR css-b1kpk9-MuiTable-root"
+          class="MuiTable-root sc-jHbxoU sc-cMHOsR kwEbVg hRusAK css-b1kpk9-MuiTable-root"
         >
           <thead
             class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
@@ -42,7 +42,7 @@ exports[`containers/tables/payments/PaymentRecordAndPaymentPeopleTable should re
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jqVXSH pIYqL css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -66,7 +66,7 @@ exports[`containers/tables/payments/PaymentRecordAndPaymentPeopleTable should re
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jqVXSH pIYqL css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -90,7 +90,7 @@ exports[`containers/tables/payments/PaymentRecordAndPaymentPeopleTable should re
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jqVXSH pIYqL css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -114,7 +114,7 @@ exports[`containers/tables/payments/PaymentRecordAndPaymentPeopleTable should re
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jqVXSH pIYqL css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -138,7 +138,7 @@ exports[`containers/tables/payments/PaymentRecordAndPaymentPeopleTable should re
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jqVXSH pIYqL css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -163,11 +163,11 @@ exports[`containers/tables/payments/PaymentRecordAndPaymentPeopleTable should re
             class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-cGXZpB cLBbAl css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit fhAcgb css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-jZCRgm loPQsZ css-1ex1afd-MuiTableCell-root"
                 colspan="5"
               >
                 <span
@@ -177,11 +177,11 @@ exports[`containers/tables/payments/PaymentRecordAndPaymentPeopleTable should re
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-cGXZpB cLBbAl css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit fhAcgb css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-jZCRgm loPQsZ css-1ex1afd-MuiTableCell-root"
                 colspan="5"
               >
                 <span
@@ -191,11 +191,11 @@ exports[`containers/tables/payments/PaymentRecordAndPaymentPeopleTable should re
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-cGXZpB cLBbAl css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit fhAcgb css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-jZCRgm loPQsZ css-1ex1afd-MuiTableCell-root"
                 colspan="5"
               >
                 <span
@@ -205,11 +205,11 @@ exports[`containers/tables/payments/PaymentRecordAndPaymentPeopleTable should re
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-cGXZpB cLBbAl css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit fhAcgb css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-jZCRgm loPQsZ css-1ex1afd-MuiTableCell-root"
                 colspan="5"
               >
                 <span
@@ -219,11 +219,11 @@ exports[`containers/tables/payments/PaymentRecordAndPaymentPeopleTable should re
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-cGXZpB cLBbAl css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit fhAcgb css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-jZCRgm loPQsZ css-1ex1afd-MuiTableCell-root"
                 colspan="5"
               >
                 <span

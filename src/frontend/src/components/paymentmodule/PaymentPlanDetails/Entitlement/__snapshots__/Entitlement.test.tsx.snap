@@ -6,13 +6,13 @@ exports[`components/paymentmodule/PaymentPlanDetails/Entitlement should render 1
     class="MuiBox-root css-zwiamn"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-blHHSb kPa-dfK css-1ps6pg7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-KXCwU fCeEQk css-1ps6pg7-MuiPaper-root"
     >
       <div
         class="MuiBox-root css-1yuhvjn"
       >
         <div
-          class="sc-dntaoT hJhDMc"
+          class="sc-dDvxFM gwleqS"
         >
           <h6
             class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
@@ -21,7 +21,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/Entitlement should render 1
           </h6>
         </div>
         <p
-          class="sc-iuUfFv tBMPQ"
+          class="sc-hzvwrc TjvAS"
         >
           Select Entitlement Formula
         </p>
@@ -119,15 +119,15 @@ exports[`components/paymentmodule/PaymentPlanDetails/Entitlement should render 1
           class="MuiBox-root css-70qvj9"
         >
           <div
-            class="sc-eUlrpB jGrimq"
+            class="sc-fkSzgi etXNcz"
           />
           <div
-            class="sc-hJRrWL bjdJAt"
+            class="sc-hFflus ijgatB"
           >
             Or
           </div>
           <div
-            class="sc-eUlrpB jGrimq"
+            class="sc-fkSzgi etXNcz"
           />
         </div>
       </div>
@@ -138,7 +138,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/Entitlement should render 1
           class="MuiBox-root css-11ze7cv"
         >
           <div
-            class="sc-bMTdWJ gVUDoh MuiBox-root css-7jugx5"
+            class="sc-bHCmUC grkuay MuiBox-root css-7jugx5"
           >
             <button
               class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary css-11ph28e-MuiButtonBase-root-MuiButton-root"
@@ -167,7 +167,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/Entitlement should render 1
               />
             </button>
             <p
-              class="sc-dprtRQ fhOqfo"
+              class="sc-ekQdgj bfgOiY"
             >
               Template contains payment list with all targeted households
             </p>
@@ -212,7 +212,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/Entitlement should render 1
               </div>
             </div>
             <p
-              class="sc-dprtRQ fhOqfo"
+              class="sc-ekQdgj bfgOiY"
             >
               Uploaded file should contain entitlement for each household
             </p>
@@ -220,11 +220,11 @@ exports[`components/paymentmodule/PaymentPlanDetails/Entitlement should render 1
         </div>
       </div>
       <div
-        class="sc-geXuza gvOJDy"
+        class="sc-gFcPut kqlHJG"
       />
       <div>
         <span
-          class="sc-gtLWhw bkWrmx"
+          class="sc-gyycJP gXmLtn"
           color="textSecondary"
         >
           Total Entitled Quantity
@@ -233,11 +233,11 @@ exports[`components/paymentmodule/PaymentPlanDetails/Entitlement should render 1
           data-cy="label-Total Entitled Quantity"
         >
           <span
-            class="sc-egkSDF XYdBd"
+            class="sc-eaUbBy dvpGUa"
             color="textSecondary"
           >
             <div
-              class="sc-cHqXqK iAzTMC"
+              class="sc-cMHOsR bVnDrp"
               data-cy="total-entitled-quantity-usd"
             >
               2691.69 PLN (376 USD)

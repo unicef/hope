@@ -3,10 +3,10 @@
 exports[`components/rdi/details/households/HouseholdDetails should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-blHHSb kPa-dfK css-1ps6pg7-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-KXCwU fCeEQk css-1ps6pg7-MuiPaper-root"
   >
     <div
-      class="sc-dntaoT hJhDMc"
+      class="sc-dDvxFM gwleqS"
     >
       <h6
         class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
@@ -15,7 +15,7 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
       </h6>
     </div>
     <div
-      class="sc-ivxoEo lgtXIC"
+      class="sc-jqVXSH fTeLHB"
     >
       <div
         class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-6 css-zow5z4-MuiGrid-root"
@@ -25,7 +25,7 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
         >
           <div>
             <span
-              class="sc-egkSDF bUfwNm"
+              class="sc-eaUbBy fROMRt"
               color="textSecondary"
             >
               Household Size
@@ -34,7 +34,7 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
               data-cy="label-Household Size"
             >
               <span
-                class="sc-fAUdSK fuvdWP"
+                class="sc-gaZyOd huUmeo"
                 color="textSecondary"
               >
                 4
@@ -47,7 +47,7 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
         >
           <div>
             <span
-              class="sc-egkSDF bUfwNm"
+              class="sc-eaUbBy fROMRt"
               color="textSecondary"
             >
               Country
@@ -64,7 +64,7 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
         >
           <div>
             <span
-              class="sc-egkSDF bUfwNm"
+              class="sc-eaUbBy fROMRt"
               color="textSecondary"
             >
               Residence Status
@@ -73,7 +73,7 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
               data-cy="label-Residence Status"
             >
               <span
-                class="sc-fAUdSK fuvdWP"
+                class="sc-gaZyOd huUmeo"
                 color="textSecondary"
               >
                 None
@@ -86,7 +86,7 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
         >
           <div>
             <span
-              class="sc-egkSDF bUfwNm"
+              class="sc-eaUbBy fROMRt"
               color="textSecondary"
             >
               Country of Origin
@@ -103,7 +103,7 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
         >
           <div>
             <span
-              class="sc-egkSDF bUfwNm"
+              class="sc-eaUbBy fROMRt"
               color="textSecondary"
             >
               Head of Household
@@ -112,11 +112,11 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
               data-cy="label-Head of Household"
             >
               <span
-                class="sc-fAUdSK fuvdWP"
+                class="sc-gaZyOd huUmeo"
                 color="textSecondary"
               >
                 <a
-                  class="sc-gtLWhw flPTLU"
+                  class="sc-gyycJP cORliC"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/registration-data-import/individual/SW5kaXZpZHVhbE5vZGU6Y2MwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDAx"
                 >
                   Jan Kowalski
@@ -130,7 +130,7 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
         >
           <div>
             <span
-              class="sc-egkSDF bUfwNm"
+              class="sc-eaUbBy fROMRt"
               color="textSecondary"
             >
               FEMALE CHILD HEADED HOUSEHOLD
@@ -139,7 +139,7 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
               data-cy="label-FEMALE CHILD HEADED HOUSEHOLD"
             >
               <span
-                class="sc-fAUdSK fuvdWP"
+                class="sc-gaZyOd huUmeo"
                 color="textSecondary"
               >
                 No
@@ -152,7 +152,7 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
         >
           <div>
             <span
-              class="sc-egkSDF bUfwNm"
+              class="sc-eaUbBy fROMRt"
               color="textSecondary"
             >
               CHILD HEADED HOUSEHOLD
@@ -161,7 +161,7 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
               data-cy="label-CHILD HEADED HOUSEHOLD"
             >
               <span
-                class="sc-fAUdSK fuvdWP"
+                class="sc-gaZyOd huUmeo"
                 color="textSecondary"
               >
                 No
@@ -174,7 +174,7 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
         >
           <div>
             <span
-              class="sc-egkSDF bUfwNm"
+              class="sc-eaUbBy fROMRt"
               color="textSecondary"
             >
               ADMINISTRATIVE LEVEL 1
@@ -191,7 +191,7 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
         >
           <div>
             <span
-              class="sc-egkSDF bUfwNm"
+              class="sc-eaUbBy fROMRt"
               color="textSecondary"
             >
               ADMINISTRATIVE LEVEL 2
@@ -208,7 +208,7 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
         >
           <div>
             <span
-              class="sc-egkSDF bUfwNm"
+              class="sc-eaUbBy fROMRt"
               color="textSecondary"
             >
               Data Collecting Type
@@ -217,7 +217,7 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
               data-cy="label-Data Collecting Type"
             >
               <span
-                class="sc-fAUdSK fuvdWP"
+                class="sc-gaZyOd huUmeo"
                 color="textSecondary"
               >
                 data collecting type

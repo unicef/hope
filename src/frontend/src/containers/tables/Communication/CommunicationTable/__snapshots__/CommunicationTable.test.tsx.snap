@@ -3,19 +3,19 @@
 exports[`containers/tables//Communication/CommunicationTable should render loading 1`] = `
 <div>
   <div
-    class="sc-blHHSb czsBqi"
+    class="sc-KXCwU edfDZM"
   >
     <div
-      class="sc-ixGGxD bFnwdh"
+      class="sc-hWWBcw glzqeh"
     >
       <div
-        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-khLCKb iRXenP css-1ps6pg7-MuiPaper-root"
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-jHbxoU cxLkyn css-1ps6pg7-MuiPaper-root"
       >
         <div
-          class="MuiTableContainer-root sc-jwIPbr css-rorn0c-MuiTableContainer-root"
+          class="MuiTableContainer-root sc-jMLmsk css-rorn0c-MuiTableContainer-root"
         >
           <div
-            class="sc-cHqXqK euLMoZ MuiBox-root css-0"
+            class="sc-cMHOsR BZKmm MuiBox-root css-0"
           >
             <div
               class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1w02pvu-MuiToolbar-root"
@@ -28,11 +28,11 @@ exports[`containers/tables//Communication/CommunicationTable should render loadi
               </h6>
             </div>
             <div
-              class="sc-cHqXqK euLMoZ MuiBox-root css-1ruxp1v"
+              class="sc-cMHOsR BZKmm MuiBox-root css-1ruxp1v"
             />
           </div>
           <table
-            class="MuiTable-root sc-dstKZu sc-jtQUzJ inqucy cpgMYb css-b1kpk9-MuiTable-root"
+            class="MuiTable-root sc-cGXZpB sc-kfmGjC jfkrWK hcGOws css-b1kpk9-MuiTable-root"
           >
             <thead
               class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
@@ -45,7 +45,7 @@ exports[`containers/tables//Communication/CommunicationTable should render loadi
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-ghWlax fIFOXT css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-gTrWKq fFZOTJ css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -69,7 +69,7 @@ exports[`containers/tables//Communication/CommunicationTable should render loadi
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-ghWlax fIFOXT css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-gTrWKq fFZOTJ css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -93,7 +93,7 @@ exports[`containers/tables//Communication/CommunicationTable should render loadi
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-ghWlax fIFOXT css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-gTrWKq fFZOTJ css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -117,7 +117,7 @@ exports[`containers/tables//Communication/CommunicationTable should render loadi
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-ghWlax fIFOXT css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-gTrWKq fFZOTJ css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -141,7 +141,7 @@ exports[`containers/tables//Communication/CommunicationTable should render loadi
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-ghWlax fIFOXT css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-gTrWKq fFZOTJ css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -166,11 +166,11 @@ exports[`containers/tables//Communication/CommunicationTable should render loadi
               class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
             >
               <tr
-                class="MuiTableRow-root sc-keTIit gpxSVY css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-jZCRgm eekLry css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-dpBQxM gVFkqf css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-cZztgT kkzxcC css-1ex1afd-MuiTableCell-root"
                   colspan="5"
                 >
                   <span
@@ -180,11 +180,11 @@ exports[`containers/tables//Communication/CommunicationTable should render loadi
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-keTIit gpxSVY css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-jZCRgm eekLry css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-dpBQxM gVFkqf css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-cZztgT kkzxcC css-1ex1afd-MuiTableCell-root"
                   colspan="5"
                 >
                   <span
@@ -194,11 +194,11 @@ exports[`containers/tables//Communication/CommunicationTable should render loadi
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-keTIit gpxSVY css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-jZCRgm eekLry css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-dpBQxM gVFkqf css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-cZztgT kkzxcC css-1ex1afd-MuiTableCell-root"
                   colspan="5"
                 >
                   <span
@@ -208,11 +208,11 @@ exports[`containers/tables//Communication/CommunicationTable should render loadi
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-keTIit gpxSVY css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-jZCRgm eekLry css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-dpBQxM gVFkqf css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-cZztgT kkzxcC css-1ex1afd-MuiTableCell-root"
                   colspan="5"
                 >
                   <span
@@ -222,11 +222,11 @@ exports[`containers/tables//Communication/CommunicationTable should render loadi
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-keTIit gpxSVY css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-jZCRgm eekLry css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-dpBQxM gVFkqf css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-cZztgT kkzxcC css-1ex1afd-MuiTableCell-root"
                   colspan="5"
                 >
                   <span
@@ -236,11 +236,11 @@ exports[`containers/tables//Communication/CommunicationTable should render loadi
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-keTIit gpxSVY css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-jZCRgm eekLry css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-dpBQxM gVFkqf css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-cZztgT kkzxcC css-1ex1afd-MuiTableCell-root"
                   colspan="5"
                 >
                   <span
@@ -250,11 +250,11 @@ exports[`containers/tables//Communication/CommunicationTable should render loadi
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-keTIit gpxSVY css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-jZCRgm eekLry css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-dpBQxM gVFkqf css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-cZztgT kkzxcC css-1ex1afd-MuiTableCell-root"
                   colspan="5"
                 >
                   <span
@@ -264,11 +264,11 @@ exports[`containers/tables//Communication/CommunicationTable should render loadi
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-keTIit gpxSVY css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-jZCRgm eekLry css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-dpBQxM gVFkqf css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-cZztgT kkzxcC css-1ex1afd-MuiTableCell-root"
                   colspan="5"
                 >
                   <span
@@ -278,11 +278,11 @@ exports[`containers/tables//Communication/CommunicationTable should render loadi
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-keTIit gpxSVY css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-jZCRgm eekLry css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-dpBQxM gVFkqf css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-cZztgT kkzxcC css-1ex1afd-MuiTableCell-root"
                   colspan="5"
                 >
                   <span
@@ -292,11 +292,11 @@ exports[`containers/tables//Communication/CommunicationTable should render loadi
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-keTIit gpxSVY css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-jZCRgm eekLry css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-dpBQxM gVFkqf css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-cZztgT kkzxcC css-1ex1afd-MuiTableCell-root"
                   colspan="5"
                 >
                   <span
@@ -416,7 +416,7 @@ exports[`containers/tables//Communication/CommunicationTable should render loadi
 exports[`containers/tables//Communication/CommunicationTable should render with data 1`] = `
 <div>
   <div
-    class="sc-blHHSb czsBqi"
+    class="sc-KXCwU edfDZM"
   >
     <div>
       Unexpected error

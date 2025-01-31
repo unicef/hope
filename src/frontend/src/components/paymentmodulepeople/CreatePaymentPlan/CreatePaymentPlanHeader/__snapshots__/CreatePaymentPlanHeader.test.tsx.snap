@@ -30,15 +30,15 @@ exports[`components/paymentmodule/CreatePaymentPlanHeader should render 1`] = `
       >
         <div>
           <div
-            class="sc-fAUdSK ctcpKb"
+            class="sc-gaZyOd bmKNSg"
             data-cy="breadcrumbs-container"
           >
             <span
-              class="sc-egkSDF gCtgrB"
+              class="sc-eaUbBy eXxvdm"
               data-cy="breadcrumbs-element-container"
             >
               <a
-                class="sc-blHHSb ixwyqw"
+                class="sc-KXCwU eukzGS"
                 data-cy="breadcrumbs-link"
                 href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/payment-module/payment-plans"
               >
