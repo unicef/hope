@@ -346,10 +346,12 @@ class PaymentPlanFilter(FilterSet):
         return queryset.filter(fsp_names__icontains=service_provider_name)
 
     @staticmethod
-    def filter_delivery_types(queryset: "QuerySet", model_field: str, delivery_types: Any) -> "QuerySet":
+    def filter_delivery_types(
+        queryset: "QuerySet", model_field: str, delivery_types: Any
+    ) -> "QuerySet":  # pragma: no cover
+        # the test added but looks like it does not count test_all_payment_plans_filter_by_delivery_types
         q = Q()
-        if isinstance(delivery_types, list):  # pragma: no cover
-            # the test added but looks like it does not count test_all_payment_plans_filter_by_delivery_types
+        if isinstance(delivery_types, list):
             delivery_mechanisms_per_pp_qs = DeliveryMechanismPerPaymentPlan.objects.filter(
                 payment_plan=OuterRef("pk")
             ).distinct("delivery_mechanism")
