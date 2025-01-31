@@ -111,6 +111,7 @@ class PermissionsBackend(BaseBackend):
         return permissions_set
 
     def has_perm(self, user_obj: Union[User, AnonymousUser], perm: str, obj: Optional[Model] = None) -> bool:  # type: ignore
+        print(obj)
         if user_obj.is_superuser:
             return True
         if isinstance(user_obj, AnonymousUser):
