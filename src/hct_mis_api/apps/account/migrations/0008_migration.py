@@ -256,7 +256,7 @@ def migrate_unicef_partners(apps, schema_editor):
         name="Role for UNICEF Partners",
         is_visible_on_ui=False,
         is_available_for_partner=False,
-        permissions=DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER,
+        defaults={"permissions": DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER},
     )
     role_for_unicef_subpartners.refresh_from_db()
 

@@ -36,7 +36,7 @@ from adminfilters.mixin import AdminAutoCompleteSearchMixin, AdminFiltersMixin
 from jsoneditor.forms import JSONEditor
 from xlrd import XLRDError
 
-from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment, User
+from hct_mis_api.apps.account.models import Partner, RoleAssignment
 from hct_mis_api.apps.administration.widgets import JsonWidget
 from hct_mis_api.apps.core.celery_tasks import (
     upload_new_kobo_template_and_update_flex_fields_task,

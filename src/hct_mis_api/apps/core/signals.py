@@ -6,6 +6,9 @@ from django.db.models.signals import m2m_changed, post_save
 from django.dispatch import receiver
 
 from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment
+from hct_mis_api.apps.account.permissions import (
+    DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER,
+)
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 
 
@@ -27,7 +30,12 @@ def business_area_created(sender: Any, instance: BusinessArea, created: bool, **
     if created:
         unicef = Partner.objects.get(name="UNICEF")
         unicef_subpartner = Partner.objects.create(name=f"UNICEF Partner for {instance.slug}", parent=unicef)
-        role_for_unicef_subpartners, _ = Role.objects.get_or_create(name="Role for UNICEF Partners")
+        role_for_unicef_subpartners, _ = Role.objects.get_or_create(
+            name="Role for UNICEF Partners",
+            is_visible_on_ui=False,
+            is_available_for_partner=False,
+            defaults={"permissions": DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER},
+        )
         unicef_subpartner.allowed_business_areas.add(instance)
         RoleAssignment.objects.create(
             user=None, partner=unicef_subpartner, role=role_for_unicef_subpartners, business_area=instance, program=None

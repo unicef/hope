@@ -566,7 +566,6 @@ class BaseMutationPermissionMixin:
         print(program)
         print(info.context.user)
 
-        print(info.context.user.get_all_permissions(program))
         if not any(
             [
                 permission.name
