@@ -95,6 +95,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         partner = PartnerFactory(name="Partner")
         cls.user = UserFactory.create(partner=partner)
+        cls.program = ProgramFactory(business_area=cls.business_area, name="Test Program", status=Program.ACTIVE)
         cls.create_user_role_with_permissions(
             cls.user,
             [
@@ -104,8 +105,8 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
                 Permissions.GRIEVANCES_CREATE,
             ],
             cls.business_area,
+            cls.program,
         )
-        cls.program = ProgramFactory(business_area=cls.business_area, name="Test Program", status=Program.ACTIVE)
         cls.registration_data_import = RegistrationDataImportFactory(
             business_area=cls.business_area, program=cls.program
         )
@@ -117,7 +118,6 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
             },
             individuals_data=[{}],
         )
-        cls.create_partner_role_with_permissions(cls.partner, [], cls.business_area, cls.program)
 
         country = geo_models.Country.objects.create(name="Afghanistan")
         cls.area_type = AreaTypeFactory(
