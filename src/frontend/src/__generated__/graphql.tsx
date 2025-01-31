@@ -4376,6 +4376,8 @@ export enum PaymentPlanStatus {
   InReview = 'IN_REVIEW',
   Locked = 'LOCKED',
   LockedFsp = 'LOCKED_FSP',
+  MigrationBlocked = 'MIGRATION_BLOCKED',
+  MigrationFailed = 'MIGRATION_FAILED',
   Open = 'OPEN',
   Preparing = 'PREPARING',
   Processing = 'PROCESSING',
@@ -7836,7 +7838,6 @@ export type UserNode = Node & {
   createdTickets: GrievanceTicketNodeConnection;
   customFields: Scalars['JSONString']['output'];
   dateJoined: Scalars['DateTime']['output'];
-  doapHash: Scalars['String']['output'];
   documentSet: DocumentNodeConnection;
   email: Scalars['String']['output'];
   feedbackMessages: FeedbackMessageNodeConnection;
@@ -7847,7 +7848,6 @@ export type UserNode = Node & {
   isStaff: Scalars['Boolean']['output'];
   isSuperuser: Scalars['Boolean']['output'];
   jobTitle: Scalars['String']['output'];
-  lastDoapSync?: Maybe<Scalars['DateTime']['output']>;
   lastLogin?: Maybe<Scalars['DateTime']['output']>;
   lastModifyDate?: Maybe<Scalars['DateTime']['output']>;
   lastName: Scalars['String']['output'];
@@ -26293,7 +26293,6 @@ export type UserNodeResolvers<ContextType = any, ParentType extends ResolversPar
   createdTickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, Partial<UserNodeCreatedTicketsArgs>>;
   customFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>;
   dateJoined?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  doapHash?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   documentSet?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, Partial<UserNodeDocumentSetArgs>>;
   email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   feedbackMessages?: Resolver<ResolversTypes['FeedbackMessageNodeConnection'], ParentType, ContextType, Partial<UserNodeFeedbackMessagesArgs>>;
@@ -26304,7 +26303,6 @@ export type UserNodeResolvers<ContextType = any, ParentType extends ResolversPar
   isStaff?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   isSuperuser?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   jobTitle?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  lastDoapSync?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   lastLogin?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   lastModifyDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   lastName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;

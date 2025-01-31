@@ -136,6 +136,7 @@ class TestSouthSudanUpdateScript(TestCase):
         self.assertEqual(individual.full_name, "Jan Romaniak")
         self.assertEqual(individual.birth_date, datetime.date(1991, 11, 18))
         self.assertEqual(individual.sex, MALE)
+        self.assertEqual(individual.phone_no, "+48603499023")
         self.assertEqual(individual.flex_fields.get("ss_hw_lot_num_i_f"), 32.0)
         self.assertEqual(individual.flex_fields.get("ss_health_facility_name_i_f"), "ed")
         self.assertEqual(individual.flex_fields.get("ss_hw_title_i_f"), "foo")

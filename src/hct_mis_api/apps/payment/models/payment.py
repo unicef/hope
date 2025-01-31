@@ -219,6 +219,10 @@ class PaymentPlan(
         ACCEPTED = "ACCEPTED", "Accepted"
         FINISHED = "FINISHED", "Finished"
 
+        # remove after migration TP>PP
+        MIGRATION_BLOCKED = "MIGRATION_BLOCKED", "Migration Blocked"
+        MIGRATION_FAILED = "MIGRATION_FAILED", "Migration Failed"
+
     PRE_PAYMENT_PLAN_STATUSES = (
         Status.TP_OPEN,
         Status.TP_LOCKED,
@@ -696,7 +700,6 @@ class PaymentPlan(
         """copied from TP
         used in:
         1) create PP.create_payments() all list just filter by targeting_criteria, PaymentPlan.Status.TP_OPEN
-        2)
         """
         all_households = Household.objects.filter(business_area=self.business_area, program=self.program_cycle.program)
         households = all_households.filter(self.targeting_criteria.get_query()).order_by("unicef_id")
@@ -1011,6 +1014,8 @@ class PaymentPlan(
                 PaymentPlan.Status.TP_STEFICON_WAIT,
                 PaymentPlan.Status.TP_STEFICON_COMPLETED,
                 PaymentPlan.Status.TP_STEFICON_ERROR,
+                # TODO: remove after migrations TP>PP
+                PaymentPlan.Status.MIGRATION_BLOCKED,
             ]
         ],
     )
@@ -1029,6 +1034,8 @@ class PaymentPlan(
                 PaymentPlan.Status.TP_STEFICON_WAIT,
                 PaymentPlan.Status.TP_STEFICON_COMPLETED,
                 PaymentPlan.Status.TP_STEFICON_ERROR,
+                # TODO: remove after migrations TP>PP
+                PaymentPlan.Status.MIGRATION_BLOCKED,
             ]
         ],
     )
@@ -1047,6 +1054,8 @@ class PaymentPlan(
                 PaymentPlan.Status.TP_STEFICON_COMPLETED,
                 PaymentPlan.Status.TP_STEFICON_ERROR,
                 PaymentPlan.Status.TP_STEFICON_WAIT,
+                # TODO: remove after migrations TP>PP
+                PaymentPlan.Status.MIGRATION_BLOCKED,
             ]
         ],
     )
