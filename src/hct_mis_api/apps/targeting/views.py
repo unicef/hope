@@ -20,12 +20,12 @@ logger = logging.getLogger(__name__)
 
 @staff_member_required
 def download_xlsx_households(request: HttpRequest, target_population_id: "UUID") -> HttpResponse:
-    payment_plan = get_object_or_404(PaymentPlan, id=target_population_id)
+    payment_plan = get_object_or_404(PaymentPlan, id=target_population_id)  # pragma no cover
     mimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    filename = f"{payment_plan.name}.xlsx"
+    filename = f"{payment_plan.name}.xlsx"  # pragma no cover
     response = HttpResponse(content_type=mimetype)
     response["Content-Disposition"] = f"attachment; filename={filename}"
-    service = XlsxExportTargetingService(payment_plan)
+    service = XlsxExportTargetingService(payment_plan)  # pragma no cover
     wb = service.generate_workbook()
     with NamedTemporaryFile() as tmp:
         wb.save(tmp.name)

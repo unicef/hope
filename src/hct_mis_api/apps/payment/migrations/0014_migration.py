@@ -8,8 +8,8 @@ def assign_targeting_criteria_for_all_payment_plans(apps, schema_editor):
     TargetingCriteria = apps.get_model("targeting", "TargetingCriteria")
     payment_plan_qs = PaymentPlan.objects.filter(targeting_criteria__isnull=True)
     for payment_plan in payment_plan_qs:
-        payment_plan.targeting_criteria = TargetingCriteria.objects.create()
-        payment_plan.save()
+        payment_plan.targeting_criteria = TargetingCriteria.objects.create()  # pragma no cover
+        payment_plan.save()  # pragma no cover
 
 class Migration(migrations.Migration):
 

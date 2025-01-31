@@ -28,10 +28,12 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
 from hct_mis_api.apps.payment.fields import DynamicChoiceArrayField, DynamicChoiceField
+from hct_mis_api.apps.payment.filters import PaymentPlanFilter
 from hct_mis_api.apps.payment.fixtures import (
     ApprovalFactory,
     ApprovalProcessFactory,
     DeliveryMechanismDataFactory,
+    DeliveryMechanismFactory,
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
@@ -43,6 +45,7 @@ from hct_mis_api.apps.payment.fixtures import (
 from hct_mis_api.apps.payment.models import (
     Approval,
     DeliveryMechanism,
+    DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     Payment,
@@ -392,6 +395,36 @@ class TestPaymentPlanModel(TestCase):
             individual_ids="IND-01, IND-02",
         )
         self.assertFalse(pp.has_empty_ids_criteria)
+
+    def test_filter_delivery_types(self) -> None:
+        generate_delivery_mechanisms()
+        self.pp_1 = PaymentPlanFactory(
+            name="Payment Plan 1",
+            is_follow_up=False,
+            created_by=self.user,
+            currency="PLN",
+        )
+        self.pp_2 = PaymentPlanFactory(
+            name="Payment Plan 222",
+            is_follow_up=False,
+            created_by=self.user,
+            currency="PLN",
+        )
+        self.cash_dm = DeliveryMechanismFactory(code="cash", is_active=True)
+        self.referral = DeliveryMechanismFactory(code="referral", is_active=True)
+        self.fsp_1 = FinancialServiceProviderFactory(name="FSP_1")
+        self.fsp_2 = FinancialServiceProviderFactory(name="FSP_2")
+        DeliveryMechanismPerPaymentPlanFactory(payment_plan=self.pp_1, delivery_mechanism=self.cash_dm)
+        DeliveryMechanismPerPaymentPlan.objects.create(
+            payment_plan=self.pp_2, financial_service_provider=self.fsp_2, delivery_mechanism=self.referral
+        )
+
+        queryset = PaymentPlan.objects.all()
+        filter_data = {"delivery_types": ["cash"]}
+        filtered_qs = PaymentPlanFilter(filter_data, queryset=queryset).qs
+
+        self.assertIn(self.pp_1, filtered_qs)
+        self.assertNotIn(self.pp_2, filtered_qs)
 
 
 class TestPaymentModel(TestCase):
