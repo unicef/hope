@@ -71,7 +71,9 @@ def create_user_role_with_permissions(set_admin_area_limits_in_program: Any) -> 
         # whole_business_area is used to create a role for all programs in a business area (program=None)
         if not program and not whole_business_area_access:
             program = ProgramFactory(business_area=business_area, name="Program for User Role")
-        user_role, _ = RoleAssignment.objects.get_or_create(user=user, role=role, business_area=business_area)
+        user_role, _ = RoleAssignment.objects.get_or_create(
+            user=user, role=role, business_area=business_area, program=program
+        )
 
         # set admin area limits
         if program and areas:

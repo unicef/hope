@@ -67,7 +67,7 @@ class TestRegistrationDataImportViews:
         )
 
     @pytest.mark.parametrize(
-        "permissions, partner_permissions, access_to_program, expected_status",
+        "user_permissions, partner_permissions, is_permission_in_correct_program, expected_status",
         [
             ([], [], True, status.HTTP_403_FORBIDDEN),
             ([Permissions.RDI_VIEW_LIST], [], True, status.HTTP_200_OK),
@@ -91,9 +91,9 @@ class TestRegistrationDataImportViews:
     )
     def test_list_registration_data_imports_permission(
         self,
-        permissions: list,
+        user_permissions: list,
         partner_permissions: list,
-        access_to_program: bool,
+        is_permission_in_correct_program: bool,
         expected_status: str,
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
@@ -102,15 +102,13 @@ class TestRegistrationDataImportViews:
         id_to_base64: Callable,
     ) -> None:
         self.set_up(api_client, afghanistan, id_to_base64)
-        create_user_role_with_permissions(
-            self.user,
-            permissions,
-            self.afghanistan,
-        )
-        create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
-        if access_to_program:
-            create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan, self.program2)
+
+        if is_permission_in_correct_program:
+            create_user_role_with_permissions(self.user, user_permissions, self.afghanistan, self.program1)
+            create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan, self.program1)
         else:
+            # role will be created for different program
+            create_user_role_with_permissions(self.user, user_permissions, self.afghanistan)
             create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
 
         response = self.client.get(self.url_list)
@@ -229,7 +227,7 @@ class TestRegistrationDataImportViews:
 
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 12
+            assert len(ctx.captured_queries) == 15
 
         # Test that reoccurring requests use cached data
         with CaptureQueriesContext(connection) as ctx:
@@ -238,7 +236,7 @@ class TestRegistrationDataImportViews:
 
             etag_second_call = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 5
+            assert len(ctx.captured_queries) == 3
 
             assert etag_second_call == etag
 
@@ -251,7 +249,7 @@ class TestRegistrationDataImportViews:
 
             etag_call_after_update = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 12
+            assert len(ctx.captured_queries) == 10  # less than the first call because of cached permissions
 
             assert etag_call_after_update != etag
 
@@ -262,6 +260,6 @@ class TestRegistrationDataImportViews:
 
             etag_call_after_update_second_call = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 5
+            assert len(ctx.captured_queries) == 3
 
             assert etag_call_after_update_second_call == etag_call_after_update
