@@ -7,6 +7,24 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
+snapshots['TestPaymentPlanQueries::test_all_payment_plans_filter_by_delivery_types 1'] = {
+    'data': {
+        'allPaymentPlans': {
+            'edges': [
+                {
+                    'node': {
+                        'dispersionEndDate': '2020-12-10',
+                        'dispersionStartDate': '2020-08-10',
+                        'status': 'OPEN',
+                        'totalEntitledQuantity': 100.0,
+                        'unicefId': 'PP-01'
+                    }
+                }
+            ]
+        }
+    }
+}
+
 snapshots['TestPaymentPlanQueries::test_all_payment_verification_log_entries 1'] = {
     'data': {
         'allPaymentVerificationLogEntries': {

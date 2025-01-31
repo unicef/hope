@@ -502,6 +502,18 @@ class TestPaymentPlanQueries(APITestCase):
             )
 
     @freeze_time("2020-10-10")
+    def test_all_payment_plans_filter_by_delivery_types(self) -> None:
+        self.snapshot_graphql_request(
+            request_string=self.ALL_PAYMENT_PLANS_FILTER_QUERY,
+            context={"user": self.user},
+            variables={
+                "businessArea": "afghanistan",
+                "program": encode_id_base64(self.pp.program.pk, "Program"),
+                **{"deliveryTypes": ["cash"]},
+            },
+        )
+
+    @freeze_time("2020-10-10")
     def test_filter_payment_plans_with_source_id(self) -> None:
         create_child_payment_plans(self.pp, self.user)
 
