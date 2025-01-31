@@ -54,8 +54,6 @@ class PermissionsBackend(BaseBackend):
         cached_permissions = cache.get(cache_key)
 
         if cached_permissions:
-            print("cached")
-            print(cached_permissions)
             return cached_permissions
 
         # If permission is checked for a Program and User does not have access to it, return empty set
@@ -82,8 +80,6 @@ class PermissionsBackend(BaseBackend):
             (Q(user=user) | Q(partner__user=user))
             & (Q(business_area=filters.get("business_area"), program=None) | Q(**filters))
         ).exclude(expiry_date__lt=timezone.now())
-
-        print(role_assignments)
 
         if business_area and not role_assignments.exists():
             return set()
@@ -115,8 +111,6 @@ class PermissionsBackend(BaseBackend):
         return permissions_set
 
     def has_perm(self, user_obj: Union[User, AnonymousUser], perm: str, obj: Optional[Model] = None) -> bool:  # type: ignore
-        print("sd original")
-        print(perm)
         if user_obj.is_superuser:
             return True
         if isinstance(user_obj, AnonymousUser):
