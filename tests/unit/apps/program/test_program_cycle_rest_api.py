@@ -43,13 +43,9 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
             Permissions.PM_PROGRAMME_CYCLE_UPDATE,
             Permissions.PM_PROGRAMME_CYCLE_DELETE,
         ]
-        partner = PartnerFactory(name="UNICEF")
+        unicef = PartnerFactory(name="UNICEF")
+        partner = PartnerFactory(name="UNICEF HQ", parent=unicef)
         cls.user = UserFactory(username="Hope_Test_DRF", password="SpeedUp", partner=partner, is_superuser=True)
-        permission_list = [perm.value for perm in user_permissions]
-        role, created = Role.objects.update_or_create(name="TestName", defaults={"permissions": permission_list})
-        user_role, _ = RoleAssignment.objects.get_or_create(user=cls.user, role=role, business_area=cls.business_area)
-        cls.client = APIClient()
-
         cls.program = ProgramFactory(
             name="Test REST API Program",
             status=Program.ACTIVE,
@@ -62,6 +58,13 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
             cycle__end_date="2023-01-10",
             cycle__created_by=cls.user,
         )
+        permission_list = [perm.value for perm in user_permissions]
+        role, created = Role.objects.update_or_create(name="TestName", defaults={"permissions": permission_list})
+        user_role, _ = RoleAssignment.objects.get_or_create(
+            user=cls.user, role=role, business_area=cls.business_area, program=cls.program
+        )
+        cls.client = APIClient()
+
         cls.cycle1 = ProgramCycle.objects.create(
             program=cls.program,
             title="Cycle 1",
