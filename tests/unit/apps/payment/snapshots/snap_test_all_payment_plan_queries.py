@@ -19,6 +19,15 @@ snapshots['TestPaymentPlanQueries::test_all_payment_plans_filter_by_delivery_typ
                         'totalEntitledQuantity': 100.0,
                         'unicefId': 'PP-01'
                     }
+                },
+                {
+                    'node': {
+                        'dispersionEndDate': '2020-10-10',
+                        'dispersionStartDate': '2020-10-10',
+                        'status': 'LOCKED',
+                        'totalEntitledQuantity': 100.0,
+                        'unicefId': 'PP-02'
+                    }
                 }
             ]
         }
