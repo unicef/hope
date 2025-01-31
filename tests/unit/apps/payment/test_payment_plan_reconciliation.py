@@ -176,8 +176,8 @@ mutation ChooseDeliveryMechanismsForPaymentPlan($input: ChooseDeliveryMechanisms
 """
 
 AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY = """
-query AvailableFspsForDeliveryMechanisms($input: AvailableFspsForDeliveryMechanismsInput!) {
-    availableFspsForDeliveryMechanisms(input: $input) {
+query AvailableFspsForDeliveryMechanisms {
+    availableFspsForDeliveryMechanisms {
         deliveryMechanism
         fsps {
             id

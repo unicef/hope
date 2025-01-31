@@ -8,6 +8,7 @@ from django.db import IntegrityError
 from django.utils import timezone
 
 from aniso8601 import parse_date
+from apps.payment.fixtures import PaymentPlanSplitFactory
 from django_fsm import TransitionNotAllowed
 from flaky import flaky
 from freezegun import freeze_time
@@ -277,7 +278,7 @@ class TestPaymentPlanServices(APITestCase):
         with mock.patch(
             "hct_mis_api.apps.payment.services.payment_plan_services.transaction"
         ) as mock_prepare_payment_plan_task:
-            with self.assertNumQueries(11):
+            with self.assertNumQueries(12):
                 pp = PaymentPlanService.create(
                     input_data=input_data, user=self.user, business_area_slug=self.business_area.slug
                 )
@@ -601,17 +602,18 @@ class TestPaymentPlanServices(APITestCase):
             payment_gateway_id="123",
         )
         pg_fsp.delivery_mechanisms.add(self.dm_transfer_to_account)
-        dm = DeliveryMechanismPerPaymentPlanFactory(
+        DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=pp,
             financial_service_provider=pg_fsp,
             delivery_mechanism=self.dm_transfer_to_account,
         )
+        split = PaymentPlanSplitFactory(payment_plan=pp, send_to_payment_gateway=True)
 
         with self.assertRaisesMessage(GraphQLError, "Already sent to Payment Gateway"):
             PaymentPlanService(pp).send_to_payment_gateway()
 
-        dm.sent_to_payment_gateway = False
-        dm.save()
+        split.sent_to_payment_gateway = False
+        split.save()
         with mock.patch(
             "hct_mis_api.apps.payment.services.payment_plan_services.send_to_payment_gateway.delay"
         ) as mock_send_to_payment_gateway_task:
@@ -714,7 +716,7 @@ class TestPaymentPlanServices(APITestCase):
         with mock.patch(
             "hct_mis_api.apps.payment.services.payment_plan_services.transaction"
         ) as mock_prepare_payment_plan_task:
-            with self.assertNumQueries(11):
+            with self.assertNumQueries(12):
                 pp = PaymentPlanService.create(
                     input_data=input_data, user=self.user, business_area_slug=self.business_area.slug
                 )

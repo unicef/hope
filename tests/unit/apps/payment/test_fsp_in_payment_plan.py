@@ -238,7 +238,6 @@ class TestVolumeByDeliveryMechanism(APITestCase):
         data = get_volume_by_delivery_mechanism_response["data"]["paymentPlan"]["volumeByDeliveryMechanism"]
         assert len(data) == 1
         assert data[0]["deliveryMechanism"]["name"] == DeliveryMechanismChoices.DELIVERY_TYPE_TRANSFER
-        assert data[0]["deliveryMechanism"]["order"] == 1
         assert data[0]["deliveryMechanism"]["fsp"]["id"] == self.encoded_santander_fsp_id
         assert data[0]["volume"] == 0
         assert data[0]["volumeUsd"] == 0

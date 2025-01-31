@@ -4,6 +4,7 @@ from typing import Any
 from unittest import mock
 
 import pytest
+from apps.payment.fixtures import PaymentPlanSplitFactory
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -125,9 +126,6 @@ class TestPaymentGatewayService(APITestCase):
         get_exchange_rate_mock: Any,
         change_payment_instruction_status_mock: Any,
     ) -> None:
-        self.dm.sent_to_payment_gateway = True
-        self.dm.save()
-
         pp_split_1 = PaymentPlanSplit.objects.create(
             payment_plan=self.pp,
             split_type=PaymentPlanSplit.SplitType.BY_COLLECTOR,
@@ -217,6 +215,7 @@ class TestPaymentGatewayService(APITestCase):
         get_exchange_rate_mock: Any,
         change_payment_instruction_status_mock: Any,
     ) -> None:
+        PaymentPlanSplitFactory(payment_plan=self.pp, sent_to_payment_gateway=True)
         for _ in range(2):
             collector = IndividualFactory(household=None)
             hoh = IndividualFactory(household=None)
@@ -235,10 +234,6 @@ class TestPaymentGatewayService(APITestCase):
                     financial_service_provider=self.pg_fsp,
                 )
             )
-
-        self.dm.sent_to_payment_gateway = True
-        self.dm.save()
-
         get_records_for_payment_instruction_mock.return_value = [
             PaymentRecordData(
                 id=1,
@@ -328,9 +323,7 @@ class TestPaymentGatewayService(APITestCase):
         get_exchange_rate_mock: Any,
         change_payment_instruction_status_mock: Any,
     ) -> None:
-        self.dm.sent_to_payment_gateway = True
-        self.dm.save()
-
+        PaymentPlanSplitFactory(payment_plan=self.pp, sent_to_payment_gateway=True)
         get_records_for_payment_instruction_mock.return_value = [
             PaymentRecordData(
                 id=1,
@@ -360,7 +353,7 @@ class TestPaymentGatewayService(APITestCase):
         pg_service = PaymentGatewayService()
         pg_service.api.get_records_for_payment_instruction = get_records_for_payment_instruction_mock  # type: ignore
 
-        assert self.pp.splits.exists() is False
+        assert self.pp.splits.exists() is True
         assert self.pp.is_reconciled is False
 
         pg_service.sync_records()
@@ -543,6 +536,7 @@ class TestPaymentGatewayService(APITestCase):
     def test_add_records_to_payment_instructions(
         self, change_payment_instruction_status_mock: Any, add_records_to_payment_instruction_mock: Any
     ) -> None:
+        split = PaymentPlanSplitFactory(payment_plan=self.pp, sent_to_payment_gateway=False)
         add_records_to_payment_instruction_mock.return_value = AddRecordsResponseData(
             remote_id="1",
             records={"1": self.payments[0].id, "2": self.payments[1].id},
@@ -560,7 +554,7 @@ class TestPaymentGatewayService(APITestCase):
         self.payments[0].refresh_from_db()
         self.payments[1].refresh_from_db()
 
-        self.assertEqual(self.pp.delivery_mechanism.sent_to_payment_gateway, True)
+        self.assertEqual(split.sent_to_payment_gateway, True)
         self.assertEqual(change_payment_instruction_status_mock.call_count, 2)
         self.assertEqual(self.payments[0].status, Payment.STATUS_SENT_TO_PG)
         self.assertEqual(self.payments[1].status, Payment.STATUS_SENT_TO_PG)
@@ -569,6 +563,7 @@ class TestPaymentGatewayService(APITestCase):
         "hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.add_records_to_payment_instruction"
     )
     def test_add_records_to_payment_instructions_error(self, add_records_to_payment_instruction_mock: Any) -> None:
+        split = PaymentPlanSplitFactory(payment_plan=self.pp, sent_to_payment_gateway=False)
         add_records_to_payment_instruction_mock.return_value = AddRecordsResponseData(
             remote_id="1",
             records=None,
@@ -581,7 +576,7 @@ class TestPaymentGatewayService(APITestCase):
         self.payments[0].refresh_from_db()
         self.payments[1].refresh_from_db()
 
-        self.assertEqual(self.pp.delivery_mechanisms.first().sent_to_payment_gateway, False)
+        self.assertEqual(split.sent_to_payment_gateway, False)
         self.assertEqual(self.payments[0].status, Payment.STATUS_ERROR)
         self.assertEqual(self.payments[1].status, Payment.STATUS_ERROR)
         self.assertEqual(self.payments[0].reason_for_unsuccessful_payment, "Error")

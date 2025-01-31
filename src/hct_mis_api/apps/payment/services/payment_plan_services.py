@@ -758,7 +758,7 @@ class PaymentPlanService:
                 raise GraphQLError(
                     f"Payment Parts number should be between {PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK} and total number of payments"
                 )
-            payments_chunks = list(chunks(list(payments.order_by("unicef_id").values_list("id", flat=True)), chunks_no))
+            payments_chunks = list(chunks(list(payments.order_by("unicef_id")), chunks_no))
 
         elif split_type in [
             PaymentPlanSplit.SplitType.BY_ADMIN_AREA1,
@@ -773,13 +773,13 @@ class PaymentPlanService:
             )
             payments_chunks = []
             for _, payments in groupby(grouped_payments, key=lambda x: getattr(x.household, f"admin{area_level}")):  # type: ignore
-                payments_chunks.append([payment.id for payment in payments])
+                payments_chunks.append(payments)
 
         elif split_type == PaymentPlanSplit.SplitType.BY_COLLECTOR:
             grouped_payments = list(payments.order_by("collector__unicef_id", "unicef_id").select_related("collector"))
             payments_chunks = []
             for _, payments in groupby(grouped_payments, key=lambda x: x.collector):  # type: ignore
-                payments_chunks.append([payment.id for payment in payments])
+                payments_chunks.append(payments)
 
         payments_chunks_count = len(payments_chunks)
         if payments_chunks_count > PaymentPlanSplit.MAX_CHUNKS:
@@ -805,7 +805,7 @@ class PaymentPlanService:
                 )
             PaymentPlanSplit.objects.bulk_create(payment_plan_splits_to_create)
             for i, chunk in enumerate(payments_chunks):
-                payment_plan_splits_to_create[i].split_payment_items.set(*chunk)
+                payment_plan_splits_to_create[i].split_payment_items.set(chunk)
 
         return self.payment_plan
 

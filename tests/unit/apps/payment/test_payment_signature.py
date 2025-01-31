@@ -5,6 +5,11 @@ from unittest import mock
 from django.conf import settings
 from django.utils import timezone
 
+from apps.payment.fixtures import (
+    FinancialServiceProviderFactory,
+    generate_delivery_mechanisms,
+)
+from apps.payment.models import DeliveryMechanism
 from freezegun import freeze_time
 from pytz import utc
 
@@ -36,6 +41,7 @@ class TestPaymentSignature(APITestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         create_afghanistan()
+        generate_delivery_mechanisms()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory.create()
 
@@ -127,6 +133,8 @@ class TestPaymentSignature(APITestCase):
         program_cycle = program.cycles.first()
         program_cycle_id = self.id_to_base64(program_cycle.id, "ProgramCycleNode")
 
+        fsp = FinancialServiceProviderFactory()
+
         targeting_criteria = {
             "flag_exclude_if_active_adjudication_ticket": False,
             "flag_exclude_if_on_sanction_list": False,
@@ -147,6 +155,8 @@ class TestPaymentSignature(APITestCase):
             program_cycle_id=program_cycle_id,
             targeting_criteria=targeting_criteria,
             excluded_ids="TEST_INVALID_ID_01, TEST_INVALID_ID_02",
+            fsp_id=fsp.id,
+            delivery_mechanism_code=DeliveryMechanism.objects.get(code="cash").code,
         )
 
         with mock.patch("hct_mis_api.apps.payment.services.payment_plan_services.prepare_payment_plan_task"):
