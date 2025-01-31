@@ -362,15 +362,6 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans_filters 7'] = {
     'data': {
         'allPaymentPlans': {
             'edges': [
-                {
-                    'node': {
-                        'dispersionEndDate': '2020-12-10',
-                        'dispersionStartDate': '2020-08-10',
-                        'status': 'OPEN',
-                        'totalEntitledQuantity': 100.0,
-                        'unicefId': 'PP-01'
-                    }
-                }
             ]
         }
     }
@@ -380,6 +371,15 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans_filters 8'] = {
     'data': {
         'allPaymentPlans': {
             'edges': [
+                {
+                    'node': {
+                        'dispersionEndDate': '2020-12-10',
+                        'dispersionStartDate': '2020-08-10',
+                        'status': 'OPEN',
+                        'totalEntitledQuantity': 100.0,
+                        'unicefId': 'PP-01'
+                    }
+                }
             ]
         }
     }
