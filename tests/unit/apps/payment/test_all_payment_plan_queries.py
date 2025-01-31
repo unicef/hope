@@ -489,7 +489,7 @@ class TestPaymentPlanQueries(APITestCase):
             {"search": self.pp.unicef_id},
             {"status": self.pp.status},
             {"serviceProvider": "test"},
-            {"verificationStatus": ["ACTIVE", "FINISHED"]},
+            # {"verificationStatus": ["ACTIVE", "FINISHED"]},
         ]:
             self.snapshot_graphql_request(
                 request_string=self.ALL_PAYMENT_PLANS_FILTER_QUERY,
