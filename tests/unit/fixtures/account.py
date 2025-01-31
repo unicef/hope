@@ -47,7 +47,7 @@ def create_partner_role_with_permissions() -> Callable:
         permission_list = [perm.value for perm in permissions]
         role, created = Role.objects.update_or_create(name=name, defaults={"permissions": permission_list})
         # whole_business_area is used to create a role for all programs in a business area (program=None)
-        if not whole_business_area_access:
+        if not program and not whole_business_area_access:
             program = ProgramFactory(business_area=business_area, name="Program for Partner Role")
         partner.allowed_business_areas.add(business_area)
         RoleAssignment.objects.get_or_create(partner=partner, role=role, business_area=business_area, program=program)
@@ -64,9 +64,13 @@ def create_user_role_with_permissions(set_admin_area_limits_in_program: Any) -> 
         program: Optional[Program] = None,
         areas: Optional[List[Area]] = None,
         name: Optional[str] = "Role with Permissions",
+        whole_business_area_access: Optional[bool] = False,
     ) -> RoleAssignment:
         permission_list = [perm.value for perm in permissions]
         role, created = Role.objects.update_or_create(name=name, defaults={"permissions": permission_list})
+        # whole_business_area is used to create a role for all programs in a business area (program=None)
+        if not program and not whole_business_area_access:
+            program = ProgramFactory(business_area=business_area, name="Program for User Role")
         user_role, _ = RoleAssignment.objects.get_or_create(user=user, role=role, business_area=business_area)
 
         # set admin area limits
