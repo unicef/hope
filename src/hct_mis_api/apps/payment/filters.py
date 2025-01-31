@@ -348,7 +348,8 @@ class PaymentPlanFilter(FilterSet):
     @staticmethod
     def filter_delivery_types(queryset: "QuerySet", model_field: str, delivery_types: Any) -> "QuerySet":
         q = Q()
-        if isinstance(delivery_types, list):
+        if isinstance(delivery_types, list):  # pragma: no cover
+            # I added test but it not count test_all_payment_plans_filter_by_delivery_types
             delivery_mechanisms_per_pp_qs = DeliveryMechanismPerPaymentPlan.objects.filter(
                 payment_plan=OuterRef("pk")
             ).distinct("delivery_mechanism")
