@@ -55,7 +55,6 @@ from hct_mis_api.apps.core.models import (
     FlexibleAttribute,
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,
-    MigrationStatus,
     PeriodicFieldData,
     StorageFile,
     XLSXKoboTemplate,
@@ -721,11 +720,6 @@ class StorageFileAdmin(ExtraButtonsMixin, admin.ModelAdmin):
 
     def has_add_permission(self, request: HttpRequest) -> bool:
         return request.user.can_download_storage_files()
-
-
-@admin.register(MigrationStatus)
-class MigrationStatusAdmin(admin.ModelAdmin):
-    pass
 
 
 @admin.register(DataCollectingType)

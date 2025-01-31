@@ -602,7 +602,7 @@ def adjust_payments(business_area: BusinessArea) -> None:
 
     payments_ids = list(
         Payment.objects.filter(
-            parent__target_population__program__business_area=business_area, household__is_original=True
+            parent__program_cycle__program__business_area=business_area, household__is_original=True
         ).values_list("pk", flat=True)
     )
     payments_count = len(payments_ids)
@@ -614,7 +614,7 @@ def adjust_payments(business_area: BusinessArea) -> None:
 
         payments_batch = Payment.objects.filter(id__in=payments_ids[batch_start:batch_end])
         for payment in payments_batch:
-            payment_program = payment.parent.target_population.program
+            payment_program = payment.parent.program_cycle.program
             representation_collector = get_individual_representation_per_program_by_old_individual_id(
                 program=payment_program,
                 old_individual_id=payment.collector_id,
