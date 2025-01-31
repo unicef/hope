@@ -333,7 +333,7 @@ class TestPaymentPlanQueries(APITestCase):
             cls.pp.unicef_id = "PP-01"
             cls.pp.save()
             cash_dm = DeliveryMechanismFactory(code="cash", is_active=True)
-            DeliveryMechanismFactory(code="referral", is_active=True)
+            referral_dm = DeliveryMechanismFactory(code="referral", is_active=True)
             DeliveryMechanismPerPaymentPlanFactory(payment_plan=cls.pp, delivery_mechanism=cash_dm)
             PaymentVerificationSummaryFactory(payment_plan=cls.pp, status="ACTIVE")
 
@@ -439,6 +439,7 @@ class TestPaymentPlanQueries(APITestCase):
                 financial_service_provider__payment_gateway_id="test123",
                 created_by=cls.user,
                 sent_by=cls.user,
+                delivery_mechanism=referral_dm,
             )
 
             with patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0):
@@ -489,7 +490,6 @@ class TestPaymentPlanQueries(APITestCase):
             {"status": self.pp.status},
             {"serviceProvider": "test"},
             {"verificationStatus": ["ACTIVE", "FINISHED"]},
-            # {"deliveryTypes": ["referral", "cash"]},
         ]:
             self.snapshot_graphql_request(
                 request_string=self.ALL_PAYMENT_PLANS_FILTER_QUERY,
@@ -509,7 +509,7 @@ class TestPaymentPlanQueries(APITestCase):
             variables={
                 "businessArea": "afghanistan",
                 "program": encode_id_base64(self.pp.program.pk, "Program"),
-                **{"deliveryTypes": ["cash"]},
+                **{"deliveryTypes": ["cash", "referral"]},
             },
         )
 
