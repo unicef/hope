@@ -143,7 +143,7 @@ class APITestCase(SnapshotTestTestCase):
         permission_list = [perm.value for perm in permissions]
         role, created = Role.objects.update_or_create(name=name, defaults={"permissions": permission_list})
         # whole_business_area is used to create a role for all programs in a business area (program=None)
-        if not whole_business_area_access:
+        if not program and not whole_business_area_access:
             program = ProgramFactory(business_area=business_area, name="Program for Partner Role")
         partner.allowed_business_areas.add(business_area)
         role_assignment, _ = RoleAssignment.objects.get_or_create(
@@ -170,8 +170,9 @@ class APITestCase(SnapshotTestTestCase):
         """
         permission_list = [perm.value for perm in permissions]
         role, created = Role.objects.update_or_create(name=name, defaults={"permissions": permission_list})
-        if not whole_business_area_access:
-            program = ProgramFactory(business_area=business_area, name="Program for Partner Role")
+        # whole_business_area is used to create a role for all programs in a business area (program=None)
+        if not program and not whole_business_area_access:
+            program = ProgramFactory(business_area=business_area, name="Program for User Role")
         role_assignment, _ = RoleAssignment.objects.get_or_create(
             user=user, role=role, business_area=business_area, program=program
         )
