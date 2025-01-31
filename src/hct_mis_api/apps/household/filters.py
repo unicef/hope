@@ -120,7 +120,6 @@ class HouseholdFilter(FilterSet):
             "household__id",
             "id",
             "unicef_id",
-            "household_ca_id",
             "size",
             "status_label",
             Lower("head_of_household__full_name"),

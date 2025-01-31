@@ -922,7 +922,6 @@ class PaymentRecordAndPaymentNode(BaseNodePermissionMixin, graphene.ObjectType):
 
     obj_type = graphene.String()
     id = graphene.String()
-    ca_id = graphene.String(source="unicef_id")
     status = graphene.String()
     full_name = graphene.String(source="full_name")
     parent = graphene.Field(CashPlanAndPaymentPlanNode, source="parent")

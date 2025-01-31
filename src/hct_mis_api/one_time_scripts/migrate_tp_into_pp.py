@@ -107,8 +107,6 @@ TP_MIGRATION_MAPPING = {
     "storage_file": "storage_file",
 }
 INTERNAL_DATA_FIELDS = {
-    "ca_id": "internal_data__ca_id",
-    "ca_hash_id": "internal_data__ca_hash_id",
     "sent_to_datahub": "internal_data__sent_to_datahub",
     # we need to store ID in case to migrate maybe data in future like Message or Survey
     "id": "internal_data__target_population_id",

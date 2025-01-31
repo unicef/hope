@@ -183,7 +183,6 @@ def recalculate_data(
             household.fchild_hoh = True
         household.child_hoh = True
 
-    household.is_recalculated_group_ages = True
     if save:
         household.save(update_fields=updated_fields)
 
