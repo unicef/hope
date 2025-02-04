@@ -8,7 +8,7 @@ exports[`components/paymentmodule/DeliveryMechanismWarning should render 1`] = `
   >
     <svg
       aria-hidden="true"
-      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium sc-gyycJP duSpTU css-i4bv87-MuiSvgIcon-root"
+      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium sc-gyycJP duSpTU css-1umw9bq-MuiSvgIcon-root"
       data-testid="ErrorOutlineIcon"
       focusable="false"
       viewBox="0 0 24 24"
