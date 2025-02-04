@@ -3,7 +3,7 @@ import {
   FormControlLabel,
   Checkbox,
   FormHelperText,
-  Grid,
+  Grid2 as Grid,
 } from '@mui/material';
 import get from 'lodash/get';
 import { LabelizedField } from '@components/core/LabelizedField';

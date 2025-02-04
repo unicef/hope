@@ -30,7 +30,7 @@ const muiTheme = createTheme({
 
 export const FONT = 'Roboto';
 export const theme = {
-  ...muiTheme,
+  ...structuredClone(muiTheme), // Deep clone to avoid immutability issues
   spacing: muiTheme.spacing,
   drawer: {
     width: 270,

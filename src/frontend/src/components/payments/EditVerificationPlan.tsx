@@ -3,7 +3,7 @@ import {
   Button,
   DialogContent,
   DialogTitle,
-  Grid,
+  Grid2 as Grid,
   Typography,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/EditRounded';
