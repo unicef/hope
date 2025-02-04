@@ -121,7 +121,7 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
         except FileTemp.DoesNotExist:  # pragma: no cover
             raise GraphQLError("Xlsx Verification File does not exist.")
         except FileTemp.MultipleObjectsReturned as e:  # pragma: no cover
-            logger.exception(e)
+            logger.warning(e)
             raise GraphQLError("Query returned multiple Xlsx Verification Files when only one was expected.")
 
     @property

@@ -33,11 +33,11 @@ class MessageArgumentVerifier:
         last_1 = fields.pop()
         if not any(inputs):
             err_msg = f"Must provide any one of {', '.join(fields)} or {last_1}"
-            logger.error(err_msg)
+            logger.warning(err_msg)
             raise GraphQLError(err_msg)
         if len([value for value in inputs if value]) > 1:
             err_msg = f"Must provide only one of {', '.join(fields)} or {last_1}"
-            logger.error(err_msg)
+            logger.warning(err_msg)
             raise GraphQLError(err_msg)
 
         options = self.ARGUMENTS.get("sampling_type")
@@ -47,10 +47,10 @@ class MessageArgumentVerifier:
             for required in value.get("required"):
                 if self.input_data.get(required) is None:
                     err_msg = f"Must provide {required} for {key}"
-                    logger.error(err_msg)
+                    logger.warning(err_msg)
                     raise GraphQLError(err_msg)
             for not_allowed in value.get("not_allowed"):
                 if self.input_data.get(not_allowed) is not None:
                     err_msg = f"Must not provide {not_allowed} for {key}"
-                    logger.error(err_msg)
+                    logger.warning(err_msg)
                     raise GraphQLError(err_msg)

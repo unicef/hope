@@ -472,7 +472,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
                 url = reverse("admin:steficon_rule_change", args=[self.object.id])
                 return HttpResponseRedirect(url)
         except Exception as e:
-            logger.exception(e)
+            logger.warning(e)
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
             return HttpResponseRedirect(reverse("admin:index"))
 
@@ -502,7 +502,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
             )
             return TemplateResponse(request, "admin/steficon/rule/diff.html", context)
         except Exception as e:
-            logger.exception(e)
+            logger.warning(e)
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
             return HttpResponseRedirect(reverse("admin:index"))
 

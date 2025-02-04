@@ -104,7 +104,7 @@ class HouseholdStatusView(APIView):
         try:
             data = get_household_or_individual(tax_id, registration_id, business_area_code)
         except Exception as e:  # pragma: no cover
-            logger.exception(e)
+            logger.warning(e)
             return Response({"status": "not found", "error_message": "Household not Found"}, status=404)
 
         return Response(data, status=200)

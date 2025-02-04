@@ -125,7 +125,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
     def get_payload(self, obj: Payment) -> Dict:
         snapshot = getattr(obj, "household_snapshot", None)
         if not snapshot:
-            logger.error(f"Not found snapshot for Payment {obj.unicef_id}")
+            logger.warning(f"Not found snapshot for Payment {obj.unicef_id}")
 
         snapshot_data = snapshot.snapshot_data
         collector_data = snapshot_data.get("primary_collector") or snapshot_data.get("alternate_collector") or dict()
@@ -186,7 +186,7 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
                     self.payout_amount, entitlement_quantity
                 )
             except Exception:
-                logger.error(f"Invalid delivered_quantity {self.payout_amount} for Payment {self.remote_id}")
+                logger.warning(f"Invalid delivered_quantity {self.payout_amount} for Payment {self.remote_id}")
                 _hope_status = Payment.STATUS_ERROR
             return _hope_status
 
@@ -202,7 +202,7 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
 
         hope_status = mapping.get(self.status)
         if not hope_status:
-            logger.error(f"Invalid Payment status: {self.status}")
+            logger.warning(f"Invalid Payment status: {self.status}")
             hope_status = Payment.STATUS_ERROR
 
         return hope_status() if callable(hope_status) else hope_status

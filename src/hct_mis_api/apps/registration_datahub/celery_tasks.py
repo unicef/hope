@@ -409,7 +409,7 @@ def check_rdi_import_periodic_task(self: Any, business_area_slug: Optional[str] 
             manager.execute()
             return True
         except Exception as e:
-            logger.error(e)
+            logger.warning(e)
             raise self.retry(exc=e)
 
 
@@ -450,7 +450,7 @@ def remove_old_rdi_links_task(page_count: int = 100) -> None:
 
         logger.info(f"Data links for RDI(s): {''.join([str(_id) for _id in unmerged_rdi_ids])} removed successfully")
     except Exception:  # pragma: no cover
-        logger.error("Removing old RDI objects failed")
+        logger.warning("Removing old RDI objects failed")
         raise
 
 
@@ -469,7 +469,7 @@ def deduplication_engine_process(self: Any, program_id: str) -> None:
         program = Program.objects.get(id=program_id)
         BiometricDeduplicationService().upload_and_process_deduplication_set(program)
     except Exception as e:
-        logger.exception(e)
+        logger.warning(e)
         raise
 
 
@@ -482,7 +482,7 @@ def fetch_biometric_deduplication_results_and_process(self: Any, deduplication_s
     )
 
     if not deduplication_set_id:
-        logger.error("Program.deduplication_set_id is None")
+        logger.warning("Program.deduplication_set_id is None")
         return
 
     program = Program.objects.get(deduplication_set_id=deduplication_set_id)
@@ -492,5 +492,5 @@ def fetch_biometric_deduplication_results_and_process(self: Any, deduplication_s
         service = BiometricDeduplicationService()
         service.fetch_biometric_deduplication_results_and_process(deduplication_set_id)
     except Exception as e:
-        logger.exception(e)
+        logger.warning(e)
         raise
