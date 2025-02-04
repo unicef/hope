@@ -27,7 +27,7 @@ import {
   DialogContent,
   DialogTitle,
   FormHelperText,
-  Grid,
+  Grid2 as Grid,
   IconButton,
   TextField,
   Typography,

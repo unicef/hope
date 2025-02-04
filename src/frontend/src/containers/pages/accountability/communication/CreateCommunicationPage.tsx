@@ -3,7 +3,7 @@ import {
   Button,
   FormControlLabel,
   FormHelperText,
-  Grid,
+  Grid2 as Grid,
   Radio,
   RadioGroup,
   Step,

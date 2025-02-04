@@ -629,7 +629,6 @@ export const EditGrievancePage = (): ReactElement => {
                                     ) => (
                                       <Grid
                                         container
-                                        item
                                         size={{ xs: 12 }}
                                         key={item.id}
                                       >

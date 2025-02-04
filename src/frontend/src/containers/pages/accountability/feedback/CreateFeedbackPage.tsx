@@ -2,7 +2,7 @@ import {
   Box,
   Button,
   FormHelperText,
-  Grid,
+  Grid2 as Grid,
   Step,
   StepLabel,
   Stepper,

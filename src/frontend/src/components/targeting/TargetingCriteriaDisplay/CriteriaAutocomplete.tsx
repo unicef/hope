@@ -1,8 +1,7 @@
 import { forwardRef, ReactElement, useEffect, useState } from 'react';
-import Autocomplete from '@mui/lab/Autocomplete';
 import styled from 'styled-components';
 import get from 'lodash/get';
-import { Paper, TextField } from '@mui/material';
+import { Autocomplete, Paper, TextField } from '@mui/material';
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: 100%;

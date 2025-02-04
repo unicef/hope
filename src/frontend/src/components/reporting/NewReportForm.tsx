@@ -2,7 +2,7 @@ import {
   Button,
   DialogContent,
   DialogTitle,
-  Grid,
+  Grid2 as Grid,
   Paper,
   Typography,
 } from '@mui/material';

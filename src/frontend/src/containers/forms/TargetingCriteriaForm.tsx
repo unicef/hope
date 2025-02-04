@@ -5,7 +5,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid,
+  Grid2 as Grid,
   Typography,
 } from '@mui/material';
 import { AddCircleOutline } from '@mui/icons-material';
