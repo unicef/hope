@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material';
+import { Grid2 as Grid } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
@@ -50,7 +50,7 @@ export const DashboardFilters = ({
     >
       <Grid container alignItems="flex-end" spacing={3}>
         {isAllPrograms && (
-          <Grid item xs={5}>
+          <Grid size={{ xs:5 }}>
             <ProgramAutocomplete
               filter={filter}
               name="program"
@@ -62,7 +62,7 @@ export const DashboardFilters = ({
             />
           </Grid>
         )}
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <AdminAreaAutocomplete
             name="administrativeArea"
             level={2}

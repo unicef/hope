@@ -16,10 +16,10 @@ exports[`components/rdi/details/individual/RegistrationIndividualAdditionalRegis
       </h6>
     </div>
     <div
-      class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-6 css-1qw2a80-MuiGrid-root"
+      class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-6 css-ipzchf-MuiGrid2-root"
     >
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+        class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
       >
         <div>
           <span
@@ -41,7 +41,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualAdditionalRegis
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+        class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
       >
         <div>
           <span
@@ -63,7 +63,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualAdditionalRegis
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+        class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
       >
         <div>
           <span

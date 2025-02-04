@@ -3,16 +3,17 @@
 exports[`components/grievances/GrievancesDetails should render 1`] = `
 <div>
   <div
-    class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-13i4rnv-MuiGrid-root"
+    class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-12 css-1j0u08r-MuiGrid2-root"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-eaUbBy maNC css-1ps6pg7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-eaUbBy maNC css-1gtchvp-MuiPaper-root"
+      style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
     >
       <div
         class="sc-cMHOsR cCIMKX"
       >
         <h6
-          class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
+          class="MuiTypography-root MuiTypography-h6 css-66ugg1-MuiTypography-root"
         >
           Details
         </h6>
@@ -21,10 +22,10 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
         class="sc-gTrWKq kXBwus"
       >
         <div
-          class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-6 css-zow5z4-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-6 css-ipzchf-MuiGrid2-root"
         >
           <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
           >
             <div>
               <span
@@ -55,7 +56,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
           >
             <div>
               <span
@@ -86,7 +87,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
           >
             <div>
               <span
@@ -117,7 +118,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
           >
             <div>
               <span
@@ -139,7 +140,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
           >
             <div>
               <span
@@ -163,7 +164,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
           >
             <div>
               <span
@@ -187,7 +188,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
           >
             <div>
               <span
@@ -216,7 +217,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
           >
             <div>
               <span
@@ -245,7 +246,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
           >
             <div>
               <span
@@ -269,7 +270,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
           >
             <div>
               <span
@@ -293,7 +294,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
           >
             <div>
               <span
@@ -317,7 +318,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
           >
             <div>
               <span
@@ -339,7 +340,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
           >
             <div>
               <span
@@ -361,7 +362,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
           >
             <div>
               <span
@@ -387,7 +388,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
           >
             <div>
               <span
@@ -413,7 +414,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
           >
             <div>
               <span
@@ -439,7 +440,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-12 css-1j0u08r-MuiGrid2-root"
           >
             <div>
               <span

@@ -55,7 +55,7 @@ export function Check({
         style={{ whiteSpace: 'nowrap' }}
       />
       {displayValue && (
-        <Grid item xs={9}>
+        <Grid size={{ xs:9 }}>
           <LabelizedField label={label}>{displayValue}</LabelizedField>
         </Grid>
       )}

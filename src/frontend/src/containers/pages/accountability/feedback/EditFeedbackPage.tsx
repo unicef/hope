@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Grid } from '@mui/material';
+import { Box, Button, Divider, Grid2 as Grid } from '@mui/material';
 import { Field, Formik } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -202,18 +202,18 @@ export const EditFeedbackPage = (): ReactElement => {
               </Box>
             </PageHeader>
             <Grid container spacing={3}>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <Box p={3}>
                   <ContainerColumnWithBorder>
                     <Box p={3}>
                       <Box mb={3}>
-                        <Grid container item xs={6} spacing={6}>
-                          <Grid item xs={6}>
+                        <Grid container size={{ xs: 6 }} spacing={6}>
+                          <Grid size={{ xs:6 }}>
                             <LabelizedField label={t('Category')}>
                               {t('Feedback')}
                             </LabelizedField>
                           </Grid>
-                          <Grid item xs={6}>
+                          <Grid size={{ xs:6 }}>
                             <LabelizedField label={t('Issue Type')}>
                               {feedback.issueType === 'POSITIVE_FEEDBACK'
                                 ? 'Positive Feedback'
@@ -221,8 +221,8 @@ export const EditFeedbackPage = (): ReactElement => {
                             </LabelizedField>
                           </Grid>
                         </Grid>
-                        <Grid container xs={6} spacing={6}>
-                          <Grid item xs={6}>
+                        <Grid container size={{ xs: 6 }} spacing={6}>
+                          <Grid size={{ xs:6 }}>
                             <LabelizedField
                               label={t(`${beneficiaryGroup?.groupLabel} ID`)}
                             >
@@ -244,7 +244,7 @@ export const EditFeedbackPage = (): ReactElement => {
                               )}
                             </LabelizedField>
                           </Grid>
-                          <Grid item xs={6}>
+                          <Grid size={{ xs:6 }}>
                             <LabelizedField
                               label={t(`${beneficiaryGroup?.memberLabel} ID`)}
                             >
@@ -272,7 +272,7 @@ export const EditFeedbackPage = (): ReactElement => {
                         </Box>
                       </Box>
                       <Grid container spacing={3}>
-                        <Grid item xs={12}>
+                        <Grid size={{ xs: 12 }}>
                           <Field
                             name="description"
                             multiline
@@ -283,7 +283,7 @@ export const EditFeedbackPage = (): ReactElement => {
                             component={FormikTextField}
                           />
                         </Grid>
-                        <Grid item xs={12}>
+                        <Grid size={{ xs: 12 }}>
                           <Field
                             name="comments"
                             multiline
@@ -293,7 +293,7 @@ export const EditFeedbackPage = (): ReactElement => {
                             component={FormikTextField}
                           />
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid size={{ xs:6 }}>
                           <Field
                             name="admin2"
                             variant="outlined"
@@ -301,7 +301,7 @@ export const EditFeedbackPage = (): ReactElement => {
                             disabled={Boolean(feedback.admin2?.id)}
                           />
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid size={{ xs:6 }}>
                           <Field
                             name="area"
                             fullWidth
@@ -310,7 +310,7 @@ export const EditFeedbackPage = (): ReactElement => {
                             component={FormikTextField}
                           />
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid size={{ xs:6 }}>
                           <Field
                             name="language"
                             multiline
@@ -320,7 +320,7 @@ export const EditFeedbackPage = (): ReactElement => {
                             component={FormikTextField}
                           />
                         </Grid>
-                        <Grid item xs={3}>
+                        <Grid size={{ xs: 3 }}>
                           <Field
                             name="program"
                             label={t('Programme Name')}

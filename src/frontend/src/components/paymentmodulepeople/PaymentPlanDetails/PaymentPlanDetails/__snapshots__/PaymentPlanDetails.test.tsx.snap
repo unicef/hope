@@ -3,7 +3,7 @@
 exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should render 1`] = `
 <div>
   <div
-    class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-13i4rnv-MuiGrid-root"
+    class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-12 css-1j0u08r-MuiGrid2-root"
   >
     <div
       class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-eaUbBy maNC css-1gtchvp-MuiPaper-root"
@@ -22,13 +22,13 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
         class="sc-jqVXSH jvJmsy"
       >
         <div
-          class="MuiGrid-root MuiGrid-container css-11lq3yg-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-1jxwjqx-MuiGrid2-root"
         >
           <div
-            class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-6 MuiGrid-grid-xs-9 css-en51pv-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-grid-xs-9 MuiGrid2-spacing-xs-6 css-kel0za-MuiGrid2-root"
           >
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
             >
               <div>
                 <span
@@ -50,7 +50,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
             >
               <div>
                 <span
@@ -77,7 +77,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
             >
               <div>
                 <span
@@ -102,7 +102,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
             >
               <div>
                 <span
@@ -124,7 +124,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
             >
               <div>
                 <span
@@ -150,7 +150,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
             >
               <div>
                 <span
@@ -176,7 +176,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
             >
               <div>
                 <span
@@ -202,7 +202,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
             >
               <div>
                 <span
@@ -228,7 +228,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
             >
               <div
                 class="MuiBox-root css-15ro776"
@@ -271,10 +271,10 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-6 MuiGrid-direction-xs-column MuiGrid-grid-xs-3 css-1nj92tu-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-column MuiGrid2-grid-xs-3 MuiGrid2-spacing-xs-6 css-gxd0v3-MuiGrid2-root"
           >
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-12 css-1j0u08r-MuiGrid2-root"
             >
               <div
                 class="sc-kuACkN gumivP"

@@ -140,10 +140,10 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
       </div>
     </div>
     <div
-      class="MuiGrid-root MuiGrid-container css-11lq3yg-MuiGrid-root"
+      class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-1jxwjqx-MuiGrid2-root"
     >
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+        class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
       >
         <div
           class="MuiBox-root css-j7qwjs"
@@ -196,10 +196,10 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+        class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
       />
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+        class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
       />
     </div>
   </div>

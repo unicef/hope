@@ -8,10 +8,10 @@ exports[`components/dashboard/TotalAmountTransferredSection should render 1`] = 
     style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
   >
     <div
-      class="MuiGrid-root MuiGrid-container css-9cyib4-MuiGrid-root"
+      class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-15fcp3v-MuiGrid2-root"
     >
       <div
-        class="MuiGrid-root MuiGrid-item css-13i4rnv-MuiGrid-root"
+        class="MuiGrid2-root MuiGrid2-direction-xs-row css-1fzlhpv-MuiGrid2-root"
       >
         <div
           class="sc-KXCwU hHIlsE"
@@ -25,14 +25,14 @@ exports[`components/dashboard/TotalAmountTransferredSection should render 1`] = 
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item css-13i4rnv-MuiGrid-root"
+        class="MuiGrid2-root MuiGrid2-direction-xs-row css-1fzlhpv-MuiGrid2-root"
         data-cy="total-amount-transferred"
       >
         <div
-          class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 css-vjvnmv-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-3 css-15imkbu-MuiGrid2-root"
         >
           <div
-            class="MuiGrid-root MuiGrid-item css-13i4rnv-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-direction-xs-row css-1fzlhpv-MuiGrid2-root"
           >
             <div
               class="sc-gaZyOd ldimWS"
@@ -41,7 +41,7 @@ exports[`components/dashboard/TotalAmountTransferredSection should render 1`] = 
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-item css-13i4rnv-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-direction-xs-row css-1fzlhpv-MuiGrid2-root"
           >
             <div
               bg="#d9eceb"

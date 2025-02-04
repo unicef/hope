@@ -27,10 +27,10 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
         </a>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 css-121v4hs-MuiGrid-root"
+        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-3 css-17oen6o-MuiGrid2-root"
       >
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
         >
           <div>
             <span
@@ -52,7 +52,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
         >
           <div>
             <span
@@ -74,7 +74,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
         >
           <div>
             <span
@@ -120,10 +120,10 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
           class="sc-kuACkN brAbXR"
         >
           <div
-            class="MuiGrid-root MuiGrid-container css-1bzpx2o-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-188izze-MuiGrid2-root"
           >
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
             >
               <div
                 class="sc-jqVXSH hQuOQK"
@@ -150,7 +150,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
             >
               <div
                 class="sc-jqVXSH olaeO"
@@ -177,7 +177,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
             >
               <div
                 class="sc-jqVXSH mKpoc"
@@ -205,10 +205,10 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-container css-1e2bu2o-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-xg0rmm-MuiGrid2-root"
           >
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
             >
               <div
                 class="sc-hWWBcw dASJb"

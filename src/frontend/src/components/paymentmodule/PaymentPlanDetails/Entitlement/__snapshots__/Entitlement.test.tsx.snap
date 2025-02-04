@@ -27,10 +27,10 @@ exports[`components/paymentmodule/PaymentPlanDetails/Entitlement should render 1
           Select Entitlement Formula
         </p>
         <div
-          class="MuiGrid-root MuiGrid-container css-1vam7s3-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-1nmjuun-MuiGrid2-root"
         >
           <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-11 css-ykovpn-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-11 css-egdial-MuiGrid2-root"
           >
             <div
               class="MuiFormControl-root MuiFormControl-fullWidth css-ytlejw-MuiFormControl-root"
@@ -100,7 +100,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/Entitlement should render 1
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-item css-13i4rnv-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-direction-xs-row css-1fzlhpv-MuiGrid2-root"
           >
             <div
               class="MuiBox-root css-1isemmb"

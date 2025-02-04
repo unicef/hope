@@ -19,16 +19,16 @@ exports[`components/paymentmodule/PaymentPlanDetails/PeoplePaymentPlanDetailsHea
       class="sc-jqVXSH bREItC"
     >
       <div
-        class="MuiGrid-root MuiGrid-container css-11lq3yg-MuiGrid-root"
+        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-1jxwjqx-MuiGrid2-root"
       >
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
         >
           <div
-            class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 css-a5kyt8-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-3 css-6d7jwz-MuiGrid2-root"
           >
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
             >
               <div
                 class="sc-gaZyOd cJGpnC"
@@ -55,7 +55,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PeoplePaymentPlanDetailsHea
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
             >
               <div
                 class="sc-gaZyOd fdAJHX"
@@ -82,7 +82,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PeoplePaymentPlanDetailsHea
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
             >
               <div
                 class="sc-gaZyOd kvpxty"
@@ -109,7 +109,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PeoplePaymentPlanDetailsHea
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
             >
               <div
                 class="sc-gaZyOd ecWBWe"
@@ -138,13 +138,13 @@ exports[`components/paymentmodule/PaymentPlanDetails/PeoplePaymentPlanDetailsHea
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
         >
           <div
-            class="MuiGrid-root MuiGrid-container css-1e2bu2o-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-xg0rmm-MuiGrid2-root"
           >
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
             >
               <div
                 class="sc-hWWBcw dASJb"
@@ -161,13 +161,13 @@ exports[`components/paymentmodule/PaymentPlanDetails/PeoplePaymentPlanDetailsHea
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
         >
           <div
-            class="MuiGrid-root MuiGrid-container css-16g5rpk-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-fa87wz-MuiGrid2-root"
           >
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
             >
               <div
                 class="sc-gTrWKq hKUOAg"

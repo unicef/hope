@@ -184,7 +184,7 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
                       />
                       {values.withdrawReason === 'duplicate' && (
                         <Grid container>
-                          <Grid item xs={6}>
+                          <Grid size={{ xs:6 }}>
                             <Field
                               name="reasonHhId"
                               fullWidth

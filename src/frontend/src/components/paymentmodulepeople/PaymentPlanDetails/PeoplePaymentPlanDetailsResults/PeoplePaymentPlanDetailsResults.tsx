@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@mui/material';
+import { Grid2 as Grid, Typography } from '@mui/material';
 import { Pie } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -69,9 +69,9 @@ export const PeoplePaymentPlanDetailsResults = ({
       </Title>
       <ContentWrapper>
         <Grid container>
-          <Grid item xs={4}>
+          <Grid size={{ xs: 4 }}>
             <Grid container spacing={3} justifyContent="flex-start">
-              <Grid item xs={6}>
+              <Grid size={{ xs:6 }}>
                 <FieldBorder color={colors.femaleChildren}>
                   <LabelizedField
                     label={t('Female Children')}
@@ -79,7 +79,7 @@ export const PeoplePaymentPlanDetailsResults = ({
                   />
                 </FieldBorder>
               </Grid>
-              <Grid item xs={6}>
+              <Grid size={{ xs:6 }}>
                 <FieldBorder color={colors.femaleAdult}>
                   <LabelizedField
                     label={t('Female Adults')}
@@ -87,7 +87,7 @@ export const PeoplePaymentPlanDetailsResults = ({
                   />
                 </FieldBorder>
               </Grid>
-              <Grid item xs={6}>
+              <Grid size={{ xs:6 }}>
                 <FieldBorder color={colors.maleChildren}>
                   <LabelizedField
                     label={t('Male Children')}
@@ -95,7 +95,7 @@ export const PeoplePaymentPlanDetailsResults = ({
                   />
                 </FieldBorder>
               </Grid>
-              <Grid item xs={6}>
+              <Grid size={{ xs:6 }}>
                 <FieldBorder color={colors.maleAdult}>
                   <LabelizedField
                     label={t('Male Adults')}
@@ -105,14 +105,14 @@ export const PeoplePaymentPlanDetailsResults = ({
               </Grid>
             </Grid>
           </Grid>
-          <Grid item xs={4}>
+          <Grid size={{ xs: 4 }}>
             <Grid
               container
               spacing={0}
               justifyContent="flex-start"
               alignItems="center"
             >
-              <Grid item xs={4}>
+              <Grid size={{ xs: 4 }}>
                 <ChartContainer data-cy="chart-container">
                   <Pie
                     width={100}
@@ -155,9 +155,9 @@ export const PeoplePaymentPlanDetailsResults = ({
               </Grid>
             </Grid>
           </Grid>
-          <Grid item xs={4}>
+          <Grid size={{ xs: 4 }}>
             <Grid container spacing={0} justifyContent="flex-end">
-              <Grid item xs={6}>
+              <Grid size={{ xs:6 }}>
                 <SummaryBorder>
                   <LabelizedField label={t('Total Number of People')}>
                     <SummaryValue>{totalIndividualsCount || '0'}</SummaryValue>

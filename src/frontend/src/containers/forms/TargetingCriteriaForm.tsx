@@ -363,7 +363,7 @@ export const TargetingCriteriaForm = ({
                 </DialogDescription>
                 <Grid container spacing={3}>
                   {householdFiltersAvailable && (
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                       <Field
                         data-cy="input-included-household-ids"
                         name="householdIds"
@@ -376,7 +376,7 @@ export const TargetingCriteriaForm = ({
                     </Grid>
                   )}
                   {householdFiltersAvailable && individualFiltersAvailable && (
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                       <AndDivider>
                         <AndDividerLabel>AND</AndDividerLabel>
                       </AndDivider>
@@ -446,7 +446,7 @@ export const TargetingCriteriaForm = ({
                     ) : null}
                     <Grid container spacing={3}>
                       <>
-                        <Grid item xs={12}>
+                        <Grid size={{ xs: 12 }}>
                           <Box pb={3}>
                             <Field
                               data-cy="input-included-individual-ids"
@@ -460,7 +460,7 @@ export const TargetingCriteriaForm = ({
                             />
                           </Box>
                         </Grid>
-                        <Grid item xs={12}>
+                        <Grid size={{ xs: 12 }}>
                           <AndDivider>
                             <AndDividerLabel>AND</AndDividerLabel>
                           </AndDivider>

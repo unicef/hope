@@ -1,4 +1,4 @@
-import { Box, Button, FormHelperText, Grid, Typography } from '@mui/material';
+import { Box, Button, FormHelperText, Grid2 as Grid, Typography } from '@mui/material';
 import { Field, Formik } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -357,17 +357,17 @@ export const EditGrievancePage = (): ReactElement => {
                 </Box>
               </PageHeader>
               <Grid container spacing={3}>
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12 }}>
                   <NewTicket>
                     <ContainerColumnWithBorder>
                       <Grid container spacing={3}>
-                        <Grid item xs={3}>
+                        <Grid size={{ xs: 3 }}>
                           <LabelizedField label={t('Category')}>
                             {categoryChoices[ticket.category]}
                           </LabelizedField>
                         </Grid>
                         {showIssueType(values) ? (
-                          <Grid item xs={6}>
+                          <Grid size={{ xs:6 }}>
                             <LabelizedField label={t('Issue Type')}>
                               {selectedIssueType(
                                 values,
@@ -379,13 +379,13 @@ export const EditGrievancePage = (): ReactElement => {
                         {values.category && (
                           <>
                             <DividerLine />
-                            <Grid item xs={6}>
+                            <Grid size={{ xs:6 }}>
                               <LabelizedField label={t('Category Description')}>
                                 {categoryDescription}
                               </LabelizedField>
                             </Grid>
                             {issueTypeDescription && (
-                              <Grid item xs={6}>
+                              <Grid size={{ xs:6 }}>
                                 <LabelizedField
                                   label={t('Issue Type Description')}
                                 >
@@ -396,8 +396,8 @@ export const EditGrievancePage = (): ReactElement => {
                             <DividerLine />
                           </>
                         )}
-                        <Grid container xs={12} item>
-                          <Grid item xs={3}>
+                        <Grid container size={{ xs: 12 }} >
+                          <Grid size={{ xs: 3 }}>
                             <LabelizedField
                               label={`${beneficiaryGroup?.groupLabel}`}
                             >
@@ -420,7 +420,7 @@ export const EditGrievancePage = (): ReactElement => {
                               </span>
                             </LabelizedField>
                           </Grid>
-                          <Grid item xs={3}>
+                          <Grid size={{ xs: 3 }}>
                             <LabelizedField label={t('Individual ID')}>
                               <span>
                                 {ticket.individual?.id &&
@@ -445,7 +445,7 @@ export const EditGrievancePage = (): ReactElement => {
                       </Grid>
                       <BoxPadding>
                         <Grid container spacing={3}>
-                          <Grid item xs={12}>
+                          <Grid size={{ xs: 12 }}>
                             <Field
                               name="description"
                               multiline
@@ -457,7 +457,7 @@ export const EditGrievancePage = (): ReactElement => {
                               component={FormikTextField}
                             />
                           </Grid>
-                          <Grid item xs={12}>
+                          <Grid size={{ xs: 12 }}>
                             <Field
                               name="comments"
                               multiline
@@ -468,7 +468,7 @@ export const EditGrievancePage = (): ReactElement => {
                               component={FormikTextField}
                             />
                           </Grid>
-                          <Grid item xs={6}>
+                          <Grid size={{ xs:6 }}>
                             <Field
                               name="admin"
                               disabled={Boolean(ticket.admin)}
@@ -476,7 +476,7 @@ export const EditGrievancePage = (): ReactElement => {
                               component={FormikAdminAreaAutocomplete}
                             />
                           </Grid>
-                          <Grid item xs={6}>
+                          <Grid size={{ xs:6 }}>
                             <Field
                               name="area"
                               fullWidth
@@ -486,7 +486,7 @@ export const EditGrievancePage = (): ReactElement => {
                               component={FormikTextField}
                             />
                           </Grid>
-                          <Grid item xs={6}>
+                          <Grid size={{ xs:6 }}>
                             <Field
                               name="language"
                               multiline
@@ -497,7 +497,7 @@ export const EditGrievancePage = (): ReactElement => {
                               component={FormikTextField}
                             />
                           </Grid>
-                          <Grid item xs={3}>
+                          <Grid size={{ xs: 3 }}>
                             <Field
                               name="priority"
                               multiline
@@ -510,7 +510,7 @@ export const EditGrievancePage = (): ReactElement => {
                               component={FormikSelectField}
                             />
                           </Grid>
-                          <Grid item xs={3}>
+                          <Grid size={{ xs: 3 }}>
                             <Field
                               name="urgency"
                               multiline
@@ -523,7 +523,7 @@ export const EditGrievancePage = (): ReactElement => {
                               component={FormikSelectField}
                             />
                           </Grid>
-                          <Grid item xs={3}>
+                          <Grid size={{ xs: 3 }}>
                             <Field
                               name="program"
                               label={t('Programme Name')}
@@ -560,7 +560,7 @@ export const EditGrievancePage = (): ReactElement => {
                         )}
                       </BoxPadding>
                       <BoxPadding>
-                        <Grid item xs={6}>
+                        <Grid size={{ xs:6 }}>
                           <Box py={3}>
                             <LookUpLinkedTickets
                               values={values}
@@ -574,7 +574,7 @@ export const EditGrievancePage = (): ReactElement => {
                           ticket.issueType?.toString() ===
                             GRIEVANCE_ISSUE_TYPES.FSP_COMPLAINT) && (
                           <BoxWithBottomBorders>
-                            <Grid item xs={6}>
+                            <Grid size={{ xs:6 }}>
                               <Box py={3}>
                                 <LookUpPaymentRecord
                                   values={values}
@@ -630,7 +630,7 @@ export const EditGrievancePage = (): ReactElement => {
                                       <Grid
                                         container
                                         item
-                                        xs={12}
+                                        size={{ xs: 12 }}
                                         key={item.id}
                                       >
                                         <Typography variant="subtitle1">
@@ -654,14 +654,14 @@ export const EditGrievancePage = (): ReactElement => {
                                               alignItems="flex-end"
                                               spacing={3}
                                             >
-                                              <Grid item xs={4}>
+                                              <Grid size={{ xs: 4 }}>
                                                 <LabelizedField
                                                   label={t('Field Name')}
                                                 >
                                                   {field.name}
                                                 </LabelizedField>
                                               </Grid>
-                                              <Grid item xs={4}>
+                                              <Grid size={{ xs: 4 }}>
                                                 <Field
                                                   name={`individualDataUpdateDeliveryMechanismDataToEdit[${index}].dataFields[${fieldIndex}].previous_value`}
                                                   type="text"
@@ -670,7 +670,7 @@ export const EditGrievancePage = (): ReactElement => {
                                                   disabled
                                                 />
                                               </Grid>
-                                              <Grid item xs={4}>
+                                              <Grid size={{ xs: 4 }}>
                                                 <Field
                                                   name={`individualDataUpdateDeliveryMechanismDataToEdit[${index}].dataFields[${fieldIndex}].value`}
                                                   type="text"
@@ -694,7 +694,7 @@ export const EditGrievancePage = (): ReactElement => {
                     </ContainerColumnWithBorder>
                   </NewTicket>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid size={{ xs:6 }}>
                   <NewTicket>
                     <OtherRelatedTicketsCreate values={values} />
                   </NewTicket>

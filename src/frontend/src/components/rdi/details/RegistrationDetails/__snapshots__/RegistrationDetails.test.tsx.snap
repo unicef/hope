@@ -19,16 +19,16 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
       class="sc-gaZyOd VtufC"
     >
       <div
-        class="MuiGrid-root MuiGrid-container css-1vam7s3-MuiGrid-root"
+        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-1nmjuun-MuiGrid2-root"
       >
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-auto css-1wrgmsj-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-auto css-1djy14n-MuiGrid2-root"
         >
           <div
-            class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 css-121v4hs-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-3 css-17oen6o-MuiGrid2-root"
           >
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
             >
               <div
                 class="MuiBox-root css-j7qwjs"
@@ -63,7 +63,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
             >
               <div>
                 <span
@@ -85,7 +85,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
             >
               <div>
                 <span
@@ -111,7 +111,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
             >
               <div>
                 <span
@@ -135,13 +135,13 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-auto css-1wrgmsj-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-auto css-1djy14n-MuiGrid2-root"
         >
           <div
-            class="MuiGrid-root MuiGrid-container css-11lq3yg-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-1jxwjqx-MuiGrid2-root"
           >
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
             >
               <div
                 class="sc-cZztgT cGskEj"
@@ -173,7 +173,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
             >
               <div
                 class="sc-cZztgT cGskEj"
@@ -207,19 +207,19 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-auto css-1wrgmsj-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-auto css-1djy14n-MuiGrid2-root"
         >
           <div
-            class="MuiGrid-root MuiGrid-container MuiGrid-direction-xs-column css-1vpwcmr-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-column css-1k7z4bv-MuiGrid2-root"
           >
             <div
-              class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-3 MuiGrid-grid-xs-12 css-ecnrms-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-grid-xs-12 MuiGrid2-spacing-xs-3 css-13omhve-MuiGrid2-root"
             >
               <div
-                class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+                class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
               />
               <div
-                class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+                class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
               >
                 <span
                   class="sc-kfmGjC ldKSMb"
@@ -232,10 +232,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
               class="sc-gTrWKq czkiJG"
             >
               <div
-                class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 css-121v4hs-MuiGrid-root"
+                class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-3 css-17oen6o-MuiGrid2-root"
               >
                 <div
-                  class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
+                  class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-12 css-1j0u08r-MuiGrid2-root"
                 >
                   <div
                     class="MuiBox-root css-1yp4ln"
@@ -250,16 +250,16 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                   </div>
                 </div>
                 <div
-                  class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
+                  class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-12 css-1j0u08r-MuiGrid2-root"
                 >
                   <div
-                    class="MuiGrid-root MuiGrid-container MuiGrid-direction-xs-column css-1vpwcmr-MuiGrid-root"
+                    class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-column css-1k7z4bv-MuiGrid2-root"
                   >
                     <div
-                      class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-4 css-11nsb57-MuiGrid-root"
+                      class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-4 css-14dudm3-MuiGrid2-root"
                     >
                       <div
-                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
                       >
                         <span
                           class="sc-hWWBcw bgxiOP"
@@ -273,10 +273,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         </span>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-4 MuiGrid-grid-xs-4 css-1os70nx-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 MuiGrid2-spacing-xs-4 css-oppe0l-MuiGrid2-root"
                       >
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
                             class="sc-kuACkN cnKTty"
@@ -287,7 +287,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                           </span>
                         </div>
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
                             class="sc-hWWBcw bgxiOP"
@@ -300,10 +300,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         </div>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-4 MuiGrid-grid-xs-4 css-1os70nx-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 MuiGrid2-spacing-xs-4 css-oppe0l-MuiGrid2-root"
                       >
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
                             class="sc-kuACkN cnKTty"
@@ -314,7 +314,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                           </span>
                         </div>
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
                             class="sc-hWWBcw bgxiOP"
@@ -327,10 +327,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         </div>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-4 MuiGrid-grid-xs-4 css-1os70nx-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 MuiGrid2-spacing-xs-4 css-oppe0l-MuiGrid2-root"
                       >
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
                             class="sc-kuACkN cnKTty"
@@ -341,7 +341,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                           </span>
                         </div>
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
                             class="sc-hWWBcw bgxiOP"
@@ -355,10 +355,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                       </div>
                     </div>
                     <div
-                      class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-4 css-11nsb57-MuiGrid-root"
+                      class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-4 css-14dudm3-MuiGrid2-root"
                     >
                       <div
-                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
                       >
                         <span
                           class="sc-hWWBcw bgxiOP"
@@ -372,10 +372,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         </span>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-4 MuiGrid-grid-xs-4 css-1os70nx-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 MuiGrid2-spacing-xs-4 css-oppe0l-MuiGrid2-root"
                       >
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
                             class="sc-kuACkN cnKTty"
@@ -386,7 +386,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                           </span>
                         </div>
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
                             class="sc-hWWBcw bgxiOP"
@@ -399,10 +399,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         </div>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-4 MuiGrid-grid-xs-4 css-1os70nx-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 MuiGrid2-spacing-xs-4 css-oppe0l-MuiGrid2-root"
                       >
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
                             class="sc-kuACkN cnKTty"
@@ -413,7 +413,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                           </span>
                         </div>
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
                             class="sc-hWWBcw bgxiOP"
@@ -426,10 +426,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         </div>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-4 MuiGrid-grid-xs-4 css-1os70nx-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 MuiGrid2-spacing-xs-4 css-oppe0l-MuiGrid2-root"
                       >
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
                             class="sc-kuACkN cnKTty"
@@ -440,7 +440,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                           </span>
                         </div>
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
                             class="sc-hWWBcw bgxiOP"
@@ -461,10 +461,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
               class="sc-gTrWKq czkiJG"
             >
               <div
-                class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 css-121v4hs-MuiGrid-root"
+                class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-3 css-17oen6o-MuiGrid2-root"
               >
                 <div
-                  class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
+                  class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-12 css-1j0u08r-MuiGrid2-root"
                 >
                   <div
                     class="MuiBox-root css-1yp4ln"
@@ -479,16 +479,16 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                   </div>
                 </div>
                 <div
-                  class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
+                  class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-12 css-1j0u08r-MuiGrid2-root"
                 >
                   <div
-                    class="MuiGrid-root MuiGrid-container MuiGrid-direction-xs-column css-1vpwcmr-MuiGrid-root"
+                    class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-column css-1k7z4bv-MuiGrid2-root"
                   >
                     <div
-                      class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-4 css-11nsb57-MuiGrid-root"
+                      class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-4 css-14dudm3-MuiGrid2-root"
                     >
                       <div
-                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
                       >
                         <span
                           class="sc-hWWBcw bgxiOP"
@@ -502,10 +502,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         </span>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-4 MuiGrid-grid-xs-4 css-1os70nx-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 MuiGrid2-spacing-xs-4 css-oppe0l-MuiGrid2-root"
                       >
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
                             class="sc-kuACkN cnKTty"
@@ -516,7 +516,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                           </span>
                         </div>
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
                             class="sc-hWWBcw bgxiOP"
@@ -529,10 +529,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         </div>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-4 MuiGrid-grid-xs-4 css-1os70nx-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 MuiGrid2-spacing-xs-4 css-oppe0l-MuiGrid2-root"
                       >
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
                             class="sc-kuACkN cnKTty"
@@ -543,7 +543,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                           </span>
                         </div>
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
                             class="sc-hWWBcw bgxiOP"
@@ -556,10 +556,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         </div>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-4 MuiGrid-grid-xs-4 css-1os70nx-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 MuiGrid2-spacing-xs-4 css-oppe0l-MuiGrid2-root"
                       >
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
                             class="sc-kuACkN cnKTty"
@@ -570,7 +570,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                           </span>
                         </div>
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
                             class="sc-hWWBcw bgxiOP"
@@ -584,10 +584,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                       </div>
                     </div>
                     <div
-                      class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-4 css-11nsb57-MuiGrid-root"
+                      class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-4 css-14dudm3-MuiGrid2-root"
                     >
                       <div
-                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
                       >
                         <span
                           class="sc-hWWBcw bgxiOP"
@@ -601,10 +601,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         </span>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-4 MuiGrid-grid-xs-4 css-1os70nx-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 MuiGrid2-spacing-xs-4 css-oppe0l-MuiGrid2-root"
                       >
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
                             class="sc-kuACkN cnKTty"
@@ -615,7 +615,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                           </span>
                         </div>
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
                             class="sc-hWWBcw bgxiOP"
@@ -628,10 +628,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         </div>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-4 MuiGrid-grid-xs-4 css-1os70nx-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 MuiGrid2-spacing-xs-4 css-oppe0l-MuiGrid2-root"
                       >
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
                             class="sc-kuACkN cnKTty"
@@ -642,7 +642,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                           </span>
                         </div>
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
                             class="sc-hWWBcw bgxiOP"
@@ -655,10 +655,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         </div>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-4 MuiGrid-grid-xs-4 css-1os70nx-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 MuiGrid2-spacing-xs-4 css-oppe0l-MuiGrid2-root"
                       >
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
                             class="sc-kuACkN cnKTty"
@@ -669,7 +669,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                           </span>
                         </div>
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
                             class="sc-hWWBcw bgxiOP"
@@ -683,10 +683,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                       </div>
                     </div>
                     <div
-                      class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-4 css-11nsb57-MuiGrid-root"
+                      class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-4 css-14dudm3-MuiGrid2-root"
                     >
                       <div
-                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
                       >
                         <span
                           class="sc-hWWBcw bgxiOP"
@@ -700,10 +700,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         </span>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-4 MuiGrid-grid-xs-4 css-1os70nx-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 MuiGrid2-spacing-xs-4 css-oppe0l-MuiGrid2-root"
                       >
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
                             class="sc-kuACkN cnKTty"
@@ -714,7 +714,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                           </span>
                         </div>
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
                             class="sc-hWWBcw bgxiOP"
@@ -727,10 +727,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         </div>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-4 MuiGrid-grid-xs-4 css-1os70nx-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 MuiGrid2-spacing-xs-4 css-oppe0l-MuiGrid2-root"
                       >
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
                             class="sc-kuACkN cnKTty"
@@ -741,7 +741,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                           </span>
                         </div>
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
                             class="sc-hWWBcw bgxiOP"
@@ -754,10 +754,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         </div>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-4 MuiGrid-grid-xs-4 css-1os70nx-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 MuiGrid2-spacing-xs-4 css-oppe0l-MuiGrid2-root"
                       >
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
                             class="sc-kuACkN cnKTty"
@@ -768,7 +768,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                           </span>
                         </div>
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
                             class="sc-hWWBcw bgxiOP"

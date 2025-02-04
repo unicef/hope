@@ -17,7 +17,7 @@ exports[`components/population/HouseholdAdditionalRegistrationInformation should
         </h6>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-6 css-1qw2a80-MuiGrid-root"
+        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-6 css-ipzchf-MuiGrid2-root"
       />
     </div>
   </div>

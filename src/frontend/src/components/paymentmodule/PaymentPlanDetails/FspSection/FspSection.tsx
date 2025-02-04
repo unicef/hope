@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Typography } from '@mui/material';
+import { Box, Button, Grid2 as Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import { PaymentPlanQuery, PaymentPlanStatus } from '@generated/graphql';
@@ -64,11 +64,11 @@ export const FspSection = ({
         <Grid container spacing={3}>
           {deliveryMechanisms.map((el) => (
             <>
-              <Grid key={`${el.name}-${el.fsp?.name}`} item xs={3}>
+              <Grid key={`${el.name}-${el.fsp?.name}`} size={{ xs: 3 }}>
                 <LabelizedField label={el.name} value={el.fsp?.name} />
               </Grid>
               {el.chosenConfiguration && (
-                <Grid key={el.chosenConfiguration} item xs={3}>
+                <Grid key={el.chosenConfiguration} size={{ xs: 3 }}>
                   <LabelizedField
                     label="Configuration"
                     value={el.chosenConfiguration}

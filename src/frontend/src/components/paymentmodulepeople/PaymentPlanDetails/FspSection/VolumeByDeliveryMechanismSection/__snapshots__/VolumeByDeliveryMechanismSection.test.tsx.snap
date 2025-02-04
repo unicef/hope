@@ -19,10 +19,10 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
       class="sc-dDvxFM diyMsl"
     >
       <div
-        class="MuiGrid-root MuiGrid-container css-1bzpx2o-MuiGrid-root"
+        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-188izze-MuiGrid2-root"
       >
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
         >
           <div
             class="sc-eaUbBy fhaEUs"
@@ -49,7 +49,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
         >
           <div
             class="sc-eaUbBy kSotGU"
@@ -76,7 +76,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
         >
           <div
             class="sc-eaUbBy bxMHKm"
@@ -104,10 +104,10 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-container css-1e2bu2o-MuiGrid-root"
+        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-xg0rmm-MuiGrid2-root"
       >
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
         >
           <div
             class="sc-jqVXSH dFIxpr"
