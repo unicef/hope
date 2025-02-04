@@ -26,7 +26,7 @@ class TargetValidator(BaseValidator):
     @staticmethod
     def validate_is_finalized(target_status: str) -> None:
         if target_status == "FINALIZED":
-            logger.error("Target Population has been finalized. Cannot change.")
+            logger.warning("Target Population has been finalized. Cannot change.")
             raise ValidationError("Target Population has been finalized. Cannot change.")
 
 
@@ -35,7 +35,7 @@ class RebuildTargetPopulationValidator:
     def validate(target_population: TargetPopulation) -> None:
         if target_population.status != TargetPopulation.STATUS_OPEN:
             message = f"Only Target Population with status {TargetPopulation.STATUS_OPEN} can be rebuild"
-            logger.error(message)
+            logger.warning(message)
             raise ValidationError(message)
 
 
@@ -44,7 +44,7 @@ class LockTargetPopulationValidator:
     def validate(target_population: TargetPopulation) -> None:
         if target_population.status != TargetPopulation.STATUS_OPEN:
             message = f"Only Target Population with status {TargetPopulation.STATUS_OPEN} can be approved"
-            logger.error(message)
+            logger.warning(message)
             raise ValidationError(message)
 
 
@@ -53,7 +53,7 @@ class UnlockTargetPopulationValidator:
     def validate(target_population: TargetPopulation) -> None:
         if not target_population.is_locked():
             message = "Only locked Target Population with status can be unlocked"
-            logger.error(message)
+            logger.warning(message)
             raise ValidationError(message)
 
 
@@ -62,11 +62,11 @@ class FinalizeTargetPopulationValidator:
     def validate(target_population: TargetPopulation) -> None:
         if not target_population.is_locked():
             message = "Only locked Target Population with status can be finalized"
-            logger.error(message)
+            logger.warning(message)
             raise ValidationError(message)
         if target_population.program.status != Program.ACTIVE:
             message = f"Only Target Population assigned to program with status {Program.ACTIVE} can be send"
-            logger.error(message)
+            logger.warning(message)
             raise ValidationError(message)
 
 
@@ -78,7 +78,7 @@ class TargetingCriteriaRuleFilterInputValidator:
             attributes = FieldFactory.from_scope(Scope.TARGETING).to_dict_by("name")
             attribute = attributes.get(rule_filter.field_name)
             if attribute is None:
-                logger.error(f"Can't find any core field attribute associated with {rule_filter.field_name} field name")
+                logger.warning(f"Can't find any core field attribute associated with {rule_filter.field_name} field name")
                 raise ValidationError(
                     f"Can't find any core field attribute associated with {rule_filter.field_name} field name"
                 )
@@ -86,7 +86,7 @@ class TargetingCriteriaRuleFilterInputValidator:
             try:
                 attribute = FlexibleAttribute.objects.get(name=rule_filter.field_name, program=None)
             except FlexibleAttribute.DoesNotExist:
-                logger.exception(
+                logger.warning(
                     f"Can't find any flex field attribute associated with {rule_filter.field_name} field name",
                 )
                 raise ValidationError(
@@ -96,7 +96,7 @@ class TargetingCriteriaRuleFilterInputValidator:
             try:
                 attribute = FlexibleAttribute.objects.get(name=rule_filter.field_name, program=program)
             except FlexibleAttribute.DoesNotExist:  # pragma: no cover
-                logger.exception(
+                logger.warning(
                     f"Can't find PDU flex field attribute associated with {rule_filter.field_name} field name in program {program.name}",
                 )
                 raise ValidationError(
@@ -104,7 +104,7 @@ class TargetingCriteriaRuleFilterInputValidator:
                 )
         comparison_attribute = TargetingCriteriaRuleFilter.COMPARISON_ATTRIBUTES.get(rule_filter.comparison_method)
         if comparison_attribute is None:
-            logger.error(f"Unknown comparison method - {rule_filter.comparison_method}")
+            logger.warning(f"Unknown comparison method - {rule_filter.comparison_method}")
             raise ValidationError(f"Unknown comparison method - {rule_filter.comparison_method}")
         args_count = comparison_attribute.get("arguments")
         given_args_count = len(rule_filter.arguments)
@@ -170,7 +170,7 @@ class TargetingCriteriaInputValidator:
             if household_ids and not (
                 program_dct.household_filters_available or program_dct.type == DataCollectingType.Type.SOCIAL
             ):
-                logger.error("Target criteria can only have individual ids")
+                logger.warning("Target criteria can only have individual ids")
                 raise ValidationError("Target criteria can only have individual ids")
             if individual_ids and not program_dct.individual_filters_available:
                 raise ValidationError("Target criteria can only have household ids")

@@ -72,5 +72,5 @@ class IncompatibleRoleFilter(SimpleListFilter):
                 Q(role_one=self.value()) | Q(role_two=self.value()),
             )
         except (ValueError, ValidationError) as e:
-            logger.exception(e)
+            logger.warning(e)
             raise IncorrectLookupParameters(e)
