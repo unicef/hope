@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Grid2 as Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -60,9 +60,9 @@ export function VerificationPlanDetails({
         />
       </Box>
       <Grid container>
-        <Grid item xs={9}>
+        <Grid size={{ xs:9 }}>
           <Grid container spacing={3}>
-            <Grid item xs={3}>
+            <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('STATUS')}>
                 <StatusBox
                   status={verificationPlan.status}
@@ -117,13 +117,13 @@ export function VerificationPlanDetails({
                 ),
               },
             ].map((el) => (
-              <Grid item xs={3} key={el.label}>
+              <Grid size={{ xs:3 }} key={el.label}>
                 <LabelizedField label={el.label} value={el.value} />
               </Grid>
             ))}
           </Grid>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <VerificationPlanDetailsChart verificationPlan={verificationPlan} />
         </Grid>
       </Grid>

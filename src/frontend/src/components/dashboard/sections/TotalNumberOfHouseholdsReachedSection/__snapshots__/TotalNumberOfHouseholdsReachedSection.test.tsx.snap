@@ -13,10 +13,10 @@ exports[`components/dashboard/TotalNumberOfHouseholdsReachedSection should rende
       TOTAL NUMBER OF HOUSEHOLDS REACHED
     </div>
     <div
-      class="MuiGrid-root MuiGrid-container css-9cyib4-MuiGrid-root"
+      class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-15fcp3v-MuiGrid2-root"
     >
       <div
-        class="MuiGrid-root MuiGrid-item css-13i4rnv-MuiGrid-root"
+        class="MuiGrid2-root MuiGrid2-direction-xs-row css-1fzlhpv-MuiGrid2-root"
         data-cy="total-number-of-households-reached"
       >
         <div
@@ -26,7 +26,7 @@ exports[`components/dashboard/TotalNumberOfHouseholdsReachedSection should rende
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item css-13i4rnv-MuiGrid-root"
+        class="MuiGrid2-root MuiGrid2-direction-xs-row css-1fzlhpv-MuiGrid2-root"
       >
         <div
           bg="#DAF1FF"

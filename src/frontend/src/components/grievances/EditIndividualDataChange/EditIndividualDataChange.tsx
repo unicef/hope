@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Typography } from '@mui/material';
+import { Box, Button, Grid2 as Grid, Typography } from '@mui/material';
 import { AddCircleOutline } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
@@ -117,7 +117,7 @@ export function EditIndividualDataChange({
                       values={values}
                     />
                   ))}
-                  <Grid item xs={4}>
+                  <Grid size={{ xs: 4 }}>
                     <Button
                       color="primary"
                       onClick={() => {

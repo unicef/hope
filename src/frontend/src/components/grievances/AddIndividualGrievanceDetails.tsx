@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Typography } from '@mui/material';
+import { Box, Button, Grid2 as Grid, Typography } from '@mui/material';
 import capitalize from 'lodash/capitalize';
 import { useTranslation } from 'react-i18next';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -75,7 +75,7 @@ export function AddIndividualGrievanceDetails({
         textValue = value.map((el) => capitalize(el)).join(', ');
       }
       return (
-        <Grid key={key} item xs={6}>
+        <Grid key={key} size={{ xs: 6 }}>
           <LabelizedField
             label={key === 'sex' ? t('GENDER') : key.replace(/_/g, ' ')}
             value={<span>{textValue as ReactNode}</span>}
@@ -87,7 +87,7 @@ export function AddIndividualGrievanceDetails({
   const flexFieldLabels =
     Object.entries(flexFields || {}).map(
       ([key, value]: [string, string | string[]]) => (
-        <Grid key={key} item xs={6}>
+        <Grid key={key} size={{ xs: 6 }}>
           <LabelizedField
             label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
             value={getFlexFieldTextValue(key, value, fieldsDict[key])}
@@ -97,7 +97,7 @@ export function AddIndividualGrievanceDetails({
     ) || [];
   const documentLabels =
     documents?.map((item) => (
-      <Grid key={item?.country + item?.key} item xs={6}>
+      <Grid key={item?.country + item?.key} size={{ xs: 6 }}>
         <LabelizedField
           label={item?.key?.replace(/_/g, ' ')}
           value={item.number}
@@ -108,7 +108,7 @@ export function AddIndividualGrievanceDetails({
     identities?.map((item) => {
       const partner = item.partner || item.agency; // For backward compatibility
       return (
-        <Grid key={item.country + partner} item xs={6}>
+        <Grid key={item.country + partner} size={{ xs: 6 }}>
           <LabelizedField label={partner} value={item.number} />
         </Grid>
       );

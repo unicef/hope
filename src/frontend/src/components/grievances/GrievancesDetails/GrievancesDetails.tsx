@@ -12,7 +12,7 @@ import {
   GrievancesChoiceDataQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { Box, Grid, GridSize, Typography } from '@mui/material';
+import { Box, Grid2 as Grid, GridSize, Typography } from '@mui/material';
 import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import {
   choicesToDict,
@@ -188,7 +188,7 @@ export function GrievancesDetails({
   };
 
   return (
-    <Grid item xs={12}>
+    <Grid size={{ xs: 12 }}>
       <ContainerColumnWithBorder>
         <Title>
           <Typography variant="h6">{t('Details')}</Typography>
@@ -383,7 +383,7 @@ export function GrievancesDetails({
                   el.label &&
                   el.value &&
                   el.size && (
-                    <Grid key={el.label} item xs={el.size as GridSize}>
+                    <Grid key={el.label} size={{ xs: el.size as GridSize }}>
                       <LabelizedField label={el.label}>
                         {el.value}
                       </LabelizedField>

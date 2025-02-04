@@ -300,7 +300,7 @@ export function CreateFeedbackPage(): ReactElement {
                 }
               />
               <Grid container spacing={3}>
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12 }}>
                   <NewTicket>
                     <InnerBoxPadding>
                       <ContainerColumnWithBorder>
@@ -321,12 +321,12 @@ export function CreateFeedbackPage(): ReactElement {
                         </NoRootPadding>
                         {activeStep === FeedbackSteps.Selection && (
                           <Grid container spacing={3}>
-                            <Grid item xs={6}>
+                            <Grid size={{ xs:6 }}>
                               <LabelizedField label={t('Category')}>
                                 {t('Feedback')}
                               </LabelizedField>
                             </Grid>
-                            <Grid item xs={6}>
+                            <Grid size={{ xs:6 }}>
                               <Field
                                 name="issueType"
                                 label="Issue Type"
@@ -400,12 +400,12 @@ export function CreateFeedbackPage(): ReactElement {
                             <OverviewContainer>
                               <Box p={6}>
                                 <Grid container spacing={6}>
-                                  <Grid item xs={6}>
+                                  <Grid size={{ xs:6 }}>
                                     <LabelizedField label={t('Category')}>
                                       {t('Feedback')}
                                     </LabelizedField>
                                   </Grid>
-                                  <Grid item xs={6}>
+                                  <Grid size={{ xs:6 }}>
                                     <LabelizedField label={t('Issue Type')}>
                                       {values.issueType ===
                                       FeedbackIssueType.PositiveFeedback
@@ -413,7 +413,7 @@ export function CreateFeedbackPage(): ReactElement {
                                         : 'Negative Feedback'}
                                     </LabelizedField>
                                   </Grid>
-                                  <Grid item xs={6}>
+                                  <Grid size={{ xs:6 }}>
                                     <LabelizedField
                                       label={t(
                                         `${beneficiaryGroup?.groupLabel}`,
@@ -422,7 +422,7 @@ export function CreateFeedbackPage(): ReactElement {
                                       {values.selectedHousehold?.unicefId}
                                     </LabelizedField>
                                   </Grid>
-                                  <Grid item xs={6}>
+                                  <Grid size={{ xs:6 }}>
                                     <LabelizedField
                                       label={t(
                                         `${beneficiaryGroup?.memberLabel}`,
@@ -437,7 +437,7 @@ export function CreateFeedbackPage(): ReactElement {
                             <BoxWithBorderBottom />
                             <BoxPadding />
                             <Grid container spacing={3}>
-                              <Grid item xs={12}>
+                              <Grid size={{ xs: 12 }}>
                                 <Field
                                   name="description"
                                   multiline
@@ -449,7 +449,7 @@ export function CreateFeedbackPage(): ReactElement {
                                   data-cy="input-description"
                                 />
                               </Grid>
-                              <Grid item xs={12}>
+                              <Grid size={{ xs: 12 }}>
                                 <Field
                                   name="comments"
                                   multiline
@@ -460,7 +460,7 @@ export function CreateFeedbackPage(): ReactElement {
                                   data-cy="input-comments"
                                 />
                               </Grid>
-                              <Grid item xs={6}>
+                              <Grid size={{ xs:6 }}>
                                 <Field
                                   name="admin2"
                                   variant="outlined"
@@ -471,7 +471,7 @@ export function CreateFeedbackPage(): ReactElement {
                                   )}
                                 />
                               </Grid>
-                              <Grid item xs={6}>
+                              <Grid size={{ xs:6 }}>
                                 <Field
                                   name="area"
                                   fullWidth
@@ -481,7 +481,7 @@ export function CreateFeedbackPage(): ReactElement {
                                   data-cy="input-area"
                                 />
                               </Grid>
-                              <Grid item xs={6}>
+                              <Grid size={{ xs:6 }}>
                                 <Field
                                   name="language"
                                   multiline
@@ -492,7 +492,7 @@ export function CreateFeedbackPage(): ReactElement {
                                   data-cy="input-languages"
                                 />
                               </Grid>
-                              <Grid item xs={3}>
+                              <Grid size={{ xs: 3 }}>
                                 <Field
                                   name="program"
                                   label={t('Programme Name')}

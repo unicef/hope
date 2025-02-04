@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel, Grid, MenuItem } from '@mui/material';
+import { Checkbox, FormControlLabel, Grid2 as Grid, MenuItem } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { DatePickerFilter } from '@components/core/DatePickerFilter';
@@ -52,7 +52,7 @@ export function ReportingFilters({
       clearHandler={handleClearFilter}
     >
       <Grid container alignItems="flex-end" spacing={3}>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SelectFilter
             label={t('Report Type')}
             onChange={(e) => handleFilterChange('type', e.target.value)}
@@ -66,7 +66,7 @@ export function ReportingFilters({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <DatePickerFilter
             dataCy="report-created-from-filter"
             topLabel={t('Creation Date')}
@@ -75,7 +75,7 @@ export function ReportingFilters({
             value={filter.createdFrom}
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <DatePickerFilter
             dataCy="report-created-to-filter"
             placeholder={t('To')}
@@ -83,7 +83,7 @@ export function ReportingFilters({
             value={filter.createdTo}
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SelectFilter
             dataCy="report-status-filter"
             label="Status"
@@ -97,7 +97,7 @@ export function ReportingFilters({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item xs={12}>
+        <Grid size={{ xs: 12 }}>
           <FormControlLabel
             control={
               <Checkbox

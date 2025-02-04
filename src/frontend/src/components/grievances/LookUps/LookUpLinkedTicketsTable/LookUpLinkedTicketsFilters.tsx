@@ -1,4 +1,4 @@
-import { Grid, MenuItem } from '@mui/material';
+import { Grid2 as Grid, MenuItem } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { GrievancesChoiceDataQuery } from '@generated/graphql';
@@ -53,7 +53,7 @@ export function LookUpLinkedTicketsFilters({
       isOnPaper={false}
     >
       <Grid container alignItems="flex-end" spacing={3}>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SearchTextField
             label={t('Search')}
             value={filter.search}
@@ -61,7 +61,7 @@ export function LookUpLinkedTicketsFilters({
             data-cy="filters-search"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             label={t('Status')}
@@ -75,7 +75,7 @@ export function LookUpLinkedTicketsFilters({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SearchTextField
             label={t('FSP')}
             value={filter.fsp}
@@ -83,7 +83,7 @@ export function LookUpLinkedTicketsFilters({
             data-cy="filters-fsp"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <DatePickerFilter
             topLabel={t('Creation Date')}
             label="From"
@@ -92,7 +92,7 @@ export function LookUpLinkedTicketsFilters({
             dataCy="filters-creation-date-from"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <DatePickerFilter
             label={t('To')}
             onChange={(date) => handleFilterChange('createdAtRangeMax', date)}
@@ -100,7 +100,7 @@ export function LookUpLinkedTicketsFilters({
             dataCy="filters-creation-date-to"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <AdminAreaAutocomplete
             level={2}
             name="admin2"

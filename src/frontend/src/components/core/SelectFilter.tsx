@@ -99,7 +99,7 @@ export const SelectFilter = ({
               const selectedOptions = Children.toArray(children).filter(
                 (child): child is ReactElement<any> =>
                   isValidElement(child) &&
-                  selectedValues.includes(child.props.value),
+                  selectedValues.includes((child as ReactElement<any>).props.value),
               );
 
               return (

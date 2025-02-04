@@ -12,10 +12,10 @@ exports[`components/dashboard/GrievancesSection should render 1`] = `
       Grievances and Feedback
     </div>
     <div
-      class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 css-121v4hs-MuiGrid-root"
+      class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-3 css-17oen6o-MuiGrid2-root"
     >
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+        class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
       >
         <div
           class="sc-gyycJP bvArgO"
@@ -30,7 +30,7 @@ exports[`components/dashboard/GrievancesSection should render 1`] = `
         </span>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+        class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
       >
         <div
           class="sc-gyycJP bvArgO"

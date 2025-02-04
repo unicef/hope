@@ -22,10 +22,10 @@ exports[`components/paymentmodule/PaymentPlanTargeting should render 1`] = `
         class="sc-kuACkN eXzApe MuiBox-root css-j7qwjs"
       >
         <div
-          class="MuiGrid-root MuiGrid-container css-11lq3yg-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-1jxwjqx-MuiGrid2-root"
         >
           <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
           >
             <div
               choices="[object Object],[object Object],[object Object],[object Object],[object Object]"

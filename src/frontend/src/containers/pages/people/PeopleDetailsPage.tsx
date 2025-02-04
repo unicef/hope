@@ -27,7 +27,7 @@ import {
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
-import { Box, Grid, Paper, Typography } from '@mui/material';
+import { Box, Grid2 as Grid, Paper, Typography } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import {
   formatCurrencyWithSymbol,
@@ -183,12 +183,12 @@ export const PeopleDetailsPage = (): ReactElement => {
               <Typography variant="h6">{t('Benefits')}</Typography>
             </Title>
             <Grid container>
-              <Grid item xs={3}>
+              <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Cash received')}>
                   {household?.deliveredQuantities?.length ? (
                     <Box mb={2}>
                       <Grid container>
-                        <Grid item xs={6}>
+                        <Grid size={{ xs:6 }}>
                           <Box display="flex" flexDirection="column">
                             {household?.deliveredQuantities?.map((item) => (
                               <Box
@@ -214,7 +214,7 @@ export const PeopleDetailsPage = (): ReactElement => {
                   )}
                 </LabelizedField>
               </Grid>
-              <Grid item xs={3}>
+              <Grid size={{ xs: 3 }}>
                 <BigValueContainer>
                   <LabelizedField label={t('Total Cash Received')}>
                     <BigValue>
@@ -248,17 +248,17 @@ export const PeopleDetailsPage = (): ReactElement => {
               <Typography variant="h6">{t('Registration Details')}</Typography>
             </Title>
             <Grid container spacing={6}>
-              <Grid item xs={3}>
+              <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Source')}>
                   <div>{household?.registrationDataImport?.dataSource}</div>
                 </LabelizedField>
               </Grid>
-              <Grid item xs={3}>
+              <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Import name')}>
                   <div>{household?.registrationDataImport?.name}</div>
                 </LabelizedField>
               </Grid>
-              <Grid item xs={3}>
+              <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Registration Date')}>
                   <div>
                     <UniversalMoment>
@@ -267,7 +267,7 @@ export const PeopleDetailsPage = (): ReactElement => {
                   </div>
                 </LabelizedField>
               </Grid>
-              <Grid item xs={3}>
+              <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('User name')}>
                   {household?.registrationDataImport?.importedBy?.email}
                 </LabelizedField>
@@ -278,19 +278,19 @@ export const PeopleDetailsPage = (): ReactElement => {
                 <hr />
                 <SubTitle variant="h6">{t('Data Collection')}</SubTitle>
                 <Grid container spacing={6}>
-                  <Grid item xs={3}>
+                  <Grid size={{ xs: 3 }}>
                     <LabelizedField label={t('Start time')}>
                       <UniversalMoment>{household?.start}</UniversalMoment>
                     </LabelizedField>
                   </Grid>
-                  <Grid item xs={3}>
+                  <Grid size={{ xs: 3 }}>
                     <LabelizedField label={t('End time')}>
                       <UniversalMoment>
                         {household?.firstRegistrationDate}
                       </UniversalMoment>
                     </LabelizedField>
                   </Grid>
-                  <Grid item xs={3}>
+                  <Grid size={{ xs: 3 }}>
                     <LabelizedField label={t('Device ID')}>
                       {/* //TODO: Figure it out. deviceId removed from the model? */}
                       {/* {household?.deviceid} */} -

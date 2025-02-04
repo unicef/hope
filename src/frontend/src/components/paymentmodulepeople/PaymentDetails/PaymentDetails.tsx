@@ -1,4 +1,4 @@
-import { Grid, Paper, Typography } from '@mui/material';
+import { Grid2 as Grid, Paper, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -70,7 +70,7 @@ export function PaymentDetails({
           <Typography variant="h6">{t('Details')}</Typography>
         </Title>
         <Grid container spacing={3}>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('STATUS')}>
               <StatusBox
                 status={payment.status}
@@ -79,28 +79,28 @@ export function PaymentDetails({
               />
             </LabelizedField>
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('ENTITLEMENT QUANTITY')}
               value={payment.entitlementQuantity}
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('DELIVERED QUANTITY')}
               value={payment.deliveredQuantity}
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('CURRENCY')} value={payment.currency} />
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('DELIVERY DATE')}
               value={<UniversalMoment>{payment.deliveryDate}</UniversalMoment>}
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('TARGET POPULATION')}>
               <BlackLink
                 to={`/${businessArea}/programs/${programId}/target-population/${payment.parent.id}`}
@@ -109,13 +109,13 @@ export function PaymentDetails({
               </BlackLink>
             </LabelizedField>
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('DISTRIBUTION MODALITY')}
               value={payment.distributionModality}
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('Related Payment Id')}
               value={payment.sourcePayment?.unicefId}
@@ -129,7 +129,7 @@ export function PaymentDetails({
             <Typography variant="h6">{t('Verification Details')}</Typography>
           </Title>
           <Grid container spacing={3}>
-            <Grid item xs={3}>
+            <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('STATUS')}>
                 <StatusBox
                   status={paymentVerification.status}
@@ -138,7 +138,7 @@ export function PaymentDetails({
               </LabelizedField>
             </Grid>
 
-            <Grid item xs={3}>
+            <Grid size={{ xs: 3 }}>
               <LabelizedField
                 label={t('AMOUNT RECEIVED')}
                 value={formatCurrencyWithSymbol(
@@ -155,7 +155,7 @@ export function PaymentDetails({
           <Typography variant="h6">{beneficiaryGroup?.groupLabel}</Typography>
         </Title>
         <Grid container spacing={3}>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField label={`${beneficiaryGroup?.groupLabel} ID`}>
               {payment.household?.id && canViewHouseholdDetails ? (
                 <BlackLink
@@ -170,25 +170,25 @@ export function PaymentDetails({
               )}
             </LabelizedField>
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t("Collector's Name")}
               value={payment.snapshotCollectorFullName}
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t("Collector's ID")}
               value={payment.collector?.unicefId}
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('TOTAL PERSON COVERED')}
               value={payment.household.size}
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('PHONE NUMBER')}
               value={getPhoneNoLabel(
@@ -197,7 +197,7 @@ export function PaymentDetails({
               )}
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('ALT. PHONE NUMBER')}
               value={getPhoneNoLabel(
@@ -213,19 +213,19 @@ export function PaymentDetails({
           <Typography variant="h6">{t('Entitlement Details')}</Typography>
         </Title>
         <Grid container spacing={3}>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('DELIVERY MECHANISM')}
               value={payment.deliveryType.name}
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('FSP')}
               value={payment.serviceProvider?.fullName}
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('TRANSACTION REFERENCE ID')}
               value={payment.transactionReferenceId}
@@ -234,13 +234,13 @@ export function PaymentDetails({
         </Grid>
         <DividerLine />
         <Grid container spacing={3}>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('Bank Name')}
               value={payment.snapshotCollectorBankName}
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('Bank Account Number')}
               value={payment.snapshotCollectorBankAccountNumber}
@@ -248,13 +248,13 @@ export function PaymentDetails({
           </Grid>
           {payment.deliveryType?.name === 'Deposit to Card' && (
             <>
-              <Grid item xs={3}>
+              <Grid size={{ xs: 3 }}>
                 <LabelizedField
                   label={t('Debit Card Issuer')}
                   value={payment.debitCardIssuer}
                 />
               </Grid>
-              <Grid item xs={3}>
+              <Grid size={{ xs: 3 }}>
                 <LabelizedField
                   label={t('Debit Card Number')}
                   value={payment.debitCardNumber}
@@ -269,19 +269,19 @@ export function PaymentDetails({
           <Typography variant="h6">{t('Reconciliation Details')}</Typography>
         </Title>
         <Grid container spacing={3}>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t("Collector's Name")}
               value={payment.additionalCollectorName}
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('Document Type')}
               value={payment.additionalDocumentType}
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('Document Number')}
               value={payment.additionalDocumentNumber}
@@ -291,14 +291,14 @@ export function PaymentDetails({
         <DividerLine />
         <Grid container spacing={3}>
           {showFailureReason && (
-            <Grid item xs={3}>
+            <Grid size={{ xs: 3 }}>
               <LabelizedField
                 label={t('Failure Reason')}
                 value={payment.reasonForUnsuccessfulPayment}
               />
             </Grid>
           )}
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('Bank Account Number')}
               value={payment.snapshotCollectorBankAccountNumber}

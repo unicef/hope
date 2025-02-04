@@ -353,7 +353,7 @@ export const CreateCommunicationPage = (): ReactElement => {
               }
             />
             <PaperContainer>
-              <Grid xs={9} item>
+              <Grid size={{ xs: 9 }} >
                 <Stepper activeStep={activeStep}>
                   {steps.map((label) => {
                     const stepProps: { completed?: boolean } = {};
@@ -517,9 +517,9 @@ export const CreateCommunicationPage = (): ReactElement => {
 
                             <Grid container>
                               {values.ageCheckbox && (
-                                <Grid item xs={12}>
+                                <Grid size={{ xs: 12 }}>
                                   <Grid container>
-                                    <Grid item xs={4}>
+                                    <Grid size={{ xs: 4 }}>
                                       <Field
                                         name="filterAgeMin"
                                         label={t('Minimum Age')}
@@ -528,7 +528,7 @@ export const CreateCommunicationPage = (): ReactElement => {
                                         component={FormikTextField}
                                       />
                                     </Grid>
-                                    <Grid item xs={4}>
+                                    <Grid size={{ xs: 4 }}>
                                       <Field
                                         name="filterAgeMax"
                                         label={t('Maximum Age')}
@@ -541,7 +541,7 @@ export const CreateCommunicationPage = (): ReactElement => {
                                 </Grid>
                               )}
                               {values.sexCheckbox && (
-                                <Grid item xs={5}>
+                                <Grid size={{ xs:5 }}>
                                   <Field
                                     name="filterSex"
                                     label={t('Gender')}
@@ -593,7 +593,7 @@ export const CreateCommunicationPage = (): ReactElement => {
                   <>
                     <Border />
                     <Box my={3}>
-                      <Grid item xs={12}>
+                      <Grid size={{ xs: 12 }}>
                         <Field
                           name="title"
                           required
@@ -605,7 +605,7 @@ export const CreateCommunicationPage = (): ReactElement => {
                         />
                       </Grid>
                     </Box>
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                       <Field
                         name="body"
                         required

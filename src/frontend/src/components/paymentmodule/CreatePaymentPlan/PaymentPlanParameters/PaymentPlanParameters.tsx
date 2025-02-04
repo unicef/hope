@@ -1,6 +1,6 @@
 import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
-import { Grid, Typography } from '@mui/material';
+import { Grid2 as Grid, Typography } from '@mui/material';
 import { FormikCurrencyAutocomplete } from '@shared/Formik/FormikCurrencyAutocomplete';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { tomorrow } from '@utils/utils';
@@ -27,7 +27,7 @@ export const PaymentPlanParameters = ({
       </Title>
       <OverviewContainer>
         <Grid spacing={3} container>
-          <Grid item xs={4}>
+          <Grid size={{ xs: 4 }}>
             <Field
               name="dispersionStartDate"
               label={t('Dispersion Start Date')}
@@ -41,7 +41,7 @@ export const PaymentPlanParameters = ({
               )}
             />
           </Grid>
-          <Grid item xs={4}>
+          <Grid size={{ xs: 4 }}>
             <Field
               name="dispersionEndDate"
               label={t('Dispersion End Date')}
@@ -56,7 +56,7 @@ export const PaymentPlanParameters = ({
               tooltip={t('The last day on which payments could be delivered.')}
             />
           </Grid>
-          <Grid item xs={4}>
+          <Grid size={{ xs: 4 }}>
             <Field
               name="currency"
               component={FormikCurrencyAutocomplete}
