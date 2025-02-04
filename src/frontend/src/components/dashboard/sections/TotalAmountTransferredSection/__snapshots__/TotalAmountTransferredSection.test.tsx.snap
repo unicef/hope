@@ -3,8 +3,9 @@
 exports[`components/dashboard/TotalAmountTransferredSection should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-jqVXSH dowxgI css-1ps6pg7-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-jqVXSH dowxgI css-1gtchvp-MuiPaper-root"
     color="#1E877D"
+    style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
   >
     <div
       class="MuiGrid-root MuiGrid-container css-9cyib4-MuiGrid-root"
@@ -28,7 +29,7 @@ exports[`components/dashboard/TotalAmountTransferredSection should render 1`] = 
         data-cy="total-amount-transferred"
       >
         <div
-          class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 css-73i7jt-MuiGrid-root"
+          class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 css-vjvnmv-MuiGrid-root"
         >
           <div
             class="MuiGrid-root MuiGrid-item css-13i4rnv-MuiGrid-root"
@@ -49,7 +50,7 @@ exports[`components/dashboard/TotalAmountTransferredSection should render 1`] = 
             >
               <svg
                 aria-hidden="true"
-                class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit css-1vooibu-MuiSvgIcon-root"
+                class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit css-1ckov0h-MuiSvgIcon-root"
                 data-testid="AccountBalanceWalletIcon"
                 focusable="false"
                 viewBox="0 0 24 24"

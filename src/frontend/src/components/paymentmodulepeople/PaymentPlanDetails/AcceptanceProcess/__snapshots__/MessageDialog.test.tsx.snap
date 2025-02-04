@@ -3,7 +3,8 @@
 exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/MessageDialog should render 1`] = `
 <div>
   <button
-    class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-78trlr-MuiButtonBase-root-MuiIconButton-root"
+    class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-53g0n7-MuiButtonBase-root-MuiIconButton-root"
+    id=":r0:"
     tabindex="0"
     type="button"
   >
@@ -12,7 +13,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/MessageDi
     >
       <svg
         aria-hidden="true"
-        class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit css-1vooibu-MuiSvgIcon-root"
+        class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit css-1ckov0h-MuiSvgIcon-root"
         data-testid="MessageIcon"
         focusable="false"
         viewBox="0 0 24 24"
@@ -22,9 +23,6 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/MessageDi
         />
       </svg>
     </div>
-    <span
-      class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
-    />
   </button>
 </div>
 `;
