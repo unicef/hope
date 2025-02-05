@@ -50,7 +50,6 @@ export const SelectFilter = ({
   children,
   onChange,
   icon = null,
-  borderRadius = '4px',
   fullWidth = true,
   disableClearable = false,
   dataCy = 'select-filter',
@@ -68,7 +67,6 @@ export const SelectFilter = ({
   return (
     <SelectWrapper>
       <StyledFormControl
-        theme={{ borderRadius }}
         fullWidth={fullWidth}
         variant="outlined"
         size="small"

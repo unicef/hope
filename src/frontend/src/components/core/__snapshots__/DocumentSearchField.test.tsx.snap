@@ -25,6 +25,7 @@ exports[`components/core/DocumentSearchField should render 1`] = `
               Document Type
             </label>
             <div
+              borderradius="0px 4px 4px 0px"
               class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall sc-jqVXSH cvKxAn MuiSelect-root css-jcgkb9-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root"
               data-cy="filters-document-type"
             >
