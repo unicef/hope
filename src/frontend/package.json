@@ -18,7 +18,7 @@
     "generate-rest-api-types": "npx openapi-typescript-codegen --input http://localhost:8080/api/rest/ --output ./generated"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   },
   "dependencies": {
     "@apollo/client": "^3.12.8",
