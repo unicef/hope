@@ -207,6 +207,7 @@ class TestPaymentCeleryTask(TestCase):
             status=PaymentPlan.Status.TP_OPEN,
             build_status=PaymentPlan.BuildStatus.BUILD_STATUS_FAILED,
         )
+        DeliveryMechanismPerPaymentPlanFactory(payment_plan=payment_plan)
         PaymentFactory(parent=payment_plan)
         payment_plan_full_rebuild(str(payment_plan.pk))
 

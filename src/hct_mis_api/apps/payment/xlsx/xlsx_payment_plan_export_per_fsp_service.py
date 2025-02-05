@@ -243,17 +243,26 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         delivery_mechanism_per_payment_plan: DeliveryMechanismPerPaymentPlan = self.payment_plan.delivery_mechanism
         fsp: FinancialServiceProvider = delivery_mechanism_per_payment_plan.financial_service_provider
         delivery_mechanism: DeliveryMechanism = delivery_mechanism_per_payment_plan.delivery_mechanism
-        for i, split in enumerate(self.payment_plan.splits.all().order_by("order")):
-            wb, ws_fsp = self.open_workbook(f"{fsp.name}-chunk{i + 1}")
+        splits = self.payment_plan.splits.all().order_by("order")
+        splits_count = splits.count()
+        for i, split in enumerate(splits):
+            filename = fsp.name
+            if splits_count > 1:
+                filename += f"-chunk{i + 1}"
+            wb, ws_fsp = self.open_workbook(filename)
             fsp_xlsx_template = self.get_template(fsp, delivery_mechanism)
-            payment_ids = list(split.payments.all().order_by("unicef_id").values_list("id", flat=True))
+            payment_ids = list(split.split_payment_items.all().order_by("unicef_id").values_list("id", flat=True))
             ws_fsp.append(self.prepare_headers(fsp_xlsx_template))
             self.add_rows(fsp_xlsx_template, payment_ids, ws_fsp)
             self._adjust_column_width_from_col(ws_fsp)
+            workbook_name = f"payment_plan_payment_list_{self.payment_plan.unicef_id}_FSP_{fsp.name}_{delivery_mechanism_per_payment_plan.delivery_mechanism}"
+            if splits_count > 1:
+                workbook_name += f"_chunk{i + 1}"
+            workbook_name += ".xlsx"
             self.save_workbook(
                 zip_file,
                 wb,
-                f"payment_plan_payment_list_{self.payment_plan.unicef_id}_FSP_{fsp.name}_{delivery_mechanism_per_payment_plan.delivery_mechanism}_chunk{i + 1}.xlsx",
+                workbook_name,
                 password,
             )
 

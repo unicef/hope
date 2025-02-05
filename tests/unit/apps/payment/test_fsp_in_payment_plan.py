@@ -172,30 +172,6 @@ query PaymentPlan($id: ID!) {
 """
 
 
-class TestFSPSetup(APITestCase):
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        base_setup(cls)
-
-    def test_being_able_to_get_possible_delivery_mechanisms(self) -> None:
-        query = """
-            query AllDeliveryMechanisms {
-                allDeliveryMechanisms {
-                    name
-                    value
-                }
-            }
-        """
-        response = self.graphql_request(request_string=query, context=self.context)
-        assert response is not None and "data" in response
-        all_delivery_mechanisms = response["data"]["allDeliveryMechanisms"]
-        assert all_delivery_mechanisms is not None, response
-        assert all(
-            key in entry for entry in all_delivery_mechanisms for key in ["name", "value"]
-        ), all_delivery_mechanisms
-
-
 class TestVolumeByDeliveryMechanism(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:

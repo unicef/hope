@@ -8,7 +8,6 @@ from django.db import IntegrityError
 from django.utils import timezone
 
 from aniso8601 import parse_date
-from apps.payment.fixtures import PaymentPlanSplitFactory
 from django_fsm import TransitionNotAllowed
 from flaky import flaky
 from freezegun import freeze_time
@@ -38,6 +37,7 @@ from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    PaymentPlanSplitFactory,
     generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import (
@@ -288,10 +288,11 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp.total_households_count, 0)
         self.assertEqual(pp.total_individuals_count, 0)
         self.assertEqual(pp.payment_items.count(), 0)
-        with self.assertNumQueries(74):
+        with self.assertNumQueries(76):
             prepare_payment_plan_task.delay(str(pp.id))
         pp.refresh_from_db()
         self.assertEqual(pp.status, PaymentPlan.Status.TP_OPEN)
+        self.assertEqual(pp.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_OK)
         self.assertEqual(pp.total_households_count, 2)
         self.assertEqual(pp.total_individuals_count, 4)
         self.assertEqual(pp.payment_items.count(), 2)
@@ -549,37 +550,37 @@ class TestPaymentPlanServices(APITestCase):
 
         self.assertEqual(pp_splits.count(), unique_collectors_count)
         self.assertEqual(pp_splits[0].split_type, PaymentPlanSplit.SplitType.BY_COLLECTOR)
-        self.assertEqual(pp_splits[0].payments.count(), 3)
-        self.assertEqual(pp_splits[1].payments.count(), 1)
-        self.assertEqual(pp_splits[2].payments.count(), 1)
-        self.assertEqual(pp_splits[3].payments.count(), 1)
-        self.assertEqual(pp_splits[4].payments.count(), 1)
-        self.assertEqual(pp_splits[5].payments.count(), 1)
-        self.assertEqual(pp_splits[6].payments.count(), 1)
-        self.assertEqual(pp_splits[7].payments.count(), 1)
-        self.assertEqual(pp_splits[8].payments.count(), 1)
-        self.assertEqual(pp_splits[9].payments.count(), 1)
+        self.assertEqual(pp_splits[0].split_payment_items.count(), 3)
+        self.assertEqual(pp_splits[1].split_payment_items.count(), 1)
+        self.assertEqual(pp_splits[2].split_payment_items.count(), 1)
+        self.assertEqual(pp_splits[3].split_payment_items.count(), 1)
+        self.assertEqual(pp_splits[4].split_payment_items.count(), 1)
+        self.assertEqual(pp_splits[5].split_payment_items.count(), 1)
+        self.assertEqual(pp_splits[6].split_payment_items.count(), 1)
+        self.assertEqual(pp_splits[7].split_payment_items.count(), 1)
+        self.assertEqual(pp_splits[8].split_payment_items.count(), 1)
+        self.assertEqual(pp_splits[9].split_payment_items.count(), 1)
 
         # split by records
-        with self.assertNumQueries(16):
+        with self.assertNumQueries(17):
             PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_RECORDS, chunks_no=5)
         pp_splits = pp.splits.all().order_by("order")
         self.assertEqual(pp_splits.count(), 3)
         self.assertEqual(pp_splits[0].split_type, PaymentPlanSplit.SplitType.BY_RECORDS)
-        self.assertEqual(pp_splits[0].payments.count(), 5)
-        self.assertEqual(pp_splits[1].payments.count(), 5)
-        self.assertEqual(pp_splits[2].payments.count(), 2)
+        self.assertEqual(pp_splits[0].split_payment_items.count(), 5)
+        self.assertEqual(pp_splits[1].split_payment_items.count(), 5)
+        self.assertEqual(pp_splits[2].split_payment_items.count(), 2)
 
         # split by admin2
-        with self.assertNumQueries(14):
+        with self.assertNumQueries(15):
             PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_ADMIN_AREA2)
         unique_admin2_count = pp.eligible_payments.values_list("household__admin2", flat=True).distinct().count()
         self.assertEqual(unique_admin2_count, 2)
         pp_splits = pp.splits.all().order_by("order")
         self.assertEqual(pp.splits.count(), unique_admin2_count)
         self.assertEqual(pp_splits[0].split_type, PaymentPlanSplit.SplitType.BY_ADMIN_AREA2)
-        self.assertEqual(pp_splits[0].payments.count(), 4)
-        self.assertEqual(pp_splits[1].payments.count(), 8)
+        self.assertEqual(pp_splits[0].split_payment_items.count(), 4)
+        self.assertEqual(pp_splits[1].split_payment_items.count(), 8)
 
     @freeze_time("2023-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
@@ -607,7 +608,7 @@ class TestPaymentPlanServices(APITestCase):
             financial_service_provider=pg_fsp,
             delivery_mechanism=self.dm_transfer_to_account,
         )
-        split = PaymentPlanSplitFactory(payment_plan=pp, send_to_payment_gateway=True)
+        split = PaymentPlanSplitFactory(payment_plan=pp, sent_to_payment_gateway=True)
 
         with self.assertRaisesMessage(GraphQLError, "Already sent to Payment Gateway"):
             PaymentPlanService(pp).send_to_payment_gateway()
@@ -726,10 +727,11 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp.total_households_count, 0)
         self.assertEqual(pp.total_individuals_count, 0)
         self.assertEqual(pp.payment_items.count(), 0)
-        with self.assertNumQueries(74):
+        with self.assertNumQueries(76):
             prepare_payment_plan_task.delay(str(pp.id))
         pp.refresh_from_db()
         self.assertEqual(pp.status, PaymentPlan.Status.TP_OPEN)
+        self.assertEqual(pp.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_OK)
         self.assertEqual(pp.payment_items.count(), 2)
 
         old_payment_ids = list(pp.payment_items.values_list("id", flat=True))

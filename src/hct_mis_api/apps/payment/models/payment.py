@@ -730,6 +730,8 @@ class PaymentPlan(
 
     @property
     def is_payment_gateway(self) -> bool:
+        if not hasattr(self, "delivery_mechanism"):
+            return False
         return self.delivery_mechanism.financial_service_provider.is_payment_gateway
 
     @property
@@ -875,6 +877,9 @@ class PaymentPlan(
 
     @property
     def can_send_to_payment_gateway(self) -> bool:
+        if not hasattr(self, "delivery_mechanism"):
+            return False
+
         status_accepted = self.status == PaymentPlan.Status.ACCEPTED
         has_payment_gateway_fsp = self.delivery_mechanism.financial_service_provider.is_payment_gateway
         has_not_sent_to_payment_gateway_splits = self.splits.filter(
@@ -2076,7 +2081,7 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
         if not dmd.is_valid:
             return False
 
-        if not dmd.validate_fsp_requirements(fsp.required_fields_definitions):
+        if not dmd.validate_fsp_required_fields(fsp.required_fields_definitions):
             return False
 
         return True

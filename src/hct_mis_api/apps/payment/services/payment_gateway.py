@@ -3,7 +3,6 @@ import logging
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
-from django.db.models import Q
 from django.utils.timezone import now
 
 from _decimal import Decimal
@@ -392,7 +391,7 @@ class PaymentGatewayService:
 
         if payment_plan.is_payment_gateway:
             for split in payment_plan.splits.filter(sent_to_payment_gateway=False).all().order_by("order"):
-                payments = list(split.payments.order_by("unicef_id"))
+                payments = list(split.split_payment_items.order_by("unicef_id"))
                 _add_records(payments, split)
 
     def sync_fsps(self) -> None:
@@ -471,7 +470,7 @@ class PaymentGatewayService:
 
     def sync_records(self) -> None:
         payment_plans = PaymentPlan.objects.filter(
-            Q(splits__sent_to_payment_gateway=True),
+            splits__sent_to_payment_gateway=True,
             status=PaymentPlan.Status.ACCEPTED,
             delivery_mechanism__financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
             delivery_mechanism__financial_service_provider__payment_gateway_id__isnull=False,
@@ -483,7 +482,7 @@ class PaymentGatewayService:
             if not payment_plan.is_reconciled and payment_plan.is_payment_gateway:
                 payment_instructions = payment_plan.splits.filter(sent_to_payment_gateway=True)
                 for instruction in payment_instructions:
-                    pending_payments = instruction.payments.filter(
+                    pending_payments = instruction.split_payment_items.filter(
                         status__in=self.PENDING_UPDATE_PAYMENT_STATUSES
                     ).order_by("unicef_id")
                     if pending_payments.exists():
@@ -494,6 +493,8 @@ class PaymentGatewayService:
                 if payment_plan.is_reconciled:
                     for instruction in payment_instructions:
                         self.change_payment_instruction_status(PaymentInstructionStatus.FINALIZED, instruction)
+                    payment_plan.status_finished()
+                    payment_plan.save()
 
     def sync_delivery_mechanisms(self) -> None:
         delivery_mechanisms: List[DeliveryMechanismData] = self.api.get_delivery_mechanisms()

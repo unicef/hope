@@ -363,7 +363,7 @@ class PaymentPlanService:
 
     @staticmethod
     def create_payments(payment_plan: PaymentPlan) -> None:
-        dmppp = payment_plan.delivery_mechanism
+        dmppp = getattr(payment_plan, "delivery_mechanism", None)
         pp_split = payment_plan.splits.first()
         payments_to_create = []
         households = payment_plan.household_list
@@ -384,8 +384,12 @@ class PaymentPlanService:
                 logging.exception(msg)
                 raise GraphQLError(msg)
 
-            has_valid_wallet = DeliveryMechanismData.collector_has_valid_wallet(
-                collector_id, dmppp.delivery_mechanism, dmppp.financial_service_provider
+            has_valid_wallet = (
+                DeliveryMechanismData.collector_has_valid_wallet(
+                    collector_id, dmppp.delivery_mechanism, dmppp.financial_service_provider
+                )
+                if dmppp
+                else True
             )
             payments_to_create.append(
                 Payment(
@@ -398,8 +402,8 @@ class PaymentPlanService:
                     household_id=household["pk"],
                     head_of_household_id=household["head_of_household"],
                     collector_id=collector_id,
-                    financial_service_provider_id=dmppp.financial_service_provider_id,
-                    delivery_type_id=dmppp.delivery_mechanism_id,
+                    financial_service_provider_id=dmppp.financial_service_provider_id if dmppp else None,
+                    delivery_type_id=dmppp.delivery_mechanism_id if dmppp else None,
                     has_valid_wallet=has_valid_wallet,
                 )
             )
@@ -773,13 +777,13 @@ class PaymentPlanService:
             )
             payments_chunks = []
             for _, payments in groupby(grouped_payments, key=lambda x: getattr(x.household, f"admin{area_level}")):  # type: ignore
-                payments_chunks.append(payments)
+                payments_chunks.append(list(payments))
 
         elif split_type == PaymentPlanSplit.SplitType.BY_COLLECTOR:
             grouped_payments = list(payments.order_by("collector__unicef_id", "unicef_id").select_related("collector"))
             payments_chunks = []
             for _, payments in groupby(grouped_payments, key=lambda x: x.collector):  # type: ignore
-                payments_chunks.append(payments)
+                payments_chunks.append(list(payments))
 
         payments_chunks_count = len(payments_chunks)
         if payments_chunks_count > PaymentPlanSplit.MAX_CHUNKS:
@@ -822,7 +826,6 @@ class PaymentPlanService:
     def rebuild_payment_plan_population(
         rebuild_list: bool, should_update_money_stats: bool, vulnerability_filter: bool, payment_plan: PaymentPlan
     ) -> None:
-        # TODO validae fsp dm
         rebuild_full_list = payment_plan.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES and rebuild_list
         payment_plan.build_status_pending()
         payment_plan.save(update_fields=("build_status", "built_at"))

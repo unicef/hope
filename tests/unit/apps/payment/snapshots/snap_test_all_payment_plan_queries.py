@@ -96,6 +96,10 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                             {
                                 'name': 'By Records',
                                 'value': 'BY_RECORDS'
+                            },
+                            {
+                                'name': 'No Split',
+                                'value': 'NO_SPLIT'
                             }
                         ],
                         'status': 'OPEN',
@@ -183,6 +187,10 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                             {
                                 'name': 'By Records',
                                 'value': 'BY_RECORDS'
+                            },
+                            {
+                                'name': 'No Split',
+                                'value': 'NO_SPLIT'
                             }
                         ],
                         'status': 'LOCKED',

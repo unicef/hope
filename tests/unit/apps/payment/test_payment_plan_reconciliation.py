@@ -44,6 +44,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     payment_plan_apply_engine_rule,
 )
 from hct_mis_api.apps.payment.fixtures import (
+    DeliveryMechanismDataFactory,
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
@@ -178,7 +179,10 @@ mutation ChooseDeliveryMechanismsForPaymentPlan($input: ChooseDeliveryMechanisms
 AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY = """
 query AvailableFspsForDeliveryMechanisms {
     availableFspsForDeliveryMechanisms {
-        deliveryMechanism
+        deliveryMechanism {
+            name
+            code
+        }
         fsps {
             id
             name
@@ -382,6 +386,9 @@ class TestPaymentPlanReconciliation(APITestCase):
         dm_cash = DeliveryMechanism.objects.get(code="cash")
         dm_transfer = DeliveryMechanism.objects.get(code="transfer_to_account")
 
+        for ind in [individual_1, individual_2, individual_3]:
+            DeliveryMechanismDataFactory(individual=ind, is_valid=True, delivery_mechanism=dm_cash)
+
         santander_fsp = FinancialServiceProviderFactory(
             name="Santander",
             distribution_limit=None,
@@ -400,14 +407,21 @@ class TestPaymentPlanReconciliation(APITestCase):
         )
         assert "errors" not in available_fsps_query_response, available_fsps_query_response
         available_fsps_data = available_fsps_query_response["data"]["availableFspsForDeliveryMechanisms"]
-        assert len(available_fsps_data) == 2
+        assert len(available_fsps_data) == 14
 
-        assert available_fsps_data[0]["fsps"][0]["name"] == santander_fsp.name
-        assert available_fsps_data[0]["deliveryMechanism"]["name"] == dm_cash.name
-        assert available_fsps_data[0]["deliveryMechanism"]["code"] == dm_cash.code
-        assert available_fsps_data[1]["fsps"][0]["name"] == santander_fsp.name
-        assert available_fsps_data[1]["deliveryMechanism"]["name"] == dm_transfer.name
-        assert available_fsps_data[1]["deliveryMechanism"]["code"] == dm_transfer.code
+        dm_cash_resp = next((dm for dm in available_fsps_data if dm["deliveryMechanism"]["code"] == dm_cash.code), None)
+        dm_transfer_resp = next(
+            (dm for dm in available_fsps_data if dm["deliveryMechanism"]["code"] == dm_transfer.code), None
+        )
+
+        assert dm_cash_resp is not None
+        assert dm_transfer_resp is not None
+        assert dm_cash_resp["fsps"][0]["name"] == santander_fsp.name
+        assert dm_cash_resp["deliveryMechanism"]["name"] == dm_cash.name
+        assert dm_cash_resp["deliveryMechanism"]["code"] == dm_cash.code
+        assert dm_transfer_resp["fsps"][0]["name"] == santander_fsp.name
+        assert dm_transfer_resp["deliveryMechanism"]["name"] == dm_transfer.name
+        assert dm_transfer_resp["deliveryMechanism"]["code"] == dm_transfer.code
 
         with patch(
             "hct_mis_api.apps.payment.services.payment_plan_services.transaction"
@@ -433,8 +447,8 @@ class TestPaymentPlanReconciliation(APITestCase):
                                 }
                             ],
                         },
-                        "fsp_id": encoded_santander_fsp_id,
-                        "delivery_mechanism_code": dm_cash.code,
+                        "fspId": encoded_santander_fsp_id,
+                        "deliveryMechanismCode": dm_cash.code,
                     },
                 },
             )
@@ -499,15 +513,16 @@ class TestPaymentPlanReconciliation(APITestCase):
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         payment = PaymentFactory(
             parent=payment_plan,
+            parent_split=payment_plan.splits.first(),
             business_area=self.business_area,
             household=self.household_1,
             collector=self.individual_1,
-            delivery_type=None,
+            delivery_type=dm_cash,
             entitlement_quantity=1000,
             entitlement_quantity_usd=100,
             delivered_quantity=None,
             delivered_quantity_usd=None,
-            financial_service_provider=None,
+            financial_service_provider=santander_fsp,
             currency="PLN",
         )
         self.assertEqual(payment.entitlement_quantity, 1000)
@@ -570,12 +585,8 @@ class TestPaymentPlanReconciliation(APITestCase):
         )
 
         payment_plan.refresh_from_db()
-        assert (
-            payment_plan.delivery_mechanisms.filter(
-                financial_service_provider=santander_fsp, delivery_mechanism=dm_cash
-            ).count()
-            == 1
-        )
+        assert payment_plan.delivery_mechanism.financial_service_provider == santander_fsp
+        assert payment_plan.delivery_mechanism.delivery_mechanism == dm_cash
         assert (
             payment_plan.eligible_payments.filter(
                 financial_service_provider__isnull=False,

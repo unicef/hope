@@ -331,6 +331,7 @@ class PaymentFactory(DjangoModelFactory):
     financial_service_provider = factory.SubFactory(FinancialServiceProviderFactory)
     excluded = False
     conflicted = False
+    has_valid_wallet = True
 
     @classmethod
     def _create(cls, model_class: Any, *args: Any, **kwargs: Any) -> "Payment":

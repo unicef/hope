@@ -236,24 +236,6 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             financial_service_provider=financial_service_provider1,
             delivery_mechanism=self.dm_cash,
         )
-        financial_service_provider2 = FinancialServiceProviderFactory()
-        financial_service_provider2.delivery_mechanisms.add(self.dm_transfer)
-        FspXlsxTemplatePerDeliveryMechanismFactory(
-            financial_service_provider=financial_service_provider2,
-            delivery_mechanism=self.dm_transfer,
-        )
-
-        DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=self.payment_plan,
-            delivery_mechanism=self.dm_cash,
-            financial_service_provider=financial_service_provider1,
-        )
-
-        DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=self.payment_plan,
-            delivery_mechanism=self.dm_transfer,
-            financial_service_provider=financial_service_provider2,
-        )
         self.payment_plan.status = PaymentPlan.Status.ACCEPTED
         self.payment_plan.save()
 
