@@ -44,6 +44,7 @@ from hct_mis_api.apps.payment.fixtures import (
     FspXlsxTemplatePerDeliveryMechanismFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    PaymentPlanSplitFactory,
     RealProgramFactory,
     generate_delivery_mechanisms,
 )
@@ -106,6 +107,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         cls.dm_transfer = DeliveryMechanism.objects.get(code="transfer")
         cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
         cls.payment_plan = PaymentPlanFactory(program_cycle=program.cycles.first(), business_area=cls.business_area)
+        cls.split = PaymentPlanSplitFactory(payment_plan=cls.payment_plan)
         cls.fsp_1 = FinancialServiceProviderFactory(
             name="Test FSP 1",
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
@@ -121,7 +123,11 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         program.households.set(Household.objects.all().values_list("id", flat=True))
         for household in program.households.all():
             PaymentFactory(
-                parent=cls.payment_plan, household=household, financial_service_provider=cls.fsp_1, currency="PLN"
+                parent=cls.payment_plan,
+                parent_split=cls.split,
+                household=household,
+                financial_service_provider=cls.fsp_1,
+                currency="PLN",
             )
 
         cls.user = UserFactory()
@@ -257,12 +263,11 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
                 f"payment_plan_payment_list_{self.payment_plan.unicef_id}"
             )
         )
-        fsp_ids = self.payment_plan.delivery_mechanisms.values_list("financial_service_provider_id", flat=True)
+        fsp_id = self.payment_plan.delivery_mechanism.financial_service_provider_id
         with zipfile.ZipFile(self.payment_plan.export_file_per_fsp.file, mode="r") as zip_file:  # type: ignore
             file_list = zip_file.namelist()
-            self.assertEqual(len(fsp_ids), len(file_list))
             fsp_xlsx_template_per_delivery_mechanism_list = FspXlsxTemplatePerDeliveryMechanism.objects.filter(
-                financial_service_provider_id__in=fsp_ids,
+                financial_service_provider_id=fsp_id,
             )
             file_list_fsp = [
                 f.replace(".xlsx", "").replace(f"payment_plan_payment_list_{self.payment_plan.unicef_id}_FSP_", "")
