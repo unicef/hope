@@ -569,7 +569,7 @@ class PaymentPlanService:
 
         new_currency = input_data.get("currency")
         if new_currency and new_currency != self.payment_plan.currency:
-            dmppp = DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=self.payment_plan).first()
+            dmppp = self.payment_plan.delivery_mechanism
             if (
                 new_currency == USDC
                 and dmppp.delivery_mechanism.transfer_type != DeliveryMechanism.TransferType.DIGITAL.value

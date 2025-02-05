@@ -67,6 +67,7 @@ class TestPaymentPlanServices(APITestCase):
         cls.user = UserFactory.create()
         cls.create_user_role_with_permissions(cls.user, [Permissions.PM_CREATE], cls.business_area)
         cls.dm_transfer_to_account = DeliveryMechanism.objects.get(code="transfer_to_account")
+        cls.dm_transfer_to_digital_wallet = DeliveryMechanism.objects.get(code="transfer_to_digital_wallet")
         cls.program = ProgramFactory(status=Program.ACTIVE)
         cls.cycle = cls.program.cycles.first()
 
@@ -989,10 +990,27 @@ class TestPaymentPlanServices(APITestCase):
             status=PaymentPlan.Status.OPEN,
             currency="AMD",
         )
-        DeliveryMechanismPerPaymentPlanFactory(payment_plan=payment_plan)
+        DeliveryMechanismPerPaymentPlanFactory(
+            payment_plan=payment_plan, delivery_mechanism=self.dm_transfer_to_account
+        )
         PaymentPlanService(payment_plan).update({"currency": "PLN"})
         payment_plan.refresh_from_db()
         self.assertEqual(payment_plan.currency, "PLN")
+
+    def test_update_pp_currency_validation(self) -> None:
+        payment_plan = PaymentPlanFactory(
+            program_cycle=self.cycle,
+            created_by=self.user,
+            status=PaymentPlan.Status.OPEN,
+            currency="USDC",
+        )
+        DeliveryMechanismPerPaymentPlanFactory(
+            payment_plan=payment_plan, delivery_mechanism=self.dm_transfer_to_digital_wallet
+        )
+        with self.assertRaisesMessage(
+            GraphQLError, "For delivery mechanism Transfer to Digital Wallet only currency USDC can be assigned."
+        ):
+            PaymentPlanService(payment_plan).update({"currency": "PLN"})
 
     def test_update_dispersion_end_date(self) -> None:
         payment_plan = PaymentPlanFactory(
