@@ -78,7 +78,9 @@ class TargetingCriteriaRuleFilterInputValidator:
             attributes = FieldFactory.from_scope(Scope.TARGETING).to_dict_by("name")
             attribute = attributes.get(rule_filter.field_name)
             if attribute is None:
-                logger.warning(f"Can't find any core field attribute associated with {rule_filter.field_name} field name")
+                logger.warning(
+                    f"Can't find any core field attribute associated with {rule_filter.field_name} field name"
+                )
                 raise ValidationError(
                     f"Can't find any core field attribute associated with {rule_filter.field_name} field name"
                 )
