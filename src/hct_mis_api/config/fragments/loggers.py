@@ -28,10 +28,10 @@ LOGGING: Dict[str, Any] = {
             "class": "logging.FileHandler",
             "filename": "debug.log",
         },
-        'sentry': {
-            'level': 'ERROR',
-            'class': 'sentry_sdk.integrations.logging.EventHandler',
-            'formatter': 'verbose',
+        "sentry": {
+            "level": "ERROR",
+            "class": "sentry_sdk.integrations.logging.EventHandler",
+            "formatter": "verbose",
         },
     },
     "loggers": {
