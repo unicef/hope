@@ -285,7 +285,7 @@ export const TargetingCriteriaForm = ({
         validationSchema={validationSchema}
         enableReinitialize
       >
-        {({ submitForm, values, resetForm, errors }) => {
+        {({ submitForm, values, resetForm, setFieldValue, errors }) => {
           const mappedDeliveryMechanisms =
             availableFspsForDeliveryMechanismData.availableFspsForDeliveryMechanisms.map(
               (el) => ({
@@ -567,6 +567,9 @@ export const TargetingCriteriaForm = ({
                                   variant="outlined"
                                   choices={mappedDeliveryMechanisms}
                                   component={FormikSelectField}
+                                  onChange={() => {
+                                    setFieldValue('fsp', '');
+                                  }}
                                   data-cy="input-delivery-mechanism"
                                 />
                               </Grid>
