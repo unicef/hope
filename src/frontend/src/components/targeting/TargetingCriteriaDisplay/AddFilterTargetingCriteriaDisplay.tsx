@@ -219,7 +219,6 @@ export const AddFilterTargetingCriteriaDisplay = ({
           individualFiltersAvailable={individualFiltersAvailable}
           householdFiltersAvailable={householdFiltersAvailable}
           collectorsFiltersAvailable={true}
-          targetPopulation={targetPopulation}
           criteriaIndex={criteriaIndex}
         />
         <ContentWrapper>
@@ -230,6 +229,7 @@ export const AddFilterTargetingCriteriaDisplay = ({
                     // eslint-disable-next-line
                     <Fragment key={criteria.id || index}>
                       <Criteria
+                        criteriaIndex={index}
                         isEdit={isEdit}
                         allDataFieldsChoicesDict={allDataChoicesDict}
                         allCollectorFieldsChoicesDict={
@@ -245,6 +245,8 @@ export const AddFilterTargetingCriteriaDisplay = ({
                         }
                         householdIds={criteria.householdIds}
                         individualIds={criteria.individualIds}
+                        deliveryMechanism={targetPopulation?.deliveryMechanism}
+                        criteria={criteria}
                         editFunction={() => editCriteria(criteria, index)}
                         removeFunction={() => helpers.remove(index)}
                       />

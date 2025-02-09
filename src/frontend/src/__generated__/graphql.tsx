@@ -8297,6 +8297,8 @@ export type UpdatePpMutationVariables = Exact<{
   vulnerabilityScoreMax?: InputMaybe<Scalars['Decimal']['input']>;
   excludedIds?: InputMaybe<Scalars['String']['input']>;
   exclusionReason?: InputMaybe<Scalars['String']['input']>;
+  fspId?: InputMaybe<Scalars['ID']['input']>;
+  deliveryMechanism?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -9695,7 +9697,7 @@ export type TargetPopulationQueryVariables = Exact<{
 }>;
 
 
-export type TargetPopulationQuery = { __typename?: 'Query', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, version: any, name?: string | null, status: PaymentPlanStatus, buildStatus?: PaymentPlanBuildStatus | null, adminUrl?: string | null, failedWalletValidationCollectorsIds?: Array<string | null> | null, totalHouseholdsCount: number, totalIndividualsCount: number, femaleChildrenCount: number, femaleAdultsCount: number, maleChildrenCount: number, maleAdultsCount: number, excludedIds?: string | null, exclusionReason?: string | null, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, steficonRuleTargeting?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, program?: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate?: any | null, isSocialWorkerProgram?: boolean | null } | null, programCycle: { __typename: 'ProgramCycleNode', id: string, title?: string | null }, createdBy: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string }, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds?: string | null, individualIds?: string | null, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, householdIds: string, individualIds: string, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null, collectorsFiltersBlocks: Array<{ __typename: 'TargetingCollectorRuleFilterBlockNode', id: any, createdAt: any, updatedAt: any, collectorBlockFilters?: Array<{ __typename: 'TargetingCollectorBlockRuleFilterNode', id: any, createdAt: any, updatedAt: any, fieldName: string, comparisonMethod?: string | null, flexFieldClassification: TargetingCollectorBlockRuleFilterFlexFieldClassification, arguments?: Array<any | null> | null, labelEn?: string | null } | null> | null }>, householdsFiltersBlocks?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null } | null } | null };
+export type TargetPopulationQuery = { __typename?: 'Query', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, version: any, name?: string | null, status: PaymentPlanStatus, buildStatus?: PaymentPlanBuildStatus | null, adminUrl?: string | null, failedWalletValidationCollectorsIds?: Array<string | null> | null, totalHouseholdsCount: number, totalIndividualsCount: number, femaleChildrenCount: number, femaleAdultsCount: number, maleChildrenCount: number, maleAdultsCount: number, excludedIds?: string | null, exclusionReason?: string | null, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, deliveryMechanism?: { __typename?: 'DeliveryMechanismPerPaymentPlanNode', id: string, name?: string | null, code?: string | null, fsp?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string } | null } | null, steficonRuleTargeting?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, program?: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate?: any | null, isSocialWorkerProgram?: boolean | null } | null, programCycle: { __typename: 'ProgramCycleNode', id: string, title?: string | null }, createdBy: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string }, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds?: string | null, individualIds?: string | null, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, householdIds: string, individualIds: string, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null, collectorsFiltersBlocks: Array<{ __typename: 'TargetingCollectorRuleFilterBlockNode', id: any, createdAt: any, updatedAt: any, collectorBlockFilters?: Array<{ __typename: 'TargetingCollectorBlockRuleFilterNode', id: any, createdAt: any, updatedAt: any, fieldName: string, comparisonMethod?: string | null, flexFieldClassification: TargetingCollectorBlockRuleFilterFlexFieldClassification, arguments?: Array<any | null> | null, labelEn?: string | null } | null> | null }>, householdsFiltersBlocks?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null } | null } | null };
 
 export const IndividualMinimalFragmentDoc = gql`
     fragment individualMinimal on IndividualNode {
@@ -12078,9 +12080,9 @@ export type DeletePaymentPMutationHookResult = ReturnType<typeof useDeletePaymen
 export type DeletePaymentPMutationResult = Apollo.MutationResult<DeletePaymentPMutation>;
 export type DeletePaymentPMutationOptions = Apollo.BaseMutationOptions<DeletePaymentPMutation, DeletePaymentPMutationVariables>;
 export const UpdatePpDocument = gql`
-    mutation UpdatePP($paymentPlanId: ID!, $dispersionStartDate: Date, $dispersionEndDate: Date, $currency: String, $name: String, $targetingCriteria: TargetingCriteriaObjectType, $programCycleId: ID, $vulnerabilityScoreMin: Decimal, $vulnerabilityScoreMax: Decimal, $excludedIds: String, $exclusionReason: String) {
+    mutation UpdatePP($paymentPlanId: ID!, $dispersionStartDate: Date, $dispersionEndDate: Date, $currency: String, $name: String, $targetingCriteria: TargetingCriteriaObjectType, $programCycleId: ID, $vulnerabilityScoreMin: Decimal, $vulnerabilityScoreMax: Decimal, $excludedIds: String, $exclusionReason: String, $fspId: ID, $deliveryMechanism: String) {
   updatePaymentPlan(
-    input: {paymentPlanId: $paymentPlanId, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, currency: $currency, name: $name, targetingCriteria: $targetingCriteria, programCycleId: $programCycleId, vulnerabilityScoreMin: $vulnerabilityScoreMin, vulnerabilityScoreMax: $vulnerabilityScoreMax, excludedIds: $excludedIds, exclusionReason: $exclusionReason}
+    input: {paymentPlanId: $paymentPlanId, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, currency: $currency, name: $name, targetingCriteria: $targetingCriteria, programCycleId: $programCycleId, vulnerabilityScoreMin: $vulnerabilityScoreMin, vulnerabilityScoreMax: $vulnerabilityScoreMax, excludedIds: $excludedIds, exclusionReason: $exclusionReason, fspId: $fspId, deliveryMechanism: $deliveryMechanism}
   ) {
     paymentPlan {
       id
@@ -12114,6 +12116,8 @@ export type UpdatePpMutationFn = Apollo.MutationFunction<UpdatePpMutation, Updat
  *      vulnerabilityScoreMax: // value for 'vulnerabilityScoreMax'
  *      excludedIds: // value for 'excludedIds'
  *      exclusionReason: // value for 'exclusionReason'
+ *      fspId: // value for 'fspId'
+ *      deliveryMechanism: // value for 'deliveryMechanism'
  *   },
  * });
  */
@@ -21201,6 +21205,15 @@ export const TargetPopulationDocument = gql`
     status
     buildStatus
     adminUrl
+    deliveryMechanism {
+      id
+      name
+      code
+      fsp {
+        id
+        name
+      }
+    }
     failedWalletValidationCollectorsIds
     totalHouseholdsCount
     totalIndividualsCount

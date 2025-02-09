@@ -13,6 +13,8 @@ export const UPDATE_PAYMENT_PLAN = gql`
     $vulnerabilityScoreMax: Decimal
     $excludedIds: String
     $exclusionReason: String
+    $fspId: ID
+    $deliveryMechanism: String
   ) {
     updatePaymentPlan(
       input: {
@@ -27,6 +29,8 @@ export const UPDATE_PAYMENT_PLAN = gql`
         vulnerabilityScoreMax: $vulnerabilityScoreMax
         excludedIds: $excludedIds
         exclusionReason: $exclusionReason
+        fspId: $fspId
+        deliveryMechanism: $deliveryMechanism
       }
     ) {
       paymentPlan {

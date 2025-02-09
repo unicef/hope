@@ -250,11 +250,11 @@ function mapBlockFilters(blocks, blockKey) {
   }));
 }
 
-export function mapCriteriaToInitialValues(criteria, targetPopulation) {
+export function mapCriteriaToInitialValues(criteria) {
   const individualIds = criteria.individualIds || '';
   const householdIds = criteria.householdIds || '';
-  const deliveryMechanism = targetPopulation?.deliveryMechanism?.code || '';
-  const fsp = targetPopulation?.deliveryMechanism?.fsp?.id || '';
+  const deliveryMechanism = criteria.deliveryMechanism || '';
+  const fsp = criteria.fsp || '';
   const householdsFiltersBlocks = criteria.householdsFiltersBlocks || [];
   const individualsFiltersBlocks = criteria.individualsFiltersBlocks || [];
   const collectorsFiltersBlocks = criteria.collectorsFiltersBlocks || [];

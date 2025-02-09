@@ -152,7 +152,6 @@ interface TargetingCriteriaFormPropTypes {
   householdFiltersAvailable: boolean;
   collectorsFiltersAvailable: boolean;
   isSocialWorkingProgram: boolean;
-  targetPopulation;
   criteriaIndex: number;
 }
 
@@ -168,7 +167,6 @@ export const TargetingCriteriaForm = ({
   householdFiltersAvailable,
   collectorsFiltersAvailable,
   isSocialWorkingProgram,
-  targetPopulation,
   criteriaIndex,
 }: TargetingCriteriaFormPropTypes): ReactElement => {
   const { t } = useTranslation();
@@ -195,15 +193,20 @@ export const TargetingCriteriaForm = ({
   const householdsFiltersBlocksWrapperRef = useRef(null);
   const individualsFiltersBlocksWrapperRef = useRef(null);
   const collectorsFiltersBlocksWrapperRef = useRef(null);
-  const initialValue = mapCriteriaToInitialValues(criteria, targetPopulation);
+  const initialValue = mapCriteriaToInitialValues(criteria);
   const [individualData, setIndividualData] = useState(null);
   const [householdData, setHouseholdData] = useState(null);
   const [allDataChoicesDict, setAllDataChoicesDict] = useState(null);
   const [allCollectorFieldsChoicesDict, setAllCollectorFieldsChoicesDict] =
     useState(null);
+
   const [openPaymentChannelCollapse, setOpenPaymentChannelCollapse] = useState(
-    Boolean(initialValue.deliveryMechanism),
+    initialValue.deliveryMechanism,
   );
+
+  useEffect(() => {
+    setOpenPaymentChannelCollapse(initialValue.deliveryMechanism);
+  }, [initialValue.deliveryMechanism]);
 
   const handlePaymentChannelButtonClick = () => {
     setOpenPaymentChannelCollapse(!openPaymentChannelCollapse);
@@ -299,6 +302,7 @@ export const TargetingCriteriaForm = ({
                 (el) => el.deliveryMechanism.code === values.deliveryMechanism,
               )
               ?.fsps.map((el) => ({ name: el.name, value: el.id })) || [];
+
           return (
             <Dialog
               open={open}
@@ -568,6 +572,9 @@ export const TargetingCriteriaForm = ({
                                   choices={mappedDeliveryMechanisms}
                                   component={FormikSelectField}
                                   onChange={() => {
+                                    setFieldValue('fsp', '');
+                                  }}
+                                  onClear={() => {
                                     setFieldValue('fsp', '');
                                   }}
                                   data-cy="input-delivery-mechanism"

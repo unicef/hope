@@ -31,17 +31,47 @@ interface EditTargetPopulationProps {
   screenBeneficiary: boolean;
 }
 
+type TargetingCriteriaRuleNodeExtended = {
+  __typename: 'TargetingCriteriaRuleNode';
+  id: any;
+  householdIds: string;
+  individualIds: string;
+  individualsFiltersBlocks?: {
+    __typename: 'TargetingIndividualRuleFilterBlockNode';
+    individualBlockFilters?: {
+      // Define the properties of individualBlockFilters here
+    }[];
+  }[];
+  collectorsFiltersBlocks: {
+    // Define the properties of collectorsFiltersBlocks here
+  }[];
+  householdsFiltersBlocks?: {
+    // Define the properties of householdsFiltersBlocks here
+  }[];
+  deliveryMechanism?: string;
+  fsp?: string;
+};
+
 export const EditTargetPopulation = ({
   paymentPlan,
   screenBeneficiary,
 }: EditTargetPopulationProps): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const targetingCriteriaCopy: TargetingCriteriaRuleNodeExtended[] =
+    paymentPlan.targetingCriteria?.rules.map((rule) => ({ ...rule })) || [];
+
+  if (targetingCriteriaCopy.length > 0) {
+    targetingCriteriaCopy[0].deliveryMechanism =
+      paymentPlan.deliveryMechanism?.code;
+    targetingCriteriaCopy[0].fsp = paymentPlan.deliveryMechanism?.fsp.id;
+  }
+
   const initialValues = {
     id: paymentPlan.id,
     name: paymentPlan.name || '',
     program: paymentPlan.program?.id || '',
-    targetingCriteria: paymentPlan.targetingCriteria?.rules || [],
+    targetingCriteria: targetingCriteriaCopy || [],
     excludedIds: paymentPlan.excludedIds || '',
     exclusionReason: paymentPlan.exclusionReason || '',
     flagExcludeIfActiveAdjudicationTicket:
@@ -91,6 +121,8 @@ export const EditTargetPopulation = ({
       await mutate({
         variables: {
           paymentPlanId: values.id,
+          fspId: values.targetingCriteria[0]?.fsp,
+          deliveryMechanism: values.targetingCriteria[0]?.deliveryMechanism,
           excludedIds: values.excludedIds,
           exclusionReason: values.exclusionReason,
           programCycleId: values.programCycleId.value,
