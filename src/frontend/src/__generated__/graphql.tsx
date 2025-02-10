@@ -8918,7 +8918,7 @@ export type AllEditHouseholdFieldsQuery = { __typename?: 'Query', allEditHouseho
 export type AllEditPeopleFieldsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AllEditPeopleFieldsQuery = { __typename?: 'Query', allEditPeopleFieldsAttributes?: Array<{ __typename?: 'FieldAttributeNode', id?: string | null, type?: string | null, name?: string | null, required?: boolean | null, labelEn?: string | null, hint?: string | null, isFlexField?: boolean | null, labels?: Array<{ __typename?: 'LabelNode', language?: string | null, label?: string | null } | null> | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', labelEn?: string | null, value?: string | null, admin?: string | null, listName?: string | null, labels?: Array<{ __typename?: 'LabelNode', label?: string | null, language?: string | null } | null> | null } | null> | null } | null> | null };
+export type AllEditPeopleFieldsQuery = { __typename?: 'Query', allEditPeopleFieldsAttributes?: Array<{ __typename?: 'FieldAttributeNode', id?: string | null, type?: string | null, name?: string | null, required?: boolean | null, labelEn?: string | null, hint?: string | null, isFlexField?: boolean | null, labels?: Array<{ __typename?: 'LabelNode', language?: string | null, label?: string | null } | null> | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', labelEn?: string | null, value?: string | null, admin?: string | null, listName?: string | null, labels?: Array<{ __typename?: 'LabelNode', label?: string | null, language?: string | null } | null> | null } | null> | null } | null> | null, countriesChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, documentTypeChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, identityTypeChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
 export type AllHouseholdsFlexFieldsAttributesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -15407,6 +15407,18 @@ export const AllEditPeopleFieldsDocument = gql`
       listName
     }
     isFlexField
+  }
+  countriesChoices {
+    name
+    value
+  }
+  documentTypeChoices {
+    name
+    value
+  }
+  identityTypeChoices {
+    name
+    value
   }
 }
     `;
