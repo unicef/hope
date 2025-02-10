@@ -122,7 +122,7 @@ export const EditTargetPopulation = ({
         variables: {
           paymentPlanId: values.id,
           fspId: values.targetingCriteria[0]?.fsp,
-          deliveryMechanism: values.targetingCriteria[0]?.deliveryMechanism,
+          deliveryMechanismCode: values.targetingCriteria[0]?.deliveryMechanism,
           excludedIds: values.excludedIds,
           exclusionReason: values.exclusionReason,
           programCycleId: values.programCycleId.value,
