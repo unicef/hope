@@ -85,7 +85,7 @@ class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.L
     def get_queryset(self) -> QuerySet:
         business_area = self.get_business_area()
         queryset = PaymentPlan.objects.filter(business_area=business_area)
-        program_ids = self.request.user.partner.get_program_ids_for_business_area(str(business_area.id))
+        program_ids = self.request.user.get_program_ids_for_business_area(str(business_area.id))
         return queryset.filter(
             status__in=[
                 PaymentPlan.Status.IN_APPROVAL,
