@@ -14,7 +14,7 @@ export const UPDATE_PAYMENT_PLAN = gql`
     $excludedIds: String
     $exclusionReason: String
     $fspId: ID
-    $deliveryMechanism: String
+    $deliveryMechanismCode: String
   ) {
     updatePaymentPlan(
       input: {
@@ -30,7 +30,7 @@ export const UPDATE_PAYMENT_PLAN = gql`
         excludedIds: $excludedIds
         exclusionReason: $exclusionReason
         fspId: $fspId
-        deliveryMechanism: $deliveryMechanism
+        deliveryMechanismCode: $deliveryMechanismCode
       }
     ) {
       paymentPlan {

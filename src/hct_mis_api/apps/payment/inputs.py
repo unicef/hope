@@ -95,4 +95,4 @@ class UpdatePaymentPlanInput(graphene.InputObjectType):
     exclusion_reason = graphene.String()
 
     fsp_id = graphene.ID(required=False)
-    delivery_mechanism = graphene.String(required=False)
+    delivery_mechanism_code = graphene.String(required=False)

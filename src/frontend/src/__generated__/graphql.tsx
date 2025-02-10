@@ -7479,7 +7479,7 @@ export type UpdateIndividualDataUpdateIssueTypeExtras = {
 
 export type UpdatePaymentPlanInput = {
   currency?: InputMaybe<Scalars['String']['input']>;
-  deliveryMechanism?: InputMaybe<Scalars['String']['input']>;
+  deliveryMechanismCode?: InputMaybe<Scalars['String']['input']>;
   dispersionEndDate?: InputMaybe<Scalars['Date']['input']>;
   dispersionStartDate?: InputMaybe<Scalars['Date']['input']>;
   excludedIds?: InputMaybe<Scalars['String']['input']>;
@@ -8298,7 +8298,7 @@ export type UpdatePpMutationVariables = Exact<{
   excludedIds?: InputMaybe<Scalars['String']['input']>;
   exclusionReason?: InputMaybe<Scalars['String']['input']>;
   fspId?: InputMaybe<Scalars['ID']['input']>;
-  deliveryMechanism?: InputMaybe<Scalars['String']['input']>;
+  deliveryMechanismCode?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -12080,9 +12080,9 @@ export type DeletePaymentPMutationHookResult = ReturnType<typeof useDeletePaymen
 export type DeletePaymentPMutationResult = Apollo.MutationResult<DeletePaymentPMutation>;
 export type DeletePaymentPMutationOptions = Apollo.BaseMutationOptions<DeletePaymentPMutation, DeletePaymentPMutationVariables>;
 export const UpdatePpDocument = gql`
-    mutation UpdatePP($paymentPlanId: ID!, $dispersionStartDate: Date, $dispersionEndDate: Date, $currency: String, $name: String, $targetingCriteria: TargetingCriteriaObjectType, $programCycleId: ID, $vulnerabilityScoreMin: Decimal, $vulnerabilityScoreMax: Decimal, $excludedIds: String, $exclusionReason: String, $fspId: ID, $deliveryMechanism: String) {
+    mutation UpdatePP($paymentPlanId: ID!, $dispersionStartDate: Date, $dispersionEndDate: Date, $currency: String, $name: String, $targetingCriteria: TargetingCriteriaObjectType, $programCycleId: ID, $vulnerabilityScoreMin: Decimal, $vulnerabilityScoreMax: Decimal, $excludedIds: String, $exclusionReason: String, $fspId: ID, $deliveryMechanismCode: String) {
   updatePaymentPlan(
-    input: {paymentPlanId: $paymentPlanId, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, currency: $currency, name: $name, targetingCriteria: $targetingCriteria, programCycleId: $programCycleId, vulnerabilityScoreMin: $vulnerabilityScoreMin, vulnerabilityScoreMax: $vulnerabilityScoreMax, excludedIds: $excludedIds, exclusionReason: $exclusionReason, fspId: $fspId, deliveryMechanism: $deliveryMechanism}
+    input: {paymentPlanId: $paymentPlanId, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, currency: $currency, name: $name, targetingCriteria: $targetingCriteria, programCycleId: $programCycleId, vulnerabilityScoreMin: $vulnerabilityScoreMin, vulnerabilityScoreMax: $vulnerabilityScoreMax, excludedIds: $excludedIds, exclusionReason: $exclusionReason, fspId: $fspId, deliveryMechanismCode: $deliveryMechanismCode}
   ) {
     paymentPlan {
       id
@@ -12117,7 +12117,7 @@ export type UpdatePpMutationFn = Apollo.MutationFunction<UpdatePpMutation, Updat
  *      excludedIds: // value for 'excludedIds'
  *      exclusionReason: // value for 'exclusionReason'
  *      fspId: // value for 'fspId'
- *      deliveryMechanism: // value for 'deliveryMechanism'
+ *      deliveryMechanismCode: // value for 'deliveryMechanismCode'
  *   },
  * });
  */

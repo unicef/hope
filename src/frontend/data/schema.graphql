@@ -4397,7 +4397,7 @@ input UpdatePaymentPlanInput {
   excludedIds: String
   exclusionReason: String
   fspId: ID
-  deliveryMechanism: String
+  deliveryMechanismCode: String
 }
 
 type UpdatePaymentPlanMutation {

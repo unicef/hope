@@ -495,7 +495,7 @@ class PaymentPlanService:
         dispersion_start_date = input_data.get("dispersion_start_date")
         dispersion_end_date = input_data.get("dispersion_end_date")
         fsp_id = input_data.get("fsp_id")
-        delivery_mechanism = input_data.get("delivery_mechanism")
+        delivery_mechanism_code = input_data.get("delivery_mechanism_code")
 
         if (
             any([excluded_ids, exclusion_reason, targeting_criteria_input])
@@ -584,13 +584,13 @@ class PaymentPlanService:
             should_update_money_stats = True
             Payment.objects.filter(parent=self.payment_plan).update(currency=self.payment_plan.currency)
 
-        if not (fsp_id and delivery_mechanism) and hasattr(self.payment_plan, "delivery_mechanism"):
+        if not (fsp_id and delivery_mechanism_code) and hasattr(self.payment_plan, "delivery_mechanism"):
             self.payment_plan.delivery_mechanism.delete()
             should_rebuild_list = True
 
-        if fsp_id and delivery_mechanism:
+        if fsp_id and delivery_mechanism_code:
             fsp = get_object_or_404(FinancialServiceProvider, pk=decode_id_string(fsp_id))
-            delivery_mechanism = get_object_or_404(DeliveryMechanism, name=delivery_mechanism)
+            delivery_mechanism = get_object_or_404(DeliveryMechanism, code=delivery_mechanism_code)
 
             dmppp = DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=self.payment_plan).first()
             if dmppp:
