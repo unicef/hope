@@ -363,7 +363,8 @@ class PaymentFilter(FilterSet):
                 When(status=Payment.STATUS_NOT_DISTRIBUTED, then=Value(3)),
                 When(status=Payment.STATUS_ERROR, then=Value(4)),
                 When(status=Payment.STATUS_FORCE_FAILED, then=Value(5)),
-                When(status=Payment.STATUS_PENDING, then=Value(6)),
+                When(status=Payment.STATUS_MANUALLY_CANCELLED, then=Value(6)),
+                When(status=Payment.STATUS_PENDING, then=Value(7)),
                 output_field=IntegerField(),
             )
         )
