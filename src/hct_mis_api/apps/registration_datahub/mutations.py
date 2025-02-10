@@ -302,7 +302,7 @@ class RegistrationDeduplicationMutation(BaseValidator, PermissionMutation):
     @classmethod
     def validate_object_status(cls, rdi_obj: RegistrationDataImport, *args: Any, **kwargs: Any) -> None:
         if rdi_obj.status != RegistrationDataImport.DEDUPLICATION_FAILED:
-            logger.error(
+            logger.warning(
                 "Deduplication can only be called when Registration Data Import status is Deduplication Failed"
             )
             raise ValidationError(
@@ -451,7 +451,7 @@ class RefuseRegistrationDataImportMutation(BaseValidator, PermissionMutation):
     def validate_object_status(cls, *args: Any, **kwargs: Any) -> None:
         status = kwargs.get("status")
         if status != RegistrationDataImport.IN_REVIEW:
-            logger.error("Only In Review Registration Data Import can be refused")
+            logger.warning("Only In Review Registration Data Import can be refused")
             raise ValidationError("Only In Review Registration Data Import can be refused")
 
     @classmethod
@@ -518,7 +518,7 @@ class EraseRegistrationDataImportMutation(PermissionMutation):
             RegistrationDataImport.DEDUPLICATION_FAILED,
         ):
             msg = "RDI can be erased only when status is: IMPORT_ERROR, MERGE_ERROR, DEDUPLICATION_FAILED"
-            logger.error(msg)
+            logger.warning(msg)
             raise GraphQLError(msg)
 
         Household.all_objects.filter(registration_data_import=obj_hct).delete()

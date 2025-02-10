@@ -376,7 +376,7 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(PermissionMutation):
         ):
             log_and_raise("You can only update status of payment verification for MANUAL verification method")
         if payment_verification.payment_verification_plan.status != PaymentVerificationPlan.STATUS_ACTIVE:
-            logger.error(
+            logger.warning(
                 f"You can only update status of payment verification for {PaymentVerificationPlan.STATUS_ACTIVE} cash plan verification"
             )
             raise GraphQLError(
@@ -384,7 +384,7 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(PermissionMutation):
             )
         delivered_amount = payment_verification.payment.delivered_quantity
         if status == PaymentVerification.STATUS_PENDING and received_amount is not None:  # pragma: no cover
-            logger.error(
+            logger.warning(
                 f"Wrong status {PaymentVerification.STATUS_PENDING} when received_amount ({received_amount}) is not empty",
             )
             raise GraphQLError(
@@ -395,7 +395,7 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(PermissionMutation):
             and received_amount is not None
             and received_amount != Decimal(0)
         ):
-            logger.error(
+            logger.warning(
                 f"Wrong status {PaymentVerification.STATUS_NOT_RECEIVED} when received_amount ({received_amount}) is not 0 or empty",
             )
             raise GraphQLError(
@@ -404,7 +404,7 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(PermissionMutation):
         elif status == PaymentVerification.STATUS_RECEIVED_WITH_ISSUES and (
             received_amount is None or received_amount == Decimal(0)
         ):
-            logger.error(
+            logger.warning(
                 f"Wrong status {PaymentVerification.STATUS_RECEIVED_WITH_ISSUES} when received_amount ({received_amount}) is 0 or empty",
             )
             raise GraphQLError(
@@ -412,7 +412,7 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(PermissionMutation):
             )
         elif status == PaymentVerification.STATUS_RECEIVED and received_amount != delivered_amount:
             received_amount_text = "None" if received_amount is None else received_amount
-            logger.error(
+            logger.warning(
                 f"Wrong status {PaymentVerification.STATUS_RECEIVED} when received_amount ({received_amount_text}) ≠ delivered_amount ({delivered_amount})"
             )
             raise GraphQLError(
@@ -476,7 +476,7 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
         ):
             log_and_raise("You can only update status of payment verification for MANUAL verification method")
         if payment_verification.payment_verification_plan.status != PaymentVerificationPlan.STATUS_ACTIVE:
-            logger.error(
+            logger.warning(
                 f"You can only update status of payment verification for {PaymentVerificationPlan.STATUS_ACTIVE} cash plan verification"
             )
             raise GraphQLError(
@@ -1026,12 +1026,12 @@ class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
 
         if payment_plan.status != PaymentPlan.Status.LOCKED:
             msg = "You can only import for LOCKED Payment Plan"
-            logger.error(msg)
+            logger.warning(msg)
             raise GraphQLError(msg)
 
         if payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS:
             msg = "Import in progress"
-            logger.error(msg)
+            logger.warning(msg)
             raise GraphQLError(msg)
 
         with transaction.atomic():

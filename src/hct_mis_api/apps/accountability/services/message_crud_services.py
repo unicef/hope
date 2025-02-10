@@ -52,7 +52,7 @@ class MessageCrudServices:
 
         if message.number_of_recipients == 0:
             err_msg = "No recipients found for the given criteria"
-            logger.error(err_msg)
+            logger.warning(err_msg)
             raise GraphQLError(err_msg)
 
         message.save()

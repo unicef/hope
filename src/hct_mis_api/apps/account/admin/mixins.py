@@ -122,7 +122,7 @@ class DjAdminManager:
                 )
 
         except Exception as e:
-            logger.exception(e)
+            logger.warning(e)
             raise
 
     def _get(self, url: str) -> Any:
@@ -220,7 +220,7 @@ class KoboAccessMixin:
             try:
                 self._grant_kobo_accesss_to_user(user)
             except Exception as e:
-                logger.exception(e)
+                logger.warning(e)
                 self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
         self.message_user(
             request,
@@ -237,7 +237,7 @@ class KoboAccessMixin:
             self._grant_kobo_accesss_to_user(self.get_queryset(request).get(pk=pk))
             self.message_user(request, f"Granted access to {settings.KOBO_KF_URL}", messages.SUCCESS)
         except Exception as e:
-            logger.exception(e)
+            logger.warning(e)
             self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
 
     def delete_view(self, request: HttpRequest, object_id: str, extra_context: Optional[Dict] = None) -> HttpResponse:
@@ -273,7 +273,7 @@ class KoboAccessMixin:
                 api.delete_user(obj.custom_fields["kobo_username"], obj.custom_fields["kobo_pk"])
             super().delete_model(request, obj)
         except Exception as e:
-            logger.exception(e)
+            logger.warning(e)
             self.message_user(request, str(e), messages.ERROR)
             raise
 
@@ -295,7 +295,7 @@ class KoboAccessMixin:
                 messages.WARNING,
             )
         except Exception as e:
-            logger.exception(e)
+            logger.warning(e)
             self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
 
     @button(label="Sync users from Kobo", permission="account.can_import_from_kobo")
@@ -335,6 +335,6 @@ class KoboAccessMixin:
                 ctx["users"] = users
 
             except Exception as e:
-                logger.exception(e)
+                logger.warning(e)
                 self.message_user(request, str(e), messages.ERROR)
         return TemplateResponse(request, "admin/kobo_users.html", ctx)

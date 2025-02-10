@@ -33,10 +33,10 @@ def process_flex_records_task(self: Any, reg_id: "UUID", rdi_id: "UUID", records
         if service := registration.rdi_parser:
             service.process_records(rdi_id, records_ids)
         else:
-            logger.exception("Not Implemented Service for Registration")
+            logger.warning("Not Implemented Service for Registration")
             raise NotImplementedError
     except Exception as e:
-        logger.exception("Process Flex Records Task error")
+        logger.warning("Process Flex Records Task error")
         raise self.retry(exc=e)
 
 
@@ -134,5 +134,5 @@ def clean_old_record_files_task(default_timedelta: int = 60) -> None:
         )
         logger.info("Record's files have benn successfully cleared")
     except Exception as e:
-        logger.error(e)
+        logger.warning(e)
         raise

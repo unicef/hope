@@ -61,7 +61,7 @@ def migrate_rdi_deduplication_statistics() -> None:
             ],
         )
     except Exception as e:
-        logger.error(e)
+        logger.warning(e)
         raise
 
     logger.info("Updating RDI deduplication stats finished")

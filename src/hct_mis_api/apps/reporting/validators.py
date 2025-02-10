@@ -15,5 +15,5 @@ class ReportValidator(BaseValidator):
         report_data = kwargs.get("report_data")
         report_type = report_data.get("report_type")
         if report_type not in dict(Report.REPORT_TYPES):
-            logger.error("Wrong report type")
+            logger.warning("Wrong report type")
             raise ValidationError("Wrong report type")

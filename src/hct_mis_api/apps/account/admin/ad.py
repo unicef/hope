@@ -96,7 +96,7 @@ class ADUSerMixin:
                     messages.SUCCESS,
                 )
         except Exception as e:
-            logger.exception(e)
+            logger.warning(e)
             self.message_user(request, str(e), messages.ERROR)
 
     @button(label="Sync", permission="account.can_sync_with_ad")
@@ -105,7 +105,7 @@ class ADUSerMixin:
             self._sync_ad_data(self.get_object(request, pk))
             self.message_user(request, "Active Directory data successfully fetched", messages.SUCCESS)
         except Exception as e:
-            logger.exception(e)
+            logger.warning(e)
             self.message_user(request, str(e), messages.ERROR)
 
     @button(permission="account.can_load_from_ad")
@@ -179,7 +179,7 @@ class ADUSerMixin:
                     ctx["results"] = results
                     return TemplateResponse(request, "admin/load_users.html", ctx)
                 except Exception as e:
-                    logger.exception(e)
+                    logger.warning(e)
                     self.message_user(request, str(e), messages.ERROR)
         ctx["form"] = form
         return TemplateResponse(request, "admin/load_users.html", ctx)

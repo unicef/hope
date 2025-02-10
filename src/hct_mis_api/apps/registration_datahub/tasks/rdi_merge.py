@@ -409,7 +409,7 @@ class RdiMergeTask:
                         cache.delete(key)
 
         except Exception as e:
-            logger.error(e)
+            logger.warning(e)
             raise
 
     def _update_household_collections(self, households: list, rdi: RegistrationDataImport) -> None:

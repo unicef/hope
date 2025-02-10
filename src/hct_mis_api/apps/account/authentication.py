@@ -54,7 +54,7 @@ def require_email(
     if user and user.email:
         return
     elif is_new and not details.get("email"):
-        logger.error("Email couldn't be validated")
+        logger.warning("Email couldn't be validated")
         raise InvalidEmail(strategy)
 
 

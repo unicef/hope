@@ -1,5 +1,3 @@
-import logging
-
 from hct_mis_api.config.env import env
 
 SENTRY_DSN = env("SENTRY_DSN")
@@ -17,8 +15,8 @@ if SENTRY_DSN:
     from hct_mis_api.apps.utils.sentry import SentryFilter
 
     sentry_logging = LoggingIntegration(
-        level=logging.INFO,
-        event_level=logging.ERROR,  # Capture info and above as breadcrumbs  # Send errors as events
+        level=None,
+        event_level=None,  # Capture info and above as breadcrumbs  # Send errors as events
     )
     sentry_sdk.init(
         dsn=SENTRY_DSN,

@@ -293,7 +293,7 @@ def nested_getattr(obj: Any, attr: Any, default: object = raise_attribute_error)
     except AttributeError as e:
         if default != raise_attribute_error:
             return default
-        logger.exception(e)
+        logger.warning(e)
         raise
 
 
