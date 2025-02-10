@@ -67,19 +67,59 @@ const StyledBox = styled(Box)`
   width: 100%;
 `;
 
-const validationSchema = Yup.object().shape({
-  deliveryMechanism: Yup.string().when(
-    'openPaymentChannelCollapse',
-    (openPaymentChannelCollapse, schema) =>
-      openPaymentChannelCollapse
-        ? schema.required('Delivery Mechanism is required')
-        : schema,
+const requiredSchema = Yup.object().shape({
+  deliveryMechanism: Yup.string().required('Delivery Mechanism is required'),
+  fsp: Yup.string().required('FSP is required'),
+  householdIds: HhIdValidation,
+  individualIds: IndIdValidation,
+  filters: Yup.array().of(
+    Yup.object().shape({
+      fieldName: Yup.string().required('Field Type is required'),
+    }),
   ),
-  fsp: Yup.string().when(
-    'openPaymentChannelCollapse',
-    (openPaymentChannelCollapse, schema) =>
-      openPaymentChannelCollapse ? schema.required('FSP is required') : schema,
+  individualsFiltersBlocks: Yup.array().of(
+    Yup.object().shape({
+      individualBlockFilters: Yup.array().of(
+        Yup.object().shape({
+          fieldName: Yup.string().required('Field Type is required'),
+          fieldAttribute: Yup.object().shape({
+            type: Yup.string().required(),
+          }),
+          roundNumber: Yup.string()
+            .nullable()
+            .when(
+              ['fieldName', 'fieldAttribute'],
+              (_fieldName, _fieldAttribute, schema) => {
+                const parent = schema.parent;
+                if (
+                  parent &&
+                  parent.fieldAttribute &&
+                  parent.fieldAttribute?.type === 'PDU'
+                ) {
+                  return Yup.string().required('Round Number is required');
+                }
+                return Yup.string().notRequired();
+              },
+            ),
+        }),
+      ),
+    }),
   ),
+  collectorsFiltersBlocks: Yup.array().of(
+    Yup.object().shape({
+      collectorBlockFilters: Yup.array().of(
+        Yup.object().shape({
+          fieldName: Yup.string().required('Field Type is required'),
+          value: Yup.string().required('Field Value is required'),
+        }),
+      ),
+    }),
+  ),
+});
+
+const optionalSchema = Yup.object().shape({
+  deliveryMechanism: Yup.string(),
+  fsp: Yup.string(),
   householdIds: HhIdValidation,
   individualIds: IndIdValidation,
   filters: Yup.array().of(
@@ -277,6 +317,11 @@ export const TargetingCriteriaForm = ({
     });
     return bag.resetForm();
   };
+
+  const validationSchema = openPaymentChannelCollapse
+    ? requiredSchema
+    : optionalSchema;
+
   if (loading || !open || !availableFspsForDeliveryMechanismData) return null;
 
   return (
