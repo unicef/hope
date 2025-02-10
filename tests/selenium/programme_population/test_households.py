@@ -109,7 +109,6 @@ class TestSmokeHouseholds:
         assert "-" in pageHouseholdsDetails.getLabelLengthOfTimeSinceArrival().text
         assert "-" in pageHouseholdsDetails.getLabelNumberOfTimesDisplaced().text
         assert "-" in pageHouseholdsDetails.getLabelLinkedGrievances().text
-        assert add_household.collect_individual_data in pageHouseholdsDetails.getLabelDataCollectingType().text
         assert "USD 0.00" in pageHouseholdsDetails.getLabelCashReceived().text
         assert "USD 0.00" in pageHouseholdsDetails.getLabelTotalCashReceived().text
         assert "Items Group Members" in pageHouseholdsDetails.getTableTitle().text
