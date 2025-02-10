@@ -594,7 +594,7 @@ class Household(
         self.withdrawn_date = None
         self.save()
 
-    def set_admin_areas(self, new_admin_area: Area, save: bool = True) -> None:
+    def set_admin_areas(self, new_admin_area: Optional[Area], save: bool = True) -> None:
         """Propagates admin1,2,3,4 based on admin_area parents"""
         admins = ["admin1", "admin2", "admin3", "admin4"]
         if not new_admin_area:
@@ -609,7 +609,7 @@ class Household(
             new_admin_area = getattr(new_admin_area, "parent", None)
 
         if save:
-            self.save(update_fields= admins)
+            self.save(update_fields=admins)
 
     @property
     def sanction_list_possible_match(self) -> bool:

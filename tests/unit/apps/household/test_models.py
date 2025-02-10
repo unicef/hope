@@ -56,11 +56,10 @@ class TestHousehold(TestCase):
 
     def test_household_admin_areas_set(self) -> None:
         household, (individual) = create_household(household_args={"size": 1, "business_area": self.business_area})
-        household.admin_area = self.area1
         household.admin1 = self.area1
         household.save()
 
-        household.set_admin_areas()
+        household.set_admin_areas(self.area1)
         household.refresh_from_db()
 
         self.assertEqual(household.admin_area, self.area1)
