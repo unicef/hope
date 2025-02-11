@@ -192,18 +192,24 @@
                         .brushOn(false)
                         .elasticY(true)
                         .renderHorizontalGridLines(true)
-                        .xAxisLabel("Countries")
-                        .yAxisLabel("{% translate 'Amount Paid (USD)' %}")
-                        .barPadding(0.01)
-                        .margins({ top: 20, right: 20, bottom: 50, left: 80 })
-                        .outerPadding(0.05)
-                        .ordering((d) => -d.value)
-                        .title((d) => `${d.key}: ${d.value.toFixed(2)} USD`)
+                        .yAxisLabel("{% translate 'Amount Paid (USD)  '%}", 40)
+                        .barPadding(0.1)
+                        .margins({ top: 30, right: 25, bottom: 95, left: 90 })
+                        .outerPadding(0.5)
+                        .ordering((d) => -d.key)
+                        .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)} USD`)
                         .colors(d3.scaleOrdinal().range(d3.schemePaired))
-                        .colorAccessor((d) => d.key) 
+                        .colorAccessor((d) => d.key)
+                        .yAxisPadding(100)
+                        .useViewBoxResizing(true) 
                         .render();
-                    countryChart.yAxis().ticks(5);
-
+                    countryChart.yAxis().ticks(4);
+                    countryChart.on('renderlet', function(chart) {
+                        chart.selectAll('g.x text')
+                            .attr("transform", "rotate(30)")
+                            .style("text-anchor", "start")
+                            .attr("dx", "2");
+                            });
                         function updateTopMetrics() {
                         const totalPaymentsCount = ndx.groupAll().reduceSum(d => d.payments || 0).value();
                         const reconciliationData = ndx.groupAll().reduce(
