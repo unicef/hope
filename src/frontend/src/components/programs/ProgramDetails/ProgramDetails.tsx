@@ -65,7 +65,7 @@ export const ProgramDetails = ({
     return (
       <Grid container spacing={6}>
         {Object.keys(counts).map((level) => (
-          <Grid size={{ xs:3 }} key={level}>
+          <Grid size={{ xs: 3 }} key={level}>
             <LabelizedField
               dataCy={`admin-area-${level}-total-count`}
               label={t(`Admin Area ${level}`)}
@@ -187,10 +187,7 @@ export const ProgramDetails = ({
           <OverviewContainer>
             <Grid container spacing={6}>
               {partners.map((partner) => (
-                <Grid
-                  key={partner.id}
-                  size={{ xs:partner.areaAccess === 'BUSINESS_AREA' ? 3 : 6 }}
-                >
+                <Grid key={partner.id} size={{ xs: 12 }}>
                   <StyledBox p={6} flexDirection="column">
                     <Typography data-cy="label-partner-name" variant="h6">
                       {partner.name}
