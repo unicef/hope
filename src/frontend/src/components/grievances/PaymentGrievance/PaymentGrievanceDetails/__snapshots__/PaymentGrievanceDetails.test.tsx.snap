@@ -72,14 +72,10 @@ exports[`components/grievances/PaymentGrievanceDetails should render with data 1
           />
           <td
             class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-177gid-MuiTableCell-root"
-          >
-            1686
-          </td>
+          />
           <td
             class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-177gid-MuiTableCell-root"
-          >
-            423
-          </td>
+          />
           <td
             class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-177gid-MuiTableCell-root"
           />
