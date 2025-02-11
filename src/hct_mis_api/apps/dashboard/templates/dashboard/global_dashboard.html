@@ -6,7 +6,9 @@
 {% block content %}
     <div class="bg-white p-4 rounded shadow">
         <h4 class="text-lg font-semibold">{% translate "Payments by Country" %}</h4>
-        <div id="payments-by-country" class="dc-chart w-full h-[600px]" style="padding: 28px;"></div>
+        <div id="payments-by-country"
+             class="dc-chart w-full h-[600px]"
+             style="padding: 28px"></div>
     </div>
     <!-- Main Metrics and Row Chart Layout -->
     <div class="grid grid-cols-4 gap-4">
@@ -22,7 +24,16 @@
         </div>
     </div>
     <!-- Other Charts -->
-    <div class="flex flex-grow grid grid-cols-3 gap-2 mt-8">{% include "dashboard/includes/charts.html" %}</div>
+    <div class="flex flex-grow grid grid-cols-3 gap-2 mt-8">
+        <!-- Payments by Delivery Mechanism -->
+        <div class="bg-white p-4 rounded shadow">
+            <h3 class="text-sm font-semibold">
+                <span class="icon icon-financing icon-blue"></span>
+                {% translate "Payments by Delivery Mechanism" %}
+            </h3>
+            <div id="payments-by-delivery" class="dc-chart w-full h-full"></div>
+        </div>
+    </div>
 {% endblock %}
 {% block scripts %}
     <script>
@@ -60,10 +71,8 @@
 
             function createDashboard() {
                 [
-                    "payments-by-fsp",
                     "payments-by-delivery",
                     "payments-by-sector",
-                    "volume-by-program",
                     "payments-by-country",
                 ].forEach(showSpinner);
 
@@ -97,60 +106,37 @@
                     // Define dimensions and groups
                     const idDim = ndx.dimension((d) => d.id);
                     const yearDim = ndx.dimension((d) => d.year);
-                    const fspDim = ndx.dimension((d) => d.fsp);
                     const deliveryDim = ndx.dimension((d) => d.delivery_types);
                     const sectorDim = ndx.dimension((d) => d.sector);
-                    const programDim = ndx.dimension((d) => d.program);
                     const countryDim = ndx.dimension((d) => d.country);
 
-
-                    const fspGroup = fspDim
-                        .group()
-                        .reduceSum((d) => d.delivered_quantity_usd);
                     const deliveryGroup = deliveryDim
                         .group()
                         .reduceSum((d) => d.delivered_quantity_usd);
                     const sectorGroup = sectorDim
                         .group()
                         .reduceSum((d) => d.delivered_quantity_usd);
-                    const programGroup = programDim
-                        .group()
-                        .reduceSum((d) => d.delivered_quantity_usd);
+                  
                     const countryGroup = countryDim
                         .group()
                         .reduceSum((d) => d.delivered_quantity_usd);
-                        const topProgramGroup = {
-                            all: () => programGroup.all().slice(0, 30), // Top 30 programs
-                        };
-
-                    // Define charts
-                    const fspChart = dc
-                        .pieChart("#payments-by-fsp")
-                        .dimension(fspDim)
-                        .group(fspGroup)
-                        .radius(150)
-                        .innerRadius(30)
-                        .renderLabel(true)
-                        .useViewBoxResizing(true)
-                        .label(
-                            (d) =>
-                            `${truncateLabel(d.key)}: ${((d.value / fspGroup.all().reduce((sum, g) => sum + g.value, 0)) * 100).toFixed(0)}%`,
-                        )
-                        .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)}`);
 
                     const deliveryChart = dc
-                        .pieChart("#payments-by-delivery")
+                        .rowChart("#payments-by-delivery")
                         .dimension(deliveryDim)
                         .group(deliveryGroup)
-                        .radius(150)
-                        .innerRadius(30)
                         .renderLabel(true)
+                        .elasticX(true)
+                        .height(400)
+                        .margins({ top: 10, right: 5, bottom: 30, left: 4 })
                         .useViewBoxResizing(true)
                         .label(
                             (d) =>
                             `${d.key} ${((d.value / deliveryGroup.all().reduce((sum, g) => sum + g.value, 0)) * 100).toFixed(0)}%`,
                         )
-                        .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)}`);
+                        .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)}`)
+                        .xAxis()
+                        .ticks(3);
 
                     const sectorChart = dc
                         .rowChart("#payments-by-sector")
@@ -163,23 +149,6 @@
                             `${d.key}: ${decimalnumberFormatter(d.value)} USD (${((d.value / sectorGroup.all().reduce((sum, g) => sum + g.value, 0)) * 100).toFixed(0)}%)`,
                         )
                         .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)} USD`)
-                        .xAxis()
-                        .ticks(3);
-
-                    const programChart = dc
-                        .rowChart("#volume-by-program")
-                        .dimension(programDim)
-                        .group(topProgramGroup)
-                        .elasticX(true)
-                        .height(400)
-                        .margins({ top: 10, right: 0, bottom: 30, left: 4 }) 
-                        .label(
-                            (d) =>
-                            `${truncateLabel(d.key)}: ${decimalnumberFormatter(d.value)} USD (${((d.value / programGroup.all().reduce((sum, g) => sum + g.value, 0)) * 100).toFixed(0)}%)`,
-                        )
-                        .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)} USD`)
-                        .labelOffsetX(10)
-                        .useViewBoxResizing(true)
                         .xAxis()
                         .ticks(3);
 
@@ -399,10 +368,8 @@
                             updateTopMetrics();
                         });
                     }
-                    hideSpinner("payments-by-fsp");
                     hideSpinner("payments-by-delivery");
                     hideSpinner("payments-by-sector");
-                    hideSpinner("volume-by-program");
                     hideSpinner("payments-by-country");
                     dc.renderAll();
                     isChartsInitialized = true;
