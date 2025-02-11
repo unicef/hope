@@ -733,7 +733,7 @@ class TestCreateTargeting:
         pageTargetingCreate.getInputIndividualsFiltersBlocksValueFrom().send_keys("2")
         pageTargetingCreate.getInputIndividualsFiltersBlocksValueTo().send_keys("4")
         pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
-        expected_criteria_text = "Test Decimal Attribute: 2 - 4\nRound 1 (Test Round Decimal 1)"
+        expected_criteria_text = "Test Decimal Attribute: 2 - 5\nRound 1 (Test Round Decimal 1)"
         assert pageTargetingCreate.getCriteriaContainer().text == expected_criteria_text
         targeting_name = "Test Targeting PDU decimal"
         pageTargetingCreate.getFieldName().send_keys(targeting_name)
@@ -751,7 +751,7 @@ class TestCreateTargeting:
         pageTargetingDetails.getButtonIconEdit().click()
         pageTargetingCreate.getInputIndividualsFiltersBlocksValueTo().send_keys(Keys.BACKSPACE)
         pageTargetingCreate.getInputIndividualsFiltersBlocksValueTo().send_keys("5")
-        bool_no_expected_criteria_text = "Test Decimal Attribute: 2 - 4\nRound 1 (Test Round Decimal 1)"
+        bool_no_expected_criteria_text = "Test Decimal Attribute: 2 - 5\nRound 1 (Test Round Decimal 1)"
 
         pageTargetingCreate.get_elements(pageTargetingCreate.targetingCriteriaAddDialogSaveButton)[1].click()
 
