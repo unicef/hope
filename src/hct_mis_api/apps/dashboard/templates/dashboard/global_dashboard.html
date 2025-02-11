@@ -5,8 +5,8 @@
 {% endblock %}
 {% block content %}
     <div class="bg-white p-4 rounded shadow">
-        <h3 class="text-lg font-semibold">{% translate "Payments by Country" %}</h3>
-        <div id="payments-by-country" class="dc-chart w-full h-[600px]"></div>
+        <h4 class="text-lg font-semibold">{% translate "Payments by Country" %}</h4>
+        <div id="payments-by-country" class="dc-chart w-full h-[600px]" style="padding: 28px;"></div>
     </div>
     <!-- Main Metrics and Row Chart Layout -->
     <div class="grid grid-cols-4 gap-4">
@@ -192,15 +192,15 @@
                         .brushOn(false)
                         .elasticY(true)
                         .renderHorizontalGridLines(true)
-                        .yAxisLabel("{% translate 'Amount Paid (USD)  '%}", 40)
-                        .barPadding(0.1)
+                        .yAxisLabel("{% translate 'Amount Paid (USD) ' %}", 30)
+                        .barPadding(0.5)
                         .margins({ top: 30, right: 25, bottom: 95, left: 90 })
                         .outerPadding(0.5)
                         .ordering((d) => -d.key)
                         .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)} USD`)
                         .colors(d3.scaleOrdinal().range(d3.schemePaired))
                         .colorAccessor((d) => d.key)
-                        .yAxisPadding(100)
+                        .yAxisPadding(90)
                         .useViewBoxResizing(true) 
                         .render();
                     countryChart.yAxis().ticks(4);
