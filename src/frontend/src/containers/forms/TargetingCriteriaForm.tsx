@@ -171,7 +171,7 @@ interface ArrayFieldWrapperProps {
   arrayHelpers;
   children: ReactNode;
 }
-class ArrayFieldWrapper extends Component<ArrayFieldWrapperProps> {
+class ArrayFieldWrapper extends Component<ArrayFieldWrapperProps, any> {
   getArrayHelpers(): object {
     const { arrayHelpers } = this.props;
     return arrayHelpers;
@@ -241,11 +241,11 @@ export const TargetingCriteriaForm = ({
     useState(null);
 
   const [openPaymentChannelCollapse, setOpenPaymentChannelCollapse] = useState(
-    initialValue.deliveryMechanism,
+    !!initialValue.deliveryMechanism,
   );
 
   useEffect(() => {
-    setOpenPaymentChannelCollapse(initialValue.deliveryMechanism);
+    setOpenPaymentChannelCollapse(!!initialValue.deliveryMechanism);
   }, [initialValue.deliveryMechanism]);
 
   const handlePaymentChannelButtonClick = () => {
