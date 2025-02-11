@@ -338,7 +338,7 @@ exports[`components/ProgramDetails should render 1`] = `
         class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-6 css-ipzchf-MuiGrid2-root"
       >
         <div
-          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-12 css-1j0u08r-MuiGrid2-root"
         >
           <div
             class="sc-jZCRgm clgcSD MuiBox-root css-bo4s1r"
