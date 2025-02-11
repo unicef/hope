@@ -92,10 +92,7 @@ from hct_mis_api.apps.household.models import (
     SEX_CHOICE,
     WORK_STATUS_CHOICE,
 )
-from hct_mis_api.apps.registration_data.models import (
-    COLLECT_TYPES,
-    RegistrationDataImport,
-)
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 logger = logging.getLogger(__name__)
 
@@ -713,19 +710,6 @@ CORE_FIELDS_ATTRIBUTES = [
             Scope.XLSX_PEOPLE,
             Scope.PEOPLE_UPDATE,
         ],
-    },
-    {
-        "id": "d9eea60c-5747-4d26-9f4b-f99a2165e913",
-        "type": TYPE_SELECT_ONE,
-        "name": "collect_individual_data",
-        "lookup": "collect_individual_data",
-        "required": False,
-        "label": {"English(EN)": f"Will you be collecting all member {TEMPLATE_INDIVIDUAL} data?"},
-        "hint": "",
-        "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in COLLECT_TYPES],
-        "associated_with": _HOUSEHOLD,
-        "xlsx_field": "collect_individual_data_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE, Scope.XLSX],
     },
     {
         "id": "1c2e3c42-8b32-4198-bd4f-06a61e2ecf0e",

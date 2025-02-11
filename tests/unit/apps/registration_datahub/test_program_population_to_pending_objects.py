@@ -71,7 +71,6 @@ HOUSEHOLD_FIELDS = (
     "org_name_enumerator",
     "village",
     "registration_method",
-    "collect_individual_data",
     "currency",
     "unhcr_id",
     "geopoint",
