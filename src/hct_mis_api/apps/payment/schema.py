@@ -684,13 +684,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
             not_delivered=Count("id", filter=Q(status=Payment.STATUS_NOT_DISTRIBUTED)),
             unsuccessful=Count(
                 "id",
-                filter=Q(
-                    status__in=[
-                        Payment.STATUS_ERROR,
-                        Payment.STATUS_FORCE_FAILED,
-                        Payment.STATUS_MANUALLY_CANCELLED,
-                    ]
-                ),
+                filter=Q(status__in=Payment.FAILED_STATUSES),
             ),
             pending=Count("id", filter=Q(status__in=Payment.PENDING_STATUSES)),
             reconciled=Count("id", filter=~Q(status__in=Payment.PENDING_STATUSES)),

@@ -593,13 +593,7 @@ class PaymentPlan(
             self.imported_file_date = None
 
     def unsuccessful_payments(self) -> "QuerySet":
-        return self.eligible_payments.filter(
-            status__in=[
-                Payment.STATUS_ERROR,  # delivered_quantity < 0 (-1)
-                Payment.STATUS_NOT_DISTRIBUTED,  # delivered_quantity == 0
-                Payment.STATUS_FORCE_FAILED,
-            ]
-        )
+        return self.eligible_payments.filter(status__in=Payment.FAILED_STATUSES)
 
     def unsuccessful_payments_for_follow_up(self) -> "QuerySet":
         """
@@ -1633,6 +1627,7 @@ class Payment(
     )
     PENDING_STATUSES = (STATUS_PENDING, STATUS_SENT_TO_PG, STATUS_SENT_TO_FSP)
     DELIVERED_STATUSES = (STATUS_SUCCESS, STATUS_DISTRIBUTION_SUCCESS, STATUS_DISTRIBUTION_PARTIAL)
+    FAILED_STATUSES = (STATUS_FORCE_FAILED, STATUS_ERROR, STATUS_MANUALLY_CANCELLED, STATUS_NOT_DISTRIBUTED)
 
     ENTITLEMENT_CARD_STATUS_ACTIVE = "ACTIVE"
     ENTITLEMENT_CARD_STATUS_INACTIVE = "INACTIVE"
