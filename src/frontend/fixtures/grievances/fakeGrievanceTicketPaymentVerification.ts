@@ -174,7 +174,6 @@ export const fakeGrievanceTicketPaymentVerification = {
     orgEnumerator: 'A_',
     updatedAt: '2024-12-09T20:40:33.645629+00:00',
     consent: null,
-    collectIndividualData: 'A_',
     registrationDataImport: {
       name: 'Test Import',
       dataSource: 'API',
