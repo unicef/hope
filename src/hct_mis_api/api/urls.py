@@ -34,11 +34,6 @@ urlpatterns = [
         "lookups/observeddisability/", endpoints.lookups.ObservedDisability().as_view(), name="observeddisability-list"
     ),
     path("lookups/relationship/", endpoints.lookups.Relationship().as_view(), name="relationship-list"),
-    path(
-        "lookups/datacollectingpolicy/",
-        endpoints.lookups.DataCollectingPolicy().as_view(),
-        name="datacollectingpolicy-list",
-    ),
     path("lookups/role/", endpoints.lookups.Roles().as_view(), name="role-list"),
     path("lookups/sex/", endpoints.lookups.Sex().as_view(), name="sex-list"),
     path("lookups/program-statuses/", endpoints.lookups.ProgramStatuses().as_view(), name="program-statuses-list"),

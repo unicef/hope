@@ -151,7 +151,6 @@ export const fakeHousehold = {
   orgEnumerator: 'A_',
   updatedAt: '2024-01-17T09:20:12.470481+00:00',
   consent: null,
-  collectIndividualData: 'A_',
   registrationDataImport: {
     name: 'Test Import',
     dataSource: 'FLEX_REGISTRATION',
