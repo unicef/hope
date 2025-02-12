@@ -1394,6 +1394,7 @@ class TestTargeting:
         pageTargetingCreate.getInputFiltersValueTo(0).send_keys("1")
         pageTargetingCreate.getInputFiltersValueTo(0).send_keys("1")
         pageTargetingCreate.getButtonTargetPopulationAddCriteria().click()
+        pageTargetingCreate.getNoValidationFspAccept().click()
         pageTargetingCreate.getInputName().send_keys("Target Population for Females Age 0 - 5")
         pageTargetingCreate.getInputFlagexcludeifactiveadjudicationticket().click()
         pageTargetingCreate.clickButtonTargetPopulationCreate()
