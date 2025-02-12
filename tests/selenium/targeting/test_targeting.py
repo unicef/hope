@@ -861,6 +861,7 @@ class TestCreateTargeting:
         assert pageTargetingDetails.getTitlePage().text.split("\n")[0].strip() == targeting_name
         assert pageTargetingDetails.getCriteriaContainer().text == expected_criteria_text
         assert Household.objects.count() == 3
+        print("==> ", individual3.relationship, individual3.household)
 
         assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual3.household.unicef_id
         assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "1"
@@ -907,7 +908,7 @@ class TestCreateTargeting:
         pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
         expected_criteria_text = "Test String Attribute SW: Text\nRound 1 (Test Round String 1)"
         assert pageTargetingCreate.getCriteriaContainer().text == expected_criteria_text
-        targeting_name = "Test Targeting SW PDU string"
+        targeting_name = "Test Targeting SW PDU str"
         pageTargetingCreate.getFieldName().send_keys(targeting_name)
         pageTargetingCreate.getTargetPopulationSaveButton().click()
         pageTargetingDetails.getLockButton()
