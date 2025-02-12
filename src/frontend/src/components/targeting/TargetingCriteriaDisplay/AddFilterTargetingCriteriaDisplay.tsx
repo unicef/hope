@@ -168,6 +168,12 @@ export const AddFilterTargetingCriteriaDisplay = ({
     return closeModal();
   };
 
+  //function to open a first modal
+  const handleAddFilter = (): void => {
+    setIndex(0);
+    setOpen(true);
+  };
+
   // const  collectorFiltersAvailable =
   //   selectedProgram?.dataCollectingType?.collectorFiltersAvailable;
 
@@ -263,7 +269,7 @@ export const AddFilterTargetingCriteriaDisplay = ({
 
               {!rules.length && (
                 <AddCriteria
-                  onClick={() => setOpen(true)}
+                  onClick={handleAddFilter}
                   data-cy="button-target-population-add-criteria"
                 >
                   <AddCircleOutline />
