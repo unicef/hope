@@ -76,6 +76,37 @@ class UserPartnerTest(TestCase):
         resp_2 = self.unicef_user.partner.get_program_ids_for_business_area(business_area_id=self.business_area.pk)
         self.assertListEqual(resp_2, [str(self.program.pk)])
 
+    def test_get_partner_program_ids_for_permission_in_business_area(self) -> None:
+        resp_1 = self.other_user.partner.get_program_ids_for_permission_in_business_area(
+            business_area_id=self.business_area.pk,
+            permissions=["PROGRAMME_CREATE"],
+            one_of_permissions=True,
+        )
+        self.assertListEqual(resp_1, [])
+
+        resp_2 = self.other_user.partner.get_program_ids_for_permission_in_business_area(
+            business_area_id=self.business_area.pk,
+            permissions=["PROGRAMME_CREATE", "PROGRAMME_FINISH"],
+            one_of_permissions=True,
+        )
+
+        self.assertListEqual(resp_2, [str(self.program.pk)])
+
+        resp_3 = self.other_user.partner.get_program_ids_for_permission_in_business_area(
+            business_area_id=self.business_area.pk,
+            permissions=["PROGRAMME_CREATE", "PROGRAMME_FINISH"],
+            one_of_permissions=False,
+        )
+
+        self.assertListEqual(resp_3, [])
+
+        resp_4 = self.unicef_user.partner.get_program_ids_for_permission_in_business_area(
+            business_area_id=self.business_area.pk,
+            permissions=["PROGRAMME_CREATE"],
+            one_of_permissions=False,
+        )
+        self.assertListEqual(resp_4, [str(self.program.pk)])
+
     def test_get_partner_area_limits_per_program(self) -> None:
         other_partner_areas = self.other_user.partner.get_area_limits_for_program(self.program.pk)
         self.assertQuerysetEqual(other_partner_areas, Area.objects.filter(id=self.area_1.pk))
