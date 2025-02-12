@@ -1482,14 +1482,6 @@ type GroupAttributeNode {
   labelEn: String
 }
 
-enum HouseholdCollectIndividualData {
-  A_
-  A_2
-  A_1
-  A_3
-  A_0
-}
-
 enum HouseholdCollectType {
   STANDARD
   SINGLE
@@ -1582,7 +1574,6 @@ type HouseholdNode implements Node {
   orgNameEnumerator: String!
   village: String!
   registrationMethod: HouseholdRegistrationMethod!
-  collectIndividualData: HouseholdCollectIndividualData!
   currency: String
   unhcrId: String!
   detailId: String
@@ -1713,7 +1704,6 @@ input HouseholdUpdateDataObjectType {
   orgNameEnumerator: String
   village: String
   registrationMethod: String
-  collectIndividualData: String
   currency: String
   unhcrId: String
   flexFields: Arg
@@ -4576,8 +4566,6 @@ type UserNode implements Node {
   jobTitle: String!
   adUuid: String
   lastModifyDate: DateTime
-  lastDoapSync: DateTime
-  doapHash: String!
   userRoles: [UserRoleNode!]!
   documentSet(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
   approvalSet: [ApprovalNode!]!

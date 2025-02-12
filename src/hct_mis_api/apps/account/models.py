@@ -174,16 +174,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
     job_title = models.CharField(max_length=255, blank=True)
     ad_uuid = models.CharField(max_length=64, unique=True, null=True, blank=True, editable=False)
 
-    # CashAssist DOAP fields
     last_modify_date = models.DateTimeField(auto_now=True, null=True, blank=True)
-    last_doap_sync = models.DateTimeField(
-        default=None, null=True, blank=True, help_text="Timestamp of last sync with CA"
-    )
-    doap_hash = models.TextField(
-        editable=False,
-        default="",
-        help_text="System field used to check if changes need to be sent to CA",
-    )
 
     def __str__(self) -> str:
         if self.first_name or self.last_name:
@@ -322,9 +313,9 @@ class HorizontalChoiceArrayField(ArrayField):
 
 
 class UserRole(NaturalKeyModel, TimeStampedUUIDModel):
-    business_area = models.ForeignKey("core.BusinessArea", related_name="user_roles", on_delete=models.CASCADE)
     user = models.ForeignKey("account.User", related_name="user_roles", on_delete=models.CASCADE)
     role = models.ForeignKey("account.Role", related_name="user_roles", on_delete=models.CASCADE)
+    business_area = models.ForeignKey("core.BusinessArea", related_name="user_roles", on_delete=models.CASCADE)
     expiry_date = models.DateField(
         blank=True, null=True, help_text="After expiry date this User Role will be inactive."
     )
@@ -337,9 +328,9 @@ class UserRole(NaturalKeyModel, TimeStampedUUIDModel):
 
 
 class UserGroup(NaturalKeyModel, models.Model):
-    business_area = models.ForeignKey("core.BusinessArea", related_name="user_groups", on_delete=models.CASCADE)
     user = models.ForeignKey("account.User", related_name="user_groups", on_delete=models.CASCADE)
     group = models.ForeignKey(Group, related_name="user_groups", on_delete=models.CASCADE)
+    business_area = models.ForeignKey("core.BusinessArea", related_name="user_groups", on_delete=models.CASCADE)
 
     class Meta:
         unique_together = ("business_area", "user", "group")
