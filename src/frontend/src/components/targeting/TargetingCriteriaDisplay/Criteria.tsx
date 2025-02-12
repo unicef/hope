@@ -307,7 +307,7 @@ export function Criteria({
 
     const deliveryMechanismName =
       deliveryMechanism?.name ||
-      mappedDeliveryMechanisms.find(
+      mappedDeliveryMechanisms?.find(
         (el) => el.value === criteria.deliveryMechanism,
       )?.name;
 
@@ -317,7 +317,7 @@ export function Criteria({
           (el) =>
             el.deliveryMechanism.code === deliveryMechanism ||
             el.deliveryMechanism.code ===
-              mappedDeliveryMechanisms.find(
+              mappedDeliveryMechanisms?.find(
                 (elem) => elem.value === criteria.deliveryMechanism,
               )?.value,
         )
@@ -325,7 +325,7 @@ export function Criteria({
 
     const fspName =
       deliveryMechanism?.fsp?.name ||
-      mappedFsps.find((el) => el.value === criteria.fsp)?.name;
+      mappedFsps?.find((el) => el.value === criteria.fsp)?.name;
 
     setDeliveryMechanismToDisplay(deliveryMechanismName);
     setFspToDisplay(fspName);
