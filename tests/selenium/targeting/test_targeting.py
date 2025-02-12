@@ -534,6 +534,7 @@ class TestCreateTargeting:
         pageTargetingCreate.getTargetingCriteriaValue().click()
         pageTargetingCreate.select_multiple_option_by_name(HEARING, SEEING)
         pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
+        pageTargetingCreate.getNoValidationFspAccept().click()
         disability_expected_criteria_text = "Does the Social Worker have disability?: Difficulty hearing (even if using a hearing aid), Difficulty seeing (even if wearing glasses)"
         assert pageTargetingCreate.getCriteriaContainer().text == disability_expected_criteria_text
         targeting_name = "Test targeting people"
@@ -573,7 +574,7 @@ class TestCreateTargeting:
         pageTargetingCreate.getTargetingCriteriaValue().click()
         pageTargetingCreate.getSelectRefugee().click()
         pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
-
+        pageTargetingCreate.getNoValidationFspAccept().click()
         disability_expected_criteria_text = "Residence status: Displaced | Refugee / Asylum Seeker"
         assert pageTargetingCreate.getCriteriaContainer().text == disability_expected_criteria_text
         targeting_name = "Test targeting people"
@@ -620,6 +621,7 @@ class TestCreateTargeting:
         pageTargetingCreate.getSelectRoundOption(1).click()
         pageTargetingCreate.getInputIndividualsFiltersBlocksValue().send_keys("Text")
         pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
+        pageTargetingCreate.getNoValidationFspAccept().click()
         expected_criteria_text = "Test String Attribute: Text\nRound 1 (Test Round String 1)"
         assert pageTargetingCreate.getCriteriaContainer().text == expected_criteria_text
         targeting_name = "Test Targeting PDU string"
@@ -666,6 +668,7 @@ class TestCreateTargeting:
         pageTargetingCreate.getSelectIndividualsFiltersBlocksValue().click()
         pageTargetingCreate.select_option_by_name("Yes")
         pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
+        pageTargetingCreate.getNoValidationFspAccept().click()
         bool_yes_expected_criteria_text = "Test Bool Attribute: Yes\nRound 2 (Test Round Bool 2)"
         assert pageTargetingCreate.getCriteriaContainer().text == bool_yes_expected_criteria_text
 
@@ -738,6 +741,7 @@ class TestCreateTargeting:
         targeting_name = "Test Targeting PDU decimal"
         pageTargetingCreate.getFieldName().send_keys(targeting_name)
         pageTargetingCreate.getTargetPopulationSaveButton().click()
+        pageTargetingCreate.getNoValidationFspAccept().click()
         pageTargetingDetails.getLockButton()
         assert pageTargetingDetails.getTitlePage().text.split("\n")[0].strip() == targeting_name
         assert pageTargetingDetails.getCriteriaContainer().text == expected_criteria_text
@@ -806,6 +810,7 @@ class TestCreateTargeting:
         pageTargetingCreate.getInputDateIndividualsFiltersBlocksValueTo().click()
         pageTargetingCreate.getInputDateIndividualsFiltersBlocksValueTo().send_keys("2022-03-03")
         pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
+        pageTargetingCreate.getNoValidationFspAccept().click()
         expected_criteria_text = "Test Date Attribute: 2022-01-01 - 2022-03-03\nRound 1 (Test Round Date 1)"
         assert pageTargetingCreate.getCriteriaContainer().text == expected_criteria_text
         targeting_name = "Test Targeting PDU date"
@@ -852,6 +857,7 @@ class TestCreateTargeting:
         pageTargetingCreate.getSelectRoundOption(1).click()
         pageTargetingCreate.getSelectIndividualsiFltersBlocksIsNull().click()
         pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
+        pageTargetingCreate.getNoValidationFspAccept().click()
         expected_criteria_text = "Test String Attribute: Empty\nRound 1 (Test Round String 1)"
         assert pageTargetingCreate.getCriteriaContainer().text == expected_criteria_text
         targeting_name = "Test Targeting PDU null"
@@ -905,6 +911,7 @@ class TestCreateTargeting:
         pageTargetingCreate.getSelectRoundOption(1).click()
         pageTargetingCreate.getInputFiltersValue().send_keys("Text")
         pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
+        pageTargetingCreate.getNoValidationFspAccept().click()
         expected_criteria_text = "Test String Attribute SW: Text\nRound 1 (Test Round String 1)"
         assert pageTargetingCreate.getCriteriaContainer().text == expected_criteria_text
         targeting_name = "Test Targeting SW PDU string"
@@ -940,8 +947,10 @@ class TestTargeting:
         pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
         pageTargetingCreate.select_listbox_element("First Cycle In Programme")
         pageTargetingCreate.getDivTargetPopulationAddCriteria().click()
+        pageTargetingCreate.getInputHouseholdids().click()
         pageTargetingCreate.getInputHouseholdids().send_keys(household_with_disability.unicef_id)
         pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
+        pageTargetingCreate.getNoValidationFspAccept().click()
         pageTargetingCreate.getInputName().send_keys(f"Target Population for {household_with_disability.unicef_id}")
         pageTargetingCreate.clickButtonTargetPopulationCreate()
         target_population = PaymentPlan.objects.get(name=f"Target Population for {household_with_disability.unicef_id}")
@@ -1171,6 +1180,7 @@ class TestTargeting:
         pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
         pageTargetingCreate.select_listbox_element("First Cycle In Programme")
         pageTargetingCreate.getDivTargetPopulationAddCriteria().click()
+        pageTargetingCreate.getInputHouseholdids().click()
         pageTargetingCreate.getInputHouseholdids().send_keys(household_with_disability.unicef_id)
         pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
         pageTargetingCreate.getInputName().send_keys(f"Test {household_with_disability.unicef_id}")
@@ -1241,6 +1251,7 @@ class TestTargeting:
         pageTargeting.getButtonCreateNew().click()
         pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
         pageTargetingCreate.select_listbox_element("First Cycle In Programme")
+        pageTargetingCreate.getInputHouseholdids().click()
         pageTargetingCreate.getInputHouseholdids().send_keys(household_with_disability.unicef_id)
         pageTargetingCreate.getInputName().send_keys(f"Test {household_with_disability.unicef_id}")
         pageTargetingCreate.getInputFlagexcludeifonsanctionlist().click()

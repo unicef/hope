@@ -1926,7 +1926,7 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
         if not self.validation_errors:
             self.is_valid = True
 
-    def validate_fsp_required_fields(self, required_fields: Dict) -> bool:
+    def validate_fsp_required_fields(self, required_fields: List[Dict]) -> bool:
         for required_field in required_fields:
             associated_object = self.get_associated_object(required_field["associated_with"])
             if isinstance(associated_object, dict):
@@ -2062,21 +2062,11 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
                 grievance_ticket.individual_data_update_ticket_details.save()
                 grievance_ticket.save()
 
-    @classmethod
-    def collector_has_valid_wallet(
-        cls, collector_id: str, delivery_mechanism: "DeliveryMechanism", fsp: "FinancialServiceProvider"
-    ) -> bool:
-        dmd = cls.objects.filter(
-            individual_id=collector_id,
-            delivery_mechanism=delivery_mechanism,
-        ).first()
-        if not dmd:
+    def is_valid_for_fsp(self, fsp: "FinancialServiceProvider") -> bool:
+        if not self.is_valid:
             return False
 
-        if not dmd.is_valid:
-            return False
-
-        if not dmd.validate_fsp_required_fields(fsp.required_fields_definitions):
+        if not self.validate_fsp_required_fields(fsp.required_fields_definitions):
             return False
 
         return True
