@@ -334,16 +334,16 @@ export const TargetingCriteriaForm = ({
         enableReinitialize
       >
         {({ submitForm, values, resetForm, setFieldValue, errors }) => {
-          const mappedDeliveryMechanisms =
-            availableFspsForDeliveryMechanismData?.availableFspsForDeliveryMechanisms?.map(
-              (el) => ({
-                name: el.deliveryMechanism.name,
-                value: el.deliveryMechanism.code,
-              }),
-            );
+          const fsps =
+            availableFspsForDeliveryMechanismData?.availableFspsForDeliveryMechanisms ||
+            [];
+          const mappedDeliveryMechanisms = fsps.map((el) => ({
+            name: el.deliveryMechanism.name,
+            value: el.deliveryMechanism.code,
+          }));
           const mappedFsps =
-            availableFspsForDeliveryMechanismData?.availableFspsForDeliveryMechanisms
-              ?.find(
+            fsps
+              .find(
                 (el) => el.deliveryMechanism.code === values.deliveryMechanism,
               )
               ?.fsps.map((el) => ({ name: el.name, value: el.id })) || [];
