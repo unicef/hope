@@ -332,7 +332,7 @@ class TestPaymentPlanServices(APITestCase):
         )
         program = pp.program_cycle.program
         payments = []
-        for _ in range(4):
+        for _ in range(5):
             hoh = IndividualFactory(household=None)
             hh = HouseholdFactory(head_of_household=hoh, program=program, business_area=self.business_area)
             IndividualRoleInHouseholdFactory(household=hh, individual=hoh, role=ROLE_PRIMARY)
@@ -350,20 +350,19 @@ class TestPaymentPlanServices(APITestCase):
         ):
             PaymentPlanService(pp).create_follow_up(self.user, dispersion_start_date, dispersion_end_date)
 
-        # do not create follow-up payments for STATUS_ERROR, STATUS_NOT_DISTRIBUTED, STATUS_FORCE_FAILED,
-        for payment, status in zip(
-            payments[:3], [Payment.STATUS_ERROR, Payment.STATUS_NOT_DISTRIBUTED, Payment.STATUS_FORCE_FAILED]
-        ):
+        # create follow-up payments for STATUS_ERROR, STATUS_NOT_DISTRIBUTED, STATUS_FORCE_FAILED, STATUS_MANUALLY_CANCELLED
+        for payment, status in zip(payments[:4], Payment.FAILED_STATUSES):
             payment.status = status
             payment.save()
 
         # do not create follow-up payments for withdrawn households
-        payments[3].household.withdrawn = True
-        payments[3].household.save()
+        payments[4].household.withdrawn = True
+        payments[4].household.save()
 
-        pp_error = payments[0]
-        pp_not_distributed = payments[1]
-        pp_force_failed = payments[2]
+        p_error = payments[0]
+        p_not_distributed = payments[1]
+        p_force_failed = payments[2]
+        p_manually_cancelled = payments[3]
 
         with self.assertNumQueries(7):
             follow_up_pp = PaymentPlanService(pp).create_follow_up(
@@ -394,9 +393,9 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(follow_up_pp.status, PaymentPlan.Status.OPEN)
         self.assertEqual(follow_up_pp.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_OK)
 
-        self.assertEqual(follow_up_pp.payment_items.count(), 3)
+        self.assertEqual(follow_up_pp.payment_items.count(), 4)
         self.assertEqual(
-            {pp_error.id, pp_not_distributed.id, pp_force_failed.id},
+            {p_error.id, p_not_distributed.id, p_force_failed.id, p_manually_cancelled.id},
             set(follow_up_pp.payment_items.values_list("source_payment_id", flat=True)),
         )
 
