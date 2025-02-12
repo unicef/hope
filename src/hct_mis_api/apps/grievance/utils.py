@@ -9,6 +9,7 @@ from django.db.models import Q, QuerySet
 from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.account.models import Partner, User
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.accountability.models import Feedback
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.grievance.models import (
@@ -128,6 +129,7 @@ def filter_grievance_tickets_based_on_partner_areas_2(
     user: User,
     business_area_id: str,
     program_id: Optional[str],
+    permissions: List[Permissions],
 ) -> QuerySet["GrievanceTicket"]:
     return filter_based_on_partner_areas_2(
         queryset=queryset,
@@ -136,6 +138,7 @@ def filter_grievance_tickets_based_on_partner_areas_2(
         program_id=program_id,
         lookup_id="programs__id__in",
         id_container=lambda program_id: [program_id],
+        permissions=permissions,
     )
 
 
@@ -144,6 +147,7 @@ def filter_feedback_based_on_partner_areas_2(
     user: User,
     business_area_id: str,
     program_id: Optional[str],
+    permissions: List[Permissions],
 ) -> QuerySet["Feedback"]:
     return filter_based_on_partner_areas_2(
         queryset=queryset,
@@ -152,6 +156,7 @@ def filter_feedback_based_on_partner_areas_2(
         program_id=program_id,
         lookup_id="program__id__in",
         id_container=lambda program_id: [program_id],
+        permissions=permissions,
     )
 
 
@@ -162,6 +167,7 @@ def filter_based_on_partner_areas_2(
     program_id: Optional[str],
     lookup_id: str,
     id_container: Callable[[Any], List[Any]],
+    permissions: List[Permissions],
 ) -> QuerySet["GrievanceTicket", "Feedback"]:
     try:
         programs_for_business_area = []
@@ -169,7 +175,9 @@ def filter_based_on_partner_areas_2(
         if program_id and user.has_program_access(program_id):
             programs_for_business_area = [program_id]
         elif not program_id:
-            programs_for_business_area = user.get_program_ids_for_business_area(business_area_id)
+            programs_for_business_area = user.get_program_ids_for_permission_in_business_area(
+                business_area_id=business_area_id, permissions=permissions, one_of_permissions=True
+            )
         # if user does not have access to any program/selected program -> return empty queryset for program-related obj
         if not programs_for_business_area:
             return queryset.model.objects.none()

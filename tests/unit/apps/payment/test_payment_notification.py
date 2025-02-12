@@ -6,7 +6,7 @@ from django.utils import timezone
 
 from constance.test import override_config
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory, RoleFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -87,19 +87,49 @@ class TestPaymentNotification(APITestCase):
 
         # partners setup
         partner_with_different_role_in_program = PartnerFactory(name="Partner with different role in program")
-        cls.create_partner_role_with_permissions(partner_with_different_role_in_program, [Permissions.PROGRAMME_CREATE], cls.business_area, cls.program, name="Role with different permissions")
+        cls.create_partner_role_with_permissions(
+            partner_with_different_role_in_program,
+            [Permissions.PROGRAMME_CREATE],
+            cls.business_area,
+            cls.program,
+            name="Role with different permissions",
+        )
 
-        partner_with_approval_permission_in_different_program = PartnerFactory(name="Partner with approval permission in different program")
-        cls.create_partner_role_with_permissions(partner_with_approval_permission_in_different_program, [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE], cls.business_area, cls.program2, name="Role with approval permission")
+        partner_with_approval_permission_in_different_program = PartnerFactory(
+            name="Partner with approval permission in different program"
+        )
+        cls.create_partner_role_with_permissions(
+            partner_with_approval_permission_in_different_program,
+            [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
+            cls.business_area,
+            cls.program2,
+            name="Role with approval permission",
+        )
 
         partner_with_action_permissions = PartnerFactory(name="Partner with action permissions")
-        cls.create_partner_role_with_permissions(partner_with_action_permissions, action_permissions_list, cls.business_area, program=cls.program, name="Role with action permissions")
+        cls.create_partner_role_with_permissions(
+            partner_with_action_permissions,
+            action_permissions_list,
+            cls.business_area,
+            program=cls.program,
+            name="Role with action permissions",
+        )
 
-        partner_with_action_permissions_in_whole_ba = PartnerFactory(name="Partner with action permissions in whole business area")
-        cls.create_partner_role_with_permissions(partner_with_action_permissions_in_whole_ba, action_permissions_list, cls.business_area, whole_business_area_access=True, name="Role with action permissions")
+        partner_with_action_permissions_in_whole_ba = PartnerFactory(
+            name="Partner with action permissions in whole business area"
+        )
+        cls.create_partner_role_with_permissions(
+            partner_with_action_permissions_in_whole_ba,
+            action_permissions_list,
+            cls.business_area,
+            whole_business_area_access=True,
+            name="Role with action permissions",
+        )
 
         # users setup
-        cls.user_with_partner_unicef_hq = UserFactory(partner=partner_unicef_hq)  # UNICEF HQ has "Role with all permissions"
+        cls.user_with_partner_unicef_hq = UserFactory(
+            partner=partner_unicef_hq
+        )  # UNICEF HQ has "Role with all permissions"
         cls.user_with_partner_unicef_in_ba = UserFactory(partner=partner_unicef_in_ba)  # has "Role for UNICEF Partners"
 
         # adjust "Role for UNICEF Partners" to have only approval permission
@@ -109,10 +139,18 @@ class TestPaymentNotification(APITestCase):
 
         # no permissions on user combinations
         cls.user_with_no_permissions = UserFactory(partner=partner_empty)
-        cls.user_with_no_permissions_partner_with_different_role_in_program = UserFactory(partner=partner_with_different_role_in_program)
-        cls.user_with_no_permissions_partner_with_approval_permission_in_different_program = UserFactory(partner=partner_with_approval_permission_in_different_program)
-        cls.user_with_no_permissions_partner_with_action_permissions = UserFactory(partner=partner_with_action_permissions)
-        cls.user_with_no_permissions_partner_with_action_permissions_in_whole_ba = UserFactory(partner=partner_with_action_permissions_in_whole_ba)
+        cls.user_with_no_permissions_partner_with_different_role_in_program = UserFactory(
+            partner=partner_with_different_role_in_program
+        )
+        cls.user_with_no_permissions_partner_with_approval_permission_in_different_program = UserFactory(
+            partner=partner_with_approval_permission_in_different_program
+        )
+        cls.user_with_no_permissions_partner_with_action_permissions = UserFactory(
+            partner=partner_with_action_permissions
+        )
+        cls.user_with_no_permissions_partner_with_action_permissions_in_whole_ba = UserFactory(
+            partner=partner_with_action_permissions_in_whole_ba
+        )
 
         # user with approval permission - in program
         cls.user_with_approval_permission_partner_unicef_in_ba = UserFactory(partner=partner_unicef_in_ba)
@@ -125,7 +163,8 @@ class TestPaymentNotification(APITestCase):
         )
 
         cls.user_with_approval_permission_partner_with_different_role_in_program = UserFactory(
-            partner=partner_with_different_role_in_program)
+            partner=partner_with_different_role_in_program
+        )
         cls.create_user_role_with_permissions(
             cls.user_with_approval_permission_partner_with_different_role_in_program,
             [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
@@ -135,7 +174,8 @@ class TestPaymentNotification(APITestCase):
         )
 
         cls.user_with_approval_permission_partner_with_approval_permission_in_different_program = UserFactory(
-            partner=partner_with_approval_permission_in_different_program)
+            partner=partner_with_approval_permission_in_different_program
+        )
         cls.create_user_role_with_permissions(
             cls.user_with_approval_permission_partner_with_approval_permission_in_different_program,
             [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
@@ -145,7 +185,8 @@ class TestPaymentNotification(APITestCase):
         )
 
         cls.user_with_approval_permission_partner_with_action_permissions = UserFactory(
-            partner=partner_with_action_permissions)
+            partner=partner_with_action_permissions
+        )
         cls.create_user_role_with_permissions(
             cls.user_with_approval_permission_partner_with_action_permissions,
             [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
@@ -155,7 +196,8 @@ class TestPaymentNotification(APITestCase):
         )
 
         cls.user_with_approval_permission_partner_with_action_permissions_in_whole_ba = UserFactory(
-            partner=partner_with_action_permissions_in_whole_ba)
+            partner=partner_with_action_permissions_in_whole_ba
+        )
         cls.create_user_role_with_permissions(
             cls.user_with_approval_permission_partner_with_action_permissions_in_whole_ba,
             [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
@@ -183,7 +225,9 @@ class TestPaymentNotification(APITestCase):
             name="Role with approval permission",
         )
 
-        cls.user_with_approval_permission_in_ba_partner_with_different_role_in_program = UserFactory(partner=partner_with_different_role_in_program)
+        cls.user_with_approval_permission_in_ba_partner_with_different_role_in_program = UserFactory(
+            partner=partner_with_different_role_in_program
+        )
         cls.create_user_role_with_permissions(
             cls.user_with_approval_permission_in_ba_partner_with_different_role_in_program,
             [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
@@ -192,7 +236,9 @@ class TestPaymentNotification(APITestCase):
             name="Role with approval permission",
         )
 
-        cls.user_with_approval_permission_in_ba_partner_with_approval_permission_in_different_program = UserFactory(partner=partner_with_approval_permission_in_different_program)
+        cls.user_with_approval_permission_in_ba_partner_with_approval_permission_in_different_program = UserFactory(
+            partner=partner_with_approval_permission_in_different_program
+        )
         cls.create_user_role_with_permissions(
             cls.user_with_approval_permission_in_ba_partner_with_approval_permission_in_different_program,
             [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
@@ -201,7 +247,9 @@ class TestPaymentNotification(APITestCase):
             name="Role with approval permission",
         )
 
-        cls.user_with_approval_permission_in_ba_partner_with_action_permissions = UserFactory(partner=partner_with_action_permissions)
+        cls.user_with_approval_permission_in_ba_partner_with_action_permissions = UserFactory(
+            partner=partner_with_action_permissions
+        )
         cls.create_user_role_with_permissions(
             cls.user_with_approval_permission_in_ba_partner_with_action_permissions,
             [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
@@ -210,7 +258,9 @@ class TestPaymentNotification(APITestCase):
             name="Role with approval permission",
         )
 
-        cls.user_with_approval_permission_in_ba_partner_with_action_permissions_in_whole_ba = UserFactory(partner=partner_with_action_permissions_in_whole_ba)
+        cls.user_with_approval_permission_in_ba_partner_with_action_permissions_in_whole_ba = UserFactory(
+            partner=partner_with_action_permissions_in_whole_ba
+        )
         cls.create_user_role_with_permissions(
             cls.user_with_approval_permission_in_ba_partner_with_action_permissions_in_whole_ba,
             [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
@@ -239,7 +289,8 @@ class TestPaymentNotification(APITestCase):
         )
 
         cls.user_with_approval_permission_wrong_program_partner_with_different_role_in_program = UserFactory(
-            partner=partner_with_different_role_in_program)
+            partner=partner_with_different_role_in_program
+        )
         cls.create_user_role_with_permissions(
             cls.user_with_approval_permission_wrong_program_partner_with_different_role_in_program,
             [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
@@ -248,8 +299,9 @@ class TestPaymentNotification(APITestCase):
             name="Role with approval permission",
         )
 
-        cls.user_with_approval_permission_wrong_program_partner_with_approval_permission_in_different_program = UserFactory(
-            partner=partner_with_approval_permission_in_different_program)
+        cls.user_with_approval_permission_wrong_program_partner_with_approval_permission_in_different_program = (
+            UserFactory(partner=partner_with_approval_permission_in_different_program)
+        )
         cls.create_user_role_with_permissions(
             cls.user_with_approval_permission_wrong_program_partner_with_approval_permission_in_different_program,
             [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
@@ -259,7 +311,8 @@ class TestPaymentNotification(APITestCase):
         )
 
         cls.user_with_approval_permission_wrong_program_partner_with_action_permissions = UserFactory(
-            partner=partner_with_action_permissions)
+            partner=partner_with_action_permissions
+        )
         cls.create_user_role_with_permissions(
             cls.user_with_approval_permission_wrong_program_partner_with_action_permissions,
             [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
@@ -269,7 +322,8 @@ class TestPaymentNotification(APITestCase):
         )
 
         cls.user_with_approval_permission_wrong_program_partner_with_action_permissions_in_whole_ba = UserFactory(
-            partner=partner_with_action_permissions_in_whole_ba)
+            partner=partner_with_action_permissions_in_whole_ba
+        )
         cls.create_user_role_with_permissions(
             cls.user_with_approval_permission_wrong_program_partner_with_action_permissions_in_whole_ba,
             [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
