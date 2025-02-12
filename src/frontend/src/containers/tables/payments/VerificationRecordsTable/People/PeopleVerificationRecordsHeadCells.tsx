@@ -2,6 +2,12 @@ import { HeadCell } from '@core/Table/EnhancedTableHead';
 import { PaymentVerificationNode } from '@generated/graphql';
 
 export const headCells: HeadCell<PaymentVerificationNode>[] = [
+    {
+    disablePadding: false,
+    label: 'Payment ID',
+    id: 'unicef_id',
+    numeric: false,
+  },
   {
     disablePadding: false,
     label: 'Verification Channel',
