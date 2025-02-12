@@ -120,6 +120,29 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
             )
         return [str(program_id) for program_id in programs_ids]
 
+    def get_program_ids_for_permission_in_business_area(
+        self, business_area_id: str, permissions: List[str], one_of_permissions: bool
+    ) -> List[str]:
+        """
+        Return list of program ids that the partner has permissions for in the given business area -
+        If one_of_permissions=True, the function will return programs in which the user has at least one of the permissions.
+        If one_of_permissions=False, the function will return programs in which the user has all of the permissions.
+        """
+        from hct_mis_api.apps.program.models import Program
+
+        if one_of_permissions:
+            permission_filter = Q(role__permissions__overlap=permissions)
+        else:
+            permission_filter = Q(role__permissions__contains=permissions)
+
+        if self.role_assignments.filter(permission_filter, business_area_id=business_area_id, program=None).exists():
+            programs_ids = Program.objects.filter(business_area_id=business_area_id).values_list("id", flat=True)
+        else:
+            programs_ids = self.role_assignments.filter(
+                permission_filter, business_area_id=business_area_id
+            ).values_list("program_id", flat=True)
+        return [str(program_id) for program_id in programs_ids]
+
     def has_program_access(self, program_id: Union[str, UUID]) -> bool:
         from hct_mis_api.apps.program.models import Program
 
@@ -200,6 +223,9 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         )
 
     def get_program_ids_for_business_area(self, business_area_id: str) -> List[str]:
+        """
+        Return list of program ids that the user (or user's partner) has access to in the given business area.
+        """
         from hct_mis_api.apps.program.models import Program
 
         if RoleAssignment.objects.filter(
@@ -208,6 +234,36 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             programs_ids = Program.objects.filter(business_area_id=business_area_id).values_list("id", flat=True)
         else:
             programs_ids = RoleAssignment.objects.filter(
+                Q(user=self) | Q(partner__user=self),
+                business_area_id=business_area_id,
+            ).values_list("program_id", flat=True)
+        return [str(program_id) for program_id in programs_ids]
+
+    def get_program_ids_for_permission_in_business_area(
+        self, business_area_id: str, permissions: List[Permissions], one_of_permissions: bool
+    ) -> List[str]:
+        """
+        Return list of program ids that the user (or user's partner) has permissions for in the given business area -
+        If one_of_permissions=True, the function will return programs in which the user has at least one of the permissions.
+        If one_of_permissions=False, the function will return programs in which the user has all of the permissions.
+        """
+        from hct_mis_api.apps.program.models import Program
+
+        if one_of_permissions:
+            permission_filter = Q(role__permissions__overlap=[perm.value for perm in permissions])
+        else:
+            permission_filter = Q(role__permissions__contains=[perm.value for perm in permissions])
+
+        if RoleAssignment.objects.filter(
+            permission_filter,
+            Q(user=self) | Q(partner__user=self),
+            business_area_id=business_area_id,
+            program=None,
+        ).exists():
+            programs_ids = Program.objects.filter(business_area_id=business_area_id).values_list("id", flat=True)
+        else:
+            programs_ids = RoleAssignment.objects.filter(
+                permission_filter,
                 Q(user=self) | Q(partner__user=self),
                 business_area_id=business_area_id,
             ).values_list("program_id", flat=True)
