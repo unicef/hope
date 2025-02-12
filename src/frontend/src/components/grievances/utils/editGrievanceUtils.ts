@@ -28,7 +28,7 @@ interface EditValuesTypes {
   selectedIndividual?;
   selectedPaymentRecords: Pick<
     PaymentRecordAndPaymentNode,
-    'id' | 'caId' | 'deliveredQuantity' | 'entitlementQuantity' | 'objType'
+    'id' | 'unicefId' | 'deliveredQuantity' | 'entitlementQuantity' | 'objType'
   >[];
   paymentRecord?: string;
   selectedLinkedTickets: string[];
