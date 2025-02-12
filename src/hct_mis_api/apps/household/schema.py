@@ -737,7 +737,15 @@ class Query(graphene.ObjectType):
         if program_id and user.has_program_access(program_id):
             programs_for_business_area = [program_id]
         elif not program_id:
-            programs_for_business_area = user.get_program_ids_for_business_area(business_area_id)
+            programs_for_business_area = user.get_program_ids_for_permission_in_business_area(
+                business_area_id,
+                [
+                    Permissions.RDI_VIEW_DETAILS,
+                    Permissions.POPULATION_VIEW_INDIVIDUALS_LIST,
+                    *ALL_GRIEVANCES_CREATE_MODIFY,
+                ],
+                one_of_permissions=True,
+            )
         if not programs_for_business_area:
             return Individual.objects.none()
 
@@ -790,7 +798,15 @@ class Query(graphene.ObjectType):
         if program_id and user.has_program_access(program_id):
             programs_for_business_area = [program_id]
         elif not program_id:
-            programs_for_business_area = user.get_program_ids_for_business_area(business_area_id)
+            programs_for_business_area = user.get_program_ids_for_permission_in_business_area(
+                business_area_id,
+                [
+                    Permissions.RDI_VIEW_DETAILS,
+                    Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST,
+                    *ALL_GRIEVANCES_CREATE_MODIFY,
+                ],
+                one_of_permissions=True,
+            )
         if not programs_for_business_area:
             return Household.objects.none()
 

@@ -579,8 +579,21 @@ class Query(graphene.ObjectType):
             and program_id
             and not user.partner.has_area_limits_in_program(program_id)
         ):
-            queryset = filter_grievance_tickets_based_on_partner_areas_2(queryset, user, business_area_id, program_id)
-
+            queryset = filter_grievance_tickets_based_on_partner_areas_2(
+                queryset,
+                user,
+                business_area_id,
+                program_id,
+                [
+                    Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                    Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
+                    Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
+                    Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                    Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
+                    Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
+                    *POPULATION_DETAILS,
+                ],
+            )
         if program_id is None:
             queryset = queryset | (
                 GrievanceTicket.objects.select_related("admin2", "assigned_to", "created_by")
