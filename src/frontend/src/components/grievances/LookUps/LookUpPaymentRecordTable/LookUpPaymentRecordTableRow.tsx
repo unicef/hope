@@ -53,10 +53,10 @@ export function LookUpPaymentRecordTableRow({
       <TableCell align="left">
         {!isAllPrograms ? (
           <BlackLink to={renderUrl(paymentRecord.objType)}>
-            {paymentRecord.caId}
+            {paymentRecord.unicefId}
           </BlackLink>
         ) : (
-          <span>{paymentRecord.caId}</span>
+          <span>{paymentRecord.unicefId}</span>
         )}
       </TableCell>
       <TableCell align="left">
