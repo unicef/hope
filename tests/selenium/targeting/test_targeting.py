@@ -736,6 +736,7 @@ class TestCreateTargeting:
         pageTargetingCreate.getInputIndividualsFiltersBlocksValueFrom().send_keys("2")
         pageTargetingCreate.getInputIndividualsFiltersBlocksValueTo().send_keys("4")
         pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
+        pageTargetingCreate.getNoValidationFspAccept().click()
         expected_criteria_text = "Test Decimal Attribute: 2 - 5\nRound 1 (Test Round Decimal 1)"
         assert pageTargetingCreate.getCriteriaContainer().text == expected_criteria_text
         targeting_name = "Test Targeting PDU decimal"
