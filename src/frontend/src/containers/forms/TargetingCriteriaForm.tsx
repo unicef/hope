@@ -335,15 +335,15 @@ export const TargetingCriteriaForm = ({
       >
         {({ submitForm, values, resetForm, setFieldValue, errors }) => {
           const mappedDeliveryMechanisms =
-            availableFspsForDeliveryMechanismData.availableFspsForDeliveryMechanisms.map(
+            availableFspsForDeliveryMechanismData?.availableFspsForDeliveryMechanisms?.map(
               (el) => ({
                 name: el.deliveryMechanism.name,
                 value: el.deliveryMechanism.code,
               }),
             );
           const mappedFsps =
-            availableFspsForDeliveryMechanismData.availableFspsForDeliveryMechanisms
-              .find(
+            availableFspsForDeliveryMechanismData?.availableFspsForDeliveryMechanisms
+              ?.find(
                 (el) => el.deliveryMechanism.code === values.deliveryMechanism,
               )
               ?.fsps.map((el) => ({ name: el.name, value: el.id })) || [];

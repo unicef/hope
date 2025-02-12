@@ -298,7 +298,7 @@ export function Criteria({
 
   useEffect(() => {
     const mappedDeliveryMechanisms =
-      availableFspsForDeliveryMechanismData?.availableFspsForDeliveryMechanisms.map(
+      availableFspsForDeliveryMechanismData?.availableFspsForDeliveryMechanisms?.map(
         (el) => ({
           name: el.deliveryMechanism.name,
           value: el.deliveryMechanism.code,
@@ -313,7 +313,7 @@ export function Criteria({
 
     const mappedFsps =
       availableFspsForDeliveryMechanismData?.availableFspsForDeliveryMechanisms
-        .find(
+        ?.find(
           (el) =>
             el.deliveryMechanism.code === deliveryMechanism ||
             el.deliveryMechanism.code ===
