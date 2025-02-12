@@ -1184,6 +1184,7 @@ class TestTargeting:
         pageTargetingCreate.getInputHouseholdids().click()
         pageTargetingCreate.getInputHouseholdids().send_keys(household_with_disability.unicef_id)
         pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
+        pageTargetingCreate.getNoValidationFspAccept().click()
         pageTargetingCreate.getInputName().send_keys(f"Test {household_with_disability.unicef_id}")
         pageTargetingCreate.getInputFlagexcludeifactiveadjudicationticket().click()
         pageTargetingCreate.clickButtonTargetPopulationCreate()
