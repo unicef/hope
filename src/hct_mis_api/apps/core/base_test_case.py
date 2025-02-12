@@ -134,13 +134,14 @@ class APITestCase(SnapshotTestTestCase):
         business_area: "BusinessArea",
         program: Optional["Program"] = None,
         areas: Optional[List["Area"]] = None,
-        name: Optional[str] = "Partner Role with Permissions",
+        name: Optional[str] = None,
         whole_business_area_access: Optional[bool] = False,
     ) -> RoleAssignment:
         """
         whole_business_area_access: If True, the role is created for all programs in a business area (program=None).
         """
         permission_list = [perm.value for perm in permissions]
+        name = name or f"Partner Role with Permissions {permission_list[0:3], ...}"
         role, created = Role.objects.update_or_create(name=name, defaults={"permissions": permission_list})
         # whole_business_area is used to create a role for all programs in a business area (program=None)
         if not program and not whole_business_area_access:
@@ -162,13 +163,14 @@ class APITestCase(SnapshotTestTestCase):
         business_area: "BusinessArea",
         program: Optional["Program"] = None,
         areas: Optional[List["Area"]] = None,
-        name: Optional[str] = "Role with Permissions",
+        name: Optional[str] = None,
         whole_business_area_access: Optional[bool] = False,
     ) -> RoleAssignment:
         """
         whole_business_area_access: If True, the role is created for all programs in a business area (program=None).
         """
         permission_list = [perm.value for perm in permissions]
+        name = name or f"User Role with Permissions {permission_list[0:3], ...}"
         role, created = Role.objects.update_or_create(name=name, defaults={"permissions": permission_list})
         # whole_business_area is used to create a role for all programs in a business area (program=None)
         if not program and not whole_business_area_access:
