@@ -23,7 +23,7 @@ class Command(BaseCommand):
     def handle(self, *args: Any, **options: Any) -> None:
         if options["skip_drop"] is False:
             call_command("dropalldb")
-            call_command("migratealldb")
+            call_command("migrate")
 
         reset_business_area_sequences()
         call_command("flush", "--noinput")

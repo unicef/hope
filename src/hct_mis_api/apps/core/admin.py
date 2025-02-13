@@ -1,6 +1,4 @@
-import csv
 import logging
-from io import StringIO
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
 
 from django import forms
@@ -10,9 +8,7 @@ from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
 from django.contrib.messages import ERROR
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.contrib.postgres.fields import JSONField
-from django.contrib.sites.models import Site
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.core.mail import EmailMessage
 from django.core.validators import RegexValidator
 from django.db import transaction
 from django.forms import inlineformset_factory
@@ -26,23 +22,19 @@ from django.shortcuts import get_object_or_404, redirect
 from django.template.defaultfilters import slugify
 from django.template.response import TemplateResponse
 from django.urls import reverse
-from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 import xlrd
 from admin_extra_buttons.api import button
-from admin_extra_buttons.decorators import choice, view
 from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
 from admin_sync.mixin import GetManyFromRemoteMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter
 from adminfilters.mixin import AdminAutoCompleteSearchMixin, AdminFiltersMixin
-from constance import config
 from jsoneditor.forms import JSONEditor
 from xlrd import XLRDError
 
-from hct_mis_api.apps.account.models import Role, User
 from hct_mis_api.apps.administration.widgets import JsonWidget
 from hct_mis_api.apps.core.celery_tasks import (
     upload_new_kobo_template_and_update_flex_fields_task,
@@ -55,7 +47,6 @@ from hct_mis_api.apps.core.models import (
     FlexibleAttribute,
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,
-    MigrationStatus,
     PeriodicFieldData,
     StorageFile,
     XLSXKoboTemplate,
@@ -244,10 +235,6 @@ class BusinessAreaAdmin(
             return db_field.formfield(**kwargs)
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
-    @choice(label="DOAP", change_list=False)
-    def doap(self, button: button) -> None:
-        button.choices = [self.force_sync_doap, self.send_doap, self.export_doap, self.view_ca_doap]
-
     @button(label="Create Business Office", permission="core.can_split")
     def split_business_area(self, request: HttpRequest, pk: "UUID") -> Union[HttpResponseRedirect, TemplateResponse]:
         context = self.get_common_context(request, pk)
@@ -282,127 +269,6 @@ class BusinessAreaAdmin(
             context["form"] = BusinessOfficeForm()
 
         return TemplateResponse(request, "core/admin/split_ba.html", context)
-
-    def _get_doap_matrix(self, obj: Any) -> List[Any]:
-        matrix = []
-        ca_roles = Role.objects.filter(subsystem=Role.CA).order_by("name").values_list("name", flat=True)
-        fields = ["org", "Last Name", "First Name", "Email", "Business Unit", "Partner Instance ID", "Action"]
-        fields += list(ca_roles)
-        matrix.append(fields)
-        all_user_data = {}
-        for member in obj.user_roles.all():
-            user_data = {}
-            if member.user.pk not in all_user_data:
-                user_roles = list(
-                    member.user.user_roles.filter(role__subsystem="CA").values_list("role__name", flat=True)
-                )
-                user_data["org"] = member.user.partner.name
-                user_data["Last Name"] = member.user.last_name
-                user_data["First Name"] = member.user.first_name
-                user_data["Email"] = member.user.email
-                user_data["Business Unit"] = f"UNICEF - {obj.name}"
-                user_data["Partner Instance ID"] = int(obj.cash_assist_code)
-                user_data["Action"] = ""
-                for role in ca_roles:
-                    user_data[role] = {True: "Yes", False: ""}[role in user_roles]
-
-                # user_data["user_roles"] = user_roles
-                all_user_data[member.user.pk] = user_data
-
-                values = {key: value for (key, value) in user_data.items() if key != "action"}
-                signature = str(hash(frozenset(values.items())))
-
-                user_data["signature"] = signature
-                user_data["hash"] = member.user.doap_hash
-                user_data["values"] = values
-                action = None
-                if member.user.doap_hash:
-                    if signature == member.user.doap_hash:
-                        action = "ACTIVE"
-                    elif len(user_roles) == 0:
-                        action = "REMOVE"
-                    else:
-                        action = "EDIT"
-                elif len(user_roles):
-                    action = "ADD"
-
-                if action:
-                    user_data["Action"] = action
-                    matrix.append(user_data)  # type: ignore
-        return matrix
-
-    @view(label="Force DOAP SYNC", permission="core.can_reset_doap", group="doap")
-    def force_sync_doap(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
-        context = self.get_common_context(request, pk, title="Members")
-        obj = context["original"]
-        matrix = self._get_doap_matrix(obj)
-        for row in matrix[1:]:
-            User.objects.filter(email=row["Email"]).update(doap_hash=row["signature"])
-        return HttpResponseRedirect(reverse("admin:core_businessarea_view_ca_doap", args=[obj.pk]))
-
-    @view(label="Send DOAP", group="doap")
-    def send_doap(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
-        context = self.get_common_context(request, pk, title="Members")
-        obj = context["original"]
-        try:
-            matrix = self._get_doap_matrix(obj)
-            buffer = StringIO()
-            writer = csv.DictWriter(buffer, matrix[0], extrasaction="ignore")
-            writer.writeheader()
-            for row in matrix[1:]:
-                writer.writerow(row)
-            recipients = [request.user.email] + config.CASHASSIST_DOAP_RECIPIENT.split(";")
-            self.log_change(request, obj, f'DOAP sent to {", ".join(recipients)}')
-            buffer.seek(0)
-            environment = Site.objects.first().name
-            mail = EmailMessage(
-                f"CashAssist - UNICEF - {obj.name} user updates",
-                f"""Dear GSD,\n
-In CashAssist, please update the users in {environment} UNICEF - {obj.name} business unit as per the attached DOAP.
-Many thanks,
-UNICEF HOPE""",
-                to=recipients,
-            )
-            mail.attach(f"UNICEF - {obj.name} {environment} DOAP.csv", buffer.read(), "text/csv")
-            mail.send()
-            for row in matrix[1:]:
-                if row["Action"] == "REMOVE":
-                    User.objects.filter(email=row["Email"]).update(doap_hash="")
-                else:
-                    User.objects.filter(email=row["Email"]).update(doap_hash=row["signature"])
-            obj.custom_fields.update({"hope": {"last_doap_sync": str(timezone.now())}})
-            obj.save()
-            self.message_user(request, f'Email sent to {", ".join(recipients)}', messages.SUCCESS)
-        except Exception as e:
-            logger.exception(e)
-            self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
-
-        return HttpResponseRedirect(reverse("admin:core_businessarea_view_ca_doap", args=[obj.pk]))
-
-    @view(label="Export DOAP", group="doap", permission="core.can_export_doap")
-    def export_doap(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
-        context = self.get_common_context(request, pk, title="DOAP matrix")
-        obj = context["original"]
-        environment = Site.objects.first().name
-        response = HttpResponse(content_type="text/csv")
-        response["Content-Disposition"] = f"attachment; filename=UNICEF - {obj.name} {environment} DOAP.csv"
-        matrix = self._get_doap_matrix(obj)
-        writer = csv.DictWriter(response, matrix[0], extrasaction="ignore")
-        writer.writeheader()
-        for row in matrix[1:]:
-            writer.writerow(row)
-        return response
-
-    @view(permission="core.can_send_doap")
-    def view_ca_doap(self, request: HttpRequest, pk: "UUID") -> TemplateResponse:
-        context = self.get_common_context(request, pk, title="DOAP matrix")
-        context["aeu_groups"] = ["doap"]
-        obj = context["original"]
-        matrix = self._get_doap_matrix(obj)
-        context["headers"] = matrix[0]
-        context["rows"] = matrix[0:]
-        context["matrix"] = matrix
-        return TemplateResponse(request, "core/admin/ca_doap.html", context)
 
     @button(permission="account.view_user")
     def members(self, request: HttpRequest, pk: "UUID") -> TemplateResponse:
@@ -562,6 +428,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         "file",
         "import_status",
         "error_description",
+        "first_connection_failed_time",
     )
 
     def import_status(self, obj: Any) -> str:
@@ -720,11 +587,6 @@ class StorageFileAdmin(ExtraButtonsMixin, admin.ModelAdmin):
 
     def has_add_permission(self, request: HttpRequest) -> bool:
         return request.user.can_download_storage_files()
-
-
-@admin.register(MigrationStatus)
-class MigrationStatusAdmin(admin.ModelAdmin):
-    pass
 
 
 @admin.register(DataCollectingType)

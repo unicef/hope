@@ -92,7 +92,6 @@ class HouseholdUpdateDataObjectType(graphene.InputObjectType):
     org_name_enumerator = graphene.String()
     village = graphene.String()
     registration_method = graphene.String()
-    collect_individual_data = graphene.String()
     currency = graphene.String()
     unhcr_id = graphene.String()
     flex_fields = Arg()

@@ -53,7 +53,7 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
             },
         ),
     )
-    readonly_fields = ("ad_uuid", "last_modify_date", "doap_hash")
+    readonly_fields = ("ad_uuid", "last_modify_date")
 
     change_form_template = None
     hijack_success_url = f"/api/{settings.ADMIN_PANEL_URL}/"
@@ -94,7 +94,7 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
     extra_fieldsets = (
         (
             _("Custom Fields"),
-            {"classes": ["collapse"], "fields": ("custom_fields", "doap_hash", "ad_uuid")},
+            {"classes": ["collapse"], "fields": ("custom_fields", "ad_uuid")},
         ),
         (
             _("Permissions"),
@@ -118,7 +118,6 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
                     "last_login",
                     "date_joined",
                     "last_modify_date",
-                    "last_doap_sync",
                 ),
             },
         ),

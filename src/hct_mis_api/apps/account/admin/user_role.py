@@ -24,6 +24,7 @@ class UserRoleInline(admin.TabularInline):
     model = account_models.UserRole
     extra = 0
     formset = UserRoleInlineFormSet
+    raw_id_fields = ("business_area", "role")
 
 
 @admin.register(account_models.UserRole)

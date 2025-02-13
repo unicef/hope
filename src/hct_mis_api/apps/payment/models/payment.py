@@ -295,6 +295,7 @@ class PaymentPlan(
     ]
 
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
+    program_cycle = models.ForeignKey("program.ProgramCycle", related_name="payment_plans", on_delete=models.CASCADE)
     status_date = models.DateTimeField()
     start_date = models.DateTimeField(
         db_index=True,
@@ -352,7 +353,6 @@ class PaymentPlan(
         decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0"))], null=True, blank=True
     )
 
-    program_cycle = models.ForeignKey("program.ProgramCycle", related_name="payment_plans", on_delete=models.CASCADE)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
@@ -592,13 +592,7 @@ class PaymentPlan(
             self.imported_file_date = None
 
     def unsuccessful_payments(self) -> "QuerySet":
-        return self.eligible_payments.filter(
-            status__in=[
-                Payment.STATUS_ERROR,  # delivered_quantity < 0 (-1)
-                Payment.STATUS_NOT_DISTRIBUTED,  # delivered_quantity == 0
-                Payment.STATUS_FORCE_FAILED,
-            ]
-        )
+        return self.eligible_payments.filter(status__in=Payment.FAILED_STATUSES)
 
     def unsuccessful_payments_for_follow_up(self) -> "QuerySet":
         """
@@ -1630,6 +1624,9 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
         related_name="delivery_mechanisms_per_payment_plan",
         null=True,
     )
+    delivery_mechanism = models.ForeignKey("DeliveryMechanism", on_delete=models.SET_NULL, null=True)
+    delivery_mechanism_order = models.PositiveIntegerField()
+    status = FSMField(default=Status.NOT_SENT, protected=False, db_index=True)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
@@ -1642,12 +1639,9 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
         related_name="sent_delivery_mechanisms",
         null=True,
     )
-    status = FSMField(default=Status.NOT_SENT, protected=False, db_index=True)
-    delivery_mechanism = models.ForeignKey("DeliveryMechanism", on_delete=models.SET_NULL, null=True)
-    delivery_mechanism_order = models.PositiveIntegerField()
 
-    sent_to_payment_gateway = models.BooleanField(default=False)
     chosen_configuration = models.CharField(max_length=50, null=True)
+    sent_to_payment_gateway = models.BooleanField(default=False)
 
     class Meta:
         constraints = [
@@ -1710,6 +1704,7 @@ class Payment(
     )
     PENDING_STATUSES = (STATUS_PENDING, STATUS_SENT_TO_PG, STATUS_SENT_TO_FSP)
     DELIVERED_STATUSES = (STATUS_SUCCESS, STATUS_DISTRIBUTION_SUCCESS, STATUS_DISTRIBUTION_PARTIAL)
+    FAILED_STATUSES = (STATUS_FORCE_FAILED, STATUS_ERROR, STATUS_MANUALLY_CANCELLED, STATUS_NOT_DISTRIBUTED)
 
     ENTITLEMENT_CARD_STATUS_ACTIVE = "ACTIVE"
     ENTITLEMENT_CARD_STATUS_INACTIVE = "INACTIVE"
@@ -1718,16 +1713,31 @@ class Payment(
         (ENTITLEMENT_CARD_STATUS_INACTIVE, _("Inactive")),
     )
 
+    parent = models.ForeignKey(
+        "payment.PaymentPlan",
+        on_delete=models.CASCADE,
+        related_name="payment_items",
+    )
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
+    # use program_id in UniqueConstraint order_number and token_number per Program
+    program = models.ForeignKey("program.Program", on_delete=models.SET_NULL, null=True, blank=True)
+    household = models.ForeignKey("household.Household", on_delete=models.CASCADE)
+    head_of_household = models.ForeignKey("household.Individual", on_delete=models.CASCADE, null=True)
+    delivery_type = models.ForeignKey("payment.DeliveryMechanism", on_delete=models.SET_NULL, null=True)
+    financial_service_provider = models.ForeignKey(
+        "payment.FinancialServiceProvider", on_delete=models.PROTECT, null=True
+    )
+    collector = models.ForeignKey("household.Individual", on_delete=models.CASCADE, related_name="collector_payments")
+    source_payment = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.CASCADE, related_name="follow_ups"
+    )
+    is_follow_up = models.BooleanField(default=False)
     status = models.CharField(
         max_length=255,
         choices=STATUS_CHOICE,
         default=STATUS_PENDING,
     )
     status_date = models.DateTimeField()
-    household = models.ForeignKey("household.Household", on_delete=models.CASCADE)
-    head_of_household = models.ForeignKey("household.Individual", on_delete=models.CASCADE, null=True)
-    delivery_type = models.ForeignKey("payment.DeliveryMechanism", on_delete=models.SET_NULL, null=True)
     currency = models.CharField(
         max_length=4,
         null=True,
@@ -1739,6 +1749,7 @@ class Payment(
     entitlement_quantity_usd = models.DecimalField(
         decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
     )
+    entitlement_date = models.DateTimeField(null=True, blank=True)
     delivered_quantity = models.DecimalField(
         decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
     )
@@ -1748,25 +1759,9 @@ class Payment(
     delivery_date = models.DateTimeField(null=True, blank=True)
     transaction_reference_id = models.CharField(max_length=255, null=True, blank=True)  # transaction_id
     transaction_status_blockchain_link = models.CharField(max_length=255, null=True, blank=True)
-    parent = models.ForeignKey(
-        "payment.PaymentPlan",
-        on_delete=models.CASCADE,
-        related_name="payment_items",
-    )
     conflicted = models.BooleanField(default=False)
     excluded = models.BooleanField(default=False)
-    entitlement_date = models.DateTimeField(null=True, blank=True)
-    financial_service_provider = models.ForeignKey(
-        "payment.FinancialServiceProvider", on_delete=models.PROTECT, null=True
-    )
-    collector = models.ForeignKey("household.Individual", on_delete=models.CASCADE, related_name="collector_payments")
-    source_payment = models.ForeignKey(
-        "self", null=True, blank=True, on_delete=models.CASCADE, related_name="follow_ups"
-    )
-    is_follow_up = models.BooleanField(default=False)
     reason_for_unsuccessful_payment = models.CharField(max_length=255, null=True, blank=True)
-    # use program_id in UniqueConstraint order_number and token_number per Program
-    program = models.ForeignKey("program.Program", on_delete=models.SET_NULL, null=True, blank=True)
     order_number = models.PositiveIntegerField(
         blank=True,
         null=True,
@@ -1795,11 +1790,11 @@ class Payment(
         max_length=128, blank=True, null=True, help_text="Use this field for reconciliation data"
     )
     fsp_auth_code = models.CharField(max_length=128, blank=True, null=True, help_text="FSP Auth Code")
-    is_cash_assist = models.BooleanField(default=False)
 
     vulnerability_score = models.DecimalField(
         blank=True, null=True, decimal_places=3, max_digits=6, help_text="Written by Steficon", db_index=True
     )
+    is_cash_assist = models.BooleanField(default=False)
 
     objects = PaymentManager()
 
@@ -2222,8 +2217,8 @@ class PaymentPlanSupportingDocument(models.Model):
     FILE_LIMIT = 10  # max 10 files per Payment Plan
     FILE_SIZE_LIMIT = 10 * 1024 * 1024  # 10 MB
 
-    payment_plan = models.ForeignKey(PaymentPlan, on_delete=models.CASCADE, related_name="documents")
     title = models.CharField(max_length=255)
+    payment_plan = models.ForeignKey(PaymentPlan, on_delete=models.CASCADE, related_name="documents")
     file = models.FileField()
     uploaded_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")

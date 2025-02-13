@@ -363,7 +363,8 @@ class PaymentFilter(FilterSet):
                 When(status=Payment.STATUS_NOT_DISTRIBUTED, then=Value(3)),
                 When(status=Payment.STATUS_ERROR, then=Value(4)),
                 When(status=Payment.STATUS_FORCE_FAILED, then=Value(5)),
-                When(status=Payment.STATUS_PENDING, then=Value(6)),
+                When(status=Payment.STATUS_MANUALLY_CANCELLED, then=Value(6)),
+                When(status=Payment.STATUS_PENDING, then=Value(7)),
                 output_field=IntegerField(),
             )
         )
@@ -458,9 +459,7 @@ def payment_ordering(queryset: QuerySet[Payment], order_by: str) -> QuerySet[Pay
     reverse = "-" if order_by.startswith("-") else ""
     order_by = order_by[1:] if reverse else order_by
 
-    if order_by == "ca_id":
-        qs = queryset.order_by(reverse + "unicef_id")
-    elif order_by in ("head_of_household", "entitlement_quantity", "delivered_quantity", "delivery_date"):
+    if order_by in ("head_of_household", "entitlement_quantity", "delivered_quantity", "delivery_date"):
         order_by_dict = {f"{order_by}__isnull": True}
         qs_null = queryset.filter(**order_by_dict)
         qs_non_null = queryset.exclude(**order_by_dict)

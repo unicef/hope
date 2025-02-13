@@ -48,9 +48,9 @@ export function PaymentRecordAndPaymentPeopleTableRow({
     >
       <TableCell align="left">
         {canViewDetails ? (
-          <BlackLink to={detailsPath}>{paymentRecordOrPayment.caId}</BlackLink>
+          <BlackLink to={detailsPath}>{paymentRecordOrPayment.unicefId}</BlackLink>
         ) : (
-          paymentRecordOrPayment.caId
+          paymentRecordOrPayment.unicefId
         )}
       </TableCell>
       <TableCell align="left">

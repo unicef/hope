@@ -38,7 +38,6 @@ class RegistrationDataImportFactory(DjangoModelFactory):
     )
     number_of_individuals = factory.fuzzy.FuzzyInteger(100, 10000)
     number_of_households = factory.fuzzy.FuzzyInteger(3, 50)
-    datahub_id = factory.Faker("uuid4")
     business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
     program = factory.SubFactory(ProgramFactory)
     erased = False

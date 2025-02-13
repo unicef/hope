@@ -174,7 +174,6 @@ export const fakeGrievanceTicketPaymentVerification = {
     orgEnumerator: 'A_',
     updatedAt: '2024-12-09T20:40:33.645629+00:00',
     consent: null,
-    collectIndividualData: 'A_',
     registrationDataImport: {
       name: 'Test Import',
       dataSource: 'API',
@@ -199,7 +198,7 @@ export const fakeGrievanceTicketPaymentVerification = {
   },
   paymentRecord: {
     id: 'UGF5bWVudE5vZGU6MTAwMDAwMDAtZmVlZC1iZWVmLTAwMDAtMDAwMDBiYWRmMDBk',
-    caId: 'RCPT-0060-24-0.000.078',
+    unicefId: 'RCPT-0060-24-0.000.078',
     deliveredQuantity: null,
     entitlementQuantity: null,
     objType: 'Payment',

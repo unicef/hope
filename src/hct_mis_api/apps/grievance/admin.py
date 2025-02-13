@@ -106,7 +106,7 @@ class TicketNoteAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 
 @admin.register(TicketComplaintDetails)
 class TicketComplaintDetailsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
-    raw_id_fields = ("ticket", "household", "individual")
+    raw_id_fields = ("ticket", "household", "individual", "payment")
 
 
 @admin.register(TicketSensitiveDetails)
@@ -136,7 +136,7 @@ class TicketDeleteIndividualDetailsAdmin(LinkedObjectsMixin, HOPEModelAdminBase)
 
 @admin.register(TicketDeleteHouseholdDetails)
 class TicketDeleteHouseholdDetailsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
-    raw_id_fields = ("ticket", "household")
+    raw_id_fields = ("ticket", "household", "reason_household")
 
 
 @admin.register(TicketNeedsAdjudicationDetails)
@@ -154,7 +154,7 @@ class TicketNeedsAdjudicationDetailsAdmin(LinkedObjectsMixin, HOPEModelAdminBase
 
 @admin.register(TicketPaymentVerificationDetails)
 class TicketPaymentVerificationDetailsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
-    raw_id_fields = ("ticket",)
+    raw_id_fields = ("ticket", "payment_verifications")
     filter_horizontal = ["payment_verifications"]
 
 
