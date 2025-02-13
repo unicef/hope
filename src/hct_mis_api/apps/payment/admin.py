@@ -200,6 +200,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         "source_payment_plan",
     )
     search_fields = ("id", "unicef_id", "name")
+    date_hierarchy = "updated_at"
 
     def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return is_root(request)
