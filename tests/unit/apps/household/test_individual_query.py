@@ -40,9 +40,6 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
-from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
-    migrate_data_to_representations,
-)
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
@@ -296,7 +293,6 @@ class TestIndividualQuery(APITestCase):
 
         cls.update_partner_access_to_program(cls.partner, cls.program, [cls.household_one.admin_area])
         cls.update_partner_access_to_program(cls.partner, cls.program_draft, [cls.household_one.admin_area])
-
         # just add one PENDING Ind to be sure filters works correctly
         IndividualFactory(
             **{
@@ -308,10 +304,6 @@ class TestIndividualQuery(APITestCase):
             },
             rdi_merge_status=MergeStatusModel.PENDING,
         )
-
-        # remove after data migration
-        migrate_data_to_representations()
-
         rebuild_search_index()
 
     @parameterized.expand(

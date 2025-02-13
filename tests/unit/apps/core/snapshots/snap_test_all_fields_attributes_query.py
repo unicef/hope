@@ -53170,7 +53170,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'SLL'
+                        'value': 'SLE'
                     },
                     {
                         'labelEn': 'Silver (one troy ounce)',
@@ -53758,63 +53758,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'name': 'who_answers_phone',
                 'required': False,
                 'type': 'STRING'
-            },
-            {
-                'associatedWith': 'Household',
-                'choices': [
-                    {
-                        'labelEn': 'Full individual collected',
-                        'labels': [
-                            {
-                                'label': 'Full individual collected',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': '1'
-                    },
-                    {
-                        'labelEn': 'No individual data',
-                        'labels': [
-                            {
-                                'label': 'No individual data',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': '0'
-                    },
-                    {
-                        'labelEn': 'Partial individuals collected',
-                        'labels': [
-                            {
-                                'label': 'Partial individuals collected',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': '2'
-                    },
-                    {
-                        'labelEn': 'Unknown',
-                        'labels': [
-                            {
-                                'label': 'Unknown',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': ''
-                    }
-                ],
-                'hint': '',
-                'isFlexField': False,
-                'labelEn': 'Will you be collecting all member Individual data?',
-                'labels': [
-                    {
-                        'label': 'Will you be collecting all member Individual data?',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'collect_individual_data',
-                'required': False,
-                'type': 'SELECT_ONE'
             },
             {
                 'associatedWith': 'Household',

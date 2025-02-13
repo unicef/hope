@@ -120,7 +120,6 @@ class HouseholdFilter(FilterSet):
             "household__id",
             "id",
             "unicef_id",
-            "household_ca_id",
             "size",
             "status_label",
             Lower("head_of_household__full_name"),
@@ -451,7 +450,10 @@ class IndividualFilter(FilterSet):
     def filter_duplicates_only(self, queryset: "QuerySet", model_field: Any, value: bool) -> "QuerySet":
         if value is True:
             return queryset.filter(
-                Q(deduplication_golden_record_status=DUPLICATE) | Q(deduplication_batch_status=DUPLICATE_IN_BATCH)
+                Q(deduplication_golden_record_status=DUPLICATE)
+                | Q(deduplication_batch_status=DUPLICATE_IN_BATCH)
+                | Q(biometric_deduplication_batch_status=DUPLICATE_IN_BATCH)
+                | Q(biometric_deduplication_golden_record_status=DUPLICATE)
             )
         return queryset
 

@@ -56,16 +56,28 @@ class MessageAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase, IsOriginalAdmi
         "title",
         "body",
         "business_area",
+        "program",
+        "payment_plan",
         "registration_data_import",
         "sampling_type",
         "sample_size",
+        "created_by",
+        "copied_from",
+        "is_original",
     )
-    list_filter = (
-        ("created_by", AutoCompleteFilter),
-        "created_at",
+    list_display = (
+        "unicef_id",
+        "title",
+        "sampling_type",
+        "sample_size",
+        "created_by",
+        "registration_data_import",
+        "number_of_recipients",
     )
-    raw_id_fields = ["created_by", "target_population", "program"]
+    list_filter = (("created_by", AutoCompleteFilter), "created_at", "sampling_type")
+    raw_id_fields = ["created_by", "payment_plan", "program", "copied_from"]
     filter_horizontal = ["households"]
+    search_fields = ("unicef_id",)
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return self.model.original_and_repr_objects.get_queryset()
@@ -73,9 +85,50 @@ class MessageAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase, IsOriginalAdmi
 
 @admin.register(Survey)
 class SurveyAdmin(HOPEModelAdminBase):
-    pass
+    filter_horizontal = ["recipients"]
+    list_display = (
+        "unicef_id",
+        "title",
+        "category",
+        "business_area",
+        "program",
+        "flow_id",
+        "created_by",
+        "sample_file",
+        "sample_size",
+    )
+    readonly_fields = (
+        "category",
+        "created_by",
+        "payment_plan",
+        "program",
+        "business_area",
+    )
+    list_filter = ("category", ("flow_id", AutoCompleteFilter))
+    search_fields = ("unicef_id", "title")
+    raw_id_fields = ("created_by", "payment_plan", "program", "business_area")
 
 
 @admin.register(Feedback)
 class FeedbackAdmin(HOPEModelAdminBase):
-    pass
+    list_display = (
+        "unicef_id",
+        "issue_type",
+        "business_area",
+        "area",
+        "consent",
+        "household_lookup",
+        "individual_lookup",
+    )
+    list_filter = ("issue_type", ("business_area", AutoCompleteFilter), "consent")
+    search_fields = ("unicef_id",)
+    raw_id_fields = [
+        "business_area",
+        "household_lookup",
+        "individual_lookup",
+        "admin2",
+        "program",
+        "created_by",
+        "linked_grievance",
+        "copied_from",
+    ]

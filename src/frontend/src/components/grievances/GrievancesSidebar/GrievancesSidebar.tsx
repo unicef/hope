@@ -28,7 +28,6 @@ export function GrievancesSidebar({
       household =
         ticket.needsAdjudicationTicketDetails.selectedIndividual?.household;
     }
-
     const isOneIndividual = household?.activeIndividualsCount === 1;
     if (isOneIndividual) return false;
 
@@ -43,6 +42,7 @@ export function GrievancesSidebar({
       },
       {
         category: GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING,
+        issueType: undefined,
         approveStatus: ticket?.systemFlaggingTicketDetails?.approveStatus,
       },
       {
@@ -53,7 +53,7 @@ export function GrievancesSidebar({
     ].some(
       (condition) =>
         category.toString() === condition.category &&
-        (issueType.toString() === condition.issueType ||
+        (issueType?.toString() === condition.issueType ||
           condition.approveStatus ||
           condition.selectedIndividual),
     );
@@ -107,7 +107,7 @@ export function GrievancesSidebar({
                   ticket.paymentVerificationTicketDetails?.paymentVerifications?.edges.map(
                     (edge) => ({
                       id: edge.node.id,
-                      caId: ticket.paymentRecord.caId,
+                      caId: ticket.paymentRecord.unicefId,
                     }),
                   ) || []
                 }

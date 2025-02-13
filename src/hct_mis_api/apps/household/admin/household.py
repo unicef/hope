@@ -213,19 +213,30 @@ class HouseholdAdmin(
         "unicef_id",
         "business_area",
         "country",
-        "head_of_household",
-        "size",
-        "withdrawn",
         "program",
+        "head_of_household",
         "rdi_merge_status",
+        "registration_data_import",
+        "registration_method",
+        "residence_status",
+        "collect_type",
+        "withdrawn",
+        "size",
+        "consent",
+        "consent_sharing",
     )
     list_filter = (
         DepotManager,
+        QueryStringFilter,
         ("business_area", LinkedAutoCompleteFilter.factory(parent=None)),
         ("program", LinkedAutoCompleteFilter.factory(parent="business_area")),
         ("registration_data_import", LinkedAutoCompleteFilter.factory(parent="program")),
-        QueryStringFilter,
+        "registration_method",
+        "residence_status",
+        "collect_type",
         "withdrawn",
+        "consent",
+        "consent_sharing",
     )
     search_fields = ("head_of_household__family_name", "unicef_id")
     readonly_fields = ("created_at", "updated_at")
@@ -244,6 +255,8 @@ class HouseholdAdmin(
         "head_of_household",
         "registration_data_import",
         "household_collection",
+        "storage_obj",
+        "copied_from",
     )
     fieldsets = [
         (None, {"fields": (("unicef_id", "head_of_household"),)}),
@@ -289,7 +302,17 @@ class HouseholdAdmin(
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         qs = self.model.all_objects.get_queryset().select_related(
-            "head_of_household", "country", "country_origin", "admin_area", "admin1", "admin2", "admin3", "admin4"
+            "business_area",
+            "head_of_household",
+            "country",
+            "country_origin",
+            "admin_area",
+            "admin1",
+            "admin2",
+            "admin3",
+            "admin4",
+            "program",
+            "registration_data_import",
         )
         ordering = self.get_ordering(request)
         if ordering:
@@ -310,7 +333,7 @@ class HouseholdAdmin(
     def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return False
 
-    @button()
+    @button(permission="grievance.view_grievanceticket")
     def tickets(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         context = self.get_common_context(request, pk, title="Tickets")
         obj = context["original"]
@@ -320,17 +343,16 @@ class HouseholdAdmin(
         context["tickets"] = tickets
         return TemplateResponse(request, "admin/household/household/tickets.html", context)
 
-    @button()
+    @button(permission="household.view_household")
     def members(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
         obj = Household.all_merge_status_objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
         flt = f"&qs=household_id={obj.id}"
         return HttpResponseRedirect(f"{url}?{flt}")
 
-    @button()
+    @button(permission=is_root)
     def sanity_check(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
-        # NOTE: this code is should be optimized in the future and it is not
-        # intended to be used in bulk
+        # NOTE: this code should be optimized in the future, and it is not intended to be used in bulk
         hh = self.get_object(request, str(pk))
         warnings: List[List] = []
         primary = None
@@ -354,14 +376,6 @@ class HouseholdAdmin(
 
         active_individuals = hh.individuals(manager="all_objects").exclude(Q(duplicate=True) | Q(withdrawn=True))
         ghosts_individuals = hh.individuals(manager="all_objects").filter(Q(duplicate=True) | Q(withdrawn=True))
-        all_individuals = hh.individuals(manager="all_objects").all()
-        if hh.collect_individual_data:
-            if active_individuals.count() != hh.size:
-                warnings.append([messages.WARNING, "HH size does not match"])
-
-        else:
-            if all_individuals.count() > 1:
-                warnings.append([messages.ERROR, "Individual data not collected but members found"])
 
         if hh.size != total_in_ranges:
             warnings.append(
@@ -472,7 +486,7 @@ class HouseholdAdmin(
 
     @button(
         label="Withdraw households from list",
-        permission=is_root,
+        permission="household.can_withdrawn",
     )
     def withdraw_households_from_list_button(self, request: HttpRequest) -> Optional[HttpResponse]:
         return self.withdraw_households_from_list(request)
@@ -488,6 +502,15 @@ class HouseholdCollectionAdmin(admin.ModelAdmin):
     search_fields = ("unicef_id",)
     list_filter = [BusinessAreaForHouseholdCollectionListFilter]
     inlines = [HouseholdRepresentationInline]
+
+    def get_queryset(self, request: HttpRequest) -> "QuerySet":
+        return (
+            super()
+            .get_queryset(request)
+            .prefetch_related(
+                "households",
+            )
+        )
 
     def number_of_representations(self, obj: HouseholdCollection) -> int:
         return obj.households(manager="all_objects").count()

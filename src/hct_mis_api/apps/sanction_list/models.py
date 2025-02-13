@@ -34,42 +34,45 @@ class ActiveIndividualsManager(models.Manager):
 
 
 class SanctionListIndividual(TimeStampedUUIDModel):
-    data_id = models.PositiveIntegerField()
-    version_num = models.PositiveIntegerField()
     first_name = models.CharField(max_length=85)
     second_name = models.CharField(max_length=85, blank=True, default="")
     third_name = models.CharField(max_length=85, blank=True, default="")
     fourth_name = models.CharField(max_length=85, blank=True, default="")
     full_name = models.CharField(max_length=255)
     name_original_script = models.CharField(max_length=255, blank=True, default="")
+    list_type = models.CharField(max_length=50)
     un_list_type = models.CharField(max_length=100, blank=True, default="")
     reference_number = models.CharField(max_length=50, unique=True)
     listed_on = models.DateTimeField()
     comments = models.TextField(blank=True, default="")
     designation = models.TextField(blank=True, default="")
-    list_type = models.CharField(max_length=50)
     street = models.CharField(max_length=255, blank=True, default="")
     city = models.CharField(max_length=255, blank=True, default="")
     state_province = models.CharField(max_length=255, blank=True, default="")
     address_note = models.CharField(max_length=255, blank=True, default="")
+    data_id = models.PositiveIntegerField()
+    version_num = models.PositiveIntegerField()
     country_of_birth = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     active = models.BooleanField(default=True)
 
     objects = ActiveIndividualsManager()
     all_objects = ActiveIndividualsManager(active_only=False)
 
+    class Meta:
+        ordering = ["-listed_on"]
+
 
 class SanctionListIndividualDocument(TimeStampedUUIDModel):
-    document_number = models.CharField(max_length=255)
-    type_of_document = models.CharField(max_length=255)
-    date_of_issue = models.CharField(max_length=255, blank=True, null=True, default="")
-    issuing_country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
-    note = models.CharField(max_length=255, blank=True, default="")
     individual = models.ForeignKey(
         "SanctionListIndividual",
         on_delete=models.CASCADE,
         related_name="documents",
     )
+    type_of_document = models.CharField(max_length=255)
+    document_number = models.CharField(max_length=255)
+    date_of_issue = models.CharField(max_length=255, blank=True, null=True, default="")
+    issuing_country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
+    note = models.CharField(max_length=255, blank=True, default="")
 
 
 class SanctionListIndividualNationalities(TimeStampedUUIDModel):

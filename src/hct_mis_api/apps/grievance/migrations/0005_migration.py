@@ -4,14 +4,7 @@ import django.db.models.deletion
 
 
 def migrate_onetoone_to_foreignkey(apps, schema_editor):
-    TicketSensitiveDetails = apps.get_model("grievance", "TicketSensitiveDetails")
-    TicketComplaintDetails = apps.get_model("grievance", "TicketComplaintDetails")
-    TicketSensitiveDetails.objects.filter(
-        payment_object_id__isnull=False
-    ).update(payment_fk=models.F("payment_object_id"))
-    TicketComplaintDetails.objects.filter(
-        payment_object_id__isnull=False
-    ).update(payment_fk=models.F("payment_object_id"))
+    pass
 
 
 class Migration(migrations.Migration):
@@ -19,6 +12,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('grievance', '0004_migration'),
+        ('payment', '0001_migration'),
     ]
 
     operations = [
@@ -32,7 +26,7 @@ class Migration(migrations.Migration):
             name='payment_fk',
             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='payment.payment'),
         ),
-        migrations.RunPython(migrate_onetoone_to_foreignkey),
+        migrations.RunPython(migrate_onetoone_to_foreignkey, reverse_code=migrations.RunPython.noop),
         migrations.RemoveField(
             model_name='ticketcomplaintdetails',
             name='payment',

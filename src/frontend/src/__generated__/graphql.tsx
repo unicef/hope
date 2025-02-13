@@ -48,10 +48,10 @@ export type AccountabilityRandomSamplingArguments = {
 
 export type AccountabilitySampleSizeInput = {
   fullListArguments?: InputMaybe<AccountabilityFullListArguments>;
+  paymentPlan?: InputMaybe<Scalars['ID']['input']>;
   program?: InputMaybe<Scalars['ID']['input']>;
   randomSamplingArguments?: InputMaybe<AccountabilityRandomSamplingArguments>;
   samplingType: Scalars['String']['input'];
-  targetPopulation?: InputMaybe<Scalars['ID']['input']>;
 };
 
 export type AccountabilitySampleSizeNode = {
@@ -63,6 +63,7 @@ export type AccountabilitySampleSizeNode = {
 export enum Action {
   Approve = 'APPROVE',
   Authorize = 'AUTHORIZE',
+  Draft = 'DRAFT',
   Finish = 'FINISH',
   Lock = 'LOCK',
   LockFsp = 'LOCK_FSP',
@@ -70,6 +71,10 @@ export enum Action {
   Review = 'REVIEW',
   SendForApproval = 'SEND_FOR_APPROVAL',
   SendToPaymentGateway = 'SEND_TO_PAYMENT_GATEWAY',
+  SendXlsxPassword = 'SEND_XLSX_PASSWORD',
+  TpLock = 'TP_LOCK',
+  TpRebuild = 'TP_REBUILD',
+  TpUnlock = 'TP_UNLOCK',
   Unlock = 'UNLOCK',
   UnlockFsp = 'UNLOCK_FSP'
 }
@@ -484,7 +489,6 @@ export type BusinessAreaNode = Node & {
   id: Scalars['ID']['output'];
   individualSet: IndividualNodeConnection;
   isAccountabilityApplicable?: Maybe<Scalars['Boolean']['output']>;
-  isPaymentPlanApplicable: Scalars['Boolean']['output'];
   isSplit: Scalars['Boolean']['output'];
   koboToken?: Maybe<Scalars['String']['output']>;
   koboUrl?: Maybe<Scalars['String']['output']>;
@@ -512,7 +516,6 @@ export type BusinessAreaNode = Node & {
   screenBeneficiary: Scalars['Boolean']['output'];
   slug: Scalars['String']['output'];
   surveySet: SurveyNodeConnection;
-  targetpopulationSet: TargetPopulationNodeConnection;
   tickets: GrievanceTicketNodeConnection;
   updatedAt: Scalars['DateTime']['output'];
   userRoles: Array<UserRoleNode>;
@@ -656,38 +659,6 @@ export type BusinessAreaNodeSurveySetArgs = {
 };
 
 
-export type BusinessAreaNodeTargetpopulationSetArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  businessArea?: InputMaybe<Scalars['String']['input']>;
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  createdAtRange?: InputMaybe<Scalars['String']['input']>;
-  createdAt_Gte?: InputMaybe<Scalars['DateTime']['input']>;
-  createdAt_Lte?: InputMaybe<Scalars['DateTime']['input']>;
-  createdByName?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  households?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  name?: InputMaybe<Scalars['String']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
-  program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
-  programCycle?: InputMaybe<Scalars['String']['input']>;
-  status?: InputMaybe<Scalars['String']['input']>;
-  statusNot?: InputMaybe<Scalars['String']['input']>;
-  totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountMin?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountWithValidPhoneNoMax?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountWithValidPhoneNoMin?: InputMaybe<Scalars['Int']['input']>;
-  totalIndividualsCountMax?: InputMaybe<Scalars['Int']['input']>;
-  totalIndividualsCountMin?: InputMaybe<Scalars['Int']['input']>;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  updatedAt_Gte?: InputMaybe<Scalars['DateTime']['input']>;
-  updatedAt_Lte?: InputMaybe<Scalars['DateTime']['input']>;
-};
-
-
 export type BusinessAreaNodeTicketsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -816,16 +787,14 @@ export type CommunicationMessageNode = Node & {
   fullListArguments?: Maybe<Scalars['JSONString']['output']>;
   households: HouseholdNodeConnection;
   id: Scalars['ID']['output'];
-  isMigrationHandled: Scalars['Boolean']['output'];
   isOriginal: Scalars['Boolean']['output'];
-  migratedAt?: Maybe<Scalars['DateTime']['output']>;
   numberOfRecipients: Scalars['Int']['output'];
+  paymentPlan?: Maybe<PaymentPlanNode>;
   program?: Maybe<ProgramNode>;
   randomSamplingArguments?: Maybe<Scalars['JSONString']['output']>;
   registrationDataImport?: Maybe<RegistrationDataImportNode>;
   sampleSize: Scalars['Int']['output'];
   samplingType: MessageSamplingType;
-  targetPopulation?: Maybe<TargetPopulationNode>;
   title: Scalars['String']['output'];
   unicefId?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['DateTime']['output'];
@@ -928,22 +897,9 @@ export type CopyProgramInput = {
   startDate?: InputMaybe<Scalars['Date']['input']>;
 };
 
-export type CopyTargetPopulationInput = {
-  id?: InputMaybe<Scalars['ID']['input']>;
-  name?: InputMaybe<Scalars['String']['input']>;
-  programCycleId: Scalars['ID']['input'];
-};
-
-export type CopyTargetPopulationMutationInput = {
-  clientMutationId?: InputMaybe<Scalars['String']['input']>;
-  targetPopulationData?: InputMaybe<CopyTargetPopulationInput>;
-};
-
-export type CopyTargetPopulationMutationPayload = {
-  __typename?: 'CopyTargetPopulationMutationPayload';
-  clientMutationId?: Maybe<Scalars['String']['output']>;
-  targetPopulation?: Maybe<TargetPopulationNode>;
-  validationErrors?: Maybe<Scalars['Arg']['output']>;
+export type CopyTargetingCriteriaMutation = {
+  __typename?: 'CopyTargetingCriteriaMutation';
+  paymentPlan?: Maybe<PaymentPlanNode>;
 };
 
 export type CoreFieldChoiceObject = {
@@ -965,10 +921,10 @@ export type CreateAccountabilityCommunicationMessageInput = {
   body: Scalars['String']['input'];
   fullListArguments?: InputMaybe<AccountabilityFullListArguments>;
   households?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  paymentPlan?: InputMaybe<Scalars['ID']['input']>;
   randomSamplingArguments?: InputMaybe<AccountabilityRandomSamplingArguments>;
   registrationDataImport?: InputMaybe<Scalars['ID']['input']>;
   samplingType: SamplingChoices;
-  targetPopulation?: InputMaybe<Scalars['ID']['input']>;
   title: Scalars['String']['input'];
 };
 
@@ -1042,11 +998,11 @@ export type CreateGrievanceTicketMutation = {
 };
 
 export type CreatePaymentPlanInput = {
-  businessAreaSlug: Scalars['String']['input'];
-  currency: Scalars['String']['input'];
-  dispersionEndDate: Scalars['Date']['input'];
-  dispersionStartDate: Scalars['Date']['input'];
-  targetingId: Scalars['ID']['input'];
+  excludedIds: Scalars['String']['input'];
+  exclusionReason?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  programCycleId: Scalars['ID']['input'];
+  targetingCriteria: TargetingCriteriaObjectType;
 };
 
 export type CreatePaymentPlanMutation = {
@@ -1110,30 +1066,16 @@ export type CreateSurveyInput = {
   category: Scalars['String']['input'];
   flow: Scalars['String']['input'];
   fullListArguments?: InputMaybe<AccountabilityFullListArguments>;
+  paymentPlan?: InputMaybe<Scalars['ID']['input']>;
   program?: InputMaybe<Scalars['ID']['input']>;
   randomSamplingArguments?: InputMaybe<AccountabilityRandomSamplingArguments>;
   samplingType: Scalars['String']['input'];
-  targetPopulation?: InputMaybe<Scalars['ID']['input']>;
   title: Scalars['String']['input'];
 };
 
 export type CreateSurveyMutation = {
   __typename?: 'CreateSurveyMutation';
   survey?: Maybe<SurveyNode>;
-};
-
-export type CreateTargetPopulationInput = {
-  excludedIds: Scalars['String']['input'];
-  exclusionReason?: InputMaybe<Scalars['String']['input']>;
-  name: Scalars['String']['input'];
-  programCycleId: Scalars['ID']['input'];
-  targetingCriteria: TargetingCriteriaObjectType;
-};
-
-export type CreateTargetPopulationMutation = {
-  __typename?: 'CreateTargetPopulationMutation';
-  targetPopulation?: Maybe<TargetPopulationNode>;
-  validationErrors?: Maybe<Scalars['Arg']['output']>;
 };
 
 export type CreateTicketNoteInput = {
@@ -1155,6 +1097,7 @@ export type DataCollectingTypeChoiceObject = {
   __typename?: 'DataCollectingTypeChoiceObject';
   description?: Maybe<Scalars['String']['output']>;
   name?: Maybe<Scalars['String']['output']>;
+  type?: Maybe<Scalars['String']['output']>;
   value?: Maybe<Scalars['String']['output']>;
 };
 
@@ -1217,8 +1160,12 @@ export enum DataCollectingTypeType {
 
 export type DeduplicationEngineSimilarityPairIndividualNode = {
   __typename?: 'DeduplicationEngineSimilarityPairIndividualNode';
+  age?: Maybe<Scalars['Int']['output']>;
   fullName?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['String']['output']>;
+  location?: Maybe<Scalars['String']['output']>;
   photo?: Maybe<Scalars['String']['output']>;
+  similarityScore?: Maybe<Scalars['Float']['output']>;
   unicefId?: Maybe<Scalars['String']['output']>;
 };
 
@@ -1239,6 +1186,7 @@ export type DeduplicationResultNode = {
   location?: Maybe<Scalars['String']['output']>;
   proximityToScore?: Maybe<Scalars['Float']['output']>;
   score?: Maybe<Scalars['Float']['output']>;
+  unicefId?: Maybe<Scalars['String']['output']>;
 };
 
 export type DeleteHouseholdApproveMutation = {
@@ -1263,17 +1211,6 @@ export type DeleteProgram = {
 
 export type DeleteRegistrationDataImport = {
   __typename?: 'DeleteRegistrationDataImport';
-  ok?: Maybe<Scalars['Boolean']['output']>;
-};
-
-export type DeleteTargetPopulationMutationInput = {
-  clientMutationId?: InputMaybe<Scalars['String']['input']>;
-  targetId: Scalars['ID']['input'];
-};
-
-export type DeleteTargetPopulationMutationPayload = {
-  __typename?: 'DeleteTargetPopulationMutationPayload';
-  clientMutationId?: Maybe<Scalars['String']['output']>;
   ok?: Maybe<Scalars['Boolean']['output']>;
 };
 
@@ -1674,12 +1611,10 @@ export type FeedbackNode = Node & {
   householdLookup?: Maybe<HouseholdNode>;
   id: Scalars['ID']['output'];
   individualLookup?: Maybe<IndividualNode>;
-  isMigrationHandled: Scalars['Boolean']['output'];
   isOriginal: Scalars['Boolean']['output'];
   issueType: FeedbackIssueType;
   language: Scalars['String']['output'];
   linkedGrievance?: Maybe<GrievanceTicketNode>;
-  migratedAt?: Maybe<Scalars['DateTime']['output']>;
   program?: Maybe<ProgramNode>;
   unicefId?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['DateTime']['output'];
@@ -1738,11 +1673,6 @@ export type FilteredActionsListNode = {
   authorization?: Maybe<Array<Maybe<ApprovalNode>>>;
   financeRelease?: Maybe<Array<Maybe<ApprovalNode>>>;
   reject?: Maybe<Array<Maybe<ApprovalNode>>>;
-};
-
-export type FinalizeTargetPopulationMutation = {
-  __typename?: 'FinalizeTargetPopulationMutation';
-  targetPopulation?: Maybe<TargetPopulationNode>;
 };
 
 export enum FinancialServiceProviderCommunicationChannel {
@@ -1949,10 +1879,10 @@ export type GenericPaymentPlanNodeVerificationPlansArgs = {
 export type GetAccountabilityCommunicationMessageSampleSizeInput = {
   fullListArguments?: InputMaybe<AccountabilityFullListArguments>;
   households?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  paymentPlan?: InputMaybe<Scalars['ID']['input']>;
   randomSamplingArguments?: InputMaybe<AccountabilityRandomSamplingArguments>;
   registrationDataImport?: InputMaybe<Scalars['ID']['input']>;
   samplingType: SamplingChoices;
-  targetPopulation?: InputMaybe<Scalars['ID']['input']>;
 };
 
 export type GetCashplanVerificationSampleSizeInput = {
@@ -2144,14 +2074,6 @@ export type GroupAttributeNodeFlexAttributesArgs = {
   flexField?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
-export enum HouseholdCollectIndividualData {
-  A = 'A_',
-  A_0 = 'A_0',
-  A_1 = 'A_1',
-  A_2 = 'A_2',
-  A_3 = 'A_3'
-}
-
 export enum HouseholdCollectType {
   Single = 'SINGLE',
   Standard = 'STANDARD'
@@ -2187,7 +2109,6 @@ export type HouseholdNode = Node & {
   childHoh?: Maybe<Scalars['Boolean']['output']>;
   childrenCount?: Maybe<Scalars['Int']['output']>;
   childrenDisabledCount?: Maybe<Scalars['Int']['output']>;
-  collectIndividualData: HouseholdCollectIndividualData;
   collectType: HouseholdCollectType;
   complaintTicketDetails: TicketComplaintDetailsNodeConnection;
   consent?: Maybe<Scalars['Boolean']['output']>;
@@ -2234,7 +2155,6 @@ export type HouseholdNode = Node & {
   internalData: Scalars['JSONString']['output'];
   isMigrationHandled: Scalars['Boolean']['output'];
   isOriginal: Scalars['Boolean']['output'];
-  isRecalculatedGroupAges: Scalars['Boolean']['output'];
   isRemoved: Scalars['Boolean']['output'];
   koboSubmissionTime?: Maybe<Scalars['DateTime']['output']>;
   koboSubmissionUuid?: Maybe<Scalars['UUID']['output']>;
@@ -2284,7 +2204,6 @@ export type HouseholdNode = Node & {
   start?: Maybe<Scalars['DateTime']['output']>;
   status?: Maybe<Scalars['String']['output']>;
   surveys: SurveyNodeConnection;
-  targetPopulations: TargetPopulationNodeConnection;
   totalCashReceived?: Maybe<Scalars['Decimal']['output']>;
   totalCashReceivedUsd?: Maybe<Scalars['Decimal']['output']>;
   unhcrId: Scalars['String']['output'];
@@ -2467,38 +2386,6 @@ export type HouseholdNodeSurveysArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
-export type HouseholdNodeTargetPopulationsArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  businessArea?: InputMaybe<Scalars['String']['input']>;
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  createdAtRange?: InputMaybe<Scalars['String']['input']>;
-  createdAt_Gte?: InputMaybe<Scalars['DateTime']['input']>;
-  createdAt_Lte?: InputMaybe<Scalars['DateTime']['input']>;
-  createdByName?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  households?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  name?: InputMaybe<Scalars['String']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
-  program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
-  programCycle?: InputMaybe<Scalars['String']['input']>;
-  status?: InputMaybe<Scalars['String']['input']>;
-  statusNot?: InputMaybe<Scalars['String']['input']>;
-  totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountMin?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountWithValidPhoneNoMax?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountWithValidPhoneNoMin?: InputMaybe<Scalars['Int']['input']>;
-  totalIndividualsCountMax?: InputMaybe<Scalars['Int']['input']>;
-  totalIndividualsCountMin?: InputMaybe<Scalars['Int']['input']>;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  updatedAt_Gte?: InputMaybe<Scalars['DateTime']['input']>;
-  updatedAt_Lte?: InputMaybe<Scalars['DateTime']['input']>;
-};
-
 export type HouseholdNodeConnection = {
   __typename?: 'HouseholdNodeConnection';
   edgeCount?: Maybe<Scalars['Int']['output']>;
@@ -2538,7 +2425,6 @@ export type HouseholdSelectionNode = {
   id: Scalars['UUID']['output'];
   isMigrationHandled: Scalars['Boolean']['output'];
   isOriginal: Scalars['Boolean']['output'];
-  targetPopulation: TargetPopulationNode;
   updatedAt: Scalars['DateTime']['output'];
   vulnerabilityScore?: Maybe<Scalars['Float']['output']>;
 };
@@ -2547,7 +2433,6 @@ export type HouseholdUpdateDataObjectType = {
   address?: InputMaybe<Scalars['String']['input']>;
   adminAreaTitle?: InputMaybe<Scalars['String']['input']>;
   childHoh?: InputMaybe<Scalars['Boolean']['input']>;
-  collectIndividualData?: InputMaybe<Scalars['String']['input']>;
   consent?: InputMaybe<Scalars['Boolean']['input']>;
   consentSharing?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   country?: InputMaybe<Scalars['String']['input']>;
@@ -2666,6 +2551,21 @@ export type ImportedDocumentTypeNodeDocumentsArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
+export enum IndividualBiometricDeduplicationBatchStatus {
+  DuplicateInBatch = 'DUPLICATE_IN_BATCH',
+  NotProcessed = 'NOT_PROCESSED',
+  SimilarInBatch = 'SIMILAR_IN_BATCH',
+  UniqueInBatch = 'UNIQUE_IN_BATCH'
+}
+
+export enum IndividualBiometricDeduplicationGoldenRecordStatus {
+  Duplicate = 'DUPLICATE',
+  NeedsAdjudication = 'NEEDS_ADJUDICATION',
+  NotProcessed = 'NOT_PROCESSED',
+  Postpone = 'POSTPONE',
+  Unique = 'UNIQUE'
+}
+
 export type IndividualDataChangeApproveMutation = {
   __typename?: 'IndividualDataChangeApproveMutation';
   grievanceTicket?: Maybe<GrievanceTicketNode>;
@@ -2776,6 +2676,10 @@ export type IndividualNode = Node & {
   age?: Maybe<Scalars['Int']['output']>;
   ageAtRegistration?: Maybe<Scalars['Int']['output']>;
   bankAccountInfo?: Maybe<BankAccountInfoNode>;
+  biometricDeduplicationBatchResults?: Maybe<Array<Maybe<DeduplicationEngineSimilarityPairIndividualNode>>>;
+  biometricDeduplicationBatchStatus: IndividualBiometricDeduplicationBatchStatus;
+  biometricDeduplicationGoldenRecordResults?: Maybe<Array<Maybe<DeduplicationEngineSimilarityPairIndividualNode>>>;
+  biometricDeduplicationGoldenRecordStatus: IndividualBiometricDeduplicationGoldenRecordStatus;
   birthDate: Scalars['Date']['output'];
   blockchainName: Scalars['String']['output'];
   businessArea: UserBusinessAreaNode;
@@ -3288,11 +3192,6 @@ export type LanguageObjectEdge = {
   node?: Maybe<LanguageObject>;
 };
 
-export type LockTargetPopulationMutation = {
-  __typename?: 'LockTargetPopulationMutation';
-  targetPopulation?: Maybe<TargetPopulationNode>;
-};
-
 export enum LogEntryAction {
   Create = 'CREATE',
   Delete = 'DELETE',
@@ -3374,7 +3273,7 @@ export type Mutations = {
   checkAgainstSanctionList?: Maybe<CheckAgainstSanctionListMutation>;
   chooseDeliveryMechanismsForPaymentPlan?: Maybe<ChooseDeliveryMechanismsForPaymentPlanMutation>;
   copyProgram?: Maybe<CopyProgram>;
-  copyTargetPopulation?: Maybe<CopyTargetPopulationMutationPayload>;
+  copyTargetingCriteria?: Maybe<CopyTargetingCriteriaMutation>;
   createAccountabilityCommunicationMessage?: Maybe<CreateCommunicationMessageMutation>;
   createFeedback?: Maybe<CreateFeedbackMutation>;
   createFeedbackMessage?: Maybe<CreateFeedbackMessageMutation>;
@@ -3385,13 +3284,11 @@ export type Mutations = {
   createProgram?: Maybe<CreateProgram>;
   createReport?: Maybe<CreateReport>;
   createSurvey?: Maybe<CreateSurveyMutation>;
-  createTargetPopulation?: Maybe<CreateTargetPopulationMutation>;
   createTicketNote?: Maybe<CreateTicketNoteMutation>;
   deletePaymentPlan?: Maybe<DeletePaymentPlanMutation>;
   deletePaymentVerificationPlan?: Maybe<DeletePaymentVerificationPlan>;
   deleteProgram?: Maybe<DeleteProgram>;
   deleteRegistrationDataImport?: Maybe<DeleteRegistrationDataImport>;
-  deleteTargetPopulation?: Maybe<DeleteTargetPopulationMutationPayload>;
   discardPaymentVerificationPlan?: Maybe<DiscardPaymentVerificationPlan>;
   editPaymentVerificationPlan?: Maybe<EditPaymentVerificationMutation>;
   eraseRegistrationDataImport?: Maybe<EraseRegistrationDataImportMutation>;
@@ -3401,16 +3298,15 @@ export type Mutations = {
   exportXlsxPaymentPlanPaymentList?: Maybe<ExportXlsxPaymentPlanPaymentListMutation>;
   exportXlsxPaymentPlanPaymentListPerFsp?: Maybe<ExportXlsxPaymentPlanPaymentListPerFspMutation>;
   exportXlsxPaymentVerificationPlanFile?: Maybe<ExportXlsxPaymentVerificationPlanFile>;
-  finalizeTargetPopulation?: Maybe<FinalizeTargetPopulationMutation>;
   finishPaymentVerificationPlan?: Maybe<FinishPaymentVerificationPlan>;
   grievanceStatusChange?: Maybe<GrievanceStatusChangeMutation>;
   importXlsxPaymentPlanPaymentList?: Maybe<ImportXlsxPaymentPlanPaymentListMutation>;
   importXlsxPaymentPlanPaymentListPerFsp?: Maybe<ImportXlsxPaymentPlanPaymentListPerFspMutation>;
   importXlsxPaymentVerificationPlanFile?: Maybe<ImportXlsxPaymentVerificationPlanFile>;
   invalidPaymentVerificationPlan?: Maybe<InvalidPaymentVerificationPlan>;
-  lockTargetPopulation?: Maybe<LockTargetPopulationMutation>;
   markPaymentAsFailed?: Maybe<MarkPaymentAsFailedMutation>;
   mergeRegistrationDataImport?: Maybe<MergeRegistrationDataImportMutation>;
+  openPaymentPlan?: Maybe<OpenPaymentPlanMutation>;
   reassignRole?: Maybe<ReassignRoleMutation>;
   refuseRegistrationDataImport?: Maybe<RefuseRegistrationDataImportMutation>;
   registrationKoboImport?: Maybe<RegistrationKoboImportMutation>;
@@ -3421,10 +3317,7 @@ export type Mutations = {
   revertMarkPaymentAsFailed?: Maybe<RevertMarkPaymentAsFailedMutation>;
   saveKoboImportDataAsync?: Maybe<SaveKoboProjectImportDataAsync>;
   setSteficonRuleOnPaymentPlanPaymentList?: Maybe<SetSteficonRuleOnPaymentPlanPaymentListMutation>;
-  setSteficonRuleOnTargetPopulation?: Maybe<SetSteficonRuleOnTargetPopulationMutationPayload>;
   splitPaymentPlan?: Maybe<SplitPaymentPlanMutation>;
-  targetPopulationRebuild?: Maybe<RebuildTargetPopulationMutation>;
-  unlockTargetPopulation?: Maybe<UnlockTargetPopulationMutation>;
   updateFeedback?: Maybe<UpdateFeedbackMutation>;
   updateGrievanceTicket?: Maybe<UpdateGrievanceTicketMutation>;
   updatePaymentPlan?: Maybe<UpdatePaymentPlanMutation>;
@@ -3432,13 +3325,13 @@ export type Mutations = {
   updatePaymentVerificationStatusAndReceivedAmount?: Maybe<UpdatePaymentVerificationStatusAndReceivedAmount>;
   updateProgram?: Maybe<UpdateProgram>;
   updateProgramPartners?: Maybe<UpdateProgramPartners>;
-  updateTargetPopulation?: Maybe<UpdateTargetPopulationMutation>;
   uploadImportDataXlsxFileAsync?: Maybe<UploadImportDataXlsxFileAsync>;
 };
 
 
 export type MutationsActionPaymentPlanMutationArgs = {
   input: ActionPaymentPlanInput;
+  version?: InputMaybe<Scalars['BigInt']['input']>;
 };
 
 
@@ -3570,8 +3463,10 @@ export type MutationsCopyProgramArgs = {
 };
 
 
-export type MutationsCopyTargetPopulationArgs = {
-  input: CopyTargetPopulationMutationInput;
+export type MutationsCopyTargetingCriteriaArgs = {
+  name: Scalars['String']['input'];
+  paymentPlanId: Scalars['ID']['input'];
+  programCycleId: Scalars['ID']['input'];
 };
 
 
@@ -3628,11 +3523,6 @@ export type MutationsCreateSurveyArgs = {
 };
 
 
-export type MutationsCreateTargetPopulationArgs = {
-  input: CreateTargetPopulationInput;
-};
-
-
 export type MutationsCreateTicketNoteArgs = {
   noteInput: CreateTicketNoteInput;
   version?: InputMaybe<Scalars['BigInt']['input']>;
@@ -3657,11 +3547,6 @@ export type MutationsDeleteProgramArgs = {
 
 export type MutationsDeleteRegistrationDataImportArgs = {
   registrationDataImportId: Scalars['String']['input'];
-};
-
-
-export type MutationsDeleteTargetPopulationArgs = {
-  input: DeleteTargetPopulationMutationInput;
 };
 
 
@@ -3701,23 +3586,19 @@ export type MutationsExportSurveySampleArgs = {
 
 
 export type MutationsExportXlsxPaymentPlanPaymentListArgs = {
+  fspXlsxTemplateId?: InputMaybe<Scalars['ID']['input']>;
   paymentPlanId: Scalars['ID']['input'];
 };
 
 
 export type MutationsExportXlsxPaymentPlanPaymentListPerFspArgs = {
+  fspXlsxTemplateId?: InputMaybe<Scalars['ID']['input']>;
   paymentPlanId: Scalars['ID']['input'];
 };
 
 
 export type MutationsExportXlsxPaymentVerificationPlanFileArgs = {
   paymentVerificationPlanId: Scalars['ID']['input'];
-};
-
-
-export type MutationsFinalizeTargetPopulationArgs = {
-  id: Scalars['ID']['input'];
-  version?: InputMaybe<Scalars['BigInt']['input']>;
 };
 
 
@@ -3758,12 +3639,6 @@ export type MutationsInvalidPaymentVerificationPlanArgs = {
 };
 
 
-export type MutationsLockTargetPopulationArgs = {
-  id: Scalars['ID']['input'];
-  version?: InputMaybe<Scalars['BigInt']['input']>;
-};
-
-
 export type MutationsMarkPaymentAsFailedArgs = {
   paymentId: Scalars['ID']['input'];
 };
@@ -3771,6 +3646,12 @@ export type MutationsMarkPaymentAsFailedArgs = {
 
 export type MutationsMergeRegistrationDataImportArgs = {
   id: Scalars['ID']['input'];
+  version?: InputMaybe<Scalars['BigInt']['input']>;
+};
+
+
+export type MutationsOpenPaymentPlanArgs = {
+  input: OpenPaymentPlanInput;
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
 
@@ -3838,11 +3719,7 @@ export type MutationsSaveKoboImportDataAsyncArgs = {
 export type MutationsSetSteficonRuleOnPaymentPlanPaymentListArgs = {
   paymentPlanId: Scalars['ID']['input'];
   steficonRuleId: Scalars['ID']['input'];
-};
-
-
-export type MutationsSetSteficonRuleOnTargetPopulationArgs = {
-  input: SetSteficonRuleOnTargetPopulationMutationInput;
+  version?: InputMaybe<Scalars['BigInt']['input']>;
 };
 
 
@@ -3850,17 +3727,6 @@ export type MutationsSplitPaymentPlanArgs = {
   paymentPlanId: Scalars['ID']['input'];
   paymentsNo?: InputMaybe<Scalars['Int']['input']>;
   splitType: Scalars['String']['input'];
-};
-
-
-export type MutationsTargetPopulationRebuildArgs = {
-  id: Scalars['ID']['input'];
-};
-
-
-export type MutationsUnlockTargetPopulationArgs = {
-  id: Scalars['ID']['input'];
-  version?: InputMaybe<Scalars['BigInt']['input']>;
 };
 
 
@@ -3877,6 +3743,7 @@ export type MutationsUpdateGrievanceTicketArgs = {
 
 export type MutationsUpdatePaymentPlanArgs = {
   input: UpdatePaymentPlanInput;
+  version?: InputMaybe<Scalars['BigInt']['input']>;
 };
 
 
@@ -3908,12 +3775,6 @@ export type MutationsUpdateProgramPartnersArgs = {
 };
 
 
-export type MutationsUpdateTargetPopulationArgs = {
-  input: UpdateTargetPopulationInput;
-  version?: InputMaybe<Scalars['BigInt']['input']>;
-};
-
-
 export type MutationsUploadImportDataXlsxFileAsyncArgs = {
   businessAreaSlug: Scalars['String']['input'];
   file: Scalars['Upload']['input'];
@@ -3931,6 +3792,18 @@ export type NegativeFeedbackTicketExtras = {
 
 export type Node = {
   id: Scalars['ID']['output'];
+};
+
+export type OpenPaymentPlanInput = {
+  currency: Scalars['String']['input'];
+  dispersionEndDate: Scalars['Date']['input'];
+  dispersionStartDate: Scalars['Date']['input'];
+  paymentPlanId: Scalars['ID']['input'];
+};
+
+export type OpenPaymentPlanMutation = {
+  __typename?: 'OpenPaymentPlanMutation';
+  paymentPlan?: Maybe<PaymentPlanNode>;
 };
 
 export type PduFieldInput = {
@@ -4176,7 +4049,7 @@ export type PaymentNode = Node & {
   collector: IndividualNode;
   conflicted: Scalars['Boolean']['output'];
   createdAt: Scalars['DateTime']['output'];
-  currency: Scalars['String']['output'];
+  currency?: Maybe<Scalars['String']['output']>;
   debitCardIssuer?: Maybe<Scalars['String']['output']>;
   debitCardNumber?: Maybe<Scalars['String']['output']>;
   deliveredQuantity?: Maybe<Scalars['Float']['output']>;
@@ -4219,7 +4092,6 @@ export type PaymentNode = Node & {
   sourcePayment?: Maybe<PaymentNode>;
   status: PaymentStatus;
   statusDate: Scalars['DateTime']['output'];
-  targetPopulation?: Maybe<TargetPopulationNode>;
   ticketComplaintDetails: TicketComplaintDetailsNodeConnection;
   ticketSensitiveDetails: TicketSensitiveDetailsNodeConnection;
   tokenNumber?: Maybe<Scalars['Int']['output']>;
@@ -4229,6 +4101,7 @@ export type PaymentNode = Node & {
   unicefId?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['DateTime']['output'];
   verification?: Maybe<PaymentVerificationNode>;
+  vulnerabilityScore?: Maybe<Scalars['Float']['output']>;
 };
 
 
@@ -4295,6 +4168,13 @@ export enum PaymentPlanBackgroundActionStatus {
   XlsxImportError = 'XLSX_IMPORT_ERROR'
 }
 
+export enum PaymentPlanBuildStatus {
+  Building = 'BUILDING',
+  Failed = 'FAILED',
+  Ok = 'OK',
+  Pending = 'PENDING'
+}
+
 export type PaymentPlanNode = Node & {
   __typename?: 'PaymentPlanNode';
   adminUrl?: Maybe<Scalars['String']['output']>;
@@ -4303,10 +4183,16 @@ export type PaymentPlanNode = Node & {
   backgroundActionStatus?: Maybe<PaymentPlanBackgroundActionStatus>;
   bankReconciliationError?: Maybe<Scalars['Int']['output']>;
   bankReconciliationSuccess?: Maybe<Scalars['Int']['output']>;
+  buildStatus?: Maybe<PaymentPlanBuildStatus>;
+  builtAt?: Maybe<Scalars['DateTime']['output']>;
   businessArea: UserBusinessAreaNode;
   canCreateFollowUp?: Maybe<Scalars['Boolean']['output']>;
   canCreatePaymentVerificationPlan?: Maybe<Scalars['Boolean']['output']>;
+  canCreateXlsxWithFspAuthCode?: Maybe<Scalars['Boolean']['output']>;
+  canDownloadXlsx?: Maybe<Scalars['Boolean']['output']>;
+  canExportXlsx?: Maybe<Scalars['Boolean']['output']>;
   canSendToPaymentGateway?: Maybe<Scalars['Boolean']['output']>;
+  canSendXlsxPassword?: Maybe<Scalars['Boolean']['output']>;
   canSplit?: Maybe<Scalars['Boolean']['output']>;
   createdAt: Scalars['DateTime']['output'];
   createdBy: UserNode;
@@ -4320,11 +4206,13 @@ export type PaymentPlanNode = Node & {
   exchangeRate?: Maybe<Scalars['Float']['output']>;
   excludeHouseholdError: Scalars['String']['output'];
   excludedHouseholds?: Maybe<Array<Maybe<HouseholdNode>>>;
+  excludedIds: Scalars['String']['output'];
   excludedIndividuals?: Maybe<Array<Maybe<IndividualNode>>>;
   exclusionReason: Scalars['String']['output'];
   femaleAdultsCount: Scalars['Int']['output'];
   femaleChildrenCount: Scalars['Int']['output'];
   followUps: PaymentPlanNodeConnection;
+  fspCommunicationChannel?: Maybe<Scalars['String']['output']>;
   hasFspDeliveryMechanismXlsxTemplate?: Maybe<Scalars['Boolean']['output']>;
   hasPaymentListExportFile?: Maybe<Scalars['Boolean']['output']>;
   id: Scalars['ID']['output'];
@@ -4336,6 +4224,7 @@ export type PaymentPlanNode = Node & {
   isRemoved: Scalars['Boolean']['output'];
   maleAdultsCount: Scalars['Int']['output'];
   maleChildrenCount: Scalars['Int']['output'];
+  messages: CommunicationMessageNodeConnection;
   name?: Maybe<Scalars['String']['output']>;
   paymentItems: PaymentNodeConnection;
   paymentVerificationPlans: PaymentVerificationPlanNodeConnection;
@@ -4351,8 +4240,11 @@ export type PaymentPlanNode = Node & {
   statusDate: Scalars['DateTime']['output'];
   steficonAppliedDate?: Maybe<Scalars['DateTime']['output']>;
   steficonRule?: Maybe<RuleCommitNode>;
+  steficonRuleTargeting?: Maybe<RuleCommitNode>;
+  steficonTargetingAppliedDate?: Maybe<Scalars['DateTime']['output']>;
   supportingDocuments?: Maybe<Array<Maybe<PaymentPlanSupportingDocumentNode>>>;
-  targetPopulation: TargetPopulationNode;
+  surveys: SurveyNodeConnection;
+  targetingCriteria?: Maybe<TargetingCriteriaNode>;
   totalDeliveredQuantity?: Maybe<Scalars['Float']['output']>;
   totalDeliveredQuantityUsd?: Maybe<Scalars['Float']['output']>;
   totalEntitledQuantity?: Maybe<Scalars['Float']['output']>;
@@ -4360,6 +4252,7 @@ export type PaymentPlanNode = Node & {
   totalEntitledQuantityRevisedUsd?: Maybe<Scalars['Float']['output']>;
   totalEntitledQuantityUsd?: Maybe<Scalars['Float']['output']>;
   totalHouseholdsCount: Scalars['Int']['output'];
+  totalHouseholdsCountWithValidPhoneNo?: Maybe<Scalars['Int']['output']>;
   totalIndividualsCount: Scalars['Int']['output'];
   totalUndeliveredQuantity?: Maybe<Scalars['Float']['output']>;
   totalUndeliveredQuantityUsd?: Maybe<Scalars['Float']['output']>;
@@ -4370,6 +4263,8 @@ export type PaymentPlanNode = Node & {
   verificationPlans?: Maybe<PaymentVerificationPlanNodeConnection>;
   version: Scalars['BigInt']['output'];
   volumeByDeliveryMechanism?: Maybe<Array<Maybe<VolumeByDeliveryMechanismNode>>>;
+  vulnerabilityScoreMax?: Maybe<Scalars['Float']['output']>;
+  vulnerabilityScoreMin?: Maybe<Scalars['Float']['output']>;
 };
 
 
@@ -4400,6 +4295,15 @@ export type PaymentPlanNodeFollowUpsArgs = {
 };
 
 
+export type PaymentPlanNodeMessagesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type PaymentPlanNodePaymentItemsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -4410,6 +4314,15 @@ export type PaymentPlanNodePaymentItemsArgs = {
 
 
 export type PaymentPlanNodePaymentVerificationPlansArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type PaymentPlanNodeSurveysArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -4443,14 +4356,24 @@ export type PaymentPlanNodeEdge = {
 
 export enum PaymentPlanStatus {
   Accepted = 'ACCEPTED',
+  Draft = 'DRAFT',
   Finished = 'FINISHED',
   InApproval = 'IN_APPROVAL',
   InAuthorization = 'IN_AUTHORIZATION',
   InReview = 'IN_REVIEW',
   Locked = 'LOCKED',
   LockedFsp = 'LOCKED_FSP',
+  MigrationBlocked = 'MIGRATION_BLOCKED',
+  MigrationFailed = 'MIGRATION_FAILED',
   Open = 'OPEN',
-  Preparing = 'PREPARING'
+  Preparing = 'PREPARING',
+  Processing = 'PROCESSING',
+  SteficonCompleted = 'STEFICON_COMPLETED',
+  SteficonError = 'STEFICON_ERROR',
+  SteficonRun = 'STEFICON_RUN',
+  SteficonWait = 'STEFICON_WAIT',
+  TpLocked = 'TP_LOCKED',
+  TpOpen = 'TP_OPEN'
 }
 
 export type PaymentPlanSupportingDocumentNode = Node & {
@@ -4477,7 +4400,6 @@ export type PaymentPlanSupportingDocumentNodeEdge = {
 
 export type PaymentRecordAndPaymentNode = {
   __typename?: 'PaymentRecordAndPaymentNode';
-  caId?: Maybe<Scalars['String']['output']>;
   currency?: Maybe<Scalars['String']['output']>;
   deliveredQuantity?: Maybe<Scalars['Float']['output']>;
   deliveredQuantityUsd?: Maybe<Scalars['Float']['output']>;
@@ -4488,6 +4410,7 @@ export type PaymentRecordAndPaymentNode = {
   objType?: Maybe<Scalars['String']['output']>;
   parent?: Maybe<CashPlanAndPaymentPlanNode>;
   status?: Maybe<Scalars['String']['output']>;
+  unicefId?: Maybe<Scalars['String']['output']>;
   verification?: Maybe<PaymentVerificationNode>;
 };
 
@@ -4751,7 +4674,6 @@ export type ProgramCycleNode = Node & {
   program: ProgramNode;
   startDate: Scalars['Date']['output'];
   status: ProgramCycleStatus;
-  targetPopulations: TargetPopulationNodeConnection;
   title?: Maybe<Scalars['String']['output']>;
   totalDeliveredQuantityUsd?: Maybe<Scalars['Float']['output']>;
   totalEntitledQuantityUsd?: Maybe<Scalars['Float']['output']>;
@@ -4767,38 +4689,6 @@ export type ProgramCycleNodePaymentPlansArgs = {
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-};
-
-
-export type ProgramCycleNodeTargetPopulationsArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  businessArea?: InputMaybe<Scalars['String']['input']>;
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  createdAtRange?: InputMaybe<Scalars['String']['input']>;
-  createdAt_Gte?: InputMaybe<Scalars['DateTime']['input']>;
-  createdAt_Lte?: InputMaybe<Scalars['DateTime']['input']>;
-  createdByName?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  households?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  name?: InputMaybe<Scalars['String']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
-  program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
-  programCycle?: InputMaybe<Scalars['String']['input']>;
-  status?: InputMaybe<Scalars['String']['input']>;
-  statusNot?: InputMaybe<Scalars['String']['input']>;
-  totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountMin?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountWithValidPhoneNoMax?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountWithValidPhoneNoMin?: InputMaybe<Scalars['Int']['input']>;
-  totalIndividualsCountMax?: InputMaybe<Scalars['Int']['input']>;
-  totalIndividualsCountMin?: InputMaybe<Scalars['Int']['input']>;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  updatedAt_Gte?: InputMaybe<Scalars['DateTime']['input']>;
-  updatedAt_Lte?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
 export type ProgramCycleNodeConnection = {
@@ -4836,8 +4726,6 @@ export type ProgramNode = Node & {
   biometricDeduplicationEnabled: Scalars['Boolean']['output'];
   budget?: Maybe<Scalars['Decimal']['output']>;
   businessArea: UserBusinessAreaNode;
-  caHashId?: Maybe<Scalars['String']['output']>;
-  caId?: Maybe<Scalars['String']['output']>;
   canFinish?: Maybe<Scalars['Boolean']['output']>;
   cashPlus: Scalars['Boolean']['output'];
   createdAt: Scalars['DateTime']['output'];
@@ -4875,7 +4763,6 @@ export type ProgramNode = Node & {
   status: ProgramStatus;
   surveys: SurveyNodeConnection;
   targetPopulationsCount?: Maybe<Scalars['Int']['output']>;
-  targetpopulationSet: TargetPopulationNodeConnection;
   totalDeliveredQuantity?: Maybe<Scalars['Decimal']['output']>;
   totalEntitledQuantity?: Maybe<Scalars['Decimal']['output']>;
   totalNumberOfHouseholds?: Maybe<Scalars['Int']['output']>;
@@ -5010,38 +4897,6 @@ export type ProgramNodeSurveysArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
-export type ProgramNodeTargetpopulationSetArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  businessArea?: InputMaybe<Scalars['String']['input']>;
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  createdAtRange?: InputMaybe<Scalars['String']['input']>;
-  createdAt_Gte?: InputMaybe<Scalars['DateTime']['input']>;
-  createdAt_Lte?: InputMaybe<Scalars['DateTime']['input']>;
-  createdByName?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  households?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  name?: InputMaybe<Scalars['String']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
-  program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
-  programCycle?: InputMaybe<Scalars['String']['input']>;
-  status?: InputMaybe<Scalars['String']['input']>;
-  statusNot?: InputMaybe<Scalars['String']['input']>;
-  totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountMin?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountWithValidPhoneNoMax?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountWithValidPhoneNoMin?: InputMaybe<Scalars['Int']['input']>;
-  totalIndividualsCountMax?: InputMaybe<Scalars['Int']['input']>;
-  totalIndividualsCountMin?: InputMaybe<Scalars['Int']['input']>;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  updatedAt_Gte?: InputMaybe<Scalars['DateTime']['input']>;
-  updatedAt_Lte?: InputMaybe<Scalars['DateTime']['input']>;
-};
-
 export type ProgramNodeConnection = {
   __typename?: 'ProgramNodeConnection';
   edgeCount?: Maybe<Scalars['Int']['output']>;
@@ -5099,7 +4954,6 @@ export type Query = {
   allAccountabilityCommunicationMessageRecipients?: Maybe<CommunicationMessageRecipientMapNodeConnection>;
   allAccountabilityCommunicationMessages?: Maybe<CommunicationMessageNodeConnection>;
   allActivePrograms?: Maybe<ProgramNodeConnection>;
-  allActiveTargetPopulations?: Maybe<TargetPopulationNodeConnection>;
   allAddIndividualsFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>;
   allAdminAreas?: Maybe<AreaNodeConnection>;
   allAreasTree?: Maybe<Array<Maybe<AreaTreeNode>>>;
@@ -5138,7 +4992,6 @@ export type Query = {
   allSanctionListIndividuals?: Maybe<SanctionListIndividualNodeConnection>;
   allSteficonRules?: Maybe<SteficonRuleNodeConnection>;
   allSurveys?: Maybe<SurveyNodeConnection>;
-  allTargetPopulation?: Maybe<TargetPopulationNodeConnection>;
   allTicketNotes?: Maybe<TicketNoteNodeConnection>;
   allUsers?: Maybe<UserNodeConnection>;
   availableFspsForDeliveryMechanisms?: Maybe<Array<Maybe<FspChoices>>>;
@@ -5241,9 +5094,6 @@ export type Query = {
   surveyCategoryChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   tableTotalCashTransferredByAdministrativeArea?: Maybe<TableTotalCashTransferred>;
   tableTotalCashTransferredByAdministrativeAreaForPeople?: Maybe<TableTotalCashTransferredForPeople>;
-  targetPopulation?: Maybe<TargetPopulationNode>;
-  targetPopulationHouseholds?: Maybe<HouseholdNodeConnection>;
-  targetPopulationStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   ticketsByCategory?: Maybe<ChartDatasetNode>;
   ticketsByLocationAndCategory?: Maybe<ChartDetailedDatasetsNode>;
   ticketsByStatus?: Maybe<ChartDatasetNode>;
@@ -5303,9 +5153,9 @@ export type QueryAllAccountabilityCommunicationMessagesArgs = {
   numberOfRecipients_Lte?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
+  paymentPlan?: InputMaybe<Scalars['ID']['input']>;
   program?: InputMaybe<Scalars['String']['input']>;
   samplingType?: InputMaybe<Scalars['String']['input']>;
-  targetPopulation?: InputMaybe<Scalars['ID']['input']>;
   title?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -5330,38 +5180,6 @@ export type QueryAllActiveProgramsArgs = {
   sector?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   startDate?: InputMaybe<Scalars['Date']['input']>;
   status?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-};
-
-
-export type QueryAllActiveTargetPopulationsArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  businessArea?: InputMaybe<Scalars['String']['input']>;
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  createdAtRange?: InputMaybe<Scalars['String']['input']>;
-  createdAt_Gte?: InputMaybe<Scalars['DateTime']['input']>;
-  createdAt_Lte?: InputMaybe<Scalars['DateTime']['input']>;
-  createdByName?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  households?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  name?: InputMaybe<Scalars['String']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
-  program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
-  programCycle?: InputMaybe<Scalars['String']['input']>;
-  status?: InputMaybe<Scalars['String']['input']>;
-  statusNot?: InputMaybe<Scalars['String']['input']>;
-  totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountMin?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountWithValidPhoneNoMax?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountWithValidPhoneNoMin?: InputMaybe<Scalars['Int']['input']>;
-  totalIndividualsCountMax?: InputMaybe<Scalars['Int']['input']>;
-  totalIndividualsCountMin?: InputMaybe<Scalars['Int']['input']>;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  updatedAt_Gte?: InputMaybe<Scalars['DateTime']['input']>;
-  updatedAt_Lte?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
 
@@ -5446,6 +5264,7 @@ export type QueryAllFinancialServiceProviderXlsxTemplatesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   createdBy?: InputMaybe<Scalars['ID']['input']>;
+  financialServiceProviders?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
@@ -5648,11 +5467,15 @@ export type QueryAllPaymentPlansArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   businessArea: Scalars['String']['input'];
+  createdAtRange?: InputMaybe<Scalars['String']['input']>;
   dispersionEndDate?: InputMaybe<Scalars['Date']['input']>;
   dispersionStartDate?: InputMaybe<Scalars['Date']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   isFollowUp?: InputMaybe<Scalars['Boolean']['input']>;
+  isPaymentPlan?: InputMaybe<Scalars['Boolean']['input']>;
+  isTargetPopulation?: InputMaybe<Scalars['Boolean']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
   program?: InputMaybe<Scalars['String']['input']>;
@@ -5660,8 +5483,13 @@ export type QueryAllPaymentPlansArgs = {
   search?: InputMaybe<Scalars['String']['input']>;
   sourcePaymentPlanId?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  statusNot?: InputMaybe<Scalars['String']['input']>;
   totalEntitledQuantityFrom?: InputMaybe<Scalars['Float']['input']>;
   totalEntitledQuantityTo?: InputMaybe<Scalars['Float']['input']>;
+  totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
+  totalHouseholdsCountMin?: InputMaybe<Scalars['Int']['input']>;
+  totalHouseholdsCountWithValidPhoneNoMax?: InputMaybe<Scalars['Int']['input']>;
+  totalHouseholdsCountWithValidPhoneNoMin?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -5839,41 +5667,9 @@ export type QueryAllSurveysArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
+  paymentPlan?: InputMaybe<Scalars['ID']['input']>;
   program?: InputMaybe<Scalars['ID']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
-  targetPopulation?: InputMaybe<Scalars['ID']['input']>;
-};
-
-
-export type QueryAllTargetPopulationArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  businessArea?: InputMaybe<Scalars['String']['input']>;
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  createdAtRange?: InputMaybe<Scalars['String']['input']>;
-  createdAt_Gte?: InputMaybe<Scalars['DateTime']['input']>;
-  createdAt_Lte?: InputMaybe<Scalars['DateTime']['input']>;
-  createdByName?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  households?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  name?: InputMaybe<Scalars['String']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
-  program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
-  programCycle?: InputMaybe<Scalars['String']['input']>;
-  status?: InputMaybe<Scalars['String']['input']>;
-  statusNot?: InputMaybe<Scalars['String']['input']>;
-  totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountMin?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountWithValidPhoneNoMax?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountWithValidPhoneNoMin?: InputMaybe<Scalars['Int']['input']>;
-  totalIndividualsCountMax?: InputMaybe<Scalars['Int']['input']>;
-  totalIndividualsCountMin?: InputMaybe<Scalars['Int']['input']>;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  updatedAt_Gte?: InputMaybe<Scalars['DateTime']['input']>;
-  updatedAt_Lte?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
 
@@ -6231,23 +6027,6 @@ export type QueryTableTotalCashTransferredByAdministrativeAreaForPeopleArgs = {
 };
 
 
-export type QueryTargetPopulationArgs = {
-  id: Scalars['ID']['input'];
-};
-
-
-export type QueryTargetPopulationHouseholdsArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  businessArea?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  targetPopulation: Scalars['ID']['input'];
-};
-
-
 export type QueryTicketsByCategoryArgs = {
   businessAreaSlug: Scalars['String']['input'];
 };
@@ -6319,11 +6098,6 @@ export type ReassignRoleMutation = {
   __typename?: 'ReassignRoleMutation';
   household?: Maybe<HouseholdNode>;
   individual?: Maybe<IndividualNode>;
-};
-
-export type RebuildTargetPopulationMutation = {
-  __typename?: 'RebuildTargetPopulationMutation';
-  targetPopulation?: Maybe<TargetPopulationNode>;
 };
 
 export type RecipientNode = Node & {
@@ -6424,7 +6198,6 @@ export type RegistrationDataImportNode = Node & {
   canMerge?: Maybe<Scalars['Boolean']['output']>;
   createdAt: Scalars['DateTime']['output'];
   dataSource: RegistrationDataImportDataSource;
-  datahubId?: Maybe<Scalars['UUID']['output']>;
   dedupEngineBatchDuplicates: Scalars['Int']['output'];
   dedupEngineGoldenRecordDuplicates: Scalars['Int']['output'];
   deduplicationEngineStatus?: Maybe<RegistrationDataImportDeduplicationEngineStatus>;
@@ -6442,6 +6215,7 @@ export type RegistrationDataImportNode = Node & {
   id: Scalars['ID']['output'];
   importData?: Maybe<ImportDataNode>;
   importDate: Scalars['DateTime']['output'];
+  importFromIds?: Maybe<Scalars['String']['output']>;
   importedBy?: Maybe<UserNode>;
   individuals: IndividualNodeConnection;
   messages: CommunicationMessageNodeConnection;
@@ -6552,6 +6326,7 @@ export type RegistrationProgramPopulationImportMutation = {
 
 export type RegistrationProgramPopulationImportMutationInput = {
   businessAreaSlug?: InputMaybe<Scalars['String']['input']>;
+  importFromIds?: InputMaybe<Scalars['String']['input']>;
   importFromProgramId?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   screenBeneficiary?: InputMaybe<Scalars['Boolean']['input']>;
@@ -6691,8 +6466,8 @@ export type RuleCommitNode = Node & {
   isRelease: Scalars['Boolean']['output'];
   language: RuleCommitLanguage;
   paymentPlans: PaymentPlanNodeConnection;
+  paymentPlansTarget: PaymentPlanNodeConnection;
   rule?: Maybe<SteficonRuleNode>;
-  targetPopulations: TargetPopulationNodeConnection;
   timestamp: Scalars['DateTime']['output'];
   updatedBy?: Maybe<UserNode>;
 };
@@ -6707,35 +6482,12 @@ export type RuleCommitNodePaymentPlansArgs = {
 };
 
 
-export type RuleCommitNodeTargetPopulationsArgs = {
+export type RuleCommitNodePaymentPlansTargetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
-  businessArea?: InputMaybe<Scalars['String']['input']>;
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  createdAtRange?: InputMaybe<Scalars['String']['input']>;
-  createdAt_Gte?: InputMaybe<Scalars['DateTime']['input']>;
-  createdAt_Lte?: InputMaybe<Scalars['DateTime']['input']>;
-  createdByName?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
-  households?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
   last?: InputMaybe<Scalars['Int']['input']>;
-  name?: InputMaybe<Scalars['String']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
-  program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
-  programCycle?: InputMaybe<Scalars['String']['input']>;
-  status?: InputMaybe<Scalars['String']['input']>;
-  statusNot?: InputMaybe<Scalars['String']['input']>;
-  totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountMin?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountWithValidPhoneNoMax?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountWithValidPhoneNoMin?: InputMaybe<Scalars['Int']['input']>;
-  totalIndividualsCountMax?: InputMaybe<Scalars['Int']['input']>;
-  totalIndividualsCountMin?: InputMaybe<Scalars['Int']['input']>;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  updatedAt_Gte?: InputMaybe<Scalars['DateTime']['input']>;
-  updatedAt_Lte?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
 export type RuleCommitNodeConnection = {
@@ -6998,19 +6750,6 @@ export type SetSteficonRuleOnPaymentPlanPaymentListMutation = {
   paymentPlan?: Maybe<PaymentPlanNode>;
 };
 
-export type SetSteficonRuleOnTargetPopulationMutationInput = {
-  clientMutationId?: InputMaybe<Scalars['String']['input']>;
-  steficonRuleId?: InputMaybe<Scalars['ID']['input']>;
-  targetId: Scalars['ID']['input'];
-  version?: InputMaybe<Scalars['BigInt']['input']>;
-};
-
-export type SetSteficonRuleOnTargetPopulationMutationPayload = {
-  __typename?: 'SetSteficonRuleOnTargetPopulationMutationPayload';
-  clientMutationId?: Maybe<Scalars['String']['output']>;
-  targetPopulation?: Maybe<TargetPopulationNode>;
-};
-
 export type SimpleApproveMutation = {
   __typename?: 'SimpleApproveMutation';
   grievanceTicket?: Maybe<GrievanceTicketNode>;
@@ -7093,6 +6832,7 @@ export type SurveyNode = Node & {
   hasValidSampleFile?: Maybe<Scalars['Boolean']['output']>;
   id: Scalars['ID']['output'];
   numberOfRecipients: Scalars['Int']['output'];
+  paymentPlan?: Maybe<PaymentPlanNode>;
   program?: Maybe<ProgramNode>;
   randomSamplingArguments: Scalars['JSONString']['output'];
   rapidProUrl?: Maybe<Scalars['String']['output']>;
@@ -7103,7 +6843,6 @@ export type SurveyNode = Node & {
   sampleSize: Scalars['Int']['output'];
   samplingType: SurveySamplingType;
   successfulRapidProCalls: Array<Scalars['JSONString']['output']>;
-  targetPopulation?: Maybe<TargetPopulationNode>;
   title: Scalars['String']['output'];
   unicefId?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['DateTime']['output'];
@@ -7147,138 +6886,6 @@ export type TableTotalCashTransferredForPeople = {
   data?: Maybe<Array<Maybe<_TableTotalCashTransferredDataForPeopleNode>>>;
 };
 
-export enum TargetPopulationBuildStatus {
-  Building = 'BUILDING',
-  Failed = 'FAILED',
-  Ok = 'OK',
-  Pending = 'PENDING'
-}
-
-export type TargetPopulationNode = Node & {
-  __typename?: 'TargetPopulationNode';
-  adminUrl?: Maybe<Scalars['String']['output']>;
-  adultFemaleCount?: Maybe<Scalars['Int']['output']>;
-  adultMaleCount?: Maybe<Scalars['Int']['output']>;
-  buildStatus: TargetPopulationBuildStatus;
-  builtAt?: Maybe<Scalars['DateTime']['output']>;
-  businessArea?: Maybe<UserBusinessAreaNode>;
-  caHashId?: Maybe<Scalars['String']['output']>;
-  caId?: Maybe<Scalars['String']['output']>;
-  changeDate?: Maybe<Scalars['DateTime']['output']>;
-  changedBy?: Maybe<UserNode>;
-  childFemaleCount?: Maybe<Scalars['Int']['output']>;
-  childMaleCount?: Maybe<Scalars['Int']['output']>;
-  createdAt: Scalars['DateTime']['output'];
-  createdBy?: Maybe<UserNode>;
-  excludedIds: Scalars['String']['output'];
-  exclusionReason: Scalars['String']['output'];
-  finalizedAt?: Maybe<Scalars['DateTime']['output']>;
-  finalizedBy?: Maybe<UserNode>;
-  hasEmptyCriteria?: Maybe<Scalars['Boolean']['output']>;
-  hasEmptyIdsCriteria?: Maybe<Scalars['Boolean']['output']>;
-  householdList?: Maybe<HouseholdNodeConnection>;
-  households?: Maybe<HouseholdNodeConnection>;
-  id: Scalars['ID']['output'];
-  isRemoved: Scalars['Boolean']['output'];
-  messages: CommunicationMessageNodeConnection;
-  name: Scalars['String']['output'];
-  paymentPlans: PaymentPlanNodeConnection;
-  program: ProgramNode;
-  programCycle: ProgramCycleNode;
-  selections: Array<HouseholdSelectionNode>;
-  sentToDatahub: Scalars['Boolean']['output'];
-  status: TargetPopulationStatus;
-  steficonAppliedDate?: Maybe<Scalars['DateTime']['output']>;
-  steficonRule?: Maybe<RuleCommitNode>;
-  surveys: SurveyNodeConnection;
-  targetingCriteria?: Maybe<TargetingCriteriaNode>;
-  totalFamilySize?: Maybe<Scalars['Int']['output']>;
-  totalHouseholdsCount?: Maybe<Scalars['Int']['output']>;
-  totalHouseholdsCountWithValidPhoneNo?: Maybe<Scalars['Int']['output']>;
-  totalIndividualsCount?: Maybe<Scalars['Int']['output']>;
-  updatedAt: Scalars['DateTime']['output'];
-  version: Scalars['BigInt']['output'];
-  vulnerabilityScoreMax?: Maybe<Scalars['Float']['output']>;
-  vulnerabilityScoreMin?: Maybe<Scalars['Float']['output']>;
-};
-
-
-export type TargetPopulationNodeHouseholdListArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  businessArea?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-};
-
-
-export type TargetPopulationNodeHouseholdsArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  businessArea?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-};
-
-
-export type TargetPopulationNodeMessagesArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-};
-
-
-export type TargetPopulationNodePaymentPlansArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-};
-
-
-export type TargetPopulationNodeSurveysArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-};
-
-export type TargetPopulationNodeConnection = {
-  __typename?: 'TargetPopulationNodeConnection';
-  edgeCount?: Maybe<Scalars['Int']['output']>;
-  edges: Array<Maybe<TargetPopulationNodeEdge>>;
-  pageInfo: PageInfo;
-  totalCount?: Maybe<Scalars['Int']['output']>;
-};
-
-export type TargetPopulationNodeEdge = {
-  __typename?: 'TargetPopulationNodeEdge';
-  cursor: Scalars['String']['output'];
-  node?: Maybe<TargetPopulationNode>;
-};
-
-export enum TargetPopulationStatus {
-  Assigned = 'ASSIGNED',
-  Locked = 'LOCKED',
-  Open = 'OPEN',
-  Processing = 'PROCESSING',
-  ReadyForCashAssist = 'READY_FOR_CASH_ASSIST',
-  ReadyForPaymentModule = 'READY_FOR_PAYMENT_MODULE',
-  SendingToCashAssist = 'SENDING_TO_CASH_ASSIST',
-  SteficonCompleted = 'STEFICON_COMPLETED',
-  SteficonError = 'STEFICON_ERROR',
-  SteficonRun = 'STEFICON_RUN',
-  SteficonWait = 'STEFICON_WAIT'
-}
-
 export enum TargetingCollectorBlockRuleFilterFlexFieldClassification {
   FlexFieldBasic = 'FLEX_FIELD_BASIC',
   FlexFieldPdu = 'FLEX_FIELD_PDU',
@@ -7319,8 +6926,8 @@ export type TargetingCriteriaNode = {
   householdIds?: Maybe<Scalars['String']['output']>;
   id: Scalars['UUID']['output'];
   individualIds?: Maybe<Scalars['String']['output']>;
+  paymentPlan?: Maybe<PaymentPlanNode>;
   rules?: Maybe<Array<Maybe<TargetingCriteriaRuleNode>>>;
-  targetPopulation?: Maybe<TargetPopulationNode>;
   updatedAt: Scalars['DateTime']['output'];
 };
 
@@ -7844,11 +7451,6 @@ export type TicketSystemFlaggingDetailsNodeEdge = {
   node?: Maybe<TicketSystemFlaggingDetailsNode>;
 };
 
-export type UnlockTargetPopulationMutation = {
-  __typename?: 'UnlockTargetPopulationMutation';
-  targetPopulation?: Maybe<TargetPopulationNode>;
-};
-
 export type UpdateAddIndividualIssueTypeExtras = {
   individualData: AddIndividualDataObjectType;
 };
@@ -7919,8 +7521,14 @@ export type UpdatePaymentPlanInput = {
   currency?: InputMaybe<Scalars['String']['input']>;
   dispersionEndDate?: InputMaybe<Scalars['Date']['input']>;
   dispersionStartDate?: InputMaybe<Scalars['Date']['input']>;
+  excludedIds?: InputMaybe<Scalars['String']['input']>;
+  exclusionReason?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
   paymentPlanId: Scalars['ID']['input'];
-  targetingId?: InputMaybe<Scalars['ID']['input']>;
+  programCycleId?: InputMaybe<Scalars['ID']['input']>;
+  targetingCriteria?: InputMaybe<TargetingCriteriaObjectType>;
+  vulnerabilityScoreMax?: InputMaybe<Scalars['Decimal']['input']>;
+  vulnerabilityScoreMin?: InputMaybe<Scalars['Decimal']['input']>;
 };
 
 export type UpdatePaymentPlanMutation = {
@@ -7975,23 +7583,6 @@ export type UpdateProgramPartnersInput = {
   partners?: InputMaybe<Array<InputMaybe<ProgramPartnerThroughInput>>>;
 };
 
-export type UpdateTargetPopulationInput = {
-  excludedIds?: InputMaybe<Scalars['String']['input']>;
-  exclusionReason?: InputMaybe<Scalars['String']['input']>;
-  id: Scalars['ID']['input'];
-  name?: InputMaybe<Scalars['String']['input']>;
-  programCycleId?: InputMaybe<Scalars['ID']['input']>;
-  targetingCriteria?: InputMaybe<TargetingCriteriaObjectType>;
-  vulnerabilityScoreMax?: InputMaybe<Scalars['Decimal']['input']>;
-  vulnerabilityScoreMin?: InputMaybe<Scalars['Decimal']['input']>;
-};
-
-export type UpdateTargetPopulationMutation = {
-  __typename?: 'UpdateTargetPopulationMutation';
-  targetPopulation?: Maybe<TargetPopulationNode>;
-  validationErrors?: Maybe<Scalars['Arg']['output']>;
-};
-
 export type UploadImportDataXlsxFileAsync = {
   __typename?: 'UploadImportDataXLSXFileAsync';
   errors?: Maybe<Array<Maybe<XlsxRowErrorNode>>>;
@@ -8023,7 +7614,6 @@ export type UserBusinessAreaNode = Node & {
   id: Scalars['ID']['output'];
   individualSet: IndividualNodeConnection;
   isAccountabilityApplicable?: Maybe<Scalars['Boolean']['output']>;
-  isPaymentPlanApplicable: Scalars['Boolean']['output'];
   isSplit: Scalars['Boolean']['output'];
   koboToken?: Maybe<Scalars['String']['output']>;
   koboUrl?: Maybe<Scalars['String']['output']>;
@@ -8052,7 +7642,6 @@ export type UserBusinessAreaNode = Node & {
   screenBeneficiary: Scalars['Boolean']['output'];
   slug: Scalars['String']['output'];
   surveySet: SurveyNodeConnection;
-  targetpopulationSet: TargetPopulationNodeConnection;
   tickets: GrievanceTicketNodeConnection;
   updatedAt: Scalars['DateTime']['output'];
   userRoles: Array<UserRoleNode>;
@@ -8196,38 +7785,6 @@ export type UserBusinessAreaNodeSurveySetArgs = {
 };
 
 
-export type UserBusinessAreaNodeTargetpopulationSetArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  businessArea?: InputMaybe<Scalars['String']['input']>;
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  createdAtRange?: InputMaybe<Scalars['String']['input']>;
-  createdAt_Gte?: InputMaybe<Scalars['DateTime']['input']>;
-  createdAt_Lte?: InputMaybe<Scalars['DateTime']['input']>;
-  createdByName?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  households?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  name?: InputMaybe<Scalars['String']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
-  program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
-  programCycle?: InputMaybe<Scalars['String']['input']>;
-  status?: InputMaybe<Scalars['String']['input']>;
-  statusNot?: InputMaybe<Scalars['String']['input']>;
-  totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountMin?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountWithValidPhoneNoMax?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountWithValidPhoneNoMin?: InputMaybe<Scalars['Int']['input']>;
-  totalIndividualsCountMax?: InputMaybe<Scalars['Int']['input']>;
-  totalIndividualsCountMin?: InputMaybe<Scalars['Int']['input']>;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  updatedAt_Gte?: InputMaybe<Scalars['DateTime']['input']>;
-  updatedAt_Lte?: InputMaybe<Scalars['DateTime']['input']>;
-};
-
-
 export type UserBusinessAreaNodeTicketsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -8255,9 +7812,7 @@ export type UserNode = Node & {
   adUuid?: Maybe<Scalars['String']['output']>;
   approvalSet: Array<ApprovalNode>;
   assignedTickets: GrievanceTicketNodeConnection;
-  availableForExport: Scalars['Boolean']['output'];
   businessAreas?: Maybe<UserBusinessAreaNodeConnection>;
-  changedTargetPopulations: TargetPopulationNodeConnection;
   createdDeliveryMechanisms: DeliveryMechanismPerPaymentPlanNodeConnection;
   createdFinancialServiceProviderXlsxTemplates: FinancialServiceProviderXlsxTemplateNodeConnection;
   createdFinancialServiceProviders: FinancialServiceProviderNodeConnection;
@@ -8265,32 +7820,28 @@ export type UserNode = Node & {
   createdTickets: GrievanceTicketNodeConnection;
   customFields: Scalars['JSONString']['output'];
   dateJoined: Scalars['DateTime']['output'];
-  doapHash: Scalars['String']['output'];
   documentSet: DocumentNodeConnection;
   email: Scalars['String']['output'];
   feedbackMessages: FeedbackMessageNodeConnection;
   feedbacks: FeedbackNodeConnection;
-  finalizedTargetPopulations: TargetPopulationNodeConnection;
   firstName: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   isActive: Scalars['Boolean']['output'];
   isStaff: Scalars['Boolean']['output'];
   isSuperuser: Scalars['Boolean']['output'];
   jobTitle: Scalars['String']['output'];
-  lastDoapSync?: Maybe<Scalars['DateTime']['output']>;
   lastLogin?: Maybe<Scalars['DateTime']['output']>;
   lastModifyDate?: Maybe<Scalars['DateTime']['output']>;
   lastName: Scalars['String']['output'];
   logs: PaymentVerificationLogEntryNodeConnection;
   messages: CommunicationMessageNodeConnection;
-  partner?: Maybe<PartnerNode>;
+  partner: PartnerNode;
   partnerRoles?: Maybe<Array<Maybe<PartnerRoleNode>>>;
   registrationDataImports: RegistrationDataImportNodeConnection;
   reports: ReportNodeConnection;
   sentDeliveryMechanisms: DeliveryMechanismPerPaymentPlanNodeConnection;
   status: UserStatus;
   surveys: SurveyNodeConnection;
-  targetPopulations: TargetPopulationNodeConnection;
   ticketNotes: TicketNoteNodeConnection;
   userRoles: Array<UserRoleNode>;
   username: Scalars['String']['output'];
@@ -8313,38 +7864,6 @@ export type UserNodeBusinessAreasArgs = {
   id?: InputMaybe<Scalars['UUID']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-};
-
-
-export type UserNodeChangedTargetPopulationsArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  businessArea?: InputMaybe<Scalars['String']['input']>;
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  createdAtRange?: InputMaybe<Scalars['String']['input']>;
-  createdAt_Gte?: InputMaybe<Scalars['DateTime']['input']>;
-  createdAt_Lte?: InputMaybe<Scalars['DateTime']['input']>;
-  createdByName?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  households?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  name?: InputMaybe<Scalars['String']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
-  program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
-  programCycle?: InputMaybe<Scalars['String']['input']>;
-  status?: InputMaybe<Scalars['String']['input']>;
-  statusNot?: InputMaybe<Scalars['String']['input']>;
-  totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountMin?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountWithValidPhoneNoMax?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountWithValidPhoneNoMin?: InputMaybe<Scalars['Int']['input']>;
-  totalIndividualsCountMax?: InputMaybe<Scalars['Int']['input']>;
-  totalIndividualsCountMin?: InputMaybe<Scalars['Int']['input']>;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  updatedAt_Gte?: InputMaybe<Scalars['DateTime']['input']>;
-  updatedAt_Lte?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
 
@@ -8420,38 +7939,6 @@ export type UserNodeFeedbacksArgs = {
 };
 
 
-export type UserNodeFinalizedTargetPopulationsArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  businessArea?: InputMaybe<Scalars['String']['input']>;
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  createdAtRange?: InputMaybe<Scalars['String']['input']>;
-  createdAt_Gte?: InputMaybe<Scalars['DateTime']['input']>;
-  createdAt_Lte?: InputMaybe<Scalars['DateTime']['input']>;
-  createdByName?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  households?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  name?: InputMaybe<Scalars['String']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
-  program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
-  programCycle?: InputMaybe<Scalars['String']['input']>;
-  status?: InputMaybe<Scalars['String']['input']>;
-  statusNot?: InputMaybe<Scalars['String']['input']>;
-  totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountMin?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountWithValidPhoneNoMax?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountWithValidPhoneNoMin?: InputMaybe<Scalars['Int']['input']>;
-  totalIndividualsCountMax?: InputMaybe<Scalars['Int']['input']>;
-  totalIndividualsCountMin?: InputMaybe<Scalars['Int']['input']>;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  updatedAt_Gte?: InputMaybe<Scalars['DateTime']['input']>;
-  updatedAt_Lte?: InputMaybe<Scalars['DateTime']['input']>;
-};
-
-
 export type UserNodeLogsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -8503,38 +7990,6 @@ export type UserNodeSurveysArgs = {
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
-};
-
-
-export type UserNodeTargetPopulationsArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  businessArea?: InputMaybe<Scalars['String']['input']>;
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  createdAtRange?: InputMaybe<Scalars['String']['input']>;
-  createdAt_Gte?: InputMaybe<Scalars['DateTime']['input']>;
-  createdAt_Lte?: InputMaybe<Scalars['DateTime']['input']>;
-  createdByName?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  households?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  name?: InputMaybe<Scalars['String']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
-  program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
-  programCycle?: InputMaybe<Scalars['String']['input']>;
-  status?: InputMaybe<Scalars['String']['input']>;
-  statusNot?: InputMaybe<Scalars['String']['input']>;
-  totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountMin?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountWithValidPhoneNoMax?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountWithValidPhoneNoMin?: InputMaybe<Scalars['Int']['input']>;
-  totalIndividualsCountMax?: InputMaybe<Scalars['Int']['input']>;
-  totalIndividualsCountMin?: InputMaybe<Scalars['Int']['input']>;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  updatedAt_Gte?: InputMaybe<Scalars['DateTime']['input']>;
-  updatedAt_Lte?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
 
@@ -8624,11 +8079,11 @@ export type _TableTotalCashTransferredDataNode = {
   totalHouseholds?: Maybe<Scalars['Int']['output']>;
 };
 
-export type GrievanceTicketDetailedFragment = { __typename?: 'GrievanceTicketNode', id: string, unicefId?: string | null, status: number, category: number, consent: boolean, targetId?: string | null, createdAt: any, updatedAt: any, description: string, language: string, admin?: string | null, area: string, adminUrl?: string | null, issueType?: number | null, priority?: number | null, urgency?: number | null, comments?: string | null, partner?: { __typename?: 'PartnerType', id: string, name: string } | null, businessArea: { __typename?: 'UserBusinessAreaNode', postponeDeduplication: boolean }, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, pCode?: string | null } | null, assignedTo?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, individual?: { __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null, household?: { __typename?: 'HouseholdNode', activeIndividualsCount?: number | null, countryOrigin?: string | null, country?: string | null, zipCode?: string | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, start?: any | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, address: string, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, flexFields?: any | null, programRegistrationId?: string | null, id: string, status?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, residenceStatus?: string | null, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, totalCashReceivedUsd?: any | null, currency?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unicefId?: string | null, unhcrId: string, geopoint?: any | null, village: string, adminAreaTitle?: string | null, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null, paymentRecord?: { __typename?: 'PaymentRecordAndPaymentNode', id?: string | null, caId?: string | null, deliveredQuantity?: number | null, entitlementQuantity?: number | null, objType?: string | null, parent?: { __typename?: 'CashPlanAndPaymentPlanNode', id?: string | null, unicefId?: string | null, objType?: string | null } | null, verification?: { __typename?: 'PaymentVerificationNode', id: string } | null } | null, relatedTickets?: Array<{ __typename?: 'GrievanceTicketNode', id: string, unicefId?: string | null, status: number, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null> | null, linkedTickets?: Array<{ __typename?: 'GrievanceTicketNode', id: string, unicefId?: string | null, category: number, status: number, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null> | null, existingTickets?: Array<{ __typename?: 'GrievanceTicketNode', id: string, category: number, unicefId?: string | null, status: number, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null> | null, addIndividualTicketDetails?: { __typename?: 'TicketAddIndividualDetailsNode', id: string, individualData?: any | null, approveStatus: boolean, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null, individualDataUpdateTicketDetails?: { __typename?: 'TicketIndividualDataUpdateDetailsNode', id: string, individualData?: any | null, roleReassignData: any, individual?: { __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null } | null, householdDataUpdateTicketDetails?: { __typename?: 'TicketHouseholdDataUpdateDetailsNode', id: string, householdData?: any | null, household?: { __typename?: 'HouseholdNode', activeIndividualsCount?: number | null, countryOrigin?: string | null, country?: string | null, zipCode?: string | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, start?: any | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, address: string, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, flexFields?: any | null, programRegistrationId?: string | null, id: string, status?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, residenceStatus?: string | null, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, totalCashReceivedUsd?: any | null, currency?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unicefId?: string | null, unhcrId: string, geopoint?: any | null, village: string, adminAreaTitle?: string | null, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null } | null, deleteIndividualTicketDetails?: { __typename?: 'TicketDeleteIndividualDetailsNode', id: string, roleReassignData: any, approveStatus: boolean } | null, deleteHouseholdTicketDetails?: { __typename?: 'TicketDeleteHouseholdDetailsNode', id: string, approveStatus: boolean, reasonHousehold?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null, systemFlaggingTicketDetails?: { __typename?: 'TicketSystemFlaggingDetailsNode', id: string, approveStatus: boolean, roleReassignData: any, goldenRecordsIndividual: { __typename?: 'IndividualNode', id: string, duplicate: boolean, fullName: string, birthDate: any, lastRegistrationDate: any, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, documentNumber: string, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null }, sanctionListIndividual: { __typename?: 'SanctionListIndividualNode', id: string, fullName: string, referenceNumber: string, datesOfBirth: { __typename?: 'SanctionListIndividualDateOfBirthNodeConnection', edges: Array<{ __typename?: 'SanctionListIndividualDateOfBirthNodeEdge', node?: { __typename?: 'SanctionListIndividualDateOfBirthNode', id: string, date: any } | null } | null> }, documents: { __typename?: 'SanctionListIndividualDocumentNodeConnection', edges: Array<{ __typename?: 'SanctionListIndividualDocumentNodeEdge', node?: { __typename?: 'SanctionListIndividualDocumentNode', id: string, documentNumber: string, typeOfDocument: string } | null } | null> } } } | null, paymentVerificationTicketDetails?: { __typename?: 'TicketPaymentVerificationDetailsNode', id: string, newStatus?: TicketPaymentVerificationDetailsNewStatus | null, oldReceivedAmount?: number | null, newReceivedAmount?: number | null, approveStatus: boolean, paymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus, hasMultiplePaymentVerifications?: boolean | null, paymentVerification?: { __typename?: 'PaymentVerificationNode', id: string, receivedAmount?: number | null } | null, paymentVerifications: { __typename?: 'PaymentVerificationNodeConnection', edges: Array<{ __typename?: 'PaymentVerificationNodeEdge', node?: { __typename?: 'PaymentVerificationNode', id: string } | null } | null> } } | null, needsAdjudicationTicketDetails?: { __typename?: 'TicketNeedsAdjudicationDetailsNode', id: string, hasDuplicatedDocument?: boolean | null, isMultipleDuplicatesVersion: boolean, roleReassignData: any, extraData?: { __typename?: 'TicketNeedsAdjudicationDetailsExtraDataNode', goldenRecords?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null, possibleDuplicate?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null, dedupEngineSimilarityPair?: { __typename?: 'DeduplicationEngineSimilarityPairNode', similarityScore?: string | null, individual1?: { __typename?: 'DeduplicationEngineSimilarityPairIndividualNode', unicefId?: string | null, fullName?: string | null, photo?: string | null } | null, individual2?: { __typename?: 'DeduplicationEngineSimilarityPairIndividualNode', unicefId?: string | null, fullName?: string | null, photo?: string | null } | null } | null } | null, goldenRecordsIndividual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string, birthDate: any, lastRegistrationDate: any, sex: IndividualSex, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, village: string, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null }, possibleDuplicate?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, lastRegistrationDate: any, fullName: string, birthDate: any, sex: IndividualSex, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', unicefId?: string | null, id: string, village: string, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null } | null, possibleDuplicates?: Array<{ __typename?: 'IndividualNode', id: string, unicefId?: string | null, lastRegistrationDate: any, fullName: string, birthDate: any, sex: IndividualSex, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', unicefId?: string | null, id: string, village: string, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null } | null> | null, selectedIndividual?: { __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, activeIndividualsCount?: number | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, flexFields?: any | null, programRegistrationId?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, currency?: string | null, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unhcrId: string, adminAreaTitle?: string | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null, selectedDuplicates?: Array<{ __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, activeIndividualsCount?: number | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, flexFields?: any | null, programRegistrationId?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, currency?: string | null, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unhcrId: string, adminAreaTitle?: string | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null> | null, selectedDistinct?: Array<{ __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, activeIndividualsCount?: number | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, flexFields?: any | null, programRegistrationId?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, currency?: string | null, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unhcrId: string, adminAreaTitle?: string | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null> | null } | null, ticketNotes: { __typename?: 'TicketNoteNodeConnection', edges: Array<{ __typename?: 'TicketNoteNodeEdge', node?: { __typename?: 'TicketNoteNode', id: string, createdAt: any, updatedAt: any, description: string, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null } | null> }, programs?: Array<{ __typename?: 'ProgramNode', name: string, id: string } | null> | null, documentation?: Array<{ __typename?: 'GrievanceDocumentNode', id: string, createdAt: any, updatedAt: any, name?: string | null, fileSize?: number | null, contentType: string, filePath?: string | null, fileName?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null };
+export type GrievanceTicketDetailedFragment = { __typename?: 'GrievanceTicketNode', id: string, unicefId?: string | null, status: number, category: number, consent: boolean, targetId?: string | null, createdAt: any, updatedAt: any, description: string, language: string, admin?: string | null, area: string, adminUrl?: string | null, issueType?: number | null, priority?: number | null, urgency?: number | null, comments?: string | null, partner?: { __typename?: 'PartnerType', id: string, name: string } | null, businessArea: { __typename?: 'UserBusinessAreaNode', postponeDeduplication: boolean }, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, pCode?: string | null } | null, assignedTo?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, individual?: { __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null, household?: { __typename?: 'HouseholdNode', activeIndividualsCount?: number | null, countryOrigin?: string | null, country?: string | null, zipCode?: string | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, start?: any | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, address: string, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, flexFields?: any | null, programRegistrationId?: string | null, id: string, status?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, residenceStatus?: string | null, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, totalCashReceivedUsd?: any | null, currency?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unicefId?: string | null, unhcrId: string, geopoint?: any | null, village: string, adminAreaTitle?: string | null, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null, paymentRecord?: { __typename?: 'PaymentRecordAndPaymentNode', id?: string | null, unicefId?: string | null, deliveredQuantity?: number | null, entitlementQuantity?: number | null, objType?: string | null, parent?: { __typename?: 'CashPlanAndPaymentPlanNode', id?: string | null, unicefId?: string | null, objType?: string | null } | null, verification?: { __typename?: 'PaymentVerificationNode', id: string } | null } | null, relatedTickets?: Array<{ __typename?: 'GrievanceTicketNode', id: string, unicefId?: string | null, status: number, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null> | null, linkedTickets?: Array<{ __typename?: 'GrievanceTicketNode', id: string, unicefId?: string | null, category: number, status: number, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null> | null, existingTickets?: Array<{ __typename?: 'GrievanceTicketNode', id: string, category: number, unicefId?: string | null, status: number, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null> | null, addIndividualTicketDetails?: { __typename?: 'TicketAddIndividualDetailsNode', id: string, individualData?: any | null, approveStatus: boolean, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null, individualDataUpdateTicketDetails?: { __typename?: 'TicketIndividualDataUpdateDetailsNode', id: string, individualData?: any | null, roleReassignData: any, individual?: { __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null } | null, householdDataUpdateTicketDetails?: { __typename?: 'TicketHouseholdDataUpdateDetailsNode', id: string, householdData?: any | null, household?: { __typename?: 'HouseholdNode', activeIndividualsCount?: number | null, countryOrigin?: string | null, country?: string | null, zipCode?: string | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, start?: any | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, address: string, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, flexFields?: any | null, programRegistrationId?: string | null, id: string, status?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, residenceStatus?: string | null, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, totalCashReceivedUsd?: any | null, currency?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unicefId?: string | null, unhcrId: string, geopoint?: any | null, village: string, adminAreaTitle?: string | null, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null } | null, deleteIndividualTicketDetails?: { __typename?: 'TicketDeleteIndividualDetailsNode', id: string, roleReassignData: any, approveStatus: boolean } | null, deleteHouseholdTicketDetails?: { __typename?: 'TicketDeleteHouseholdDetailsNode', id: string, approveStatus: boolean, reasonHousehold?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null, systemFlaggingTicketDetails?: { __typename?: 'TicketSystemFlaggingDetailsNode', id: string, approveStatus: boolean, roleReassignData: any, goldenRecordsIndividual: { __typename?: 'IndividualNode', id: string, duplicate: boolean, fullName: string, birthDate: any, lastRegistrationDate: any, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, documentNumber: string, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null }, sanctionListIndividual: { __typename?: 'SanctionListIndividualNode', id: string, fullName: string, referenceNumber: string, datesOfBirth: { __typename?: 'SanctionListIndividualDateOfBirthNodeConnection', edges: Array<{ __typename?: 'SanctionListIndividualDateOfBirthNodeEdge', node?: { __typename?: 'SanctionListIndividualDateOfBirthNode', id: string, date: any } | null } | null> }, documents: { __typename?: 'SanctionListIndividualDocumentNodeConnection', edges: Array<{ __typename?: 'SanctionListIndividualDocumentNodeEdge', node?: { __typename?: 'SanctionListIndividualDocumentNode', id: string, documentNumber: string, typeOfDocument: string } | null } | null> } } } | null, paymentVerificationTicketDetails?: { __typename?: 'TicketPaymentVerificationDetailsNode', id: string, newStatus?: TicketPaymentVerificationDetailsNewStatus | null, oldReceivedAmount?: number | null, newReceivedAmount?: number | null, approveStatus: boolean, paymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus, hasMultiplePaymentVerifications?: boolean | null, paymentVerification?: { __typename?: 'PaymentVerificationNode', id: string, receivedAmount?: number | null } | null, paymentVerifications: { __typename?: 'PaymentVerificationNodeConnection', edges: Array<{ __typename?: 'PaymentVerificationNodeEdge', node?: { __typename?: 'PaymentVerificationNode', id: string } | null } | null> } } | null, needsAdjudicationTicketDetails?: { __typename?: 'TicketNeedsAdjudicationDetailsNode', id: string, hasDuplicatedDocument?: boolean | null, isMultipleDuplicatesVersion: boolean, roleReassignData: any, extraData?: { __typename?: 'TicketNeedsAdjudicationDetailsExtraDataNode', goldenRecords?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null, possibleDuplicate?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null, dedupEngineSimilarityPair?: { __typename?: 'DeduplicationEngineSimilarityPairNode', similarityScore?: string | null, individual1?: { __typename?: 'DeduplicationEngineSimilarityPairIndividualNode', unicefId?: string | null, fullName?: string | null, photo?: string | null } | null, individual2?: { __typename?: 'DeduplicationEngineSimilarityPairIndividualNode', unicefId?: string | null, fullName?: string | null, photo?: string | null } | null } | null } | null, goldenRecordsIndividual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string, birthDate: any, lastRegistrationDate: any, sex: IndividualSex, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, village: string, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null }, possibleDuplicate?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, lastRegistrationDate: any, fullName: string, birthDate: any, sex: IndividualSex, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', unicefId?: string | null, id: string, village: string, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null } | null, possibleDuplicates?: Array<{ __typename?: 'IndividualNode', id: string, unicefId?: string | null, lastRegistrationDate: any, fullName: string, birthDate: any, sex: IndividualSex, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', unicefId?: string | null, id: string, village: string, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null } | null> | null, selectedIndividual?: { __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, activeIndividualsCount?: number | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, flexFields?: any | null, programRegistrationId?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, currency?: string | null, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unhcrId: string, adminAreaTitle?: string | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null, selectedDuplicates?: Array<{ __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, activeIndividualsCount?: number | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, flexFields?: any | null, programRegistrationId?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, currency?: string | null, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unhcrId: string, adminAreaTitle?: string | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null> | null, selectedDistinct?: Array<{ __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, activeIndividualsCount?: number | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, flexFields?: any | null, programRegistrationId?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, currency?: string | null, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unhcrId: string, adminAreaTitle?: string | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null> | null } | null, ticketNotes: { __typename?: 'TicketNoteNodeConnection', edges: Array<{ __typename?: 'TicketNoteNodeEdge', node?: { __typename?: 'TicketNoteNode', id: string, createdAt: any, updatedAt: any, description: string, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null } | null> }, programs?: Array<{ __typename?: 'ProgramNode', name: string, id: string } | null> | null, documentation?: Array<{ __typename?: 'GrievanceDocumentNode', id: string, createdAt: any, updatedAt: any, name?: string | null, fileSize?: number | null, contentType: string, filePath?: string | null, fileName?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null };
 
 export type HouseholdMinimalFragment = { __typename?: 'HouseholdNode', id: string, status?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, residenceStatus?: string | null, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, totalCashReceivedUsd?: any | null, currency?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unicefId?: string | null, flexFields?: any | null, unhcrId: string, geopoint?: any | null, village: string, adminAreaTitle?: string | null, address: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } };
 
-export type HouseholdDetailedFragment = { __typename?: 'HouseholdNode', activeIndividualsCount?: number | null, countryOrigin?: string | null, country?: string | null, zipCode?: string | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, start?: any | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, address: string, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, flexFields?: any | null, programRegistrationId?: string | null, id: string, status?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, residenceStatus?: string | null, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, totalCashReceivedUsd?: any | null, currency?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unicefId?: string | null, unhcrId: string, geopoint?: any | null, village: string, adminAreaTitle?: string | null, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null };
+export type HouseholdDetailedFragment = { __typename?: 'HouseholdNode', activeIndividualsCount?: number | null, countryOrigin?: string | null, country?: string | null, zipCode?: string | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, start?: any | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, address: string, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, flexFields?: any | null, programRegistrationId?: string | null, id: string, status?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, residenceStatus?: string | null, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, totalCashReceivedUsd?: any | null, currency?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unicefId?: string | null, unhcrId: string, geopoint?: any | null, village: string, adminAreaTitle?: string | null, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null };
 
 export type MergedHouseholdMinimalFragment = { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, size?: number | null, firstRegistrationDate: any, hasDuplicates?: boolean | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null };
 
@@ -8638,15 +8093,11 @@ export type IndividualDetailedFragment = { __typename?: 'IndividualNode', givenN
 
 export type MergedIndividualMinimalFragment = { __typename?: 'IndividualNode', id: string, unicefId?: string | null, age?: number | null, fullName: string, birthDate: any, sex: IndividualSex, role?: string | null, relationship?: IndividualRelationship | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, importId?: string | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, age?: number | null, location?: string | null } | null> | null, deduplicationBatchResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, age?: number | null, location?: string | null } | null> | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string } };
 
-export type ProgramDetailsFragment = { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate?: any | null, status: ProgramStatus, caId?: string | null, caHashId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, isSocialWorkerProgram?: boolean | null, version: any, adminUrl?: string | null, partnerAccess: ProgramPartnerAccess, targetPopulationsCount?: number | null, canFinish?: boolean | null, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string, type?: DataCollectingTypeType | null } | null, partners?: Array<{ __typename?: 'PartnerNode', id: string, name?: string | null, areaAccess?: string | null, areas?: Array<{ __typename?: 'AreaNode', id: string, level: number } | null> | null } | null> | null, registrationImports: { __typename?: 'RegistrationDataImportNodeConnection', totalCount?: number | null }, pduFields?: Array<{ __typename?: 'PeriodicFieldNode', id: string, label: any, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null> | null, beneficiaryGroup?: { __typename?: 'BeneficiaryGroupNode', id: string, name: string, groupLabel: string, groupLabelPlural: string, memberLabel: string, memberLabelPlural: string, masterDetail: boolean } | null };
+export type ProgramDetailsFragment = { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate?: any | null, status: ProgramStatus, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, isSocialWorkerProgram?: boolean | null, version: any, adminUrl?: string | null, partnerAccess: ProgramPartnerAccess, targetPopulationsCount?: number | null, canFinish?: boolean | null, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string, type?: DataCollectingTypeType | null } | null, partners?: Array<{ __typename?: 'PartnerNode', id: string, name?: string | null, areaAccess?: string | null, areas?: Array<{ __typename?: 'AreaNode', id: string, level: number } | null> | null } | null> | null, registrationImports: { __typename?: 'RegistrationDataImportNodeConnection', totalCount?: number | null }, pduFields?: Array<{ __typename?: 'PeriodicFieldNode', id: string, label: any, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null> | null, beneficiaryGroup?: { __typename?: 'BeneficiaryGroupNode', id: string, name: string, groupLabel: string, groupLabelPlural: string, memberLabel: string, memberLabelPlural: string, masterDetail: boolean } | null };
 
 export type RegistrationMinimalFragment = { __typename?: 'RegistrationDataImportNode', id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, numberOfIndividuals: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, biometricDeduplicated?: string | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate?: any | null, status: ProgramStatus } | null };
 
-export type RegistrationDetailedFragment = { __typename?: 'RegistrationDataImportNode', numberOfIndividuals: number, datahubId?: any | null, errorMessage: string, canMerge?: boolean | null, biometricDeduplicationEnabled?: boolean | null, deduplicationEngineStatus?: RegistrationDataImportDeduplicationEngineStatus | null, id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, biometricDeduplicated?: string | null, batchDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, batchUniqueCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordUniqueCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordPossibleDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate?: any | null, status: ProgramStatus } | null };
-
-export type TargetPopulationMinimalFragment = { __typename: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, createdAt: any, updatedAt: any, totalHouseholdsCount?: number | null, totalHouseholdsCountWithValidPhoneNo?: number | null, totalIndividualsCount?: number | null, program: { __typename: 'ProgramNode', id: string, name: string }, createdBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null };
-
-export type TargetPopulationDetailedFragment = { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, adminUrl?: string | null, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, hasEmptyCriteria?: boolean | null, hasEmptyIdsCriteria?: boolean | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate?: any | null, isSocialWorkerProgram?: boolean | null }, programCycle: { __typename: 'ProgramCycleNode', id: string, title?: string | null }, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds?: string | null, individualIds?: string | null, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, householdIds: string, individualIds: string, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null, collectorsFiltersBlocks: Array<{ __typename: 'TargetingCollectorRuleFilterBlockNode', id: any, createdAt: any, updatedAt: any, collectorBlockFilters?: Array<{ __typename: 'TargetingCollectorBlockRuleFilterNode', id: any, createdAt: any, updatedAt: any, fieldName: string, comparisonMethod?: string | null, flexFieldClassification: TargetingCollectorBlockRuleFilterFlexFieldClassification, arguments?: Array<any | null> | null, labelEn?: string | null } | null> | null }>, householdsFiltersBlocks?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null } | null };
+export type RegistrationDetailedFragment = { __typename?: 'RegistrationDataImportNode', numberOfIndividuals: number, errorMessage: string, canMerge?: boolean | null, biometricDeduplicationEnabled?: boolean | null, deduplicationEngineStatus?: RegistrationDataImportDeduplicationEngineStatus | null, id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, biometricDeduplicated?: string | null, batchDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, batchUniqueCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordUniqueCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordPossibleDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate?: any | null, status: ProgramStatus } | null };
 
 export type CreateFeedbackTicketMutationVariables = Exact<{
   input: CreateFeedbackInput;
@@ -8729,7 +8180,7 @@ export type ApproveHouseholdDataChangeMutationVariables = Exact<{
 }>;
 
 
-export type ApproveHouseholdDataChangeMutation = { __typename?: 'Mutations', approveHouseholdDataChange?: { __typename?: 'HouseholdDataChangeApproveMutation', grievanceTicket?: { __typename?: 'GrievanceTicketNode', id: string, status: number, householdDataUpdateTicketDetails?: { __typename?: 'TicketHouseholdDataUpdateDetailsNode', id: string, householdData?: any | null, household?: { __typename?: 'HouseholdNode', activeIndividualsCount?: number | null, countryOrigin?: string | null, country?: string | null, zipCode?: string | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, start?: any | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, address: string, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, flexFields?: any | null, programRegistrationId?: string | null, id: string, status?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, residenceStatus?: string | null, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, totalCashReceivedUsd?: any | null, currency?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unicefId?: string | null, unhcrId: string, geopoint?: any | null, village: string, adminAreaTitle?: string | null, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null } | null } | null } | null };
+export type ApproveHouseholdDataChangeMutation = { __typename?: 'Mutations', approveHouseholdDataChange?: { __typename?: 'HouseholdDataChangeApproveMutation', grievanceTicket?: { __typename?: 'GrievanceTicketNode', id: string, status: number, householdDataUpdateTicketDetails?: { __typename?: 'TicketHouseholdDataUpdateDetailsNode', id: string, householdData?: any | null, household?: { __typename?: 'HouseholdNode', activeIndividualsCount?: number | null, countryOrigin?: string | null, country?: string | null, zipCode?: string | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, start?: any | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, address: string, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, flexFields?: any | null, programRegistrationId?: string | null, id: string, status?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, residenceStatus?: string | null, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, totalCashReceivedUsd?: any | null, currency?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unicefId?: string | null, unhcrId: string, geopoint?: any | null, village: string, adminAreaTitle?: string | null, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null } | null } | null } | null };
 
 export type ApproveIndividualDataChangeMutationVariables = Exact<{
   grievanceTicketId: Scalars['ID']['input'];
@@ -8761,7 +8212,7 @@ export type ApproveNeedsAdjudicationMutationVariables = Exact<{
 }>;
 
 
-export type ApproveNeedsAdjudicationMutation = { __typename?: 'Mutations', approveNeedsAdjudication?: { __typename?: 'NeedsAdjudicationApproveMutation', grievanceTicket?: { __typename?: 'GrievanceTicketNode', id: string, status: number, needsAdjudicationTicketDetails?: { __typename?: 'TicketNeedsAdjudicationDetailsNode', id: string, hasDuplicatedDocument?: boolean | null, isMultipleDuplicatesVersion: boolean, roleReassignData: any, extraData?: { __typename?: 'TicketNeedsAdjudicationDetailsExtraDataNode', goldenRecords?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null, possibleDuplicate?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null } | null, goldenRecordsIndividual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string, birthDate: any, lastRegistrationDate: any, sex: IndividualSex, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, village: string, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null }, possibleDuplicate?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, lastRegistrationDate: any, fullName: string, birthDate: any, sex: IndividualSex, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', unicefId?: string | null, id: string, village: string, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null } | null, possibleDuplicates?: Array<{ __typename?: 'IndividualNode', id: string, unicefId?: string | null, lastRegistrationDate: any, fullName: string, birthDate: any, sex: IndividualSex, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', unicefId?: string | null, id: string, village: string, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null } | null> | null, selectedIndividual?: { __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, activeIndividualsCount?: number | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, flexFields?: any | null, programRegistrationId?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, currency?: string | null, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unhcrId: string, adminAreaTitle?: string | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null, selectedDuplicates?: Array<{ __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, activeIndividualsCount?: number | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, flexFields?: any | null, programRegistrationId?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, currency?: string | null, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unhcrId: string, adminAreaTitle?: string | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null> | null, selectedDistinct?: Array<{ __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, activeIndividualsCount?: number | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, flexFields?: any | null, programRegistrationId?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, currency?: string | null, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unhcrId: string, adminAreaTitle?: string | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null> | null } | null } | null } | null };
+export type ApproveNeedsAdjudicationMutation = { __typename?: 'Mutations', approveNeedsAdjudication?: { __typename?: 'NeedsAdjudicationApproveMutation', grievanceTicket?: { __typename?: 'GrievanceTicketNode', id: string, status: number, needsAdjudicationTicketDetails?: { __typename?: 'TicketNeedsAdjudicationDetailsNode', id: string, hasDuplicatedDocument?: boolean | null, isMultipleDuplicatesVersion: boolean, roleReassignData: any, extraData?: { __typename?: 'TicketNeedsAdjudicationDetailsExtraDataNode', goldenRecords?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null, possibleDuplicate?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null } | null, goldenRecordsIndividual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string, birthDate: any, lastRegistrationDate: any, sex: IndividualSex, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, village: string, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null }, possibleDuplicate?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, lastRegistrationDate: any, fullName: string, birthDate: any, sex: IndividualSex, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', unicefId?: string | null, id: string, village: string, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null } | null, possibleDuplicates?: Array<{ __typename?: 'IndividualNode', id: string, unicefId?: string | null, lastRegistrationDate: any, fullName: string, birthDate: any, sex: IndividualSex, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', unicefId?: string | null, id: string, village: string, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null } | null> | null, selectedIndividual?: { __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, activeIndividualsCount?: number | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, flexFields?: any | null, programRegistrationId?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, currency?: string | null, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unhcrId: string, adminAreaTitle?: string | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null, selectedDuplicates?: Array<{ __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, activeIndividualsCount?: number | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, flexFields?: any | null, programRegistrationId?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, currency?: string | null, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unhcrId: string, adminAreaTitle?: string | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null> | null, selectedDistinct?: Array<{ __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, activeIndividualsCount?: number | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, flexFields?: any | null, programRegistrationId?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, currency?: string | null, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unhcrId: string, adminAreaTitle?: string | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null> | null } | null } | null } | null };
 
 export type ApprovePaymentDetailsMutationVariables = Exact<{
   grievanceTicketId: Scalars['ID']['input'];
@@ -8835,7 +8286,7 @@ export type GrievanceTicketStatusChangeMutationVariables = Exact<{
 }>;
 
 
-export type GrievanceTicketStatusChangeMutation = { __typename?: 'Mutations', grievanceStatusChange?: { __typename?: 'GrievanceStatusChangeMutation', grievanceTicket?: { __typename?: 'GrievanceTicketNode', id: string, unicefId?: string | null, status: number, category: number, consent: boolean, targetId?: string | null, createdAt: any, updatedAt: any, description: string, language: string, admin?: string | null, area: string, adminUrl?: string | null, issueType?: number | null, priority?: number | null, urgency?: number | null, comments?: string | null, partner?: { __typename?: 'PartnerType', id: string, name: string } | null, businessArea: { __typename?: 'UserBusinessAreaNode', postponeDeduplication: boolean }, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, pCode?: string | null } | null, assignedTo?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, individual?: { __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null, household?: { __typename?: 'HouseholdNode', activeIndividualsCount?: number | null, countryOrigin?: string | null, country?: string | null, zipCode?: string | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, start?: any | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, address: string, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, flexFields?: any | null, programRegistrationId?: string | null, id: string, status?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, residenceStatus?: string | null, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, totalCashReceivedUsd?: any | null, currency?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unicefId?: string | null, unhcrId: string, geopoint?: any | null, village: string, adminAreaTitle?: string | null, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null, paymentRecord?: { __typename?: 'PaymentRecordAndPaymentNode', id?: string | null, caId?: string | null, deliveredQuantity?: number | null, entitlementQuantity?: number | null, objType?: string | null, parent?: { __typename?: 'CashPlanAndPaymentPlanNode', id?: string | null, unicefId?: string | null, objType?: string | null } | null, verification?: { __typename?: 'PaymentVerificationNode', id: string } | null } | null, relatedTickets?: Array<{ __typename?: 'GrievanceTicketNode', id: string, unicefId?: string | null, status: number, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null> | null, linkedTickets?: Array<{ __typename?: 'GrievanceTicketNode', id: string, unicefId?: string | null, category: number, status: number, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null> | null, existingTickets?: Array<{ __typename?: 'GrievanceTicketNode', id: string, category: number, unicefId?: string | null, status: number, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null> | null, addIndividualTicketDetails?: { __typename?: 'TicketAddIndividualDetailsNode', id: string, individualData?: any | null, approveStatus: boolean, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null, individualDataUpdateTicketDetails?: { __typename?: 'TicketIndividualDataUpdateDetailsNode', id: string, individualData?: any | null, roleReassignData: any, individual?: { __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null } | null, householdDataUpdateTicketDetails?: { __typename?: 'TicketHouseholdDataUpdateDetailsNode', id: string, householdData?: any | null, household?: { __typename?: 'HouseholdNode', activeIndividualsCount?: number | null, countryOrigin?: string | null, country?: string | null, zipCode?: string | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, start?: any | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, address: string, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, flexFields?: any | null, programRegistrationId?: string | null, id: string, status?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, residenceStatus?: string | null, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, totalCashReceivedUsd?: any | null, currency?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unicefId?: string | null, unhcrId: string, geopoint?: any | null, village: string, adminAreaTitle?: string | null, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null } | null, deleteIndividualTicketDetails?: { __typename?: 'TicketDeleteIndividualDetailsNode', id: string, roleReassignData: any, approveStatus: boolean } | null, deleteHouseholdTicketDetails?: { __typename?: 'TicketDeleteHouseholdDetailsNode', id: string, approveStatus: boolean, reasonHousehold?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null, systemFlaggingTicketDetails?: { __typename?: 'TicketSystemFlaggingDetailsNode', id: string, approveStatus: boolean, roleReassignData: any, goldenRecordsIndividual: { __typename?: 'IndividualNode', id: string, duplicate: boolean, fullName: string, birthDate: any, lastRegistrationDate: any, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, documentNumber: string, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null }, sanctionListIndividual: { __typename?: 'SanctionListIndividualNode', id: string, fullName: string, referenceNumber: string, datesOfBirth: { __typename?: 'SanctionListIndividualDateOfBirthNodeConnection', edges: Array<{ __typename?: 'SanctionListIndividualDateOfBirthNodeEdge', node?: { __typename?: 'SanctionListIndividualDateOfBirthNode', id: string, date: any } | null } | null> }, documents: { __typename?: 'SanctionListIndividualDocumentNodeConnection', edges: Array<{ __typename?: 'SanctionListIndividualDocumentNodeEdge', node?: { __typename?: 'SanctionListIndividualDocumentNode', id: string, documentNumber: string, typeOfDocument: string } | null } | null> } } } | null, paymentVerificationTicketDetails?: { __typename?: 'TicketPaymentVerificationDetailsNode', id: string, newStatus?: TicketPaymentVerificationDetailsNewStatus | null, oldReceivedAmount?: number | null, newReceivedAmount?: number | null, approveStatus: boolean, paymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus, hasMultiplePaymentVerifications?: boolean | null, paymentVerification?: { __typename?: 'PaymentVerificationNode', id: string, receivedAmount?: number | null } | null, paymentVerifications: { __typename?: 'PaymentVerificationNodeConnection', edges: Array<{ __typename?: 'PaymentVerificationNodeEdge', node?: { __typename?: 'PaymentVerificationNode', id: string } | null } | null> } } | null, needsAdjudicationTicketDetails?: { __typename?: 'TicketNeedsAdjudicationDetailsNode', id: string, hasDuplicatedDocument?: boolean | null, isMultipleDuplicatesVersion: boolean, roleReassignData: any, extraData?: { __typename?: 'TicketNeedsAdjudicationDetailsExtraDataNode', goldenRecords?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null, possibleDuplicate?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null, dedupEngineSimilarityPair?: { __typename?: 'DeduplicationEngineSimilarityPairNode', similarityScore?: string | null, individual1?: { __typename?: 'DeduplicationEngineSimilarityPairIndividualNode', unicefId?: string | null, fullName?: string | null, photo?: string | null } | null, individual2?: { __typename?: 'DeduplicationEngineSimilarityPairIndividualNode', unicefId?: string | null, fullName?: string | null, photo?: string | null } | null } | null } | null, goldenRecordsIndividual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string, birthDate: any, lastRegistrationDate: any, sex: IndividualSex, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, village: string, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null }, possibleDuplicate?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, lastRegistrationDate: any, fullName: string, birthDate: any, sex: IndividualSex, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', unicefId?: string | null, id: string, village: string, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null } | null, possibleDuplicates?: Array<{ __typename?: 'IndividualNode', id: string, unicefId?: string | null, lastRegistrationDate: any, fullName: string, birthDate: any, sex: IndividualSex, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', unicefId?: string | null, id: string, village: string, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null } | null> | null, selectedIndividual?: { __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, activeIndividualsCount?: number | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, flexFields?: any | null, programRegistrationId?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, currency?: string | null, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unhcrId: string, adminAreaTitle?: string | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null, selectedDuplicates?: Array<{ __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, activeIndividualsCount?: number | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, flexFields?: any | null, programRegistrationId?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, currency?: string | null, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unhcrId: string, adminAreaTitle?: string | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null> | null, selectedDistinct?: Array<{ __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, activeIndividualsCount?: number | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, flexFields?: any | null, programRegistrationId?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, currency?: string | null, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unhcrId: string, adminAreaTitle?: string | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null> | null } | null, ticketNotes: { __typename?: 'TicketNoteNodeConnection', edges: Array<{ __typename?: 'TicketNoteNodeEdge', node?: { __typename?: 'TicketNoteNode', id: string, createdAt: any, updatedAt: any, description: string, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null } | null> }, programs?: Array<{ __typename?: 'ProgramNode', name: string, id: string } | null> | null, documentation?: Array<{ __typename?: 'GrievanceDocumentNode', id: string, createdAt: any, updatedAt: any, name?: string | null, fileSize?: number | null, contentType: string, filePath?: string | null, fileName?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null } | null } | null };
+export type GrievanceTicketStatusChangeMutation = { __typename?: 'Mutations', grievanceStatusChange?: { __typename?: 'GrievanceStatusChangeMutation', grievanceTicket?: { __typename?: 'GrievanceTicketNode', id: string, unicefId?: string | null, status: number, category: number, consent: boolean, targetId?: string | null, createdAt: any, updatedAt: any, description: string, language: string, admin?: string | null, area: string, adminUrl?: string | null, issueType?: number | null, priority?: number | null, urgency?: number | null, comments?: string | null, partner?: { __typename?: 'PartnerType', id: string, name: string } | null, businessArea: { __typename?: 'UserBusinessAreaNode', postponeDeduplication: boolean }, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, pCode?: string | null } | null, assignedTo?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, individual?: { __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null, household?: { __typename?: 'HouseholdNode', activeIndividualsCount?: number | null, countryOrigin?: string | null, country?: string | null, zipCode?: string | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, start?: any | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, address: string, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, flexFields?: any | null, programRegistrationId?: string | null, id: string, status?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, residenceStatus?: string | null, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, totalCashReceivedUsd?: any | null, currency?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unicefId?: string | null, unhcrId: string, geopoint?: any | null, village: string, adminAreaTitle?: string | null, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null, paymentRecord?: { __typename?: 'PaymentRecordAndPaymentNode', id?: string | null, unicefId?: string | null, deliveredQuantity?: number | null, entitlementQuantity?: number | null, objType?: string | null, parent?: { __typename?: 'CashPlanAndPaymentPlanNode', id?: string | null, unicefId?: string | null, objType?: string | null } | null, verification?: { __typename?: 'PaymentVerificationNode', id: string } | null } | null, relatedTickets?: Array<{ __typename?: 'GrievanceTicketNode', id: string, unicefId?: string | null, status: number, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null> | null, linkedTickets?: Array<{ __typename?: 'GrievanceTicketNode', id: string, unicefId?: string | null, category: number, status: number, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null> | null, existingTickets?: Array<{ __typename?: 'GrievanceTicketNode', id: string, category: number, unicefId?: string | null, status: number, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null> | null, addIndividualTicketDetails?: { __typename?: 'TicketAddIndividualDetailsNode', id: string, individualData?: any | null, approveStatus: boolean, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null, individualDataUpdateTicketDetails?: { __typename?: 'TicketIndividualDataUpdateDetailsNode', id: string, individualData?: any | null, roleReassignData: any, individual?: { __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null } | null, householdDataUpdateTicketDetails?: { __typename?: 'TicketHouseholdDataUpdateDetailsNode', id: string, householdData?: any | null, household?: { __typename?: 'HouseholdNode', activeIndividualsCount?: number | null, countryOrigin?: string | null, country?: string | null, zipCode?: string | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, start?: any | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, address: string, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, flexFields?: any | null, programRegistrationId?: string | null, id: string, status?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, residenceStatus?: string | null, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, totalCashReceivedUsd?: any | null, currency?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unicefId?: string | null, unhcrId: string, geopoint?: any | null, village: string, adminAreaTitle?: string | null, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null } | null, deleteIndividualTicketDetails?: { __typename?: 'TicketDeleteIndividualDetailsNode', id: string, roleReassignData: any, approveStatus: boolean } | null, deleteHouseholdTicketDetails?: { __typename?: 'TicketDeleteHouseholdDetailsNode', id: string, approveStatus: boolean, reasonHousehold?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null, systemFlaggingTicketDetails?: { __typename?: 'TicketSystemFlaggingDetailsNode', id: string, approveStatus: boolean, roleReassignData: any, goldenRecordsIndividual: { __typename?: 'IndividualNode', id: string, duplicate: boolean, fullName: string, birthDate: any, lastRegistrationDate: any, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, documentNumber: string, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null }, sanctionListIndividual: { __typename?: 'SanctionListIndividualNode', id: string, fullName: string, referenceNumber: string, datesOfBirth: { __typename?: 'SanctionListIndividualDateOfBirthNodeConnection', edges: Array<{ __typename?: 'SanctionListIndividualDateOfBirthNodeEdge', node?: { __typename?: 'SanctionListIndividualDateOfBirthNode', id: string, date: any } | null } | null> }, documents: { __typename?: 'SanctionListIndividualDocumentNodeConnection', edges: Array<{ __typename?: 'SanctionListIndividualDocumentNodeEdge', node?: { __typename?: 'SanctionListIndividualDocumentNode', id: string, documentNumber: string, typeOfDocument: string } | null } | null> } } } | null, paymentVerificationTicketDetails?: { __typename?: 'TicketPaymentVerificationDetailsNode', id: string, newStatus?: TicketPaymentVerificationDetailsNewStatus | null, oldReceivedAmount?: number | null, newReceivedAmount?: number | null, approveStatus: boolean, paymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus, hasMultiplePaymentVerifications?: boolean | null, paymentVerification?: { __typename?: 'PaymentVerificationNode', id: string, receivedAmount?: number | null } | null, paymentVerifications: { __typename?: 'PaymentVerificationNodeConnection', edges: Array<{ __typename?: 'PaymentVerificationNodeEdge', node?: { __typename?: 'PaymentVerificationNode', id: string } | null } | null> } } | null, needsAdjudicationTicketDetails?: { __typename?: 'TicketNeedsAdjudicationDetailsNode', id: string, hasDuplicatedDocument?: boolean | null, isMultipleDuplicatesVersion: boolean, roleReassignData: any, extraData?: { __typename?: 'TicketNeedsAdjudicationDetailsExtraDataNode', goldenRecords?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null, possibleDuplicate?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null, dedupEngineSimilarityPair?: { __typename?: 'DeduplicationEngineSimilarityPairNode', similarityScore?: string | null, individual1?: { __typename?: 'DeduplicationEngineSimilarityPairIndividualNode', unicefId?: string | null, fullName?: string | null, photo?: string | null } | null, individual2?: { __typename?: 'DeduplicationEngineSimilarityPairIndividualNode', unicefId?: string | null, fullName?: string | null, photo?: string | null } | null } | null } | null, goldenRecordsIndividual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string, birthDate: any, lastRegistrationDate: any, sex: IndividualSex, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, village: string, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null }, possibleDuplicate?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, lastRegistrationDate: any, fullName: string, birthDate: any, sex: IndividualSex, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', unicefId?: string | null, id: string, village: string, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null } | null, possibleDuplicates?: Array<{ __typename?: 'IndividualNode', id: string, unicefId?: string | null, lastRegistrationDate: any, fullName: string, birthDate: any, sex: IndividualSex, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', unicefId?: string | null, id: string, village: string, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null } | null> | null, selectedIndividual?: { __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, activeIndividualsCount?: number | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, flexFields?: any | null, programRegistrationId?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, currency?: string | null, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unhcrId: string, adminAreaTitle?: string | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null, selectedDuplicates?: Array<{ __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, activeIndividualsCount?: number | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, flexFields?: any | null, programRegistrationId?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, currency?: string | null, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unhcrId: string, adminAreaTitle?: string | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null> | null, selectedDistinct?: Array<{ __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, activeIndividualsCount?: number | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, flexFields?: any | null, programRegistrationId?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, currency?: string | null, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unhcrId: string, adminAreaTitle?: string | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null> | null } | null, ticketNotes: { __typename?: 'TicketNoteNodeConnection', edges: Array<{ __typename?: 'TicketNoteNodeEdge', node?: { __typename?: 'TicketNoteNode', id: string, createdAt: any, updatedAt: any, description: string, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null } | null> }, programs?: Array<{ __typename?: 'ProgramNode', name: string, id: string } | null> | null, documentation?: Array<{ __typename?: 'GrievanceDocumentNode', id: string, createdAt: any, updatedAt: any, name?: string | null, fileSize?: number | null, contentType: string, filePath?: string | null, fileName?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null } | null } | null };
 
 export type ReassignRoleGrievanceMutationVariables = Exact<{
   grievanceTicketId: Scalars['ID']['input'];
@@ -8886,21 +8337,35 @@ export type CreateFollowUpPpMutationVariables = Exact<{
 export type CreateFollowUpPpMutation = { __typename?: 'Mutations', createFollowUpPaymentPlan?: { __typename?: 'CreateFollowUpPaymentPlanMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null } | null } | null };
 
 export type CreatePpMutationVariables = Exact<{
-  input: CreatePaymentPlanInput;
+  programCycleId: Scalars['ID']['input'];
+  name: Scalars['String']['input'];
+  targetingCriteria: TargetingCriteriaObjectType;
+  excludedIds: Scalars['String']['input'];
+  exclusionReason?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
 export type CreatePpMutation = { __typename?: 'Mutations', createPaymentPlan?: { __typename?: 'CreatePaymentPlanMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string } | null } | null };
 
-export type DeletePpMutationVariables = Exact<{
+export type DeletePaymentPMutationVariables = Exact<{
   paymentPlanId: Scalars['ID']['input'];
 }>;
 
 
-export type DeletePpMutation = { __typename?: 'Mutations', deletePaymentPlan?: { __typename?: 'DeletePaymentPlanMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, status: PaymentPlanStatus } | null } | null };
+export type DeletePaymentPMutation = { __typename?: 'Mutations', deletePaymentPlan?: { __typename?: 'DeletePaymentPlanMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, status: PaymentPlanStatus } | null } | null };
 
 export type UpdatePpMutationVariables = Exact<{
-  input: UpdatePaymentPlanInput;
+  paymentPlanId: Scalars['ID']['input'];
+  dispersionStartDate?: InputMaybe<Scalars['Date']['input']>;
+  dispersionEndDate?: InputMaybe<Scalars['Date']['input']>;
+  currency?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  targetingCriteria?: InputMaybe<TargetingCriteriaObjectType>;
+  programCycleId?: InputMaybe<Scalars['ID']['input']>;
+  vulnerabilityScoreMin?: InputMaybe<Scalars['Decimal']['input']>;
+  vulnerabilityScoreMax?: InputMaybe<Scalars['Decimal']['input']>;
+  excludedIds?: InputMaybe<Scalars['String']['input']>;
+  exclusionReason?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -8931,6 +8396,7 @@ export type ExportXlsxPpListMutation = { __typename?: 'Mutations', exportXlsxPay
 
 export type ExportXlsxPpListPerFspMutationVariables = Exact<{
   paymentPlanId: Scalars['ID']['input'];
+  fspXlsxTemplateId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -8959,6 +8425,16 @@ export type MarkPayAsFailedMutationVariables = Exact<{
 
 export type MarkPayAsFailedMutation = { __typename?: 'Mutations', markPaymentAsFailed?: { __typename?: 'MarkPaymentAsFailedMutation', payment?: { __typename?: 'PaymentNode', id: string, unicefId?: string | null, status: PaymentStatus, statusDate: any, deliveredQuantity?: number | null, deliveryDate?: any | null } | null } | null };
 
+export type OpenPpMutationVariables = Exact<{
+  paymentPlanId: Scalars['ID']['input'];
+  dispersionStartDate: Scalars['Date']['input'];
+  dispersionEndDate: Scalars['Date']['input'];
+  currency: Scalars['String']['input'];
+}>;
+
+
+export type OpenPpMutation = { __typename?: 'Mutations', openPaymentPlan?: { __typename?: 'OpenPaymentPlanMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string } | null } | null };
+
 export type RevertMarkPayAsFailedMutationVariables = Exact<{
   paymentId: Scalars['ID']['input'];
   deliveredQuantity: Scalars['Decimal']['input'];
@@ -8971,10 +8447,11 @@ export type RevertMarkPayAsFailedMutation = { __typename?: 'Mutations', revertMa
 export type SetSteficonRuleOnPpListMutationVariables = Exact<{
   paymentPlanId: Scalars['ID']['input'];
   steficonRuleId: Scalars['ID']['input'];
+  version?: InputMaybe<Scalars['BigInt']['input']>;
 }>;
 
 
-export type SetSteficonRuleOnPpListMutation = { __typename?: 'Mutations', setSteficonRuleOnPaymentPlanPaymentList?: { __typename?: 'SetSteficonRuleOnPaymentPlanPaymentListMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, steficonRule?: { __typename?: 'RuleCommitNode', id: string, rule?: { __typename?: 'SteficonRuleNode', id: string, name: string } | null } | null } | null } | null };
+export type SetSteficonRuleOnPpListMutation = { __typename?: 'Mutations', setSteficonRuleOnPaymentPlanPaymentList?: { __typename?: 'SetSteficonRuleOnPaymentPlanPaymentListMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, steficonRule?: { __typename?: 'RuleCommitNode', id: string, rule?: { __typename?: 'SteficonRuleNode', id: string, name: string } | null } | null, steficonRuleTargeting?: { __typename?: 'RuleCommitNode', id: string, rule?: { __typename?: 'SteficonRuleNode', id: string, name: string } | null } | null } | null } | null };
 
 export type ActivatePaymentVerificationPlanMutationVariables = Exact<{
   paymentVerificationPlanId: Scalars['ID']['input'];
@@ -9095,7 +8572,7 @@ export type UpdateProgramMutationVariables = Exact<{
 }>;
 
 
-export type UpdateProgramMutation = { __typename?: 'Mutations', updateProgram?: { __typename?: 'UpdateProgram', validationErrors?: any | null, program?: { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate?: any | null, status: ProgramStatus, caId?: string | null, caHashId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, isSocialWorkerProgram?: boolean | null, version: any, adminUrl?: string | null, partnerAccess: ProgramPartnerAccess, targetPopulationsCount?: number | null, canFinish?: boolean | null, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string, type?: DataCollectingTypeType | null } | null, partners?: Array<{ __typename?: 'PartnerNode', id: string, name?: string | null, areaAccess?: string | null, areas?: Array<{ __typename?: 'AreaNode', id: string, level: number } | null> | null } | null> | null, registrationImports: { __typename?: 'RegistrationDataImportNodeConnection', totalCount?: number | null }, pduFields?: Array<{ __typename?: 'PeriodicFieldNode', id: string, label: any, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null> | null, beneficiaryGroup?: { __typename?: 'BeneficiaryGroupNode', id: string, name: string, groupLabel: string, groupLabelPlural: string, memberLabel: string, memberLabelPlural: string, masterDetail: boolean } | null } | null } | null };
+export type UpdateProgramMutation = { __typename?: 'Mutations', updateProgram?: { __typename?: 'UpdateProgram', validationErrors?: any | null, program?: { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate?: any | null, status: ProgramStatus, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, isSocialWorkerProgram?: boolean | null, version: any, adminUrl?: string | null, partnerAccess: ProgramPartnerAccess, targetPopulationsCount?: number | null, canFinish?: boolean | null, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string, type?: DataCollectingTypeType | null } | null, partners?: Array<{ __typename?: 'PartnerNode', id: string, name?: string | null, areaAccess?: string | null, areas?: Array<{ __typename?: 'AreaNode', id: string, level: number } | null> | null } | null> | null, registrationImports: { __typename?: 'RegistrationDataImportNodeConnection', totalCount?: number | null }, pduFields?: Array<{ __typename?: 'PeriodicFieldNode', id: string, label: any, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null> | null, beneficiaryGroup?: { __typename?: 'BeneficiaryGroupNode', id: string, name: string, groupLabel: string, groupLabelPlural: string, memberLabel: string, memberLabelPlural: string, masterDetail: boolean } | null } | null } | null };
 
 export type UpdateProgramPartnersMutationVariables = Exact<{
   programData?: InputMaybe<UpdateProgramPartnersInput>;
@@ -9103,28 +8580,28 @@ export type UpdateProgramPartnersMutationVariables = Exact<{
 }>;
 
 
-export type UpdateProgramPartnersMutation = { __typename?: 'Mutations', updateProgramPartners?: { __typename?: 'UpdateProgramPartners', program?: { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate?: any | null, status: ProgramStatus, caId?: string | null, caHashId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, isSocialWorkerProgram?: boolean | null, version: any, adminUrl?: string | null, partnerAccess: ProgramPartnerAccess, targetPopulationsCount?: number | null, canFinish?: boolean | null, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string, type?: DataCollectingTypeType | null } | null, partners?: Array<{ __typename?: 'PartnerNode', id: string, name?: string | null, areaAccess?: string | null, areas?: Array<{ __typename?: 'AreaNode', id: string, level: number } | null> | null } | null> | null, registrationImports: { __typename?: 'RegistrationDataImportNodeConnection', totalCount?: number | null }, pduFields?: Array<{ __typename?: 'PeriodicFieldNode', id: string, label: any, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null> | null, beneficiaryGroup?: { __typename?: 'BeneficiaryGroupNode', id: string, name: string, groupLabel: string, groupLabelPlural: string, memberLabel: string, memberLabelPlural: string, masterDetail: boolean } | null } | null } | null };
+export type UpdateProgramPartnersMutation = { __typename?: 'Mutations', updateProgramPartners?: { __typename?: 'UpdateProgramPartners', program?: { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate?: any | null, status: ProgramStatus, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, isSocialWorkerProgram?: boolean | null, version: any, adminUrl?: string | null, partnerAccess: ProgramPartnerAccess, targetPopulationsCount?: number | null, canFinish?: boolean | null, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string, type?: DataCollectingTypeType | null } | null, partners?: Array<{ __typename?: 'PartnerNode', id: string, name?: string | null, areaAccess?: string | null, areas?: Array<{ __typename?: 'AreaNode', id: string, level: number } | null> | null } | null> | null, registrationImports: { __typename?: 'RegistrationDataImportNodeConnection', totalCount?: number | null }, pduFields?: Array<{ __typename?: 'PeriodicFieldNode', id: string, label: any, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null> | null, beneficiaryGroup?: { __typename?: 'BeneficiaryGroupNode', id: string, name: string, groupLabel: string, groupLabelPlural: string, memberLabel: string, memberLabelPlural: string, masterDetail: boolean } | null } | null } | null };
 
 export type CreateRegistrationKoboImportMutationVariables = Exact<{
   registrationDataImportData: RegistrationKoboImportMutationInput;
 }>;
 
 
-export type CreateRegistrationKoboImportMutation = { __typename?: 'Mutations', registrationKoboImport?: { __typename?: 'RegistrationKoboImportMutation', validationErrors?: any | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', id: string, name: string, dataSource: RegistrationDataImportDataSource, datahubId?: any | null, screenBeneficiary: boolean } | null } | null };
+export type CreateRegistrationKoboImportMutation = { __typename?: 'Mutations', registrationKoboImport?: { __typename?: 'RegistrationKoboImportMutation', validationErrors?: any | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', id: string, name: string, dataSource: RegistrationDataImportDataSource, screenBeneficiary: boolean } | null } | null };
 
 export type CreateRegistrationProgramPopulationImportMutationVariables = Exact<{
   registrationDataImportData: RegistrationProgramPopulationImportMutationInput;
 }>;
 
 
-export type CreateRegistrationProgramPopulationImportMutation = { __typename?: 'Mutations', registrationProgramPopulationImport?: { __typename?: 'RegistrationProgramPopulationImportMutation', validationErrors?: any | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', id: string, name: string, dataSource: RegistrationDataImportDataSource, datahubId?: any | null, screenBeneficiary: boolean } | null } | null };
+export type CreateRegistrationProgramPopulationImportMutation = { __typename?: 'Mutations', registrationProgramPopulationImport?: { __typename?: 'RegistrationProgramPopulationImportMutation', validationErrors?: any | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', id: string, name: string, dataSource: RegistrationDataImportDataSource, screenBeneficiary: boolean } | null } | null };
 
 export type CreateRegistrationXlsxImportMutationVariables = Exact<{
   registrationDataImportData: RegistrationXlsxImportMutationInput;
 }>;
 
 
-export type CreateRegistrationXlsxImportMutation = { __typename?: 'Mutations', registrationXlsxImport?: { __typename?: 'RegistrationXlsxImportMutation', validationErrors?: any | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', id: string, name: string, dataSource: RegistrationDataImportDataSource, datahubId?: any | null, screenBeneficiary: boolean } | null } | null };
+export type CreateRegistrationXlsxImportMutation = { __typename?: 'Mutations', registrationXlsxImport?: { __typename?: 'RegistrationXlsxImportMutation', validationErrors?: any | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', id: string, name: string, dataSource: RegistrationDataImportDataSource, screenBeneficiary: boolean } | null } | null };
 
 export type EraseRdiMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -9138,7 +8615,7 @@ export type MergeRdiMutationVariables = Exact<{
 }>;
 
 
-export type MergeRdiMutation = { __typename?: 'Mutations', mergeRegistrationDataImport?: { __typename?: 'MergeRegistrationDataImportMutation', registrationDataImport?: { __typename?: 'RegistrationDataImportNode', numberOfIndividuals: number, datahubId?: any | null, errorMessage: string, canMerge?: boolean | null, biometricDeduplicationEnabled?: boolean | null, deduplicationEngineStatus?: RegistrationDataImportDeduplicationEngineStatus | null, id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, biometricDeduplicated?: string | null, batchDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, batchUniqueCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordUniqueCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordPossibleDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate?: any | null, status: ProgramStatus } | null } | null } | null };
+export type MergeRdiMutation = { __typename?: 'Mutations', mergeRegistrationDataImport?: { __typename?: 'MergeRegistrationDataImportMutation', registrationDataImport?: { __typename?: 'RegistrationDataImportNode', numberOfIndividuals: number, errorMessage: string, canMerge?: boolean | null, biometricDeduplicationEnabled?: boolean | null, deduplicationEngineStatus?: RegistrationDataImportDeduplicationEngineStatus | null, id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, biometricDeduplicated?: string | null, batchDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, batchUniqueCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordUniqueCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordPossibleDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate?: any | null, status: ProgramStatus } | null } | null } | null };
 
 export type RefuseRdiMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -9197,75 +8674,35 @@ export type RestartCreateReportMutationVariables = Exact<{
 
 export type RestartCreateReportMutation = { __typename?: 'Mutations', restartCreateReport?: { __typename?: 'RestartCreateReport', report?: { __typename?: 'ReportNode', id: string, status: number, reportType: number, createdAt: any, dateFrom: any, dateTo: any, fileUrl?: string | null, createdBy: { __typename?: 'UserNode', firstName: string, lastName: string }, adminArea: { __typename?: 'AreaNodeConnection', edges: Array<{ __typename?: 'AreaNodeEdge', node?: { __typename?: 'AreaNode', name: string } | null } | null> }, program?: { __typename?: 'ProgramNode', name: string } | null } | null } | null };
 
+export type CopyCriteriaMutationVariables = Exact<{
+  name: Scalars['String']['input'];
+  paymentPlanId: Scalars['ID']['input'];
+  programCycleId: Scalars['ID']['input'];
+}>;
+
+
+export type CopyCriteriaMutation = { __typename?: 'Mutations', copyTargetingCriteria?: { __typename?: 'CopyTargetingCriteriaMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, name?: string | null } | null } | null };
+
 export type CreateTpMutationVariables = Exact<{
-  input: CreateTargetPopulationInput;
+  input: CreatePaymentPlanInput;
 }>;
 
 
-export type CreateTpMutation = { __typename?: 'Mutations', createTargetPopulation?: { __typename?: 'CreateTargetPopulationMutation', validationErrors?: any | null, targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, status: TargetPopulationStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null } | null } | null };
-
-export type DeleteTargetPopulationMutationVariables = Exact<{
-  input: DeleteTargetPopulationMutationInput;
-}>;
-
-
-export type DeleteTargetPopulationMutation = { __typename?: 'Mutations', deleteTargetPopulation?: { __typename?: 'DeleteTargetPopulationMutationPayload', clientMutationId?: string | null } | null };
-
-export type CopyTargetPopulationMutationVariables = Exact<{
-  input: CopyTargetPopulationMutationInput;
-}>;
-
-
-export type CopyTargetPopulationMutation = { __typename?: 'Mutations', copyTargetPopulation?: { __typename?: 'CopyTargetPopulationMutationPayload', clientMutationId?: string | null, validationErrors?: any | null, targetPopulation?: { __typename?: 'TargetPopulationNode', id: string } | null } | null };
-
-export type FinalizeTpMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type FinalizeTpMutation = { __typename?: 'Mutations', finalizeTargetPopulation?: { __typename?: 'FinalizeTargetPopulationMutation', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, adminUrl?: string | null, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, hasEmptyCriteria?: boolean | null, hasEmptyIdsCriteria?: boolean | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate?: any | null, isSocialWorkerProgram?: boolean | null }, programCycle: { __typename: 'ProgramCycleNode', id: string, title?: string | null }, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds?: string | null, individualIds?: string | null, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, householdIds: string, individualIds: string, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null, collectorsFiltersBlocks: Array<{ __typename: 'TargetingCollectorRuleFilterBlockNode', id: any, createdAt: any, updatedAt: any, collectorBlockFilters?: Array<{ __typename: 'TargetingCollectorBlockRuleFilterNode', id: any, createdAt: any, updatedAt: any, fieldName: string, comparisonMethod?: string | null, flexFieldClassification: TargetingCollectorBlockRuleFilterFlexFieldClassification, arguments?: Array<any | null> | null, labelEn?: string | null } | null> | null }>, householdsFiltersBlocks?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null } | null } | null } | null };
-
-export type LockTpMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type LockTpMutation = { __typename?: 'Mutations', lockTargetPopulation?: { __typename?: 'LockTargetPopulationMutation', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, adminUrl?: string | null, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, hasEmptyCriteria?: boolean | null, hasEmptyIdsCriteria?: boolean | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate?: any | null, isSocialWorkerProgram?: boolean | null }, programCycle: { __typename: 'ProgramCycleNode', id: string, title?: string | null }, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds?: string | null, individualIds?: string | null, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, householdIds: string, individualIds: string, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null, collectorsFiltersBlocks: Array<{ __typename: 'TargetingCollectorRuleFilterBlockNode', id: any, createdAt: any, updatedAt: any, collectorBlockFilters?: Array<{ __typename: 'TargetingCollectorBlockRuleFilterNode', id: any, createdAt: any, updatedAt: any, fieldName: string, comparisonMethod?: string | null, flexFieldClassification: TargetingCollectorBlockRuleFilterFlexFieldClassification, arguments?: Array<any | null> | null, labelEn?: string | null } | null> | null }>, householdsFiltersBlocks?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null } | null } | null } | null };
-
-export type RebuildTpMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type RebuildTpMutation = { __typename?: 'Mutations', targetPopulationRebuild?: { __typename?: 'RebuildTargetPopulationMutation', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, adminUrl?: string | null, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, hasEmptyCriteria?: boolean | null, hasEmptyIdsCriteria?: boolean | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate?: any | null, isSocialWorkerProgram?: boolean | null }, programCycle: { __typename: 'ProgramCycleNode', id: string, title?: string | null }, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds?: string | null, individualIds?: string | null, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, householdIds: string, individualIds: string, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null, collectorsFiltersBlocks: Array<{ __typename: 'TargetingCollectorRuleFilterBlockNode', id: any, createdAt: any, updatedAt: any, collectorBlockFilters?: Array<{ __typename: 'TargetingCollectorBlockRuleFilterNode', id: any, createdAt: any, updatedAt: any, fieldName: string, comparisonMethod?: string | null, flexFieldClassification: TargetingCollectorBlockRuleFilterFlexFieldClassification, arguments?: Array<any | null> | null, labelEn?: string | null } | null> | null }>, householdsFiltersBlocks?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null } | null } | null } | null };
-
-export type SetSteficonRuleOnTargetPopulationMutationVariables = Exact<{
-  input: SetSteficonRuleOnTargetPopulationMutationInput;
-}>;
-
-
-export type SetSteficonRuleOnTargetPopulationMutation = { __typename?: 'Mutations', setSteficonRuleOnTargetPopulation?: { __typename?: 'SetSteficonRuleOnTargetPopulationMutationPayload', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, adminUrl?: string | null, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, hasEmptyCriteria?: boolean | null, hasEmptyIdsCriteria?: boolean | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate?: any | null, isSocialWorkerProgram?: boolean | null }, programCycle: { __typename: 'ProgramCycleNode', id: string, title?: string | null }, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds?: string | null, individualIds?: string | null, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, householdIds: string, individualIds: string, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null, collectorsFiltersBlocks: Array<{ __typename: 'TargetingCollectorRuleFilterBlockNode', id: any, createdAt: any, updatedAt: any, collectorBlockFilters?: Array<{ __typename: 'TargetingCollectorBlockRuleFilterNode', id: any, createdAt: any, updatedAt: any, fieldName: string, comparisonMethod?: string | null, flexFieldClassification: TargetingCollectorBlockRuleFilterFlexFieldClassification, arguments?: Array<any | null> | null, labelEn?: string | null } | null> | null }>, householdsFiltersBlocks?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null } | null } | null } | null };
-
-export type UnlockTpMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type UnlockTpMutation = { __typename?: 'Mutations', unlockTargetPopulation?: { __typename?: 'UnlockTargetPopulationMutation', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, adminUrl?: string | null, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, hasEmptyCriteria?: boolean | null, hasEmptyIdsCriteria?: boolean | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate?: any | null, isSocialWorkerProgram?: boolean | null }, programCycle: { __typename: 'ProgramCycleNode', id: string, title?: string | null }, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds?: string | null, individualIds?: string | null, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, householdIds: string, individualIds: string, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null, collectorsFiltersBlocks: Array<{ __typename: 'TargetingCollectorRuleFilterBlockNode', id: any, createdAt: any, updatedAt: any, collectorBlockFilters?: Array<{ __typename: 'TargetingCollectorBlockRuleFilterNode', id: any, createdAt: any, updatedAt: any, fieldName: string, comparisonMethod?: string | null, flexFieldClassification: TargetingCollectorBlockRuleFilterFlexFieldClassification, arguments?: Array<any | null> | null, labelEn?: string | null } | null> | null }>, householdsFiltersBlocks?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null } | null } | null } | null };
+export type CreateTpMutation = { __typename?: 'Mutations', createPaymentPlan?: { __typename?: 'CreatePaymentPlanMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, status: PaymentPlanStatus, totalHouseholdsCount: number, totalIndividualsCount: number } | null } | null };
 
 export type UpdateTpMutationVariables = Exact<{
-  input: UpdateTargetPopulationInput;
+  input: UpdatePaymentPlanInput;
 }>;
 
 
-export type UpdateTpMutation = { __typename?: 'Mutations', updateTargetPopulation?: { __typename?: 'UpdateTargetPopulationMutation', validationErrors?: any | null, targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, status: TargetPopulationStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null } | null } | null };
+export type UpdateTpMutation = { __typename?: 'Mutations', updatePaymentPlan?: { __typename?: 'UpdatePaymentPlanMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, status: PaymentPlanStatus, totalHouseholdsCount: number, totalIndividualsCount: number } | null } | null };
 
 export type AccountabilityCommunicationMessageQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type AccountabilityCommunicationMessageQuery = { __typename?: 'Query', accountabilityCommunicationMessage?: { __typename?: 'CommunicationMessageNode', id: string, unicefId?: string | null, adminUrl?: string | null, createdAt: any, title: string, body: string, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string } | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', id: string, name: string } | null } | null };
+export type AccountabilityCommunicationMessageQuery = { __typename?: 'Query', accountabilityCommunicationMessage?: { __typename?: 'CommunicationMessageNode', id: string, unicefId?: string | null, adminUrl?: string | null, createdAt: any, title: string, body: string, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null, name?: string | null } | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', id: string, name: string } | null } | null };
 
 export type AccountabilityCommunicationMessageSampleSizeQueryVariables = Exact<{
   input: GetAccountabilityCommunicationMessageSampleSizeInput;
@@ -9307,7 +8744,7 @@ export type AllAccountabilityCommunicationMessagesQueryVariables = Exact<{
   numberOfRecipients?: InputMaybe<Scalars['Int']['input']>;
   numberOfRecipients_Gte?: InputMaybe<Scalars['Int']['input']>;
   numberOfRecipients_Lte?: InputMaybe<Scalars['Int']['input']>;
-  targetPopulation?: InputMaybe<Scalars['ID']['input']>;
+  paymentPlan?: InputMaybe<Scalars['ID']['input']>;
   createdBy?: InputMaybe<Scalars['ID']['input']>;
   program?: InputMaybe<Scalars['String']['input']>;
   createdAtRange?: InputMaybe<Scalars['String']['input']>;
@@ -9389,7 +8826,7 @@ export type AllUsersQueryVariables = Exact<{
 }>;
 
 
-export type AllUsersQuery = { __typename?: 'Query', allUsers?: { __typename?: 'UserNodeConnection', totalCount?: number | null, edgeCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, endCursor?: string | null, startCursor?: string | null }, edges: Array<{ __typename?: 'UserNodeEdge', cursor: string, node?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, username: string, email: string, isActive: boolean, lastLogin?: any | null, status: UserStatus, partner?: { __typename?: 'PartnerNode', name?: string | null } | null, userRoles: Array<{ __typename?: 'UserRoleNode', businessArea: { __typename?: 'UserBusinessAreaNode', name: string }, role: { __typename?: 'RoleNode', name: string, permissions?: Array<string> | null } }>, partnerRoles?: Array<{ __typename?: 'PartnerRoleNode', businessArea: { __typename?: 'UserBusinessAreaNode', name: string }, roles: Array<{ __typename?: 'RoleNode', name: string, permissions?: Array<string> | null }> } | null> | null } | null } | null> } | null };
+export type AllUsersQuery = { __typename?: 'Query', allUsers?: { __typename?: 'UserNodeConnection', totalCount?: number | null, edgeCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, endCursor?: string | null, startCursor?: string | null }, edges: Array<{ __typename?: 'UserNodeEdge', cursor: string, node?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, username: string, email: string, isActive: boolean, lastLogin?: any | null, status: UserStatus, partner: { __typename?: 'PartnerNode', name?: string | null }, userRoles: Array<{ __typename?: 'UserRoleNode', businessArea: { __typename?: 'UserBusinessAreaNode', name: string }, role: { __typename?: 'RoleNode', name: string, permissions?: Array<string> | null } }>, partnerRoles?: Array<{ __typename?: 'PartnerRoleNode', businessArea: { __typename?: 'UserBusinessAreaNode', name: string }, roles: Array<{ __typename?: 'RoleNode', name: string, permissions?: Array<string> | null }> } | null> | null } | null } | null> } | null };
 
 export type AllUsersForFiltersQueryVariables = Exact<{
   businessArea: Scalars['String']['input'];
@@ -9413,7 +8850,7 @@ export type BusinessAreaDataQueryVariables = Exact<{
 }>;
 
 
-export type BusinessAreaDataQuery = { __typename?: 'Query', businessArea?: { __typename?: 'BusinessAreaNode', id: string, screenBeneficiary: boolean, isPaymentPlanApplicable: boolean, isAccountabilityApplicable?: boolean | null } | null };
+export type BusinessAreaDataQuery = { __typename?: 'Query', businessArea?: { __typename?: 'BusinessAreaNode', id: string, screenBeneficiary: boolean, isAccountabilityApplicable?: boolean | null } | null };
 
 export type CashAssistUrlPrefixQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -9428,7 +8865,7 @@ export type CurrencyChoicesQuery = { __typename?: 'Query', currencyChoices?: Arr
 export type DataCollectionTypeChoiceDataQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type DataCollectionTypeChoiceDataQuery = { __typename?: 'Query', dataCollectionTypeChoices?: Array<{ __typename?: 'DataCollectingTypeChoiceObject', name?: string | null, value?: string | null, description?: string | null } | null> | null };
+export type DataCollectionTypeChoiceDataQuery = { __typename?: 'Query', dataCollectionTypeChoices?: Array<{ __typename?: 'DataCollectingTypeChoiceObject', name?: string | null, value?: string | null, description?: string | null, type?: string | null } | null> | null };
 
 export type LoggedCheckerQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -9458,7 +8895,7 @@ export type AllEditHouseholdFieldsQuery = { __typename?: 'Query', allEditHouseho
 export type AllEditPeopleFieldsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AllEditPeopleFieldsQuery = { __typename?: 'Query', allEditPeopleFieldsAttributes?: Array<{ __typename?: 'FieldAttributeNode', id?: string | null, type?: string | null, name?: string | null, required?: boolean | null, labelEn?: string | null, hint?: string | null, isFlexField?: boolean | null, labels?: Array<{ __typename?: 'LabelNode', language?: string | null, label?: string | null } | null> | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', labelEn?: string | null, value?: string | null, admin?: string | null, listName?: string | null, labels?: Array<{ __typename?: 'LabelNode', label?: string | null, language?: string | null } | null> | null } | null> | null } | null> | null };
+export type AllEditPeopleFieldsQuery = { __typename?: 'Query', allEditPeopleFieldsAttributes?: Array<{ __typename?: 'FieldAttributeNode', id?: string | null, type?: string | null, name?: string | null, required?: boolean | null, labelEn?: string | null, hint?: string | null, isFlexField?: boolean | null, labels?: Array<{ __typename?: 'LabelNode', language?: string | null, label?: string | null } | null> | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', labelEn?: string | null, value?: string | null, admin?: string | null, listName?: string | null, labels?: Array<{ __typename?: 'LabelNode', label?: string | null, language?: string | null } | null> | null } | null> | null } | null> | null, countriesChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, documentTypeChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, identityTypeChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
 export type AllHouseholdsFlexFieldsAttributesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -9599,7 +9036,7 @@ export type GrievanceTicketQueryVariables = Exact<{
 }>;
 
 
-export type GrievanceTicketQuery = { __typename?: 'Query', grievanceTicket?: { __typename?: 'GrievanceTicketNode', id: string, unicefId?: string | null, status: number, category: number, consent: boolean, targetId?: string | null, createdAt: any, updatedAt: any, description: string, language: string, admin?: string | null, area: string, adminUrl?: string | null, issueType?: number | null, priority?: number | null, urgency?: number | null, comments?: string | null, partner?: { __typename?: 'PartnerType', id: string, name: string } | null, businessArea: { __typename?: 'UserBusinessAreaNode', postponeDeduplication: boolean }, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, pCode?: string | null } | null, assignedTo?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, individual?: { __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null, household?: { __typename?: 'HouseholdNode', activeIndividualsCount?: number | null, countryOrigin?: string | null, country?: string | null, zipCode?: string | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, start?: any | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, address: string, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, flexFields?: any | null, programRegistrationId?: string | null, id: string, status?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, residenceStatus?: string | null, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, totalCashReceivedUsd?: any | null, currency?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unicefId?: string | null, unhcrId: string, geopoint?: any | null, village: string, adminAreaTitle?: string | null, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null, paymentRecord?: { __typename?: 'PaymentRecordAndPaymentNode', id?: string | null, caId?: string | null, deliveredQuantity?: number | null, entitlementQuantity?: number | null, objType?: string | null, parent?: { __typename?: 'CashPlanAndPaymentPlanNode', id?: string | null, unicefId?: string | null, objType?: string | null } | null, verification?: { __typename?: 'PaymentVerificationNode', id: string } | null } | null, relatedTickets?: Array<{ __typename?: 'GrievanceTicketNode', id: string, unicefId?: string | null, status: number, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null> | null, linkedTickets?: Array<{ __typename?: 'GrievanceTicketNode', id: string, unicefId?: string | null, category: number, status: number, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null> | null, existingTickets?: Array<{ __typename?: 'GrievanceTicketNode', id: string, category: number, unicefId?: string | null, status: number, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null> | null, addIndividualTicketDetails?: { __typename?: 'TicketAddIndividualDetailsNode', id: string, individualData?: any | null, approveStatus: boolean, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null, individualDataUpdateTicketDetails?: { __typename?: 'TicketIndividualDataUpdateDetailsNode', id: string, individualData?: any | null, roleReassignData: any, individual?: { __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null } | null, householdDataUpdateTicketDetails?: { __typename?: 'TicketHouseholdDataUpdateDetailsNode', id: string, householdData?: any | null, household?: { __typename?: 'HouseholdNode', activeIndividualsCount?: number | null, countryOrigin?: string | null, country?: string | null, zipCode?: string | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, start?: any | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, address: string, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, flexFields?: any | null, programRegistrationId?: string | null, id: string, status?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, residenceStatus?: string | null, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, totalCashReceivedUsd?: any | null, currency?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unicefId?: string | null, unhcrId: string, geopoint?: any | null, village: string, adminAreaTitle?: string | null, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null } | null, deleteIndividualTicketDetails?: { __typename?: 'TicketDeleteIndividualDetailsNode', id: string, roleReassignData: any, approveStatus: boolean } | null, deleteHouseholdTicketDetails?: { __typename?: 'TicketDeleteHouseholdDetailsNode', id: string, approveStatus: boolean, reasonHousehold?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null, systemFlaggingTicketDetails?: { __typename?: 'TicketSystemFlaggingDetailsNode', id: string, approveStatus: boolean, roleReassignData: any, goldenRecordsIndividual: { __typename?: 'IndividualNode', id: string, duplicate: boolean, fullName: string, birthDate: any, lastRegistrationDate: any, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, documentNumber: string, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null }, sanctionListIndividual: { __typename?: 'SanctionListIndividualNode', id: string, fullName: string, referenceNumber: string, datesOfBirth: { __typename?: 'SanctionListIndividualDateOfBirthNodeConnection', edges: Array<{ __typename?: 'SanctionListIndividualDateOfBirthNodeEdge', node?: { __typename?: 'SanctionListIndividualDateOfBirthNode', id: string, date: any } | null } | null> }, documents: { __typename?: 'SanctionListIndividualDocumentNodeConnection', edges: Array<{ __typename?: 'SanctionListIndividualDocumentNodeEdge', node?: { __typename?: 'SanctionListIndividualDocumentNode', id: string, documentNumber: string, typeOfDocument: string } | null } | null> } } } | null, paymentVerificationTicketDetails?: { __typename?: 'TicketPaymentVerificationDetailsNode', id: string, newStatus?: TicketPaymentVerificationDetailsNewStatus | null, oldReceivedAmount?: number | null, newReceivedAmount?: number | null, approveStatus: boolean, paymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus, hasMultiplePaymentVerifications?: boolean | null, paymentVerification?: { __typename?: 'PaymentVerificationNode', id: string, receivedAmount?: number | null } | null, paymentVerifications: { __typename?: 'PaymentVerificationNodeConnection', edges: Array<{ __typename?: 'PaymentVerificationNodeEdge', node?: { __typename?: 'PaymentVerificationNode', id: string } | null } | null> } } | null, needsAdjudicationTicketDetails?: { __typename?: 'TicketNeedsAdjudicationDetailsNode', id: string, hasDuplicatedDocument?: boolean | null, isMultipleDuplicatesVersion: boolean, roleReassignData: any, extraData?: { __typename?: 'TicketNeedsAdjudicationDetailsExtraDataNode', goldenRecords?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null, possibleDuplicate?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null, dedupEngineSimilarityPair?: { __typename?: 'DeduplicationEngineSimilarityPairNode', similarityScore?: string | null, individual1?: { __typename?: 'DeduplicationEngineSimilarityPairIndividualNode', unicefId?: string | null, fullName?: string | null, photo?: string | null } | null, individual2?: { __typename?: 'DeduplicationEngineSimilarityPairIndividualNode', unicefId?: string | null, fullName?: string | null, photo?: string | null } | null } | null } | null, goldenRecordsIndividual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string, birthDate: any, lastRegistrationDate: any, sex: IndividualSex, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, village: string, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null }, possibleDuplicate?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, lastRegistrationDate: any, fullName: string, birthDate: any, sex: IndividualSex, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', unicefId?: string | null, id: string, village: string, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null } | null, possibleDuplicates?: Array<{ __typename?: 'IndividualNode', id: string, unicefId?: string | null, lastRegistrationDate: any, fullName: string, birthDate: any, sex: IndividualSex, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', unicefId?: string | null, id: string, village: string, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null } | null> | null, selectedIndividual?: { __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, activeIndividualsCount?: number | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, flexFields?: any | null, programRegistrationId?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, currency?: string | null, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unhcrId: string, adminAreaTitle?: string | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null, selectedDuplicates?: Array<{ __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, activeIndividualsCount?: number | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, flexFields?: any | null, programRegistrationId?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, currency?: string | null, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unhcrId: string, adminAreaTitle?: string | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null> | null, selectedDistinct?: Array<{ __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, activeIndividualsCount?: number | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, flexFields?: any | null, programRegistrationId?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, currency?: string | null, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unhcrId: string, adminAreaTitle?: string | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null> | null } | null, ticketNotes: { __typename?: 'TicketNoteNodeConnection', edges: Array<{ __typename?: 'TicketNoteNodeEdge', node?: { __typename?: 'TicketNoteNode', id: string, createdAt: any, updatedAt: any, description: string, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null } | null> }, programs?: Array<{ __typename?: 'ProgramNode', name: string, id: string } | null> | null, documentation?: Array<{ __typename?: 'GrievanceDocumentNode', id: string, createdAt: any, updatedAt: any, name?: string | null, fileSize?: number | null, contentType: string, filePath?: string | null, fileName?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null } | null };
+export type GrievanceTicketQuery = { __typename?: 'Query', grievanceTicket?: { __typename?: 'GrievanceTicketNode', id: string, unicefId?: string | null, status: number, category: number, consent: boolean, targetId?: string | null, createdAt: any, updatedAt: any, description: string, language: string, admin?: string | null, area: string, adminUrl?: string | null, issueType?: number | null, priority?: number | null, urgency?: number | null, comments?: string | null, partner?: { __typename?: 'PartnerType', id: string, name: string } | null, businessArea: { __typename?: 'UserBusinessAreaNode', postponeDeduplication: boolean }, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, pCode?: string | null } | null, assignedTo?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, individual?: { __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null, household?: { __typename?: 'HouseholdNode', activeIndividualsCount?: number | null, countryOrigin?: string | null, country?: string | null, zipCode?: string | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, start?: any | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, address: string, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, flexFields?: any | null, programRegistrationId?: string | null, id: string, status?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, residenceStatus?: string | null, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, totalCashReceivedUsd?: any | null, currency?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unicefId?: string | null, unhcrId: string, geopoint?: any | null, village: string, adminAreaTitle?: string | null, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null, paymentRecord?: { __typename?: 'PaymentRecordAndPaymentNode', id?: string | null, unicefId?: string | null, deliveredQuantity?: number | null, entitlementQuantity?: number | null, objType?: string | null, parent?: { __typename?: 'CashPlanAndPaymentPlanNode', id?: string | null, unicefId?: string | null, objType?: string | null } | null, verification?: { __typename?: 'PaymentVerificationNode', id: string } | null } | null, relatedTickets?: Array<{ __typename?: 'GrievanceTicketNode', id: string, unicefId?: string | null, status: number, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null> | null, linkedTickets?: Array<{ __typename?: 'GrievanceTicketNode', id: string, unicefId?: string | null, category: number, status: number, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null> | null, existingTickets?: Array<{ __typename?: 'GrievanceTicketNode', id: string, category: number, unicefId?: string | null, status: number, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null> | null, addIndividualTicketDetails?: { __typename?: 'TicketAddIndividualDetailsNode', id: string, individualData?: any | null, approveStatus: boolean, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null, individualDataUpdateTicketDetails?: { __typename?: 'TicketIndividualDataUpdateDetailsNode', id: string, individualData?: any | null, roleReassignData: any, individual?: { __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null } | null, householdDataUpdateTicketDetails?: { __typename?: 'TicketHouseholdDataUpdateDetailsNode', id: string, householdData?: any | null, household?: { __typename?: 'HouseholdNode', activeIndividualsCount?: number | null, countryOrigin?: string | null, country?: string | null, zipCode?: string | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, start?: any | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, address: string, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, flexFields?: any | null, programRegistrationId?: string | null, id: string, status?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, residenceStatus?: string | null, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, totalCashReceivedUsd?: any | null, currency?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unicefId?: string | null, unhcrId: string, geopoint?: any | null, village: string, adminAreaTitle?: string | null, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null } | null, deleteIndividualTicketDetails?: { __typename?: 'TicketDeleteIndividualDetailsNode', id: string, roleReassignData: any, approveStatus: boolean } | null, deleteHouseholdTicketDetails?: { __typename?: 'TicketDeleteHouseholdDetailsNode', id: string, approveStatus: boolean, reasonHousehold?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null, systemFlaggingTicketDetails?: { __typename?: 'TicketSystemFlaggingDetailsNode', id: string, approveStatus: boolean, roleReassignData: any, goldenRecordsIndividual: { __typename?: 'IndividualNode', id: string, duplicate: boolean, fullName: string, birthDate: any, lastRegistrationDate: any, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, documentNumber: string, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null }, sanctionListIndividual: { __typename?: 'SanctionListIndividualNode', id: string, fullName: string, referenceNumber: string, datesOfBirth: { __typename?: 'SanctionListIndividualDateOfBirthNodeConnection', edges: Array<{ __typename?: 'SanctionListIndividualDateOfBirthNodeEdge', node?: { __typename?: 'SanctionListIndividualDateOfBirthNode', id: string, date: any } | null } | null> }, documents: { __typename?: 'SanctionListIndividualDocumentNodeConnection', edges: Array<{ __typename?: 'SanctionListIndividualDocumentNodeEdge', node?: { __typename?: 'SanctionListIndividualDocumentNode', id: string, documentNumber: string, typeOfDocument: string } | null } | null> } } } | null, paymentVerificationTicketDetails?: { __typename?: 'TicketPaymentVerificationDetailsNode', id: string, newStatus?: TicketPaymentVerificationDetailsNewStatus | null, oldReceivedAmount?: number | null, newReceivedAmount?: number | null, approveStatus: boolean, paymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus, hasMultiplePaymentVerifications?: boolean | null, paymentVerification?: { __typename?: 'PaymentVerificationNode', id: string, receivedAmount?: number | null } | null, paymentVerifications: { __typename?: 'PaymentVerificationNodeConnection', edges: Array<{ __typename?: 'PaymentVerificationNodeEdge', node?: { __typename?: 'PaymentVerificationNode', id: string } | null } | null> } } | null, needsAdjudicationTicketDetails?: { __typename?: 'TicketNeedsAdjudicationDetailsNode', id: string, hasDuplicatedDocument?: boolean | null, isMultipleDuplicatesVersion: boolean, roleReassignData: any, extraData?: { __typename?: 'TicketNeedsAdjudicationDetailsExtraDataNode', goldenRecords?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null, possibleDuplicate?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null, dedupEngineSimilarityPair?: { __typename?: 'DeduplicationEngineSimilarityPairNode', similarityScore?: string | null, individual1?: { __typename?: 'DeduplicationEngineSimilarityPairIndividualNode', unicefId?: string | null, fullName?: string | null, photo?: string | null } | null, individual2?: { __typename?: 'DeduplicationEngineSimilarityPairIndividualNode', unicefId?: string | null, fullName?: string | null, photo?: string | null } | null } | null } | null, goldenRecordsIndividual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string, birthDate: any, lastRegistrationDate: any, sex: IndividualSex, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, village: string, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null }, possibleDuplicate?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, lastRegistrationDate: any, fullName: string, birthDate: any, sex: IndividualSex, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', unicefId?: string | null, id: string, village: string, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null } | null, possibleDuplicates?: Array<{ __typename?: 'IndividualNode', id: string, unicefId?: string | null, lastRegistrationDate: any, fullName: string, birthDate: any, sex: IndividualSex, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', unicefId?: string | null, id: string, village: string, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null } | null> | null, selectedIndividual?: { __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, activeIndividualsCount?: number | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, flexFields?: any | null, programRegistrationId?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, currency?: string | null, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unhcrId: string, adminAreaTitle?: string | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null, selectedDuplicates?: Array<{ __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, activeIndividualsCount?: number | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, flexFields?: any | null, programRegistrationId?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, currency?: string | null, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unhcrId: string, adminAreaTitle?: string | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null> | null, selectedDistinct?: Array<{ __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email?: string | null, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, walletName: string, walletAddress: string, blockchainName: string, importId?: string | null, id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, residenceStatus?: string | null, address: string, village: string, zipCode?: string | null, geopoint?: any | null, country?: string | null, countryOrigin?: string | null, unicefId?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, activeIndividualsCount?: number | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, flexFields?: any | null, programRegistrationId?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, currency?: string | null, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unhcrId: string, adminAreaTitle?: string | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, deliveryMechanismsData?: Array<{ __typename?: 'DeliveryMechanismDataNode', name?: string | null, isValid?: boolean | null, individualTabData?: any | null } | null> | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } | null } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string }, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null } | null> | null } | null, ticketNotes: { __typename?: 'TicketNoteNodeConnection', edges: Array<{ __typename?: 'TicketNoteNodeEdge', node?: { __typename?: 'TicketNoteNode', id: string, createdAt: any, updatedAt: any, description: string, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null } | null> }, programs?: Array<{ __typename?: 'ProgramNode', name: string, id: string } | null> | null, documentation?: Array<{ __typename?: 'GrievanceDocumentNode', id: string, createdAt: any, updatedAt: any, name?: string | null, fileSize?: number | null, contentType: string, filePath?: string | null, fileName?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null } | null };
 
 export type GrievanceTicketFlexFieldsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -9640,6 +9077,11 @@ export type AllDeliveryMechanismsQueryVariables = Exact<{ [key: string]: never; 
 
 export type AllDeliveryMechanismsQuery = { __typename?: 'Query', allDeliveryMechanisms?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
+export type AllFinancialServiceProviderXlsxTemplatesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AllFinancialServiceProviderXlsxTemplatesQuery = { __typename?: 'Query', allFinancialServiceProviderXlsxTemplates?: { __typename?: 'FinancialServiceProviderXlsxTemplateNodeConnection', edges: Array<{ __typename?: 'FinancialServiceProviderXlsxTemplateNodeEdge', node?: { __typename?: 'FinancialServiceProviderXlsxTemplateNode', id: string, name: string } | null } | null> } | null };
+
 export type AllPaymentPlansForTableQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -9656,10 +9098,16 @@ export type AllPaymentPlansForTableQueryVariables = Exact<{
   isFollowUp?: InputMaybe<Scalars['Boolean']['input']>;
   program?: InputMaybe<Scalars['String']['input']>;
   programCycle?: InputMaybe<Scalars['String']['input']>;
+  totalHouseholdsCountWithValidPhoneNoMin?: InputMaybe<Scalars['Int']['input']>;
+  totalHouseholdsCountWithValidPhoneNoMax?: InputMaybe<Scalars['Int']['input']>;
+  createdAtRange?: InputMaybe<Scalars['String']['input']>;
+  statusNot?: InputMaybe<Scalars['String']['input']>;
+  isPaymentPlan?: InputMaybe<Scalars['Boolean']['input']>;
+  isTargetPopulation?: InputMaybe<Scalars['Boolean']['input']>;
 }>;
 
 
-export type AllPaymentPlansForTableQuery = { __typename?: 'Query', allPaymentPlans?: { __typename?: 'PaymentPlanNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'PaymentPlanNodeEdge', cursor: string, node?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null, name?: string | null, isFollowUp: boolean, status: PaymentPlanStatus, currency?: string | null, currencyName?: string | null, startDate?: any | null, endDate?: any | null, dispersionStartDate?: any | null, dispersionEndDate?: any | null, femaleChildrenCount: number, femaleAdultsCount: number, maleChildrenCount: number, maleAdultsCount: number, totalHouseholdsCount: number, totalIndividualsCount: number, totalEntitledQuantity?: number | null, totalDeliveredQuantity?: number | null, totalUndeliveredQuantity?: number | null, followUps: { __typename?: 'PaymentPlanNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'PaymentPlanNodeEdge', node?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null, dispersionStartDate?: any | null, dispersionEndDate?: any | null } | null } | null> }, createdBy: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string }, program?: { __typename?: 'ProgramNode', id: string, name: string } | null, targetPopulation: { __typename?: 'TargetPopulationNode', id: string, name: string } } | null } | null> } | null };
+export type AllPaymentPlansForTableQuery = { __typename?: 'Query', allPaymentPlans?: { __typename?: 'PaymentPlanNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'PaymentPlanNodeEdge', cursor: string, node?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null, name?: string | null, isFollowUp: boolean, status: PaymentPlanStatus, currency?: string | null, currencyName?: string | null, startDate?: any | null, endDate?: any | null, dispersionStartDate?: any | null, dispersionEndDate?: any | null, femaleChildrenCount: number, femaleAdultsCount: number, maleChildrenCount: number, maleAdultsCount: number, totalHouseholdsCount: number, totalIndividualsCount: number, totalEntitledQuantity?: number | null, totalDeliveredQuantity?: number | null, totalUndeliveredQuantity?: number | null, followUps: { __typename?: 'PaymentPlanNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'PaymentPlanNodeEdge', node?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null, dispersionStartDate?: any | null, dispersionEndDate?: any | null } | null } | null> }, createdBy: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string }, program?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null } | null> } | null };
 
 export type AvailableFspsForDeliveryMechanismsQueryVariables = Exact<{
   input: AvailableFspsForDeliveryMechanismsInput;
@@ -9673,14 +9121,14 @@ export type PaymentQueryVariables = Exact<{
 }>;
 
 
-export type PaymentQuery = { __typename?: 'Query', payment?: { __typename?: 'PaymentNode', id: string, unicefId?: string | null, distributionModality?: string | null, status: PaymentStatus, statusDate: any, snapshotCollectorBankName?: string | null, snapshotCollectorBankAccountNumber?: string | null, debitCardNumber?: string | null, debitCardIssuer?: string | null, currency: string, entitlementQuantity?: number | null, deliveredQuantity?: number | null, deliveryDate?: any | null, deliveredQuantityUsd?: number | null, transactionReferenceId?: string | null, additionalCollectorName?: string | null, additionalDocumentType?: string | null, additionalDocumentNumber?: string | null, reasonForUnsuccessfulPayment?: string | null, snapshotCollectorFullName?: string | null, adminUrl?: string | null, targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string } | null, sourcePayment?: { __typename?: 'PaymentNode', id: string, unicefId?: string | null } | null, verification?: { __typename?: 'PaymentVerificationNode', id: string, status: PaymentVerificationStatus, statusDate?: any | null, receivedAmount?: number | null, isManuallyEditable?: boolean | null, adminUrl?: string | null } | null, household: { __typename?: 'HouseholdNode', id: string, size?: number | null, status?: string | null, unicefId?: string | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, phoneNo: string, phoneNoAlternative: string, phoneNoValid?: boolean | null, phoneNoAlternativeValid?: boolean | null, fullName: string } | null }, collector: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string, email?: string | null, phoneNo: string, phoneNoValid?: boolean | null, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null }, parent: { __typename?: 'PaymentPlanNode', id: string, status: PaymentPlanStatus, isFollowUp: boolean, unicefId?: string | null, program?: { __typename?: 'ProgramNode', id: string, name: string } | null, verificationPlans?: { __typename?: 'PaymentVerificationPlanNodeConnection', edges: Array<{ __typename?: 'PaymentVerificationPlanNodeEdge', node?: { __typename?: 'PaymentVerificationPlanNode', id: string, status: PaymentVerificationPlanStatus, verificationChannel: PaymentVerificationPlanVerificationChannel } | null } | null> } | null }, deliveryType?: { __typename?: 'DeliveryMechanismNode', name?: string | null } | null, serviceProvider?: { __typename?: 'FinancialServiceProviderNode', id: string, fullName?: string | null } | null } | null };
+export type PaymentQuery = { __typename?: 'Query', payment?: { __typename?: 'PaymentNode', id: string, unicefId?: string | null, distributionModality?: string | null, status: PaymentStatus, statusDate: any, snapshotCollectorBankName?: string | null, snapshotCollectorBankAccountNumber?: string | null, debitCardNumber?: string | null, debitCardIssuer?: string | null, currency?: string | null, entitlementQuantity?: number | null, deliveredQuantity?: number | null, deliveryDate?: any | null, deliveredQuantityUsd?: number | null, transactionReferenceId?: string | null, additionalCollectorName?: string | null, additionalDocumentType?: string | null, additionalDocumentNumber?: string | null, reasonForUnsuccessfulPayment?: string | null, snapshotCollectorFullName?: string | null, adminUrl?: string | null, parent: { __typename?: 'PaymentPlanNode', id: string, name?: string | null, status: PaymentPlanStatus, isFollowUp: boolean, unicefId?: string | null, program?: { __typename?: 'ProgramNode', id: string, name: string } | null, verificationPlans?: { __typename?: 'PaymentVerificationPlanNodeConnection', edges: Array<{ __typename?: 'PaymentVerificationPlanNodeEdge', node?: { __typename?: 'PaymentVerificationPlanNode', id: string, status: PaymentVerificationPlanStatus, verificationChannel: PaymentVerificationPlanVerificationChannel } | null } | null> } | null }, sourcePayment?: { __typename?: 'PaymentNode', id: string, unicefId?: string | null } | null, verification?: { __typename?: 'PaymentVerificationNode', id: string, status: PaymentVerificationStatus, statusDate?: any | null, receivedAmount?: number | null, isManuallyEditable?: boolean | null, adminUrl?: string | null } | null, household: { __typename?: 'HouseholdNode', id: string, size?: number | null, status?: string | null, unicefId?: string | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, phoneNo: string, phoneNoAlternative: string, phoneNoValid?: boolean | null, phoneNoAlternativeValid?: boolean | null, fullName: string } | null }, collector: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string, email?: string | null, phoneNo: string, phoneNoValid?: boolean | null, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null }, deliveryType?: { __typename?: 'DeliveryMechanismNode', name?: string | null } | null, serviceProvider?: { __typename?: 'FinancialServiceProviderNode', id: string, fullName?: string | null } | null } | null };
 
 export type PaymentPlanQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type PaymentPlanQuery = { __typename?: 'Query', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, version: any, unicefId?: string | null, status: PaymentPlanStatus, canCreateFollowUp?: boolean | null, backgroundActionStatus?: PaymentPlanBackgroundActionStatus | null, canCreatePaymentVerificationPlan?: boolean | null, availablePaymentRecordsCount?: number | null, bankReconciliationSuccess?: number | null, bankReconciliationError?: number | null, exchangeRate?: number | null, adminUrl?: string | null, currency?: string | null, currencyName?: string | null, startDate?: any | null, endDate?: any | null, dispersionStartDate?: any | null, dispersionEndDate?: any | null, femaleChildrenCount: number, femaleAdultsCount: number, maleChildrenCount: number, maleAdultsCount: number, totalHouseholdsCount: number, totalIndividualsCount: number, totalEntitledQuantity?: number | null, totalDeliveredQuantity?: number | null, totalUndeliveredQuantity?: number | null, totalWithdrawnHouseholdsCount?: number | null, hasPaymentListExportFile?: boolean | null, hasFspDeliveryMechanismXlsxTemplate?: boolean | null, importedFileDate?: any | null, importedFileName?: string | null, totalEntitledQuantityUsd?: number | null, paymentsConflictsCount?: number | null, canSendToPaymentGateway?: boolean | null, canSplit?: boolean | null, exclusionReason: string, excludeHouseholdError: string, isFollowUp: boolean, unsuccessfulPaymentsCount?: number | null, programCycle: { __typename?: 'ProgramCycleNode', id: string }, createdBy: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string }, program?: { __typename?: 'ProgramNode', id: string, name: string, caId?: string | null } | null, targetPopulation: { __typename?: 'TargetPopulationNode', id: string, name: string }, approvalProcess: { __typename?: 'ApprovalProcessNodeConnection', totalCount?: number | null, edgeCount?: number | null, edges: Array<{ __typename?: 'ApprovalProcessNodeEdge', node?: { __typename?: 'ApprovalProcessNode', id: string, sentForApprovalDate?: any | null, sentForAuthorizationDate?: any | null, sentForFinanceReleaseDate?: any | null, approvalNumberRequired: number, authorizationNumberRequired: number, financeReleaseNumberRequired: number, rejectedOn?: string | null, sentForApprovalBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, sentForAuthorizationBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, sentForFinanceReleaseBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, actions?: { __typename?: 'FilteredActionsListNode', approval?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null, authorization?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null, financeRelease?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null, reject?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null } | null } | null } | null> }, steficonRule?: { __typename?: 'RuleCommitNode', id: string, rule?: { __typename?: 'SteficonRuleNode', id: string, name: string } | null } | null, deliveryMechanisms?: Array<{ __typename?: 'DeliveryMechanismPerPaymentPlanNode', id: string, name?: string | null, code?: string | null, order?: number | null, sentToPaymentGateway: boolean, chosenConfiguration?: string | null, fsp?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string, communicationChannel: FinancialServiceProviderCommunicationChannel, isPaymentGateway?: boolean | null } | null } | null> | null, splitChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, volumeByDeliveryMechanism?: Array<{ __typename?: 'VolumeByDeliveryMechanismNode', volume?: number | null, volumeUsd?: number | null, deliveryMechanism?: { __typename?: 'DeliveryMechanismPerPaymentPlanNode', id: string, name?: string | null, order?: number | null, fsp?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string } | null } | null } | null> | null, verificationPlans?: { __typename?: 'PaymentVerificationPlanNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'PaymentVerificationPlanNodeEdge', node?: { __typename?: 'PaymentVerificationPlanNode', id: string, unicefId?: string | null, adminUrl?: string | null, status: PaymentVerificationPlanStatus, sampleSize?: number | null, receivedCount?: number | null, notReceivedCount?: number | null, respondedCount?: number | null, verificationChannel: PaymentVerificationPlanVerificationChannel, sampling: PaymentVerificationPlanSampling, receivedWithProblemsCount?: number | null, rapidProFlowId: string, confidenceInterval?: number | null, marginOfError?: number | null, activationDate?: any | null, completionDate?: any | null, excludedAdminAreasFilter?: Array<string | null> | null, sexFilter?: string | null, xlsxFileExporting: boolean, hasXlsxFile?: boolean | null, xlsxFileWasDownloaded?: boolean | null, xlsxFileImported: boolean, ageFilter?: { __typename?: 'AgeFilterObject', min?: number | null, max?: number | null } | null } | null } | null> } | null, paymentVerificationSummary?: { __typename?: 'PaymentVerificationSummaryNode', id: string, createdAt: any, updatedAt: any, status: PaymentVerificationSummaryStatus, activationDate?: any | null, completionDate?: any | null } | null, paymentItems: { __typename?: 'PaymentNodeConnection', totalCount?: number | null, edgeCount?: number | null, edges: Array<{ __typename?: 'PaymentNodeEdge', node?: { __typename?: 'PaymentNode', id: string, status: PaymentStatus } | null } | null> }, reconciliationSummary?: { __typename?: 'ReconciliationSummaryNode', deliveredFully?: number | null, deliveredPartially?: number | null, notDelivered?: number | null, unsuccessful?: number | null, pending?: number | null, numberOfPayments?: number | null, reconciled?: number | null } | null, excludedHouseholds?: Array<{ __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null> | null, excludedIndividuals?: Array<{ __typename?: 'IndividualNode', id: string, unicefId?: string | null } | null> | null, followUps: { __typename?: 'PaymentPlanNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'PaymentPlanNodeEdge', node?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null, createdAt: any, paymentItems: { __typename?: 'PaymentNodeConnection', totalCount?: number | null } } | null } | null> }, sourcePaymentPlan?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null } | null, supportingDocuments?: Array<{ __typename?: 'PaymentPlanSupportingDocumentNode', id: string, title: string, file: string } | null> | null } | null };
+export type PaymentPlanQuery = { __typename?: 'Query', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, name?: string | null, version: any, unicefId?: string | null, status: PaymentPlanStatus, buildStatus?: PaymentPlanBuildStatus | null, canCreateFollowUp?: boolean | null, backgroundActionStatus?: PaymentPlanBackgroundActionStatus | null, canCreatePaymentVerificationPlan?: boolean | null, availablePaymentRecordsCount?: number | null, bankReconciliationSuccess?: number | null, bankReconciliationError?: number | null, exchangeRate?: number | null, fspCommunicationChannel?: string | null, canExportXlsx?: boolean | null, canDownloadXlsx?: boolean | null, canSendXlsxPassword?: boolean | null, excludedIds: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, adminUrl?: string | null, currency?: string | null, currencyName?: string | null, startDate?: any | null, endDate?: any | null, dispersionStartDate?: any | null, dispersionEndDate?: any | null, femaleChildrenCount: number, femaleAdultsCount: number, maleChildrenCount: number, maleAdultsCount: number, totalHouseholdsCount: number, totalIndividualsCount: number, totalEntitledQuantity?: number | null, totalDeliveredQuantity?: number | null, totalUndeliveredQuantity?: number | null, totalWithdrawnHouseholdsCount?: number | null, hasPaymentListExportFile?: boolean | null, hasFspDeliveryMechanismXlsxTemplate?: boolean | null, canCreateXlsxWithFspAuthCode?: boolean | null, importedFileDate?: any | null, importedFileName?: string | null, totalEntitledQuantityUsd?: number | null, paymentsConflictsCount?: number | null, canSendToPaymentGateway?: boolean | null, canSplit?: boolean | null, exclusionReason: string, excludeHouseholdError: string, isFollowUp: boolean, unsuccessfulPaymentsCount?: number | null, programCycle: { __typename?: 'ProgramCycleNode', id: string, title?: string | null }, createdBy: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string }, program?: { __typename?: 'ProgramNode', id: string, name: string, status: ProgramStatus, isSocialWorkerProgram?: boolean | null } | null, approvalProcess: { __typename?: 'ApprovalProcessNodeConnection', totalCount?: number | null, edgeCount?: number | null, edges: Array<{ __typename?: 'ApprovalProcessNodeEdge', node?: { __typename?: 'ApprovalProcessNode', id: string, sentForApprovalDate?: any | null, sentForAuthorizationDate?: any | null, sentForFinanceReleaseDate?: any | null, approvalNumberRequired: number, authorizationNumberRequired: number, financeReleaseNumberRequired: number, rejectedOn?: string | null, sentForApprovalBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, sentForAuthorizationBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, sentForFinanceReleaseBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, actions?: { __typename?: 'FilteredActionsListNode', approval?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null, authorization?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null, financeRelease?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null, reject?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null } | null } | null } | null> }, steficonRule?: { __typename?: 'RuleCommitNode', id: string, rule?: { __typename?: 'SteficonRuleNode', id: string, name: string } | null } | null, steficonRuleTargeting?: { __typename?: 'RuleCommitNode', id: string, rule?: { __typename?: 'SteficonRuleNode', id: string, name: string } | null } | null, deliveryMechanisms?: Array<{ __typename?: 'DeliveryMechanismPerPaymentPlanNode', id: string, name?: string | null, code?: string | null, order?: number | null, sentToPaymentGateway: boolean, chosenConfiguration?: string | null, fsp?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string, communicationChannel: FinancialServiceProviderCommunicationChannel, isPaymentGateway?: boolean | null } | null } | null> | null, splitChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, volumeByDeliveryMechanism?: Array<{ __typename?: 'VolumeByDeliveryMechanismNode', volume?: number | null, volumeUsd?: number | null, deliveryMechanism?: { __typename?: 'DeliveryMechanismPerPaymentPlanNode', id: string, name?: string | null, order?: number | null, fsp?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string } | null } | null } | null> | null, verificationPlans?: { __typename?: 'PaymentVerificationPlanNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'PaymentVerificationPlanNodeEdge', node?: { __typename?: 'PaymentVerificationPlanNode', id: string, unicefId?: string | null, adminUrl?: string | null, status: PaymentVerificationPlanStatus, sampleSize?: number | null, receivedCount?: number | null, notReceivedCount?: number | null, respondedCount?: number | null, verificationChannel: PaymentVerificationPlanVerificationChannel, sampling: PaymentVerificationPlanSampling, receivedWithProblemsCount?: number | null, rapidProFlowId: string, confidenceInterval?: number | null, marginOfError?: number | null, activationDate?: any | null, completionDate?: any | null, excludedAdminAreasFilter?: Array<string | null> | null, sexFilter?: string | null, xlsxFileExporting: boolean, hasXlsxFile?: boolean | null, xlsxFileWasDownloaded?: boolean | null, xlsxFileImported: boolean, ageFilter?: { __typename?: 'AgeFilterObject', min?: number | null, max?: number | null } | null } | null } | null> } | null, paymentVerificationSummary?: { __typename?: 'PaymentVerificationSummaryNode', id: string, createdAt: any, updatedAt: any, status: PaymentVerificationSummaryStatus, activationDate?: any | null, completionDate?: any | null } | null, paymentItems: { __typename?: 'PaymentNodeConnection', totalCount?: number | null, edgeCount?: number | null, edges: Array<{ __typename?: 'PaymentNodeEdge', node?: { __typename?: 'PaymentNode', id: string, status: PaymentStatus } | null } | null> }, reconciliationSummary?: { __typename?: 'ReconciliationSummaryNode', deliveredFully?: number | null, deliveredPartially?: number | null, notDelivered?: number | null, unsuccessful?: number | null, pending?: number | null, numberOfPayments?: number | null, reconciled?: number | null } | null, excludedHouseholds?: Array<{ __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null> | null, excludedIndividuals?: Array<{ __typename?: 'IndividualNode', id: string, unicefId?: string | null } | null> | null, followUps: { __typename?: 'PaymentPlanNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'PaymentPlanNodeEdge', node?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null, createdAt: any, paymentItems: { __typename?: 'PaymentNodeConnection', totalCount?: number | null } } | null } | null> }, sourcePaymentPlan?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null } | null, supportingDocuments?: Array<{ __typename?: 'PaymentPlanSupportingDocumentNode', id: string, title: string, file: string } | null> | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds?: string | null, individualIds?: string | null, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, householdIds: string, individualIds: string, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null, collectorsFiltersBlocks: Array<{ __typename: 'TargetingCollectorRuleFilterBlockNode', id: any, createdAt: any, updatedAt: any, collectorBlockFilters?: Array<{ __typename: 'TargetingCollectorBlockRuleFilterNode', id: any, createdAt: any, updatedAt: any, fieldName: string, comparisonMethod?: string | null, flexFieldClassification: TargetingCollectorBlockRuleFilterFlexFieldClassification, arguments?: Array<any | null> | null, labelEn?: string | null } | null> | null }>, householdsFiltersBlocks?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null } | null } | null };
 
 export type AllCashPlansAndPaymentPlansQueryVariables = Exact<{
   businessArea: Scalars['String']['input'];
@@ -9714,7 +9162,7 @@ export type AllPaymentRecordsAndPaymentsQueryVariables = Exact<{
 }>;
 
 
-export type AllPaymentRecordsAndPaymentsQuery = { __typename?: 'Query', allPaymentRecordsAndPayments?: { __typename?: 'PaginatedPaymentRecordsAndPaymentsNode', totalCount?: number | null, pageInfo?: { __typename?: 'PageInfoNode', hasNextPage?: boolean | null, hasPreviousPage?: boolean | null, startCursor?: string | null, endCursor?: string | null } | null, edges?: Array<{ __typename?: 'PaymentRecordsAndPaymentsEdges', cursor?: string | null, node?: { __typename?: 'PaymentRecordAndPaymentNode', objType?: string | null, id?: string | null, fullName?: string | null, status?: string | null, caId?: string | null, currency?: string | null, entitlementQuantity?: number | null, deliveredQuantity?: number | null, deliveredQuantityUsd?: number | null, deliveryDate?: string | null, parent?: { __typename?: 'CashPlanAndPaymentPlanNode', id?: string | null, programName?: string | null } | null, verification?: { __typename?: 'PaymentVerificationNode', id: string, receivedAmount?: number | null } | null } | null } | null> | null } | null };
+export type AllPaymentRecordsAndPaymentsQuery = { __typename?: 'Query', allPaymentRecordsAndPayments?: { __typename?: 'PaginatedPaymentRecordsAndPaymentsNode', totalCount?: number | null, pageInfo?: { __typename?: 'PageInfoNode', hasNextPage?: boolean | null, hasPreviousPage?: boolean | null, startCursor?: string | null, endCursor?: string | null } | null, edges?: Array<{ __typename?: 'PaymentRecordsAndPaymentsEdges', cursor?: string | null, node?: { __typename?: 'PaymentRecordAndPaymentNode', objType?: string | null, id?: string | null, fullName?: string | null, status?: string | null, unicefId?: string | null, currency?: string | null, entitlementQuantity?: number | null, deliveredQuantity?: number | null, deliveredQuantityUsd?: number | null, deliveryDate?: string | null, parent?: { __typename?: 'CashPlanAndPaymentPlanNode', id?: string | null, programName?: string | null } | null, verification?: { __typename?: 'PaymentVerificationNode', id: string, receivedAmount?: number | null } | null } | null } | null> | null } | null };
 
 export type AllPaymentsForTableQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
@@ -9727,7 +9175,7 @@ export type AllPaymentsForTableQueryVariables = Exact<{
 }>;
 
 
-export type AllPaymentsForTableQuery = { __typename?: 'Query', allPayments?: { __typename?: 'PaymentNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'PaymentNodeEdge', cursor: string, node?: { __typename?: 'PaymentNode', id: string, unicefId?: string | null, status: PaymentStatus, entitlementQuantity?: number | null, entitlementQuantityUsd?: number | null, currency: string, deliveredQuantity?: number | null, deliveredQuantityUsd?: number | null, paymentPlanHardConflicted?: boolean | null, paymentPlanSoftConflicted?: boolean | null, fspAuthCode?: string | null, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, size?: number | null, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null, individuals?: { __typename?: 'IndividualNodeConnection', edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string } | null } | null> } | null }, paymentPlanHardConflictedData?: Array<{ __typename?: 'PaymentConflictDataNode', paymentPlanUnicefId?: string | null, paymentPlanId?: string | null, paymentPlanStartDate?: string | null, paymentPlanEndDate?: string | null, paymentPlanStatus?: string | null, paymentId?: string | null, paymentUnicefId?: string | null } | null> | null, paymentPlanSoftConflictedData?: Array<{ __typename?: 'PaymentConflictDataNode', paymentPlanUnicefId?: string | null, paymentPlanId?: string | null, paymentPlanStartDate?: string | null, paymentPlanEndDate?: string | null, paymentPlanStatus?: string | null, paymentId?: string | null, paymentUnicefId?: string | null } | null> | null, collector: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, financialServiceProvider?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string } | null } | null } | null> } | null };
+export type AllPaymentsForTableQuery = { __typename?: 'Query', allPayments?: { __typename?: 'PaymentNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'PaymentNodeEdge', cursor: string, node?: { __typename?: 'PaymentNode', id: string, unicefId?: string | null, status: PaymentStatus, vulnerabilityScore?: number | null, entitlementQuantity?: number | null, entitlementQuantityUsd?: number | null, currency?: string | null, deliveredQuantity?: number | null, deliveredQuantityUsd?: number | null, paymentPlanHardConflicted?: boolean | null, paymentPlanSoftConflicted?: boolean | null, fspAuthCode?: string | null, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, size?: number | null, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string } | null, individuals?: { __typename?: 'IndividualNodeConnection', edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string } | null } | null> } | null }, paymentPlanHardConflictedData?: Array<{ __typename?: 'PaymentConflictDataNode', paymentPlanUnicefId?: string | null, paymentPlanId?: string | null, paymentPlanStartDate?: string | null, paymentPlanEndDate?: string | null, paymentPlanStatus?: string | null, paymentId?: string | null, paymentUnicefId?: string | null } | null> | null, paymentPlanSoftConflictedData?: Array<{ __typename?: 'PaymentConflictDataNode', paymentPlanUnicefId?: string | null, paymentPlanId?: string | null, paymentPlanStartDate?: string | null, paymentPlanEndDate?: string | null, paymentPlanStatus?: string | null, paymentId?: string | null, paymentUnicefId?: string | null } | null> | null, collector: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, financialServiceProvider?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string } | null } | null } | null> } | null };
 
 export type IndividualPhotosQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -9894,7 +9342,7 @@ export type AllIndividualsQueryVariables = Exact<{
 }>;
 
 
-export type AllIndividualsQuery = { __typename?: 'Query', allIndividuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'IndividualNodeEdge', cursor: string, node?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, fullName: string, relationship?: IndividualRelationship | null, age?: number | null, sex: IndividualSex, lastRegistrationDate: any, phoneNo: string, birthDate: any, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, countryIso3?: string | null, number: string } | null } | null> } | null, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null } | null } | null> } | null };
+export type AllIndividualsQuery = { __typename?: 'Query', allIndividuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'IndividualNodeEdge', cursor: string, node?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, biometricDeduplicationGoldenRecordStatus: IndividualBiometricDeduplicationGoldenRecordStatus, biometricDeduplicationBatchStatus: IndividualBiometricDeduplicationBatchStatus, sanctionListLastCheck?: any | null, fullName: string, relationship?: IndividualRelationship | null, age?: number | null, sex: IndividualSex, lastRegistrationDate: any, phoneNo: string, birthDate: any, biometricDeduplicationBatchResults?: Array<{ __typename?: 'DeduplicationEngineSimilarityPairIndividualNode', id?: string | null, unicefId?: string | null, fullName?: string | null, age?: number | null, location?: string | null, similarityScore?: number | null, photo?: string | null } | null> | null, biometricDeduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationEngineSimilarityPairIndividualNode', id?: string | null, unicefId?: string | null, fullName?: string | null, age?: number | null, location?: string | null, similarityScore?: number | null, photo?: string | null } | null> | null, deduplicationBatchResults?: Array<{ __typename?: 'DeduplicationResultNode', unicefId?: string | null, hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, location?: string | null, age?: number | null, duplicate?: boolean | null, distinct?: boolean | null } | null> | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', unicefId?: string | null, hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, location?: string | null, age?: number | null, duplicate?: boolean | null, distinct?: boolean | null } | null> | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, countryIso3?: string | null, number: string } | null } | null> } | null, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null } | null } | null> } | null };
 
 export type AllIndividualsForPopulationTableQueryVariables = Exact<{
   before?: InputMaybe<Scalars['String']['input']>;
@@ -9926,14 +9374,14 @@ export type AllIndividualsForPopulationTableQueryVariables = Exact<{
 }>;
 
 
-export type AllIndividualsForPopulationTableQuery = { __typename?: 'Query', allIndividuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'IndividualNodeEdge', cursor: string, node?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, status?: string | null, sanctionListLastCheck?: any | null, fullName: string, relationship?: IndividualRelationship | null, age?: number | null, sex: IndividualSex, lastRegistrationDate: any, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null, program?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null } | null> } | null };
+export type AllIndividualsForPopulationTableQuery = { __typename?: 'Query', allIndividuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'IndividualNodeEdge', cursor: string, node?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, status?: string | null, sanctionListLastCheck?: any | null, fullName: string, relationship?: IndividualRelationship | null, age?: number | null, sex: IndividualSex, lastRegistrationDate: any, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null, program?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null } | null> } | null };
 
 export type HouseholdQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type HouseholdQuery = { __typename?: 'Query', household?: { __typename?: 'HouseholdNode', activeIndividualsCount?: number | null, countryOrigin?: string | null, country?: string | null, zipCode?: string | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, start?: any | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, address: string, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, flexFields?: any | null, programRegistrationId?: string | null, id: string, status?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, residenceStatus?: string | null, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, totalCashReceivedUsd?: any | null, currency?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unicefId?: string | null, unhcrId: string, geopoint?: any | null, village: string, adminAreaTitle?: string | null, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null };
+export type HouseholdQuery = { __typename?: 'Query', household?: { __typename?: 'HouseholdNode', activeIndividualsCount?: number | null, countryOrigin?: string | null, country?: string | null, zipCode?: string | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, start?: any | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, address: string, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, flexFields?: any | null, programRegistrationId?: string | null, id: string, status?: string | null, adminUrl?: string | null, createdAt: any, rdiMergeStatus: HouseholdRdiMergeStatus, residenceStatus?: string | null, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, totalCashReceivedUsd?: any | null, currency?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unicefId?: string | null, unhcrId: string, geopoint?: any | null, village: string, adminAreaTitle?: string | null, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, rdiMergeStatus: IndividualRdiMergeStatus, adminUrl?: string | null, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, importId?: string | null, totalCashReceivedUsd?: any | null, lastRegistrationDate: any, start?: any | null, firstRegistrationDate: any, countryOrigin?: string | null, village: string, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } | null } | null };
 
 export type HouseholdChoiceDataQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -10004,7 +9452,7 @@ export type AllProgramsQueryVariables = Exact<{
 }>;
 
 
-export type AllProgramsQuery = { __typename?: 'Query', allPrograms?: { __typename?: 'ProgramNodeConnection', totalCount?: number | null, edgeCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, endCursor?: string | null, startCursor?: string | null }, edges: Array<{ __typename?: 'ProgramNodeEdge', cursor: string, node?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate?: any | null, status: ProgramStatus, caId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, populationGoal: number, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null } | null } | null> } | null };
+export type AllProgramsQuery = { __typename?: 'Query', allPrograms?: { __typename?: 'ProgramNodeConnection', totalCount?: number | null, edgeCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, endCursor?: string | null, startCursor?: string | null }, edges: Array<{ __typename?: 'ProgramNodeEdge', cursor: string, node?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate?: any | null, status: ProgramStatus, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, populationGoal: number, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null } | null } | null> } | null };
 
 export type AllProgramsForChoicesQueryVariables = Exact<{
   before?: InputMaybe<Scalars['String']['input']>;
@@ -10058,7 +9506,7 @@ export type ProgramQueryVariables = Exact<{
 }>;
 
 
-export type ProgramQuery = { __typename?: 'Query', program?: { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate?: any | null, status: ProgramStatus, caId?: string | null, caHashId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, isSocialWorkerProgram?: boolean | null, version: any, adminUrl?: string | null, partnerAccess: ProgramPartnerAccess, targetPopulationsCount?: number | null, canFinish?: boolean | null, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string, type?: DataCollectingTypeType | null } | null, partners?: Array<{ __typename?: 'PartnerNode', id: string, name?: string | null, areaAccess?: string | null, areas?: Array<{ __typename?: 'AreaNode', id: string, level: number } | null> | null } | null> | null, registrationImports: { __typename?: 'RegistrationDataImportNodeConnection', totalCount?: number | null }, pduFields?: Array<{ __typename?: 'PeriodicFieldNode', id: string, label: any, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null> | null, beneficiaryGroup?: { __typename?: 'BeneficiaryGroupNode', id: string, name: string, groupLabel: string, groupLabelPlural: string, memberLabel: string, memberLabelPlural: string, masterDetail: boolean } | null } | null };
+export type ProgramQuery = { __typename?: 'Query', program?: { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate?: any | null, status: ProgramStatus, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, isSocialWorkerProgram?: boolean | null, version: any, adminUrl?: string | null, partnerAccess: ProgramPartnerAccess, targetPopulationsCount?: number | null, canFinish?: boolean | null, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string, type?: DataCollectingTypeType | null } | null, partners?: Array<{ __typename?: 'PartnerNode', id: string, name?: string | null, areaAccess?: string | null, areas?: Array<{ __typename?: 'AreaNode', id: string, level: number } | null> | null } | null> | null, registrationImports: { __typename?: 'RegistrationDataImportNodeConnection', totalCount?: number | null }, pduFields?: Array<{ __typename?: 'PeriodicFieldNode', id: string, label: any, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null> | null, beneficiaryGroup?: { __typename?: 'BeneficiaryGroupNode', id: string, name: string, groupLabel: string, groupLabelPlural: string, memberLabel: string, memberLabelPlural: string, masterDetail: boolean } | null } | null };
 
 export type ProgrammeChoiceDataQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -10119,7 +9567,7 @@ export type RegistrationDataImportQueryVariables = Exact<{
 }>;
 
 
-export type RegistrationDataImportQuery = { __typename?: 'Query', registrationDataImport?: { __typename?: 'RegistrationDataImportNode', numberOfIndividuals: number, datahubId?: any | null, errorMessage: string, canMerge?: boolean | null, biometricDeduplicationEnabled?: boolean | null, deduplicationEngineStatus?: RegistrationDataImportDeduplicationEngineStatus | null, id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, biometricDeduplicated?: string | null, batchDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, batchUniqueCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordUniqueCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordPossibleDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate?: any | null, status: ProgramStatus } | null } | null };
+export type RegistrationDataImportQuery = { __typename?: 'Query', registrationDataImport?: { __typename?: 'RegistrationDataImportNode', numberOfIndividuals: number, errorMessage: string, canMerge?: boolean | null, biometricDeduplicationEnabled?: boolean | null, deduplicationEngineStatus?: RegistrationDataImportDeduplicationEngineStatus | null, id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, biometricDeduplicated?: string | null, batchDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, batchUniqueCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordUniqueCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordPossibleDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate?: any | null, status: ProgramStatus } | null } | null };
 
 export type XlsxImportDataQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -10225,7 +9673,7 @@ export type AllSurveysQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   program: Scalars['ID']['input'];
-  targetPopulation?: InputMaybe<Scalars['ID']['input']>;
+  paymentPlan?: InputMaybe<Scalars['ID']['input']>;
   createdAtRange?: InputMaybe<Scalars['String']['input']>;
   createdBy?: InputMaybe<Scalars['String']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
@@ -10258,33 +9706,12 @@ export type SurveyQueryVariables = Exact<{
 }>;
 
 
-export type SurveyQuery = { __typename?: 'Query', survey?: { __typename?: 'SurveyNode', id: string, unicefId?: string | null, category: SurveyCategory, title: string, adminUrl?: string | null, createdAt: any, body: string, rapidProUrl?: string | null, sampleFilePath?: string | null, hasValidSampleFile?: boolean | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, username: string, email: string } | null, targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null };
+export type SurveyQuery = { __typename?: 'Query', survey?: { __typename?: 'SurveyNode', id: string, unicefId?: string | null, category: SurveyCategory, title: string, adminUrl?: string | null, createdAt: any, body: string, rapidProUrl?: string | null, sampleFilePath?: string | null, hasValidSampleFile?: boolean | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, username: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string } | null, paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null, name?: string | null } | null } | null };
 
 export type SurveysChoiceDataQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type SurveysChoiceDataQuery = { __typename?: 'Query', surveyCategoryChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
-
-export type AllActiveTargetPopulationsQueryVariables = Exact<{
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  name?: InputMaybe<Scalars['String']['input']>;
-  status?: InputMaybe<Scalars['String']['input']>;
-  totalHouseholdsCountWithValidPhoneNoMin?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountWithValidPhoneNoMax?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountMin?: InputMaybe<Scalars['Int']['input']>;
-  totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
-  businessArea?: InputMaybe<Scalars['String']['input']>;
-  program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>> | InputMaybe<Scalars['ID']['input']>>;
-  createdAtRange?: InputMaybe<Scalars['String']['input']>;
-  statusNot?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type AllActiveTargetPopulationsQuery = { __typename?: 'Query', allActiveTargetPopulations?: { __typename?: 'TargetPopulationNodeConnection', totalCount?: number | null, edgeCount?: number | null, edges: Array<{ __typename?: 'TargetPopulationNodeEdge', cursor: string, node?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, totalHouseholdsCount?: number | null, totalHouseholdsCountWithValidPhoneNo?: number | null, createdAt: any, updatedAt: any, program: { __typename?: 'ProgramNode', id: string, name: string }, createdBy?: { __typename?: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null } | null } | null> } | null };
 
 export type AllCollectorFieldsAttributesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -10305,23 +9732,6 @@ export type AllSteficonRulesQueryVariables = Exact<{
 
 export type AllSteficonRulesQuery = { __typename?: 'Query', allSteficonRules?: { __typename?: 'SteficonRuleNodeConnection', edges: Array<{ __typename?: 'SteficonRuleNodeEdge', node?: { __typename?: 'SteficonRuleNode', id: string, name: string } | null } | null> } | null };
 
-export type AllTargetPopulationForChoicesQueryVariables = Exact<{
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  name?: InputMaybe<Scalars['String']['input']>;
-  status?: InputMaybe<Scalars['String']['input']>;
-  numberOfHouseholdsMin?: InputMaybe<Scalars['Int']['input']>;
-  numberOfHouseholdsMax?: InputMaybe<Scalars['Int']['input']>;
-  businessArea?: InputMaybe<Scalars['String']['input']>;
-  program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>> | InputMaybe<Scalars['ID']['input']>>;
-}>;
-
-
-export type AllTargetPopulationForChoicesQuery = { __typename?: 'Query', allTargetPopulation?: { __typename?: 'TargetPopulationNodeConnection', totalCount?: number | null, edgeCount?: number | null, edges: Array<{ __typename?: 'TargetPopulationNodeEdge', cursor: string, node?: { __typename?: 'TargetPopulationNode', id: string, name: string } | null } | null> } | null };
-
 export type AllTargetPopulationsQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -10329,38 +9739,39 @@ export type AllTargetPopulationsQueryVariables = Exact<{
   last?: InputMaybe<Scalars['Int']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
-  status?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
   totalHouseholdsCountMin?: InputMaybe<Scalars['Int']['input']>;
   totalHouseholdsCountMax?: InputMaybe<Scalars['Int']['input']>;
-  businessArea?: InputMaybe<Scalars['String']['input']>;
-  program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>> | InputMaybe<Scalars['ID']['input']>>;
+  businessArea: Scalars['String']['input'];
+  program?: InputMaybe<Scalars['String']['input']>;
   programCycle?: InputMaybe<Scalars['String']['input']>;
   createdAtRange?: InputMaybe<Scalars['String']['input']>;
-  paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
 }>;
 
 
-export type AllTargetPopulationsQuery = { __typename?: 'Query', allTargetPopulation?: { __typename?: 'TargetPopulationNodeConnection', totalCount?: number | null, edgeCount?: number | null, edges: Array<{ __typename?: 'TargetPopulationNodeEdge', cursor: string, node?: { __typename: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, createdAt: any, updatedAt: any, totalHouseholdsCount?: number | null, totalHouseholdsCountWithValidPhoneNo?: number | null, totalIndividualsCount?: number | null, program: { __typename: 'ProgramNode', id: string, name: string }, createdBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null } | null } | null> } | null };
+export type AllTargetPopulationsQuery = { __typename?: 'Query', allPaymentPlans?: { __typename?: 'PaymentPlanNodeConnection', edges: Array<{ __typename?: 'PaymentPlanNodeEdge', cursor: string, node?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null, name?: string | null, isFollowUp: boolean, status: PaymentPlanStatus, createdAt: any, updatedAt: any, currency?: string | null, currencyName?: string | null, startDate?: any | null, endDate?: any | null, dispersionStartDate?: any | null, dispersionEndDate?: any | null, femaleChildrenCount: number, femaleAdultsCount: number, maleChildrenCount: number, maleAdultsCount: number, totalHouseholdsCount: number, totalIndividualsCount: number, totalEntitledQuantity?: number | null, totalDeliveredQuantity?: number | null, totalUndeliveredQuantity?: number | null, followUps: { __typename?: 'PaymentPlanNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'PaymentPlanNodeEdge', node?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null, dispersionStartDate?: any | null, dispersionEndDate?: any | null } | null } | null> }, createdBy: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string }, program?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null } | null> } | null };
+
+export type AllTargetPopulationForChoicesQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  orderBy?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  businessArea: Scalars['String']['input'];
+  program: Scalars['String']['input'];
+  status?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
+}>;
+
+
+export type AllTargetPopulationForChoicesQuery = { __typename?: 'Query', allPaymentPlans?: { __typename?: 'PaymentPlanNodeConnection', totalCount?: number | null, edgeCount?: number | null, edges: Array<{ __typename?: 'PaymentPlanNodeEdge', cursor: string, node?: { __typename?: 'PaymentPlanNode', id: string, name?: string | null } | null } | null> } | null };
 
 export type TargetPopulationQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type TargetPopulationQuery = { __typename?: 'Query', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, adminUrl?: string | null, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, hasEmptyCriteria?: boolean | null, hasEmptyIdsCriteria?: boolean | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate?: any | null, isSocialWorkerProgram?: boolean | null }, programCycle: { __typename: 'ProgramCycleNode', id: string, title?: string | null }, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds?: string | null, individualIds?: string | null, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, householdIds: string, individualIds: string, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null, collectorsFiltersBlocks: Array<{ __typename: 'TargetingCollectorRuleFilterBlockNode', id: any, createdAt: any, updatedAt: any, collectorBlockFilters?: Array<{ __typename: 'TargetingCollectorBlockRuleFilterNode', id: any, createdAt: any, updatedAt: any, fieldName: string, comparisonMethod?: string | null, flexFieldClassification: TargetingCollectorBlockRuleFilterFlexFieldClassification, arguments?: Array<any | null> | null, labelEn?: string | null } | null> | null }>, householdsFiltersBlocks?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null } | null } | null };
-
-export type TargetPopulationHouseholdsQueryVariables = Exact<{
-  targetPopulation: Scalars['ID']['input'];
-  first?: InputMaybe<Scalars['Int']['input']>;
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  businessArea?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type TargetPopulationHouseholdsQuery = { __typename?: 'Query', targetPopulationHouseholds?: { __typename?: 'HouseholdNodeConnection', totalCount?: number | null, edgeCount?: number | null, edges: Array<{ __typename?: 'HouseholdNodeEdge', cursor: string, node?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, size?: number | null, updatedAt: any, address: string, headOfHousehold?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, givenName: string, familyName: string, fullName: string } | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string } | null, selection?: { __typename?: 'HouseholdSelectionNode', vulnerabilityScore?: number | null } | null } | null } | null> } | null };
+export type TargetPopulationQuery = { __typename?: 'Query', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, version: any, name?: string | null, status: PaymentPlanStatus, buildStatus?: PaymentPlanBuildStatus | null, adminUrl?: string | null, totalHouseholdsCount: number, totalIndividualsCount: number, femaleChildrenCount: number, femaleAdultsCount: number, maleChildrenCount: number, maleAdultsCount: number, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, steficonRuleTargeting?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, program?: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate?: any | null, isSocialWorkerProgram?: boolean | null } | null, programCycle: { __typename: 'ProgramCycleNode', id: string, title?: string | null }, createdBy: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string }, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds?: string | null, individualIds?: string | null, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, householdIds: string, individualIds: string, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null, collectorsFiltersBlocks: Array<{ __typename: 'TargetingCollectorRuleFilterBlockNode', id: any, createdAt: any, updatedAt: any, collectorBlockFilters?: Array<{ __typename: 'TargetingCollectorBlockRuleFilterNode', id: any, createdAt: any, updatedAt: any, fieldName: string, comparisonMethod?: string | null, flexFieldClassification: TargetingCollectorBlockRuleFilterFlexFieldClassification, arguments?: Array<any | null> | null, labelEn?: string | null } | null> | null }>, householdsFiltersBlocks?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null } | null } | null };
 
 export const IndividualMinimalFragmentDoc = gql`
     fragment individualMinimal on IndividualNode {
@@ -10692,7 +10103,6 @@ export const HouseholdDetailedFragmentDoc = gql`
   orgEnumerator
   updatedAt
   consent
-  collectIndividualData
   individuals {
     totalCount
     edges {
@@ -10789,7 +10199,7 @@ export const GrievanceTicketDetailedFragmentDoc = gql`
   }
   paymentRecord {
     id
-    caId
+    unicefId
     deliveredQuantity
     entitlementQuantity
     objType
@@ -11237,8 +10647,6 @@ export const ProgramDetailsFragmentDoc = gql`
   startDate
   endDate
   status
-  caId
-  caHashId
   description
   budget
   frequencyOfPayments
@@ -11332,7 +10740,6 @@ export const RegistrationDetailedFragmentDoc = gql`
     fragment registrationDetailed on RegistrationDataImportNode {
   ...registrationMinimal
   numberOfIndividuals
-  datahubId
   errorMessage
   batchDuplicatesCountAndPercentage {
     count
@@ -11359,176 +10766,6 @@ export const RegistrationDetailedFragmentDoc = gql`
   deduplicationEngineStatus
 }
     ${RegistrationMinimalFragmentDoc}`;
-export const TargetPopulationMinimalFragmentDoc = gql`
-    fragment targetPopulationMinimal on TargetPopulationNode {
-  id
-  name
-  status
-  createdAt
-  updatedAt
-  totalHouseholdsCount
-  totalHouseholdsCountWithValidPhoneNo
-  totalIndividualsCount
-  __typename
-  program {
-    id
-    name
-    __typename
-  }
-  createdBy {
-    id
-    firstName
-    lastName
-    __typename
-  }
-}
-    `;
-export const TargetPopulationDetailedFragmentDoc = gql`
-    fragment targetPopulationDetailed on TargetPopulationNode {
-  id
-  name
-  status
-  adminUrl
-  buildStatus
-  totalHouseholdsCount
-  totalIndividualsCount
-  childMaleCount
-  childFemaleCount
-  adultMaleCount
-  adultFemaleCount
-  caHashId
-  excludedIds
-  exclusionReason
-  steficonRule {
-    __typename
-    id
-    rule {
-      __typename
-      id
-      name
-    }
-  }
-  vulnerabilityScoreMin
-  vulnerabilityScoreMax
-  changeDate
-  finalizedAt
-  finalizedBy {
-    __typename
-    id
-    firstName
-    lastName
-  }
-  program {
-    __typename
-    id
-    name
-    status
-    startDate
-    endDate
-    isSocialWorkerProgram
-  }
-  programCycle {
-    __typename
-    id
-    title
-  }
-  createdBy {
-    __typename
-    id
-    email
-    firstName
-    lastName
-  }
-  hasEmptyCriteria
-  hasEmptyIdsCriteria
-  targetingCriteria {
-    __typename
-    id
-    flagExcludeIfActiveAdjudicationTicket
-    flagExcludeIfOnSanctionList
-    householdIds
-    individualIds
-    rules {
-      __typename
-      id
-      householdIds
-      individualIds
-      individualsFiltersBlocks {
-        __typename
-        individualBlockFilters {
-          __typename
-          id
-          fieldName
-          flexFieldClassification
-          roundNumber
-          arguments
-          comparisonMethod
-          fieldAttribute {
-            __typename
-            id
-            name
-            labelEn
-            type
-            choices {
-              value
-              labelEn
-            }
-            pduData {
-              id
-              subtype
-              numberOfRounds
-              roundsNames
-            }
-          }
-        }
-      }
-      collectorsFiltersBlocks {
-        __typename
-        id
-        createdAt
-        updatedAt
-        collectorBlockFilters {
-          __typename
-          id
-          createdAt
-          updatedAt
-          fieldName
-          comparisonMethod
-          flexFieldClassification
-          arguments
-          labelEn
-        }
-      }
-      householdsFiltersBlocks {
-        __typename
-        id
-        fieldName
-        flexFieldClassification
-        roundNumber
-        arguments
-        comparisonMethod
-        fieldAttribute {
-          __typename
-          id
-          name
-          labelEn
-          type
-          choices {
-            value
-            labelEn
-          }
-          pduData {
-            id
-            subtype
-            numberOfRounds
-            roundsNames
-          }
-        }
-      }
-    }
-  }
-}
-    `;
 export const CreateFeedbackTicketDocument = gql`
     mutation CreateFeedbackTicket($input: CreateFeedbackInput!) {
   createFeedback(input: $input) {
@@ -12920,8 +12157,10 @@ export type CreateFollowUpPpMutationHookResult = ReturnType<typeof useCreateFoll
 export type CreateFollowUpPpMutationResult = Apollo.MutationResult<CreateFollowUpPpMutation>;
 export type CreateFollowUpPpMutationOptions = Apollo.BaseMutationOptions<CreateFollowUpPpMutation, CreateFollowUpPpMutationVariables>;
 export const CreatePpDocument = gql`
-    mutation CreatePP($input: CreatePaymentPlanInput!) {
-  createPaymentPlan(input: $input) {
+    mutation CreatePP($programCycleId: ID!, $name: String!, $targetingCriteria: TargetingCriteriaObjectType!, $excludedIds: String!, $exclusionReason: String) {
+  createPaymentPlan(
+    input: {programCycleId: $programCycleId, name: $name, targetingCriteria: $targetingCriteria, excludedIds: $excludedIds, exclusionReason: $exclusionReason}
+  ) {
     paymentPlan {
       id
     }
@@ -12943,7 +12182,11 @@ export type CreatePpMutationFn = Apollo.MutationFunction<CreatePpMutation, Creat
  * @example
  * const [createPpMutation, { data, loading, error }] = useCreatePpMutation({
  *   variables: {
- *      input: // value for 'input'
+ *      programCycleId: // value for 'programCycleId'
+ *      name: // value for 'name'
+ *      targetingCriteria: // value for 'targetingCriteria'
+ *      excludedIds: // value for 'excludedIds'
+ *      exclusionReason: // value for 'exclusionReason'
  *   },
  * });
  */
@@ -12954,8 +12197,8 @@ export function useCreatePpMutation(baseOptions?: Apollo.MutationHookOptions<Cre
 export type CreatePpMutationHookResult = ReturnType<typeof useCreatePpMutation>;
 export type CreatePpMutationResult = Apollo.MutationResult<CreatePpMutation>;
 export type CreatePpMutationOptions = Apollo.BaseMutationOptions<CreatePpMutation, CreatePpMutationVariables>;
-export const DeletePpDocument = gql`
-    mutation DeletePP($paymentPlanId: ID!) {
+export const DeletePaymentPDocument = gql`
+    mutation DeletePaymentP($paymentPlanId: ID!) {
   deletePaymentPlan(paymentPlanId: $paymentPlanId) {
     paymentPlan {
       id
@@ -12964,35 +12207,37 @@ export const DeletePpDocument = gql`
   }
 }
     `;
-export type DeletePpMutationFn = Apollo.MutationFunction<DeletePpMutation, DeletePpMutationVariables>;
+export type DeletePaymentPMutationFn = Apollo.MutationFunction<DeletePaymentPMutation, DeletePaymentPMutationVariables>;
 
 /**
- * __useDeletePpMutation__
+ * __useDeletePaymentPMutation__
  *
- * To run a mutation, you first call `useDeletePpMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useDeletePpMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useDeletePaymentPMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeletePaymentPMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [deletePpMutation, { data, loading, error }] = useDeletePpMutation({
+ * const [deletePaymentPMutation, { data, loading, error }] = useDeletePaymentPMutation({
  *   variables: {
  *      paymentPlanId: // value for 'paymentPlanId'
  *   },
  * });
  */
-export function useDeletePpMutation(baseOptions?: Apollo.MutationHookOptions<DeletePpMutation, DeletePpMutationVariables>) {
+export function useDeletePaymentPMutation(baseOptions?: Apollo.MutationHookOptions<DeletePaymentPMutation, DeletePaymentPMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<DeletePpMutation, DeletePpMutationVariables>(DeletePpDocument, options);
+        return Apollo.useMutation<DeletePaymentPMutation, DeletePaymentPMutationVariables>(DeletePaymentPDocument, options);
       }
-export type DeletePpMutationHookResult = ReturnType<typeof useDeletePpMutation>;
-export type DeletePpMutationResult = Apollo.MutationResult<DeletePpMutation>;
-export type DeletePpMutationOptions = Apollo.BaseMutationOptions<DeletePpMutation, DeletePpMutationVariables>;
+export type DeletePaymentPMutationHookResult = ReturnType<typeof useDeletePaymentPMutation>;
+export type DeletePaymentPMutationResult = Apollo.MutationResult<DeletePaymentPMutation>;
+export type DeletePaymentPMutationOptions = Apollo.BaseMutationOptions<DeletePaymentPMutation, DeletePaymentPMutationVariables>;
 export const UpdatePpDocument = gql`
-    mutation UpdatePP($input: UpdatePaymentPlanInput!) {
-  updatePaymentPlan(input: $input) {
+    mutation UpdatePP($paymentPlanId: ID!, $dispersionStartDate: Date, $dispersionEndDate: Date, $currency: String, $name: String, $targetingCriteria: TargetingCriteriaObjectType, $programCycleId: ID, $vulnerabilityScoreMin: Decimal, $vulnerabilityScoreMax: Decimal, $excludedIds: String, $exclusionReason: String) {
+  updatePaymentPlan(
+    input: {paymentPlanId: $paymentPlanId, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, currency: $currency, name: $name, targetingCriteria: $targetingCriteria, programCycleId: $programCycleId, vulnerabilityScoreMin: $vulnerabilityScoreMin, vulnerabilityScoreMax: $vulnerabilityScoreMax, excludedIds: $excludedIds, exclusionReason: $exclusionReason}
+  ) {
     paymentPlan {
       id
     }
@@ -13014,7 +12259,17 @@ export type UpdatePpMutationFn = Apollo.MutationFunction<UpdatePpMutation, Updat
  * @example
  * const [updatePpMutation, { data, loading, error }] = useUpdatePpMutation({
  *   variables: {
- *      input: // value for 'input'
+ *      paymentPlanId: // value for 'paymentPlanId'
+ *      dispersionStartDate: // value for 'dispersionStartDate'
+ *      dispersionEndDate: // value for 'dispersionEndDate'
+ *      currency: // value for 'currency'
+ *      name: // value for 'name'
+ *      targetingCriteria: // value for 'targetingCriteria'
+ *      programCycleId: // value for 'programCycleId'
+ *      vulnerabilityScoreMin: // value for 'vulnerabilityScoreMin'
+ *      vulnerabilityScoreMax: // value for 'vulnerabilityScoreMax'
+ *      excludedIds: // value for 'excludedIds'
+ *      exclusionReason: // value for 'exclusionReason'
  *   },
  * });
  */
@@ -13151,8 +12406,11 @@ export type ExportXlsxPpListMutationHookResult = ReturnType<typeof useExportXlsx
 export type ExportXlsxPpListMutationResult = Apollo.MutationResult<ExportXlsxPpListMutation>;
 export type ExportXlsxPpListMutationOptions = Apollo.BaseMutationOptions<ExportXlsxPpListMutation, ExportXlsxPpListMutationVariables>;
 export const ExportXlsxPpListPerFspDocument = gql`
-    mutation ExportXlsxPPListPerFsp($paymentPlanId: ID!) {
-  exportXlsxPaymentPlanPaymentListPerFsp(paymentPlanId: $paymentPlanId) {
+    mutation ExportXlsxPPListPerFsp($paymentPlanId: ID!, $fspXlsxTemplateId: ID) {
+  exportXlsxPaymentPlanPaymentListPerFsp(
+    paymentPlanId: $paymentPlanId
+    fspXlsxTemplateId: $fspXlsxTemplateId
+  ) {
     paymentPlan {
       id
       status
@@ -13177,6 +12435,7 @@ export type ExportXlsxPpListPerFspMutationFn = Apollo.MutationFunction<ExportXls
  * const [exportXlsxPpListPerFspMutation, { data, loading, error }] = useExportXlsxPpListPerFspMutation({
  *   variables: {
  *      paymentPlanId: // value for 'paymentPlanId'
+ *      fspXlsxTemplateId: // value for 'fspXlsxTemplateId'
  *   },
  * });
  */
@@ -13314,6 +12573,46 @@ export function useMarkPayAsFailedMutation(baseOptions?: Apollo.MutationHookOpti
 export type MarkPayAsFailedMutationHookResult = ReturnType<typeof useMarkPayAsFailedMutation>;
 export type MarkPayAsFailedMutationResult = Apollo.MutationResult<MarkPayAsFailedMutation>;
 export type MarkPayAsFailedMutationOptions = Apollo.BaseMutationOptions<MarkPayAsFailedMutation, MarkPayAsFailedMutationVariables>;
+export const OpenPpDocument = gql`
+    mutation OpenPP($paymentPlanId: ID!, $dispersionStartDate: Date!, $dispersionEndDate: Date!, $currency: String!) {
+  openPaymentPlan(
+    input: {paymentPlanId: $paymentPlanId, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, currency: $currency}
+  ) {
+    paymentPlan {
+      id
+    }
+  }
+}
+    `;
+export type OpenPpMutationFn = Apollo.MutationFunction<OpenPpMutation, OpenPpMutationVariables>;
+
+/**
+ * __useOpenPpMutation__
+ *
+ * To run a mutation, you first call `useOpenPpMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useOpenPpMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [openPpMutation, { data, loading, error }] = useOpenPpMutation({
+ *   variables: {
+ *      paymentPlanId: // value for 'paymentPlanId'
+ *      dispersionStartDate: // value for 'dispersionStartDate'
+ *      dispersionEndDate: // value for 'dispersionEndDate'
+ *      currency: // value for 'currency'
+ *   },
+ * });
+ */
+export function useOpenPpMutation(baseOptions?: Apollo.MutationHookOptions<OpenPpMutation, OpenPpMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<OpenPpMutation, OpenPpMutationVariables>(OpenPpDocument, options);
+      }
+export type OpenPpMutationHookResult = ReturnType<typeof useOpenPpMutation>;
+export type OpenPpMutationResult = Apollo.MutationResult<OpenPpMutation>;
+export type OpenPpMutationOptions = Apollo.BaseMutationOptions<OpenPpMutation, OpenPpMutationVariables>;
 export const RevertMarkPayAsFailedDocument = gql`
     mutation revertMarkPayAsFailed($paymentId: ID!, $deliveredQuantity: Decimal!, $deliveryDate: Date!) {
   revertMarkPaymentAsFailed(
@@ -13361,14 +12660,22 @@ export type RevertMarkPayAsFailedMutationHookResult = ReturnType<typeof useRever
 export type RevertMarkPayAsFailedMutationResult = Apollo.MutationResult<RevertMarkPayAsFailedMutation>;
 export type RevertMarkPayAsFailedMutationOptions = Apollo.BaseMutationOptions<RevertMarkPayAsFailedMutation, RevertMarkPayAsFailedMutationVariables>;
 export const SetSteficonRuleOnPpListDocument = gql`
-    mutation SetSteficonRuleOnPPList($paymentPlanId: ID!, $steficonRuleId: ID!) {
+    mutation SetSteficonRuleOnPPList($paymentPlanId: ID!, $steficonRuleId: ID!, $version: BigInt) {
   setSteficonRuleOnPaymentPlanPaymentList(
     paymentPlanId: $paymentPlanId
     steficonRuleId: $steficonRuleId
+    version: $version
   ) {
     paymentPlan {
       id
       steficonRule {
+        id
+        rule {
+          id
+          name
+        }
+      }
+      steficonRuleTargeting {
         id
         rule {
           id
@@ -13396,6 +12703,7 @@ export type SetSteficonRuleOnPpListMutationFn = Apollo.MutationFunction<SetStefi
  *   variables: {
  *      paymentPlanId: // value for 'paymentPlanId'
  *      steficonRuleId: // value for 'steficonRuleId'
+ *      version: // value for 'version'
  *   },
  * });
  */
@@ -14143,7 +13451,6 @@ export const CreateRegistrationKoboImportDocument = gql`
       id
       name
       dataSource
-      datahubId
       screenBeneficiary
     }
     validationErrors
@@ -14185,7 +13492,6 @@ export const CreateRegistrationProgramPopulationImportDocument = gql`
       id
       name
       dataSource
-      datahubId
       screenBeneficiary
     }
     validationErrors
@@ -14225,7 +13531,6 @@ export const CreateRegistrationXlsxImportDocument = gql`
       id
       name
       dataSource
-      datahubId
       screenBeneficiary
     }
     validationErrors
@@ -14624,16 +13929,57 @@ export function useRestartCreateReportMutation(baseOptions?: Apollo.MutationHook
 export type RestartCreateReportMutationHookResult = ReturnType<typeof useRestartCreateReportMutation>;
 export type RestartCreateReportMutationResult = Apollo.MutationResult<RestartCreateReportMutation>;
 export type RestartCreateReportMutationOptions = Apollo.BaseMutationOptions<RestartCreateReportMutation, RestartCreateReportMutationVariables>;
+export const CopyCriteriaDocument = gql`
+    mutation CopyCriteria($name: String!, $paymentPlanId: ID!, $programCycleId: ID!) {
+  copyTargetingCriteria(
+    name: $name
+    paymentPlanId: $paymentPlanId
+    programCycleId: $programCycleId
+  ) {
+    paymentPlan {
+      id
+      name
+    }
+  }
+}
+    `;
+export type CopyCriteriaMutationFn = Apollo.MutationFunction<CopyCriteriaMutation, CopyCriteriaMutationVariables>;
+
+/**
+ * __useCopyCriteriaMutation__
+ *
+ * To run a mutation, you first call `useCopyCriteriaMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCopyCriteriaMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [copyCriteriaMutation, { data, loading, error }] = useCopyCriteriaMutation({
+ *   variables: {
+ *      name: // value for 'name'
+ *      paymentPlanId: // value for 'paymentPlanId'
+ *      programCycleId: // value for 'programCycleId'
+ *   },
+ * });
+ */
+export function useCopyCriteriaMutation(baseOptions?: Apollo.MutationHookOptions<CopyCriteriaMutation, CopyCriteriaMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CopyCriteriaMutation, CopyCriteriaMutationVariables>(CopyCriteriaDocument, options);
+      }
+export type CopyCriteriaMutationHookResult = ReturnType<typeof useCopyCriteriaMutation>;
+export type CopyCriteriaMutationResult = Apollo.MutationResult<CopyCriteriaMutation>;
+export type CopyCriteriaMutationOptions = Apollo.BaseMutationOptions<CopyCriteriaMutation, CopyCriteriaMutationVariables>;
 export const CreateTpDocument = gql`
-    mutation CreateTP($input: CreateTargetPopulationInput!) {
-  createTargetPopulation(input: $input) {
-    targetPopulation {
+    mutation CreateTP($input: CreatePaymentPlanInput!) {
+  createPaymentPlan(input: $input) {
+    paymentPlan {
       id
       status
       totalHouseholdsCount
       totalIndividualsCount
     }
-    validationErrors
   }
 }
     `;
@@ -14663,261 +14009,15 @@ export function useCreateTpMutation(baseOptions?: Apollo.MutationHookOptions<Cre
 export type CreateTpMutationHookResult = ReturnType<typeof useCreateTpMutation>;
 export type CreateTpMutationResult = Apollo.MutationResult<CreateTpMutation>;
 export type CreateTpMutationOptions = Apollo.BaseMutationOptions<CreateTpMutation, CreateTpMutationVariables>;
-export const DeleteTargetPopulationDocument = gql`
-    mutation DeleteTargetPopulation($input: DeleteTargetPopulationMutationInput!) {
-  deleteTargetPopulation(input: $input) {
-    clientMutationId
-  }
-}
-    `;
-export type DeleteTargetPopulationMutationFn = Apollo.MutationFunction<DeleteTargetPopulationMutation, DeleteTargetPopulationMutationVariables>;
-
-/**
- * __useDeleteTargetPopulationMutation__
- *
- * To run a mutation, you first call `useDeleteTargetPopulationMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useDeleteTargetPopulationMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [deleteTargetPopulationMutation, { data, loading, error }] = useDeleteTargetPopulationMutation({
- *   variables: {
- *      input: // value for 'input'
- *   },
- * });
- */
-export function useDeleteTargetPopulationMutation(baseOptions?: Apollo.MutationHookOptions<DeleteTargetPopulationMutation, DeleteTargetPopulationMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<DeleteTargetPopulationMutation, DeleteTargetPopulationMutationVariables>(DeleteTargetPopulationDocument, options);
-      }
-export type DeleteTargetPopulationMutationHookResult = ReturnType<typeof useDeleteTargetPopulationMutation>;
-export type DeleteTargetPopulationMutationResult = Apollo.MutationResult<DeleteTargetPopulationMutation>;
-export type DeleteTargetPopulationMutationOptions = Apollo.BaseMutationOptions<DeleteTargetPopulationMutation, DeleteTargetPopulationMutationVariables>;
-export const CopyTargetPopulationDocument = gql`
-    mutation CopyTargetPopulation($input: CopyTargetPopulationMutationInput!) {
-  copyTargetPopulation(input: $input) {
-    clientMutationId
-    targetPopulation {
-      id
-    }
-    validationErrors
-  }
-}
-    `;
-export type CopyTargetPopulationMutationFn = Apollo.MutationFunction<CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables>;
-
-/**
- * __useCopyTargetPopulationMutation__
- *
- * To run a mutation, you first call `useCopyTargetPopulationMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useCopyTargetPopulationMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [copyTargetPopulationMutation, { data, loading, error }] = useCopyTargetPopulationMutation({
- *   variables: {
- *      input: // value for 'input'
- *   },
- * });
- */
-export function useCopyTargetPopulationMutation(baseOptions?: Apollo.MutationHookOptions<CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables>(CopyTargetPopulationDocument, options);
-      }
-export type CopyTargetPopulationMutationHookResult = ReturnType<typeof useCopyTargetPopulationMutation>;
-export type CopyTargetPopulationMutationResult = Apollo.MutationResult<CopyTargetPopulationMutation>;
-export type CopyTargetPopulationMutationOptions = Apollo.BaseMutationOptions<CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables>;
-export const FinalizeTpDocument = gql`
-    mutation FinalizeTP($id: ID!) {
-  finalizeTargetPopulation(id: $id) {
-    targetPopulation {
-      ...targetPopulationDetailed
-    }
-  }
-}
-    ${TargetPopulationDetailedFragmentDoc}`;
-export type FinalizeTpMutationFn = Apollo.MutationFunction<FinalizeTpMutation, FinalizeTpMutationVariables>;
-
-/**
- * __useFinalizeTpMutation__
- *
- * To run a mutation, you first call `useFinalizeTpMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useFinalizeTpMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [finalizeTpMutation, { data, loading, error }] = useFinalizeTpMutation({
- *   variables: {
- *      id: // value for 'id'
- *   },
- * });
- */
-export function useFinalizeTpMutation(baseOptions?: Apollo.MutationHookOptions<FinalizeTpMutation, FinalizeTpMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<FinalizeTpMutation, FinalizeTpMutationVariables>(FinalizeTpDocument, options);
-      }
-export type FinalizeTpMutationHookResult = ReturnType<typeof useFinalizeTpMutation>;
-export type FinalizeTpMutationResult = Apollo.MutationResult<FinalizeTpMutation>;
-export type FinalizeTpMutationOptions = Apollo.BaseMutationOptions<FinalizeTpMutation, FinalizeTpMutationVariables>;
-export const LockTpDocument = gql`
-    mutation LockTP($id: ID!) {
-  lockTargetPopulation(id: $id) {
-    targetPopulation {
-      ...targetPopulationDetailed
-    }
-  }
-}
-    ${TargetPopulationDetailedFragmentDoc}`;
-export type LockTpMutationFn = Apollo.MutationFunction<LockTpMutation, LockTpMutationVariables>;
-
-/**
- * __useLockTpMutation__
- *
- * To run a mutation, you first call `useLockTpMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useLockTpMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [lockTpMutation, { data, loading, error }] = useLockTpMutation({
- *   variables: {
- *      id: // value for 'id'
- *   },
- * });
- */
-export function useLockTpMutation(baseOptions?: Apollo.MutationHookOptions<LockTpMutation, LockTpMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<LockTpMutation, LockTpMutationVariables>(LockTpDocument, options);
-      }
-export type LockTpMutationHookResult = ReturnType<typeof useLockTpMutation>;
-export type LockTpMutationResult = Apollo.MutationResult<LockTpMutation>;
-export type LockTpMutationOptions = Apollo.BaseMutationOptions<LockTpMutation, LockTpMutationVariables>;
-export const RebuildTpDocument = gql`
-    mutation RebuildTP($id: ID!) {
-  targetPopulationRebuild(id: $id) {
-    targetPopulation {
-      ...targetPopulationDetailed
-    }
-  }
-}
-    ${TargetPopulationDetailedFragmentDoc}`;
-export type RebuildTpMutationFn = Apollo.MutationFunction<RebuildTpMutation, RebuildTpMutationVariables>;
-
-/**
- * __useRebuildTpMutation__
- *
- * To run a mutation, you first call `useRebuildTpMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useRebuildTpMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [rebuildTpMutation, { data, loading, error }] = useRebuildTpMutation({
- *   variables: {
- *      id: // value for 'id'
- *   },
- * });
- */
-export function useRebuildTpMutation(baseOptions?: Apollo.MutationHookOptions<RebuildTpMutation, RebuildTpMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<RebuildTpMutation, RebuildTpMutationVariables>(RebuildTpDocument, options);
-      }
-export type RebuildTpMutationHookResult = ReturnType<typeof useRebuildTpMutation>;
-export type RebuildTpMutationResult = Apollo.MutationResult<RebuildTpMutation>;
-export type RebuildTpMutationOptions = Apollo.BaseMutationOptions<RebuildTpMutation, RebuildTpMutationVariables>;
-export const SetSteficonRuleOnTargetPopulationDocument = gql`
-    mutation setSteficonRuleOnTargetPopulation($input: SetSteficonRuleOnTargetPopulationMutationInput!) {
-  setSteficonRuleOnTargetPopulation(input: $input) {
-    targetPopulation {
-      ...targetPopulationDetailed
-    }
-  }
-}
-    ${TargetPopulationDetailedFragmentDoc}`;
-export type SetSteficonRuleOnTargetPopulationMutationFn = Apollo.MutationFunction<SetSteficonRuleOnTargetPopulationMutation, SetSteficonRuleOnTargetPopulationMutationVariables>;
-
-/**
- * __useSetSteficonRuleOnTargetPopulationMutation__
- *
- * To run a mutation, you first call `useSetSteficonRuleOnTargetPopulationMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useSetSteficonRuleOnTargetPopulationMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [setSteficonRuleOnTargetPopulationMutation, { data, loading, error }] = useSetSteficonRuleOnTargetPopulationMutation({
- *   variables: {
- *      input: // value for 'input'
- *   },
- * });
- */
-export function useSetSteficonRuleOnTargetPopulationMutation(baseOptions?: Apollo.MutationHookOptions<SetSteficonRuleOnTargetPopulationMutation, SetSteficonRuleOnTargetPopulationMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<SetSteficonRuleOnTargetPopulationMutation, SetSteficonRuleOnTargetPopulationMutationVariables>(SetSteficonRuleOnTargetPopulationDocument, options);
-      }
-export type SetSteficonRuleOnTargetPopulationMutationHookResult = ReturnType<typeof useSetSteficonRuleOnTargetPopulationMutation>;
-export type SetSteficonRuleOnTargetPopulationMutationResult = Apollo.MutationResult<SetSteficonRuleOnTargetPopulationMutation>;
-export type SetSteficonRuleOnTargetPopulationMutationOptions = Apollo.BaseMutationOptions<SetSteficonRuleOnTargetPopulationMutation, SetSteficonRuleOnTargetPopulationMutationVariables>;
-export const UnlockTpDocument = gql`
-    mutation UnlockTP($id: ID!) {
-  unlockTargetPopulation(id: $id) {
-    targetPopulation {
-      ...targetPopulationDetailed
-    }
-  }
-}
-    ${TargetPopulationDetailedFragmentDoc}`;
-export type UnlockTpMutationFn = Apollo.MutationFunction<UnlockTpMutation, UnlockTpMutationVariables>;
-
-/**
- * __useUnlockTpMutation__
- *
- * To run a mutation, you first call `useUnlockTpMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useUnlockTpMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [unlockTpMutation, { data, loading, error }] = useUnlockTpMutation({
- *   variables: {
- *      id: // value for 'id'
- *   },
- * });
- */
-export function useUnlockTpMutation(baseOptions?: Apollo.MutationHookOptions<UnlockTpMutation, UnlockTpMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<UnlockTpMutation, UnlockTpMutationVariables>(UnlockTpDocument, options);
-      }
-export type UnlockTpMutationHookResult = ReturnType<typeof useUnlockTpMutation>;
-export type UnlockTpMutationResult = Apollo.MutationResult<UnlockTpMutation>;
-export type UnlockTpMutationOptions = Apollo.BaseMutationOptions<UnlockTpMutation, UnlockTpMutationVariables>;
 export const UpdateTpDocument = gql`
-    mutation UpdateTP($input: UpdateTargetPopulationInput!) {
-  updateTargetPopulation(input: $input) {
-    targetPopulation {
+    mutation UpdateTP($input: UpdatePaymentPlanInput!) {
+  updatePaymentPlan(input: $input) {
+    paymentPlan {
       id
       status
       totalHouseholdsCount
       totalIndividualsCount
     }
-    validationErrors
   }
 }
     `;
@@ -14959,11 +14059,12 @@ export const AccountabilityCommunicationMessageDocument = gql`
       lastName
       email
     }
-    createdAt
-    targetPopulation {
+    paymentPlan {
       id
+      unicefId
       name
     }
+    createdAt
     registrationDataImport {
       id
       name
@@ -15180,7 +14281,7 @@ export type AllAccountabilityCommunicationMessageRecipientsLazyQueryHookResult =
 export type AllAccountabilityCommunicationMessageRecipientsSuspenseQueryHookResult = ReturnType<typeof useAllAccountabilityCommunicationMessageRecipientsSuspenseQuery>;
 export type AllAccountabilityCommunicationMessageRecipientsQueryResult = Apollo.QueryResult<AllAccountabilityCommunicationMessageRecipientsQuery, AllAccountabilityCommunicationMessageRecipientsQueryVariables>;
 export const AllAccountabilityCommunicationMessagesDocument = gql`
-    query allAccountabilityCommunicationMessages($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $numberOfRecipients: Int, $numberOfRecipients_Gte: Int, $numberOfRecipients_Lte: Int, $targetPopulation: ID, $createdBy: ID, $program: String, $createdAtRange: String, $title: String, $body: String, $samplingType: String, $orderBy: String) {
+    query allAccountabilityCommunicationMessages($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $numberOfRecipients: Int, $numberOfRecipients_Gte: Int, $numberOfRecipients_Lte: Int, $paymentPlan: ID, $createdBy: ID, $program: String, $createdAtRange: String, $title: String, $body: String, $samplingType: String, $orderBy: String) {
   allAccountabilityCommunicationMessages(
     offset: $offset
     before: $before
@@ -15190,7 +14291,7 @@ export const AllAccountabilityCommunicationMessagesDocument = gql`
     numberOfRecipients: $numberOfRecipients
     numberOfRecipients_Gte: $numberOfRecipients_Gte
     numberOfRecipients_Lte: $numberOfRecipients_Lte
-    targetPopulation: $targetPopulation
+    paymentPlan: $paymentPlan
     createdBy: $createdBy
     program: $program
     createdAtRange: $createdAtRange
@@ -15244,7 +14345,7 @@ export const AllAccountabilityCommunicationMessagesDocument = gql`
  *      numberOfRecipients: // value for 'numberOfRecipients'
  *      numberOfRecipients_Gte: // value for 'numberOfRecipients_Gte'
  *      numberOfRecipients_Lte: // value for 'numberOfRecipients_Lte'
- *      targetPopulation: // value for 'targetPopulation'
+ *      paymentPlan: // value for 'paymentPlan'
  *      createdBy: // value for 'createdBy'
  *      program: // value for 'program'
  *      createdAtRange: // value for 'createdAtRange'
@@ -15809,7 +14910,6 @@ export const BusinessAreaDataDocument = gql`
   businessArea(businessAreaSlug: $businessAreaSlug) {
     id
     screenBeneficiary
-    isPaymentPlanApplicable
     isAccountabilityApplicable
   }
 }
@@ -15930,6 +15030,7 @@ export const DataCollectionTypeChoiceDataDocument = gql`
     name
     value
     description
+    type
   }
 }
     `;
@@ -16267,6 +15368,18 @@ export const AllEditPeopleFieldsDocument = gql`
       listName
     }
     isFlexField
+  }
+  countriesChoices {
+    name
+    value
+  }
+  documentTypeChoices {
+    name
+    value
+  }
+  identityTypeChoices {
+    name
+    value
   }
 }
     `;
@@ -17539,8 +16652,52 @@ export type AllDeliveryMechanismsQueryHookResult = ReturnType<typeof useAllDeliv
 export type AllDeliveryMechanismsLazyQueryHookResult = ReturnType<typeof useAllDeliveryMechanismsLazyQuery>;
 export type AllDeliveryMechanismsSuspenseQueryHookResult = ReturnType<typeof useAllDeliveryMechanismsSuspenseQuery>;
 export type AllDeliveryMechanismsQueryResult = Apollo.QueryResult<AllDeliveryMechanismsQuery, AllDeliveryMechanismsQueryVariables>;
+export const AllFinancialServiceProviderXlsxTemplatesDocument = gql`
+    query AllFinancialServiceProviderXlsxTemplates {
+  allFinancialServiceProviderXlsxTemplates {
+    edges {
+      node {
+        id
+        name
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useAllFinancialServiceProviderXlsxTemplatesQuery__
+ *
+ * To run a query within a React component, call `useAllFinancialServiceProviderXlsxTemplatesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllFinancialServiceProviderXlsxTemplatesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllFinancialServiceProviderXlsxTemplatesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useAllFinancialServiceProviderXlsxTemplatesQuery(baseOptions?: Apollo.QueryHookOptions<AllFinancialServiceProviderXlsxTemplatesQuery, AllFinancialServiceProviderXlsxTemplatesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AllFinancialServiceProviderXlsxTemplatesQuery, AllFinancialServiceProviderXlsxTemplatesQueryVariables>(AllFinancialServiceProviderXlsxTemplatesDocument, options);
+      }
+export function useAllFinancialServiceProviderXlsxTemplatesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllFinancialServiceProviderXlsxTemplatesQuery, AllFinancialServiceProviderXlsxTemplatesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AllFinancialServiceProviderXlsxTemplatesQuery, AllFinancialServiceProviderXlsxTemplatesQueryVariables>(AllFinancialServiceProviderXlsxTemplatesDocument, options);
+        }
+export function useAllFinancialServiceProviderXlsxTemplatesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<AllFinancialServiceProviderXlsxTemplatesQuery, AllFinancialServiceProviderXlsxTemplatesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AllFinancialServiceProviderXlsxTemplatesQuery, AllFinancialServiceProviderXlsxTemplatesQueryVariables>(AllFinancialServiceProviderXlsxTemplatesDocument, options);
+        }
+export type AllFinancialServiceProviderXlsxTemplatesQueryHookResult = ReturnType<typeof useAllFinancialServiceProviderXlsxTemplatesQuery>;
+export type AllFinancialServiceProviderXlsxTemplatesLazyQueryHookResult = ReturnType<typeof useAllFinancialServiceProviderXlsxTemplatesLazyQuery>;
+export type AllFinancialServiceProviderXlsxTemplatesSuspenseQueryHookResult = ReturnType<typeof useAllFinancialServiceProviderXlsxTemplatesSuspenseQuery>;
+export type AllFinancialServiceProviderXlsxTemplatesQueryResult = Apollo.QueryResult<AllFinancialServiceProviderXlsxTemplatesQuery, AllFinancialServiceProviderXlsxTemplatesQueryVariables>;
 export const AllPaymentPlansForTableDocument = gql`
-    query AllPaymentPlansForTable($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $isFollowUp: Boolean, $program: String, $programCycle: String) {
+    query AllPaymentPlansForTable($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $isFollowUp: Boolean, $program: String, $programCycle: String, $totalHouseholdsCountWithValidPhoneNoMin: Int, $totalHouseholdsCountWithValidPhoneNoMax: Int, $createdAtRange: String, $statusNot: String, $isPaymentPlan: Boolean, $isTargetPopulation: Boolean) {
   allPaymentPlans(
     after: $after
     before: $before
@@ -17557,6 +16714,12 @@ export const AllPaymentPlansForTableDocument = gql`
     isFollowUp: $isFollowUp
     program: $program
     programCycle: $programCycle
+    totalHouseholdsCountWithValidPhoneNoMin: $totalHouseholdsCountWithValidPhoneNoMin
+    totalHouseholdsCountWithValidPhoneNoMax: $totalHouseholdsCountWithValidPhoneNoMax
+    createdAtRange: $createdAtRange
+    statusNot: $statusNot
+    isPaymentPlan: $isPaymentPlan
+    isTargetPopulation: $isTargetPopulation
   ) {
     pageInfo {
       hasNextPage
@@ -17591,10 +16754,6 @@ export const AllPaymentPlansForTableDocument = gql`
           email
         }
         program {
-          id
-          name
-        }
-        targetPopulation {
           id
           name
         }
@@ -17646,6 +16805,12 @@ export const AllPaymentPlansForTableDocument = gql`
  *      isFollowUp: // value for 'isFollowUp'
  *      program: // value for 'program'
  *      programCycle: // value for 'programCycle'
+ *      totalHouseholdsCountWithValidPhoneNoMin: // value for 'totalHouseholdsCountWithValidPhoneNoMin'
+ *      totalHouseholdsCountWithValidPhoneNoMax: // value for 'totalHouseholdsCountWithValidPhoneNoMax'
+ *      createdAtRange: // value for 'createdAtRange'
+ *      statusNot: // value for 'statusNot'
+ *      isPaymentPlan: // value for 'isPaymentPlan'
+ *      isTargetPopulation: // value for 'isTargetPopulation'
  *   },
  * });
  */
@@ -17726,7 +16891,7 @@ export const PaymentDocument = gql`
     snapshotCollectorBankAccountNumber
     debitCardNumber
     debitCardIssuer
-    targetPopulation {
+    parent {
       id
       name
     }
@@ -17845,12 +17010,11 @@ export const PaymentPlanDocument = gql`
     query PaymentPlan($id: ID!) {
   paymentPlan(id: $id) {
     id
+    name
     version
     unicefId
     status
-    programCycle {
-      id
-    }
+    buildStatus
     canCreateFollowUp
     backgroundActionStatus
     canCreatePaymentVerificationPlan
@@ -17858,6 +17022,15 @@ export const PaymentPlanDocument = gql`
     bankReconciliationSuccess
     bankReconciliationError
     exchangeRate
+    fspCommunicationChannel
+    canExportXlsx
+    canDownloadXlsx
+    canSendXlsxPassword
+    programCycle {
+      id
+      title
+    }
+    excludedIds
     createdBy {
       id
       firstName
@@ -17867,12 +17040,11 @@ export const PaymentPlanDocument = gql`
     program {
       id
       name
-      caId
+      status
+      isSocialWorkerProgram
     }
-    targetPopulation {
-      id
-      name
-    }
+    vulnerabilityScoreMin
+    vulnerabilityScoreMax
     adminUrl
     currency
     currencyName
@@ -17977,8 +17149,16 @@ export const PaymentPlanDocument = gql`
         name
       }
     }
+    steficonRuleTargeting {
+      id
+      rule {
+        id
+        name
+      }
+    }
     hasPaymentListExportFile
     hasFspDeliveryMechanismXlsxTemplate
+    canCreateXlsxWithFspAuthCode
     importedFileDate
     importedFileName
     totalEntitledQuantityUsd
@@ -18110,6 +17290,92 @@ export const PaymentPlanDocument = gql`
       id
       title
       file
+    }
+    targetingCriteria {
+      __typename
+      id
+      flagExcludeIfActiveAdjudicationTicket
+      flagExcludeIfOnSanctionList
+      householdIds
+      individualIds
+      rules {
+        __typename
+        id
+        householdIds
+        individualIds
+        individualsFiltersBlocks {
+          __typename
+          individualBlockFilters {
+            __typename
+            id
+            fieldName
+            flexFieldClassification
+            roundNumber
+            arguments
+            comparisonMethod
+            fieldAttribute {
+              __typename
+              id
+              name
+              labelEn
+              type
+              choices {
+                value
+                labelEn
+              }
+              pduData {
+                id
+                subtype
+                numberOfRounds
+                roundsNames
+              }
+            }
+          }
+        }
+        collectorsFiltersBlocks {
+          __typename
+          id
+          createdAt
+          updatedAt
+          collectorBlockFilters {
+            __typename
+            id
+            createdAt
+            updatedAt
+            fieldName
+            comparisonMethod
+            flexFieldClassification
+            arguments
+            labelEn
+          }
+        }
+        householdsFiltersBlocks {
+          __typename
+          id
+          fieldName
+          flexFieldClassification
+          roundNumber
+          arguments
+          comparisonMethod
+          fieldAttribute {
+            __typename
+            id
+            name
+            labelEn
+            type
+            choices {
+              value
+              labelEn
+            }
+            pduData {
+              id
+              subtype
+              numberOfRounds
+              roundsNames
+            }
+          }
+        }
+      }
     }
   }
 }
@@ -18273,7 +17539,7 @@ export const AllPaymentRecordsAndPaymentsDocument = gql`
         id
         fullName
         status
-        caId
+        unicefId
         currency
         entitlementQuantity
         deliveredQuantity
@@ -18357,6 +17623,7 @@ export const AllPaymentsForTableDocument = gql`
         id
         unicefId
         status
+        vulnerabilityScore
         household {
           id
           unicefId
@@ -18364,6 +17631,11 @@ export const AllPaymentsForTableDocument = gql`
           admin2 {
             id
             name
+          }
+          headOfHousehold {
+            id
+            unicefId
+            fullName
           }
           individuals {
             edges {
@@ -19327,6 +18599,49 @@ export const AllIndividualsDocument = gql`
         sanctionListPossibleMatch
         sanctionListConfirmedMatch
         deduplicationGoldenRecordStatus
+        deduplicationBatchStatus
+        biometricDeduplicationGoldenRecordStatus
+        biometricDeduplicationBatchStatus
+        biometricDeduplicationBatchResults {
+          id
+          unicefId
+          fullName
+          age
+          location
+          similarityScore
+          photo
+        }
+        biometricDeduplicationGoldenRecordResults {
+          id
+          unicefId
+          fullName
+          age
+          location
+          similarityScore
+          photo
+        }
+        deduplicationBatchResults {
+          unicefId
+          hitId
+          fullName
+          score
+          proximityToScore
+          location
+          age
+          duplicate
+          distinct
+        }
+        deduplicationGoldenRecordResults {
+          unicefId
+          hitId
+          fullName
+          score
+          proximityToScore
+          location
+          age
+          duplicate
+          distinct
+        }
         sanctionListLastCheck
         fullName
         household {
@@ -19487,6 +18802,7 @@ export const AllIndividualsForPopulationTableDocument = gql`
         sanctionListPossibleMatch
         sanctionListConfirmedMatch
         deduplicationGoldenRecordStatus
+        deduplicationBatchStatus
         status
         sanctionListLastCheck
         fullName
@@ -19974,7 +19290,6 @@ export const AllProgramsDocument = gql`
         startDate
         endDate
         status
-        caId
         description
         budget
         frequencyOfPayments
@@ -21438,7 +20753,7 @@ export type RdiAutocompleteLazyQueryHookResult = ReturnType<typeof useRdiAutocom
 export type RdiAutocompleteSuspenseQueryHookResult = ReturnType<typeof useRdiAutocompleteSuspenseQuery>;
 export type RdiAutocompleteQueryResult = Apollo.QueryResult<RdiAutocompleteQuery, RdiAutocompleteQueryVariables>;
 export const AllSurveysDocument = gql`
-    query AllSurveys($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $program: ID!, $targetPopulation: ID, $createdAtRange: String, $createdBy: String, $search: String, $orderBy: String) {
+    query AllSurveys($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $program: ID!, $paymentPlan: ID, $createdAtRange: String, $createdBy: String, $search: String, $orderBy: String) {
   allSurveys(
     offset: $offset
     before: $before
@@ -21446,7 +20761,7 @@ export const AllSurveysDocument = gql`
     first: $first
     last: $last
     program: $program
-    targetPopulation: $targetPopulation
+    paymentPlan: $paymentPlan
     createdAtRange: $createdAtRange
     createdBy: $createdBy
     search: $search
@@ -21496,7 +20811,7 @@ export const AllSurveysDocument = gql`
  *      first: // value for 'first'
  *      last: // value for 'last'
  *      program: // value for 'program'
- *      targetPopulation: // value for 'targetPopulation'
+ *      paymentPlan: // value for 'paymentPlan'
  *      createdAtRange: // value for 'createdAtRange'
  *      createdBy: // value for 'createdBy'
  *      search: // value for 'search'
@@ -21659,12 +20974,13 @@ export const SurveyDocument = gql`
       email
     }
     createdAt
-    targetPopulation {
+    program {
       id
       name
     }
-    program {
+    paymentPlan {
       id
+      unicefId
       name
     }
     body
@@ -21748,99 +21064,6 @@ export type SurveysChoiceDataQueryHookResult = ReturnType<typeof useSurveysChoic
 export type SurveysChoiceDataLazyQueryHookResult = ReturnType<typeof useSurveysChoiceDataLazyQuery>;
 export type SurveysChoiceDataSuspenseQueryHookResult = ReturnType<typeof useSurveysChoiceDataSuspenseQuery>;
 export type SurveysChoiceDataQueryResult = Apollo.QueryResult<SurveysChoiceDataQuery, SurveysChoiceDataQueryVariables>;
-export const AllActiveTargetPopulationsDocument = gql`
-    query AllActiveTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $totalHouseholdsCountWithValidPhoneNoMin: Int, $totalHouseholdsCountWithValidPhoneNoMax: Int, $totalHouseholdsCountMin: Int, $totalHouseholdsCountMax: Int, $businessArea: String, $program: [ID], $createdAtRange: String, $statusNot: String) {
-  allActiveTargetPopulations(
-    after: $after
-    before: $before
-    first: $first
-    last: $last
-    orderBy: $orderBy
-    name: $name
-    status: $status
-    totalHouseholdsCountWithValidPhoneNoMin: $totalHouseholdsCountWithValidPhoneNoMin
-    totalHouseholdsCountWithValidPhoneNoMax: $totalHouseholdsCountWithValidPhoneNoMax
-    totalHouseholdsCountMin: $totalHouseholdsCountMin
-    totalHouseholdsCountMax: $totalHouseholdsCountMax
-    businessArea: $businessArea
-    program: $program
-    createdAtRange: $createdAtRange
-    statusNot: $statusNot
-  ) {
-    edges {
-      node {
-        id
-        name
-        status
-        program {
-          id
-          name
-        }
-        totalHouseholdsCount
-        totalHouseholdsCountWithValidPhoneNo
-        createdAt
-        updatedAt
-        createdBy {
-          id
-          email
-          firstName
-          lastName
-        }
-      }
-      cursor
-    }
-    totalCount
-    edgeCount
-  }
-}
-    `;
-
-/**
- * __useAllActiveTargetPopulationsQuery__
- *
- * To run a query within a React component, call `useAllActiveTargetPopulationsQuery` and pass it any options that fit your needs.
- * When your component renders, `useAllActiveTargetPopulationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useAllActiveTargetPopulationsQuery({
- *   variables: {
- *      after: // value for 'after'
- *      before: // value for 'before'
- *      first: // value for 'first'
- *      last: // value for 'last'
- *      orderBy: // value for 'orderBy'
- *      name: // value for 'name'
- *      status: // value for 'status'
- *      totalHouseholdsCountWithValidPhoneNoMin: // value for 'totalHouseholdsCountWithValidPhoneNoMin'
- *      totalHouseholdsCountWithValidPhoneNoMax: // value for 'totalHouseholdsCountWithValidPhoneNoMax'
- *      totalHouseholdsCountMin: // value for 'totalHouseholdsCountMin'
- *      totalHouseholdsCountMax: // value for 'totalHouseholdsCountMax'
- *      businessArea: // value for 'businessArea'
- *      program: // value for 'program'
- *      createdAtRange: // value for 'createdAtRange'
- *      statusNot: // value for 'statusNot'
- *   },
- * });
- */
-export function useAllActiveTargetPopulationsQuery(baseOptions?: Apollo.QueryHookOptions<AllActiveTargetPopulationsQuery, AllActiveTargetPopulationsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllActiveTargetPopulationsQuery, AllActiveTargetPopulationsQueryVariables>(AllActiveTargetPopulationsDocument, options);
-      }
-export function useAllActiveTargetPopulationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllActiveTargetPopulationsQuery, AllActiveTargetPopulationsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllActiveTargetPopulationsQuery, AllActiveTargetPopulationsQueryVariables>(AllActiveTargetPopulationsDocument, options);
-        }
-export function useAllActiveTargetPopulationsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<AllActiveTargetPopulationsQuery, AllActiveTargetPopulationsQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllActiveTargetPopulationsQuery, AllActiveTargetPopulationsQueryVariables>(AllActiveTargetPopulationsDocument, options);
-        }
-export type AllActiveTargetPopulationsQueryHookResult = ReturnType<typeof useAllActiveTargetPopulationsQuery>;
-export type AllActiveTargetPopulationsLazyQueryHookResult = ReturnType<typeof useAllActiveTargetPopulationsLazyQuery>;
-export type AllActiveTargetPopulationsSuspenseQueryHookResult = ReturnType<typeof useAllActiveTargetPopulationsSuspenseQuery>;
-export type AllActiveTargetPopulationsQueryResult = Apollo.QueryResult<AllActiveTargetPopulationsQuery, AllActiveTargetPopulationsQueryVariables>;
 export const AllCollectorFieldsAttributesDocument = gql`
     query AllCollectorFieldsAttributes {
   allCollectorFieldsAttributes {
@@ -21988,9 +21211,9 @@ export type AllSteficonRulesQueryHookResult = ReturnType<typeof useAllSteficonRu
 export type AllSteficonRulesLazyQueryHookResult = ReturnType<typeof useAllSteficonRulesLazyQuery>;
 export type AllSteficonRulesSuspenseQueryHookResult = ReturnType<typeof useAllSteficonRulesSuspenseQuery>;
 export type AllSteficonRulesQueryResult = Apollo.QueryResult<AllSteficonRulesQuery, AllSteficonRulesQueryVariables>;
-export const AllTargetPopulationForChoicesDocument = gql`
-    query AllTargetPopulationForChoices($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $numberOfHouseholdsMin: Int, $numberOfHouseholdsMax: Int, $businessArea: String, $program: [ID]) {
-  allTargetPopulation(
+export const AllTargetPopulationsDocument = gql`
+    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: [String], $totalHouseholdsCountMin: Int, $totalHouseholdsCountMax: Int, $businessArea: String!, $program: String, $programCycle: String, $createdAtRange: String) {
+  allPaymentPlans(
     after: $after
     before: $before
     first: $first
@@ -21998,10 +21221,121 @@ export const AllTargetPopulationForChoicesDocument = gql`
     orderBy: $orderBy
     name: $name
     status: $status
-    totalHouseholdsCountMin: $numberOfHouseholdsMin
-    totalHouseholdsCountMax: $numberOfHouseholdsMax
+    totalHouseholdsCountMin: $totalHouseholdsCountMin
+    totalHouseholdsCountMax: $totalHouseholdsCountMax
     businessArea: $businessArea
     program: $program
+    programCycle: $programCycle
+    createdAtRange: $createdAtRange
+  ) {
+    edges {
+      cursor
+      node {
+        id
+        unicefId
+        name
+        isFollowUp
+        followUps {
+          totalCount
+          edges {
+            node {
+              id
+              unicefId
+              dispersionStartDate
+              dispersionEndDate
+            }
+          }
+        }
+        status
+        createdAt
+        updatedAt
+        createdBy {
+          id
+          firstName
+          lastName
+          email
+        }
+        program {
+          id
+          name
+        }
+        currency
+        currencyName
+        startDate
+        endDate
+        dispersionStartDate
+        dispersionEndDate
+        femaleChildrenCount
+        femaleAdultsCount
+        maleChildrenCount
+        maleAdultsCount
+        totalHouseholdsCount
+        totalIndividualsCount
+        totalEntitledQuantity
+        totalDeliveredQuantity
+        totalUndeliveredQuantity
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useAllTargetPopulationsQuery__
+ *
+ * To run a query within a React component, call `useAllTargetPopulationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllTargetPopulationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllTargetPopulationsQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      orderBy: // value for 'orderBy'
+ *      name: // value for 'name'
+ *      status: // value for 'status'
+ *      totalHouseholdsCountMin: // value for 'totalHouseholdsCountMin'
+ *      totalHouseholdsCountMax: // value for 'totalHouseholdsCountMax'
+ *      businessArea: // value for 'businessArea'
+ *      program: // value for 'program'
+ *      programCycle: // value for 'programCycle'
+ *      createdAtRange: // value for 'createdAtRange'
+ *   },
+ * });
+ */
+export function useAllTargetPopulationsQuery(baseOptions: Apollo.QueryHookOptions<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables> & ({ variables: AllTargetPopulationsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>(AllTargetPopulationsDocument, options);
+      }
+export function useAllTargetPopulationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>(AllTargetPopulationsDocument, options);
+        }
+export function useAllTargetPopulationsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>(AllTargetPopulationsDocument, options);
+        }
+export type AllTargetPopulationsQueryHookResult = ReturnType<typeof useAllTargetPopulationsQuery>;
+export type AllTargetPopulationsLazyQueryHookResult = ReturnType<typeof useAllTargetPopulationsLazyQuery>;
+export type AllTargetPopulationsSuspenseQueryHookResult = ReturnType<typeof useAllTargetPopulationsSuspenseQuery>;
+export type AllTargetPopulationsQueryResult = Apollo.QueryResult<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>;
+export const AllTargetPopulationForChoicesDocument = gql`
+    query AllTargetPopulationForChoices($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $businessArea: String!, $program: String!, $status: [String]) {
+  allPaymentPlans(
+    after: $after
+    before: $before
+    first: $first
+    last: $last
+    orderBy: $orderBy
+    name: $name
+    businessArea: $businessArea
+    program: $program
+    status: $status
   ) {
     edges {
       node {
@@ -22034,15 +21368,13 @@ export const AllTargetPopulationForChoicesDocument = gql`
  *      last: // value for 'last'
  *      orderBy: // value for 'orderBy'
  *      name: // value for 'name'
- *      status: // value for 'status'
- *      numberOfHouseholdsMin: // value for 'numberOfHouseholdsMin'
- *      numberOfHouseholdsMax: // value for 'numberOfHouseholdsMax'
  *      businessArea: // value for 'businessArea'
  *      program: // value for 'program'
+ *      status: // value for 'status'
  *   },
  * });
  */
-export function useAllTargetPopulationForChoicesQuery(baseOptions?: Apollo.QueryHookOptions<AllTargetPopulationForChoicesQuery, AllTargetPopulationForChoicesQueryVariables>) {
+export function useAllTargetPopulationForChoicesQuery(baseOptions: Apollo.QueryHookOptions<AllTargetPopulationForChoicesQuery, AllTargetPopulationForChoicesQueryVariables> & ({ variables: AllTargetPopulationForChoicesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<AllTargetPopulationForChoicesQuery, AllTargetPopulationForChoicesQueryVariables>(AllTargetPopulationForChoicesDocument, options);
       }
@@ -22058,88 +21390,146 @@ export type AllTargetPopulationForChoicesQueryHookResult = ReturnType<typeof use
 export type AllTargetPopulationForChoicesLazyQueryHookResult = ReturnType<typeof useAllTargetPopulationForChoicesLazyQuery>;
 export type AllTargetPopulationForChoicesSuspenseQueryHookResult = ReturnType<typeof useAllTargetPopulationForChoicesSuspenseQuery>;
 export type AllTargetPopulationForChoicesQueryResult = Apollo.QueryResult<AllTargetPopulationForChoicesQuery, AllTargetPopulationForChoicesQueryVariables>;
-export const AllTargetPopulationsDocument = gql`
-    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $totalHouseholdsCountMin: Int, $totalHouseholdsCountMax: Int, $businessArea: String, $program: [ID], $programCycle: String, $createdAtRange: String, $paymentPlanApplicable: Boolean) {
-  allTargetPopulation(
-    after: $after
-    before: $before
-    first: $first
-    last: $last
-    orderBy: $orderBy
-    name: $name
-    status: $status
-    totalHouseholdsCountMin: $totalHouseholdsCountMin
-    totalHouseholdsCountMax: $totalHouseholdsCountMax
-    businessArea: $businessArea
-    program: $program
-    programCycle: $programCycle
-    createdAtRange: $createdAtRange
-    paymentPlanApplicable: $paymentPlanApplicable
-  ) {
-    edges {
-      node {
-        ...targetPopulationMinimal
-      }
-      cursor
-    }
-    totalCount
-    edgeCount
-  }
-}
-    ${TargetPopulationMinimalFragmentDoc}`;
-
-/**
- * __useAllTargetPopulationsQuery__
- *
- * To run a query within a React component, call `useAllTargetPopulationsQuery` and pass it any options that fit your needs.
- * When your component renders, `useAllTargetPopulationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useAllTargetPopulationsQuery({
- *   variables: {
- *      after: // value for 'after'
- *      before: // value for 'before'
- *      first: // value for 'first'
- *      last: // value for 'last'
- *      orderBy: // value for 'orderBy'
- *      name: // value for 'name'
- *      status: // value for 'status'
- *      totalHouseholdsCountMin: // value for 'totalHouseholdsCountMin'
- *      totalHouseholdsCountMax: // value for 'totalHouseholdsCountMax'
- *      businessArea: // value for 'businessArea'
- *      program: // value for 'program'
- *      programCycle: // value for 'programCycle'
- *      createdAtRange: // value for 'createdAtRange'
- *      paymentPlanApplicable: // value for 'paymentPlanApplicable'
- *   },
- * });
- */
-export function useAllTargetPopulationsQuery(baseOptions?: Apollo.QueryHookOptions<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>(AllTargetPopulationsDocument, options);
-      }
-export function useAllTargetPopulationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>(AllTargetPopulationsDocument, options);
-        }
-export function useAllTargetPopulationsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>(AllTargetPopulationsDocument, options);
-        }
-export type AllTargetPopulationsQueryHookResult = ReturnType<typeof useAllTargetPopulationsQuery>;
-export type AllTargetPopulationsLazyQueryHookResult = ReturnType<typeof useAllTargetPopulationsLazyQuery>;
-export type AllTargetPopulationsSuspenseQueryHookResult = ReturnType<typeof useAllTargetPopulationsSuspenseQuery>;
-export type AllTargetPopulationsQueryResult = Apollo.QueryResult<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>;
 export const TargetPopulationDocument = gql`
-    query targetPopulation($id: ID!) {
-  targetPopulation(id: $id) {
-    ...targetPopulationDetailed
+    query TargetPopulation($id: ID!) {
+  paymentPlan(id: $id) {
+    id
+    version
+    name
+    status
+    buildStatus
+    adminUrl
+    totalHouseholdsCount
+    totalIndividualsCount
+    femaleChildrenCount
+    femaleAdultsCount
+    maleChildrenCount
+    maleAdultsCount
+    excludedIds
+    exclusionReason
+    vulnerabilityScoreMin
+    vulnerabilityScoreMax
+    steficonRuleTargeting {
+      __typename
+      id
+      rule {
+        __typename
+        id
+        name
+      }
+    }
+    vulnerabilityScoreMin
+    vulnerabilityScoreMax
+    program {
+      __typename
+      id
+      name
+      status
+      startDate
+      endDate
+      isSocialWorkerProgram
+    }
+    programCycle {
+      __typename
+      id
+      title
+    }
+    createdBy {
+      __typename
+      id
+      email
+      firstName
+      lastName
+    }
+    targetingCriteria {
+      __typename
+      id
+      flagExcludeIfActiveAdjudicationTicket
+      flagExcludeIfOnSanctionList
+      householdIds
+      individualIds
+      rules {
+        __typename
+        id
+        householdIds
+        individualIds
+        individualsFiltersBlocks {
+          __typename
+          individualBlockFilters {
+            __typename
+            id
+            fieldName
+            flexFieldClassification
+            roundNumber
+            arguments
+            comparisonMethod
+            fieldAttribute {
+              __typename
+              id
+              name
+              labelEn
+              type
+              choices {
+                value
+                labelEn
+              }
+              pduData {
+                id
+                subtype
+                numberOfRounds
+                roundsNames
+              }
+            }
+          }
+        }
+        collectorsFiltersBlocks {
+          __typename
+          id
+          createdAt
+          updatedAt
+          collectorBlockFilters {
+            __typename
+            id
+            createdAt
+            updatedAt
+            fieldName
+            comparisonMethod
+            flexFieldClassification
+            arguments
+            labelEn
+          }
+        }
+        householdsFiltersBlocks {
+          __typename
+          id
+          fieldName
+          flexFieldClassification
+          roundNumber
+          arguments
+          comparisonMethod
+          fieldAttribute {
+            __typename
+            id
+            name
+            labelEn
+            type
+            choices {
+              value
+              labelEn
+            }
+            pduData {
+              id
+              subtype
+              numberOfRounds
+              roundsNames
+            }
+          }
+        }
+      }
+    }
   }
 }
-    ${TargetPopulationDetailedFragmentDoc}`;
+    `;
 
 /**
  * __useTargetPopulationQuery__
@@ -22173,85 +21563,6 @@ export type TargetPopulationQueryHookResult = ReturnType<typeof useTargetPopulat
 export type TargetPopulationLazyQueryHookResult = ReturnType<typeof useTargetPopulationLazyQuery>;
 export type TargetPopulationSuspenseQueryHookResult = ReturnType<typeof useTargetPopulationSuspenseQuery>;
 export type TargetPopulationQueryResult = Apollo.QueryResult<TargetPopulationQuery, TargetPopulationQueryVariables>;
-export const TargetPopulationHouseholdsDocument = gql`
-    query TargetPopulationHouseholds($targetPopulation: ID!, $first: Int, $after: String, $before: String, $last: Int, $orderBy: String, $businessArea: String) {
-  targetPopulationHouseholds(
-    targetPopulation: $targetPopulation
-    after: $after
-    before: $before
-    first: $first
-    last: $last
-    orderBy: $orderBy
-    businessArea: $businessArea
-  ) {
-    edges {
-      node {
-        id
-        unicefId
-        headOfHousehold {
-          id
-          unicefId
-          givenName
-          familyName
-          fullName
-        }
-        size
-        adminArea {
-          id
-          name
-        }
-        updatedAt
-        address
-        selection {
-          vulnerabilityScore
-        }
-      }
-      cursor
-    }
-    totalCount
-    edgeCount
-  }
-}
-    `;
-
-/**
- * __useTargetPopulationHouseholdsQuery__
- *
- * To run a query within a React component, call `useTargetPopulationHouseholdsQuery` and pass it any options that fit your needs.
- * When your component renders, `useTargetPopulationHouseholdsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useTargetPopulationHouseholdsQuery({
- *   variables: {
- *      targetPopulation: // value for 'targetPopulation'
- *      first: // value for 'first'
- *      after: // value for 'after'
- *      before: // value for 'before'
- *      last: // value for 'last'
- *      orderBy: // value for 'orderBy'
- *      businessArea: // value for 'businessArea'
- *   },
- * });
- */
-export function useTargetPopulationHouseholdsQuery(baseOptions: Apollo.QueryHookOptions<TargetPopulationHouseholdsQuery, TargetPopulationHouseholdsQueryVariables> & ({ variables: TargetPopulationHouseholdsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<TargetPopulationHouseholdsQuery, TargetPopulationHouseholdsQueryVariables>(TargetPopulationHouseholdsDocument, options);
-      }
-export function useTargetPopulationHouseholdsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<TargetPopulationHouseholdsQuery, TargetPopulationHouseholdsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<TargetPopulationHouseholdsQuery, TargetPopulationHouseholdsQueryVariables>(TargetPopulationHouseholdsDocument, options);
-        }
-export function useTargetPopulationHouseholdsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<TargetPopulationHouseholdsQuery, TargetPopulationHouseholdsQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<TargetPopulationHouseholdsQuery, TargetPopulationHouseholdsQueryVariables>(TargetPopulationHouseholdsDocument, options);
-        }
-export type TargetPopulationHouseholdsQueryHookResult = ReturnType<typeof useTargetPopulationHouseholdsQuery>;
-export type TargetPopulationHouseholdsLazyQueryHookResult = ReturnType<typeof useTargetPopulationHouseholdsLazyQuery>;
-export type TargetPopulationHouseholdsSuspenseQueryHookResult = ReturnType<typeof useTargetPopulationHouseholdsSuspenseQuery>;
-export type TargetPopulationHouseholdsQueryResult = Apollo.QueryResult<TargetPopulationHouseholdsQuery, TargetPopulationHouseholdsQueryVariables>;
 
 
 export type ResolverTypeWrapper<T> = Promise<T> | T;
@@ -22322,7 +21633,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping of interface types */
 export type ResolversInterfaceTypes<_RefType extends Record<string, unknown>> = {
-  Node: ( ApprovalProcessNode ) | ( AreaNode ) | ( AreaTypeNode ) | ( BankAccountInfoNode ) | ( BeneficiaryGroupNode ) | ( BusinessAreaNode ) | ( CommunicationMessageNode ) | ( CommunicationMessageRecipientMapNode ) | ( DataCollectingTypeNode ) | ( DeliveryMechanismDataNode ) | ( DeliveryMechanismNode ) | ( DeliveryMechanismPerPaymentPlanNode ) | ( DocumentNode ) | ( FeedbackMessageNode ) | ( FeedbackNode ) | ( FinancialServiceProviderNode ) | ( FinancialServiceProviderXlsxTemplateNode ) | ( GrievanceDocumentNode ) | ( GrievanceTicketNode ) | ( HouseholdNode ) | ( ImportDataNode ) | ( IndividualIdentityNode ) | ( IndividualNode ) | ( KoboImportDataNode ) | ( LogEntryNode ) | ( PaymentHouseholdSnapshotNode ) | ( PaymentNode ) | ( PaymentPlanNode ) | ( PaymentPlanSupportingDocumentNode ) | ( PaymentVerificationLogEntryNode ) | ( PaymentVerificationNode ) | ( PaymentVerificationPlanNode ) | ( PaymentVerificationSummaryNode ) | ( PeriodicFieldNode ) | ( ProgramCycleNode ) | ( ProgramNode ) | ( RecipientNode ) | ( RegistrationDataImportDatahubNode ) | ( RegistrationDataImportNode ) | ( ReportNode ) | ( RuleCommitNode ) | ( SanctionListIndividualAliasNameNode ) | ( SanctionListIndividualCountriesNode ) | ( SanctionListIndividualDateOfBirthNode ) | ( SanctionListIndividualDocumentNode ) | ( SanctionListIndividualNationalitiesNode ) | ( SanctionListIndividualNode ) | ( SteficonRuleNode ) | ( SurveyNode ) | ( TargetPopulationNode ) | ( TicketAddIndividualDetailsNode ) | ( TicketComplaintDetailsNode ) | ( TicketDeleteHouseholdDetailsNode ) | ( TicketDeleteIndividualDetailsNode ) | ( TicketHouseholdDataUpdateDetailsNode ) | ( TicketIndividualDataUpdateDetailsNode ) | ( TicketNeedsAdjudicationDetailsNode ) | ( TicketNegativeFeedbackDetailsNode ) | ( TicketNoteNode ) | ( TicketPaymentVerificationDetailsNode ) | ( TicketPositiveFeedbackDetailsNode ) | ( TicketReferralDetailsNode ) | ( TicketSensitiveDetailsNode ) | ( TicketSystemFlaggingDetailsNode ) | ( UserBusinessAreaNode ) | ( UserNode ) | ( VolumeByDeliveryMechanismNode );
+  Node: ( ApprovalProcessNode ) | ( AreaNode ) | ( AreaTypeNode ) | ( BankAccountInfoNode ) | ( BeneficiaryGroupNode ) | ( BusinessAreaNode ) | ( CommunicationMessageNode ) | ( CommunicationMessageRecipientMapNode ) | ( DataCollectingTypeNode ) | ( DeliveryMechanismDataNode ) | ( DeliveryMechanismNode ) | ( DeliveryMechanismPerPaymentPlanNode ) | ( DocumentNode ) | ( FeedbackMessageNode ) | ( FeedbackNode ) | ( FinancialServiceProviderNode ) | ( FinancialServiceProviderXlsxTemplateNode ) | ( GrievanceDocumentNode ) | ( GrievanceTicketNode ) | ( HouseholdNode ) | ( ImportDataNode ) | ( IndividualIdentityNode ) | ( IndividualNode ) | ( KoboImportDataNode ) | ( LogEntryNode ) | ( PaymentHouseholdSnapshotNode ) | ( PaymentNode ) | ( PaymentPlanNode ) | ( PaymentPlanSupportingDocumentNode ) | ( PaymentVerificationLogEntryNode ) | ( PaymentVerificationNode ) | ( PaymentVerificationPlanNode ) | ( PaymentVerificationSummaryNode ) | ( PeriodicFieldNode ) | ( ProgramCycleNode ) | ( ProgramNode ) | ( RecipientNode ) | ( RegistrationDataImportDatahubNode ) | ( RegistrationDataImportNode ) | ( ReportNode ) | ( RuleCommitNode ) | ( SanctionListIndividualAliasNameNode ) | ( SanctionListIndividualCountriesNode ) | ( SanctionListIndividualDateOfBirthNode ) | ( SanctionListIndividualDocumentNode ) | ( SanctionListIndividualNationalitiesNode ) | ( SanctionListIndividualNode ) | ( SteficonRuleNode ) | ( SurveyNode ) | ( TicketAddIndividualDetailsNode ) | ( TicketComplaintDetailsNode ) | ( TicketDeleteHouseholdDetailsNode ) | ( TicketDeleteIndividualDetailsNode ) | ( TicketHouseholdDataUpdateDetailsNode ) | ( TicketIndividualDataUpdateDetailsNode ) | ( TicketNeedsAdjudicationDetailsNode ) | ( TicketNegativeFeedbackDetailsNode ) | ( TicketNoteNode ) | ( TicketPaymentVerificationDetailsNode ) | ( TicketPositiveFeedbackDetailsNode ) | ( TicketReferralDetailsNode ) | ( TicketSensitiveDetailsNode ) | ( TicketSystemFlaggingDetailsNode ) | ( UserBusinessAreaNode ) | ( UserNode ) | ( VolumeByDeliveryMechanismNode );
 };
 
 /** Mapping between all available schema types and the resolvers types */
@@ -22391,9 +21702,7 @@ export type ResolversTypes = {
   ContentTypeObjectType: ResolverTypeWrapper<ContentTypeObjectType>;
   CopyProgram: ResolverTypeWrapper<CopyProgram>;
   CopyProgramInput: CopyProgramInput;
-  CopyTargetPopulationInput: CopyTargetPopulationInput;
-  CopyTargetPopulationMutationInput: CopyTargetPopulationMutationInput;
-  CopyTargetPopulationMutationPayload: ResolverTypeWrapper<CopyTargetPopulationMutationPayload>;
+  CopyTargetingCriteriaMutation: ResolverTypeWrapper<CopyTargetingCriteriaMutation>;
   CoreFieldChoiceObject: ResolverTypeWrapper<CoreFieldChoiceObject>;
   CountAndPercentageNode: ResolverTypeWrapper<CountAndPercentageNode>;
   CreateAccountabilityCommunicationMessageInput: CreateAccountabilityCommunicationMessageInput;
@@ -22415,8 +21724,6 @@ export type ResolversTypes = {
   CreateReportInput: CreateReportInput;
   CreateSurveyInput: CreateSurveyInput;
   CreateSurveyMutation: ResolverTypeWrapper<CreateSurveyMutation>;
-  CreateTargetPopulationInput: CreateTargetPopulationInput;
-  CreateTargetPopulationMutation: ResolverTypeWrapper<CreateTargetPopulationMutation>;
   CreateTicketNoteInput: CreateTicketNoteInput;
   CreateTicketNoteMutation: ResolverTypeWrapper<CreateTicketNoteMutation>;
   CreateVerificationPlanMutation: ResolverTypeWrapper<CreateVerificationPlanMutation>;
@@ -22436,8 +21743,6 @@ export type ResolversTypes = {
   DeletePaymentVerificationPlan: ResolverTypeWrapper<DeletePaymentVerificationPlan>;
   DeleteProgram: ResolverTypeWrapper<DeleteProgram>;
   DeleteRegistrationDataImport: ResolverTypeWrapper<DeleteRegistrationDataImport>;
-  DeleteTargetPopulationMutationInput: DeleteTargetPopulationMutationInput;
-  DeleteTargetPopulationMutationPayload: ResolverTypeWrapper<DeleteTargetPopulationMutationPayload>;
   DeliveredQuantityNode: ResolverTypeWrapper<DeliveredQuantityNode>;
   DeliveryMechanismDataNode: ResolverTypeWrapper<DeliveryMechanismDataNode>;
   DeliveryMechanismDataNodeConnection: ResolverTypeWrapper<DeliveryMechanismDataNodeConnection>;
@@ -22483,7 +21788,6 @@ export type ResolversTypes = {
   FeedbackNodeEdge: ResolverTypeWrapper<FeedbackNodeEdge>;
   FieldAttributeNode: ResolverTypeWrapper<FieldAttributeNode>;
   FilteredActionsListNode: ResolverTypeWrapper<FilteredActionsListNode>;
-  FinalizeTargetPopulationMutation: ResolverTypeWrapper<FinalizeTargetPopulationMutation>;
   FinancialServiceProviderCommunicationChannel: FinancialServiceProviderCommunicationChannel;
   FinancialServiceProviderNode: ResolverTypeWrapper<FinancialServiceProviderNode>;
   FinancialServiceProviderNodeConnection: ResolverTypeWrapper<FinancialServiceProviderNodeConnection>;
@@ -22517,7 +21821,6 @@ export type ResolversTypes = {
   GrievanceTicketNodeConnection: ResolverTypeWrapper<GrievanceTicketNodeConnection>;
   GrievanceTicketNodeEdge: ResolverTypeWrapper<GrievanceTicketNodeEdge>;
   GroupAttributeNode: ResolverTypeWrapper<GroupAttributeNode>;
-  HouseholdCollectIndividualData: HouseholdCollectIndividualData;
   HouseholdCollectType: HouseholdCollectType;
   HouseholdDataChangeApproveMutation: ResolverTypeWrapper<HouseholdDataChangeApproveMutation>;
   HouseholdDataUpdateIssueTypeExtras: HouseholdDataUpdateIssueTypeExtras;
@@ -22538,6 +21841,8 @@ export type ResolversTypes = {
   ImportXLSXPaymentPlanPaymentListPerFSPMutation: ResolverTypeWrapper<ImportXlsxPaymentPlanPaymentListPerFspMutation>;
   ImportXlsxPaymentVerificationPlanFile: ResolverTypeWrapper<ImportXlsxPaymentVerificationPlanFile>;
   ImportedDocumentTypeNode: ResolverTypeWrapper<ImportedDocumentTypeNode>;
+  IndividualBiometricDeduplicationBatchStatus: IndividualBiometricDeduplicationBatchStatus;
+  IndividualBiometricDeduplicationGoldenRecordStatus: IndividualBiometricDeduplicationGoldenRecordStatus;
   IndividualDataChangeApproveMutation: ResolverTypeWrapper<IndividualDataChangeApproveMutation>;
   IndividualDataUpdateIssueTypeExtras: IndividualDataUpdateIssueTypeExtras;
   IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus;
@@ -22575,7 +21880,6 @@ export type ResolversTypes = {
   LanguageObject: ResolverTypeWrapper<LanguageObject>;
   LanguageObjectConnection: ResolverTypeWrapper<LanguageObjectConnection>;
   LanguageObjectEdge: ResolverTypeWrapper<LanguageObjectEdge>;
-  LockTargetPopulationMutation: ResolverTypeWrapper<LockTargetPopulationMutation>;
   LogEntryAction: LogEntryAction;
   LogEntryNode: ResolverTypeWrapper<LogEntryNode>;
   LogEntryNodeConnection: ResolverTypeWrapper<LogEntryNodeConnection>;
@@ -22587,6 +21891,8 @@ export type ResolversTypes = {
   NeedsAdjudicationApproveMutation: ResolverTypeWrapper<NeedsAdjudicationApproveMutation>;
   NegativeFeedbackTicketExtras: NegativeFeedbackTicketExtras;
   Node: ResolverTypeWrapper<ResolversInterfaceTypes<ResolversTypes>['Node']>;
+  OpenPaymentPlanInput: OpenPaymentPlanInput;
+  OpenPaymentPlanMutation: ResolverTypeWrapper<OpenPaymentPlanMutation>;
   PDUFieldInput: PduFieldInput;
   PDUSubtypeChoiceObject: ResolverTypeWrapper<PduSubtypeChoiceObject>;
   PageInfo: ResolverTypeWrapper<PageInfo>;
@@ -22603,6 +21909,7 @@ export type ResolversTypes = {
   PaymentNodeConnection: ResolverTypeWrapper<PaymentNodeConnection>;
   PaymentNodeEdge: ResolverTypeWrapper<PaymentNodeEdge>;
   PaymentPlanBackgroundActionStatus: PaymentPlanBackgroundActionStatus;
+  PaymentPlanBuildStatus: PaymentPlanBuildStatus;
   PaymentPlanNode: ResolverTypeWrapper<PaymentPlanNode>;
   PaymentPlanNodeConnection: ResolverTypeWrapper<PaymentPlanNodeConnection>;
   PaymentPlanNodeEdge: ResolverTypeWrapper<PaymentPlanNodeEdge>;
@@ -22655,7 +21962,6 @@ export type ResolversTypes = {
   RapidProFlowResult: ResolverTypeWrapper<RapidProFlowResult>;
   RapidProFlowRun: ResolverTypeWrapper<RapidProFlowRun>;
   ReassignRoleMutation: ResolverTypeWrapper<ReassignRoleMutation>;
-  RebuildTargetPopulationMutation: ResolverTypeWrapper<RebuildTargetPopulationMutation>;
   RecipientNode: ResolverTypeWrapper<RecipientNode>;
   RecipientNodeConnection: ResolverTypeWrapper<RecipientNodeConnection>;
   RecipientNodeEdge: ResolverTypeWrapper<RecipientNodeEdge>;
@@ -22716,8 +22022,6 @@ export type ResolversTypes = {
   SectionTotalNode: ResolverTypeWrapper<SectionTotalNode>;
   SensitiveGrievanceTicketExtras: SensitiveGrievanceTicketExtras;
   SetSteficonRuleOnPaymentPlanPaymentListMutation: ResolverTypeWrapper<SetSteficonRuleOnPaymentPlanPaymentListMutation>;
-  SetSteficonRuleOnTargetPopulationMutationInput: SetSteficonRuleOnTargetPopulationMutationInput;
-  SetSteficonRuleOnTargetPopulationMutationPayload: ResolverTypeWrapper<SetSteficonRuleOnTargetPopulationMutationPayload>;
   SimpleApproveMutation: ResolverTypeWrapper<SimpleApproveMutation>;
   SplitPaymentPlanMutation: ResolverTypeWrapper<SplitPaymentPlanMutation>;
   SteficonRuleNode: ResolverTypeWrapper<SteficonRuleNode>;
@@ -22731,11 +22035,6 @@ export type ResolversTypes = {
   SurveySamplingType: SurveySamplingType;
   TableTotalCashTransferred: ResolverTypeWrapper<TableTotalCashTransferred>;
   TableTotalCashTransferredForPeople: ResolverTypeWrapper<TableTotalCashTransferredForPeople>;
-  TargetPopulationBuildStatus: TargetPopulationBuildStatus;
-  TargetPopulationNode: ResolverTypeWrapper<TargetPopulationNode>;
-  TargetPopulationNodeConnection: ResolverTypeWrapper<TargetPopulationNodeConnection>;
-  TargetPopulationNodeEdge: ResolverTypeWrapper<TargetPopulationNodeEdge>;
-  TargetPopulationStatus: TargetPopulationStatus;
   TargetingCollectorBlockRuleFilterFlexFieldClassification: TargetingCollectorBlockRuleFilterFlexFieldClassification;
   TargetingCollectorBlockRuleFilterNode: ResolverTypeWrapper<TargetingCollectorBlockRuleFilterNode>;
   TargetingCollectorRuleFilterBlockNode: ResolverTypeWrapper<TargetingCollectorRuleFilterBlockNode>;
@@ -22801,7 +22100,6 @@ export type ResolversTypes = {
   TicketSystemFlaggingDetailsNodeConnection: ResolverTypeWrapper<TicketSystemFlaggingDetailsNodeConnection>;
   TicketSystemFlaggingDetailsNodeEdge: ResolverTypeWrapper<TicketSystemFlaggingDetailsNodeEdge>;
   UUID: ResolverTypeWrapper<Scalars['UUID']['output']>;
-  UnlockTargetPopulationMutation: ResolverTypeWrapper<UnlockTargetPopulationMutation>;
   UpdateAddIndividualIssueTypeExtras: UpdateAddIndividualIssueTypeExtras;
   UpdateFeedbackInput: UpdateFeedbackInput;
   UpdateFeedbackMutation: ResolverTypeWrapper<UpdateFeedbackMutation>;
@@ -22818,8 +22116,6 @@ export type ResolversTypes = {
   UpdateProgramInput: UpdateProgramInput;
   UpdateProgramPartners: ResolverTypeWrapper<UpdateProgramPartners>;
   UpdateProgramPartnersInput: UpdateProgramPartnersInput;
-  UpdateTargetPopulationInput: UpdateTargetPopulationInput;
-  UpdateTargetPopulationMutation: ResolverTypeWrapper<UpdateTargetPopulationMutation>;
   Upload: ResolverTypeWrapper<Scalars['Upload']['output']>;
   UploadImportDataXLSXFileAsync: ResolverTypeWrapper<UploadImportDataXlsxFileAsync>;
   UserBusinessAreaNode: ResolverTypeWrapper<UserBusinessAreaNode>;
@@ -22903,9 +22199,7 @@ export type ResolversParentTypes = {
   ContentTypeObjectType: ContentTypeObjectType;
   CopyProgram: CopyProgram;
   CopyProgramInput: CopyProgramInput;
-  CopyTargetPopulationInput: CopyTargetPopulationInput;
-  CopyTargetPopulationMutationInput: CopyTargetPopulationMutationInput;
-  CopyTargetPopulationMutationPayload: CopyTargetPopulationMutationPayload;
+  CopyTargetingCriteriaMutation: CopyTargetingCriteriaMutation;
   CoreFieldChoiceObject: CoreFieldChoiceObject;
   CountAndPercentageNode: CountAndPercentageNode;
   CreateAccountabilityCommunicationMessageInput: CreateAccountabilityCommunicationMessageInput;
@@ -22927,8 +22221,6 @@ export type ResolversParentTypes = {
   CreateReportInput: CreateReportInput;
   CreateSurveyInput: CreateSurveyInput;
   CreateSurveyMutation: CreateSurveyMutation;
-  CreateTargetPopulationInput: CreateTargetPopulationInput;
-  CreateTargetPopulationMutation: CreateTargetPopulationMutation;
   CreateTicketNoteInput: CreateTicketNoteInput;
   CreateTicketNoteMutation: CreateTicketNoteMutation;
   CreateVerificationPlanMutation: CreateVerificationPlanMutation;
@@ -22947,8 +22239,6 @@ export type ResolversParentTypes = {
   DeletePaymentVerificationPlan: DeletePaymentVerificationPlan;
   DeleteProgram: DeleteProgram;
   DeleteRegistrationDataImport: DeleteRegistrationDataImport;
-  DeleteTargetPopulationMutationInput: DeleteTargetPopulationMutationInput;
-  DeleteTargetPopulationMutationPayload: DeleteTargetPopulationMutationPayload;
   DeliveredQuantityNode: DeliveredQuantityNode;
   DeliveryMechanismDataNode: DeliveryMechanismDataNode;
   DeliveryMechanismDataNodeConnection: DeliveryMechanismDataNodeConnection;
@@ -22989,7 +22279,6 @@ export type ResolversParentTypes = {
   FeedbackNodeEdge: FeedbackNodeEdge;
   FieldAttributeNode: FieldAttributeNode;
   FilteredActionsListNode: FilteredActionsListNode;
-  FinalizeTargetPopulationMutation: FinalizeTargetPopulationMutation;
   FinancialServiceProviderNode: FinancialServiceProviderNode;
   FinancialServiceProviderNodeConnection: FinancialServiceProviderNodeConnection;
   FinancialServiceProviderNodeEdge: FinancialServiceProviderNodeEdge;
@@ -23062,7 +22351,6 @@ export type ResolversParentTypes = {
   LanguageObject: LanguageObject;
   LanguageObjectConnection: LanguageObjectConnection;
   LanguageObjectEdge: LanguageObjectEdge;
-  LockTargetPopulationMutation: LockTargetPopulationMutation;
   LogEntryNode: LogEntryNode;
   LogEntryNodeConnection: LogEntryNodeConnection;
   LogEntryNodeEdge: LogEntryNodeEdge;
@@ -23072,6 +22360,8 @@ export type ResolversParentTypes = {
   NeedsAdjudicationApproveMutation: NeedsAdjudicationApproveMutation;
   NegativeFeedbackTicketExtras: NegativeFeedbackTicketExtras;
   Node: ResolversInterfaceTypes<ResolversParentTypes>['Node'];
+  OpenPaymentPlanInput: OpenPaymentPlanInput;
+  OpenPaymentPlanMutation: OpenPaymentPlanMutation;
   PDUFieldInput: PduFieldInput;
   PDUSubtypeChoiceObject: PduSubtypeChoiceObject;
   PageInfo: PageInfo;
@@ -23124,7 +22414,6 @@ export type ResolversParentTypes = {
   RapidProFlowResult: RapidProFlowResult;
   RapidProFlowRun: RapidProFlowRun;
   ReassignRoleMutation: ReassignRoleMutation;
-  RebuildTargetPopulationMutation: RebuildTargetPopulationMutation;
   RecipientNode: RecipientNode;
   RecipientNodeConnection: RecipientNodeConnection;
   RecipientNodeEdge: RecipientNodeEdge;
@@ -23175,8 +22464,6 @@ export type ResolversParentTypes = {
   SectionTotalNode: SectionTotalNode;
   SensitiveGrievanceTicketExtras: SensitiveGrievanceTicketExtras;
   SetSteficonRuleOnPaymentPlanPaymentListMutation: SetSteficonRuleOnPaymentPlanPaymentListMutation;
-  SetSteficonRuleOnTargetPopulationMutationInput: SetSteficonRuleOnTargetPopulationMutationInput;
-  SetSteficonRuleOnTargetPopulationMutationPayload: SetSteficonRuleOnTargetPopulationMutationPayload;
   SimpleApproveMutation: SimpleApproveMutation;
   SplitPaymentPlanMutation: SplitPaymentPlanMutation;
   SteficonRuleNode: SteficonRuleNode;
@@ -23188,9 +22475,6 @@ export type ResolversParentTypes = {
   SurveyNodeEdge: SurveyNodeEdge;
   TableTotalCashTransferred: TableTotalCashTransferred;
   TableTotalCashTransferredForPeople: TableTotalCashTransferredForPeople;
-  TargetPopulationNode: TargetPopulationNode;
-  TargetPopulationNodeConnection: TargetPopulationNodeConnection;
-  TargetPopulationNodeEdge: TargetPopulationNodeEdge;
   TargetingCollectorBlockRuleFilterNode: TargetingCollectorBlockRuleFilterNode;
   TargetingCollectorRuleFilterBlockNode: TargetingCollectorRuleFilterBlockNode;
   TargetingCollectorRuleFilterBlockObjectType: TargetingCollectorRuleFilterBlockObjectType;
@@ -23249,7 +22533,6 @@ export type ResolversParentTypes = {
   TicketSystemFlaggingDetailsNodeConnection: TicketSystemFlaggingDetailsNodeConnection;
   TicketSystemFlaggingDetailsNodeEdge: TicketSystemFlaggingDetailsNodeEdge;
   UUID: Scalars['UUID']['output'];
-  UnlockTargetPopulationMutation: UnlockTargetPopulationMutation;
   UpdateAddIndividualIssueTypeExtras: UpdateAddIndividualIssueTypeExtras;
   UpdateFeedbackInput: UpdateFeedbackInput;
   UpdateFeedbackMutation: UpdateFeedbackMutation;
@@ -23266,8 +22549,6 @@ export type ResolversParentTypes = {
   UpdateProgramInput: UpdateProgramInput;
   UpdateProgramPartners: UpdateProgramPartners;
   UpdateProgramPartnersInput: UpdateProgramPartnersInput;
-  UpdateTargetPopulationInput: UpdateTargetPopulationInput;
-  UpdateTargetPopulationMutation: UpdateTargetPopulationMutation;
   Upload: Scalars['Upload']['output'];
   UploadImportDataXLSXFileAsync: UploadImportDataXlsxFileAsync;
   UserBusinessAreaNode: UserBusinessAreaNode;
@@ -23537,7 +22818,6 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   individualSet?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, Partial<BusinessAreaNodeIndividualSetArgs>>;
   isAccountabilityApplicable?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
-  isPaymentPlanApplicable?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   isSplit?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   koboToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   koboUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -23565,7 +22845,6 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   surveySet?: Resolver<ResolversTypes['SurveyNodeConnection'], ParentType, ContextType, Partial<BusinessAreaNodeSurveySetArgs>>;
-  targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, Partial<BusinessAreaNodeTargetpopulationSetArgs>>;
   tickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, Partial<BusinessAreaNodeTicketsArgs>>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>;
@@ -23678,16 +22957,14 @@ export type CommunicationMessageNodeResolvers<ContextType = any, ParentType exte
   fullListArguments?: Resolver<Maybe<ResolversTypes['JSONString']>, ParentType, ContextType>;
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, Partial<CommunicationMessageNodeHouseholdsArgs>>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  migratedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   numberOfRecipients?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>;
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>;
   randomSamplingArguments?: Resolver<Maybe<ResolversTypes['JSONString']>, ParentType, ContextType>;
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>;
   sampleSize?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   samplingType?: Resolver<ResolversTypes['MessageSamplingType'], ParentType, ContextType>;
-  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>;
   title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
@@ -23744,10 +23021,8 @@ export type CopyProgramResolvers<ContextType = any, ParentType extends Resolvers
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type CopyTargetPopulationMutationPayloadResolvers<ContextType = any, ParentType extends ResolversParentTypes['CopyTargetPopulationMutationPayload'] = ResolversParentTypes['CopyTargetPopulationMutationPayload']> = {
-  clientMutationId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>;
-  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>;
+export type CopyTargetingCriteriaMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CopyTargetingCriteriaMutation'] = ResolversParentTypes['CopyTargetingCriteriaMutation']> = {
+  paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -23812,12 +23087,6 @@ export type CreateSurveyMutationResolvers<ContextType = any, ParentType extends 
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type CreateTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateTargetPopulationMutation'] = ResolversParentTypes['CreateTargetPopulationMutation']> = {
-  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>;
-  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
 export type CreateTicketNoteMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateTicketNoteMutation'] = ResolversParentTypes['CreateTicketNoteMutation']> = {
   grievanceTicketNote?: Resolver<Maybe<ResolversTypes['TicketNoteNode']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -23831,6 +23100,7 @@ export type CreateVerificationPlanMutationResolvers<ContextType = any, ParentTyp
 export type DataCollectingTypeChoiceObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['DataCollectingTypeChoiceObject'] = ResolversParentTypes['DataCollectingTypeChoiceObject']> = {
   description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -23881,8 +23151,12 @@ export interface DecimalScalarConfig extends GraphQLScalarTypeConfig<ResolversTy
 }
 
 export type DeduplicationEngineSimilarityPairIndividualNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeduplicationEngineSimilarityPairIndividualNode'] = ResolversParentTypes['DeduplicationEngineSimilarityPairIndividualNode']> = {
+  age?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   fullName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  location?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   photo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  similarityScore?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -23903,6 +23177,7 @@ export type DeduplicationResultNodeResolvers<ContextType = any, ParentType exten
   location?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   proximityToScore?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   score?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -23927,12 +23202,6 @@ export type DeleteProgramResolvers<ContextType = any, ParentType extends Resolve
 };
 
 export type DeleteRegistrationDataImportResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteRegistrationDataImport'] = ResolversParentTypes['DeleteRegistrationDataImport']> = {
-  ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type DeleteTargetPopulationMutationPayloadResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteTargetPopulationMutationPayload'] = ResolversParentTypes['DeleteTargetPopulationMutationPayload']> = {
-  clientMutationId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -24190,12 +23459,10 @@ export type FeedbackNodeResolvers<ContextType = any, ParentType extends Resolver
   householdLookup?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   individualLookup?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>;
-  isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   issueType?: Resolver<ResolversTypes['FeedbackIssueType'], ParentType, ContextType>;
   language?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   linkedGrievance?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>;
-  migratedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>;
   unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
@@ -24236,11 +23503,6 @@ export type FilteredActionsListNodeResolvers<ContextType = any, ParentType exten
   authorization?: Resolver<Maybe<Array<Maybe<ResolversTypes['ApprovalNode']>>>, ParentType, ContextType>;
   financeRelease?: Resolver<Maybe<Array<Maybe<ResolversTypes['ApprovalNode']>>>, ParentType, ContextType>;
   reject?: Resolver<Maybe<Array<Maybe<ResolversTypes['ApprovalNode']>>>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type FinalizeTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinalizeTargetPopulationMutation'] = ResolversParentTypes['FinalizeTargetPopulationMutation']> = {
-  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -24521,7 +23783,6 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   childHoh?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   childrenCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   childrenDisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  collectIndividualData?: Resolver<ResolversTypes['HouseholdCollectIndividualData'], ParentType, ContextType>;
   collectType?: Resolver<ResolversTypes['HouseholdCollectType'], ParentType, ContextType>;
   complaintTicketDetails?: Resolver<ResolversTypes['TicketComplaintDetailsNodeConnection'], ParentType, ContextType, Partial<HouseholdNodeComplaintTicketDetailsArgs>>;
   consent?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
@@ -24568,7 +23829,6 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   internalData?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>;
   isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  isRecalculatedGroupAges?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   koboSubmissionTime?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   koboSubmissionUuid?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>;
@@ -24618,7 +23878,6 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   start?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   status?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   surveys?: Resolver<ResolversTypes['SurveyNodeConnection'], ParentType, ContextType, Partial<HouseholdNodeSurveysArgs>>;
-  targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, Partial<HouseholdNodeTargetPopulationsArgs>>;
   totalCashReceived?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>;
   totalCashReceivedUsd?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>;
   unhcrId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -24653,7 +23912,6 @@ export type HouseholdSelectionNodeResolvers<ContextType = any, ParentType extend
   id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>;
   isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  targetPopulation?: Resolver<ResolversTypes['TargetPopulationNode'], ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   vulnerabilityScore?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -24754,6 +24012,10 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   age?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   ageAtRegistration?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   bankAccountInfo?: Resolver<Maybe<ResolversTypes['BankAccountInfoNode']>, ParentType, ContextType>;
+  biometricDeduplicationBatchResults?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationEngineSimilarityPairIndividualNode']>>>, ParentType, ContextType>;
+  biometricDeduplicationBatchStatus?: Resolver<ResolversTypes['IndividualBiometricDeduplicationBatchStatus'], ParentType, ContextType>;
+  biometricDeduplicationGoldenRecordResults?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationEngineSimilarityPairIndividualNode']>>>, ParentType, ContextType>;
+  biometricDeduplicationGoldenRecordStatus?: Resolver<ResolversTypes['IndividualBiometricDeduplicationGoldenRecordStatus'], ParentType, ContextType>;
   birthDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   blockchainName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>;
@@ -24986,11 +24248,6 @@ export type LanguageObjectEdgeResolvers<ContextType = any, ParentType extends Re
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type LockTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['LockTargetPopulationMutation'] = ResolversParentTypes['LockTargetPopulationMutation']> = {
-  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
 export type LogEntryNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['LogEntryNode'] = ResolversParentTypes['LogEntryNode']> = {
   action?: Resolver<ResolversTypes['LogEntryAction'], ParentType, ContextType>;
   businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>;
@@ -25049,7 +24306,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   checkAgainstSanctionList?: Resolver<Maybe<ResolversTypes['CheckAgainstSanctionListMutation']>, ParentType, ContextType, RequireFields<MutationsCheckAgainstSanctionListArgs, 'file'>>;
   chooseDeliveryMechanismsForPaymentPlan?: Resolver<Maybe<ResolversTypes['ChooseDeliveryMechanismsForPaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsChooseDeliveryMechanismsForPaymentPlanArgs, 'input'>>;
   copyProgram?: Resolver<Maybe<ResolversTypes['CopyProgram']>, ParentType, ContextType, RequireFields<MutationsCopyProgramArgs, 'programData'>>;
-  copyTargetPopulation?: Resolver<Maybe<ResolversTypes['CopyTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsCopyTargetPopulationArgs, 'input'>>;
+  copyTargetingCriteria?: Resolver<Maybe<ResolversTypes['CopyTargetingCriteriaMutation']>, ParentType, ContextType, RequireFields<MutationsCopyTargetingCriteriaArgs, 'name' | 'paymentPlanId' | 'programCycleId'>>;
   createAccountabilityCommunicationMessage?: Resolver<Maybe<ResolversTypes['CreateCommunicationMessageMutation']>, ParentType, ContextType, RequireFields<MutationsCreateAccountabilityCommunicationMessageArgs, 'input'>>;
   createFeedback?: Resolver<Maybe<ResolversTypes['CreateFeedbackMutation']>, ParentType, ContextType, RequireFields<MutationsCreateFeedbackArgs, 'input'>>;
   createFeedbackMessage?: Resolver<Maybe<ResolversTypes['CreateFeedbackMessageMutation']>, ParentType, ContextType, RequireFields<MutationsCreateFeedbackMessageArgs, 'input'>>;
@@ -25060,13 +24317,11 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   createProgram?: Resolver<Maybe<ResolversTypes['CreateProgram']>, ParentType, ContextType, RequireFields<MutationsCreateProgramArgs, 'programData'>>;
   createReport?: Resolver<Maybe<ResolversTypes['CreateReport']>, ParentType, ContextType, RequireFields<MutationsCreateReportArgs, 'reportData'>>;
   createSurvey?: Resolver<Maybe<ResolversTypes['CreateSurveyMutation']>, ParentType, ContextType, RequireFields<MutationsCreateSurveyArgs, 'input'>>;
-  createTargetPopulation?: Resolver<Maybe<ResolversTypes['CreateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateTargetPopulationArgs, 'input'>>;
   createTicketNote?: Resolver<Maybe<ResolversTypes['CreateTicketNoteMutation']>, ParentType, ContextType, RequireFields<MutationsCreateTicketNoteArgs, 'noteInput'>>;
   deletePaymentPlan?: Resolver<Maybe<ResolversTypes['DeletePaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsDeletePaymentPlanArgs, 'paymentPlanId'>>;
   deletePaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['DeletePaymentVerificationPlan']>, ParentType, ContextType, RequireFields<MutationsDeletePaymentVerificationPlanArgs, 'paymentVerificationPlanId'>>;
   deleteProgram?: Resolver<Maybe<ResolversTypes['DeleteProgram']>, ParentType, ContextType, RequireFields<MutationsDeleteProgramArgs, 'programId'>>;
   deleteRegistrationDataImport?: Resolver<Maybe<ResolversTypes['DeleteRegistrationDataImport']>, ParentType, ContextType, RequireFields<MutationsDeleteRegistrationDataImportArgs, 'registrationDataImportId'>>;
-  deleteTargetPopulation?: Resolver<Maybe<ResolversTypes['DeleteTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsDeleteTargetPopulationArgs, 'input'>>;
   discardPaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['DiscardPaymentVerificationPlan']>, ParentType, ContextType, RequireFields<MutationsDiscardPaymentVerificationPlanArgs, 'paymentVerificationPlanId'>>;
   editPaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['EditPaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsEditPaymentVerificationPlanArgs, 'input'>>;
   eraseRegistrationDataImport?: Resolver<Maybe<ResolversTypes['EraseRegistrationDataImportMutation']>, ParentType, ContextType, RequireFields<MutationsEraseRegistrationDataImportArgs, 'id'>>;
@@ -25076,16 +24331,15 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   exportXlsxPaymentPlanPaymentList?: Resolver<Maybe<ResolversTypes['ExportXLSXPaymentPlanPaymentListMutation']>, ParentType, ContextType, RequireFields<MutationsExportXlsxPaymentPlanPaymentListArgs, 'paymentPlanId'>>;
   exportXlsxPaymentPlanPaymentListPerFsp?: Resolver<Maybe<ResolversTypes['ExportXLSXPaymentPlanPaymentListPerFSPMutation']>, ParentType, ContextType, RequireFields<MutationsExportXlsxPaymentPlanPaymentListPerFspArgs, 'paymentPlanId'>>;
   exportXlsxPaymentVerificationPlanFile?: Resolver<Maybe<ResolversTypes['ExportXlsxPaymentVerificationPlanFile']>, ParentType, ContextType, RequireFields<MutationsExportXlsxPaymentVerificationPlanFileArgs, 'paymentVerificationPlanId'>>;
-  finalizeTargetPopulation?: Resolver<Maybe<ResolversTypes['FinalizeTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsFinalizeTargetPopulationArgs, 'id'>>;
   finishPaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['FinishPaymentVerificationPlan']>, ParentType, ContextType, RequireFields<MutationsFinishPaymentVerificationPlanArgs, 'paymentVerificationPlanId'>>;
   grievanceStatusChange?: Resolver<Maybe<ResolversTypes['GrievanceStatusChangeMutation']>, ParentType, ContextType, Partial<MutationsGrievanceStatusChangeArgs>>;
   importXlsxPaymentPlanPaymentList?: Resolver<Maybe<ResolversTypes['ImportXLSXPaymentPlanPaymentListMutation']>, ParentType, ContextType, RequireFields<MutationsImportXlsxPaymentPlanPaymentListArgs, 'file' | 'paymentPlanId'>>;
   importXlsxPaymentPlanPaymentListPerFsp?: Resolver<Maybe<ResolversTypes['ImportXLSXPaymentPlanPaymentListPerFSPMutation']>, ParentType, ContextType, RequireFields<MutationsImportXlsxPaymentPlanPaymentListPerFspArgs, 'file' | 'paymentPlanId'>>;
   importXlsxPaymentVerificationPlanFile?: Resolver<Maybe<ResolversTypes['ImportXlsxPaymentVerificationPlanFile']>, ParentType, ContextType, RequireFields<MutationsImportXlsxPaymentVerificationPlanFileArgs, 'file' | 'paymentVerificationPlanId'>>;
   invalidPaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['InvalidPaymentVerificationPlan']>, ParentType, ContextType, RequireFields<MutationsInvalidPaymentVerificationPlanArgs, 'paymentVerificationPlanId'>>;
-  lockTargetPopulation?: Resolver<Maybe<ResolversTypes['LockTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsLockTargetPopulationArgs, 'id'>>;
   markPaymentAsFailed?: Resolver<Maybe<ResolversTypes['MarkPaymentAsFailedMutation']>, ParentType, ContextType, RequireFields<MutationsMarkPaymentAsFailedArgs, 'paymentId'>>;
   mergeRegistrationDataImport?: Resolver<Maybe<ResolversTypes['MergeRegistrationDataImportMutation']>, ParentType, ContextType, RequireFields<MutationsMergeRegistrationDataImportArgs, 'id'>>;
+  openPaymentPlan?: Resolver<Maybe<ResolversTypes['OpenPaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsOpenPaymentPlanArgs, 'input'>>;
   reassignRole?: Resolver<Maybe<ResolversTypes['ReassignRoleMutation']>, ParentType, ContextType, RequireFields<MutationsReassignRoleArgs, 'grievanceTicketId' | 'householdId' | 'individualId' | 'role'>>;
   refuseRegistrationDataImport?: Resolver<Maybe<ResolversTypes['RefuseRegistrationDataImportMutation']>, ParentType, ContextType, RequireFields<MutationsRefuseRegistrationDataImportArgs, 'id'>>;
   registrationKoboImport?: Resolver<Maybe<ResolversTypes['RegistrationKoboImportMutation']>, ParentType, ContextType, RequireFields<MutationsRegistrationKoboImportArgs, 'registrationDataImportData'>>;
@@ -25096,10 +24350,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   revertMarkPaymentAsFailed?: Resolver<Maybe<ResolversTypes['RevertMarkPaymentAsFailedMutation']>, ParentType, ContextType, RequireFields<MutationsRevertMarkPaymentAsFailedArgs, 'deliveredQuantity' | 'deliveryDate' | 'paymentId'>>;
   saveKoboImportDataAsync?: Resolver<Maybe<ResolversTypes['SaveKoboProjectImportDataAsync']>, ParentType, ContextType, RequireFields<MutationsSaveKoboImportDataAsyncArgs, 'businessAreaSlug' | 'onlyActiveSubmissions' | 'pullPictures' | 'uid'>>;
   setSteficonRuleOnPaymentPlanPaymentList?: Resolver<Maybe<ResolversTypes['SetSteficonRuleOnPaymentPlanPaymentListMutation']>, ParentType, ContextType, RequireFields<MutationsSetSteficonRuleOnPaymentPlanPaymentListArgs, 'paymentPlanId' | 'steficonRuleId'>>;
-  setSteficonRuleOnTargetPopulation?: Resolver<Maybe<ResolversTypes['SetSteficonRuleOnTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsSetSteficonRuleOnTargetPopulationArgs, 'input'>>;
   splitPaymentPlan?: Resolver<Maybe<ResolversTypes['SplitPaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsSplitPaymentPlanArgs, 'paymentPlanId' | 'splitType'>>;
-  targetPopulationRebuild?: Resolver<Maybe<ResolversTypes['RebuildTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsTargetPopulationRebuildArgs, 'id'>>;
-  unlockTargetPopulation?: Resolver<Maybe<ResolversTypes['UnlockTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsUnlockTargetPopulationArgs, 'id'>>;
   updateFeedback?: Resolver<Maybe<ResolversTypes['UpdateFeedbackMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateFeedbackArgs, 'input'>>;
   updateGrievanceTicket?: Resolver<Maybe<ResolversTypes['UpdateGrievanceTicketMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateGrievanceTicketArgs, 'input'>>;
   updatePaymentPlan?: Resolver<Maybe<ResolversTypes['UpdatePaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentPlanArgs, 'input'>>;
@@ -25107,7 +24358,6 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   updatePaymentVerificationStatusAndReceivedAmount?: Resolver<Maybe<ResolversTypes['UpdatePaymentVerificationStatusAndReceivedAmount']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentVerificationStatusAndReceivedAmountArgs, 'paymentVerificationId' | 'receivedAmount'>>;
   updateProgram?: Resolver<Maybe<ResolversTypes['UpdateProgram']>, ParentType, ContextType, Partial<MutationsUpdateProgramArgs>>;
   updateProgramPartners?: Resolver<Maybe<ResolversTypes['UpdateProgramPartners']>, ParentType, ContextType, Partial<MutationsUpdateProgramPartnersArgs>>;
-  updateTargetPopulation?: Resolver<Maybe<ResolversTypes['UpdateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateTargetPopulationArgs, 'input'>>;
   uploadImportDataXlsxFileAsync?: Resolver<Maybe<ResolversTypes['UploadImportDataXLSXFileAsync']>, ParentType, ContextType, RequireFields<MutationsUploadImportDataXlsxFileAsyncArgs, 'businessAreaSlug' | 'file'>>;
 };
 
@@ -25117,8 +24367,13 @@ export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentT
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'ApprovalProcessNode' | 'AreaNode' | 'AreaTypeNode' | 'BankAccountInfoNode' | 'BeneficiaryGroupNode' | 'BusinessAreaNode' | 'CommunicationMessageNode' | 'CommunicationMessageRecipientMapNode' | 'DataCollectingTypeNode' | 'DeliveryMechanismDataNode' | 'DeliveryMechanismNode' | 'DeliveryMechanismPerPaymentPlanNode' | 'DocumentNode' | 'FeedbackMessageNode' | 'FeedbackNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'GrievanceDocumentNode' | 'GrievanceTicketNode' | 'HouseholdNode' | 'ImportDataNode' | 'IndividualIdentityNode' | 'IndividualNode' | 'KoboImportDataNode' | 'LogEntryNode' | 'PaymentHouseholdSnapshotNode' | 'PaymentNode' | 'PaymentPlanNode' | 'PaymentPlanSupportingDocumentNode' | 'PaymentVerificationLogEntryNode' | 'PaymentVerificationNode' | 'PaymentVerificationPlanNode' | 'PaymentVerificationSummaryNode' | 'PeriodicFieldNode' | 'ProgramCycleNode' | 'ProgramNode' | 'RecipientNode' | 'RegistrationDataImportDatahubNode' | 'RegistrationDataImportNode' | 'ReportNode' | 'RuleCommitNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualDateOfBirthNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualNode' | 'SteficonRuleNode' | 'SurveyNode' | 'TargetPopulationNode' | 'TicketAddIndividualDetailsNode' | 'TicketComplaintDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketNoteNode' | 'TicketPaymentVerificationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'UserBusinessAreaNode' | 'UserNode' | 'VolumeByDeliveryMechanismNode', ParentType, ContextType>;
+  __resolveType: TypeResolveFn<'ApprovalProcessNode' | 'AreaNode' | 'AreaTypeNode' | 'BankAccountInfoNode' | 'BeneficiaryGroupNode' | 'BusinessAreaNode' | 'CommunicationMessageNode' | 'CommunicationMessageRecipientMapNode' | 'DataCollectingTypeNode' | 'DeliveryMechanismDataNode' | 'DeliveryMechanismNode' | 'DeliveryMechanismPerPaymentPlanNode' | 'DocumentNode' | 'FeedbackMessageNode' | 'FeedbackNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'GrievanceDocumentNode' | 'GrievanceTicketNode' | 'HouseholdNode' | 'ImportDataNode' | 'IndividualIdentityNode' | 'IndividualNode' | 'KoboImportDataNode' | 'LogEntryNode' | 'PaymentHouseholdSnapshotNode' | 'PaymentNode' | 'PaymentPlanNode' | 'PaymentPlanSupportingDocumentNode' | 'PaymentVerificationLogEntryNode' | 'PaymentVerificationNode' | 'PaymentVerificationPlanNode' | 'PaymentVerificationSummaryNode' | 'PeriodicFieldNode' | 'ProgramCycleNode' | 'ProgramNode' | 'RecipientNode' | 'RegistrationDataImportDatahubNode' | 'RegistrationDataImportNode' | 'ReportNode' | 'RuleCommitNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualDateOfBirthNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualNode' | 'SteficonRuleNode' | 'SurveyNode' | 'TicketAddIndividualDetailsNode' | 'TicketComplaintDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketNoteNode' | 'TicketPaymentVerificationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'UserBusinessAreaNode' | 'UserNode' | 'VolumeByDeliveryMechanismNode', ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+};
+
+export type OpenPaymentPlanMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['OpenPaymentPlanMutation'] = ResolversParentTypes['OpenPaymentPlanMutation']> = {
+  paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type PduSubtypeChoiceObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['PDUSubtypeChoiceObject'] = ResolversParentTypes['PDUSubtypeChoiceObject']> = {
@@ -25243,7 +24498,7 @@ export type PaymentNodeResolvers<ContextType = any, ParentType extends Resolvers
   collector?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>;
   conflicted?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  currency?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  currency?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   debitCardIssuer?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   debitCardNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   deliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
@@ -25286,7 +24541,6 @@ export type PaymentNodeResolvers<ContextType = any, ParentType extends Resolvers
   sourcePayment?: Resolver<Maybe<ResolversTypes['PaymentNode']>, ParentType, ContextType>;
   status?: Resolver<ResolversTypes['PaymentStatus'], ParentType, ContextType>;
   statusDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>;
   ticketComplaintDetails?: Resolver<ResolversTypes['TicketComplaintDetailsNodeConnection'], ParentType, ContextType, Partial<PaymentNodeTicketComplaintDetailsArgs>>;
   ticketSensitiveDetails?: Resolver<ResolversTypes['TicketSensitiveDetailsNodeConnection'], ParentType, ContextType, Partial<PaymentNodeTicketSensitiveDetailsArgs>>;
   tokenNumber?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
@@ -25296,6 +24550,7 @@ export type PaymentNodeResolvers<ContextType = any, ParentType extends Resolvers
   unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   verification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType>;
+  vulnerabilityScore?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -25320,10 +24575,16 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   backgroundActionStatus?: Resolver<Maybe<ResolversTypes['PaymentPlanBackgroundActionStatus']>, ParentType, ContextType>;
   bankReconciliationError?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   bankReconciliationSuccess?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  buildStatus?: Resolver<Maybe<ResolversTypes['PaymentPlanBuildStatus']>, ParentType, ContextType>;
+  builtAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>;
   canCreateFollowUp?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   canCreatePaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  canCreateXlsxWithFspAuthCode?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  canDownloadXlsx?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  canExportXlsx?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   canSendToPaymentGateway?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  canSendXlsxPassword?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   canSplit?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   createdBy?: Resolver<ResolversTypes['UserNode'], ParentType, ContextType>;
@@ -25337,11 +24598,13 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   exchangeRate?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   excludeHouseholdError?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   excludedHouseholds?: Resolver<Maybe<Array<Maybe<ResolversTypes['HouseholdNode']>>>, ParentType, ContextType>;
+  excludedIds?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   excludedIndividuals?: Resolver<Maybe<Array<Maybe<ResolversTypes['IndividualNode']>>>, ParentType, ContextType>;
   exclusionReason?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   femaleAdultsCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   femaleChildrenCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   followUps?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, Partial<PaymentPlanNodeFollowUpsArgs>>;
+  fspCommunicationChannel?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   hasFspDeliveryMechanismXlsxTemplate?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   hasPaymentListExportFile?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -25353,6 +24616,7 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   maleAdultsCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   maleChildrenCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  messages?: Resolver<ResolversTypes['CommunicationMessageNodeConnection'], ParentType, ContextType, Partial<PaymentPlanNodeMessagesArgs>>;
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   paymentItems?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, Partial<PaymentPlanNodePaymentItemsArgs>>;
   paymentVerificationPlans?: Resolver<ResolversTypes['PaymentVerificationPlanNodeConnection'], ParentType, ContextType, Partial<PaymentPlanNodePaymentVerificationPlansArgs>>;
@@ -25368,8 +24632,11 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   statusDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   steficonAppliedDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   steficonRule?: Resolver<Maybe<ResolversTypes['RuleCommitNode']>, ParentType, ContextType>;
+  steficonRuleTargeting?: Resolver<Maybe<ResolversTypes['RuleCommitNode']>, ParentType, ContextType>;
+  steficonTargetingAppliedDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   supportingDocuments?: Resolver<Maybe<Array<Maybe<ResolversTypes['PaymentPlanSupportingDocumentNode']>>>, ParentType, ContextType>;
-  targetPopulation?: Resolver<ResolversTypes['TargetPopulationNode'], ParentType, ContextType>;
+  surveys?: Resolver<ResolversTypes['SurveyNodeConnection'], ParentType, ContextType, Partial<PaymentPlanNodeSurveysArgs>>;
+  targetingCriteria?: Resolver<Maybe<ResolversTypes['TargetingCriteriaNode']>, ParentType, ContextType>;
   totalDeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   totalDeliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   totalEntitledQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
@@ -25377,6 +24644,7 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   totalEntitledQuantityRevisedUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   totalEntitledQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   totalHouseholdsCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  totalHouseholdsCountWithValidPhoneNo?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   totalIndividualsCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   totalUndeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   totalUndeliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
@@ -25387,6 +24655,8 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   verificationPlans?: Resolver<Maybe<ResolversTypes['PaymentVerificationPlanNodeConnection']>, ParentType, ContextType, Partial<PaymentPlanNodeVerificationPlansArgs>>;
   version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
   volumeByDeliveryMechanism?: Resolver<Maybe<Array<Maybe<ResolversTypes['VolumeByDeliveryMechanismNode']>>>, ParentType, ContextType>;
+  vulnerabilityScoreMax?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  vulnerabilityScoreMin?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -25427,7 +24697,6 @@ export type PaymentPlanSupportingDocumentNodeEdgeResolvers<ContextType = any, Pa
 };
 
 export type PaymentRecordAndPaymentNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentRecordAndPaymentNode'] = ResolversParentTypes['PaymentRecordAndPaymentNode']> = {
-  caId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   currency?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   deliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   deliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
@@ -25438,6 +24707,7 @@ export type PaymentRecordAndPaymentNodeResolvers<ContextType = any, ParentType e
   objType?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   parent?: Resolver<Maybe<ResolversTypes['CashPlanAndPaymentPlanNode']>, ParentType, ContextType>;
   status?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   verification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -25594,7 +24864,6 @@ export type ProgramCycleNodeResolvers<ContextType = any, ParentType extends Reso
   program?: Resolver<ResolversTypes['ProgramNode'], ParentType, ContextType>;
   startDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   status?: Resolver<ResolversTypes['ProgramCycleStatus'], ParentType, ContextType>;
-  targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, Partial<ProgramCycleNodeTargetPopulationsArgs>>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   totalDeliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   totalEntitledQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
@@ -25627,8 +24896,6 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   biometricDeduplicationEnabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   budget?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>;
   businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>;
-  caHashId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  caId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   canFinish?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   cashPlus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
@@ -25666,7 +24933,6 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   status?: Resolver<ResolversTypes['ProgramStatus'], ParentType, ContextType>;
   surveys?: Resolver<ResolversTypes['SurveyNodeConnection'], ParentType, ContextType, Partial<ProgramNodeSurveysArgs>>;
   targetPopulationsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, Partial<ProgramNodeTargetpopulationSetArgs>>;
   totalDeliveredQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>;
   totalEntitledQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>;
   totalNumberOfHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
@@ -25700,7 +24966,6 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allAccountabilityCommunicationMessageRecipients?: Resolver<Maybe<ResolversTypes['CommunicationMessageRecipientMapNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllAccountabilityCommunicationMessageRecipientsArgs, 'messageId'>>;
   allAccountabilityCommunicationMessages?: Resolver<Maybe<ResolversTypes['CommunicationMessageNodeConnection']>, ParentType, ContextType, Partial<QueryAllAccountabilityCommunicationMessagesArgs>>;
   allActivePrograms?: Resolver<Maybe<ResolversTypes['ProgramNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllActiveProgramsArgs, 'businessArea'>>;
-  allActiveTargetPopulations?: Resolver<Maybe<ResolversTypes['TargetPopulationNodeConnection']>, ParentType, ContextType, Partial<QueryAllActiveTargetPopulationsArgs>>;
   allAddIndividualsFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>;
   allAdminAreas?: Resolver<Maybe<ResolversTypes['AreaNodeConnection']>, ParentType, ContextType, Partial<QueryAllAdminAreasArgs>>;
   allAreasTree?: Resolver<Maybe<Array<Maybe<ResolversTypes['AreaTreeNode']>>>, ParentType, ContextType, RequireFields<QueryAllAreasTreeArgs, 'businessArea'>>;
@@ -25739,7 +25004,6 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allSanctionListIndividuals?: Resolver<Maybe<ResolversTypes['SanctionListIndividualNodeConnection']>, ParentType, ContextType, Partial<QueryAllSanctionListIndividualsArgs>>;
   allSteficonRules?: Resolver<Maybe<ResolversTypes['SteficonRuleNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllSteficonRulesArgs, 'type'>>;
   allSurveys?: Resolver<Maybe<ResolversTypes['SurveyNodeConnection']>, ParentType, ContextType, Partial<QueryAllSurveysArgs>>;
-  allTargetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNodeConnection']>, ParentType, ContextType, Partial<QueryAllTargetPopulationArgs>>;
   allTicketNotes?: Resolver<Maybe<ResolversTypes['TicketNoteNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllTicketNotesArgs, 'ticket'>>;
   allUsers?: Resolver<Maybe<ResolversTypes['UserNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllUsersArgs, 'businessArea'>>;
   availableFspsForDeliveryMechanisms?: Resolver<Maybe<Array<Maybe<ResolversTypes['FspChoices']>>>, ParentType, ContextType, Partial<QueryAvailableFspsForDeliveryMechanismsArgs>>;
@@ -25842,9 +25106,6 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   surveyCategoryChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   tableTotalCashTransferredByAdministrativeArea?: Resolver<Maybe<ResolversTypes['TableTotalCashTransferred']>, ParentType, ContextType, RequireFields<QueryTableTotalCashTransferredByAdministrativeAreaArgs, 'businessAreaSlug' | 'year'>>;
   tableTotalCashTransferredByAdministrativeAreaForPeople?: Resolver<Maybe<ResolversTypes['TableTotalCashTransferredForPeople']>, ParentType, ContextType, RequireFields<QueryTableTotalCashTransferredByAdministrativeAreaForPeopleArgs, 'businessAreaSlug' | 'year'>>;
-  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType, RequireFields<QueryTargetPopulationArgs, 'id'>>;
-  targetPopulationHouseholds?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryTargetPopulationHouseholdsArgs, 'targetPopulation'>>;
-  targetPopulationStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   ticketsByCategory?: Resolver<Maybe<ResolversTypes['ChartDatasetNode']>, ParentType, ContextType, RequireFields<QueryTicketsByCategoryArgs, 'businessAreaSlug'>>;
   ticketsByLocationAndCategory?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryTicketsByLocationAndCategoryArgs, 'businessAreaSlug'>>;
   ticketsByStatus?: Resolver<Maybe<ResolversTypes['ChartDatasetNode']>, ParentType, ContextType, RequireFields<QueryTicketsByStatusArgs, 'businessAreaSlug'>>;
@@ -25894,11 +25155,6 @@ export type RapidProFlowRunResolvers<ContextType = any, ParentType extends Resol
 export type ReassignRoleMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ReassignRoleMutation'] = ResolversParentTypes['ReassignRoleMutation']> = {
   household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>;
   individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type RebuildTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['RebuildTargetPopulationMutation'] = ResolversParentTypes['RebuildTargetPopulationMutation']> = {
-  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -25967,7 +25223,6 @@ export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType ex
   canMerge?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   dataSource?: Resolver<ResolversTypes['RegistrationDataImportDataSource'], ParentType, ContextType>;
-  datahubId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>;
   dedupEngineBatchDuplicates?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   dedupEngineGoldenRecordDuplicates?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   deduplicationEngineStatus?: Resolver<Maybe<ResolversTypes['RegistrationDataImportDeduplicationEngineStatus']>, ParentType, ContextType>;
@@ -25985,6 +25240,7 @@ export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType ex
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   importData?: Resolver<Maybe<ResolversTypes['ImportDataNode']>, ParentType, ContextType>;
   importDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  importFromIds?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   importedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>;
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, Partial<RegistrationDataImportNodeIndividualsArgs>>;
   messages?: Resolver<ResolversTypes['CommunicationMessageNodeConnection'], ParentType, ContextType, Partial<RegistrationDataImportNodeMessagesArgs>>;
@@ -26113,8 +25369,8 @@ export type RuleCommitNodeResolvers<ContextType = any, ParentType extends Resolv
   isRelease?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   language?: Resolver<ResolversTypes['RuleCommitLanguage'], ParentType, ContextType>;
   paymentPlans?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, Partial<RuleCommitNodePaymentPlansArgs>>;
+  paymentPlansTarget?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, Partial<RuleCommitNodePaymentPlansTargetArgs>>;
   rule?: Resolver<Maybe<ResolversTypes['SteficonRuleNode']>, ParentType, ContextType>;
-  targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, Partial<RuleCommitNodeTargetPopulationsArgs>>;
   timestamp?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   updatedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -26309,12 +25565,6 @@ export type SetSteficonRuleOnPaymentPlanPaymentListMutationResolvers<ContextType
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type SetSteficonRuleOnTargetPopulationMutationPayloadResolvers<ContextType = any, ParentType extends ResolversParentTypes['SetSteficonRuleOnTargetPopulationMutationPayload'] = ResolversParentTypes['SetSteficonRuleOnTargetPopulationMutationPayload']> = {
-  clientMutationId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
 export type SimpleApproveMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['SimpleApproveMutation'] = ResolversParentTypes['SimpleApproveMutation']> = {
   grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -26371,6 +25621,7 @@ export type SurveyNodeResolvers<ContextType = any, ParentType extends ResolversP
   hasValidSampleFile?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   numberOfRecipients?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>;
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>;
   randomSamplingArguments?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>;
   rapidProUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -26381,7 +25632,6 @@ export type SurveyNodeResolvers<ContextType = any, ParentType extends ResolversP
   sampleSize?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   samplingType?: Resolver<ResolversTypes['SurveySamplingType'], ParentType, ContextType>;
   successfulRapidProCalls?: Resolver<Array<ResolversTypes['JSONString']>, ParentType, ContextType>;
-  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>;
   title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
@@ -26409,68 +25659,6 @@ export type TableTotalCashTransferredResolvers<ContextType = any, ParentType ext
 
 export type TableTotalCashTransferredForPeopleResolvers<ContextType = any, ParentType extends ResolversParentTypes['TableTotalCashTransferredForPeople'] = ResolversParentTypes['TableTotalCashTransferredForPeople']> = {
   data?: Resolver<Maybe<Array<Maybe<ResolversTypes['_TableTotalCashTransferredDataForPeopleNode']>>>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetPopulationNode'] = ResolversParentTypes['TargetPopulationNode']> = {
-  adminUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  adultFemaleCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  adultMaleCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  buildStatus?: Resolver<ResolversTypes['TargetPopulationBuildStatus'], ParentType, ContextType>;
-  builtAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
-  businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>;
-  caHashId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  caId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  changeDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
-  changedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>;
-  childFemaleCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  childMaleCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>;
-  excludedIds?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  exclusionReason?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  finalizedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
-  finalizedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>;
-  hasEmptyCriteria?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
-  hasEmptyIdsCriteria?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
-  householdList?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, Partial<TargetPopulationNodeHouseholdListArgs>>;
-  households?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, Partial<TargetPopulationNodeHouseholdsArgs>>;
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  messages?: Resolver<ResolversTypes['CommunicationMessageNodeConnection'], ParentType, ContextType, Partial<TargetPopulationNodeMessagesArgs>>;
-  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  paymentPlans?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, Partial<TargetPopulationNodePaymentPlansArgs>>;
-  program?: Resolver<ResolversTypes['ProgramNode'], ParentType, ContextType>;
-  programCycle?: Resolver<ResolversTypes['ProgramCycleNode'], ParentType, ContextType>;
-  selections?: Resolver<Array<ResolversTypes['HouseholdSelectionNode']>, ParentType, ContextType>;
-  sentToDatahub?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  status?: Resolver<ResolversTypes['TargetPopulationStatus'], ParentType, ContextType>;
-  steficonAppliedDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
-  steficonRule?: Resolver<Maybe<ResolversTypes['RuleCommitNode']>, ParentType, ContextType>;
-  surveys?: Resolver<ResolversTypes['SurveyNodeConnection'], ParentType, ContextType, Partial<TargetPopulationNodeSurveysArgs>>;
-  targetingCriteria?: Resolver<Maybe<ResolversTypes['TargetingCriteriaNode']>, ParentType, ContextType>;
-  totalFamilySize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  totalHouseholdsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  totalHouseholdsCountWithValidPhoneNo?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  totalIndividualsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
-  vulnerabilityScoreMax?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
-  vulnerabilityScoreMin?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type TargetPopulationNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetPopulationNodeConnection'] = ResolversParentTypes['TargetPopulationNodeConnection']> = {
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  edges?: Resolver<Array<Maybe<ResolversTypes['TargetPopulationNodeEdge']>>, ParentType, ContextType>;
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type TargetPopulationNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetPopulationNodeEdge'] = ResolversParentTypes['TargetPopulationNodeEdge']> = {
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  node?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -26503,8 +25691,8 @@ export type TargetingCriteriaNodeResolvers<ContextType = any, ParentType extends
   householdIds?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>;
   individualIds?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>;
   rules?: Resolver<Maybe<Array<Maybe<ResolversTypes['TargetingCriteriaRuleNode']>>>, ParentType, ContextType>;
-  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -26934,11 +26122,6 @@ export interface UuidScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
   name: 'UUID';
 }
 
-export type UnlockTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['UnlockTargetPopulationMutation'] = ResolversParentTypes['UnlockTargetPopulationMutation']> = {
-  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
 export type UpdateFeedbackMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateFeedbackMutation'] = ResolversParentTypes['UpdateFeedbackMutation']> = {
   feedback?: Resolver<Maybe<ResolversTypes['FeedbackNode']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -26972,12 +26155,6 @@ export type UpdateProgramResolvers<ContextType = any, ParentType extends Resolve
 
 export type UpdateProgramPartnersResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateProgramPartners'] = ResolversParentTypes['UpdateProgramPartners']> = {
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>;
-  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type UpdateTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateTargetPopulationMutation'] = ResolversParentTypes['UpdateTargetPopulationMutation']> = {
-  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>;
   validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -27016,7 +26193,6 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   individualSet?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, Partial<UserBusinessAreaNodeIndividualSetArgs>>;
   isAccountabilityApplicable?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
-  isPaymentPlanApplicable?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   isSplit?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   koboToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   koboUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -27045,7 +26221,6 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   surveySet?: Resolver<ResolversTypes['SurveyNodeConnection'], ParentType, ContextType, Partial<UserBusinessAreaNodeSurveySetArgs>>;
-  targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, Partial<UserBusinessAreaNodeTargetpopulationSetArgs>>;
   tickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, Partial<UserBusinessAreaNodeTicketsArgs>>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>;
@@ -27070,9 +26245,7 @@ export type UserNodeResolvers<ContextType = any, ParentType extends ResolversPar
   adUuid?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   approvalSet?: Resolver<Array<ResolversTypes['ApprovalNode']>, ParentType, ContextType>;
   assignedTickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, Partial<UserNodeAssignedTicketsArgs>>;
-  availableForExport?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   businessAreas?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNodeConnection']>, ParentType, ContextType, Partial<UserNodeBusinessAreasArgs>>;
-  changedTargetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, Partial<UserNodeChangedTargetPopulationsArgs>>;
   createdDeliveryMechanisms?: Resolver<ResolversTypes['DeliveryMechanismPerPaymentPlanNodeConnection'], ParentType, ContextType, Partial<UserNodeCreatedDeliveryMechanismsArgs>>;
   createdFinancialServiceProviderXlsxTemplates?: Resolver<ResolversTypes['FinancialServiceProviderXlsxTemplateNodeConnection'], ParentType, ContextType, Partial<UserNodeCreatedFinancialServiceProviderXlsxTemplatesArgs>>;
   createdFinancialServiceProviders?: Resolver<ResolversTypes['FinancialServiceProviderNodeConnection'], ParentType, ContextType, Partial<UserNodeCreatedFinancialServiceProvidersArgs>>;
@@ -27080,32 +26253,28 @@ export type UserNodeResolvers<ContextType = any, ParentType extends ResolversPar
   createdTickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, Partial<UserNodeCreatedTicketsArgs>>;
   customFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>;
   dateJoined?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  doapHash?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   documentSet?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, Partial<UserNodeDocumentSetArgs>>;
   email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   feedbackMessages?: Resolver<ResolversTypes['FeedbackMessageNodeConnection'], ParentType, ContextType, Partial<UserNodeFeedbackMessagesArgs>>;
   feedbacks?: Resolver<ResolversTypes['FeedbackNodeConnection'], ParentType, ContextType, Partial<UserNodeFeedbacksArgs>>;
-  finalizedTargetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, Partial<UserNodeFinalizedTargetPopulationsArgs>>;
   firstName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   isActive?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   isStaff?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   isSuperuser?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   jobTitle?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  lastDoapSync?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   lastLogin?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   lastModifyDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   lastName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   logs?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, Partial<UserNodeLogsArgs>>;
   messages?: Resolver<ResolversTypes['CommunicationMessageNodeConnection'], ParentType, ContextType, Partial<UserNodeMessagesArgs>>;
-  partner?: Resolver<Maybe<ResolversTypes['PartnerNode']>, ParentType, ContextType>;
+  partner?: Resolver<ResolversTypes['PartnerNode'], ParentType, ContextType>;
   partnerRoles?: Resolver<Maybe<Array<Maybe<ResolversTypes['PartnerRoleNode']>>>, ParentType, ContextType>;
   registrationDataImports?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, Partial<UserNodeRegistrationDataImportsArgs>>;
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, Partial<UserNodeReportsArgs>>;
   sentDeliveryMechanisms?: Resolver<ResolversTypes['DeliveryMechanismPerPaymentPlanNodeConnection'], ParentType, ContextType, Partial<UserNodeSentDeliveryMechanismsArgs>>;
   status?: Resolver<ResolversTypes['UserStatus'], ParentType, ContextType>;
   surveys?: Resolver<ResolversTypes['SurveyNodeConnection'], ParentType, ContextType, Partial<UserNodeSurveysArgs>>;
-  targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, Partial<UserNodeTargetPopulationsArgs>>;
   ticketNotes?: Resolver<ResolversTypes['TicketNoteNodeConnection'], ParentType, ContextType, Partial<UserNodeTicketNotesArgs>>;
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>;
   username?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -27232,7 +26401,7 @@ export type Resolvers<ContextType = any> = {
   CommunicationMessageRecipientMapNodeEdge?: CommunicationMessageRecipientMapNodeEdgeResolvers<ContextType>;
   ContentTypeObjectType?: ContentTypeObjectTypeResolvers<ContextType>;
   CopyProgram?: CopyProgramResolvers<ContextType>;
-  CopyTargetPopulationMutationPayload?: CopyTargetPopulationMutationPayloadResolvers<ContextType>;
+  CopyTargetingCriteriaMutation?: CopyTargetingCriteriaMutationResolvers<ContextType>;
   CoreFieldChoiceObject?: CoreFieldChoiceObjectResolvers<ContextType>;
   CountAndPercentageNode?: CountAndPercentageNodeResolvers<ContextType>;
   CreateCommunicationMessageMutation?: CreateCommunicationMessageMutationResolvers<ContextType>;
@@ -27244,7 +26413,6 @@ export type Resolvers<ContextType = any> = {
   CreateProgram?: CreateProgramResolvers<ContextType>;
   CreateReport?: CreateReportResolvers<ContextType>;
   CreateSurveyMutation?: CreateSurveyMutationResolvers<ContextType>;
-  CreateTargetPopulationMutation?: CreateTargetPopulationMutationResolvers<ContextType>;
   CreateTicketNoteMutation?: CreateTicketNoteMutationResolvers<ContextType>;
   CreateVerificationPlanMutation?: CreateVerificationPlanMutationResolvers<ContextType>;
   DataCollectingTypeChoiceObject?: DataCollectingTypeChoiceObjectResolvers<ContextType>;
@@ -27262,7 +26430,6 @@ export type Resolvers<ContextType = any> = {
   DeletePaymentVerificationPlan?: DeletePaymentVerificationPlanResolvers<ContextType>;
   DeleteProgram?: DeleteProgramResolvers<ContextType>;
   DeleteRegistrationDataImport?: DeleteRegistrationDataImportResolvers<ContextType>;
-  DeleteTargetPopulationMutationPayload?: DeleteTargetPopulationMutationPayloadResolvers<ContextType>;
   DeliveredQuantityNode?: DeliveredQuantityNodeResolvers<ContextType>;
   DeliveryMechanismDataNode?: DeliveryMechanismDataNodeResolvers<ContextType>;
   DeliveryMechanismDataNodeConnection?: DeliveryMechanismDataNodeConnectionResolvers<ContextType>;
@@ -27295,7 +26462,6 @@ export type Resolvers<ContextType = any> = {
   FeedbackNodeEdge?: FeedbackNodeEdgeResolvers<ContextType>;
   FieldAttributeNode?: FieldAttributeNodeResolvers<ContextType>;
   FilteredActionsListNode?: FilteredActionsListNodeResolvers<ContextType>;
-  FinalizeTargetPopulationMutation?: FinalizeTargetPopulationMutationResolvers<ContextType>;
   FinancialServiceProviderNode?: FinancialServiceProviderNodeResolvers<ContextType>;
   FinancialServiceProviderNodeConnection?: FinancialServiceProviderNodeConnectionResolvers<ContextType>;
   FinancialServiceProviderNodeEdge?: FinancialServiceProviderNodeEdgeResolvers<ContextType>;
@@ -27350,7 +26516,6 @@ export type Resolvers<ContextType = any> = {
   LanguageObject?: LanguageObjectResolvers<ContextType>;
   LanguageObjectConnection?: LanguageObjectConnectionResolvers<ContextType>;
   LanguageObjectEdge?: LanguageObjectEdgeResolvers<ContextType>;
-  LockTargetPopulationMutation?: LockTargetPopulationMutationResolvers<ContextType>;
   LogEntryNode?: LogEntryNodeResolvers<ContextType>;
   LogEntryNodeConnection?: LogEntryNodeConnectionResolvers<ContextType>;
   LogEntryNodeEdge?: LogEntryNodeEdgeResolvers<ContextType>;
@@ -27359,6 +26524,7 @@ export type Resolvers<ContextType = any> = {
   Mutations?: MutationsResolvers<ContextType>;
   NeedsAdjudicationApproveMutation?: NeedsAdjudicationApproveMutationResolvers<ContextType>;
   Node?: NodeResolvers<ContextType>;
+  OpenPaymentPlanMutation?: OpenPaymentPlanMutationResolvers<ContextType>;
   PDUSubtypeChoiceObject?: PduSubtypeChoiceObjectResolvers<ContextType>;
   PageInfo?: PageInfoResolvers<ContextType>;
   PageInfoNode?: PageInfoNodeResolvers<ContextType>;
@@ -27405,7 +26571,6 @@ export type Resolvers<ContextType = any> = {
   RapidProFlowResult?: RapidProFlowResultResolvers<ContextType>;
   RapidProFlowRun?: RapidProFlowRunResolvers<ContextType>;
   ReassignRoleMutation?: ReassignRoleMutationResolvers<ContextType>;
-  RebuildTargetPopulationMutation?: RebuildTargetPopulationMutationResolvers<ContextType>;
   RecipientNode?: RecipientNodeResolvers<ContextType>;
   RecipientNodeConnection?: RecipientNodeConnectionResolvers<ContextType>;
   RecipientNodeEdge?: RecipientNodeEdgeResolvers<ContextType>;
@@ -27450,7 +26615,6 @@ export type Resolvers<ContextType = any> = {
   SaveKoboProjectImportDataAsync?: SaveKoboProjectImportDataAsyncResolvers<ContextType>;
   SectionTotalNode?: SectionTotalNodeResolvers<ContextType>;
   SetSteficonRuleOnPaymentPlanPaymentListMutation?: SetSteficonRuleOnPaymentPlanPaymentListMutationResolvers<ContextType>;
-  SetSteficonRuleOnTargetPopulationMutationPayload?: SetSteficonRuleOnTargetPopulationMutationPayloadResolvers<ContextType>;
   SimpleApproveMutation?: SimpleApproveMutationResolvers<ContextType>;
   SplitPaymentPlanMutation?: SplitPaymentPlanMutationResolvers<ContextType>;
   SteficonRuleNode?: SteficonRuleNodeResolvers<ContextType>;
@@ -27461,9 +26625,6 @@ export type Resolvers<ContextType = any> = {
   SurveyNodeEdge?: SurveyNodeEdgeResolvers<ContextType>;
   TableTotalCashTransferred?: TableTotalCashTransferredResolvers<ContextType>;
   TableTotalCashTransferredForPeople?: TableTotalCashTransferredForPeopleResolvers<ContextType>;
-  TargetPopulationNode?: TargetPopulationNodeResolvers<ContextType>;
-  TargetPopulationNodeConnection?: TargetPopulationNodeConnectionResolvers<ContextType>;
-  TargetPopulationNodeEdge?: TargetPopulationNodeEdgeResolvers<ContextType>;
   TargetingCollectorBlockRuleFilterNode?: TargetingCollectorBlockRuleFilterNodeResolvers<ContextType>;
   TargetingCollectorRuleFilterBlockNode?: TargetingCollectorRuleFilterBlockNodeResolvers<ContextType>;
   TargetingCriteriaNode?: TargetingCriteriaNodeResolvers<ContextType>;
@@ -27516,7 +26677,6 @@ export type Resolvers<ContextType = any> = {
   TicketSystemFlaggingDetailsNodeConnection?: TicketSystemFlaggingDetailsNodeConnectionResolvers<ContextType>;
   TicketSystemFlaggingDetailsNodeEdge?: TicketSystemFlaggingDetailsNodeEdgeResolvers<ContextType>;
   UUID?: GraphQLScalarType;
-  UnlockTargetPopulationMutation?: UnlockTargetPopulationMutationResolvers<ContextType>;
   UpdateFeedbackMutation?: UpdateFeedbackMutationResolvers<ContextType>;
   UpdateGrievanceTicketMutation?: UpdateGrievanceTicketMutationResolvers<ContextType>;
   UpdatePaymentPlanMutation?: UpdatePaymentPlanMutationResolvers<ContextType>;
@@ -27524,7 +26684,6 @@ export type Resolvers<ContextType = any> = {
   UpdatePaymentVerificationStatusAndReceivedAmount?: UpdatePaymentVerificationStatusAndReceivedAmountResolvers<ContextType>;
   UpdateProgram?: UpdateProgramResolvers<ContextType>;
   UpdateProgramPartners?: UpdateProgramPartnersResolvers<ContextType>;
-  UpdateTargetPopulationMutation?: UpdateTargetPopulationMutationResolvers<ContextType>;
   Upload?: GraphQLScalarType;
   UploadImportDataXLSXFileAsync?: UploadImportDataXlsxFileAsyncResolvers<ContextType>;
   UserBusinessAreaNode?: UserBusinessAreaNodeResolvers<ContextType>;

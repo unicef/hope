@@ -40,7 +40,7 @@ class TestChartTotalTransferredCashByCountry(APITestCase):
         dm_voucher = DeliveryMechanism.objects.get(code="voucher")
         cls.partner = PartnerFactory(name="Test1")
         cls.user = UserFactory(partner=cls.partner)
-        payment_plan = PaymentPlanFactory(exchange_rate=None)
+        payment_plan = PaymentPlanFactory(exchange_rate=None, created_by=cls.user)
         chosen_business_areas = ("afghanistan", "botswana", "angola")
         delivery_date = timezone.datetime(2021, 10, 10, tzinfo=utc)
         for business_area_slug in chosen_business_areas:

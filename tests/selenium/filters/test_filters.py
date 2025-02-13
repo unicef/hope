@@ -24,11 +24,7 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDataImport
-from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetPopulationFactory,
-)
-from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
 from tests.selenium.page_object.filters import Filters
 from tests.selenium.page_object.grievance.details_grievance_page import (
     GrievanceDetailsPage,
@@ -44,14 +40,17 @@ pytestmark = pytest.mark.django_db()
 
 @pytest.fixture
 def create_payment_plan() -> None:
-    tp = TargetPopulation.objects.all()[0]
-    tp2 = TargetPopulation.objects.all()[1]
+    ba = BusinessArea.objects.get(slug="afghanistan")
+    targeting_criteria = TargetingCriteriaFactory()
+    targeting_criteria_2 = TargetingCriteriaFactory()
+    program_1 = ProgramFactory(business_area=ba)
+    program_2 = ProgramFactory(business_area=ba)
 
     pp = PaymentPlan.objects.update_or_create(
         name="Test Payment Plan 1",
         unicef_id="PP-0060-22-11223344",
-        business_area=BusinessArea.objects.only("is_payment_plan_applicable").get(slug="afghanistan"),
-        target_population=tp,
+        business_area=ba,
+        targeting_criteria=targeting_criteria,
         start_date=datetime.now(),
         end_date=datetime.now() + relativedelta(days=30),
         currency="USD",
@@ -63,15 +62,15 @@ def create_payment_plan() -> None:
         total_delivered_quantity=999,
         total_entitled_quantity=2999,
         is_follow_up=False,
-        program_cycle=tp.program.cycles.first(),
+        program_cycle=program_1.cycles.first(),
     )
     pp[0].unicef_id = "PP-0060-22-11223344"
     pp[0].save()
 
     PaymentPlan.objects.update_or_create(
         name="Test Payment Plan 2",
-        business_area=BusinessArea.objects.only("is_payment_plan_applicable").get(slug="afghanistan"),
-        target_population=tp2,
+        business_area=ba,
+        targeting_criteria=targeting_criteria_2,
         start_date=datetime.now(),
         end_date=datetime.now() + relativedelta(days=30),
         currency="USD",
@@ -83,7 +82,7 @@ def create_payment_plan() -> None:
         total_delivered_quantity=999,
         total_entitled_quantity=2999,
         is_follow_up=False,
-        program_cycle=tp2.program.cycles.first(),
+        program_cycle=program_2.cycles.first(),
     )
 
 
@@ -222,17 +221,19 @@ def add_payment_verification() -> None:
 def create_targeting() -> None:
     user = User.objects.first()
     business_area = BusinessArea.objects.get(slug="afghanistan")
-    TargetPopulationFactory(
+    PaymentPlanFactory(
         name="Test",
         created_by=user,
         targeting_criteria=TargetingCriteriaFactory(),
         business_area=business_area,
+        status=PaymentPlan.Status.TP_OPEN,
     )
-    TargetPopulationFactory(
+    PaymentPlanFactory(
         name="Targeting 2",
         created_by=user,
         targeting_criteria=TargetingCriteriaFactory(),
         business_area=business_area,
+        status=PaymentPlan.Status.TP_OPEN,
     )
 
 

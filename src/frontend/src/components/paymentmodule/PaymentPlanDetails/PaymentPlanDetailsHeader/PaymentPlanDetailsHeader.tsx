@@ -58,14 +58,6 @@ export function PaymentPlanDetailsHeader({
     PERMISSIONS.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
     permissions,
   );
-  const canDownloadXlsx = hasPermissions(
-    PERMISSIONS.PM_DOWNLOAD_XLSX_FOR_FSP,
-    permissions,
-  );
-  const canExportXlsx = hasPermissions(
-    PERMISSIONS.PM_EXPORT_XLSX_FOR_FSP,
-    permissions,
-  );
   const canSendToPaymentGateway =
     hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
     paymentPlan.canSendToPaymentGateway;
@@ -139,23 +131,11 @@ export function PaymentPlanDetailsHeader({
       );
       break;
     case 'ACCEPTED':
+    case 'FINISHED':
       buttons = (
         <AcceptedPaymentPlanHeaderButtons
-          canDownloadXlsx={canDownloadXlsx}
-          canExportXlsx={canExportXlsx}
           canSendToPaymentGateway={canSendToPaymentGateway}
           canSplit={canSplit}
-          paymentPlan={paymentPlan}
-        />
-      );
-      break;
-    case 'FINISHED': // TODO: may create another one for that explicitly but good for now
-      buttons = (
-        <AcceptedPaymentPlanHeaderButtons
-          canDownloadXlsx={canDownloadXlsx}
-          canExportXlsx={canExportXlsx}
-          canSendToPaymentGateway={false}
-          canSplit={false}
           paymentPlan={paymentPlan}
         />
       );

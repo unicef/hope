@@ -14,8 +14,8 @@ from django.utils.safestring import mark_safe
 
 from admin_extra_buttons.api import confirm_action
 from admin_extra_buttons.decorators import button
-from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
+from adminfilters.autocomplete import AutoCompleteFilter, LinkedAutoCompleteFilter
+from adminfilters.filters import ChoicesFieldComboFilter
 from adminfilters.mixin import AdminAutoCompleteSearchMixin
 from adminfilters.querystring import QueryStringFilter
 
@@ -27,6 +27,8 @@ from hct_mis_api.apps.household.models import Individual, PendingIndividual
 from hct_mis_api.apps.payment.models import Payment
 from hct_mis_api.apps.registration_data.models import (
     DeduplicationEngineSimilarityPair,
+    ImportData,
+    KoboImportData,
     RegistrationDataImport,
 )
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
@@ -44,17 +46,40 @@ logger = logging.getLogger(__name__)
 
 @admin.register(RegistrationDataImport)
 class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBase):
-    list_display = ("name", "status", "import_date", "data_source", "business_area")
+    list_display = (
+        "name",
+        "business_area",
+        "program",
+        "status",
+        "data_source",
+        "import_date",
+        "imported_by",
+        "deduplication_engine_status",
+        "number_of_individuals",
+        "number_of_households",
+        "screen_beneficiary",
+        "pull_pictures",
+        "excluded",
+        "erased",
+        "deduplication_engine_status",
+    )
     search_fields = ("name",)
     list_filter = (
         QueryStringFilter,
         ("status", ChoicesFieldComboFilter),
         ("data_source", ChoicesFieldComboFilter),
-        ("business_area", AutoCompleteFilter),
+        ("business_area", LinkedAutoCompleteFilter.factory(parent=None)),
+        ("program", LinkedAutoCompleteFilter.factory(parent="business_area")),
         ("imported_by", AutoCompleteFilter),
+        "data_source",
+        "screen_beneficiary",
+        "pull_pictures",
+        "excluded",
+        "erased",
+        "deduplication_engine_status",
     )
     date_hierarchy = "updated_at"
-    raw_id_fields = ("imported_by", "business_area", "program")
+    raw_id_fields = ("imported_by", "business_area", "program", "import_data")
     advanced_filter_fields = (
         "status",
         "updated_at",
@@ -63,11 +88,11 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
     )
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
-        return super().get_queryset(request).select_related("business_area")
+        return super().get_queryset(request).select_related("business_area", "program", "imported_by")
 
     @button(
         label="Re-run RDI",
-        permission=lambda r, o, handler: r.user.is_superuser,
+        permission="registration_data.rerun_rdi",
         enabled=lambda btn: btn.original.status == RegistrationDataImport.IMPORT_ERROR,
     )
     def rerun_rdi(self, request: HttpRequest, pk: UUID) -> None:
@@ -102,7 +127,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
 
     @button(
         label="Re-run Merging RDI",
-        permission=lambda r, o, handler: r.user.is_superuser,
+        permission="registration_data.rerun_rdi",
         enabled=lambda btn: btn.original.status == RegistrationDataImport.MERGE_ERROR,
     )
     def rerun_merge_rdi(self, request: HttpRequest, pk: UUID) -> None:
@@ -248,7 +273,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
             self.message_user(request, "An error occurred while processing RDI delete", messages.ERROR)
             return None
 
-    @button()
+    @button(permission="household.view_household")
     def households(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
         obj = self.get_object(request, str(pk))
         url = reverse("admin:household_household_changelist")
@@ -286,9 +311,40 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         return TemplateResponse(request, "admin/household/household/enroll_households_to_program.html", context)
 
 
+@admin.register(ImportData)
+class ImportDataAdmin(HOPEModelAdminBase):
+    list_display = ("business_area_slug", "status", "data_type", "number_of_households", "number_of_individuals")
+    list_filter = (
+        "status",
+        "data_type",
+        ("created_by_id", AutoCompleteFilter),
+    )
+
+
+@admin.register(KoboImportData)
+class KoboImportDataDataAdmin(HOPEModelAdminBase):
+    list_display = (
+        "business_area_slug",
+        "status",
+        "data_type",
+        "kobo_asset_id",
+        "number_of_households",
+        "number_of_individuals",
+        "only_active_submissions",
+        "pull_pictures",
+    )
+    list_filter = (
+        "status",
+        "data_type",
+        ("created_by_id", AutoCompleteFilter),
+        "only_active_submissions",
+        "pull_pictures",
+    )
+
+
 @admin.register(DeduplicationEngineSimilarityPair)
 class DeduplicationEngineSimilarityPairAdmin(HOPEModelAdminBase):
     list_display = ("program", "individual1", "individual2", "similarity_score")
-    list_filter = (("program__name", ValueFilter),)
+    list_filter = (("program", AutoCompleteFilter),)
     raw_id_fields = ("program", "individual1", "individual2")
-    search_fields = ("individual1", "individual2")
+    search_fields = ("program", "individual1", "individual2")

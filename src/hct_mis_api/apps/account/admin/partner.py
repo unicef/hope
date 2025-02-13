@@ -10,6 +10,7 @@ from django.urls import reverse
 from django.utils.html import format_html
 
 from admin_extra_buttons.decorators import button
+from adminfilters.autocomplete import AutoCompleteFilter
 
 from hct_mis_api.apps.account import models as account_models
 from hct_mis_api.apps.account.models import IncompatibleRoles, Role
@@ -47,11 +48,12 @@ class ProgramAreaForm(forms.Form):
 
 @admin.register(account_models.Partner)
 class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
-    list_filter = ("is_un", "parent")
+    list_filter = ("is_un", ("parent", AutoCompleteFilter))
     search_fields = ("name",)
     readonly_fields = ("sub_partners",)
     list_display = (
-        "__str__",
+        "name",
+        "parent",
         "sub_partners",
         "is_un",
     )
@@ -94,7 +96,7 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
         form.base_fields["parent"].queryset = queryset
         return form
 
-    @button(enabled=lambda obj: obj.original.is_editable)
+    @button(enabled=lambda obj: obj.original.is_editable, permission="auth.view_permission")
     def permissions(self, request: HttpRequest, pk: int) -> Union[TemplateResponse, HttpResponseRedirect]:
         context = self.get_common_context(request, pk, title="Partner permissions")
         partner: account_models.Partner = context["original"]

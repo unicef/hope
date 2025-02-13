@@ -9,7 +9,7 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models, transaction
-from django.db.models import Count, OuterRef, Q, Subquery
+from django.db.models import Count, OuterRef, Q, QuerySet, Subquery
 from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
@@ -71,7 +71,6 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
             "data_source",
             "number_of_individuals",
             "number_of_households",
-            "datahub_id",
             "error_message",
         ]
     )
@@ -148,6 +147,19 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         ],
     )
     status = models.CharField(max_length=255, choices=STATUS_CHOICE, default=IN_REVIEW, db_index=True)
+    deduplication_engine_status = models.CharField(
+        max_length=255, choices=DEDUP_ENGINE_STATUS_CHOICE, blank=True, null=True, default=None
+    )
+    business_area = models.ForeignKey(BusinessArea, null=True, on_delete=models.CASCADE)
+    # TODO: set to not nullable Program and on_delete=models.PROTECT
+    program = models.ForeignKey(
+        "program.Program",
+        null=True,
+        blank=True,
+        db_index=True,
+        related_name="registration_imports",
+        on_delete=models.SET_NULL,
+    )
     import_date = models.DateTimeField(auto_now_add=True, db_index=True)
     imported_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -159,6 +171,23 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         max_length=255,
         choices=DATA_SOURCE_CHOICE,
     )
+    import_data = models.OneToOneField(
+        "ImportData",
+        related_name="registration_data_import_hope",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    import_from_ids = models.TextField(blank=True, null=True)
+    pull_pictures = models.BooleanField(default=True)
+    screen_beneficiary = models.BooleanField(default=False)
+    excluded = models.BooleanField(default=False, help_text="Exclude RDI in UI")
+    erased = models.BooleanField(default=False, help_text="Abort RDI")
+    refuse_reason = models.CharField(max_length=100, blank=True, null=True)
+    allow_delivery_mechanisms_validation_errors = models.BooleanField(default=False)
+    error_message = models.TextField(blank=True)
+    sentry_id = models.CharField(max_length=100, default="", blank=True, null=True)
+
     number_of_individuals = models.PositiveIntegerField(db_index=True)
     number_of_households = models.PositiveIntegerField(db_index=True)
 
@@ -172,43 +201,13 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
     dedup_engine_batch_duplicates = models.PositiveIntegerField(default=0)
     dedup_engine_golden_record_duplicates = models.PositiveIntegerField(default=0)
 
-    datahub_id = models.UUIDField(null=True, default=None, db_index=True, blank=True)
-    error_message = models.TextField(blank=True)
-    sentry_id = models.CharField(max_length=100, default="", blank=True, null=True)
-
-    pull_pictures = models.BooleanField(default=True)
-    business_area = models.ForeignKey(BusinessArea, null=True, on_delete=models.CASCADE)
-    screen_beneficiary = models.BooleanField(default=False)
-    excluded = models.BooleanField(default=False, help_text="Exclude RDI in UI")
-    # TODO: set to not nullable Program and on_delete=models.PROTECT
-    program = models.ForeignKey(
-        "program.Program",
-        null=True,
-        blank=True,
-        db_index=True,
-        related_name="registration_imports",
-        on_delete=models.SET_NULL,
-    )
-    erased = models.BooleanField(default=False, help_text="Abort RDI")
-    refuse_reason = models.CharField(max_length=100, blank=True, null=True)
-    allow_delivery_mechanisms_validation_errors = models.BooleanField(default=False)
-    import_data = models.OneToOneField(
-        "ImportData",
-        related_name="registration_data_import_hope",
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-    )
-    deduplication_engine_status = models.CharField(
-        max_length=255, choices=DEDUP_ENGINE_STATUS_CHOICE, blank=True, null=True, default=None
-    )
-
     def __str__(self) -> str:
         return self.name
 
     class Meta:
         unique_together = ("name", "business_area")
         verbose_name = "Registration data import"
+        permissions = (("rerun_rdi", "Can Rerun RDI"),)
 
     def should_check_against_sanction_list(self) -> bool:
         return self.screen_beneficiary
@@ -293,8 +292,8 @@ class ImportData(TimeStampedUUIDModel):
     )
     status = models.CharField(max_length=40, default=STATUS_FINISHED, choices=STATUS_CHOICES)
     business_area_slug = models.CharField(max_length=200, blank=True)
-    file = models.FileField(null=True)
     data_type = models.CharField(max_length=4, choices=DATA_TYPE_CHOICES, default=XLSX)
+    file = models.FileField(null=True)
     number_of_households = models.PositiveIntegerField(null=True)
     number_of_individuals = models.PositiveIntegerField(null=True)
     error = models.TextField(blank=True)
@@ -343,10 +342,6 @@ class RegistrationDataImportDatahub(TimeStampedUUIDModel):
     @property
     def business_area(self) -> str:
         return self.business_area_slug
-
-    @property
-    def linked_rdi(self) -> "RegistrationDataImport":
-        return RegistrationDataImport.objects.get(datahub_id=self.id)
 
 
 class KoboImportedSubmission(models.Model):
@@ -439,3 +434,26 @@ class DeduplicationEngineSimilarityPair(models.Model):
             },
             "similarity_score": float(self.similarity_score),
         }
+
+    @classmethod
+    def serialize_for_individual(
+        cls,
+        individual: Individual,
+        similarity_pairs: QuerySet["DeduplicationEngineSimilarityPair"],
+    ) -> List:
+        duplicates = []
+        for pair in similarity_pairs:
+            duplicate = pair.individual2 if pair.individual1 == individual else pair.individual1
+            household = duplicate.household
+            duplicates.append(
+                dict(
+                    id=str(duplicate.id),
+                    unicef_id=str(duplicate.unicef_id),
+                    full_name=duplicate.full_name,
+                    similarity_score=float(pair.similarity_score),
+                    age=duplicate.age,
+                    location=household.admin2.name if duplicate.household and duplicate.household.admin2 else None,
+                )
+            )
+
+        return duplicates

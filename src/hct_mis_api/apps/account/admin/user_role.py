@@ -24,11 +24,12 @@ class UserRoleInline(admin.TabularInline):
     model = account_models.UserRole
     extra = 0
     formset = UserRoleInlineFormSet
+    raw_id_fields = ("business_area", "role")
 
 
 @admin.register(account_models.UserRole)
 class UserRoleAdmin(HOPEModelAdminBase):
-    list_display = ("user", "role", "business_area")
+    list_display = ("user", "role", "business_area", "expiry_date")
     form = UserRoleAdminForm
     autocomplete_fields = ("role",)
     raw_id_fields = ("user", "business_area", "role")

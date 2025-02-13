@@ -1,23 +1,21 @@
 import {
-  TargetPopulationStatus,
-  ProgramStatus,
   PaymentPlanStatus,
+  ProgramStatus,
   PaymentPlanBackgroundActionStatus,
 } from '@generated/graphql';
 
 export const TARGETING_STATES = {
   NONE: 'None',
-  [TargetPopulationStatus.Open]: 'Open',
-  [TargetPopulationStatus.Locked]: 'Locked',
-  [TargetPopulationStatus.ReadyForCashAssist]: 'Ready For Cash Assist',
-  [TargetPopulationStatus.ReadyForPaymentModule]: 'Ready For Payment Module',
-  [TargetPopulationStatus.Processing]: 'Processing',
-  [TargetPopulationStatus.SteficonWait]: 'Entitlement Formula Wait',
-  [TargetPopulationStatus.SteficonRun]: 'Entitlement Formula Run',
-  [TargetPopulationStatus.SteficonCompleted]: 'Entitlement Formula Completed',
-  [TargetPopulationStatus.SteficonError]: 'Entitlement Formula Error',
-  [TargetPopulationStatus.Assigned]: 'Assigned',
-  [TargetPopulationStatus.SendingToCashAssist]: 'Sending To Cash Assist',
+  [PaymentPlanStatus.TpOpen]: 'Open',
+  [PaymentPlanStatus.TpLocked]: 'Locked',
+  // [PaymentPlanStatus.ReadyForCashAssist]: 'Ready For Cash Assist',
+  // [PaymentPlanStatus.ReadyForPaymentModule]: 'Ready For Payment Module',
+  [PaymentPlanStatus.Processing]: 'Processing',
+  [PaymentPlanStatus.SteficonWait]: 'Entitlement Formula Wait',
+  [PaymentPlanStatus.SteficonRun]: 'Entitlement Formula Run',
+  [PaymentPlanStatus.SteficonCompleted]: 'Entitlement Formula Completed',
+  [PaymentPlanStatus.SteficonError]: 'Entitlement Formula Error',
+  // [PaymentPlanStatus.Assigned]: 'Assigned',
 };
 
 export const PROGRAM_STATES = {

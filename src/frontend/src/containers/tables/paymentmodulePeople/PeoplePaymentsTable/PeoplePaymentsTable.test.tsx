@@ -9,7 +9,7 @@ import { PeoplePaymentsTable } from './PeoplePaymentsTable';
 import { PERMISSIONS } from '../../../../config/permissions';
 
 const paymentPlan = fakeApolloAllPaymentPlansForTable[0].result.data
-  .allPaymentPlans.edges[0].node as PaymentPlanQuery['paymentPlan'];
+  .allPaymentPlans.edges[0].node as unknown as PaymentPlanQuery['paymentPlan'];
 
 describe('containers/tables/paymentmodule/PeoplePaymentsTable', () => {
   it('should render with data', async () => {

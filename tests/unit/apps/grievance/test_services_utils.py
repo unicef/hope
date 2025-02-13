@@ -15,6 +15,7 @@ from hct_mis_api.apps.account.fixtures import (
 )
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import FlexibleAttribute as Core_FlexibleAttribute
 from hct_mis_api.apps.core.utils import encode_id_base64_required
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.grievance.fixtures import (
@@ -24,6 +25,7 @@ from hct_mis_api.apps.grievance.fixtures import (
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.grievance.services.data_change.utils import (
     cast_flex_fields,
+    convert_to_empty_string_if_null,
     handle_add_document,
     handle_add_payment_channel,
     handle_role,
@@ -69,6 +71,13 @@ class FlexibleAttribute:
 
 
 class TestGrievanceUtils(TestCase):
+    def test_convert_to_empty_string_if_null(self) -> None:
+        self.assertEqual(convert_to_empty_string_if_null(None), "")
+        self.assertTrue(convert_to_empty_string_if_null(True))
+        self.assertFalse(convert_to_empty_string_if_null(False))
+        self.assertEqual(convert_to_empty_string_if_null("test"), "test")
+        self.assertEqual(convert_to_empty_string_if_null(123), 123)
+
     def test_to_phone_number_str(self) -> None:
         data = {"phone_number": 123456789}
         to_phone_number_str(data, "phone_number")
@@ -139,6 +148,21 @@ class TestGrievanceUtils(TestCase):
         with pytest.raises(ValueError) as e:
             verify_flex_fields({"key": "value"}, "individuals")
             assert str(e.value) == "key is not a correct `flex field"
+
+    def test_verify_flex_fields_with_date_type(self) -> None:
+        national_id_issue_date_i_f = Core_FlexibleAttribute(
+            type=Core_FlexibleAttribute.DATE,
+            name="national_id_issue_date_i_f",
+            associated_with=Core_FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            label={"English(EN)": "value123"},
+        )
+        national_id_issue_date_i_f.save()
+
+        verify_flex_fields({"national_id_issue_date_i_f": "2025-01-15"}, "individuals")
+
+        with pytest.raises(ValueError) as e:
+            verify_flex_fields({"national_id_issue_date_i_f": "invalid"}, "individuals")
+            assert str(e.value) == "time data 'invalid' does not match format '%Y-%m-%d'"
 
     def test_handle_role(self) -> None:
         create_afghanistan()

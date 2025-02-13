@@ -1,6 +1,9 @@
 import { Box, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { PaymentRecordAndPaymentNode, PaymentVerificationNode } from '@generated/graphql';
+import {
+  PaymentRecordAndPaymentNode,
+  PaymentVerificationNode,
+} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ContentLink } from '@core/ContentLink';
 import { Title } from '@core/Title';
@@ -9,7 +12,7 @@ import { ReactElement } from 'react';
 
 type VerificationId = {
   id: PaymentVerificationNode['id'];
-  caId: PaymentRecordAndPaymentNode['caId'];
+  caId: PaymentRecordAndPaymentNode['unicefId'];
 };
 
 interface PaymentIdsProps {

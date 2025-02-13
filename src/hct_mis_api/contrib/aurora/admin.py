@@ -19,9 +19,11 @@ import requests
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminactions.mass_update import mass_update
+from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.combo import ChoicesFieldComboFilter
 from adminfilters.depot.widget import DepotManager
 from adminfilters.json import JsonFieldFilter
+from adminfilters.mixin import AdminFiltersMixin
 from adminfilters.numbers import NumberFilter
 from adminfilters.querystring import QueryStringFilter
 from jsoneditor.forms import JSONEditor
@@ -69,19 +71,23 @@ class StatusFilter(ChoicesFieldComboFilter):
 
 
 @smart_register(models.Organization)
-class OrganizationAdmin(admin.ModelAdmin):
+class OrganizationAdmin(AdminFiltersMixin, admin.ModelAdmin):
+    search_fields = ("name", "slug")
     list_display = ("name", "slug", "business_area")
     readonly_fields = (
         "name",
         "slug",
     )
+    list_filter = (("business_area", AutoCompleteFilter),)
 
 
 @smart_register(models.Project)
-class ProjectAdmin(admin.ModelAdmin):
-    list_display = ("name", "organization")
-    list_filter = ("organization", "programme")
+class ProjectAdmin(AdminFiltersMixin, admin.ModelAdmin):
+    list_display = ("name", "organization", "programme")
+    list_filter = (("organization", AutoCompleteFilter), ("programme", AutoCompleteFilter))
     readonly_fields = ("name", "organization")
+    search_fields = ("name",)
+    raw_id_fields = ("programme",)
 
     def get_form(
         self, request: HttpRequest, obj: Optional[models.Project] = None, change: bool = False, **kwargs: Any
@@ -97,10 +103,11 @@ class ProjectAdmin(admin.ModelAdmin):
 
 
 @smart_register(models.Registration)
-class RegistrationAdmin(ExtraButtonsMixin, admin.ModelAdmin):
-    list_display = ("name", "project", "rdi_policy", "project")
+class RegistrationAdmin(AdminFiltersMixin, ExtraButtonsMixin, admin.ModelAdmin):
+    list_display = ("name", "slug", "project", "rdi_policy")
     readonly_fields = ("name", "project", "slug", "extra", "metadata")
-    list_filter = ("rdi_policy", "project")
+    list_filter = ("rdi_policy", ("project", AutoCompleteFilter))
+    search_fields = ("name",)
     raw_id_fields = ("steficon_rule",)
     formfield_overrides = {
         JSONField: {"widget": JSONEditor},
@@ -173,7 +180,7 @@ class AmendRDIForm(BaseRDIForm):
 
 
 @admin.register(Record)
-class RecordDatahubAdmin(HOPEModelAdminBase):
+class RecordAdmin(HOPEModelAdminBase):
     list_display = ("id", "registration", "timestamp", "source_id", "status", "ignored")
     readonly_fields = (
         "id",
@@ -195,12 +202,12 @@ class RecordDatahubAdmin(HOPEModelAdminBase):
     )
     change_form_template = "registration_datahub/admin/record/change_form.html"
 
-    actions = [mass_update, "extract", "async_extract", "create_rdi", "create_sr_lanka_rdi", "count_queryset"]
+    actions = [mass_update, "extract", "async_extract", "create_rdi", "count_queryset"]
 
     mass_update_exclude = ["pk", "data", "source_id", "registration", "timestamp"]
     mass_update_hints = []
 
-    @button()
+    @button(permission="aurora.can_fetch_data")
     def fetch_aurora(self, request: HttpRequest) -> HttpResponse:
         ctx = self.get_common_context(request)
         if request.method == "POST":
@@ -246,7 +253,7 @@ class RecordDatahubAdmin(HOPEModelAdminBase):
         except Exception as e:
             self.message_user(request, str(e), messages.ERROR)
 
-    @button(label="Extract")
+    @button(label="Extract", permission="aurora.view_record")
     def extract_single(self, request: HttpRequest, pk: UUID) -> None:
         records_ids = Record.objects.filter(pk=pk).values_list("pk", flat=True)
         try:
@@ -254,7 +261,7 @@ class RecordDatahubAdmin(HOPEModelAdminBase):
         except Exception as e:
             self.message_error_to_user(request, e)
 
-    @button()
+    @button(permission="aurora.can_add_records")
     def create_new_rdi(self, request: HttpRequest) -> HttpResponse:
         ctx = self.get_common_context(request, title="Create RDI")
         if request.method == "POST":
@@ -306,7 +313,7 @@ class RecordDatahubAdmin(HOPEModelAdminBase):
         ctx["form"] = form
         return render(request, "registration_datahub/admin/record/create_rdi.html", ctx)
 
-    @button()
+    @button(permission="aurora.can_add_records")
     def add_to_existing_rdi(self, request: HttpRequest) -> HttpResponse:
         ctx = self.get_common_context(request, title="Add to existing RDI")
 
@@ -350,7 +357,7 @@ class RecordDatahubAdmin(HOPEModelAdminBase):
         ctx["form"] = form
         return render(request, "registration_datahub/admin/record/create_rdi.html", ctx)
 
-    @button(permission=is_root)
+    @button(permission="aurora.can_fetch_data")
     def fetch(self, request: HttpRequest) -> TemplateResponse:
         ctx = self.get_common_context(request)
         cookies = {}

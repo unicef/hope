@@ -94,13 +94,7 @@ class DashboardReport(TimeStampedUUIDModel):
     )
 
     business_area = models.ForeignKey("core.BusinessArea", related_name="dashboard_reports", on_delete=models.CASCADE)
-    file = models.FileField(blank=True, null=True)
-    created_by = models.ForeignKey("account.User", related_name="dashboard_reports", on_delete=models.CASCADE)
-    status = models.PositiveSmallIntegerField(choices=STATUSES, default=IN_PROGRESS)
     report_type = ChoiceArrayField(models.CharField(choices=REPORT_TYPES, max_length=255))
-
-    # filters
-    year = models.PositiveSmallIntegerField(default=timezone.now().year)
     program = models.ForeignKey(
         "program.Program",
         on_delete=models.CASCADE,
@@ -115,3 +109,7 @@ class DashboardReport(TimeStampedUUIDModel):
         null=True,
         related_name="dashboard_reports",
     )
+    year = models.PositiveSmallIntegerField(default=timezone.now().year)
+    status = models.PositiveSmallIntegerField(choices=STATUSES, default=IN_PROGRESS)
+    file = models.FileField(blank=True, null=True)
+    created_by = models.ForeignKey("account.User", related_name="dashboard_reports", on_delete=models.CASCADE)
