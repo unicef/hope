@@ -46,7 +46,6 @@ from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.admin import (
     BusinessAreaForHouseholdCollectionListFilter,
     HOPEModelAdminBase,
-    IsOriginalAdminMixin,
     LastSyncDateResetMixin,
     LinkedObjectsManagerMixin,
     RdiMergeStatusAdminMixin,
@@ -60,18 +59,14 @@ logger = logging.getLogger(__name__)
 class HouseholdRepresentationInline(admin.TabularInline):
     model = Household
     extra = 0
-    fields = ("unicef_id", "program", "is_original")
-    readonly_fields = ("unicef_id", "program", "is_original")
+    fields = ("unicef_id", "program")
+    readonly_fields = ("unicef_id", "program")
     show_change_link = True
     can_delete = False
     verbose_name_plural = "Household representations"
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
-        return (
-            Household.all_objects.all()
-            .select_related("program")
-            .only("unicef_id", "is_original", "copied_from", "program__name")
-        )
+        return Household.all_objects.all().select_related("program").only("unicef_id", "copied_from", "program__name")
 
     def has_add_permission(self, request: HttpRequest, obj: Optional[Household] = None) -> bool:
         return False  # Disable adding new individual representations inline
@@ -201,7 +196,6 @@ class HouseholdAdmin(
     CursorPaginatorAdmin,
     HouseholdWithDrawnMixin,
     HOPEModelAdminBase,
-    IsOriginalAdminMixin,
     HouseholdWithdrawFromListMixin,
     RdiMergeStatusAdminMixin,
 ):

@@ -9,10 +9,8 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
-from hct_mis_api.apps.grievance.models import OriginalAndRepresentationsManager
 from hct_mis_api.apps.utils.models import (
     AdminUrlMixin,
-    RepresentationManager,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
@@ -71,7 +69,6 @@ class Message(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
     program = models.ForeignKey(
         "program.Program", null=True, blank=True, on_delete=models.CASCADE, related_name="messages"
     )
-    is_original = models.BooleanField(db_index=True, default=False)
     copied_from = models.ForeignKey(
         "self",
         null=True,
@@ -80,10 +77,6 @@ class Message(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
         related_name="copied_to",
         help_text="If this object was copied from another, this field will contain the object it was copied from.",
     )
-
-    # TODO: remove both after data migration
-    objects = RepresentationManager()
-    original_and_repr_objects = OriginalAndRepresentationsManager()
 
     class Meta:
         ordering = ("created_at",)
@@ -155,7 +148,6 @@ class Feedback(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
         verbose_name=_("Linked grievance"),
     )
     consent = models.BooleanField(default=True)
-    is_original = models.BooleanField(db_index=True, default=False)
     copied_from = models.ForeignKey(
         "self",
         null=True,
@@ -164,10 +156,6 @@ class Feedback(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
         related_name="copied_to",
         help_text="If this object was copied from another, this field will contain the object it was copied from.",
     )
-
-    # TODO: remove both after data migration
-    objects = RepresentationManager()
-    original_and_repr_objects = OriginalAndRepresentationsManager()
 
     class Meta:
         ordering = ("created_at",)

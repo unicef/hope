@@ -633,7 +633,7 @@ class TestProgramPopulationToPendingObjects(APITestCase):
         )
         # role in new program
         self.assertIsNotNone(
-            IndividualRoleInHousehold.original_and_repr_objects.filter(
+            IndividualRoleInHousehold.objects.filter(
                 household=new_hh_repr,
                 individual=individual_already_in_program_to,
             ).first(),

@@ -11,7 +11,7 @@ from django.core.files.storage import default_storage
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import JSONField, Q, QuerySet, UniqueConstraint
-from django.db.models.signals import post_save
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
@@ -81,22 +81,6 @@ class GrievanceTicketManager(models.Manager):
             (TicketSensitiveDetails.objects.filter(Q(individual__in=individuals) | Q(household__in=households))),
             (TicketComplaintDetails.objects.filter(Q(individual__in=individuals) | Q(household__in=households))),
         )
-
-    # remove 'is_original' after data migration
-    def get_queryset(self) -> "QuerySet":
-        return super().get_queryset().filter(is_original=False)
-
-
-class OriginalAndRepresentationsManager(models.Manager):
-    # TODO: remove after data migration
-    def get_queryset(self) -> "QuerySet":
-        return super().get_queryset()
-
-
-class OnlyOriginalManager(models.Manager):
-    # TODO: remove after data migration
-    def get_queryset(self) -> "QuerySet":
-        return super().get_queryset().filter(is_original=True)
 
 
 class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, UnicefIdentifiedModel):
@@ -409,9 +393,6 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
     )
 
     objects = GrievanceTicketManager()
-    # TODO: remove after data migration
-    # added for migration purposes because 0062 call .objects()
-    default_for_migrations_fix = OriginalAndRepresentationsManager()
 
     def flatten(self, t: List[List]) -> List:
         return [item for sublist in t for item in sublist]
@@ -690,12 +671,19 @@ class TicketHouseholdDataUpdateDetails(TimeStampedUUIDModel):
         "household.Household",
         related_name="household_data_update_ticket_details",
         on_delete=models.CASCADE,
-        null=True,
     )
     household_data = JSONField(null=True)
 
     class Meta:
         verbose_name_plural = "Ticket Household Data Update Details"
+
+
+@receiver(post_delete, sender=TicketHouseholdDataUpdateDetails)
+def delete_grievance_ticket_on_household_details_update_delete(
+    sender: TicketHouseholdDataUpdateDetails, instance: TicketHouseholdDataUpdateDetails, **kwargs: Any
+) -> None:
+    if hasattr(instance, "ticket"):  # pragma: no cover
+        instance.ticket.delete()
 
 
 class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
@@ -710,7 +698,6 @@ class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
         "household.Individual",
         related_name="individual_data_update_ticket_details",
         on_delete=models.CASCADE,
-        null=True,
     )
     individual_data = JSONField(null=True)
     role_reassign_data = JSONField(default=dict)
@@ -721,6 +708,14 @@ class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
 
     class Meta:
         verbose_name_plural = "Ticket Individual Data Update Details"
+
+
+@receiver(post_delete, sender=TicketIndividualDataUpdateDetails)
+def delete_grievance_ticket_on_individual_details_update_delete(
+    sender: TicketIndividualDataUpdateDetails, instance: TicketIndividualDataUpdateDetails, **kwargs: Any
+) -> None:
+    if hasattr(instance, "ticket"):  # pragma: no cover
+        instance.ticket.delete()
 
 
 class TicketAddIndividualDetails(TimeStampedUUIDModel):
