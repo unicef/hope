@@ -4,7 +4,6 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.http import Http404, HttpRequest
-from django.http.response import HttpResponseBase
 from django.utils.functional import cached_property
 from django.views.generic import TemplateView
 from django.views.generic.edit import ProcessFormView
@@ -13,6 +12,8 @@ from admin_extra_buttons.utils import HttpResponseRedirectToReferrer
 from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.generics import ListAPIView
+from rest_framework.request import Request
+from rest_framework.response import Response
 from rest_framework_extensions.cache.decorators import cache_response
 from sentry_sdk import set_tag
 
@@ -82,7 +83,7 @@ class OrganizationListView(HOPEAPIView, ListAPIView):
 
     @etag_decorator(AuroraKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=AuroraKeyConstructor())
-    def get(self, request, *args, **kwargs):
+    def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().get(request, *args, **kwargs)
 
 
@@ -94,7 +95,7 @@ class ProjectListView(HOPEAPIView, ListAPIView):
 
     @etag_decorator(AuroraKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=AuroraKeyConstructor())
-    def get(self, request, *args, **kwargs):
+    def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().get(request, *args, **kwargs)
 
 
@@ -106,5 +107,5 @@ class RegistrationListView(HOPEAPIView, ListAPIView):
 
     @etag_decorator(AuroraKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=AuroraKeyConstructor())
-    def get(self, request, *args, **kwargs):
+    def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().get(request, *args, **kwargs)
