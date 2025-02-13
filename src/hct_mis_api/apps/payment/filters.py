@@ -459,9 +459,7 @@ def payment_ordering(queryset: QuerySet[Payment], order_by: str) -> QuerySet[Pay
     reverse = "-" if order_by.startswith("-") else ""
     order_by = order_by[1:] if reverse else order_by
 
-    if order_by == "ca_id":
-        qs = queryset.order_by(reverse + "unicef_id")
-    elif order_by in ("head_of_household", "entitlement_quantity", "delivered_quantity", "delivery_date"):
+    if order_by in ("head_of_household", "entitlement_quantity", "delivered_quantity", "delivery_date"):
         order_by_dict = {f"{order_by}__isnull": True}
         qs_null = queryset.filter(**order_by_dict)
         qs_non_null = queryset.exclude(**order_by_dict)

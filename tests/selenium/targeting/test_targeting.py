@@ -1022,7 +1022,7 @@ class TestTargeting:
         pageTargetingDetails.waitForLabelStatus("LOCKED")
         pageTargetingDetails.getButtonMarkReady().click()
         pageTargetingDetails.getButtonPopupMarkReady().click()
-        pageTargetingDetails.waitForLabelStatus("READY")
+        pageTargetingDetails.waitForLabelStatus("READY FOR PAYMENT MODULE")
 
     @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
     def test_copy_targeting(

@@ -41,8 +41,6 @@
         "start_date": "2023-06-19",
         "end_date": "2029-12-24",
         "description": "qwerty",
-        "ca_id": null,
-        "ca_hash_id": null,
         "business_area": "c259b1a0-ae3a-494e-b343-f7c8eb060c68",
         "budget": "100000.00",
         "frequency_of_payments": "REGULAR",

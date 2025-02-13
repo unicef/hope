@@ -11,7 +11,6 @@ export const CREATE_REGISTRATION_PROGRAM_POPULATION_IMPORT_MUTATION = gql`
         id
         name
         dataSource
-        datahubId
         screenBeneficiary
       }
       validationErrors
