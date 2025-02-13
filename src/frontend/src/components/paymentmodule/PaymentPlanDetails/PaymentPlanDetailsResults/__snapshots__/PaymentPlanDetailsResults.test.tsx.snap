@@ -74,7 +74,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Pa
                       class="sc-gtLWhw dynQwi"
                       color="textSecondary"
                     >
-                      1
+                      2
                     </span>
                   </div>
                 </div>
@@ -188,7 +188,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Pa
                       <div
                         class="sc-kLhKbu lpqITR"
                       >
-                        1
+                        2
                       </div>
                     </span>
                   </div>
@@ -218,7 +218,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Pa
                       <div
                         class="sc-kLhKbu lpqITR"
                       >
-                        3
+                        10
                       </div>
                     </span>
                   </div>

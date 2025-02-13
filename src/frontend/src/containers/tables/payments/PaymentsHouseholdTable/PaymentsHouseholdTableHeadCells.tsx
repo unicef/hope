@@ -1,11 +1,11 @@
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { PaymentRecordAndPaymentNode } from '@generated/graphql';
+import { PaymentNode } from '@generated/graphql';
 
-export const headCells: HeadCell<PaymentRecordAndPaymentNode>[] = [
+export const headCells: HeadCell<PaymentNode>[] = [
   {
     disablePadding: false,
     label: 'Payment ID',
-    id: 'internalData__caId',
+    id: 'unicefId',
     numeric: false,
   },
   {
@@ -14,6 +14,13 @@ export const headCells: HeadCell<PaymentRecordAndPaymentNode>[] = [
     id: 'status',
     numeric: false,
   },
+  {
+    disablePadding: false,
+    label: 'Head of Household',
+    id: 'headOfHousehold',
+    numeric: false,
+  },
+
   {
     disablePadding: false,
     label: 'Entitlement Quantity',

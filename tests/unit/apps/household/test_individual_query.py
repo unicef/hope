@@ -304,6 +304,7 @@ class TestIndividualQuery(APITestCase):
             },
             rdi_merge_status=MergeStatusModel.PENDING,
         )
+
         rebuild_search_index()
 
     @parameterized.expand(

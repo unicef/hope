@@ -63,11 +63,9 @@ export const grievanceTicketDetailed = gql`
       unicefId
       deliveredQuantity
       entitlementQuantity
-      objType
       parent {
         id
         unicefId
-        objType
       }
       verification {
         id

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`containers/tables/payments/PaymentRecordHouseholdTable should render loading 1`] = `
+exports[`containers/tables/payments/PaymentsPeopleTable should render loading 1`] = `
 <div>
   <div
     class="sc-kLhKbu blzheD"
@@ -72,30 +72,6 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render lo
                   tabindex="0"
                 >
                   Status
-                  <svg
-                    aria-hidden="true"
-                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                    data-testid="ArrowDownwardIcon"
-                    focusable="false"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                    />
-                  </svg>
-                </span>
-              </th>
-              <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
-                scope="col"
-              >
-                <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
-                  data-cy="table-label"
-                  role="button"
-                  tabindex="0"
-                >
-                  Head of Household
                   <svg
                     aria-hidden="true"
                     class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
@@ -191,8 +167,8 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render lo
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit gJRWKk css-1ex1afd-MuiTableCell-root"
-                colspan="6"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit fhAcgb css-1ex1afd-MuiTableCell-root"
+                colspan="5"
               >
                 <span
                   class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -205,8 +181,8 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render lo
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit gJRWKk css-1ex1afd-MuiTableCell-root"
-                colspan="6"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit fhAcgb css-1ex1afd-MuiTableCell-root"
+                colspan="5"
               >
                 <span
                   class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -219,8 +195,8 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render lo
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit gJRWKk css-1ex1afd-MuiTableCell-root"
-                colspan="6"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit fhAcgb css-1ex1afd-MuiTableCell-root"
+                colspan="5"
               >
                 <span
                   class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -233,8 +209,8 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render lo
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit gJRWKk css-1ex1afd-MuiTableCell-root"
-                colspan="6"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit fhAcgb css-1ex1afd-MuiTableCell-root"
+                colspan="5"
               >
                 <span
                   class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -247,8 +223,8 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render lo
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit gJRWKk css-1ex1afd-MuiTableCell-root"
-                colspan="6"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit fhAcgb css-1ex1afd-MuiTableCell-root"
+                colspan="5"
               >
                 <span
                   class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -363,7 +339,7 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render lo
 </div>
 `;
 
-exports[`containers/tables/payments/PaymentRecordHouseholdTable should render with data 1`] = `
+exports[`containers/tables/payments/PaymentsPeopleTable should render with data 1`] = `
 <div>
   <div>
     Unexpected error

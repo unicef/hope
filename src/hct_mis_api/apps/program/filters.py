@@ -19,8 +19,8 @@ from hct_mis_api.apps.core.utils import (
     CustomOrderingFilter,
     get_program_id_from_headers,
 )
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.models import Program, ProgramCycle
-from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
 class ProgramFilter(FilterSet):
@@ -71,8 +71,8 @@ class ProgramFilter(FilterSet):
     def filter_number_of_households_with_tp_in_program(self, queryset: QuerySet, name: str, value: Dict) -> QuerySet:
         queryset = queryset.annotate(
             total_hh_count=Count(
-                "targetpopulation__households",
-                filter=~Q(targetpopulation__status=TargetPopulation.STATUS_OPEN),
+                "household_count",
+                filter=~Q(cycles__payment_plans__status=PaymentPlan.Status.TP_OPEN),
                 distinct=True,
             ),
         )

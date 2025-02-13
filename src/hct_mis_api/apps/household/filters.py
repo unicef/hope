@@ -106,7 +106,6 @@ class HouseholdFilter(FilterSet):
             "admin_area": ["exact"],
             "admin1": ["exact"],
             "admin2": ["exact"],
-            "target_populations": ["exact"],
             "residence_status": ["exact"],
             "withdrawn": ["exact"],
             "program": ["exact"],
