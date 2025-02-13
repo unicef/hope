@@ -75,7 +75,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PeoplePaymentPlanDetailsHea
                       class="sc-gjcoXW fZsJNd"
                       color="textSecondary"
                     >
-                      1
+                      2
                     </span>
                   </div>
                 </div>
@@ -189,7 +189,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PeoplePaymentPlanDetailsHea
                       <div
                         class="sc-kfeOyU esIFmr"
                       >
-                        3
+                        10
                       </div>
                     </span>
                   </div>

@@ -33,70 +33,16 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
                 class="sc-FEMpB ddgbkI"
                 color="textSecondary"
               >
-                Cash (Miranda Ltd)
+                Cash (Test FSP 1)
               </span>
               <div
-                data-cy="label-Cash (Miranda Ltd)"
+                data-cy="label-Cash (Test FSP 1)"
               >
                 <span
                   class="sc-gjcoXW fZsJNd"
                   color="textSecondary"
                 >
-                  0 PLN (0 USD)
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div
-          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
-        >
-          <div
-            class="sc-dVBluf NLKNm"
-            color=" #d8d8d8"
-          >
-            <div>
-              <span
-                class="sc-FEMpB ddgbkI"
-                color="textSecondary"
-              >
-                In Kind (Frazier-Watson)
-              </span>
-              <div
-                data-cy="label-In Kind (Frazier-Watson)"
-              >
-                <span
-                  class="sc-gjcoXW fZsJNd"
-                  color="textSecondary"
-                >
-                  0 PLN (0 USD)
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div
-          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
-        >
-          <div
-            class="sc-dVBluf jOQXwc"
-            color="#003C8F"
-          >
-            <div>
-              <span
-                class="sc-FEMpB ddgbkI"
-                color="textSecondary"
-              >
-                Transfer (Bray Group)
-              </span>
-              <div
-                data-cy="label-Transfer (Bray Group)"
-              >
-                <span
-                  class="sc-gjcoXW fZsJNd"
-                  color="textSecondary"
-                >
-                  0 PLN (0 USD)
+                  424 USD (424 USD)
                 </span>
               </div>
             </div>

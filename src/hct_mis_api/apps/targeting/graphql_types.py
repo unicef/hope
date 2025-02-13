@@ -13,7 +13,6 @@ from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.payment.models import DeliveryMechanism, PaymentPlan
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.choices import FlexFieldClassification
-from hct_mis_api.apps.targeting.filters import TargetPopulationFilter
 from hct_mis_api.apps.utils.schema import Arg
 
 if TYPE_CHECKING:
@@ -149,7 +148,7 @@ class TargetingCriteriaRuleNode(DjangoObjectType):
     def resolve_individuals_filters_blocks(self, info: Any) -> "QuerySet[TargetingIndividualRuleFilterBlock]":
         return self.individuals_filters_blocks.all()
 
-    def resolve_households_filters_blocks(self, info: Any) -> "QuerySet[TargetPopulationFilter]":
+    def resolve_households_filters_blocks(self, info: Any) -> "QuerySet":
         return self.filters.all()
 
     class Meta:
@@ -167,20 +166,15 @@ class TargetingCriteriaNode(DjangoObjectType):
     def resolve_rules(parent, info: Any) -> "QuerySet":
         return parent.rules.all()
 
-    # TODO: can remove this one after refactoring/removing db fields
     def resolve_individual_ids(parent, info: Any) -> str:
-        ind_ids_str = parent.individual_ids
-        ind_ids: set = (
-            set(ind_id.strip() for ind_id in ind_ids_str.split(",") if ind_id.strip()) if ind_ids_str else set()
-        )
+        ind_ids: set = set()
         for rule in parent.rules.all():
             if rule.individual_ids:
                 ind_ids.update(ind_id.strip() for ind_id in rule.individual_ids.split(",") if ind_id.strip())
         return ", ".join(sorted(ind_ids))
 
     def resolve_household_ids(parent, info: Any) -> str:
-        hh_ids_str = parent.household_ids
-        hh_ids: set = set(hh_id.strip() for hh_id in hh_ids_str.split(",") if hh_id.strip()) if hh_ids_str else set()
+        hh_ids: set = set()
         for rule in parent.rules.all():
             if rule.household_ids:
                 hh_ids.update(hh_id.strip() for hh_id in rule.household_ids.split(",") if hh_id.strip())

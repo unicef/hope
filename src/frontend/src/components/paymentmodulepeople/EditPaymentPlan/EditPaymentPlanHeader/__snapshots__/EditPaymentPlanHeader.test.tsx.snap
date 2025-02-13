@@ -40,7 +40,7 @@ exports[`components/paymentmodule/EditPaymentPlanHeader should render 1`] = `
               <a
                 class="sc-FEMpB jOYmrF"
                 data-cy="breadcrumbs-link"
-                href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/payment-module/payment-plans/UGF5bWVudFBsYW5Ob2RlOmE5YzJjMmM4LWJmYWUtNDBhMy05YmYwLWIxYWE1ZmRlMDE0YQ=="
+                href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/payment-module/followup-payment-plans/UGF5bWVudFBsYW5Ob2RlOjU4MmE3ZTYzLTRkZGEtNDQ3Zi1hYWFhLTQzYWJmMzI0ZTViMw=="
               >
                 Payment Module
               </a>
@@ -59,10 +59,10 @@ exports[`components/paymentmodule/EditPaymentPlanHeader should render 1`] = `
                 <div
                   class="MuiBox-root css-70qvj9"
                 >
-                  Payment Plan
+                  Follow-up Payment Plan
                    ID
                    
-                  PP-0060-22-00000001
+                  PP-0060-25-00000007
                   <div
                     class="sc-gNZgCX ijvZIE"
                   >
@@ -70,10 +70,10 @@ exports[`components/paymentmodule/EditPaymentPlanHeader should render 1`] = `
                       class="sc-dycHyt gCnfnG"
                     >
                       <div
-                        class="sc-jbAkgO dLceGF status-box-container"
+                        class="sc-ivxoEo cpfoMz status-box-container"
                         data-cy="status-container"
                       >
-                        LOCKED
+                        ACCEPTED
                       </div>
                     </div>
                   </div>
@@ -96,9 +96,8 @@ exports[`components/paymentmodule/EditPaymentPlanHeader should render 1`] = `
               class="MuiBox-root css-5hicrt"
             >
               <a
-                class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary css-4ifa8d-MuiButtonBase-root-MuiButton-root"
-                href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/payment-module/payment-plans/UGF5bWVudFBsYW5Ob2RlOmE5YzJjMmM4LWJmYWUtNDBhMy05YmYwLWIxYWE1ZmRlMDE0YQ=="
-                id=":r0:"
+                class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary css-11ph28e-MuiButtonBase-root-MuiButton-root"
+                href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/payment-module/payment-plans/UGF5bWVudFBsYW5Ob2RlOjU4MmE3ZTYzLTRkZGEtNDQ3Zi1hYWFhLTQzYWJmMzI0ZTViMw=="
                 tabindex="0"
               >
                 Cancel

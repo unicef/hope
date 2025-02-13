@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`containers/tables/payments/PaymentRecordHouseholdTable should render loading 1`] = `
+exports[`containers/tables/payments/PaymentsHouseholdTable should render loading 1`] = `
 <div>
   <div
     class="sc-kfeOyU brNjjF"
@@ -22,7 +22,7 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render lo
               class="MuiTypography-root MuiTypography-h6 css-15aaxeb-MuiTypography-root"
               data-cy="table-title"
             >
-              Payment Records
+              Payments
             </h6>
           </div>
           <div
@@ -365,7 +365,7 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render lo
 </div>
 `;
 
-exports[`containers/tables/payments/PaymentRecordHouseholdTable should render with data 1`] = `
+exports[`containers/tables/payments/PaymentsHouseholdTable should render with data 1`] = `
 <div>
   <div>
     Unexpected error

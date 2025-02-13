@@ -72,7 +72,7 @@ from hct_mis_api.apps.grievance.utils import (
     filter_grievance_tickets_based_on_partner_areas_2,
 )
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
-from hct_mis_api.apps.payment.schema import PaymentRecordAndPaymentNode
+from hct_mis_api.apps.payment.schema import PaymentNode
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.program.schema import ProgramNode
 from hct_mis_api.apps.registration_data.nodes import (
@@ -106,7 +106,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObje
     )
     household = graphene.Field(HouseholdNode)
     individual = graphene.Field(IndividualNode)
-    payment_record = graphene.Field(PaymentRecordAndPaymentNode)
+    payment_record = graphene.Field(PaymentNode)
     admin = graphene.String()
     admin2 = graphene.Field(AreaNode)
     linked_tickets = graphene.List(lambda: GrievanceTicketNode)
@@ -238,7 +238,7 @@ class TicketNoteNode(DjangoObjectType):
 
 
 class TicketComplaintDetailsNode(DjangoObjectType):
-    payment_record = graphene.Field(PaymentRecordAndPaymentNode)
+    payment_record = graphene.Field(PaymentNode)
 
     class Meta:
         model = TicketComplaintDetails
@@ -251,7 +251,7 @@ class TicketComplaintDetailsNode(DjangoObjectType):
 
 
 class TicketSensitiveDetailsNode(DjangoObjectType):
-    payment_record = graphene.Field(PaymentRecordAndPaymentNode)
+    payment_record = graphene.Field(PaymentNode)
 
     class Meta:
         model = TicketSensitiveDetails
