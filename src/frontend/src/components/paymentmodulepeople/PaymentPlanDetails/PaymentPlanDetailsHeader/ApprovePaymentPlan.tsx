@@ -55,7 +55,7 @@ export function ApprovePaymentPlan({
       paymentPlan.approvalProcess?.edges[0]?.node.approvalNumberRequired;
 
     const approvalsCount =
-      paymentPlan.approvalProcess?.edges[0]?.node.actions.approval.length;
+      paymentPlan.approvalProcess?.edges[0]?.node.actions?.approval?.length;
 
     return approvalNumberRequired - 1 === approvalsCount;
   };

@@ -2,19 +2,19 @@ import { MockedProvider } from '@apollo/react-testing';
 import { act } from 'react';
 
 import wait from 'waait';
-import { fakeApolloAllPaymentRecordsHousehold } from '../../../../../fixtures/payments/fakeApolloAllPaymentRecordsHousehold';
+import { fakeApolloAllPaymentsHousehold } from '../../../../../fixtures/payments/fakeApolloAllPaymentsHousehold';
 import { fakeHousehold } from '../../../../../fixtures/population/fakeHousehold';
 import { render } from '../../../../testUtils/testUtils';
-import { PaymentRecordHouseholdTable } from '.';
+import { PaymentsHouseholdTable } from '.';
 
-describe('containers/tables/payments/PaymentRecordHouseholdTable', () => {
+describe('containers/tables/payments/PaymentsHouseholdTable', () => {
   it('should render with data', async () => {
     const { container } = render(
       <MockedProvider
         addTypename={false}
-        mocks={fakeApolloAllPaymentRecordsHousehold}
+        mocks={fakeApolloAllPaymentsHousehold}
       >
-        <PaymentRecordHouseholdTable
+        <PaymentsHouseholdTable
           household={fakeHousehold}
           openInNewTab={false}
           businessArea="afghanistan"
@@ -31,9 +31,9 @@ describe('containers/tables/payments/PaymentRecordHouseholdTable', () => {
     const { container } = render(
       <MockedProvider
         addTypename={false}
-        mocks={fakeApolloAllPaymentRecordsHousehold}
+        mocks={fakeApolloAllPaymentsHousehold}
       >
-        <PaymentRecordHouseholdTable
+        <PaymentsHouseholdTable
           household={fakeHousehold}
           openInNewTab={false}
           businessArea="afghanistan"

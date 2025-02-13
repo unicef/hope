@@ -253,10 +253,8 @@ class GenerateReportContentHelpers:
             payment.delivered_quantity_usd or payment.delivered_quantity,
             cls._format_date(payment.delivery_date),
             payment.delivery_type,
-            payment.parent.unicef_id,
             payment.entitlement_quantity,
-            payment.parent.target_population.id,
-            payment.parent.target_population.name,
+            payment.parent.name,
             cash_or_voucher,
             payment.household.id,
         )
