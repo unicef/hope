@@ -144,6 +144,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Se
           class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary css-cx92lf-MuiButtonBase-root-MuiButton-root"
           data-cy="button-set-up-fsp"
           href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/payment-module/followup-payment-plans/undefined/setup-fsp/create"
+          id=":r0:"
           tabindex="0"
         >
           Set up FSP
