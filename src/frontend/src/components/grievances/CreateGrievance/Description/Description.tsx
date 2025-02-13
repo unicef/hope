@@ -314,7 +314,11 @@ export function Description({
         <Box mt={3}>
           <BoxWithBorderBottom>
             <Title>
-              <Typography variant="h6">{t('Documentation')}</Typography>
+              <Typography variant="h6">
+                {t(
+                  'Documentation: upload of document: support documentation for the ticket',
+                )}
+              </Typography>
             </Title>
             <NewDocumentationFieldArray
               values={values}

@@ -139,7 +139,7 @@ export function GrievancesDetails({
         paymentRecord,
         paymentRecord.objType,
         getUrl(paymentRecord.objType, paymentRecord.id),
-        paymentRecord.caId,
+        paymentRecord.unicefId,
       );
     }
     return <>-</>;

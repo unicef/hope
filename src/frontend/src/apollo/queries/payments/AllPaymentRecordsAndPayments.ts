@@ -34,7 +34,7 @@ export const AllPaymentRecordsAndPayments = gql`
           id
           fullName
           status
-          caId
+          unicefId
           currency
           entitlementQuantity
           deliveredQuantity

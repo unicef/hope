@@ -12,7 +12,7 @@ import { ReactElement } from 'react';
 
 type VerificationId = {
   id: PaymentVerificationNode['id'];
-  caId: PaymentRecordAndPaymentNode['caId'];
+  caId: PaymentRecordAndPaymentNode['unicefId'];
 };
 
 interface PaymentIdsProps {

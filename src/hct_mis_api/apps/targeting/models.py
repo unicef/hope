@@ -64,8 +64,6 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "name",
-            "ca_id",
-            "ca_hash_id",
             "created_by",
             "change_date",
             "changed_by",
@@ -142,8 +140,6 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             ProhibitNullCharactersValidator(),
         ],
     )
-    ca_id = CICharField(max_length=255, null=True, blank=True)
-    ca_hash_id = CICharField(max_length=255, null=True, blank=True)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
