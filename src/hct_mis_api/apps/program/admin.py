@@ -44,6 +44,7 @@ class ProgramCycleAdmin(LastSyncDateResetMixin, HOPEModelAdminBase):
     list_display = ("title", "program", "status", "start_date", "end_date", "created_by")
     date_hierarchy = "start_date"
     list_filter = (
+        ("program__business_area", AutoCompleteFilter),
         ("program", AutoCompleteFilter),
         ("created_by", AutoCompleteFilter),
         ("status", ChoicesFieldComboFilter),
