@@ -54,7 +54,7 @@ export function AcceptanceProcessRow({
       <AcceptanceProcessStepper acceptanceProcess={acceptanceProcess} />
       <Grid container>
         <Grid item xs={4}>
-          {actions.approval.length > 0 && (
+          {actions?.approval?.length > 0 && (
             <GreyInfoCard
               topMessage={`Sent for approval by ${renderUserName(
                 sentForApprovalBy,

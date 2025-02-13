@@ -381,12 +381,7 @@ class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, C
 
     @property
     def can_remove_cycle(self) -> bool:
-        return (
-            not self.target_populations.exists()
-            and not self.payment_plans.exists()
-            and self.program.cycles.count() > 1
-            and self.status == ProgramCycle.DRAFT
-        )
+        return not self.payment_plans.exists() and self.program.cycles.count() > 1 and self.status == ProgramCycle.DRAFT
 
     @property
     def total_entitled_quantity_usd(self) -> Decimal:
