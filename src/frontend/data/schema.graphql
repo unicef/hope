@@ -236,19 +236,6 @@ type AreaTypeNodeEdge {
 
 scalar Arg
 
-input AssignFspToDeliveryMechanismInput {
-  paymentPlanId: ID!
-  mappings: [FSPToDeliveryMechanismMappingInput]!
-}
-
-type AssignFspToDeliveryMechanismMutation {
-  paymentPlan: PaymentPlanNode
-}
-
-input AvailableFspsForDeliveryMechanismsInput {
-  paymentPlanId: ID!
-}
-
 type BankAccountInfoNode implements Node {
   id: ID!
   rdiMergeStatus: BankAccountInfoRdiMergeStatus!
@@ -467,15 +454,6 @@ type ChoiceObjectInt {
   value: Int
 }
 
-input ChooseDeliveryMechanismsForPaymentPlanInput {
-  paymentPlanId: ID!
-  deliveryMechanisms: [String]!
-}
-
-type ChooseDeliveryMechanismsForPaymentPlanMutation {
-  paymentPlan: PaymentPlanNode
-}
-
 type CommunicationMessageNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -661,6 +639,8 @@ input CreatePaymentPlanInput {
   targetingCriteria: TargetingCriteriaObjectType!
   excludedIds: String!
   exclusionReason: String
+  fspId: ID
+  deliveryMechanismCode: String
 }
 
 type CreatePaymentPlanMutation {
@@ -846,6 +826,11 @@ type DeliveredQuantityNode {
   currency: String
 }
 
+type DeliveryMechanismChoice {
+  name: String
+  code: String
+}
+
 type DeliveryMechanismDataNode implements Node {
   id: ID!
   rdiMergeStatus: DeliveryMechanismDataRdiMergeStatus!
@@ -928,16 +913,8 @@ type DeliveryMechanismPerPaymentPlanNode implements Node {
   paymentPlan: PaymentPlanNode!
   financialServiceProvider: FinancialServiceProviderNode
   deliveryMechanism: DeliveryMechanismNode
-  deliveryMechanismOrder: Int!
-  status: String!
-  createdBy: UserNode!
-  sentDate: DateTime!
-  sentBy: UserNode
-  chosenConfiguration: String
-  sentToPaymentGateway: Boolean!
   name: String
   code: String
-  order: Int
   fsp: FinancialServiceProviderNode
 }
 
@@ -1108,13 +1085,6 @@ type ExportXlsxPaymentVerificationPlanFile {
   paymentPlan: GenericPaymentPlanNode
 }
 
-input FSPToDeliveryMechanismMappingInput {
-  fspId: ID!
-  deliveryMechanism: String!
-  chosenConfiguration: String
-  order: Int!
-}
-
 enum FeedbackIssueType {
   POSITIVE_FEEDBACK
   NEGATIVE_FEEDBACK
@@ -1219,6 +1189,7 @@ type FinancialServiceProviderNode implements Node {
   dataTransferConfiguration: JSONString
   xlsxTemplates(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderXlsxTemplateNodeConnection!
   paymentGatewayId: String
+  requiredFields: [String!]!
   deliveryMechanismsPerPaymentPlan(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismPerPaymentPlanNodeConnection!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   fullName: String
@@ -1277,18 +1248,11 @@ scalar FlexFieldsScalar
 type FspChoice {
   id: String
   name: String
-  configurations: [FspConfiguration]
 }
 
 type FspChoices {
-  deliveryMechanism: String
+  deliveryMechanism: DeliveryMechanismChoice
   fsps: [FspChoice]
-}
-
-type FspConfiguration {
-  id: String
-  key: String
-  label: String
 }
 
 input FullListArguments {
@@ -2305,8 +2269,6 @@ type Mutations {
   createFollowUpPaymentPlan(dispersionEndDate: Date!, dispersionStartDate: Date!, paymentPlanId: ID!): CreateFollowUpPaymentPlanMutation
   updatePaymentPlan(input: UpdatePaymentPlanInput!, version: BigInt): UpdatePaymentPlanMutation
   deletePaymentPlan(paymentPlanId: ID!): DeletePaymentPlanMutation
-  chooseDeliveryMechanismsForPaymentPlan(input: ChooseDeliveryMechanismsForPaymentPlanInput!): ChooseDeliveryMechanismsForPaymentPlanMutation
-  assignFspToDeliveryMechanism(input: AssignFspToDeliveryMechanismInput!): AssignFspToDeliveryMechanismMutation
   splitPaymentPlan(paymentPlanId: ID!, paymentsNo: Int, splitType: String!): SplitPaymentPlanMutation
   excludeHouseholds(excludedHouseholdsIds: [String]!, exclusionReason: String, paymentPlanId: ID!): ExcludeHouseholdsMutation
   setSteficonRuleOnPaymentPlanPaymentList(paymentPlanId: ID!, steficonRuleId: ID!, version: BigInt): SetSteficonRuleOnPaymentPlanPaymentListMutation
@@ -2497,6 +2459,7 @@ type PaymentNode implements Node {
   transactionStatusBlockchainLink: String
   conflicted: Boolean!
   excluded: Boolean!
+  hasValidWallet: Boolean!
   reasonForUnsuccessfulPayment: String
   orderNumber: Int
   tokenNumber: Int
@@ -2607,16 +2570,16 @@ type PaymentPlanNode implements Node {
   steficonTargetingAppliedDate: DateTime
   sourcePaymentPlan: PaymentPlanNode
   isFollowUp: Boolean!
-  excludedIds: String!
-  exclusionReason: String!
-  excludeHouseholdError: String!
+  excludedIds: String
+  exclusionReason: String
+  excludeHouseholdError: String
   name: String
   vulnerabilityScoreMin: Float
   vulnerabilityScoreMax: Float
   isCashAssist: Boolean!
   approvalProcess(offset: Int, before: String, after: String, first: Int, last: Int): ApprovalProcessNodeConnection!
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
-  deliveryMechanisms: [DeliveryMechanismPerPaymentPlanNode]
+  deliveryMechanism: DeliveryMechanismPerPaymentPlanNode
   paymentItems(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   documents(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanSupportingDocumentNodeConnection!
   paymentVerificationPlans(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationPlanNodeConnection!
@@ -2652,6 +2615,7 @@ type PaymentPlanNode implements Node {
   canExportXlsx: Boolean
   canDownloadXlsx: Boolean
   canSendXlsxPassword: Boolean
+  failedWalletValidationCollectorsIds: [String]
 }
 
 type PaymentPlanNodeConnection {
@@ -3143,9 +3107,8 @@ type Query {
   allPaymentPlans(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], statusNot: String, totalEntitledQuantityFrom: Float, totalEntitledQuantityTo: Float, dispersionStartDate: Date, dispersionEndDate: Date, isFollowUp: Boolean, isPaymentPlan: Boolean, isTargetPopulation: Boolean, sourcePaymentPlanId: String, program: String, programCycle: String, name: String, totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalHouseholdsCountWithValidPhoneNoMax: Int, totalHouseholdsCountWithValidPhoneNoMin: Int, createdAtRange: String, orderBy: String): PaymentPlanNodeConnection
   paymentPlanStatusChoices: [ChoiceObject]
   currencyChoices: [ChoiceObject]
-  allDeliveryMechanisms: [ChoiceObject]
   paymentPlanBackgroundActionStatusChoices: [ChoiceObject]
-  availableFspsForDeliveryMechanisms(input: AvailableFspsForDeliveryMechanismsInput): [FspChoices]
+  availableFspsForDeliveryMechanisms: [FspChoices]
   allCashPlansAndPaymentPlans(businessArea: String!, program: String, search: String, serviceProvider: String, deliveryType: [String], verificationStatus: [String], startDateGte: String, endDateLte: String, orderBy: String, first: Int, last: Int, before: String, after: String, isPaymentVerificationPage: Boolean): PaginatedCashPlanAndPaymentPlanNode
   businessArea(businessAreaSlug: String!): BusinessAreaNode
   allBusinessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, slug: String): BusinessAreaNodeConnection
@@ -4419,6 +4382,8 @@ input UpdatePaymentPlanInput {
   vulnerabilityScoreMax: Decimal
   excludedIds: String
   exclusionReason: String
+  fspId: ID
+  deliveryMechanismCode: String
 }
 
 type UpdatePaymentPlanMutation {
@@ -4568,8 +4533,6 @@ type UserNode implements Node {
   createdPaymentPlans(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
   createdFinancialServiceProviderXlsxTemplates(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderXlsxTemplateNodeConnection!
   createdFinancialServiceProviders(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderNodeConnection!
-  createdDeliveryMechanisms(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismPerPaymentPlanNodeConnection!
-  sentDeliveryMechanisms(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismPerPaymentPlanNodeConnection!
   createdTickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   assignedTickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   ticketNotes(offset: Int, before: String, after: String, first: Int, last: Int): TicketNoteNodeConnection!
