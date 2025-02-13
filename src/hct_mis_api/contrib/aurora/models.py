@@ -63,7 +63,7 @@ class Registration(AuroraModel):
         return self.name
 
 
-class RecordBase(models.Model):
+class Record(models.Model):
     STATUS_TO_IMPORT = "TO_IMPORT"
     STATUS_IMPORTED = "IMPORTED"
     STATUS_ERROR = "ERROR"
@@ -93,11 +93,6 @@ class RecordBase(models.Model):
     index2 = models.CharField(null=True, blank=True, max_length=255, db_index=True)
     index3 = models.CharField(null=True, blank=True, max_length=255, db_index=True)
 
-    class Meta:
-        abstract = True
-
-
-class Record(RecordBase):
     class Meta:
         swappable = swapper.swappable_setting("aurora", "Record")
         permissions = (

@@ -13,7 +13,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.dashboard.serializers import DashboardBaseSerializer
 from hct_mis_api.apps.payment.models import Payment
 
-CACHE_TIMEOUT = 60 * 60 * 24  # 24 hours
+CACHE_TIMEOUT = 60 * 60 * 6  # 6 hours
 
 pwdSum = Sum(
     Coalesce(F("household__female_age_group_0_5_disabled_count"), 0)
@@ -229,9 +229,7 @@ class DashboardGlobalDataCache(DashboardDataCache):
             Payment.objects.using("read_only")
             .select_related(
                 "business_area",
-                "program",
                 "delivery_type",
-                "financial_service_provider",
                 "parent",
             )
             .filter(
@@ -243,9 +241,7 @@ class DashboardGlobalDataCache(DashboardDataCache):
             .annotate(
                 country=F("business_area__name"),
                 year=ExtractYear(Coalesce("delivery_date", "entitlement_date", "status_date")),
-                programs=Coalesce(F("household__program__name"), Value("Unknown program")),
                 sectors=Coalesce(F("household__program__sector"), Value("Unknown sector")),
-                fsp=Coalesce(F("financial_service_provider__name"), Value("Unknown fsp")),
                 delivery_types=F("delivery_type__name"),
             )
             .order_by()
@@ -254,9 +250,7 @@ class DashboardGlobalDataCache(DashboardDataCache):
                 "currency",
                 "status",
                 "year",
-                "programs",
                 "sectors",
-                "fsp",
                 "delivery_types",
             )
             .annotate(
@@ -300,9 +294,7 @@ class DashboardGlobalDataCache(DashboardDataCache):
                 item["year"],
                 item["status"],
                 item["country"],
-                item["programs"],
                 item["sectors"],
-                item["fsp"],
                 item["delivery_types"],
             )
             summary[key]["total_usd"] += item["total_usd"] or 0
@@ -320,9 +312,7 @@ class DashboardGlobalDataCache(DashboardDataCache):
             year,
             status,
             country,
-            program,
             sector,
-            fsp,
             delivery_type,
         ), totals in summary.items():
             result.append(
@@ -340,9 +330,7 @@ class DashboardGlobalDataCache(DashboardDataCache):
                     "total_payment_plans": totals["total_payment_plans"],
                     "year": year,
                     "country": country,
-                    "program": program,
                     "sector": sector,
-                    "fsp": fsp,
                     "delivery_types": delivery_type,
                 }
             )

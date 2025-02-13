@@ -1560,7 +1560,6 @@ type HouseholdNode implements Node {
   originUnicefId: String
   isMigrationHandled: Boolean!
   migratedAt: DateTime
-  isRecalculatedGroupAges: Boolean!
   collectType: HouseholdCollectType!
   koboSubmissionUuid: UUID
   koboSubmissionTime: DateTime
@@ -2896,8 +2895,6 @@ type ProgramNode implements Node {
   description: String!
   startDate: Date!
   endDate: Date
-  caId: String
-  caHashId: String
   dataCollectingType: DataCollectingTypeNode
   beneficiaryGroup: BeneficiaryGroupNode
   businessArea: UserBusinessAreaNode!
@@ -3301,7 +3298,6 @@ type RegistrationDataImportNode implements Node {
   goldenRecordUnique: Int!
   dedupEngineBatchDuplicates: Int!
   dedupEngineGoldenRecordDuplicates: Int!
-  datahubId: UUID
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
@@ -4477,9 +4473,8 @@ type UserNode implements Node {
   dateJoined: DateTime!
   id: ID!
   status: UserStatus!
-  partner: PartnerNode
+  partner: PartnerNode!
   email: String!
-  availableForExport: Boolean!
   customFields: JSONString!
   jobTitle: String!
   adUuid: String

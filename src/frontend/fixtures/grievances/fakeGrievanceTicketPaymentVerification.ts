@@ -464,7 +464,19 @@ export const fakeGrievanceTicketPaymentVerification = {
     ],
     programRegistrationId: null,
   },
-  paymentRecord: null,
+  paymentRecord: {
+    id: 'UGF5bWVudE5vZGU6MTAwMDAwMDAtZmVlZC1iZWVmLTAwMDAtMDAwMDBiYWRmMDBk',
+    unicefId: 'RCPT-0060-24-0.000.078',
+    deliveredQuantity: null,
+    entitlementQuantity: null,
+    parent: {
+      id: 'UGF5bWVudFBsYW5Ob2RlOjAwMDAwMDAwLWZlZWQtYmVlZi0wMDAwLTAwMDAwYmFkZjAwZA==',
+      unicefId: 'PP-0060-24-00000023',
+      __typename: 'PaymentPlanNode',
+    },
+    verification: null,
+    __typename: 'PaymentNode',
+  },
   relatedTickets: [
     {
       id: 'R3JpZXZhbmNlVGlja2V0Tm9kZTo3MGU1NDRlYy0zMmM0LTRiMTEtYjJkMi0xMzcyNTdmY2UwYjk=',
