@@ -33,7 +33,7 @@ def migrate_payments_to_default_split(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('payment', '0013_migration'),
+        ('payment', '0014_migration'),
     ]
 
     operations = [
