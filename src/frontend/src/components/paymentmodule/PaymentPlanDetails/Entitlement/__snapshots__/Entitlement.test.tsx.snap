@@ -39,22 +39,21 @@ exports[`components/paymentmodule/PaymentPlanDetails/Entitlement should render 1
                 class="MuiBox-root css-1itv5e3"
               >
                 <label
-                  class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeSmall MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiFormLabel-filled MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeSmall MuiInputLabel-outlined css-c63xp4-MuiFormLabel-root-MuiInputLabel-root"
+                  class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeSmall MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiFormLabel-filled MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeSmall MuiInputLabel-outlined css-xbjv7h-MuiFormLabel-root-MuiInputLabel-root"
                   data-shrink="true"
                 >
                   Entitlement Formula
                 </label>
               </div>
               <div
-                class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary Mui-disabled MuiInputBase-formControl MuiInputBase-sizeSmall css-26qevy-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root"
+                class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary Mui-disabled MuiInputBase-formControl MuiInputBase-sizeSmall MuiSelect-root css-jcgkb9-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root"
                 data-cy="input-entitlement-formula"
               >
                 <div
-                  aria-controls=":r0:"
                   aria-disabled="true"
                   aria-expanded="false"
                   aria-haspopup="listbox"
-                  class="MuiSelect-select MuiSelect-outlined Mui-disabled MuiInputBase-input MuiOutlinedInput-input Mui-disabled MuiInputBase-inputSizeSmall css-jedpe8-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input"
+                  class="MuiSelect-select MuiSelect-outlined Mui-disabled MuiInputBase-input MuiOutlinedInput-input Mui-disabled MuiInputBase-inputSizeSmall css-si86to-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input"
                   role="combobox"
                 >
                   Test Formula for Payment Plan 033
@@ -62,14 +61,14 @@ exports[`components/paymentmodule/PaymentPlanDetails/Entitlement should render 1
                 <input
                   aria-hidden="true"
                   aria-invalid="false"
-                  class="MuiSelect-nativeInput css-yf8vq0-MuiSelect-nativeInput"
+                  class="MuiSelect-nativeInput css-j0riat-MuiSelect-nativeInput"
                   disabled=""
                   tabindex="-1"
                   value="U3RlZmljb25SdWxlTm9kZTo1"
                 />
                 <svg
                   aria-hidden="true"
-                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiSelect-iconOutlined Mui-disabled css-hfutr2-MuiSvgIcon-root-MuiSelect-icon"
+                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiSelect-iconOutlined Mui-disabled css-lohd6h-MuiSvgIcon-root-MuiSelect-icon"
                   data-testid="ArrowDropDownIcon"
                   focusable="false"
                   viewBox="0 0 24 24"
@@ -141,9 +140,10 @@ exports[`components/paymentmodule/PaymentPlanDetails/Entitlement should render 1
             class="sc-bCjwNj iLXGIR MuiBox-root css-7jugx5"
           >
             <button
-              class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary Mui-disabled MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary css-11ph28e-MuiButtonBase-root-MuiButton-root"
+              class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary Mui-disabled MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary css-4ifa8d-MuiButtonBase-root-MuiButton-root"
               data-cy="button-export-xlsx"
               disabled=""
+              id=":r2:"
               tabindex="-1"
               type="button"
             >

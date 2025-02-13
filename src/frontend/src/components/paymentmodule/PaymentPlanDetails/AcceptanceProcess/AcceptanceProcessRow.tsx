@@ -53,7 +53,7 @@ export function AcceptanceProcessRow({
     <StyledBox m={5}>
       <AcceptanceProcessStepper acceptanceProcess={acceptanceProcess} />
       <Grid container>
-        <Grid item xs={4}>
+        <Grid size={{ xs: 4 }}>
           {actions?.approval?.length > 0 && (
             <GreyInfoCard
               topMessage={`Sent for approval by ${renderUserName(

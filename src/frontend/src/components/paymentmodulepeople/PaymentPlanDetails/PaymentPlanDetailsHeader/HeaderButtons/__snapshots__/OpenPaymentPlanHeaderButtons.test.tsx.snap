@@ -32,8 +32,9 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/He
       class="MuiBox-root css-1ynyhby"
     >
       <a
-        class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary css-11rak30-MuiButtonBase-root-MuiButton-root"
+        class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary css-1u75he8-MuiButtonBase-root-MuiButton-root"
         href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/payment-module/followup-payment-plans/UGF5bWVudFBsYW5Ob2RlOjU4MmE3ZTYzLTRkZGEtNDQ3Zi1hYWFhLTQzYWJmMzI0ZTViMw==/edit"
+        id=":r2:"
         tabindex="0"
       >
         <span
