@@ -72,13 +72,10 @@
     "status": "INVITED",
     "partner": 1,
     "email": "root@root.com",
-    "available_for_export": true,
     "custom_fields": {},
     "job_title": "",
     "ad_uuid": null,
     "last_modify_date": "2022-03-30 09:08:03.636-00:00",
-    "last_doap_sync": null,
-    "doap_hash": "",
     "groups": [],
     "user_permissions": []
   }

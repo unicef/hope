@@ -138,6 +138,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
             "last_name": collector_data.get("family_name", ""),
             "first_name": collector_data.get("given_name", ""),
             "full_name": collector_data.get("full_name", ""),
+            "middle_name": collector_data.get("middle_name", ""),
         }
         if obj.delivery_type.code == "mobile_money" and not delivery_mech_data:  # this workaround need to be dropped
             base_data["service_provider_code"] = collector_data.get("flex_fields", {}).get(

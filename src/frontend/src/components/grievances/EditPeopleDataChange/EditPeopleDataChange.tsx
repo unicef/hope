@@ -129,7 +129,11 @@ export function EditPeopleDataChange({
       <BoxWithBorders>
         <Box mt={3}>
           <Title>
-            <Typography variant="h6">{t('Documents')}</Typography>
+            <Typography variant="h6">
+              {t(
+                'Documents: change/upload of document with other info (country, number etc.): add label beneficiary personal documents',
+              )}
+            </Typography>
           </Title>
           <ExistingDocumentFieldArray
             values={values}

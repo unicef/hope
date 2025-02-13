@@ -74,11 +74,6 @@ CONSTANCE_CONFIG = {
         "percentages",
     ),
     "PRODUCTION_SERVER": ("https://hope.unicef.org/api/admin", "", str),
-    "CASHASSIST_DOAP_RECIPIENT": (
-        "",
-        "UNHCR email address where to send DOAP updates",
-        str,
-    ),
     "KOBO_ADMIN_CREDENTIALS": (
         "",
         "Kobo superuser credentislas in format user:password",

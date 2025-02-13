@@ -691,13 +691,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
             not_delivered=Count("id", filter=Q(status=Payment.STATUS_NOT_DISTRIBUTED)),
             unsuccessful=Count(
                 "id",
-                filter=Q(
-                    status__in=[
-                        Payment.STATUS_ERROR,
-                        Payment.STATUS_FORCE_FAILED,
-                        Payment.STATUS_MANUALLY_CANCELLED,
-                    ]
-                ),
+                filter=Q(status__in=Payment.FAILED_STATUSES),
             ),
             pending=Count("id", filter=Q(status__in=Payment.PENDING_STATUSES)),
             reconciled=Count("id", filter=~Q(status__in=Payment.PENDING_STATUSES)),
@@ -922,7 +916,7 @@ class PaymentRecordAndPaymentNode(BaseNodePermissionMixin, graphene.ObjectType):
 
     obj_type = graphene.String()
     id = graphene.String()
-    ca_id = graphene.String(source="unicef_id")
+    unicef_id = graphene.String()
     status = graphene.String()
     full_name = graphene.String(source="full_name")
     parent = graphene.Field(CashPlanAndPaymentPlanNode, source="parent")
