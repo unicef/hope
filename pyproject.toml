@@ -132,7 +132,7 @@ distribution = true
 
 [project]
 name = "hope"
-version = "2.17.0"
+version = "3.0.2"
 description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
 authors = [
     { name = "Tivix" },
@@ -225,7 +225,7 @@ dependencies = [
     "xlrd<2.0,>=1.2",
     "weasyprint<60.0,>=59.0",
     "tomli<3.0.0,>=2.0.1",
-    "sentry-sdk==1.40.5",
+    "sentry-sdk==2.8.0",
     "django-debug-toolbar<5.0.0,>=4.3.0",
     "django-graphiql-debug-toolbar<1.0.0,>=0.2.0",
     "django-rest-extensions>=0.2.0",
