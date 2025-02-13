@@ -3,20 +3,20 @@
 exports[`containers/tables/ProgrammesTable should render loading 1`] = `
 <div>
   <div
-    class="sc-KXCwU edfDZM"
+    class="sc-FEMpB kLrWFX"
   >
     <div
-      class="sc-hWWBcw glzqeh"
+      class="sc-hRDKVd lnQjmV"
     >
       <div
-        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-jHbxoU cxLkyn css-1gtchvp-MuiPaper-root"
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-jBIHhB hbtPNr css-1gtchvp-MuiPaper-root"
         style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
       >
         <div
-          class="MuiTableContainer-root sc-jMLmsk css-70zvr5-MuiTableContainer-root"
+          class="MuiTableContainer-root sc-jHswkR css-70zvr5-MuiTableContainer-root"
         >
           <div
-            class="sc-cMHOsR BZKmm MuiBox-root css-0"
+            class="sc-cSaEAk hChnVp MuiBox-root css-0"
           >
             <div
               class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-16wdp7y-MuiToolbar-root"
@@ -29,11 +29,11 @@ exports[`containers/tables/ProgrammesTable should render loading 1`] = `
               </h6>
             </div>
             <div
-              class="sc-cMHOsR BZKmm MuiBox-root css-1ruxp1v"
+              class="sc-cSaEAk hChnVp MuiBox-root css-1ruxp1v"
             />
           </div>
           <table
-            class="MuiTable-root sc-cGXZpB sc-kfmGjC jfkrWK hcGOws css-14k3lwa-MuiTable-root"
+            class="MuiTable-root sc-cMqPwU sc-jZTQcj fsSCTO kxOFyj css-14k3lwa-MuiTable-root"
           >
             <thead
               class="MuiTableHead-root css-1a7iywq-MuiTableHead-root"
@@ -46,7 +46,7 @@ exports[`containers/tables/ProgrammesTable should render loading 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gTrWKq fFZOTJ css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -70,7 +70,7 @@ exports[`containers/tables/ProgrammesTable should render loading 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gTrWKq fFZOTJ css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -94,7 +94,7 @@ exports[`containers/tables/ProgrammesTable should render loading 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gTrWKq fFZOTJ css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -118,7 +118,7 @@ exports[`containers/tables/ProgrammesTable should render loading 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gTrWKq fFZOTJ css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -142,7 +142,7 @@ exports[`containers/tables/ProgrammesTable should render loading 1`] = `
                   scope="col"
                 >
                   <span
-                    class="sc-kuACkN kMXAWY"
+                    class="sc-kfeOyU geVRDn"
                     data-cy="table-label"
                   >
                     Programme Size
@@ -153,7 +153,7 @@ exports[`containers/tables/ProgrammesTable should render loading 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gTrWKq fFZOTJ css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -178,11 +178,11 @@ exports[`containers/tables/ProgrammesTable should render loading 1`] = `
               class="MuiTableBody-root css-gmh7jj-MuiTableBody-root"
             >
               <tr
-                class="MuiTableRow-root sc-jZCRgm eekLry css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-cZztgT juHshR css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom llqALe css-1dc80h3-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -192,11 +192,11 @@ exports[`containers/tables/ProgrammesTable should render loading 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-jZCRgm eekLry css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-cZztgT juHshR css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom llqALe css-1dc80h3-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -206,11 +206,11 @@ exports[`containers/tables/ProgrammesTable should render loading 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-jZCRgm eekLry css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-cZztgT juHshR css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom llqALe css-1dc80h3-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -220,11 +220,11 @@ exports[`containers/tables/ProgrammesTable should render loading 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-jZCRgm eekLry css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-cZztgT juHshR css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom llqALe css-1dc80h3-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -234,11 +234,11 @@ exports[`containers/tables/ProgrammesTable should render loading 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-jZCRgm eekLry css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-cZztgT juHshR css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom llqALe css-1dc80h3-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -359,20 +359,20 @@ exports[`containers/tables/ProgrammesTable should render loading 1`] = `
 exports[`containers/tables/ProgrammesTable should render with data 1`] = `
 <div>
   <div
-    class="sc-KXCwU edfDZM"
+    class="sc-FEMpB kLrWFX"
   >
     <div
-      class="sc-hWWBcw glzqeh"
+      class="sc-hRDKVd lnQjmV"
     >
       <div
-        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-jHbxoU cxLkyn css-1gtchvp-MuiPaper-root"
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-jBIHhB hbtPNr css-1gtchvp-MuiPaper-root"
         style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
       >
         <div
-          class="MuiTableContainer-root sc-jMLmsk css-70zvr5-MuiTableContainer-root"
+          class="MuiTableContainer-root sc-jHswkR css-70zvr5-MuiTableContainer-root"
         >
           <div
-            class="sc-cMHOsR BZKmm MuiBox-root css-0"
+            class="sc-cSaEAk hChnVp MuiBox-root css-0"
           >
             <div
               class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-16wdp7y-MuiToolbar-root"
@@ -385,11 +385,11 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
               </h6>
             </div>
             <div
-              class="sc-cMHOsR BZKmm MuiBox-root css-1ruxp1v"
+              class="sc-cSaEAk hChnVp MuiBox-root css-1ruxp1v"
             />
           </div>
           <table
-            class="MuiTable-root sc-cGXZpB sc-kfmGjC jfkrWK hcGOws css-14k3lwa-MuiTable-root"
+            class="MuiTable-root sc-cMqPwU sc-jZTQcj fsSCTO kxOFyj css-14k3lwa-MuiTable-root"
           >
             <thead
               class="MuiTableHead-root css-1a7iywq-MuiTableHead-root"
@@ -402,7 +402,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gTrWKq fFZOTJ css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -426,7 +426,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gTrWKq fFZOTJ css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -450,7 +450,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gTrWKq fFZOTJ css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -474,7 +474,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gTrWKq fFZOTJ css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -498,7 +498,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                   scope="col"
                 >
                   <span
-                    class="sc-kuACkN kMXAWY"
+                    class="sc-kfeOyU geVRDn"
                     data-cy="table-label"
                   >
                     Programme Size
@@ -509,7 +509,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gTrWKq fFZOTJ css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -534,11 +534,11 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
               class="MuiTableBody-root css-gmh7jj-MuiTableBody-root"
             >
               <tr
-                class="MuiTableRow-root sc-jZCRgm eekLry css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-cZztgT juHshR css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom llqALe css-1dc80h3-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -548,11 +548,11 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-jZCRgm eekLry css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-cZztgT juHshR css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom llqALe css-1dc80h3-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -562,11 +562,11 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-jZCRgm eekLry css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-cZztgT juHshR css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom llqALe css-1dc80h3-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -576,11 +576,11 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-jZCRgm eekLry css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-cZztgT juHshR css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom llqALe css-1dc80h3-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -590,7 +590,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root MuiTableRow-hover sc-fkSzgi czMEyo css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root MuiTableRow-hover sc-fAomSb dYobaH css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row-Notice hair fall college enough perhaps."
                 role="checkbox"
               >
@@ -598,7 +598,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
                 >
                   <a
-                    class="sc-ffiKcS gpBkjD"
+                    class="sc-fuExOL dUQjWF"
                     href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/details/UHJvZ3JhbU5vZGU6ZDM4YWI4MTQtOTQyNy00ZmJkLTg4ODctOGUyYzlkMzcxYjg2"
                   >
                     Notice hair fall college enough perhaps.
@@ -608,10 +608,10 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
                 >
                   <div
-                    class="sc-hzvwrc kfBHWC"
+                    class="sc-hORkcV hYYNQS"
                   >
                     <div
-                      class="sc-ekQdgj hbjJzE status-box-container"
+                      class="sc-dVupuq jmkjso status-box-container"
                       data-cy="status-container"
                     >
                       ACTIVE

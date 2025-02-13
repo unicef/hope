@@ -6,11 +6,11 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
     class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-12 css-1j0u08r-MuiGrid2-root"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-eaUbBy maNC css-1gtchvp-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-dVBluf ebFzuo css-1gtchvp-MuiPaper-root"
       style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
     >
       <div
-        class="sc-gTrWKq bMuDiv"
+        class="sc-gNZgCX kFsGVB"
       >
         <h6
           class="MuiTypography-root MuiTypography-h6 css-66ugg1-MuiTypography-root"
@@ -19,7 +19,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
         </h6>
       </div>
       <div
-        class="sc-jqVXSH jvJmsy"
+        class="sc-jbAkgO jpddxj"
       >
         <div
           class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-1jxwjqx-MuiGrid2-root"
@@ -32,7 +32,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
             >
               <div>
                 <span
-                  class="sc-gaZyOd coOHSP"
+                  class="sc-fLDLck ivXKQK"
                   color="textSecondary"
                 >
                   Created By
@@ -41,7 +41,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
                   data-cy="label-Created By"
                 >
                   <span
-                    class="sc-dDvxFM gcgChj"
+                    class="sc-dycHyt kguSQI"
                     color="textSecondary"
                   >
                     Matthew Sosa
@@ -54,7 +54,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
             >
               <div>
                 <span
-                  class="sc-gaZyOd coOHSP"
+                  class="sc-fLDLck ivXKQK"
                   color="textSecondary"
                 >
                   Programme
@@ -63,11 +63,11 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
                   data-cy="label-Programme"
                 >
                   <span
-                    class="sc-dDvxFM gcgChj"
+                    class="sc-dycHyt kguSQI"
                     color="textSecondary"
                   >
                     <a
-                      class="sc-KXCwU bOnjzn"
+                      class="sc-FEMpB gVfMNY"
                       href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/details/UHJvZ3JhbU5vZGU6NWJhMjEzY2UtNmNlOS00NTc4LThhNDgtYjFmMDgyM2Q2MDAy"
                     >
                       Already attention fear well hit instead person.
@@ -81,7 +81,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
             >
               <div>
                 <span
-                  class="sc-gaZyOd coOHSP"
+                  class="sc-fLDLck ivXKQK"
                   color="textSecondary"
                 >
                   Target Population
@@ -90,11 +90,11 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
                   data-cy="label-Target Population"
                 >
                   <span
-                    class="sc-dDvxFM gcgChj"
+                    class="sc-dycHyt kguSQI"
                     color="textSecondary"
                   >
                     <a
-                      class="sc-KXCwU bOnjzn"
+                      class="sc-FEMpB gVfMNY"
                       href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/target-population/UGF5bWVudFBsYW5Ob2RlOmE5YzJjMmM4LWJmYWUtNDBhMy05YmYwLWIxYWE1ZmRlMDE0YQ=="
                     />
                   </span>
@@ -106,7 +106,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
             >
               <div>
                 <span
-                  class="sc-gaZyOd coOHSP"
+                  class="sc-fLDLck ivXKQK"
                   color="textSecondary"
                 >
                   Currency
@@ -115,7 +115,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
                   data-cy="label-Currency"
                 >
                   <span
-                    class="sc-dDvxFM gcgChj"
+                    class="sc-dycHyt kguSQI"
                     color="textSecondary"
                   >
                     PLN
@@ -128,7 +128,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
             >
               <div>
                 <span
-                  class="sc-gaZyOd coOHSP"
+                  class="sc-fLDLck ivXKQK"
                   color="textSecondary"
                 >
                   Start Date
@@ -137,7 +137,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
                   data-cy="label-Start Date"
                 >
                   <span
-                    class="sc-dDvxFM gcgChj"
+                    class="sc-dycHyt kguSQI"
                     color="textSecondary"
                   >
                     <time
@@ -154,7 +154,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
             >
               <div>
                 <span
-                  class="sc-gaZyOd coOHSP"
+                  class="sc-fLDLck ivXKQK"
                   color="textSecondary"
                 >
                   End Date
@@ -163,7 +163,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
                   data-cy="label-End Date"
                 >
                   <span
-                    class="sc-dDvxFM gcgChj"
+                    class="sc-dycHyt kguSQI"
                     color="textSecondary"
                   >
                     <time
@@ -180,7 +180,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
             >
               <div>
                 <span
-                  class="sc-gaZyOd coOHSP"
+                  class="sc-fLDLck ivXKQK"
                   color="textSecondary"
                 >
                   Dispersion Start Date
@@ -189,7 +189,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
                   data-cy="label-Dispersion Start Date"
                 >
                   <span
-                    class="sc-dDvxFM gcgChj"
+                    class="sc-dycHyt kguSQI"
                     color="textSecondary"
                   >
                     <time
@@ -206,7 +206,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
             >
               <div>
                 <span
-                  class="sc-gaZyOd coOHSP"
+                  class="sc-fLDLck ivXKQK"
                   color="textSecondary"
                 >
                   Dispersion End Date
@@ -215,7 +215,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
                   data-cy="label-Dispersion End Date"
                 >
                   <span
-                    class="sc-dDvxFM gcgChj"
+                    class="sc-dycHyt kguSQI"
                     color="textSecondary"
                   >
                     <time
@@ -235,7 +235,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
               >
                 <div>
                   <span
-                    class="sc-gaZyOd coOHSP"
+                    class="sc-fLDLck ivXKQK"
                     color="textSecondary"
                   >
                     FX Rate Applied
@@ -277,12 +277,12 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
               class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-12 css-1j0u08r-MuiGrid2-root"
             >
               <div
-                class="sc-kuACkN gumivP"
+                class="sc-kfeOyU fMDCaE"
                 color="#84A1CA"
               >
                 <div>
                   <span
-                    class="sc-gaZyOd coOHSP"
+                    class="sc-fLDLck ivXKQK"
                     color="textSecondary"
                   >
                     Related Follow-Up Payment Plans
@@ -291,7 +291,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
                     data-cy="label-Related Follow-Up Payment Plans"
                   >
                     <span
-                      class="sc-dDvxFM gcgChj"
+                      class="sc-dycHyt kguSQI"
                       color="textSecondary"
                     >
                       <div

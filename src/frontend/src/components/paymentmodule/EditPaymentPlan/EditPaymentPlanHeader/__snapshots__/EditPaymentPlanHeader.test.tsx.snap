@@ -30,15 +30,15 @@ exports[`components/paymentmodule/EditPaymentPlanHeader should render 1`] = `
       >
         <div>
           <div
-            class="sc-gaZyOd bmKNSg"
+            class="sc-fLDLck eYYPjF"
             data-cy="breadcrumbs-container"
           >
             <span
-              class="sc-eaUbBy eXxvdm"
+              class="sc-dVBluf bNa-dds"
               data-cy="breadcrumbs-element-container"
             >
               <a
-                class="sc-KXCwU eukzGS"
+                class="sc-FEMpB jOYmrF"
                 data-cy="breadcrumbs-link"
                 href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/payment-module/payment-plans/UGF5bWVudFBsYW5Ob2RlOmE5YzJjMmM4LWJmYWUtNDBhMy05YmYwLWIxYWE1ZmRlMDE0YQ=="
               >
@@ -64,13 +64,13 @@ exports[`components/paymentmodule/EditPaymentPlanHeader should render 1`] = `
                    
                   PP-0060-22-00000001
                   <div
-                    class="sc-gTrWKq buNxom"
+                    class="sc-gNZgCX ijvZIE"
                   >
                     <div
-                      class="sc-dDvxFM fXDoTN"
+                      class="sc-dycHyt gCnfnG"
                     >
                       <div
-                        class="sc-jqVXSH YIWjg status-box-container"
+                        class="sc-jbAkgO dLceGF status-box-container"
                         data-cy="status-container"
                       >
                         LOCKED

@@ -9,10 +9,10 @@ exports[`components/core/DocumentSearchField should render 1`] = `
       class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
     >
       <div
-        class="sc-dDvxFM bfZurk"
+        class="sc-dycHyt kbxpaX"
       >
         <div
-          class="MuiFormControl-root MuiFormControl-fullWidth sc-KXCwU fsfJRJ css-ytlejw-MuiFormControl-root"
+          class="MuiFormControl-root MuiFormControl-fullWidth sc-FEMpB iUuhyW css-ytlejw-MuiFormControl-root"
           data-cy="select-filter"
         >
           <div
@@ -26,7 +26,7 @@ exports[`components/core/DocumentSearchField should render 1`] = `
             </label>
             <div
               borderradius="0px 4px 4px 0px"
-              class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall sc-jqVXSH cvKxAn MuiSelect-root css-jcgkb9-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root"
+              class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall sc-jbAkgO knHlqW MuiSelect-root css-jcgkb9-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root"
               data-cy="filters-document-type"
             >
               <div
@@ -40,7 +40,7 @@ exports[`components/core/DocumentSearchField should render 1`] = `
                   class="MuiBox-root css-70qvj9"
                 >
                   <div
-                    class="sc-gTrWKq cUCbWt"
+                    class="sc-gNZgCX jugEEj"
                   >
                     Document 1
                   </div>
@@ -85,7 +85,7 @@ exports[`components/core/DocumentSearchField should render 1`] = `
       class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-8 css-1cdctrw-MuiGrid2-root"
     >
       <div
-        class="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root sc-kuACkN iUrVDJ css-cmpglg-MuiFormControl-root-MuiTextField-root"
+        class="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root sc-kfeOyU ghXnkm css-cmpglg-MuiFormControl-root-MuiTextField-root"
         data-cy="filters-document-number"
       >
         <label
