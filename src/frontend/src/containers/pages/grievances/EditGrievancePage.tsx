@@ -542,7 +542,9 @@ export const EditGrievancePage = (): ReactElement => {
                           <Box mt={3}>
                             <Title>
                               <Typography variant="h6">
-                                {t('Documentation')}
+                                {t(
+                                  'Documentation: upload of document: support documentation for the ticket',
+                                )}
                               </Typography>
                             </Title>
                             <ExistingDocumentationFieldArray

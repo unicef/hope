@@ -88,8 +88,6 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
             "start_date",
             "end_date",
             "description",
-            "ca_id",
-            "ca_hash_id",
             "business_area",
             "budget",
             "frequency_of_payments",
@@ -175,8 +173,6 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     )
     start_date = models.DateField(db_index=True)
     end_date = models.DateField(null=True, blank=True, db_index=True)
-    ca_id = CICharField(max_length=255, null=True, blank=True, db_index=True)
-    ca_hash_id = CICharField(max_length=255, null=True, blank=True, db_index=True)
     data_collecting_type = models.ForeignKey(
         "core.DataCollectingType", related_name="programs", on_delete=models.PROTECT
     )

@@ -71,7 +71,6 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
             "data_source",
             "number_of_individuals",
             "number_of_households",
-            "datahub_id",
             "error_message",
         ]
     )
@@ -201,8 +200,6 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
 
     dedup_engine_batch_duplicates = models.PositiveIntegerField(default=0)
     dedup_engine_golden_record_duplicates = models.PositiveIntegerField(default=0)
-
-    datahub_id = models.UUIDField(null=True, default=None, db_index=True, blank=True)
 
     def __str__(self) -> str:
         return self.name
@@ -345,10 +342,6 @@ class RegistrationDataImportDatahub(TimeStampedUUIDModel):
     @property
     def business_area(self) -> str:
         return self.business_area_slug
-
-    @property
-    def linked_rdi(self) -> "RegistrationDataImport":
-        return RegistrationDataImport.objects.get(datahub_id=self.id)
 
 
 class KoboImportedSubmission(models.Model):
