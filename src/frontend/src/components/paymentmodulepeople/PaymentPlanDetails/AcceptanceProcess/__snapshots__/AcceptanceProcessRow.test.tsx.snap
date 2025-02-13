@@ -3,7 +3,7 @@
 exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcessRow should render 1`] = `
 <div>
   <div
-    class="sc-jZCRgm dlftOY MuiBox-root css-zwiamn"
+    class="sc-jUkaYT sUXwi MuiBox-root css-zwiamn"
   >
     <div
       class="MuiStepper-root MuiStepper-horizontal css-ibtndc-MuiStepper-root"
@@ -152,7 +152,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
             class="MuiBox-root css-38zrbw"
           >
             <div
-              class="sc-hWWBcw cEQbov"
+              class="sc-hRDKVd hxueLb"
             >
               Sent for approval by Root Rootkowski
                on
@@ -164,7 +164,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
             </div>
           </div>
           <div
-            class="sc-cGXZpB guqlqt MuiBox-root css-e6xxd1"
+            class="sc-cMqPwU kzIWjN MuiBox-root css-e6xxd1"
           >
             <div
               class="MuiBox-root css-fv3lde"
@@ -174,7 +174,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
                 class="MuiBox-root css-15fzge"
               >
                 <div
-                  class="sc-kuACkN hXYvuG"
+                  class="sc-kfeOyU cLxrbp"
                 >
                   on 
                   <time
@@ -188,7 +188,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
                 class="MuiBox-root css-1el3gal"
               >
                 <div
-                  class="sc-jHbxoU kPyQOl"
+                  class="sc-jBIHhB bICrbh"
                 />
               </div>
             </div>

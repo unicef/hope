@@ -6,7 +6,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
     class="MuiBox-root css-j7qwjs"
   >
     <div
-      class="sc-gaZyOd ia-diyN"
+      class="sc-fLDLck fNdpDo"
     >
       <h6
         class="MuiTypography-root MuiTypography-h6 css-66ugg1-MuiTypography-root"
@@ -16,7 +16,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
        
     </div>
     <div
-      class="sc-dDvxFM diyMsl"
+      class="sc-dycHyt bmMgQK"
     >
       <div
         class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-188izze-MuiGrid2-root"
@@ -25,12 +25,12 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
           class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
         >
           <div
-            class="sc-eaUbBy fhaEUs"
+            class="sc-dVBluf hxwbZa"
             color="#D8E1EE"
           >
             <div>
               <span
-                class="sc-KXCwU flCAkT"
+                class="sc-FEMpB ddgbkI"
                 color="textSecondary"
               >
                 Cash (Miranda Ltd)
@@ -39,7 +39,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
                 data-cy="label-Cash (Miranda Ltd)"
               >
                 <span
-                  class="sc-gyycJP bSuQAM"
+                  class="sc-gjcoXW fZsJNd"
                   color="textSecondary"
                 >
                   0 PLN (0 USD)
@@ -52,12 +52,12 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
           class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
         >
           <div
-            class="sc-eaUbBy kSotGU"
+            class="sc-dVBluf NLKNm"
             color=" #d8d8d8"
           >
             <div>
               <span
-                class="sc-KXCwU flCAkT"
+                class="sc-FEMpB ddgbkI"
                 color="textSecondary"
               >
                 In Kind (Frazier-Watson)
@@ -66,7 +66,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
                 data-cy="label-In Kind (Frazier-Watson)"
               >
                 <span
-                  class="sc-gyycJP bSuQAM"
+                  class="sc-gjcoXW fZsJNd"
                   color="textSecondary"
                 >
                   0 PLN (0 USD)
@@ -79,12 +79,12 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
           class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
         >
           <div
-            class="sc-eaUbBy bxMHKm"
+            class="sc-dVBluf jOQXwc"
             color="#003C8F"
           >
             <div>
               <span
-                class="sc-KXCwU flCAkT"
+                class="sc-FEMpB ddgbkI"
                 color="textSecondary"
               >
                 Transfer (Bray Group)
@@ -93,7 +93,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
                 data-cy="label-Transfer (Bray Group)"
               >
                 <span
-                  class="sc-gyycJP bSuQAM"
+                  class="sc-gjcoXW fZsJNd"
                   color="textSecondary"
                 >
                   0 PLN (0 USD)
@@ -110,7 +110,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
           class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
         >
           <div
-            class="sc-jqVXSH dFIxpr"
+            class="sc-jbAkgO buaZnu"
           >
             <canvas
               height="0"

@@ -6,7 +6,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
     class="MuiBox-root css-zwiamn"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-KXCwU fCeEQk css-1gtchvp-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-FEMpB iyPpzz css-1gtchvp-MuiPaper-root"
       style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
     >
       <div
@@ -34,7 +34,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
         >
           <div>
             <span
-              class="sc-gaZyOd coOHSP"
+              class="sc-fLDLck ivXKQK"
               color="textSecondary"
             >
               Cash
@@ -43,7 +43,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
               data-cy="label-Cash"
             >
               <span
-                class="sc-dDvxFM gcgChj"
+                class="sc-dycHyt kguSQI"
                 color="textSecondary"
               >
                 Miranda Ltd
@@ -56,7 +56,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
         >
           <div>
             <span
-              class="sc-gaZyOd coOHSP"
+              class="sc-fLDLck ivXKQK"
               color="textSecondary"
             >
               In Kind
@@ -65,7 +65,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
               data-cy="label-In Kind"
             >
               <span
-                class="sc-dDvxFM gcgChj"
+                class="sc-dycHyt kguSQI"
                 color="textSecondary"
               >
                 Frazier-Watson
@@ -78,7 +78,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
         >
           <div>
             <span
-              class="sc-gaZyOd coOHSP"
+              class="sc-fLDLck ivXKQK"
               color="textSecondary"
             >
               Transfer
@@ -87,7 +87,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
               data-cy="label-Transfer"
             >
               <span
-                class="sc-dDvxFM gcgChj"
+                class="sc-dycHyt kguSQI"
                 color="textSecondary"
               >
                 Bray Group
@@ -97,17 +97,17 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
         </div>
       </div>
       <div
-        class="sc-gyycJP kaqjps"
+        class="sc-gjcoXW jQCndt"
       >
         <div
-          class="sc-eaUbBy cBWkqD"
+          class="sc-dVBluf cFSYVV"
         />
       </div>
       <div
         class="MuiBox-root css-j7qwjs"
       >
         <div
-          class="sc-gTrWKq hiRxxj"
+          class="sc-gNZgCX lhjjcp"
         >
           <h6
             class="MuiTypography-root MuiTypography-h6 css-66ugg1-MuiTypography-root"
@@ -117,7 +117,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
            
         </div>
         <div
-          class="sc-kuACkN brAbXR"
+          class="sc-kfeOyU bQxXsK"
         >
           <div
             class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-188izze-MuiGrid2-root"
@@ -126,12 +126,12 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
               class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
             >
               <div
-                class="sc-jqVXSH hQuOQK"
+                class="sc-jbAkgO iOCnQX"
                 color="#D8E1EE"
               >
                 <div>
                   <span
-                    class="sc-gaZyOd coOHSP"
+                    class="sc-fLDLck ivXKQK"
                     color="textSecondary"
                   >
                     Cash (Miranda Ltd)
@@ -140,7 +140,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
                     data-cy="label-Cash (Miranda Ltd)"
                   >
                     <span
-                      class="sc-dDvxFM gcgChj"
+                      class="sc-dycHyt kguSQI"
                       color="textSecondary"
                     >
                       0 PLN (0 USD)
@@ -153,12 +153,12 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
               class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
             >
               <div
-                class="sc-jqVXSH olaeO"
+                class="sc-jbAkgO fHSrDj"
                 color=" #d8d8d8"
               >
                 <div>
                   <span
-                    class="sc-gaZyOd coOHSP"
+                    class="sc-fLDLck ivXKQK"
                     color="textSecondary"
                   >
                     In Kind (Frazier-Watson)
@@ -167,7 +167,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
                     data-cy="label-In Kind (Frazier-Watson)"
                   >
                     <span
-                      class="sc-dDvxFM gcgChj"
+                      class="sc-dycHyt kguSQI"
                       color="textSecondary"
                     >
                       0 PLN (0 USD)
@@ -180,12 +180,12 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
               class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
             >
               <div
-                class="sc-jqVXSH mKpoc"
+                class="sc-jbAkgO foCXhZ"
                 color="#003C8F"
               >
                 <div>
                   <span
-                    class="sc-gaZyOd coOHSP"
+                    class="sc-fLDLck ivXKQK"
                     color="textSecondary"
                   >
                     Transfer (Bray Group)
@@ -194,7 +194,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
                     data-cy="label-Transfer (Bray Group)"
                   >
                     <span
-                      class="sc-dDvxFM gcgChj"
+                      class="sc-dycHyt kguSQI"
                       color="textSecondary"
                     >
                       0 PLN (0 USD)
@@ -211,7 +211,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
               class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
             >
               <div
-                class="sc-hWWBcw dASJb"
+                class="sc-hRDKVd bCxRDr"
               >
                 <canvas
                   height="0"
@@ -235,7 +235,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Se
     class="MuiBox-root css-zwiamn"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-KXCwU fCeEQk css-1gtchvp-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-FEMpB iyPpzz css-1gtchvp-MuiPaper-root"
       style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
     >
       <div
