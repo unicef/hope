@@ -82,8 +82,8 @@ class OrganizationListView(HOPEAPIView, ListAPIView):
 
     @etag_decorator(AuroraKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=AuroraKeyConstructor())
-    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
-        return super().dispatch(request, *args, **kwargs)
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
 
 class ProjectListView(HOPEAPIView, ListAPIView):
@@ -94,8 +94,8 @@ class ProjectListView(HOPEAPIView, ListAPIView):
 
     @etag_decorator(AuroraKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=AuroraKeyConstructor())
-    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
-        return super().dispatch(request, *args, **kwargs)
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
 
 class RegistrationListView(HOPEAPIView, ListAPIView):
@@ -106,5 +106,5 @@ class RegistrationListView(HOPEAPIView, ListAPIView):
 
     @etag_decorator(AuroraKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=AuroraKeyConstructor())
-    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
-        return super().dispatch(request, *args, **kwargs)
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
