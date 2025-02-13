@@ -2,10 +2,10 @@ import { HeadCell } from '@core/Table/EnhancedTableHead';
 import { PaymentVerificationNode } from '@generated/graphql';
 
 export const headCells: HeadCell<PaymentVerificationNode>[] = [
-  {
+    {
     disablePadding: false,
     label: 'Payment ID',
-    id: 'payment_record__ca_id',
+    id: 'unicef_id',
     numeric: false,
   },
   {

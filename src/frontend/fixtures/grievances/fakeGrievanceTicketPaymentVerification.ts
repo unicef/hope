@@ -198,7 +198,7 @@ export const fakeGrievanceTicketPaymentVerification = {
   },
   paymentRecord: {
     id: 'UGF5bWVudE5vZGU6MTAwMDAwMDAtZmVlZC1iZWVmLTAwMDAtMDAwMDBiYWRmMDBk',
-    caId: 'RCPT-0060-24-0.000.078',
+    unicefId: 'RCPT-0060-24-0.000.078',
     deliveredQuantity: null,
     entitlementQuantity: null,
     objType: 'Payment',

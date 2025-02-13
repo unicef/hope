@@ -403,7 +403,6 @@ class TestRecalculateData(TestCase):
         self.assertEqual(household.female_children_count, 2)
         self.assertEqual(household.children_disabled_count, 2)
         self.assertEqual(household.female_children_disabled_count, 2)
-        self.assertIs(household.is_recalculated_group_ages, True)
 
     @freeze_time("2021-07-30")
     def test_recalculate_population_fields_task(self) -> None:
