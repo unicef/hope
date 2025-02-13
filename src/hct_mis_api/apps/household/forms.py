@@ -15,7 +15,6 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     XlsxUpdateFile,
 )
-from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.steficon.admin import AutocompleteWidget
@@ -144,38 +143,6 @@ class MassWithdrawForm(WithdrawForm):
 
 class MassRestoreForm(RestoreForm):
     _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
-
-
-class AddToTargetPopulationForm(forms.Form):
-    _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
-    action = forms.CharField(widget=forms.HiddenInput)
-    target_population = forms.ModelChoiceField(queryset=PaymentPlan.objects.filter(status=PaymentPlan.Status.TP_OPEN))
-
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        read_only = kwargs.pop("read_only", False)
-        super().__init__(*args, **kwargs)
-        if read_only:
-            self.fields["target_population"].widget = HiddenInput()
-
-
-class CreateTargetPopulationForm(forms.Form):
-    _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
-    action = forms.CharField(widget=forms.HiddenInput)
-    name = forms.CharField()
-    program = forms.ModelChoiceField(queryset=Program.objects.filter(status=Program.ACTIVE))
-
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        read_only = kwargs.pop("read_only", False)
-        super().__init__(*args, **kwargs)
-        if "initial" in kwargs:
-            first = Household.objects.get(pk=kwargs["initial"]["_selected_action"][0])
-            self.fields["program"].queryset = Program.objects.filter(
-                status=Program.ACTIVE, business_area=first.business_area
-            )
-
-        if read_only:
-            self.fields["program"].widget = HiddenInput()
-            self.fields["name"].widget = HiddenInput()
 
 
 class CreateTargetPopulationTextForm(forms.Form):

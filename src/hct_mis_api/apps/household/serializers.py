@@ -17,11 +17,10 @@ def get_household_status(household: Household) -> Tuple[str, datetime]:
         if payments.exists():
             return "paid", payments.first().delivery_date
 
-    selections = Payment.objects.filter(household=household)
-    if selections.exists():
+    if selections := Payment.objects.filter(
+        household=household, parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES
+    ).exists():
         selection = selections.order_by("updated_at").first()
-        if selection.parent.status == PaymentPlan.Status.TP_PROCESSING:
-            return "sent to cash assist", selection.updated_at
         return "targeted", selection.updated_at
 
     return "merged to population", household.created_at

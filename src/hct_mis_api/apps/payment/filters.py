@@ -2,16 +2,7 @@ from base64 import b64decode
 from typing import Any, List
 from uuid import UUID
 
-from django.db.models import (
-    Case,
-    Count,
-    IntegerField,
-    OuterRef,
-    Q,
-    QuerySet,
-    Value,
-    When,
-)
+from django.db.models import Case, Count, IntegerField, Q, QuerySet, Value, When
 from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404
 
@@ -34,10 +25,8 @@ from hct_mis_api.apps.core.utils import (
     decode_id_string,
     decode_id_string_required,
 )
-from hct_mis_api.apps.payment.managers import ArraySubquery
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
-    DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     Payment,
@@ -339,30 +328,14 @@ class PaymentPlanFilter(FilterSet):
 
     @staticmethod
     def filter_service_provider(queryset: "QuerySet", model_field: str, service_provider_name: str) -> "QuerySet":
-        fsp_qs = FinancialServiceProvider.objects.filter(
-            delivery_mechanisms_per_payment_plan__payment_plan=OuterRef("pk")
-        ).distinct()
-        queryset = queryset.annotate(fsp_names=ArraySubquery(fsp_qs.values_list("name", flat=True)))
-        return queryset.filter(fsp_names__icontains=service_provider_name)
+        return queryset.filter(delivery_mechanism__financial_service_provider__name=service_provider_name)
 
     @staticmethod
     def filter_delivery_types(
         queryset: "QuerySet", model_field: str, delivery_types: Any
     ) -> "QuerySet":  # pragma: no cover
         # the test added but looks like it does not count test_all_payment_plans_filter_by_delivery_types
-        q = Q()
-        if isinstance(delivery_types, list):
-            delivery_mechanisms_per_pp_qs = DeliveryMechanismPerPaymentPlan.objects.filter(
-                payment_plan=OuterRef("pk")
-            ).distinct("delivery_mechanism")
-            queryset = queryset.annotate(
-                delivery_types=ArraySubquery(
-                    delivery_mechanisms_per_pp_qs.values_list("delivery_mechanism__code", flat=True)
-                )
-            )
-            for delivery_type in delivery_types:
-                q |= Q(delivery_types__icontains=delivery_type)
-        return queryset.filter(q)
+        return queryset.filter(delivery_mechanism__delivery_mechanism__code__in=delivery_types)
 
 
 class PaymentFilter(FilterSet):
