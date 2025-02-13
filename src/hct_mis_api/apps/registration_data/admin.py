@@ -312,6 +312,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
 
 @admin.register(ImportData)
 class ImportDataAdmin(HOPEModelAdminBase):
+    search_fields = ("business_area_slug",)
     list_display = ("business_area_slug", "status", "data_type", "number_of_households", "number_of_individuals")
     list_filter = (
         "status",
@@ -322,6 +323,7 @@ class ImportDataAdmin(HOPEModelAdminBase):
 
 @admin.register(KoboImportData)
 class KoboImportDataDataAdmin(HOPEModelAdminBase):
+    search_fields = ("business_area_slug",)
     list_display = (
         "business_area_slug",
         "status",
