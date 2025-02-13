@@ -157,8 +157,8 @@ class TestDetails(TestCase):
         self.assertEqual(response.status_code, 200)
         data = response.json()
         info = data["info"]
-        self.assertEqual(info["status"], "targeted")
-        self.assertEqual(info["date"], _time(Payment.objects.first().updated_at))
+        self.assertEqual(info["status"], "merged to population")
+        self.assertEqual(info["date"], _time(household.created_at))
 
     def test_getting_individual_with_status_sent_to_cash_assist(self) -> None:
         household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
@@ -166,17 +166,16 @@ class TestDetails(TestCase):
         document_type = DocumentTypeFactory(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID])
         document = PendingDocumentFactory(individual=individual, type=document_type)
         tax_id = document.document_number
-
         payment_plan = PaymentPlanFactory(
             business_area=self.business_area,
             created_by=self.user,
-            status=PaymentPlan.Status.TP_PROCESSING,
+            status=PaymentPlan.Status.TP_LOCKED,
         )
         PaymentFactory(
             parent=payment_plan,
             household=household,
-            status=PaymentPlan.Status.TP_PROCESSING,
-            delivered_quantity=None,
+            status=Payment.STATUS_PENDING,
+            delivered_quantity=999,
         )
 
         response = self.api_client.get(f"/api/hh-status?tax_id={tax_id}")
@@ -184,7 +183,7 @@ class TestDetails(TestCase):
         data = response.json()
         self.assertIsNotNone(data["info"])
         info = data["info"]
-        self.assertEqual(info["status"], "sent to cash assist")
+        self.assertEqual(info["status"], "paid")
 
     def test_getting_individual_with_status_paid(self) -> None:
         household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
