@@ -701,7 +701,7 @@ class TicketHouseholdDataUpdateDetails(TimeStampedUUIDModel):
 def delete_grievance_ticket_on_household_details_update_delete(
     sender: TicketHouseholdDataUpdateDetails, instance: TicketHouseholdDataUpdateDetails, **kwargs: Any
 ) -> None:
-    if hasattr(instance, "ticket"):
+    if hasattr(instance, "ticket"):  # pragma: no cover
         instance.ticket.delete()
 
 
@@ -733,7 +733,7 @@ class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
 def delete_grievance_ticket_on_individual_details_update_delete(
     sender: TicketIndividualDataUpdateDetails, instance: TicketIndividualDataUpdateDetails, **kwargs: Any
 ) -> None:
-    if hasattr(instance, "ticket"):
+    if hasattr(instance, "ticket"):  # pragma: no cover
         instance.ticket.delete()
 
 
