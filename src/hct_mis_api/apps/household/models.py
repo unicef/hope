@@ -563,19 +563,6 @@ class Household(
             )
         ]
 
-    def save(self, *args: Any, **kwargs: Any) -> None:
-        from hct_mis_api.apps.targeting.models import (
-            HouseholdSelection,
-            TargetPopulation,
-        )
-
-        if self.withdrawn:
-            HouseholdSelection.objects.filter(
-                household=self, target_population__status=TargetPopulation.STATUS_LOCKED
-            ).delete()
-        cache.delete_pattern(f"count_{self.business_area.slug}_HouseholdNodeConnection_*")
-        super().save(*args, **kwargs)
-
     def delete(self, *args: Any, **kwargs: Any) -> Tuple[int, Dict[str, int]]:
         household_deleted.send(self.__class__, instance=self)
         return super().delete(*args, **kwargs)
