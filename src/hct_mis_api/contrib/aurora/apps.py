@@ -6,7 +6,6 @@ class Config(AppConfig):
 
     def ready(self) -> None:
         import hct_mis_api.contrib.aurora.signals  # noqa: F401
-
         from hct_mis_api.contrib.aurora.rdi import registry
         from hct_mis_api.contrib.aurora.services.czech_republic_flex_registration_service import (
             CzechRepublicFlexRegistration,
