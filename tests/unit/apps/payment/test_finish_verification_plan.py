@@ -62,7 +62,7 @@ class TestFinishVerificationPlan(TestCase):
             household, _ = create_household(
                 {
                     "registration_data_import": registration_data_import,
-                    "admin_area": afghanistan_areas_qs.order_by("?").first(),
+                    "admin1": afghanistan_areas_qs.order_by("?").first(),
                     "program": cls.program,
                 },
                 {
@@ -70,7 +70,6 @@ class TestFinishVerificationPlan(TestCase):
                     "phone_no": f"+48 609 999 {i:03d}",
                 },
             )
-            household.set_admin_areas()
             household.program = cls.program
             household.refresh_from_db()
 
