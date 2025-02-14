@@ -12,7 +12,6 @@ import {
   BigValue,
   BigValueContainer,
 } from '@components/rdi/details/RegistrationDetails/RegistrationDetails';
-import { PaymentRecordAndPaymentPeopleTable } from '@containers/tables/payments/PaymentRecordAndPaymentPeopleTable';
 import { AdminButton } from '@core/AdminButton';
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
@@ -41,6 +40,7 @@ import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTabl
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { ReactElement } from 'react';
 import { IndividualDeliveryMechanisms } from '@components/population/IndividualDeliveryMechanisms';
+import { PaymentsPeopleTable } from '@containers/tables/payments/PaymentsPeopleTable';
 
 const Container = styled.div`
   padding: 20px 20px 00px 20px;
@@ -232,7 +232,7 @@ export const PeopleDetailsPage = (): ReactElement => {
             PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS,
             permissions,
           ) && (
-            <PaymentRecordAndPaymentPeopleTable
+            <PaymentsPeopleTable
               openInNewTab
               household={household as HouseholdNode}
               businessArea={businessArea}

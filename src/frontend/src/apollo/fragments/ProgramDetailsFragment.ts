@@ -8,8 +8,6 @@ export const programDetails = gql`
     startDate
     endDate
     status
-    caId
-    caHashId
     description
     budget
     frequencyOfPayments

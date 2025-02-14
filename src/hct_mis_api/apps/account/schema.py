@@ -234,6 +234,6 @@ class Query(graphene.ObjectType):
         return (
             get_user_model()
             .objects.prefetch_related("user_roles")
-            .filter(available_for_export=True, is_superuser=False, user_roles__business_area__slug=business_area_slug)
+            .filter(is_superuser=False, user_roles__business_area__slug=business_area_slug)
             .exists()
         )

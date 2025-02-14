@@ -686,19 +686,6 @@ def chart_create_filter_query_for_payment_verification_gfk(
     return filter_query
 
 
-class CaIdIterator:
-    def __init__(self, name: str) -> None:
-        self.name = name
-        self.last_id = 0
-
-    def __iter__(self: "CaIdIterator") -> "CaIdIterator":
-        return self
-
-    def __next__(self: "CaIdIterator") -> str:
-        self.last_id += 1
-        return f"123-21-{self.name.upper()}-{self.last_id:05d}"
-
-
 def resolve_flex_fields_choices_to_string(parent: Any) -> Dict:
     from hct_mis_api.apps.core.models import FlexibleAttribute
 
@@ -846,7 +833,9 @@ def clear_cache_for_key(key: str) -> None:
     """remove cache if key starts with"""
     if hasattr(cache, "keys"):
         all_cache_keys = cache.keys(f"{key}*")
+        print(f"🔍 Found cache keys: {all_cache_keys}")
         for k in all_cache_keys:
+            print(f"🚀🚀🚀🚀🚀 Clearing cache for: {k}")
             cache.delete(k)
 
 
