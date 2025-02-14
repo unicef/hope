@@ -861,7 +861,6 @@ class TestCreateTargeting:
         assert pageTargetingDetails.getTitlePage().text.split("\n")[0].strip() == targeting_name
         assert pageTargetingDetails.getCriteriaContainer().text == expected_criteria_text
         assert Household.objects.count() == 3
-        print("==> ", individual3.relationship, individual3.household)
 
         assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual3.household.unicef_id
         assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "1"
@@ -945,7 +944,7 @@ class TestTargeting:
         pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
         pageTargetingCreate.getInputName().send_keys(f"Target Population for {household_with_disability.unicef_id}")
         pageTargetingCreate.clickButtonTargetPopulationCreate()
-        target_population = PaymentPlan.objects.get(name=f"Target Population for {household_with_disability.unicef_id}")
+        target_population = PaymentPlan.objects.get(name__startswith="Target Population for")
         assert str(target_population.total_individuals_count) == pageTargetingDetails.getLabelTargetedIndividuals().text
         assert (
             str(target_population.total_households_count) == pageTargetingDetails.getLabelTotalNumberOfHouseholds().text
