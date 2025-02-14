@@ -13,10 +13,10 @@ export const TARGET_POPULATION_QUERY = gql`
         id
         name
         code
-        fsp {
-          id
-          name
-        }
+      }
+      financialServiceProvider {
+        id
+        name
       }
       failedWalletValidationCollectorsIds
       totalHouseholdsCount

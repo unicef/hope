@@ -37,10 +37,10 @@ export const PAYMENT_PLAN_QUERY = gql`
         id
         name
         code
-        fsp {
-          id
-          name
-        }
+      }
+      financialServiceProvider {
+        id
+        name
       }
       programCycle {
         id

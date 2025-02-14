@@ -888,8 +888,8 @@ type DeliveryMechanismNode implements Node {
   uniqueFields: [String!]!
   isActive: Boolean!
   transferType: DeliveryMechanismTransferType!
+  paymentplanSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
   financialserviceproviderSet(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderNodeConnection!
-  deliverymechanismperpaymentplanSet(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismPerPaymentPlanNodeConnection!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   deliverymechanismdataSet(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismDataNodeConnection!
 }
@@ -907,27 +907,68 @@ type DeliveryMechanismNodeEdge {
 }
 
 type DeliveryMechanismPerPaymentPlanNode implements Node {
+  isRemoved: Boolean!
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  paymentPlan: PaymentPlanNode!
-  financialServiceProvider: FinancialServiceProviderNode
-  deliveryMechanism: DeliveryMechanismNode
+  version: BigInt!
+  unicefId: String
+  internalData: JSONString!
+  businessArea: UserBusinessAreaNode!
+  programCycle: ProgramCycleNode!
+  statusDate: DateTime!
+  startDate: DateTime
+  endDate: DateTime
+  exchangeRate: Float
+  totalEntitledQuantity: Float
+  totalEntitledQuantityUsd: Float
+  totalEntitledQuantityRevised: Float
+  totalEntitledQuantityRevisedUsd: Float
+  totalDeliveredQuantity: Float
+  totalDeliveredQuantityUsd: Float
+  totalUndeliveredQuantity: Float
+  totalUndeliveredQuantityUsd: Float
+  createdBy: UserNode!
+  status: PaymentPlanStatus!
+  backgroundActionStatus: PaymentPlanBackgroundActionStatus
+  buildStatus: PaymentPlanBuildStatus
+  builtAt: DateTime
+  targetingCriteria: TargetingCriteriaNode
+  currency: PaymentPlanCurrency
+  dispersionStartDate: Date
+  dispersionEndDate: Date
+  femaleChildrenCount: Int!
+  maleChildrenCount: Int!
+  femaleAdultsCount: Int!
+  maleAdultsCount: Int!
+  totalHouseholdsCount: Int!
+  totalIndividualsCount: Int!
+  importedFileDate: DateTime
+  steficonRule: RuleCommitNode
+  steficonAppliedDate: DateTime
+  steficonRuleTargeting: RuleCommitNode
+  steficonTargetingAppliedDate: DateTime
+  sourcePaymentPlan: PaymentPlanNode
+  isFollowUp: Boolean!
+  excludedIds: String
+  exclusionReason: String
+  excludeHouseholdError: String
   name: String
+  vulnerabilityScoreMin: Float
+  vulnerabilityScoreMax: Float
+  isCashAssist: Boolean!
+  deliveryMechanism: DeliveryMechanismNode
+  financialServiceProvider: FinancialServiceProviderNode
+  approvalProcess(offset: Int, before: String, after: String, first: Int, last: Int): ApprovalProcessNodeConnection!
+  followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
+  paymentItems(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
+  documents(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanSupportingDocumentNodeConnection!
+  paymentVerificationPlans(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationPlanNodeConnection!
+  paymentVerificationSummary: PaymentVerificationSummaryNode
+  messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
+  surveys(offset: Int, before: String, after: String, first: Int, last: Int): SurveyNodeConnection!
   code: String
   fsp: FinancialServiceProviderNode
-}
-
-type DeliveryMechanismPerPaymentPlanNodeConnection {
-  pageInfo: PageInfo!
-  edges: [DeliveryMechanismPerPaymentPlanNodeEdge]!
-  totalCount: Int
-  edgeCount: Int
-}
-
-type DeliveryMechanismPerPaymentPlanNodeEdge {
-  node: DeliveryMechanismPerPaymentPlanNode
-  cursor: String!
 }
 
 enum DeliveryMechanismTransferType {
@@ -1190,7 +1231,7 @@ type FinancialServiceProviderNode implements Node {
   xlsxTemplates(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderXlsxTemplateNodeConnection!
   paymentGatewayId: String
   requiredFields: [String!]!
-  deliveryMechanismsPerPaymentPlan(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismPerPaymentPlanNodeConnection!
+  paymentplanSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   fullName: String
   isPaymentGateway: Boolean
@@ -2526,6 +2567,172 @@ enum PaymentPlanBuildStatus {
   OK
 }
 
+enum PaymentPlanCurrency {
+  A_
+  AED
+  AFN
+  ALL
+  AMD
+  ANG
+  AOA
+  ARS
+  AUD
+  AWG
+  AZN
+  BAM
+  BBD
+  BDT
+  BGN
+  BHD
+  BIF
+  BMD
+  BND
+  BOB
+  BOV
+  BRL
+  BSD
+  BTN
+  BWP
+  BYN
+  BZD
+  CAD
+  CDF
+  CHF
+  CLP
+  CNY
+  COP
+  CRC
+  CUC
+  CUP
+  CVE
+  CZK
+  DJF
+  DKK
+  DOP
+  DZD
+  EGP
+  ERN
+  ETB
+  EUR
+  FJD
+  FKP
+  GBP
+  GEL
+  GHS
+  GIP
+  GMD
+  GNF
+  GTQ
+  GYD
+  HKD
+  HNL
+  HRK
+  HTG
+  HUF
+  IDR
+  ILS
+  INR
+  IQD
+  IRR
+  ISK
+  JMD
+  JOD
+  JPY
+  KES
+  KGS
+  KHR
+  KMF
+  KPW
+  KRW
+  KWD
+  KYD
+  KZT
+  LAK
+  LBP
+  LKR
+  LRD
+  LSL
+  LYD
+  MAD
+  MDL
+  MGA
+  MKD
+  MMK
+  MNT
+  MOP
+  MRU
+  MUR
+  MVR
+  MWK
+  MXN
+  MYR
+  MZN
+  NAD
+  NGN
+  NIO
+  NOK
+  NPR
+  NZD
+  OMR
+  PAB
+  PEN
+  PGK
+  PHP
+  PKR
+  PLN
+  PYG
+  QAR
+  RON
+  RSD
+  RUB
+  RWF
+  SAR
+  SBD
+  SCR
+  SDG
+  SEK
+  SGD
+  SHP
+  SLE
+  SOS
+  SRD
+  SSP
+  STN
+  SVC
+  SYP
+  SZL
+  THB
+  TJS
+  TMT
+  TND
+  TOP
+  TRY
+  TTD
+  TWD
+  TZS
+  UAH
+  UGX
+  USD
+  UYU
+  UYW
+  UZS
+  VES
+  VND
+  VUV
+  WST
+  XAF
+  XAG
+  XAU
+  XCD
+  XOF
+  XPF
+  YER
+  ZAR
+  ZMW
+  ZWL
+  USDC
+}
+
 type PaymentPlanNode implements Node {
   isRemoved: Boolean!
   id: ID!
@@ -2577,9 +2784,10 @@ type PaymentPlanNode implements Node {
   vulnerabilityScoreMin: Float
   vulnerabilityScoreMax: Float
   isCashAssist: Boolean!
+  deliveryMechanism: DeliveryMechanismNode
+  financialServiceProvider: FinancialServiceProviderNode
   approvalProcess(offset: Int, before: String, after: String, first: Int, last: Int): ApprovalProcessNodeConnection!
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
-  deliveryMechanism: DeliveryMechanismPerPaymentPlanNode
   paymentItems(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   documents(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanSupportingDocumentNodeConnection!
   paymentVerificationPlans(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationPlanNodeConnection!
@@ -4572,8 +4780,7 @@ enum UserStatus {
   INVITED
 }
 
-type VolumeByDeliveryMechanismNode implements Node {
-  id: ID!
+type VolumeByDeliveryMechanismNode {
   deliveryMechanism: DeliveryMechanismPerPaymentPlanNode
   volume: Float
   volumeUsd: Float

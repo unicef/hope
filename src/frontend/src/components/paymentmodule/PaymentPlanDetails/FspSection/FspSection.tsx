@@ -22,11 +22,11 @@ export const FspSection = ({
   const { paymentPlanId } = useParams();
   const { isActiveProgram } = useProgramContext();
 
-  const { deliveryMechanism, isFollowUp } = paymentPlan;
-  const showFspDisplay = deliveryMechanism?.fsp !== null;
+  const { deliveryMechanism, financialServiceProvider, isFollowUp } = paymentPlan;
+  const showFspDisplay = financialServiceProvider !== null;
   const shouldDisableSetUpFsp = (): boolean => {
-    if (paymentPlan.isFollowUp) {
-      return false;
+    if (deliveryMechanism && financialServiceProvider) {
+      return true;
     }
     if (!paymentPlan.totalEntitledQuantityUsd) {
       return true;
@@ -64,13 +64,13 @@ export const FspSection = ({
         <Grid container spacing={3}>
           <>
             <Grid
-              key={`${deliveryMechanism.name}-${deliveryMechanism.fsp?.name}`}
+              key={`${deliveryMechanism.name}-${financialServiceProvider.name}`}
               item
               xs={3}
             >
               <LabelizedField
                 label={deliveryMechanism.name}
-                value={deliveryMechanism.fsp?.name}
+                value={financialServiceProvider.name}
               />
             </Grid>
           </>
