@@ -23,86 +23,46 @@ export const FspSection = ({
   const { isActiveProgram } = useProgramContext();
 
   const { deliveryMechanism, financialServiceProvider, isFollowUp } = paymentPlan;
-  const showFspDisplay = financialServiceProvider !== null;
-  const shouldDisableSetUpFsp = (): boolean => {
-    if (deliveryMechanism && financialServiceProvider) {
-      return true;
-    }
-    if (!paymentPlan.totalEntitledQuantityUsd) {
-      return true;
-    }
-    if (!isActiveProgram) {
-      return true;
-    }
-    return false;
-  };
 
-  return showFspDisplay ? (
-    <Box m={5}>
-      <ContainerColumnWithBorder>
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-          mt={4}
-        >
-          <Typography variant="h6">{t('FSPs')}</Typography>
-          {paymentPlan.status === PaymentPlanStatus.Locked && (
-            <Button
-              color="primary"
-              variant="contained"
-              component={Link}
-              to={`/${baseUrl}/payment-module/${
-                isFollowUp ? 'followup-payment-plans' : 'payment-plans'
-              }/${paymentPlanId}/setup-fsp/edit`}
-              disabled={!isActiveProgram}
-            >
-              {t('Edit FSP')}
-            </Button>
-          )}
-        </Box>
-        <Grid container spacing={3}>
-          <>
-            <Grid
-              key={`${deliveryMechanism.name}-${financialServiceProvider.name}`}
-              item
-              xs={3}
-            >
-              <LabelizedField
-                label={deliveryMechanism.name}
-                value={financialServiceProvider.name}
-              />
-            </Grid>
-          </>
-        </Grid>
-        <DividerLine />
-        <VolumeByDeliveryMechanismSection paymentPlan={paymentPlan} />
-      </ContainerColumnWithBorder>
-    </Box>
-  ) : (
-    <Box m={5}>
-      <ContainerColumnWithBorder>
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-          mt={4}
-        >
-          <Typography variant="h6">{t('FSPs')}</Typography>
+  return <Box m={5}>
+    <ContainerColumnWithBorder>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mt={4}
+      >
+        <Typography variant="h6">{t('FSPs')}</Typography>
+        {paymentPlan.status === PaymentPlanStatus.Locked && (
           <Button
             color="primary"
             variant="contained"
-            disabled={shouldDisableSetUpFsp()}
-            data-cy="button-set-up-fsp"
             component={Link}
             to={`/${baseUrl}/payment-module/${
               isFollowUp ? 'followup-payment-plans' : 'payment-plans'
-            }/${paymentPlanId}/setup-fsp/create`}
+            }/${paymentPlanId}/setup-fsp/edit`}
+            disabled={!isActiveProgram}
           >
-            {t('Set up FSP')}
+            {t('Edit FSP')}
           </Button>
-        </Box>
-      </ContainerColumnWithBorder>
-    </Box>
-  );
+        )}
+      </Box>
+      <Grid container spacing={3}>
+        <>
+          <Grid
+            key={`${deliveryMechanism.name}-${financialServiceProvider.name}`}
+            item
+            xs={3}
+          >
+            <LabelizedField
+              label={deliveryMechanism.name}
+              value={financialServiceProvider.name}
+            />
+          </Grid>
+        </>
+      </Grid>
+      <DividerLine/>
+      <VolumeByDeliveryMechanismSection paymentPlan={paymentPlan}/>
+    </ContainerColumnWithBorder>
+  </Box>
 };
