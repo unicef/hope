@@ -17,7 +17,6 @@ from rest_framework.response import Response
 from rest_framework_extensions.cache.decorators import cache_response
 from sentry_sdk import set_tag
 
-from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.api.endpoints.base import HOPEAPIView
 from hct_mis_api.api.filters import ProjectFilter, RegistrationFilter
 from hct_mis_api.contrib.aurora.api import (
@@ -81,7 +80,6 @@ class OrganizationListView(HOPEAPIView, ListAPIView):
     queryset = Organization.objects.all()
     serializer_class = OrganizationSerializer
 
-    @etag_decorator(AuroraKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=AuroraKeyConstructor())
     def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().get(request, *args, **kwargs)
@@ -93,7 +91,6 @@ class ProjectListView(HOPEAPIView, ListAPIView):
     filter_backends = [DjangoFilterBackend]
     filterset_class = ProjectFilter
 
-    @etag_decorator(AuroraKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=AuroraKeyConstructor())
     def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().get(request, *args, **kwargs)
@@ -105,7 +102,6 @@ class RegistrationListView(HOPEAPIView, ListAPIView):
     filter_backends = [DjangoFilterBackend]
     filterset_class = RegistrationFilter
 
-    @etag_decorator(AuroraKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=AuroraKeyConstructor())
     def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().get(request, *args, **kwargs)
