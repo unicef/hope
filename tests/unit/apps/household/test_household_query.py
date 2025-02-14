@@ -144,7 +144,7 @@ HOUSEHOLD_QUERY = """
 
 @override_config(USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH=True)
 class TestHouseholdQuery(APITestCase):
-    # databases = "__all__"
+    databases = "__all__"
     fixtures = (
         f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",
         f"{settings.PROJECT_ROOT}/apps/household/fixtures/documenttype.json",
