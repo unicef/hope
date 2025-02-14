@@ -33,7 +33,6 @@ from hct_mis_api.apps.payment.models import (
     ApprovalProcess,
     DeliveryMechanism,
     DeliveryMechanismData,
-    DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FspXlsxTemplatePerDeliveryMechanism,
@@ -350,15 +349,6 @@ class ApprovalFactory(DjangoModelFactory):
         model = Approval
 
 
-class DeliveryMechanismPerPaymentPlanFactory(DjangoModelFactory):
-    class Meta:
-        model = DeliveryMechanismPerPaymentPlan
-
-    payment_plan = factory.SubFactory(PaymentPlanFactory)
-    financial_service_provider = factory.SubFactory(FinancialServiceProviderFactory)
-    delivery_mechanism = factory.SubFactory(DeliveryMechanismFactory)
-
-
 class DeliveryMechanismDataFactory(DjangoModelFactory):
     individual = factory.SubFactory(IndividualFactory)
     delivery_mechanism = factory.SubFactory(DeliveryMechanismFactory)
@@ -449,7 +439,10 @@ def generate_reconciled_payment_plan() -> None:
     now = timezone.now()
     targeting_criteria: TargetingCriteria = TargetingCriteriaFactory()
     program = Program.objects.filter(business_area=afghanistan, name="Test Program").first()
-
+    dm_cash = DeliveryMechanism.objects.get(code="cash")
+    fsp_1 = FinancialServiceProviderFactory()
+    fsp_1.delivery_mechanisms.set([dm_cash])
+    FspXlsxTemplatePerDeliveryMechanismFactory(financial_service_provider=fsp_1)
     payment_plan = PaymentPlan.objects.update_or_create(
         name="Reconciled Payment Plan",
         unicef_id="PP-0060-22-11223344",
@@ -466,20 +459,12 @@ def generate_reconciled_payment_plan() -> None:
         total_entitled_quantity=2999,
         is_follow_up=False,
         exchange_rate=234.6742,
+        financial_service_provider=fsp_1,
+        delivery_mechanism=dm_cash,
     )[0]
     # update status
     payment_plan.status_finished()
     payment_plan.save()
-
-    dm_cash = DeliveryMechanism.objects.get(code="cash")
-    fsp_1 = FinancialServiceProviderFactory()
-    fsp_1.delivery_mechanisms.set([dm_cash])
-    FspXlsxTemplatePerDeliveryMechanismFactory(financial_service_provider=fsp_1)
-    DeliveryMechanismPerPaymentPlanFactory(
-        payment_plan=payment_plan,
-        financial_service_provider=fsp_1,
-        delivery_mechanism=dm_cash,
-    )
 
     create_payment_verification_plan_with_status(
         payment_plan,
@@ -621,30 +606,6 @@ def generate_payment_plan() -> None:
         field_name="registration_data_import",
         arguments=["4d100000-0000-0000-0000-000000000000"],
     )
-
-    payment_plan_pk = UUID("00000000-feed-beef-0000-00000badf00d")
-    payment_plan = PaymentPlan.objects.update_or_create(
-        name="Test Payment Plan",
-        pk=payment_plan_pk,
-        business_area=afghanistan,
-        targeting_criteria=targeting_criteria,
-        currency="USD",
-        dispersion_start_date=now,
-        dispersion_end_date=now + timedelta(days=14),
-        status_date=now,
-        created_by=root,
-        program_cycle=program_cycle,
-    )[0]
-    tc2 = TargetingCriteriaFactory()
-    tcr2 = TargetingCriteriaRuleFactory(
-        targeting_criteria=tc2,
-    )
-    TargetingCriteriaRuleFilterFactory(
-        targeting_criteria_rule=tcr2,
-        comparison_method="RANGE",
-        field_name="size",
-        arguments=[1, 11],
-    )
     delivery_mechanism_cash = DeliveryMechanism.objects.get(code="cash")
 
     fsp_1_pk = UUID("00000000-0000-0000-0000-f00000000001")
@@ -667,11 +628,32 @@ def generate_payment_plan() -> None:
         financial_service_provider=fsp_1, delivery_mechanism=delivery_mechanism_cash
     )
 
-    DeliveryMechanismPerPaymentPlanFactory(
-        payment_plan=payment_plan,
+    payment_plan_pk = UUID("00000000-feed-beef-0000-00000badf00d")
+    payment_plan = PaymentPlan.objects.update_or_create(
+        name="Test Payment Plan",
+        pk=payment_plan_pk,
+        business_area=afghanistan,
+        targeting_criteria=targeting_criteria,
+        currency="USD",
+        dispersion_start_date=now,
+        dispersion_end_date=now + timedelta(days=14),
+        status_date=now,
+        created_by=root,
+        program_cycle=program_cycle,
         financial_service_provider=fsp_1,
         delivery_mechanism=delivery_mechanism_cash,
+    )[0]
+    tc2 = TargetingCriteriaFactory()
+    tcr2 = TargetingCriteriaRuleFactory(
+        targeting_criteria=tc2,
     )
+    TargetingCriteriaRuleFilterFactory(
+        targeting_criteria_rule=tcr2,
+        comparison_method="RANGE",
+        field_name="size",
+        arguments=[1, 11],
+    )
+
     # create primary collector role
     IndividualRoleInHouseholdFactory(household=household_1, individual=individual_1, role=ROLE_PRIMARY)
     IndividualRoleInHouseholdFactory(household=household_2, individual=individual_2, role=ROLE_PRIMARY)
@@ -717,12 +699,9 @@ def generate_payment_plan() -> None:
         status_date=now,
         created_by=root,
         program_cycle=program_cycle,
-    )[0]
-    DeliveryMechanismPerPaymentPlanFactory(
-        payment_plan=pp2,
         financial_service_provider=fsp_1,
         delivery_mechanism=delivery_mechanism_cash,
-    )
+    )[0]
     PaymentPlanService(payment_plan=pp2).full_rebuild()
 
 

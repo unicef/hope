@@ -33,7 +33,6 @@ from hct_mis_api.apps.payment.celery_tasks import (
     prepare_payment_plan_task,
 )
 from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
@@ -70,12 +69,16 @@ class TestPaymentPlanServices(APITestCase):
         cls.dm_transfer_to_digital_wallet = DeliveryMechanism.objects.get(code="transfer_to_digital_wallet")
         cls.program = ProgramFactory(status=Program.ACTIVE)
         cls.cycle = cls.program.cycles.first()
-
-        cls.payment_plan = PaymentPlanFactory(
-            program_cycle=cls.cycle, created_by=cls.user, status=PaymentPlan.Status.TP_LOCKED
+        cls.fsp = FinancialServiceProviderFactory(
+            name="Test FSP 1",
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
         )
-        cls.dmppp = DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=cls.payment_plan, delivery_mechanism=cls.dm_transfer_to_account
+        cls.payment_plan = PaymentPlanFactory(
+            program_cycle=cls.cycle,
+            created_by=cls.user,
+            status=PaymentPlan.Status.TP_LOCKED,
+            delivery_mechanism=cls.dm_transfer_to_account,
+            financial_service_provider=cls.fsp,
         )
 
     def test_delete_tp_open(self) -> None:
@@ -585,9 +588,17 @@ class TestPaymentPlanServices(APITestCase):
     @freeze_time("2023-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_send_to_payment_gateway(self, get_exchange_rate_mock: Any) -> None:
+        pg_fsp = FinancialServiceProviderFactory(
+            name="Western Union",
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            payment_gateway_id="123",
+        )
+        pg_fsp.delivery_mechanisms.add(self.dm_transfer_to_account)
         pp = PaymentPlanFactory(
             status=PaymentPlan.Status.ACCEPTED,
             created_by=self.user,
+            financial_service_provider=pg_fsp,
+            delivery_mechanism=self.dm_transfer_to_account,
         )
         pp.background_action_status_send_to_payment_gateway()
         pp.save()
@@ -597,17 +608,6 @@ class TestPaymentPlanServices(APITestCase):
         pp.background_action_status_none()
         pp.save()
 
-        pg_fsp = FinancialServiceProviderFactory(
-            name="Western Union",
-            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-            payment_gateway_id="123",
-        )
-        pg_fsp.delivery_mechanisms.add(self.dm_transfer_to_account)
-        DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=pp,
-            financial_service_provider=pg_fsp,
-            delivery_mechanism=self.dm_transfer_to_account,
-        )
         split = PaymentPlanSplitFactory(payment_plan=pp, sent_to_payment_gateway=True)
 
         with self.assertRaisesMessage(GraphQLError, "Already sent to Payment Gateway"):
@@ -988,9 +988,8 @@ class TestPaymentPlanServices(APITestCase):
             created_by=self.user,
             status=PaymentPlan.Status.OPEN,
             currency="AMD",
-        )
-        DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=payment_plan, delivery_mechanism=self.dm_transfer_to_account
+            delivery_mechanism=self.dm_transfer_to_account,
+            financial_serive_provider=self.fsp,
         )
         PaymentPlanService(payment_plan).update({"currency": "PLN"})
         payment_plan.refresh_from_db()
@@ -1002,9 +1001,8 @@ class TestPaymentPlanServices(APITestCase):
             created_by=self.user,
             status=PaymentPlan.Status.OPEN,
             currency="USDC",
-        )
-        DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=payment_plan, delivery_mechanism=self.dm_transfer_to_digital_wallet
+            delivery_mechanism=self.dm_transfer_to_digital_wallet,
+            financial_service_provider=self.fsp,
         )
         with self.assertRaisesMessage(
             GraphQLError, "For delivery mechanism Transfer to Digital Wallet only currency USDC can be assigned."
@@ -1048,8 +1046,9 @@ class TestPaymentPlanServices(APITestCase):
             business_area=self.business_area,
             program_cycle=self.cycle,
             targeting_criteria=targeting_criteria,
+            delivery_mechanism=self.dm_transfer_to_account,
+            financial_service_provider=self.fsp,
         )
-        DeliveryMechanismPerPaymentPlanFactory(payment_plan=payment_plan)
         PaymentFactory(
             parent=payment_plan,
             program_id=self.program.id,

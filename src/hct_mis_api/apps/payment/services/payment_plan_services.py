@@ -35,7 +35,6 @@ from hct_mis_api.apps.payment.models import (
     ApprovalProcess,
     DeliveryMechanism,
     DeliveryMechanismData,
-    DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     Payment,
     PaymentPlan,
@@ -474,9 +473,9 @@ class PaymentPlanService:
             if fsp_id and delivery_mechanism_code:
                 fsp = get_object_or_404(FinancialServiceProvider, pk=decode_id_string(fsp_id))
                 delivery_mechanism = get_object_or_404(DeliveryMechanism, code=delivery_mechanism_code)
-                DeliveryMechanismPerPaymentPlan.objects.create(
-                    payment_plan=payment_plan, financial_service_provider=fsp, delivery_mechanism=delivery_mechanism
-                )
+                payment_plan.financial_service_provider = fsp
+                payment_plan.delivery_mechanism = delivery_mechanism
+                payment_plan.save(updte_fields=["financial_service_provider", "delivery_mechanism"])
 
             transaction.on_commit(lambda: prepare_payment_plan_task.delay(str(payment_plan.id)))
 
@@ -571,13 +570,13 @@ class PaymentPlanService:
 
         new_currency = input_data.get("currency")
         if new_currency and new_currency != self.payment_plan.currency:
-            dmppp = self.payment_plan.delivery_mechanism
+            delivery_mechanism = self.payment_plan.delivery_mechanism
             if (
                 new_currency == USDC
-                and dmppp.delivery_mechanism.transfer_type != DeliveryMechanism.TransferType.DIGITAL.value
+                and delivery_mechanism.transfer_type != DeliveryMechanism.TransferType.DIGITAL.value
             ) or (
                 new_currency != USDC
-                and dmppp.delivery_mechanism.transfer_type == DeliveryMechanism.TransferType.DIGITAL.value
+                and delivery_mechanism.transfer_type == DeliveryMechanism.TransferType.DIGITAL.value
             ):
                 raise GraphQLError(
                     "For delivery mechanism Transfer to Digital Wallet only currency USDC can be assigned."
@@ -587,27 +586,20 @@ class PaymentPlanService:
             Payment.objects.filter(parent=self.payment_plan).update(currency=self.payment_plan.currency)
 
         if not (fsp_id and delivery_mechanism_code) and hasattr(self.payment_plan, "delivery_mechanism"):
-            self.payment_plan.delivery_mechanism.delete()
+            self.payment_plan.delivery_mechanism = None
+            self.payment_plan.financial_service_provider = None
             should_rebuild_list = True
 
         if fsp_id and delivery_mechanism_code:
             fsp = get_object_or_404(FinancialServiceProvider, pk=decode_id_string(fsp_id))
             delivery_mechanism = get_object_or_404(DeliveryMechanism, code=delivery_mechanism_code)
-
-            dmppp = DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=self.payment_plan).first()
-            if dmppp:
-                if dmppp.financial_service_provider != fsp or dmppp.delivery_mechanism != delivery_mechanism:
-                    should_rebuild_list = True
-                dmppp.financial_service_provider = fsp
-                dmppp.delivery_mechanism = delivery_mechanism
-                dmppp.save()
-            else:
-                DeliveryMechanismPerPaymentPlan.objects.create(
-                    payment_plan=self.payment_plan,
-                    financial_service_provider=fsp,
-                    delivery_mechanism=delivery_mechanism,
-                )
+            if (
+                self.payment_plan.financial_service_provider != fsp
+                or self.payment_plan.delivery_mechanism != delivery_mechanism
+            ):
                 should_rebuild_list = True
+                self.payment_plan.financial_service_provider = fsp
+                self.payment_plan.delivery_mechanism = delivery_mechanism
 
         self.payment_plan.save()
 

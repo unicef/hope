@@ -13,7 +13,6 @@ from hct_mis_api.apps.household.fixtures import (
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
     PaymentFactory,
@@ -97,13 +96,7 @@ def base_setup(cls: Any) -> None:
 
 def payment_plan_setup(cls: Any) -> None:
     targeting_criteria = TargetingCriteriaFactory()
-    cls.payment_plan = PaymentPlanFactory(
-        total_households_count=4,
-        targeting_criteria=targeting_criteria,
-        status=PaymentPlan.Status.LOCKED,
-        program_cycle=cls.program.cycles.first(),
-        created_by=cls.user,
-    )
+
     cls.encoded_payment_plan_id = encode_id_base64(cls.payment_plan.id, "PaymentPlan")
 
     cls.santander_fsp = FinancialServiceProviderFactory(
@@ -136,6 +129,16 @@ def payment_plan_setup(cls: Any) -> None:
     cls.bank_of_europe_fsp.delivery_mechanisms.set([cls.dm_voucher, cls.dm_transfer, cls.dm_cash])
     cls.bank_of_europe_fsp.allowed_business_areas.add(cls.business_area)
     cls.encoded_bank_of_europe_fsp_id = encode_id_base64(cls.bank_of_europe_fsp.id, "FinancialServiceProvider")
+
+    cls.payment_plan = PaymentPlanFactory(
+        total_households_count=4,
+        targeting_criteria=targeting_criteria,
+        status=PaymentPlan.Status.LOCKED,
+        program_cycle=cls.program.cycles.first(),
+        created_by=cls.user,
+        delivery_mechanism=cls.dm_transfer,
+        financial_service_provider=cls.santander_fsp,
+    )
 
     FspXlsxTemplatePerDeliveryMechanismFactory(
         financial_service_provider=cls.santander_fsp, delivery_mechanism=cls.dm_transfer
@@ -180,12 +183,6 @@ class TestVolumeByDeliveryMechanism(APITestCase):
         payment_plan_setup(cls)
 
     def test_getting_volume_by_delivery_mechanism(self) -> None:
-        DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=self.payment_plan,
-            delivery_mechanism=self.dm_transfer,
-            financial_service_provider=self.santander_fsp,
-        )
-
         GET_VOLUME_BY_DELIVERY_MECHANISM_QUERY = """
             query PaymentPlan($paymentPlanId: ID!) {
                 paymentPlan(id: $paymentPlanId) {

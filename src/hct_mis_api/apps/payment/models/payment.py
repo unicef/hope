@@ -143,11 +143,11 @@ class PaymentPlanSplit(TimeStampedUUIDModel):
 
     @property
     def financial_service_provider(self) -> "FinancialServiceProvider":
-        return self.payment_plan.delivery_mechanism.financial_service_provider
+        return self.payment_plan.financial_service_provider
 
     @property
     def delivery_mechanism(self) -> Optional[str]:
-        return self.payment_plan.delivery_mechanism.delivery_mechanism
+        return self.payment_plan.delivery_mechanism
 
 
 class PaymentPlan(
@@ -461,6 +461,10 @@ class PaymentPlan(
     )
     storage_file = models.OneToOneField(StorageFile, blank=True, null=True, on_delete=models.SET_NULL)
     is_cash_assist = models.BooleanField(default=False)
+    delivery_mechanism = models.ForeignKey("payment.DeliveryMechanism", blank=True, null=True, on_delete=models.PROTECT)
+    financial_service_provider = models.ForeignKey(
+        "payment.FinancialServiceProvider", blank=True, null=True, on_delete=models.PROTECT
+    )
 
     class Meta:
         verbose_name = "Payment Plan"
@@ -724,9 +728,9 @@ class PaymentPlan(
 
     @property
     def is_payment_gateway(self) -> bool:
-        if not hasattr(self, "delivery_mechanism"):
+        if not hasattr(self, "financial_service_provider"):
             return False
-        return self.delivery_mechanism.financial_service_provider.is_payment_gateway
+        return self.financial_service_provider.is_payment_gateway
 
     @property
     def fsp_communication_channel(self) -> str:
@@ -871,11 +875,11 @@ class PaymentPlan(
 
     @property
     def can_send_to_payment_gateway(self) -> bool:
-        if not hasattr(self, "delivery_mechanism"):
+        if not hasattr(self, "financial_service_provider"):
             return False
 
         status_accepted = self.status == PaymentPlan.Status.ACCEPTED
-        has_payment_gateway_fsp = self.delivery_mechanism.financial_service_provider.is_payment_gateway
+        has_payment_gateway_fsp = self.financial_service_provider.is_payment_gateway
         has_not_sent_to_payment_gateway_splits = self.splits.filter(
             sent_to_payment_gateway=False,
         ).exists()
@@ -1569,11 +1573,12 @@ class FinancialServiceProvider(InternalDataFieldModel, LimitBusinessAreaModelMix
         return [field for field in all_core_fields if field["name"] in self.required_fields]
 
 
+# TODO remove in step 2
 class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
     payment_plan = models.OneToOneField(
         "payment.PaymentPlan",
         on_delete=models.CASCADE,
-        related_name="delivery_mechanism",
+        related_name="delivery_mechanism_per_payment_plan",
     )
     financial_service_provider = models.ForeignKey(
         "payment.FinancialServiceProvider",

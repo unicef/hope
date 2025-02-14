@@ -406,7 +406,7 @@ def payment_plan_filter(queryset: QuerySet[PaymentPlan], **kwargs: Any) -> Query
     if delivery_types:
         q = Q()
         for delivery_type in delivery_types:
-            q |= Q(delivery_types__icontains=delivery_type)
+            q |= Q(delivery_mechanism__name=delivery_type)
         queryset = queryset.filter(q)
 
     if search:

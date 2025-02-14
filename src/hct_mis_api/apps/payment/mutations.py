@@ -977,7 +977,7 @@ class ImportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
             raise GraphQLError(msg)
 
         if (
-            payment_plan.delivery_mechanism.financial_service_provider.communication_channel
+            payment_plan.financial_service_provider.communication_channel
             != FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX
         ):
             msg = "Only for FSP with Communication Channel XLSX can be imported reconciliation manually."

@@ -24,7 +24,6 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
     DeliveryMechanismData,
-    DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FspXlsxTemplatePerDeliveryMechanism,
@@ -332,29 +331,6 @@ class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdm
 
     def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return False
-
-
-@admin.register(DeliveryMechanismPerPaymentPlan)
-class DeliveryMechanismPerPaymentPlanAdmin(HOPEModelAdminBase):
-    list_display = (
-        "financial_service_provider",
-        "delivery_mechanism",
-        "payment_plan",
-    )
-    raw_id_fields = ("payment_plan", "financial_service_provider", "delivery_mechanism")
-    list_filter = (
-        ("financial_service_provider", AutoCompleteFilter),
-        ("delivery_mechanism", AutoCompleteFilter),
-        ("payment_plan", AutoCompleteFilter),
-    )
-    search_fields = ("financial_service_provider__name", "payment_plan__unicef_id")
-
-    def get_queryset(self, request: HttpRequest) -> "QuerySet":
-        return (
-            super()
-            .get_queryset(request)
-            .select_related("payment_plan", "financial_service_provider", "delivery_mechanism")
-        )
 
 
 @admin.register(FinancialServiceProviderXlsxTemplate)

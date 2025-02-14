@@ -20,7 +20,6 @@ from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import FileTemp, FlexibleAttribute
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
-    DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FspXlsxTemplatePerDeliveryMechanism,
@@ -240,9 +239,8 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         # there should be only one delivery mechanism/fsp in order to generate split file
         # this is guarded in SplitPaymentPlanMutation
 
-        delivery_mechanism_per_payment_plan: DeliveryMechanismPerPaymentPlan = self.payment_plan.delivery_mechanism
-        fsp: FinancialServiceProvider = delivery_mechanism_per_payment_plan.financial_service_provider
-        delivery_mechanism: DeliveryMechanism = delivery_mechanism_per_payment_plan.delivery_mechanism
+        fsp: FinancialServiceProvider = self.payment_plan.financial_service_provider
+        delivery_mechanism: DeliveryMechanism = self.payment_plan.delivery_mechanism
         splits = self.payment_plan.splits.all().order_by("order")
         splits_count = splits.count()
         for i, split in enumerate(splits):
@@ -255,7 +253,9 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             ws_fsp.append(self.prepare_headers(fsp_xlsx_template))
             self.add_rows(fsp_xlsx_template, payment_ids, ws_fsp)
             self._adjust_column_width_from_col(ws_fsp)
-            workbook_name = f"payment_plan_payment_list_{self.payment_plan.unicef_id}_FSP_{fsp.name}_{delivery_mechanism_per_payment_plan.delivery_mechanism}"
+            workbook_name = (
+                f"payment_plan_payment_list_{self.payment_plan.unicef_id}_FSP_{fsp.name}_{delivery_mechanism}"
+            )
             if splits_count > 1:
                 workbook_name += f"_chunk{i + 1}"
             workbook_name += ".xlsx"

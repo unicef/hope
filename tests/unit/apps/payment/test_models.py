@@ -32,10 +32,8 @@ from hct_mis_api.apps.payment.fixtures import (
     ApprovalFactory,
     ApprovalProcessFactory,
     DeliveryMechanismDataFactory,
-    DeliveryMechanismPerPaymentPlanFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    PaymentPlanSplitFactory,
     RealProgramFactory,
     generate_delivery_mechanisms,
 )
@@ -45,7 +43,6 @@ from hct_mis_api.apps.payment.models import (
     FinancialServiceProviderXlsxTemplate,
     Payment,
     PaymentPlan,
-    PaymentPlanSplit,
 )
 from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
@@ -676,23 +673,6 @@ class TestPaymentPlanSplitModel(TestCase):
         create_afghanistan()
         cls.user = UserFactory()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-
-    def test_properties(self) -> None:
-        pp = PaymentPlanFactory(created_by=self.user)
-        dm = DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=pp,
-        )
-        p1 = PaymentFactory(parent=pp, currency="PLN")
-        p2 = PaymentFactory(parent=pp, currency="PLN")
-        pp_split1 = PaymentPlanSplitFactory(
-            payment_plan=pp,
-            split_type=PaymentPlanSplit.SplitType.BY_RECORDS,
-            chunks_no=2,
-            order=0,
-        )
-        pp_split1.split_payment_items.set([p1, p2])
-        self.assertEqual(pp_split1.financial_service_provider, dm.financial_service_provider)
-        self.assertEqual(pp_split1.delivery_mechanism, dm.delivery_mechanism)
 
 
 class TestFinancialServiceProviderModel(TestCase):

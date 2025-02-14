@@ -8,7 +8,6 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
@@ -51,12 +50,6 @@ class TestSplitPaymentPlan(APITestCase):
     @patch("hct_mis_api.apps.payment.models.PaymentPlanSplit.MAX_CHUNKS")
     def test_split_payment_plan_mutation(self, max_chunks_mock: Any) -> None:
         max_chunks_mock.__get__ = mock.Mock(return_value=10)
-        pp = PaymentPlanFactory(
-            business_area=self.business_area,
-            status=PaymentPlan.Status.ACCEPTED,
-            created_by=self.user,
-        )
-        split = PaymentPlanSplitFactory(payment_plan=pp, sent_to_payment_gateway=True)
         dm_cash = DeliveryMechanism.objects.get(code="cash")
         fsp_1 = FinancialServiceProviderFactory(
             name="Test FSP 1",
@@ -65,12 +58,14 @@ class TestSplitPaymentPlan(APITestCase):
             payment_gateway_id="test_payment_gateway_id",
         )
         fsp_1.delivery_mechanisms.add(dm_cash)
-        DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=pp,
+        pp = PaymentPlanFactory(
+            business_area=self.business_area,
+            status=PaymentPlan.Status.ACCEPTED,
+            created_by=self.user,
             financial_service_provider=fsp_1,
             delivery_mechanism=dm_cash,
         )
-
+        split = PaymentPlanSplitFactory(payment_plan=pp, sent_to_payment_gateway=True)
         #  'Payment plan is already sent to payment gateway'
         self.snapshot_graphql_request(
             request_string=SPLIT_PAYMENT_MUTATION,

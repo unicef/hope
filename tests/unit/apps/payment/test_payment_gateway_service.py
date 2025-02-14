@@ -20,7 +20,6 @@ from hct_mis_api.apps.payment.celery_tasks import (
 )
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismDataFactory,
-    DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
@@ -68,8 +67,19 @@ class TestPaymentGatewayService(APITestCase):
         cls.dm_mobile_money = DeliveryMechanism.objects.get(code="mobile_money")
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory.create()
+        cls.pg_fsp = FinancialServiceProviderFactory(
+            name="Western Union",
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            payment_gateway_id="123",
+        )
+        cls.pg_fsp.delivery_mechanisms.add(cls.dm_cash_over_the_counter)
 
-        cls.pp = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED, created_by=cls.user)
+        cls.pp = PaymentPlanFactory(
+            status=PaymentPlan.Status.ACCEPTED,
+            created_by=cls.user,
+            financial_service_provider=cls.pg_fsp,
+            delivery_mechanism=cls.dm_cash_over_the_counter,
+        )
         cls.pp_split_1 = PaymentPlanSplit.objects.create(
             payment_plan=cls.pp,
             split_type=PaymentPlanSplit.SplitType.BY_COLLECTOR,
@@ -83,17 +93,6 @@ class TestPaymentGatewayService(APITestCase):
             chunks_no=1,
             order=1,
             sent_to_payment_gateway=False,
-        )
-        cls.pg_fsp = FinancialServiceProviderFactory(
-            name="Western Union",
-            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-            payment_gateway_id="123",
-        )
-        cls.pg_fsp.delivery_mechanisms.add(cls.dm_cash_over_the_counter)
-        cls.dm = DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=cls.pp,
-            financial_service_provider=cls.pg_fsp,
-            delivery_mechanism=cls.dm_cash_over_the_counter,
         )
         collector1 = IndividualFactory(
             household=None,

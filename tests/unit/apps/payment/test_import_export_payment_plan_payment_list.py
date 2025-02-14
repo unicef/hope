@@ -38,7 +38,6 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
@@ -106,8 +105,6 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         cls.dm_cash = DeliveryMechanism.objects.get(code="cash")
         cls.dm_transfer = DeliveryMechanism.objects.get(code="transfer")
         cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
-        cls.payment_plan = PaymentPlanFactory(program_cycle=program.cycles.first(), business_area=cls.business_area)
-        cls.split = PaymentPlanSplitFactory(payment_plan=cls.payment_plan)
         cls.fsp_1 = FinancialServiceProviderFactory(
             name="Test FSP 1",
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
@@ -115,11 +112,14 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         )
         cls.fsp_1.delivery_mechanisms.add(cls.dm_cash)
         FspXlsxTemplatePerDeliveryMechanismFactory(financial_service_provider=cls.fsp_1, delivery_mechanism=cls.dm_cash)
-        DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=cls.payment_plan,
+        cls.payment_plan = PaymentPlanFactory(
+            program_cycle=program.cycles.first(),
+            business_area=cls.business_area,
             financial_service_provider=cls.fsp_1,
             delivery_mechanism=cls.dm_cash,
         )
+        cls.split = PaymentPlanSplitFactory(payment_plan=cls.payment_plan)
+
         program.households.set(Household.objects.all().values_list("id", flat=True))
         for household in program.households.all():
             PaymentFactory(
@@ -263,7 +263,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
                 f"payment_plan_payment_list_{self.payment_plan.unicef_id}"
             )
         )
-        fsp_id = self.payment_plan.delivery_mechanism.financial_service_provider_id
+        fsp_id = self.payment_plan.financial_service_provider_id
         with zipfile.ZipFile(self.payment_plan.export_file_per_fsp.file, mode="r") as zip_file:  # type: ignore
             file_list = zip_file.namelist()
             fsp_xlsx_template_per_delivery_mechanism_list = FspXlsxTemplatePerDeliveryMechanism.objects.filter(

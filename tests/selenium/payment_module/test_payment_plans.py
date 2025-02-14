@@ -16,7 +16,6 @@ from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
@@ -156,6 +155,9 @@ def create_payment_plan(create_targeting: None) -> PaymentPlan:
         start_date=datetime.now() + relativedelta(days=10),
         end_date=datetime.now() + relativedelta(days=15),
     )
+    dm_cash = DeliveryMechanism.objects.get(code="cash")
+    fsp = FinancialServiceProviderFactory()
+    fsp.delivery_mechanisms.set([dm_cash])
     payment_plan, _ = PaymentPlan.objects.update_or_create(
         name="Test Payment Plan",
         business_area=program.business_area,
@@ -170,12 +172,6 @@ def create_payment_plan(create_targeting: None) -> PaymentPlan:
         total_delivered_quantity=999,
         total_entitled_quantity=2999,
         is_follow_up=False,
-    )
-    dm_cash = DeliveryMechanism.objects.get(code="cash")
-    fsp = FinancialServiceProviderFactory()
-    fsp.delivery_mechanisms.set([dm_cash])
-    DeliveryMechanismPerPaymentPlanFactory(
-        payment_plan=payment_plan,
         financial_service_provider=fsp,
         delivery_mechanism=dm_cash,
     )
@@ -248,22 +244,17 @@ def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKE
         start_date=datetime.now() + relativedelta(days=10),
         end_date=datetime.now() + relativedelta(days=15),
     )
-
+    dm_cash = DeliveryMechanism.objects.get(code="cash")
+    fsp = FinancialServiceProviderFactory()
+    fsp.delivery_mechanisms.set([dm_cash])
     payment_plan = PaymentPlanFactory(
         is_follow_up=False,
         status=status,
         program_cycle=program_cycle,
         dispersion_start_date=datetime.now().date(),
-    )
-    dm_cash = DeliveryMechanism.objects.get(code="cash")
-    fsp = FinancialServiceProviderFactory()
-    fsp.delivery_mechanisms.set([dm_cash])
-    DeliveryMechanismPerPaymentPlanFactory(
-        payment_plan=payment_plan,
         financial_service_provider=fsp,
         delivery_mechanism=dm_cash,
     )
-
     hoh1 = IndividualFactory(household=None)
     hoh2 = IndividualFactory(household=None)
     household_1 = HouseholdFactory(

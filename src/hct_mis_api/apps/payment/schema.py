@@ -74,12 +74,10 @@ from hct_mis_api.apps.payment.filters import (
     payment_plan_ordering,
 )
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
-from hct_mis_api.apps.payment.managers import ArraySubquery
 from hct_mis_api.apps.payment.models import (
     Approval,
     ApprovalProcess,
     DeliveryMechanism,
-    DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     Payment,
@@ -462,21 +460,17 @@ class DeliveryMechanismPerPaymentPlanNode(DjangoObjectType):
         return self.financial_service_provider
 
     class Meta:
-        model = DeliveryMechanismPerPaymentPlan
+        model = PaymentPlan
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
 
-def _calculate_volume(
-    delivery_mechanism_per_payment_plan: "DeliveryMechanismPerPaymentPlan", field: str
-) -> Optional[Decimal]:
-    if not delivery_mechanism_per_payment_plan.financial_service_provider:
+def _calculate_volume(payment_plan: "PaymentPlan", field: str) -> Optional[Decimal]:
+    if not payment_plan.financial_service_provider:
         return None
-    # TODO simple volume calculation
-    payments = delivery_mechanism_per_payment_plan.payment_plan.eligible_payments.filter(
-        financial_service_provider=delivery_mechanism_per_payment_plan.financial_service_provider,
-    )
-    return payments.aggregate(entitlement_sum=Coalesce(Sum(field), Decimal(0.0)))["entitlement_sum"]
+    return payment_plan.eligible_payments.aggregate(entitlement_sum=Coalesce(Sum(field), Decimal(0.0)))[
+        "entitlement_sum"
+    ]
 
 
 class VolumeByDeliveryMechanismNode(graphene.ObjectType):
@@ -492,11 +486,6 @@ class VolumeByDeliveryMechanismNode(graphene.ObjectType):
 
     def resolve_volume_usd(self, info: Any) -> Optional[_decimal.Decimal]:
         return _calculate_volume(self, "entitlement_quantity_usd")  # type: ignore
-
-    class Meta:
-        model = DeliveryMechanismPerPaymentPlan
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
 
 
 class FspConfiguration(graphene.ObjectType):
@@ -613,7 +602,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
 
     @staticmethod
     def resolve_delivery_mechanism(parent: PaymentPlan, info: Any) -> Optional[DeliveryMechanismPerPaymentPlanNode]:
-        return getattr(parent, "delivery_mechanism", None)
+        return parent
 
     @staticmethod
     def resolve_has_payment_list_export_file(parent: PaymentPlan, info: Any) -> bool:
@@ -627,7 +616,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
     def resolve_volume_by_delivery_mechanism(
         parent: PaymentPlan, info: Any
     ) -> List[Optional[VolumeByDeliveryMechanismNode]]:
-        return [getattr(parent, "delivery_mechanism", None)]
+        return [parent]
 
     @staticmethod
     def resolve_available_payment_records_count(parent: PaymentPlan, info: Any, **kwargs: Any) -> graphene.Int:
@@ -640,9 +629,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
         delivery_mechanism = getattr(payment_plan, "delivery_mechanism", None)
         if not delivery_mechanism:
             return False
-        if not payment_plan.delivery_mechanism.financial_service_provider.get_xlsx_template(
-            payment_plan.delivery_mechanism.delivery_mechanism
-        ):
+        if not payment_plan.financial_service_provider.get_xlsx_template(payment_plan.delivery_mechanism):
             return False
         return True
 
@@ -1502,12 +1489,6 @@ class Query(graphene.ObjectType):
         return to_choice_object(PaymentPlan.BackgroundActionStatus.choices)
 
     def resolve_all_cash_plans_and_payment_plans(self, info: Any, **kwargs: Any) -> Dict[str, Any]:
-        fsp_qs = FinancialServiceProvider.objects.filter(
-            delivery_mechanisms_per_payment_plan__payment_plan=OuterRef("pk")
-        ).distinct()
-        delivery_mechanisms_per_pp_qs = DeliveryMechanismPerPaymentPlan.objects.filter(
-            payment_plan=OuterRef("pk")
-        ).distinct("delivery_mechanism")
         payment_verification_summary_qs = PaymentVerificationSummary.objects.filter(payment_plan_id=OuterRef("id"))
 
         if "is_payment_verification_page" in kwargs and kwargs.get("is_payment_verification_page"):
@@ -1516,10 +1497,6 @@ class Query(graphene.ObjectType):
             payment_plan_qs = PaymentPlan.objects.all()
 
         payment_plan_qs = payment_plan_qs.annotate(
-            fsp_names=ArraySubquery(fsp_qs.values_list("name", flat=True)),
-            delivery_types=ArraySubquery(
-                delivery_mechanisms_per_pp_qs.values_list("delivery_mechanism__name", flat=True)
-            ),
             currency_order=F("currency"),
         )
         qs = payment_plan_qs.annotate(

@@ -21,17 +21,18 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
     RealProgramFactory,
+    generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import (
     AcceptanceProcessThreshold,
     ApprovalProcess,
+    DeliveryMechanism,
     FinancialServiceProvider,
     Payment,
     PaymentHouseholdSnapshot,
@@ -286,6 +287,7 @@ class TestPaymentPlanQueries(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        generate_delivery_mechanisms()
         cls.business_area = create_afghanistan()
         cls.user = UserFactory.create(username="qazxsw321")
         cls.create_user_role_with_permissions(
@@ -341,7 +343,11 @@ class TestPaymentPlanQueries(APITestCase):
                 currency="PLN",
                 fsp_auth_code=None,
             )
-
+            cls.financial_service_provider = FinancialServiceProviderFactory(
+                communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+                payment_gateway_id="test123",
+            )
+            dm_cash = DeliveryMechanism.objects.get(code="cash")
             # create hard conflicted payment
             cls.pp_conflicted = PaymentPlanFactory(
                 name="PaymentPlan with conflicts",
@@ -351,6 +357,8 @@ class TestPaymentPlanQueries(APITestCase):
                 dispersion_end_date=cls.pp.dispersion_end_date - relativedelta(months=2),
                 created_by=cls.user,
                 currency="UAH",
+                delivery_mechanism=dm_cash,
+                financial_service_provider=cls.financial_service_provider,
             )
             cls.pp_conflicted.unicef_id = "PP-02"
             cls.pp_conflicted.save()
@@ -408,11 +416,6 @@ class TestPaymentPlanQueries(APITestCase):
                     size=10,
                     content_type="image/jpeg",
                 ),
-            )
-            DeliveryMechanismPerPaymentPlanFactory(
-                payment_plan=cls.pp_conflicted,
-                financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
-                financial_service_provider__payment_gateway_id="test123",
             )
 
             with patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0):
@@ -949,6 +952,10 @@ class TestPaymentPlanQueries(APITestCase):
         user = UserFactory.create(username="abc")
         self.create_user_role_with_permissions(user, permissions, self.business_area)
 
+        fsp = FinancialServiceProviderFactory(
+            communication_channel=communication_channel,
+            payment_gateway_id="1243",
+        )
         payment_plan = PaymentPlanFactory(
             name="Test Finished PP",
             status=PaymentPlan.Status.FINISHED,
@@ -958,11 +965,7 @@ class TestPaymentPlanQueries(APITestCase):
             is_follow_up=False,
             created_by=user,
             currency="PLN",
-        )
-        dm_pp = DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=payment_plan,
-            financial_service_provider__communication_channel=communication_channel,
-            financial_service_provider__payment_gateway_id="1243",
+            financial_service_provider=fsp,
         )
         PaymentFactory(
             parent=payment_plan,
@@ -972,7 +975,7 @@ class TestPaymentPlanQueries(APITestCase):
             entitlement_quantity_usd=00.00,
             delivered_quantity=00.00,
             delivered_quantity_usd=00.00,
-            financial_service_provider=dm_pp.financial_service_provider,
+            financial_service_provider=fsp,
             currency="PLN",
             fsp_auth_code="987",
         )

@@ -45,7 +45,6 @@ from hct_mis_api.apps.payment.celery_tasks import (
 )
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismDataFactory,
-    DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
@@ -585,8 +584,8 @@ class TestPaymentPlanReconciliation(APITestCase):
         )
 
         payment_plan.refresh_from_db()
-        assert payment_plan.delivery_mechanism.financial_service_provider == santander_fsp
-        assert payment_plan.delivery_mechanism.delivery_mechanism == dm_cash
+        assert payment_plan.financial_service_provider == santander_fsp
+        assert payment_plan.delivery_mechanism == dm_cash
         assert (
             payment_plan.eligible_payments.filter(
                 financial_service_provider__isnull=False,
@@ -1141,14 +1140,18 @@ class TestPaymentPlanReconciliation(APITestCase):
 
     def test_correct_message_displayed_when_file_is_protected(self) -> None:
         content = Path(f"{settings.TESTS_ROOT}/apps/payment/test_file/import_file_protected.xlsx").read_bytes()
+        dm_cash = DeliveryMechanism.objects.get(code="cash")
+        financial_service_provider1 = FinancialServiceProviderFactory(
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX
+        )
+        financial_service_provider1.delivery_mechanisms.add(self.dm_cash)
         pp = PaymentPlanFactory(
             status=PaymentPlan.Status.ACCEPTED,
             created_by=self.user,
+            financial_service_provider=financial_service_provider1,
+            delivery_mechanism=dm_cash,
         )
-        DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=pp,
-            financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
-        )
+
         self.snapshot_graphql_request(
             request_string=IMPORT_XLSX_PER_FSP_MUTATION,
             context={"user": self.user},
@@ -1175,16 +1178,18 @@ class TestPaymentPlanReconciliation(APITestCase):
         )
 
     def test_export_xlsx_per_fsp_with_auth_code(self) -> None:
-        payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.FINISHED, created_by=self.user)
-        payment_1 = PaymentFactory(parent=payment_plan, fsp_auth_code="TestAuthCode")
+        dm_cash = DeliveryMechanism.objects.get(code="cash")
         fsp = FinancialServiceProviderFactory(
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API, payment_gateway_id="ABC_333"
         )
-        xlsx_template = FinancialServiceProviderXlsxTemplateFactory()
-        DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=payment_plan,
+        payment_plan = PaymentPlanFactory(
+            status=PaymentPlan.Status.FINISHED,
+            created_by=self.user,
             financial_service_provider=fsp,
+            delivery_mechanism=dm_cash,
         )
+        payment_1 = PaymentFactory(parent=payment_plan, fsp_auth_code="TestAuthCode")
+        xlsx_template = FinancialServiceProviderXlsxTemplateFactory()
         variables = {
             "paymentPlanId": encode_id_base64_required(str(payment_plan.pk), "PaymentPlan"),
             "fspXlsxTemplateId": encode_id_base64_required(
@@ -1208,15 +1213,17 @@ class TestPaymentPlanReconciliation(APITestCase):
         )
 
     def test_export_xlsx_per_fsp_error_msg(self) -> None:
-        payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED, created_by=self.user)
         fsp = FinancialServiceProviderFactory(
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API, payment_gateway_id="ABC_aaa"
         )
-        xlsx_template = FinancialServiceProviderXlsxTemplateFactory()
-        DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=payment_plan,
+        dm_cash = DeliveryMechanism.objects.get(code="cash")
+        payment_plan = PaymentPlanFactory(
+            status=PaymentPlan.Status.LOCKED,
+            created_by=self.user,
             financial_service_provider=fsp,
+            delivery_mechanism=dm_cash,
         )
+        xlsx_template = FinancialServiceProviderXlsxTemplateFactory()
         variables = {
             "paymentPlanId": encode_id_base64_required(str(payment_plan.pk), "PaymentPlan"),
             "fspXlsxTemplateId": encode_id_base64_required(
