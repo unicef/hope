@@ -5,6 +5,7 @@ from django import forms
 from django.contrib import admin
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.postgres.forms import SimpleArrayField
+from django.forms import CheckboxSelectMultiple
 from django.http import HttpRequest, HttpResponseRedirect, HttpResponse
 from django.template.response import TemplateResponse
 
@@ -18,20 +19,36 @@ from .universal_individual_update_script.universal_individual_update_script impo
 from ..utils.admin import HOPEModelAdminBase
 from .celery_tasks import run_universal_update
 
+
+class ArrayFieldFilteredSelectMultiple(FilteredSelectMultiple):
+
+    def format_value(self, value):
+        """Return selected values as a list."""
+        if value is None and self.allow_multiple_selected:
+            return []
+        elif self.allow_multiple_selected:
+            value = [v for v in value.split(",")]
+
+        if not isinstance(value, (tuple, list)):
+            value = [value]
+
+        results = [str(v) if v is not None else '' for v in value]
+        return results
+
 class UniversalUpdateAdminForm(forms.ModelForm):
     individual_fields = SimpleArrayField(
         base_field=forms.CharField(max_length=255),
-        widget=FilteredSelectMultiple("Individual Fields", is_stacked=False),
+        widget=ArrayFieldFilteredSelectMultiple("Individual Fields", is_stacked=False),
         required=False,
     )
     individual_flex_fields_fields = SimpleArrayField(
         base_field=forms.CharField(max_length=255),
-        widget=FilteredSelectMultiple("Individual Flex Fields", is_stacked=False),
+        widget=ArrayFieldFilteredSelectMultiple("Individual Flex Fields", is_stacked=False),
         required=False,
     )
     household_fields = SimpleArrayField(
         base_field=forms.CharField(max_length=255),
-        widget=FilteredSelectMultiple("Household Fields", is_stacked=False),
+        widget=ArrayFieldFilteredSelectMultiple("Household Fields", is_stacked=False),
         required=False,
     )
 
@@ -51,6 +68,8 @@ class UniversalUpdateAdminForm(forms.ModelForm):
         self.fields['household_fields'].widget.choices = list(self.get_dynamic_household_fields_choices())
         self.fields['document_types'].queryset = self.get_dynamic_document_types_queryset()
         self.fields['delivery_mechanisms'].queryset = self.get_dynamic_delivery_mechanisms_queryset()
+
+
 
     def get_dynamic_individual_fields_choices(self):
         for _column_name, field_data in individual_fields.items():
