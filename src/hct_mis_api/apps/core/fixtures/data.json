@@ -4567,1928 +4567,1687 @@
     "model": "core.countrycodemap",
     "pk": 1,
     "fields": {
-      "country": "b902840f-68d3-40a0-b74d-0fb14096a11e",
-      "ca_code": "AFG"
+      "country": "b902840f-68d3-40a0-b74d-0fb14096a11e"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 2,
     "fields": {
-      "country": "f5f4c536-4404-4779-96cd-51e01c8e4ec0",
-      "ca_code": "ALB"
+      "country": "f5f4c536-4404-4779-96cd-51e01c8e4ec0"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 3,
     "fields": {
-      "country": "760e6efc-ea4f-48e3-bcfb-d14d288742a5",
-      "ca_code": "ALG"
+      "country": "760e6efc-ea4f-48e3-bcfb-d14d288742a5"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 4,
     "fields": {
-      "country": "06eb3442-e8a4-4f1f-b265-7502085de101",
-      "ca_code": "ASM"
+      "country": "06eb3442-e8a4-4f1f-b265-7502085de101"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 5,
     "fields": {
-      "country": "04044914-d309-4d76-ad95-a80a3169c678",
-      "ca_code": "AND"
+      "country": "04044914-d309-4d76-ad95-a80a3169c678"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 6,
     "fields": {
-      "country": "f4c0b280-c0d0-4eea-a6f0-d2f49ec978e2",
-      "ca_code": "ANG"
+      "country": "f4c0b280-c0d0-4eea-a6f0-d2f49ec978e2"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 7,
     "fields": {
-      "country": "fa94df9c-b539-4599-8228-dfe9383abde3",
-      "ca_code": "AIA"
+      "country": "fa94df9c-b539-4599-8228-dfe9383abde3"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 8,
     "fields": {
-      "country": "a6c8c5f4-f1e0-478d-9664-b9a4a7d61c4b",
-      "ca_code": "ATA"
+      "country": "a6c8c5f4-f1e0-478d-9664-b9a4a7d61c4b"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 9,
     "fields": {
-      "country": "a76f75ff-36f6-4f27-804c-38a99e261588",
-      "ca_code": "ANT"
+      "country": "a76f75ff-36f6-4f27-804c-38a99e261588"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 10,
     "fields": {
-      "country": "d83c38bd-7288-40e7-af65-58371b0685a8",
-      "ca_code": "ARG"
+      "country": "d83c38bd-7288-40e7-af65-58371b0685a8"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 11,
     "fields": {
-      "country": "3736b9fb-eb1a-4dbb-b924-36e4ffb29050",
-      "ca_code": "ARM"
+      "country": "3736b9fb-eb1a-4dbb-b924-36e4ffb29050"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 12,
     "fields": {
-      "country": "db1939be-0040-4444-b820-ea0984f5366c",
-      "ca_code": "ABW"
+      "country": "db1939be-0040-4444-b820-ea0984f5366c"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 13,
     "fields": {
-      "country": "5eb07f25-2304-4a44-ae50-77277fb69ad4",
-      "ca_code": "AUL"
+      "country": "5eb07f25-2304-4a44-ae50-77277fb69ad4"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 14,
     "fields": {
-      "country": "23ee8e7f-e659-45aa-b66a-55b44f9b9e2a",
-      "ca_code": "AUS"
+      "country": "23ee8e7f-e659-45aa-b66a-55b44f9b9e2a"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 15,
     "fields": {
-      "country": "c754fe48-691e-4ae4-b036-85cd3308fe4c",
-      "ca_code": "AZE"
+      "country": "c754fe48-691e-4ae4-b036-85cd3308fe4c"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 16,
     "fields": {
-      "country": "b99086ea-e62f-4d60-925f-54a6b8103182",
-      "ca_code": "BHS"
+      "country": "b99086ea-e62f-4d60-925f-54a6b8103182"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 17,
     "fields": {
-      "country": "df4efb03-f23c-4c02-b753-5d23fa21658e",
-      "ca_code": "BAH"
+      "country": "df4efb03-f23c-4c02-b753-5d23fa21658e"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 18,
     "fields": {
-      "country": "da122556-a1df-4a2a-8fb0-867141a3a744",
-      "ca_code": "BGD"
+      "country": "da122556-a1df-4a2a-8fb0-867141a3a744"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 19,
     "fields": {
-      "country": "4b9d8f1f-1cd8-4569-8b60-853f5a8d286c",
-      "ca_code": "BAR"
+      "country": "4b9d8f1f-1cd8-4569-8b60-853f5a8d286c"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 20,
     "fields": {
-      "country": "dc586ddf-6609-46f9-8508-d3974d0c6616",
-      "ca_code": "BLR"
+      "country": "dc586ddf-6609-46f9-8508-d3974d0c6616"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 21,
     "fields": {
-      "country": "28364645-27e6-4d67-82ae-df459e907a9c",
-      "ca_code": "BEL"
+      "country": "28364645-27e6-4d67-82ae-df459e907a9c"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 22,
     "fields": {
-      "country": "55f84d8e-99ff-4e59-91e3-a9dd2dd0987b",
-      "ca_code": "BZE"
+      "country": "55f84d8e-99ff-4e59-91e3-a9dd2dd0987b"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 23,
     "fields": {
-      "country": "b7a5a7b9-225b-41f6-9a55-d6ee8fc93dcf",
-      "ca_code": "BEN"
+      "country": "b7a5a7b9-225b-41f6-9a55-d6ee8fc93dcf"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 24,
     "fields": {
-      "country": "084a096f-2748-4288-8142-17e6d6fa00bc",
-      "ca_code": "BER"
+      "country": "084a096f-2748-4288-8142-17e6d6fa00bc"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 25,
     "fields": {
-      "country": "9a1914ba-80b6-40c5-98c3-c134c426e1fd",
-      "ca_code": "BHU"
+      "country": "9a1914ba-80b6-40c5-98c3-c134c426e1fd"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 26,
     "fields": {
-      "country": "5116d4c9-5570-49b8-9098-c244e4fd1c41",
-      "ca_code": "BOL"
+      "country": "5116d4c9-5570-49b8-9098-c244e4fd1c41"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 27,
     "fields": {
-      "country": "69540ded-f9a0-4e54-b46a-fe25f3ac6556",
-      "ca_code": "BSN"
+      "country": "69540ded-f9a0-4e54-b46a-fe25f3ac6556"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 28,
     "fields": {
-      "country": "6fe128c1-6dc9-42f9-9203-6b7c6a54ba7a",
-      "ca_code": "BOT"
+      "country": "6fe128c1-6dc9-42f9-9203-6b7c6a54ba7a"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 29,
     "fields": {
-      "country": "d06b7b6d-e6ce-44e7-b7bd-dd6695b70021",
-      "ca_code": "BVT"
+      "country": "d06b7b6d-e6ce-44e7-b7bd-dd6695b70021"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 30,
     "fields": {
-      "country": "6823b0a6-e4a0-4bb8-8304-eff0a6acb079",
-      "ca_code": "BRA"
+      "country": "6823b0a6-e4a0-4bb8-8304-eff0a6acb079"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 31,
     "fields": {
-      "country": "d72a7993-1fbd-4e36-b1b4-3e164c4a21c8",
-      "ca_code": "IOT"
+      "country": "d72a7993-1fbd-4e36-b1b4-3e164c4a21c8"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 32,
     "fields": {
-      "country": "d78dd9e8-e073-48e9-b285-27ede0e11f77",
-      "ca_code": "BRU"
+      "country": "d78dd9e8-e073-48e9-b285-27ede0e11f77"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 33,
     "fields": {
-      "country": "75d98f99-ae09-4904-bddd-7d118a00074a",
-      "ca_code": "BUL"
+      "country": "75d98f99-ae09-4904-bddd-7d118a00074a"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 34,
     "fields": {
-      "country": "9bfb726b-1c37-422d-973b-8e44fe381d28",
-      "ca_code": "BKF"
+      "country": "9bfb726b-1c37-422d-973b-8e44fe381d28"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 35,
     "fields": {
-      "country": "4c50a88f-1c6d-474a-b446-f50e16fac606",
-      "ca_code": "BDI"
+      "country": "4c50a88f-1c6d-474a-b446-f50e16fac606"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 36,
     "fields": {
-      "country": "0d84a1f9-0f88-4c6f-ba07-d78d9071468c",
-      "ca_code": "CVI"
+      "country": "0d84a1f9-0f88-4c6f-ba07-d78d9071468c"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 37,
     "fields": {
-      "country": "f09b270a-55f1-4a7f-9e3b-c2b6af729d59",
-      "ca_code": "CAM"
+      "country": "f09b270a-55f1-4a7f-9e3b-c2b6af729d59"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 38,
     "fields": {
-      "country": "1ad47281-acbf-4aeb-a8bf-855a70b721e5",
-      "ca_code": "CMR"
+      "country": "1ad47281-acbf-4aeb-a8bf-855a70b721e5"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 39,
     "fields": {
-      "country": "1e99c723-4b38-4d7d-be51-15f5ce3fe96d",
-      "ca_code": "CAN"
+      "country": "1e99c723-4b38-4d7d-be51-15f5ce3fe96d"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 40,
     "fields": {
-      "country": "cfd32214-7b01-4393-8f08-e7a0562b39e9",
-      "ca_code": "CAY"
+      "country": "cfd32214-7b01-4393-8f08-e7a0562b39e9"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 41,
     "fields": {
-      "country": "b64a5652-5d14-4bfd-8a1d-be424256afde",
-      "ca_code": "CAR"
+      "country": "b64a5652-5d14-4bfd-8a1d-be424256afde"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 42,
     "fields": {
-      "country": "fd333c5f-5048-4040-8532-75299b5f2b82",
-      "ca_code": "CHD"
+      "country": "fd333c5f-5048-4040-8532-75299b5f2b82"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 43,
     "fields": {
-      "country": "77b69afe-0671-48c8-9bec-65322e39404e",
-      "ca_code": "CHL"
+      "country": "77b69afe-0671-48c8-9bec-65322e39404e"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 44,
     "fields": {
-      "country": "9eaddaa6-a48c-4651-9e40-f596583b9ae8",
-      "ca_code": "CHI"
+      "country": "9eaddaa6-a48c-4651-9e40-f596583b9ae8"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 45,
     "fields": {
-      "country": "87a74ab2-0e7e-45b1-b1ce-b7fa6998219e",
-      "ca_code": "CXR"
+      "country": "87a74ab2-0e7e-45b1-b1ce-b7fa6998219e"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 46,
     "fields": {
-      "country": "edb539d1-60fe-492c-bbfa-898319e357e1",
-      "ca_code": "CCK"
+      "country": "edb539d1-60fe-492c-bbfa-898319e357e1"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 47,
     "fields": {
-      "country": "51c5c5a2-0d9b-4048-abbc-25fc8c8ffc69",
-      "ca_code": "COL"
+      "country": "51c5c5a2-0d9b-4048-abbc-25fc8c8ffc69"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 48,
     "fields": {
-      "country": "6e25e5a1-0452-4b3e-9720-9bd0cb21f21d",
-      "ca_code": "COI"
+      "country": "6e25e5a1-0452-4b3e-9720-9bd0cb21f21d"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 49,
     "fields": {
-      "country": "62625ad9-6c81-497d-853c-23495f599059",
-      "ca_code": "COB"
+      "country": "62625ad9-6c81-497d-853c-23495f599059"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 50,
     "fields": {
-      "country": "75f33019-3ed1-4a8a-bb74-83919c4fc205",
-      "ca_code": "COD"
+      "country": "75f33019-3ed1-4a8a-bb74-83919c4fc205"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 51,
     "fields": {
-      "country": "40b9a005-c79a-4172-b645-53621184f06e",
-      "ca_code": "COK"
+      "country": "40b9a005-c79a-4172-b645-53621184f06e"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 52,
     "fields": {
-      "country": "33fded26-ef8a-4292-ac19-91dcb86dd07f",
-      "ca_code": "COS"
+      "country": "33fded26-ef8a-4292-ac19-91dcb86dd07f"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 53,
     "fields": {
-      "country": "390b52c4-ae7e-4878-aebd-1cf0f23e6681",
-      "ca_code": "ICO"
+      "country": "390b52c4-ae7e-4878-aebd-1cf0f23e6681"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 54,
     "fields": {
-      "country": "7f5ba6e0-7afb-475c-99a1-be67b019fffb",
-      "ca_code": "HRV"
+      "country": "7f5ba6e0-7afb-475c-99a1-be67b019fffb"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 55,
     "fields": {
-      "country": "8006d3cd-1950-4438-a957-c5a0fdaa08c1",
-      "ca_code": "CUB"
+      "country": "8006d3cd-1950-4438-a957-c5a0fdaa08c1"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 56,
     "fields": {
-      "country": "282205e0-8446-44bc-a6e8-dc79a0f65c37",
-      "ca_code": "CUW"
+      "country": "282205e0-8446-44bc-a6e8-dc79a0f65c37"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 57,
     "fields": {
-      "country": "12dfb2ad-4683-4bbc-b55a-6588e351ffe7",
-      "ca_code": "CYP"
+      "country": "12dfb2ad-4683-4bbc-b55a-6588e351ffe7"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 58,
     "fields": {
-      "country": "d1516f6d-1be7-4c86-a181-2f93b93da931",
-      "ca_code": "CZE"
+      "country": "d1516f6d-1be7-4c86-a181-2f93b93da931"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 59,
     "fields": {
-      "country": "cf646c13-ff3c-4dc1-ab14-28d5d6bf8746",
-      "ca_code": "DEN"
+      "country": "cf646c13-ff3c-4dc1-ab14-28d5d6bf8746"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 60,
     "fields": {
-      "country": "a07fb9a0-92a5-4641-8b4e-a9f0f34b0023",
-      "ca_code": "DJB"
+      "country": "a07fb9a0-92a5-4641-8b4e-a9f0f34b0023"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 61,
     "fields": {
-      "country": "85a5ce1e-97ab-42c0-bd50-1f6edc0f06be",
-      "ca_code": "DMA"
+      "country": "85a5ce1e-97ab-42c0-bd50-1f6edc0f06be"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 62,
     "fields": {
-      "country": "66590a67-93dc-4c72-b6bb-42fc644e5b7e",
-      "ca_code": "DOM"
+      "country": "66590a67-93dc-4c72-b6bb-42fc644e5b7e"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 63,
     "fields": {
-      "country": "c58b99fc-f79c-4332-9b43-b4434c059641",
-      "ca_code": "ECU"
+      "country": "c58b99fc-f79c-4332-9b43-b4434c059641"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 64,
     "fields": {
-      "country": "c48fcc03-8745-4f77-89d2-f684768b7160",
-      "ca_code": "ARE"
+      "country": "c48fcc03-8745-4f77-89d2-f684768b7160"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 65,
     "fields": {
-      "country": "052254c9-e821-4b8a-b7f5-4b7087397278",
-      "ca_code": "SAL"
+      "country": "052254c9-e821-4b8a-b7f5-4b7087397278"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 66,
     "fields": {
-      "country": "2fe0b52f-50eb-4bbe-a9ea-88ed2f94f304",
-      "ca_code": "EGU"
+      "country": "2fe0b52f-50eb-4bbe-a9ea-88ed2f94f304"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 67,
     "fields": {
-      "country": "1070a516-9b5b-4628-a861-abbcf6bb6c72",
-      "ca_code": "ERT"
+      "country": "1070a516-9b5b-4628-a861-abbcf6bb6c72"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 68,
     "fields": {
-      "country": "4f0a79b0-e16f-42b0-bada-ffaf2df13f3f",
-      "ca_code": "EST"
+      "country": "4f0a79b0-e16f-42b0-bada-ffaf2df13f3f"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 69,
     "fields": {
-      "country": "5c6ada1f-953d-4e1c-848a-4ba09e6217da",
-      "ca_code": "SWA"
+      "country": "5c6ada1f-953d-4e1c-848a-4ba09e6217da"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 70,
     "fields": {
-      "country": "b0737bbd-358a-4fec-af55-278c5e2c0389",
-      "ca_code": "ETH"
+      "country": "b0737bbd-358a-4fec-af55-278c5e2c0389"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 71,
     "fields": {
-      "country": "7eb7864e-1ea0-4fff-91f0-56b6b89bfa77",
-      "ca_code": "FLK"
+      "country": "7eb7864e-1ea0-4fff-91f0-56b6b89bfa77"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 72,
     "fields": {
-      "country": "5b6c9f4b-fbad-4991-9fe0-3d08187186bc",
-      "ca_code": "FRO"
+      "country": "5b6c9f4b-fbad-4991-9fe0-3d08187186bc"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 73,
     "fields": {
-      "country": "26fead03-3c1f-4437-9762-47b24103b06d",
-      "ca_code": "FIJ"
+      "country": "26fead03-3c1f-4437-9762-47b24103b06d"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 74,
     "fields": {
-      "country": "6a3e83bd-c42a-4dc1-b0ea-85868c263bf6",
-      "ca_code": "FIN"
+      "country": "6a3e83bd-c42a-4dc1-b0ea-85868c263bf6"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 75,
     "fields": {
-      "country": "8c8579ed-479a-40ad-900a-16a045e0131a",
-      "ca_code": "FRA"
+      "country": "8c8579ed-479a-40ad-900a-16a045e0131a"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 76,
     "fields": {
-      "country": "ce6f9504-58c5-4351-a547-2aedef83c8a5",
-      "ca_code": "FGU"
+      "country": "ce6f9504-58c5-4351-a547-2aedef83c8a5"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 77,
     "fields": {
-      "country": "2aaf9b9c-7184-47be-be49-1c74a31e4357",
-      "ca_code": "FPO"
+      "country": "2aaf9b9c-7184-47be-be49-1c74a31e4357"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 78,
     "fields": {
-      "country": "38528b7a-5e66-42e0-b4d3-de64c6fdd5e0",
-      "ca_code": "ATF"
+      "country": "38528b7a-5e66-42e0-b4d3-de64c6fdd5e0"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 79,
     "fields": {
-      "country": "d9576f13-e99d-4dec-b198-65382102b5ff",
-      "ca_code": "GAB"
+      "country": "d9576f13-e99d-4dec-b198-65382102b5ff"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 80,
     "fields": {
-      "country": "a337ac6f-67ca-4932-8444-4fd2e740fbff",
-      "ca_code": "GAM"
+      "country": "a337ac6f-67ca-4932-8444-4fd2e740fbff"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 81,
     "fields": {
-      "country": "475a0759-9820-45ec-8f86-40a3d9767040",
-      "ca_code": "GEO"
+      "country": "475a0759-9820-45ec-8f86-40a3d9767040"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 82,
     "fields": {
-      "country": "86a1ba2a-e089-4291-850c-ffbd4f476d5c",
-      "ca_code": "GFR"
+      "country": "86a1ba2a-e089-4291-850c-ffbd4f476d5c"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 83,
     "fields": {
-      "country": "0188bfe8-e4f3-4294-99f5-d2d133f202e5",
-      "ca_code": "GHA"
+      "country": "0188bfe8-e4f3-4294-99f5-d2d133f202e5"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 84,
     "fields": {
-      "country": "f6b49b30-4507-4796-8e4c-50933e8628fb",
-      "ca_code": "GIB"
+      "country": "f6b49b30-4507-4796-8e4c-50933e8628fb"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 85,
     "fields": {
-      "country": "176523ae-5982-4071-8513-d7ed380838c9",
-      "ca_code": "GRE"
+      "country": "176523ae-5982-4071-8513-d7ed380838c9"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 86,
     "fields": {
-      "country": "6c1e194d-578a-46ee-aea4-39df94715c96",
-      "ca_code": "GRL"
+      "country": "6c1e194d-578a-46ee-aea4-39df94715c96"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 87,
     "fields": {
-      "country": "eb379e28-09b5-4a1d-9c7f-975e9ffbd208",
-      "ca_code": "GRN"
+      "country": "eb379e28-09b5-4a1d-9c7f-975e9ffbd208"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 88,
     "fields": {
-      "country": "09b6b41c-81de-4bea-ba71-c6e74d8ee4cc",
-      "ca_code": "GUM"
+      "country": "09b6b41c-81de-4bea-ba71-c6e74d8ee4cc"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 89,
     "fields": {
-      "country": "b6fdfe0f-6723-4b65-9345-afb00adf1f49",
-      "ca_code": "GUA"
+      "country": "b6fdfe0f-6723-4b65-9345-afb00adf1f49"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 90,
     "fields": {
-      "country": "16aedef9-47c2-44ea-95f0-8648a52dad7b",
-      "ca_code": "GUI"
+      "country": "16aedef9-47c2-44ea-95f0-8648a52dad7b"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 91,
     "fields": {
-      "country": "b9209084-524e-4d77-afe3-8ddfd0d9d962",
-      "ca_code": "GNB"
+      "country": "b9209084-524e-4d77-afe3-8ddfd0d9d962"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 92,
     "fields": {
-      "country": "83244cfa-7e68-4ee2-aa68-12a8d8e73cc7",
-      "ca_code": "GUY"
+      "country": "83244cfa-7e68-4ee2-aa68-12a8d8e73cc7"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 93,
     "fields": {
-      "country": "7caed999-4769-4d70-bc05-c21160f90461",
-      "ca_code": "HAI"
+      "country": "7caed999-4769-4d70-bc05-c21160f90461"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 94,
     "fields": {
-      "country": "c53db685-76a9-4d97-825a-e7be390a9fcf",
-      "ca_code": "HMD"
+      "country": "c53db685-76a9-4d97-825a-e7be390a9fcf"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 95,
     "fields": {
-      "country": "e85265a1-3f21-412a-b075-a0dda80633c7",
-      "ca_code": "HON"
+      "country": "e85265a1-3f21-412a-b075-a0dda80633c7"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 96,
     "fields": {
-      "country": "7894670e-e717-42fd-88f9-8de55d7b9791",
-      "ca_code": "HKG"
+      "country": "7894670e-e717-42fd-88f9-8de55d7b9791"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 97,
     "fields": {
-      "country": "4a5b8962-1ea1-4bee-befd-ab4d6874bc30",
-      "ca_code": "HUN"
+      "country": "4a5b8962-1ea1-4bee-befd-ab4d6874bc30"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 98,
     "fields": {
-      "country": "69a38490-f49d-41e5-908b-aaf4e12ad860",
-      "ca_code": "ICE"
+      "country": "69a38490-f49d-41e5-908b-aaf4e12ad860"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 99,
     "fields": {
-      "country": "cbad3a9a-f005-42c6-93cd-bbcf120bc83e",
-      "ca_code": "IND"
+      "country": "cbad3a9a-f005-42c6-93cd-bbcf120bc83e"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 100,
     "fields": {
-      "country": "513e9f6f-5dff-4306-9f1b-fa36c4e6a6fa",
-      "ca_code": "INS"
+      "country": "513e9f6f-5dff-4306-9f1b-fa36c4e6a6fa"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 101,
     "fields": {
-      "country": "624c4056-b907-4d56-809d-7ef94bc69065",
-      "ca_code": "IRN"
+      "country": "624c4056-b907-4d56-809d-7ef94bc69065"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 102,
     "fields": {
-      "country": "80e1d943-fb7f-4d3c-8819-aa0df78dd462",
-      "ca_code": "IRQ"
+      "country": "80e1d943-fb7f-4d3c-8819-aa0df78dd462"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 103,
     "fields": {
-      "country": "2fb44f6d-8631-4191-96b2-c9b91404ade6",
-      "ca_code": "IRE"
+      "country": "2fb44f6d-8631-4191-96b2-c9b91404ade6"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 104,
     "fields": {
-      "country": "93d40e54-7f80-4505-8879-b59a14857e31",
-      "ca_code": "ISR"
+      "country": "93d40e54-7f80-4505-8879-b59a14857e31"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 105,
     "fields": {
-      "country": "ce26cec9-f833-4c53-8e43-d53646aedd50",
-      "ca_code": "ITA"
+      "country": "ce26cec9-f833-4c53-8e43-d53646aedd50"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 106,
     "fields": {
-      "country": "f57f5020-e8dd-4e24-af5b-9fd9cebc454b",
-      "ca_code": "JAM"
+      "country": "f57f5020-e8dd-4e24-af5b-9fd9cebc454b"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 107,
     "fields": {
-      "country": "0507e0ef-2b11-4142-9d8a-829fa67feb08",
-      "ca_code": "JPN"
+      "country": "0507e0ef-2b11-4142-9d8a-829fa67feb08"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 108,
     "fields": {
-      "country": "161339ad-713e-494c-be53-372bc0a282ec",
-      "ca_code": "JOR"
+      "country": "161339ad-713e-494c-be53-372bc0a282ec"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 109,
     "fields": {
-      "country": "40b20ff3-7311-4491-9406-4bade9ffc8b5",
-      "ca_code": "KAZ"
+      "country": "40b20ff3-7311-4491-9406-4bade9ffc8b5"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 110,
     "fields": {
-      "country": "a3680b83-c178-486a-9251-396098c635ed",
-      "ca_code": "KEN"
+      "country": "a3680b83-c178-486a-9251-396098c635ed"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 111,
     "fields": {
-      "country": "84bdce28-41e8-4868-86f4-3658b630582a",
-      "ca_code": "KIR"
+      "country": "84bdce28-41e8-4868-86f4-3658b630582a"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 112,
     "fields": {
-      "country": "88f6f9b6-34b2-4a4d-91bb-bc39909baf2f",
-      "ca_code": "KUW"
+      "country": "88f6f9b6-34b2-4a4d-91bb-bc39909baf2f"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 113,
     "fields": {
-      "country": "f1ece73e-41de-4a5b-a9ee-934357429ab8",
-      "ca_code": "KGZ"
+      "country": "f1ece73e-41de-4a5b-a9ee-934357429ab8"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 114,
     "fields": {
-      "country": "dbae3c6b-82ed-403a-bfc8-38242f7953cf",
-      "ca_code": "LAO"
+      "country": "dbae3c6b-82ed-403a-bfc8-38242f7953cf"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 115,
     "fields": {
-      "country": "cc6a1db6-a1c4-44f8-a6ef-e67bb0d0fba8",
-      "ca_code": "LVA"
+      "country": "cc6a1db6-a1c4-44f8-a6ef-e67bb0d0fba8"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 116,
     "fields": {
-      "country": "22079b4c-e0aa-4c84-8b09-d3e36b1a855b",
-      "ca_code": "LEB"
+      "country": "22079b4c-e0aa-4c84-8b09-d3e36b1a855b"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 117,
     "fields": {
-      "country": "971fdfde-8bed-46ab-b197-72efc733dfd3",
-      "ca_code": "LES"
+      "country": "971fdfde-8bed-46ab-b197-72efc733dfd3"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 118,
     "fields": {
-      "country": "f1c5ea44-f238-4558-9a50-38f48addfe68",
-      "ca_code": "LBR"
+      "country": "f1c5ea44-f238-4558-9a50-38f48addfe68"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 119,
     "fields": {
-      "country": "1a96bbd6-c000-4bd0-9c6b-547b79f1b60b",
-      "ca_code": "LBY"
+      "country": "1a96bbd6-c000-4bd0-9c6b-547b79f1b60b"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 120,
     "fields": {
-      "country": "91a44612-f73a-47b9-b130-58e59bba66fe",
-      "ca_code": "LIE"
+      "country": "91a44612-f73a-47b9-b130-58e59bba66fe"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 121,
     "fields": {
-      "country": "8e78e20e-b582-4ae8-ad12-d5a2f147d9e8",
-      "ca_code": "LTU"
+      "country": "8e78e20e-b582-4ae8-ad12-d5a2f147d9e8"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 122,
     "fields": {
-      "country": "85d4be80-20e0-4bdf-a22e-636af38b511b",
-      "ca_code": "LUX"
+      "country": "85d4be80-20e0-4bdf-a22e-636af38b511b"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 123,
     "fields": {
-      "country": "edf43578-bd66-422b-b2a6-f34a66cd0a2a",
-      "ca_code": "MAC"
+      "country": "edf43578-bd66-422b-b2a6-f34a66cd0a2a"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 124,
     "fields": {
-      "country": "04cc1fa1-8677-4bd4-9ebf-97988c92857f",
-      "ca_code": "MAD"
+      "country": "04cc1fa1-8677-4bd4-9ebf-97988c92857f"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 125,
     "fields": {
-      "country": "6e3fdb76-e2c6-49e8-bbf0-4665b2df081b",
-      "ca_code": "MLW"
+      "country": "6e3fdb76-e2c6-49e8-bbf0-4665b2df081b"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 126,
     "fields": {
-      "country": "6a01cf20-64aa-49a8-b1b4-9a18adbcb91f",
-      "ca_code": "MLS"
+      "country": "6a01cf20-64aa-49a8-b1b4-9a18adbcb91f"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 127,
     "fields": {
-      "country": "e37e4460-68b5-4b7c-a1cc-6707e5aa2312",
-      "ca_code": "MDV"
+      "country": "e37e4460-68b5-4b7c-a1cc-6707e5aa2312"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 128,
     "fields": {
-      "country": "23feb9e5-fde8-414a-a033-8f61ba61ae6f",
-      "ca_code": "MLI"
+      "country": "23feb9e5-fde8-414a-a033-8f61ba61ae6f"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 129,
     "fields": {
-      "country": "0df9f6e3-dac0-4596-b8eb-224ce6310b55",
-      "ca_code": "MTA"
+      "country": "0df9f6e3-dac0-4596-b8eb-224ce6310b55"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 130,
     "fields": {
-      "country": "a3b4c4c7-c7ec-41fe-8e29-a3c46f72f024",
-      "ca_code": "MHL"
+      "country": "a3b4c4c7-c7ec-41fe-8e29-a3c46f72f024"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 131,
     "fields": {
-      "country": "2257103a-416a-4450-ac6e-88f0b7cf6b3e",
-      "ca_code": "MAR"
+      "country": "2257103a-416a-4450-ac6e-88f0b7cf6b3e"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 132,
     "fields": {
-      "country": "1feb87b6-bb10-4e68-ba11-d035cdf4663b",
-      "ca_code": "MAU"
+      "country": "1feb87b6-bb10-4e68-ba11-d035cdf4663b"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 133,
     "fields": {
-      "country": "075f5c01-5510-4783-8219-f1462d61c42c",
-      "ca_code": "MTS"
+      "country": "075f5c01-5510-4783-8219-f1462d61c42c"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 134,
     "fields": {
-      "country": "0d983966-955c-4d0f-b4bb-d284e783c195",
-      "ca_code": "MYT"
+      "country": "0d983966-955c-4d0f-b4bb-d284e783c195"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 135,
     "fields": {
-      "country": "c2567027-5b7f-4d2f-aef0-c8929dc75f96",
-      "ca_code": "MEX"
+      "country": "c2567027-5b7f-4d2f-aef0-c8929dc75f96"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 136,
     "fields": {
-      "country": "b228b4fb-4a3d-48e7-9d5d-9ef4c26dc13e",
-      "ca_code": "FSM"
+      "country": "b228b4fb-4a3d-48e7-9d5d-9ef4c26dc13e"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 137,
     "fields": {
-      "country": "b3e21032-78c4-4bb8-93aa-84421951bdf6",
-      "ca_code": "MDA"
+      "country": "b3e21032-78c4-4bb8-93aa-84421951bdf6"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 138,
     "fields": {
-      "country": "245ef697-cafd-4fea-94b9-fe51f91bf0d3",
-      "ca_code": "MCO"
+      "country": "245ef697-cafd-4fea-94b9-fe51f91bf0d3"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 139,
     "fields": {
-      "country": "9a5c3f14-58cf-4875-8cde-148c56588bb9",
-      "ca_code": "MNG"
+      "country": "9a5c3f14-58cf-4875-8cde-148c56588bb9"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 140,
     "fields": {
-      "country": "4c89f7e6-8d39-4883-b788-50c0a2d845d1",
-      "ca_code": "MNE"
+      "country": "4c89f7e6-8d39-4883-b788-50c0a2d845d1"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 141,
     "fields": {
-      "country": "cbda5853-3141-45bc-b169-62efb9330fcc",
-      "ca_code": "MSR"
+      "country": "cbda5853-3141-45bc-b169-62efb9330fcc"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 142,
     "fields": {
-      "country": "1d222420-6baa-435c-a214-ab123c158f08",
-      "ca_code": "MOR"
+      "country": "1d222420-6baa-435c-a214-ab123c158f08"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 143,
     "fields": {
-      "country": "a61f323f-264e-4c58-98ef-e8109b9822e9",
-      "ca_code": "MOZ"
+      "country": "a61f323f-264e-4c58-98ef-e8109b9822e9"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 144,
     "fields": {
-      "country": "e7491517-b328-4a31-b680-f4324ebb8119",
-      "ca_code": "MYA"
+      "country": "e7491517-b328-4a31-b680-f4324ebb8119"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 145,
     "fields": {
-      "country": "df6fb463-29c9-46d8-bdfc-d49cb5644292",
-      "ca_code": "NAM"
+      "country": "df6fb463-29c9-46d8-bdfc-d49cb5644292"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 146,
     "fields": {
-      "country": "ddbac466-8d8e-48f8-9780-6bf8d5ae2246",
-      "ca_code": "NRU"
+      "country": "ddbac466-8d8e-48f8-9780-6bf8d5ae2246"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 147,
     "fields": {
-      "country": "12bb672e-648d-459b-8b7f-e3c8aa6ec758",
-      "ca_code": "NEP"
+      "country": "12bb672e-648d-459b-8b7f-e3c8aa6ec758"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 148,
     "fields": {
-      "country": "018b1863-57bb-4ed0-b3bf-3e2d9c39fe5e",
-      "ca_code": "NET"
+      "country": "018b1863-57bb-4ed0-b3bf-3e2d9c39fe5e"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 149,
     "fields": {
-      "country": "a7ad5c3b-39b9-46d1-bbe8-a378699ccc46",
-      "ca_code": "NCL"
+      "country": "a7ad5c3b-39b9-46d1-bbe8-a378699ccc46"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 150,
     "fields": {
-      "country": "b2e33eaa-329e-44b1-8e62-8f823d9dbe90",
-      "ca_code": "NZL"
+      "country": "b2e33eaa-329e-44b1-8e62-8f823d9dbe90"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 151,
     "fields": {
-      "country": "f6490021-d100-458b-84d6-77adf3d4f3bd",
-      "ca_code": "NIC"
+      "country": "f6490021-d100-458b-84d6-77adf3d4f3bd"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 152,
     "fields": {
-      "country": "eab05c68-610a-4874-af56-bd1466c70806",
-      "ca_code": "NGR"
+      "country": "eab05c68-610a-4874-af56-bd1466c70806"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 153,
     "fields": {
-      "country": "187aae83-1a4c-4e98-bb01-e2b02e2b4400",
-      "ca_code": "NIG"
+      "country": "187aae83-1a4c-4e98-bb01-e2b02e2b4400"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 154,
     "fields": {
-      "country": "4fcc6b27-e5dd-4936-a6d6-434ea13ca45e",
-      "ca_code": "NIU"
+      "country": "4fcc6b27-e5dd-4936-a6d6-434ea13ca45e"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 155,
     "fields": {
-      "country": "f6434c6c-d84f-4529-8fff-8ac2c342380e",
-      "ca_code": "NFK"
+      "country": "f6434c6c-d84f-4529-8fff-8ac2c342380e"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 156,
     "fields": {
-      "country": "c05e7acf-12dd-46cb-abb5-1b0e9ec91ee1",
-      "ca_code": "KRN"
+      "country": "c05e7acf-12dd-46cb-abb5-1b0e9ec91ee1"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 157,
     "fields": {
-      "country": "5365b0e0-4f6e-4473-a245-a191ca825aac",
-      "ca_code": "MCD"
+      "country": "5365b0e0-4f6e-4473-a245-a191ca825aac"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 158,
     "fields": {
-      "country": "06acf78d-baa6-465a-8f04-2d475573f3ac",
-      "ca_code": "MNP"
+      "country": "06acf78d-baa6-465a-8f04-2d475573f3ac"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 159,
     "fields": {
-      "country": "66c6c3db-8bde-41c3-b920-34ca10e7ece0",
-      "ca_code": "NOR"
+      "country": "66c6c3db-8bde-41c3-b920-34ca10e7ece0"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 160,
     "fields": {
-      "country": "c3509ed2-47fa-4d42-ae2d-87866cb5fa98",
-      "ca_code": "OMN"
+      "country": "c3509ed2-47fa-4d42-ae2d-87866cb5fa98"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 161,
     "fields": {
-      "country": "0caf1756-91e4-4080-a5e7-8226c4dde853",
-      "ca_code": "PAK"
+      "country": "0caf1756-91e4-4080-a5e7-8226c4dde853"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 162,
     "fields": {
-      "country": "a6ccd53f-0fd4-401e-8933-b5bdbcbea8a6",
-      "ca_code": "PLW"
+      "country": "a6ccd53f-0fd4-401e-8933-b5bdbcbea8a6"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 163,
     "fields": {
-      "country": "539ac4b6-09e4-4ab4-b176-d0d7b9af8d90",
-      "ca_code": "PAL"
+      "country": "539ac4b6-09e4-4ab4-b176-d0d7b9af8d90"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 164,
     "fields": {
-      "country": "f72bad33-1238-4be0-8eb1-e7401c950d62",
-      "ca_code": "PAN"
+      "country": "f72bad33-1238-4be0-8eb1-e7401c950d62"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 165,
     "fields": {
-      "country": "875d2c7c-6e64-4ec9-a910-98d80bd582c6",
-      "ca_code": "PNG"
+      "country": "875d2c7c-6e64-4ec9-a910-98d80bd582c6"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 166,
     "fields": {
-      "country": "172e2d0d-2ad5-40ed-a1d2-e373cd87d117",
-      "ca_code": "PAR"
+      "country": "172e2d0d-2ad5-40ed-a1d2-e373cd87d117"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 167,
     "fields": {
-      "country": "2bb1689f-d1ff-4cc4-adb6-988e64578299",
-      "ca_code": "PER"
+      "country": "2bb1689f-d1ff-4cc4-adb6-988e64578299"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 168,
     "fields": {
-      "country": "450443ac-eb9b-4a9e-8c69-1982d5def027",
-      "ca_code": "PHI"
+      "country": "450443ac-eb9b-4a9e-8c69-1982d5def027"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 169,
     "fields": {
-      "country": "25fd06cf-0111-4048-b9e9-5074094b4ffc",
-      "ca_code": "PCN"
+      "country": "25fd06cf-0111-4048-b9e9-5074094b4ffc"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 170,
     "fields": {
-      "country": "d1eb1574-8146-4c70-a804-caf163d451a6",
-      "ca_code": "POL"
+      "country": "d1eb1574-8146-4c70-a804-caf163d451a6"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 171,
     "fields": {
-      "country": "456f198a-88ff-4cca-b279-7a8202d9e7ae",
-      "ca_code": "POR"
+      "country": "456f198a-88ff-4cca-b279-7a8202d9e7ae"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 172,
     "fields": {
-      "country": "8b9fed85-aafd-4363-9f13-afed4e715b05",
-      "ca_code": "PUE"
+      "country": "8b9fed85-aafd-4363-9f13-afed4e715b05"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 173,
     "fields": {
-      "country": "2aa86592-328c-478a-a843-e0fece3fe77e",
-      "ca_code": "QAT"
+      "country": "2aa86592-328c-478a-a843-e0fece3fe77e"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 174,
     "fields": {
-      "country": "d7591077-567b-4088-98a4-714c598ef2f9",
-      "ca_code": "REU"
+      "country": "d7591077-567b-4088-98a4-714c598ef2f9"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 175,
     "fields": {
-      "country": "3082e1d6-1eaa-4d88-b55c-7292aa4060bf",
-      "ca_code": "ROM"
+      "country": "3082e1d6-1eaa-4d88-b55c-7292aa4060bf"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 176,
     "fields": {
-      "country": "f660e06a-bd07-4fe9-8f31-4ce48460b7ce",
-      "ca_code": "RUS"
+      "country": "f660e06a-bd07-4fe9-8f31-4ce48460b7ce"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 177,
     "fields": {
-      "country": "9a6f650c-6331-467d-85f6-e8575029a30e",
-      "ca_code": "RWA"
+      "country": "9a6f650c-6331-467d-85f6-e8575029a30e"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 178,
     "fields": {
-      "country": "6f108d73-295e-4bd9-b883-dc21d2941f9f",
-      "ca_code": "SHN"
+      "country": "6f108d73-295e-4bd9-b883-dc21d2941f9f"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 179,
     "fields": {
-      "country": "4f5b8b93-b763-4dde-8985-6e59097e07a3",
-      "ca_code": "KNA"
+      "country": "4f5b8b93-b763-4dde-8985-6e59097e07a3"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 180,
     "fields": {
-      "country": "788c6fde-a013-4b7c-bff7-ea77fc6abc23",
-      "ca_code": "LCA"
+      "country": "788c6fde-a013-4b7c-bff7-ea77fc6abc23"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 181,
     "fields": {
-      "country": "18509cac-648e-45c6-90a7-1a98734a08e5",
-      "ca_code": "SPM"
+      "country": "18509cac-648e-45c6-90a7-1a98734a08e5"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 182,
     "fields": {
-      "country": "f0be63c9-ffff-4905-901c-88a8b33903a8",
-      "ca_code": "VCT"
+      "country": "f0be63c9-ffff-4905-901c-88a8b33903a8"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 183,
     "fields": {
-      "country": "80d9c412-9c7b-4bbd-b68e-11960f42d932",
-      "ca_code": "WES"
+      "country": "80d9c412-9c7b-4bbd-b68e-11960f42d932"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 184,
     "fields": {
-      "country": "69e8682a-c974-4591-8a7e-36bb0cd7eb47",
-      "ca_code": "SMA"
+      "country": "69e8682a-c974-4591-8a7e-36bb0cd7eb47"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 185,
     "fields": {
-      "country": "775f102f-80fe-4ce6-bb84-010412895c2b",
-      "ca_code": "STP"
+      "country": "775f102f-80fe-4ce6-bb84-010412895c2b"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 186,
     "fields": {
-      "country": "51510650-25c6-4e4f-90de-854a011f35ab",
-      "ca_code": "SAU"
+      "country": "51510650-25c6-4e4f-90de-854a011f35ab"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 187,
     "fields": {
-      "country": "13f402cd-a2c6-46ab-bb0f-5ed451cb762c",
-      "ca_code": "SEN"
+      "country": "13f402cd-a2c6-46ab-bb0f-5ed451cb762c"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 188,
     "fields": {
-      "country": "7c402f49-2c0c-43bf-9da6-04855d808cf9",
-      "ca_code": "SER"
+      "country": "7c402f49-2c0c-43bf-9da6-04855d808cf9"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 189,
     "fields": {
-      "country": "8eadbb47-bc4c-4949-8e2f-6a3f9693dfef",
-      "ca_code": "SEY"
+      "country": "8eadbb47-bc4c-4949-8e2f-6a3f9693dfef"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 190,
     "fields": {
-      "country": "0705d1c6-a04c-4296-8ca0-6c77833fbe00",
-      "ca_code": "SLE"
+      "country": "0705d1c6-a04c-4296-8ca0-6c77833fbe00"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 191,
     "fields": {
-      "country": "19ecf8f5-9236-4938-b796-6db9db2b68b7",
-      "ca_code": "SIN"
+      "country": "19ecf8f5-9236-4938-b796-6db9db2b68b7"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 192,
     "fields": {
-      "country": "bf3d77fb-5ee4-4168-80dc-c5de58495a50",
-      "ca_code": "SXM"
+      "country": "bf3d77fb-5ee4-4168-80dc-c5de58495a50"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 193,
     "fields": {
-      "country": "4c7e3faa-9653-4716-a857-18b2278bedf4",
-      "ca_code": "SVK"
+      "country": "4c7e3faa-9653-4716-a857-18b2278bedf4"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 194,
     "fields": {
-      "country": "c6dd3d3f-777f-462d-9931-9964df0f5ac3",
-      "ca_code": "SVN"
+      "country": "c6dd3d3f-777f-462d-9931-9964df0f5ac3"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 195,
     "fields": {
-      "country": "a2427196-b245-4444-aec3-2d04577d8e11",
-      "ca_code": "SOL"
+      "country": "a2427196-b245-4444-aec3-2d04577d8e11"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 196,
     "fields": {
-      "country": "68752bf3-19df-400d-9a4b-76cede42baad",
-      "ca_code": "SOM"
+      "country": "68752bf3-19df-400d-9a4b-76cede42baad"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 197,
     "fields": {
-      "country": "82000002-a044-4660-952d-831cd77811f9",
-      "ca_code": "RSA"
+      "country": "82000002-a044-4660-952d-831cd77811f9"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 198,
     "fields": {
-      "country": "19108fc8-003c-45ea-8ec7-79c9ad6f9f0b",
-      "ca_code": "SGS"
+      "country": "19108fc8-003c-45ea-8ec7-79c9ad6f9f0b"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 199,
     "fields": {
-      "country": "f3b1cfb8-acdc-43d1-b059-b43248281cb4",
-      "ca_code": "KOR"
+      "country": "f3b1cfb8-acdc-43d1-b059-b43248281cb4"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 200,
     "fields": {
-      "country": "dd1e57aa-5022-49ce-bae0-dcd69438c4fd",
-      "ca_code": "SSD"
+      "country": "dd1e57aa-5022-49ce-bae0-dcd69438c4fd"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 201,
     "fields": {
-      "country": "c76b1089-5614-42a8-be6e-cecc36bc0f7b",
-      "ca_code": "SPA"
+      "country": "c76b1089-5614-42a8-be6e-cecc36bc0f7b"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 202,
     "fields": {
-      "country": "f9b0bfaa-cc6b-46eb-a486-0c29ba0ca642",
-      "ca_code": "LKA"
+      "country": "f9b0bfaa-cc6b-46eb-a486-0c29ba0ca642"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 203,
     "fields": {
-      "country": "6eb0912e-db00-4a03-8ed8-f7022f7a0aba",
-      "ca_code": "SUD"
+      "country": "6eb0912e-db00-4a03-8ed8-f7022f7a0aba"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 204,
     "fields": {
-      "country": "8d847566-b8ea-4602-86e1-1946ffc78c34",
-      "ca_code": "SUR"
+      "country": "8d847566-b8ea-4602-86e1-1946ffc78c34"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 205,
     "fields": {
-      "country": "52743518-f94e-44b8-966e-99cc6f87a597",
-      "ca_code": "SJM"
+      "country": "52743518-f94e-44b8-966e-99cc6f87a597"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 206,
     "fields": {
-      "country": "e0dd664d-f18a-4058-afb3-12fedc3680cb",
-      "ca_code": "SWE"
+      "country": "e0dd664d-f18a-4058-afb3-12fedc3680cb"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 207,
     "fields": {
-      "country": "95645090-cdc6-486e-9736-11092e1a13da",
-      "ca_code": "SWI"
+      "country": "95645090-cdc6-486e-9736-11092e1a13da"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 208,
     "fields": {
-      "country": "e4a74179-116a-4a2b-b440-6fa7ba0104bc",
-      "ca_code": "SYR"
+      "country": "e4a74179-116a-4a2b-b440-6fa7ba0104bc"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 209,
     "fields": {
-      "country": "7f405783-0704-4d4f-ac46-d6d8f33bda66",
-      "ca_code": "TWN"
+      "country": "7f405783-0704-4d4f-ac46-d6d8f33bda66"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 210,
     "fields": {
-      "country": "8aa9d49e-a25f-4c10-892c-fe3f090ae31c",
-      "ca_code": "TJK"
+      "country": "8aa9d49e-a25f-4c10-892c-fe3f090ae31c"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 211,
     "fields": {
-      "country": "45c5108c-7716-40e2-8580-1dbaacf28ca4",
-      "ca_code": "TAN"
+      "country": "45c5108c-7716-40e2-8580-1dbaacf28ca4"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 212,
     "fields": {
-      "country": "d5d71374-1195-40e0-a450-777a237cf56b",
-      "ca_code": "THA"
+      "country": "d5d71374-1195-40e0-a450-777a237cf56b"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 213,
     "fields": {
-      "country": "268aa059-e80d-4c36-ac6d-d2103effb63a",
-      "ca_code": "TMP"
+      "country": "268aa059-e80d-4c36-ac6d-d2103effb63a"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 214,
     "fields": {
-      "country": "06c69f3e-7e34-49a7-9867-11a147a8cd2d",
-      "ca_code": "TOG"
+      "country": "06c69f3e-7e34-49a7-9867-11a147a8cd2d"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 215,
     "fields": {
-      "country": "3adc2956-d0b4-46c3-aa2b-74dc2d711d3a",
-      "ca_code": "TKL"
+      "country": "3adc2956-d0b4-46c3-aa2b-74dc2d711d3a"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 216,
     "fields": {
-      "country": "6d18ea8f-3eb5-4380-b8d3-fc989a5a5ab9",
-      "ca_code": "TON"
+      "country": "6d18ea8f-3eb5-4380-b8d3-fc989a5a5ab9"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 217,
     "fields": {
-      "country": "0bbcd4bf-c75d-43ec-bd84-32ec352d8f94",
-      "ca_code": "TRT"
+      "country": "0bbcd4bf-c75d-43ec-bd84-32ec352d8f94"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 218,
     "fields": {
-      "country": "9d77a65e-1c73-410b-b4d8-c3d7ba98bffb",
-      "ca_code": "TUN"
+      "country": "9d77a65e-1c73-410b-b4d8-c3d7ba98bffb"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 219,
     "fields": {
-      "country": "93967758-ee84-4f55-90ba-a5629db57337",
-      "ca_code": "TUR"
+      "country": "93967758-ee84-4f55-90ba-a5629db57337"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 220,
     "fields": {
-      "country": "40357a91-48ad-4c9f-964a-88a40501bef3",
-      "ca_code": "TKM"
+      "country": "40357a91-48ad-4c9f-964a-88a40501bef3"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 221,
     "fields": {
-      "country": "17a782ea-0597-44da-a862-1038bba468e7",
-      "ca_code": "TCI"
+      "country": "17a782ea-0597-44da-a862-1038bba468e7"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 222,
     "fields": {
-      "country": "84d46073-f56a-4ad9-88a3-d891fa604bb9",
-      "ca_code": "TUV"
+      "country": "84d46073-f56a-4ad9-88a3-d891fa604bb9"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 223,
     "fields": {
-      "country": "30537997-ccd5-4f8a-b291-2bcff81df73a",
-      "ca_code": "UGA"
+      "country": "30537997-ccd5-4f8a-b291-2bcff81df73a"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 224,
     "fields": {
-      "country": "fea412b2-a617-4c23-b773-d0001f36a932",
-      "ca_code": "UKR"
+      "country": "fea412b2-a617-4c23-b773-d0001f36a932"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 225,
     "fields": {
-      "country": "9099b6c7-eb2d-41b0-99dc-a544488ec557",
-      "ca_code": "UAE"
+      "country": "9099b6c7-eb2d-41b0-99dc-a544488ec557"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 226,
     "fields": {
-      "country": "91727f11-0ca9-4c0b-94b2-b9172a0511d4",
-      "ca_code": "GBR"
+      "country": "91727f11-0ca9-4c0b-94b2-b9172a0511d4"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 227,
     "fields": {
-      "country": "7d53681c-66e7-4fc1-8a3f-2ee624d6f6d0",
-      "ca_code": "UMI"
+      "country": "7d53681c-66e7-4fc1-8a3f-2ee624d6f6d0"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 228,
     "fields": {
-      "country": "24532b94-0d92-4c26-9db0-b86c7d39985a",
-      "ca_code": "USA"
+      "country": "24532b94-0d92-4c26-9db0-b86c7d39985a"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 229,
     "fields": {
-      "country": "ada41885-bb17-4ac6-bc94-b52d6e66aa06",
-      "ca_code": "U"
+      "country": "ada41885-bb17-4ac6-bc94-b52d6e66aa06"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 230,
     "fields": {
-      "country": "2da36641-a5a3-4093-aa5e-be402d032926",
-      "ca_code": "URU"
+      "country": "2da36641-a5a3-4093-aa5e-be402d032926"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 231,
     "fields": {
-      "country": "e3ea0210-b4e5-4c65-bfb8-dfa3d34264d4",
-      "ca_code": "UZB"
+      "country": "e3ea0210-b4e5-4c65-bfb8-dfa3d34264d4"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 232,
     "fields": {
-      "country": "c1de8e39-8637-45bb-b5c9-ae235e51be23",
-      "ca_code": "VUT"
+      "country": "c1de8e39-8637-45bb-b5c9-ae235e51be23"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 233,
     "fields": {
-      "country": "f6f2c836-d153-4f0a-ad4e-6456e8cc12a4",
-      "ca_code": "VEN"
+      "country": "f6f2c836-d153-4f0a-ad4e-6456e8cc12a4"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 234,
     "fields": {
-      "country": "420c27a0-0145-494e-918c-893d3277f5ea",
-      "ca_code": "SRV"
+      "country": "420c27a0-0145-494e-918c-893d3277f5ea"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 235,
     "fields": {
-      "country": "528e730e-cad7-4763-93ae-0770a66031b7",
-      "ca_code": "VGB"
+      "country": "528e730e-cad7-4763-93ae-0770a66031b7"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 236,
     "fields": {
-      "country": "cae01ce4-b67f-4ffc-90f5-8ecf77c6adf7",
-      "ca_code": "VIR"
+      "country": "cae01ce4-b67f-4ffc-90f5-8ecf77c6adf7"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 237,
     "fields": {
-      "country": "9e3f2f5b-6e60-4c47-89a0-2a37132ddd79",
-      "ca_code": "WLF"
+      "country": "9e3f2f5b-6e60-4c47-89a0-2a37132ddd79"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 238,
     "fields": {
-      "country": "b66536ef-8f37-42a7-b5e6-f09dafe38206",
-      "ca_code": "WSH"
+      "country": "b66536ef-8f37-42a7-b5e6-f09dafe38206"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 239,
     "fields": {
-      "country": "7e88ad60-a97a-44ab-9807-d6f361b6dd0b",
-      "ca_code": "YEM"
+      "country": "7e88ad60-a97a-44ab-9807-d6f361b6dd0b"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 240,
     "fields": {
-      "country": "a98e47a1-a8da-496e-a6f9-f8cb7aeee40e",
-      "ca_code": "ZAM"
+      "country": "a98e47a1-a8da-496e-a6f9-f8cb7aeee40e"
     }
   },
   {
     "model": "core.countrycodemap",
     "pk": 241,
     "fields": {
-      "country": "03919bf6-0794-4989-82b0-415a34895080",
-      "ca_code": "ZIM"
+      "country": "03919bf6-0794-4989-82b0-415a34895080"
     }
   },
   {

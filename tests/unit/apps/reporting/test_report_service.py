@@ -75,10 +75,6 @@ class TestGenerateReportService(TestCase):
             )
             self.households.append(household)
             self.individuals.extend(individuals)
-            if index % 2:
-                household.programs.add(self.program_1)
-            else:
-                household.programs.add(self.program_2)
 
         self.payment_plan_1 = PaymentPlanFactory(
             business_area=self.business_area,

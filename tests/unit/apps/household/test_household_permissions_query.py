@@ -68,7 +68,6 @@ class TestHouseholdPermissionsQuery(APITestCase):
         cls.household, _ = create_household(
             {"size": 2, "address": "Lorem Ipsum 2", "country_origin": country_origin},
         )
-        cls.household.programs.add(cls.program_one)
         cls.household.program = cls.program_one
         cls.household.save()
         cls.household.set_admin_areas(cls.area2)
