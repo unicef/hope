@@ -23,10 +23,10 @@ export function AcceptanceProcessStepper({
   const steps = [
     {
       name: `${t('Approval')} (${
-        actions.approval.length
+        actions?.approval?.length
       }/${approvalNumberRequired})`,
       hasError: rejectedOn === 'IN_APPROVAL',
-      isCompleted: actions.approval.length === approvalNumberRequired,
+      isCompleted: actions?.approval?.length === approvalNumberRequired,
     },
     {
       name: `${t('Authorization')} (${
@@ -48,7 +48,7 @@ export function AcceptanceProcessStepper({
     if (actions.authorization.length === authorizationNumberRequired) {
       return 2;
     }
-    if (actions.approval.length === approvalNumberRequired) {
+    if (actions?.approval?.length === approvalNumberRequired) {
       return 1;
     }
     return 0;

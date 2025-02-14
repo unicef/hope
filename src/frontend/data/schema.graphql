@@ -236,6 +236,19 @@ type AreaTypeNodeEdge {
 
 scalar Arg
 
+input AssignFspToDeliveryMechanismInput {
+  paymentPlanId: ID!
+  mappings: [FSPToDeliveryMechanismMappingInput]!
+}
+
+type AssignFspToDeliveryMechanismMutation {
+  paymentPlan: PaymentPlanNode
+}
+
+input AvailableFspsForDeliveryMechanismsInput {
+  paymentPlanId: ID!
+}
+
 type BankAccountInfoNode implements Node {
   id: ID!
   rdiMergeStatus: BankAccountInfoRdiMergeStatus!
@@ -379,33 +392,6 @@ type BusinessAreaNodeEdge {
   cursor: String!
 }
 
-type CashPlanAndPaymentPlanEdges {
-  cursor: String
-  node: CashPlanAndPaymentPlanNode
-}
-
-type CashPlanAndPaymentPlanNode {
-  adminUrl: String
-  objType: String
-  id: String
-  unicefId: String
-  verificationStatus: String
-  status: String
-  currency: String
-  totalDeliveredQuantity: Float
-  startDate: String
-  endDate: String
-  programName: String
-  updatedAt: String
-  verificationPlans: [PaymentVerificationPlanNode]
-  totalNumberOfHouseholds: Int
-  totalEntitledQuantity: Float
-  totalUndeliveredQuantity: Float
-  assistanceMeasurement: String
-  dispersionDate: String
-  serviceProviderFullName: String
-}
-
 input CategoryExtrasInput {
   sensitiveGrievanceTicketExtras: SensitiveGrievanceTicketExtras
   grievanceComplaintTicketExtras: GrievanceComplaintTicketExtras
@@ -452,6 +438,15 @@ type ChoiceObject {
 type ChoiceObjectInt {
   name: String
   value: Int
+}
+
+input ChooseDeliveryMechanismsForPaymentPlanInput {
+  paymentPlanId: ID!
+  deliveryMechanisms: [String]!
+}
+
+type ChooseDeliveryMechanismsForPaymentPlanMutation {
+  paymentPlan: PaymentPlanNode
 }
 
 type CommunicationMessageNode implements Node {
@@ -639,8 +634,6 @@ input CreatePaymentPlanInput {
   targetingCriteria: TargetingCriteriaObjectType!
   excludedIds: String!
   exclusionReason: String
-  fspId: ID
-  deliveryMechanismCode: String
 }
 
 type CreatePaymentPlanMutation {
@@ -826,11 +819,6 @@ type DeliveredQuantityNode {
   currency: String
 }
 
-type DeliveryMechanismChoice {
-  name: String
-  code: String
-}
-
 type DeliveryMechanismDataNode implements Node {
   id: ID!
   rdiMergeStatus: DeliveryMechanismDataRdiMergeStatus!
@@ -888,8 +876,8 @@ type DeliveryMechanismNode implements Node {
   uniqueFields: [String!]!
   isActive: Boolean!
   transferType: DeliveryMechanismTransferType!
-  paymentplanSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
   financialserviceproviderSet(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderNodeConnection!
+  deliverymechanismperpaymentplanSet(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismPerPaymentPlanNodeConnection!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   deliverymechanismdataSet(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismDataNodeConnection!
 }
@@ -907,68 +895,35 @@ type DeliveryMechanismNodeEdge {
 }
 
 type DeliveryMechanismPerPaymentPlanNode implements Node {
-  isRemoved: Boolean!
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  version: BigInt!
-  unicefId: String
-  internalData: JSONString!
-  businessArea: UserBusinessAreaNode!
-  programCycle: ProgramCycleNode!
-  statusDate: DateTime!
-  startDate: DateTime
-  endDate: DateTime
-  exchangeRate: Float
-  totalEntitledQuantity: Float
-  totalEntitledQuantityUsd: Float
-  totalEntitledQuantityRevised: Float
-  totalEntitledQuantityRevisedUsd: Float
-  totalDeliveredQuantity: Float
-  totalDeliveredQuantityUsd: Float
-  totalUndeliveredQuantity: Float
-  totalUndeliveredQuantityUsd: Float
-  createdBy: UserNode!
-  status: PaymentPlanStatus!
-  backgroundActionStatus: PaymentPlanBackgroundActionStatus
-  buildStatus: PaymentPlanBuildStatus
-  builtAt: DateTime
-  targetingCriteria: TargetingCriteriaNode
-  currency: PaymentPlanCurrency
-  dispersionStartDate: Date
-  dispersionEndDate: Date
-  femaleChildrenCount: Int!
-  maleChildrenCount: Int!
-  femaleAdultsCount: Int!
-  maleAdultsCount: Int!
-  totalHouseholdsCount: Int!
-  totalIndividualsCount: Int!
-  importedFileDate: DateTime
-  steficonRule: RuleCommitNode
-  steficonAppliedDate: DateTime
-  steficonRuleTargeting: RuleCommitNode
-  steficonTargetingAppliedDate: DateTime
-  sourcePaymentPlan: PaymentPlanNode
-  isFollowUp: Boolean!
-  excludedIds: String
-  exclusionReason: String
-  excludeHouseholdError: String
-  name: String
-  vulnerabilityScoreMin: Float
-  vulnerabilityScoreMax: Float
-  isCashAssist: Boolean!
-  deliveryMechanism: DeliveryMechanismNode
+  paymentPlan: PaymentPlanNode!
   financialServiceProvider: FinancialServiceProviderNode
-  approvalProcess(offset: Int, before: String, after: String, first: Int, last: Int): ApprovalProcessNodeConnection!
-  followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
-  paymentItems(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
-  documents(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanSupportingDocumentNodeConnection!
-  paymentVerificationPlans(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationPlanNodeConnection!
-  paymentVerificationSummary: PaymentVerificationSummaryNode
-  messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
-  surveys(offset: Int, before: String, after: String, first: Int, last: Int): SurveyNodeConnection!
+  deliveryMechanism: DeliveryMechanismNode
+  deliveryMechanismOrder: Int!
+  status: String!
+  createdBy: UserNode!
+  sentDate: DateTime!
+  sentBy: UserNode
+  chosenConfiguration: String
+  sentToPaymentGateway: Boolean!
+  name: String
   code: String
+  order: Int
   fsp: FinancialServiceProviderNode
+}
+
+type DeliveryMechanismPerPaymentPlanNodeConnection {
+  pageInfo: PageInfo!
+  edges: [DeliveryMechanismPerPaymentPlanNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type DeliveryMechanismPerPaymentPlanNodeEdge {
+  node: DeliveryMechanismPerPaymentPlanNode
+  cursor: String!
 }
 
 enum DeliveryMechanismTransferType {
@@ -1126,6 +1081,13 @@ type ExportXlsxPaymentVerificationPlanFile {
   paymentPlan: GenericPaymentPlanNode
 }
 
+input FSPToDeliveryMechanismMappingInput {
+  fspId: ID!
+  deliveryMechanism: String!
+  chosenConfiguration: String
+  order: Int!
+}
+
 enum FeedbackIssueType {
   POSITIVE_FEEDBACK
   NEGATIVE_FEEDBACK
@@ -1230,8 +1192,7 @@ type FinancialServiceProviderNode implements Node {
   dataTransferConfiguration: JSONString
   xlsxTemplates(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderXlsxTemplateNodeConnection!
   paymentGatewayId: String
-  requiredFields: [String!]!
-  paymentplanSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
+  deliveryMechanismsPerPaymentPlan(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismPerPaymentPlanNodeConnection!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   fullName: String
   isPaymentGateway: Boolean
@@ -1289,11 +1250,18 @@ scalar FlexFieldsScalar
 type FspChoice {
   id: String
   name: String
+  configurations: [FspConfiguration]
 }
 
 type FspChoices {
-  deliveryMechanism: DeliveryMechanismChoice
+  deliveryMechanism: String
   fsps: [FspChoice]
+}
+
+type FspConfiguration {
+  id: String
+  key: String
+  label: String
 }
 
 input FullListArguments {
@@ -1458,7 +1426,7 @@ type GrievanceTicketNode implements Node {
   adminUrl: String
   household: HouseholdNode
   individual: IndividualNode
-  paymentRecord: PaymentRecordAndPaymentNode
+  paymentRecord: PaymentNode
   admin: String
   existingTickets: [GrievanceTicketNode]
   relatedTickets: [GrievanceTicketNode]
@@ -1610,12 +1578,10 @@ type HouseholdNode implements Node {
   positiveFeedbackTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketPositiveFeedbackDetailsNodeConnection!
   negativeFeedbackTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketNegativeFeedbackDetailsNodeConnection!
   referralTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketReferralDetailsNodeConnection!
-  selections: [HouseholdSelectionNode!]!
   messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   feedbacks(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
   surveys(offset: Int, before: String, after: String, first: Int, last: Int): SurveyNodeConnection!
   adminUrl: String
-  selection: HouseholdSelectionNode
   sanctionListPossibleMatch: Boolean
   sanctionListConfirmedMatch: Boolean
   hasDuplicates: Boolean
@@ -1655,16 +1621,6 @@ enum HouseholdRegistrationMethod {
   A_
   COMMUNITY
   HH_REGISTRATION
-}
-
-type HouseholdSelectionNode {
-  id: UUID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  household: HouseholdNode!
-  vulnerabilityScore: Float
-  isOriginal: Boolean!
-  isMigrationHandled: Boolean!
 }
 
 input HouseholdUpdateDataObjectType {
@@ -2310,6 +2266,8 @@ type Mutations {
   createFollowUpPaymentPlan(dispersionEndDate: Date!, dispersionStartDate: Date!, paymentPlanId: ID!): CreateFollowUpPaymentPlanMutation
   updatePaymentPlan(input: UpdatePaymentPlanInput!, version: BigInt): UpdatePaymentPlanMutation
   deletePaymentPlan(paymentPlanId: ID!): DeletePaymentPlanMutation
+  chooseDeliveryMechanismsForPaymentPlan(input: ChooseDeliveryMechanismsForPaymentPlanInput!): ChooseDeliveryMechanismsForPaymentPlanMutation
+  assignFspToDeliveryMechanism(input: AssignFspToDeliveryMechanismInput!): AssignFspToDeliveryMechanismMutation
   splitPaymentPlan(paymentPlanId: ID!, paymentsNo: Int, splitType: String!): SplitPaymentPlanMutation
   excludeHouseholds(excludedHouseholdsIds: [String]!, exclusionReason: String, paymentPlanId: ID!): ExcludeHouseholdsMutation
   setSteficonRuleOnPaymentPlanPaymentList(paymentPlanId: ID!, steficonRuleId: ID!, version: BigInt): SetSteficonRuleOnPaymentPlanPaymentListMutation
@@ -2377,25 +2335,6 @@ type PageInfo {
   hasPreviousPage: Boolean!
   startCursor: String
   endCursor: String
-}
-
-type PageInfoNode {
-  startCursor: String
-  endCursor: String
-  hasNextPage: Boolean
-  hasPreviousPage: Boolean
-}
-
-type PaginatedCashPlanAndPaymentPlanNode {
-  pageInfo: PageInfoNode
-  edges: [CashPlanAndPaymentPlanEdges]
-  totalCount: Int
-}
-
-type PaginatedPaymentRecordsAndPaymentsNode {
-  pageInfo: PageInfoNode
-  edges: [PaymentRecordsAndPaymentsEdges]
-  totalCount: Int
 }
 
 type PartnerNode {
@@ -2500,7 +2439,6 @@ type PaymentNode implements Node {
   transactionStatusBlockchainLink: String
   conflicted: Boolean!
   excluded: Boolean!
-  hasValidWallet: Boolean!
   reasonForUnsuccessfulPayment: String
   orderNumber: Int
   tokenNumber: Int
@@ -2567,172 +2505,6 @@ enum PaymentPlanBuildStatus {
   OK
 }
 
-enum PaymentPlanCurrency {
-  A_
-  AED
-  AFN
-  ALL
-  AMD
-  ANG
-  AOA
-  ARS
-  AUD
-  AWG
-  AZN
-  BAM
-  BBD
-  BDT
-  BGN
-  BHD
-  BIF
-  BMD
-  BND
-  BOB
-  BOV
-  BRL
-  BSD
-  BTN
-  BWP
-  BYN
-  BZD
-  CAD
-  CDF
-  CHF
-  CLP
-  CNY
-  COP
-  CRC
-  CUC
-  CUP
-  CVE
-  CZK
-  DJF
-  DKK
-  DOP
-  DZD
-  EGP
-  ERN
-  ETB
-  EUR
-  FJD
-  FKP
-  GBP
-  GEL
-  GHS
-  GIP
-  GMD
-  GNF
-  GTQ
-  GYD
-  HKD
-  HNL
-  HRK
-  HTG
-  HUF
-  IDR
-  ILS
-  INR
-  IQD
-  IRR
-  ISK
-  JMD
-  JOD
-  JPY
-  KES
-  KGS
-  KHR
-  KMF
-  KPW
-  KRW
-  KWD
-  KYD
-  KZT
-  LAK
-  LBP
-  LKR
-  LRD
-  LSL
-  LYD
-  MAD
-  MDL
-  MGA
-  MKD
-  MMK
-  MNT
-  MOP
-  MRU
-  MUR
-  MVR
-  MWK
-  MXN
-  MYR
-  MZN
-  NAD
-  NGN
-  NIO
-  NOK
-  NPR
-  NZD
-  OMR
-  PAB
-  PEN
-  PGK
-  PHP
-  PKR
-  PLN
-  PYG
-  QAR
-  RON
-  RSD
-  RUB
-  RWF
-  SAR
-  SBD
-  SCR
-  SDG
-  SEK
-  SGD
-  SHP
-  SLE
-  SOS
-  SRD
-  SSP
-  STN
-  SVC
-  SYP
-  SZL
-  THB
-  TJS
-  TMT
-  TND
-  TOP
-  TRY
-  TTD
-  TWD
-  TZS
-  UAH
-  UGX
-  USD
-  UYU
-  UYW
-  UZS
-  VES
-  VND
-  VUV
-  WST
-  XAF
-  XAG
-  XAU
-  XCD
-  XOF
-  XPF
-  YER
-  ZAR
-  ZMW
-  ZWL
-  USDC
-}
-
 type PaymentPlanNode implements Node {
   isRemoved: Boolean!
   id: ID!
@@ -2760,7 +2532,7 @@ type PaymentPlanNode implements Node {
   backgroundActionStatus: PaymentPlanBackgroundActionStatus
   buildStatus: PaymentPlanBuildStatus
   builtAt: DateTime
-  targetingCriteria: TargetingCriteriaNode
+  targetingCriteria: TargetingCriteriaNode!
   currency: String
   dispersionStartDate: Date
   dispersionEndDate: Date
@@ -2777,17 +2549,16 @@ type PaymentPlanNode implements Node {
   steficonTargetingAppliedDate: DateTime
   sourcePaymentPlan: PaymentPlanNode
   isFollowUp: Boolean!
-  excludedIds: String
-  exclusionReason: String
-  excludeHouseholdError: String
+  excludedIds: String!
+  exclusionReason: String!
+  excludeHouseholdError: String!
   name: String
   vulnerabilityScoreMin: Float
   vulnerabilityScoreMax: Float
   isCashAssist: Boolean!
-  deliveryMechanism: DeliveryMechanismNode
-  financialServiceProvider: FinancialServiceProviderNode
   approvalProcess(offset: Int, before: String, after: String, first: Int, last: Int): ApprovalProcessNodeConnection!
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
+  deliveryMechanisms: [DeliveryMechanismPerPaymentPlanNode]
   paymentItems(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   documents(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanSupportingDocumentNodeConnection!
   paymentVerificationPlans(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationPlanNodeConnection!
@@ -2823,7 +2594,6 @@ type PaymentPlanNode implements Node {
   canExportXlsx: Boolean
   canDownloadXlsx: Boolean
   canSendXlsxPassword: Boolean
-  failedWalletValidationCollectorsIds: [String]
 }
 
 type PaymentPlanNodeConnection {
@@ -2856,8 +2626,6 @@ enum PaymentPlanStatus {
   IN_REVIEW
   ACCEPTED
   FINISHED
-  MIGRATION_BLOCKED
-  MIGRATION_FAILED
 }
 
 type PaymentPlanSupportingDocumentNode implements Node {
@@ -2877,26 +2645,6 @@ type PaymentPlanSupportingDocumentNodeConnection {
 type PaymentPlanSupportingDocumentNodeEdge {
   node: PaymentPlanSupportingDocumentNode
   cursor: String!
-}
-
-type PaymentRecordAndPaymentNode {
-  objType: String
-  id: String
-  unicefId: String
-  status: String
-  fullName: String
-  parent: CashPlanAndPaymentPlanNode
-  entitlementQuantity: Float
-  deliveredQuantity: Float
-  deliveredQuantityUsd: Float
-  currency: String
-  deliveryDate: String
-  verification: PaymentVerificationNode
-}
-
-type PaymentRecordsAndPaymentsEdges {
-  cursor: String
-  node: PaymentRecordAndPaymentNode
 }
 
 enum PaymentStatus {
@@ -3283,8 +3031,7 @@ type Query {
   grievanceTicketUrgencyChoices: [ChoiceObjectInt]
   allSteficonRules(offset: Int, before: String, after: String, first: Int, last: Int, enabled: Boolean, deprecated: Boolean, type: String!): SteficonRuleNodeConnection
   payment(id: ID!): PaymentNode
-  allPayments(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, paymentPlanId: String!, programId: String, orderBy: String): PaymentNodeConnection
-  allPaymentRecordsAndPayments(businessArea: String!, program: String, household: ID, orderBy: String, first: Int, last: Int, before: String, after: String): PaginatedPaymentRecordsAndPaymentsNode
+  allPayments(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, paymentPlanId: String, programId: String, householdId: String, orderBy: String): PaymentNodeConnection
   financialServiceProviderXlsxTemplate(id: ID!): FinancialServiceProviderXlsxTemplateNode
   allFinancialServiceProviderXlsxTemplates(offset: Int, before: String, after: String, first: Int, last: Int, financialServiceProviders: [ID], name: String, createdBy: ID, orderBy: String): FinancialServiceProviderXlsxTemplateNodeConnection
   financialServiceProvider(id: ID!): FinancialServiceProviderNode
@@ -3312,12 +3059,12 @@ type Query {
   sampleSize(input: GetCashplanVerificationSampleSizeInput): GetCashplanVerificationSampleSizeObject
   allPaymentVerificationLogEntries(offset: Int, before: String, after: String, first: Int, last: Int, objectId: UUID, user: ID, businessArea: String!, search: String, module: String, userId: String, programId: String): PaymentVerificationLogEntryNodeConnection
   paymentPlan(id: ID!): PaymentPlanNode
-  allPaymentPlans(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], statusNot: String, totalEntitledQuantityFrom: Float, totalEntitledQuantityTo: Float, dispersionStartDate: Date, dispersionEndDate: Date, isFollowUp: Boolean, isPaymentPlan: Boolean, isTargetPopulation: Boolean, sourcePaymentPlanId: String, program: String, programCycle: String, name: String, totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalHouseholdsCountWithValidPhoneNoMax: Int, totalHouseholdsCountWithValidPhoneNoMin: Int, createdAtRange: String, orderBy: String): PaymentPlanNodeConnection
+  allPaymentPlans(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], statusNot: String, verificationStatus: [String], totalEntitledQuantityFrom: Float, totalEntitledQuantityTo: Float, dispersionStartDate: Date, dispersionEndDate: Date, startDate: Date, endDate: Date, isFollowUp: Boolean, isPaymentPlan: Boolean, isTargetPopulation: Boolean, sourcePaymentPlanId: String, program: String, programCycle: String, name: String, totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalHouseholdsCountWithValidPhoneNoMax: Int, totalHouseholdsCountWithValidPhoneNoMin: Int, createdAtRange: String, serviceProvider: String, deliveryTypes: [String], orderBy: String): PaymentPlanNodeConnection
   paymentPlanStatusChoices: [ChoiceObject]
   currencyChoices: [ChoiceObject]
+  allDeliveryMechanisms: [ChoiceObject]
   paymentPlanBackgroundActionStatusChoices: [ChoiceObject]
-  availableFspsForDeliveryMechanisms: [FspChoices]
-  allCashPlansAndPaymentPlans(businessArea: String!, program: String, search: String, serviceProvider: String, deliveryType: [String], verificationStatus: [String], startDateGte: String, endDateLte: String, orderBy: String, first: Int, last: Int, before: String, after: String, isPaymentVerificationPage: Boolean): PaginatedCashPlanAndPaymentPlanNode
+  availableFspsForDeliveryMechanisms(input: AvailableFspsForDeliveryMechanismsInput): [FspChoices]
   businessArea(businessAreaSlug: String!): BusinessAreaNode
   allBusinessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, slug: String): BusinessAreaNodeConnection
   allFieldsAttributes(flexField: Boolean, businessAreaSlug: String, programId: String): [FieldAttributeNode]
@@ -3347,7 +3094,7 @@ type Query {
   canRunDeduplication: Boolean
   isDeduplicationDisabled: Boolean
   household(id: ID!): HouseholdNode
-  allHouseholds(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String, address: String, address_Startswith: String, headOfHousehold_FullName: String, headOfHousehold_FullName_Startswith: String, size_Range: [Int], size_Lte: Int, size_Gte: Int, adminArea: ID, admin1: ID, admin2: ID, targetPopulations: [ID], residenceStatus: String, withdrawn: Boolean, program: ID, firstRegistrationDate: DateTime, rdiId: String, size: String, search: String, documentType: String, documentNumber: String, headOfHousehold_PhoneNoValid: Boolean, lastRegistrationDate: String, countryOrigin: String, isActiveProgram: Boolean, rdiMergeStatus: String, orderBy: String): HouseholdNodeConnection
+  allHouseholds(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String, address: String, address_Startswith: String, headOfHousehold_FullName: String, headOfHousehold_FullName_Startswith: String, size_Range: [Int], size_Lte: Int, size_Gte: Int, adminArea: ID, admin1: ID, admin2: ID, residenceStatus: String, withdrawn: Boolean, program: ID, firstRegistrationDate: DateTime, rdiId: String, size: String, search: String, documentType: String, documentNumber: String, headOfHousehold_PhoneNoValid: Boolean, lastRegistrationDate: String, countryOrigin: String, isActiveProgram: Boolean, rdiMergeStatus: String, orderBy: String): HouseholdNodeConnection
   individual(id: ID!): IndividualNode
   allIndividuals(offset: Int, before: String, after: String, first: Int, last: Int, household_Id: UUID, businessArea: String, fullName: String, fullName_Startswith: String, fullName_Endswith: String, sex: [String], household_AdminArea: ID, withdrawn: Boolean, program: ID, age: String, programs: [ID], search: String, documentType: String, documentNumber: String, lastRegistrationDate: String, admin1: [ID], admin2: [ID], status: [String], excludedId: String, flags: [String], isActiveProgram: Boolean, rdiId: String, duplicatesOnly: Boolean, rdiMergeStatus: String, orderBy: String): IndividualNodeConnection
   allMergedHouseholds(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String, rdiId: String, orderBy: String): HouseholdNodeConnection
@@ -4052,10 +3799,10 @@ type TargetingCriteriaNode {
   updatedAt: DateTime!
   flagExcludeIfActiveAdjudicationTicket: Boolean!
   flagExcludeIfOnSanctionList: Boolean!
-  householdIds: String
-  individualIds: String
   paymentPlan: PaymentPlanNode
   rules: [TargetingCriteriaRuleNode]
+  householdIds: String
+  individualIds: String
 }
 
 input TargetingCriteriaObjectType {
@@ -4204,7 +3951,7 @@ type TicketComplaintDetailsNode implements Node {
   household: HouseholdNode
   individual: IndividualNode
   payment: PaymentNode
-  paymentRecord: PaymentRecordAndPaymentNode
+  paymentRecord: PaymentNode
 }
 
 type TicketComplaintDetailsNodeConnection {
@@ -4475,7 +4222,7 @@ type TicketSensitiveDetailsNode implements Node {
   household: HouseholdNode
   individual: IndividualNode
   payment: PaymentNode
-  paymentRecord: PaymentRecordAndPaymentNode
+  paymentRecord: PaymentNode
 }
 
 type TicketSensitiveDetailsNodeConnection {
@@ -4590,8 +4337,6 @@ input UpdatePaymentPlanInput {
   vulnerabilityScoreMax: Decimal
   excludedIds: String
   exclusionReason: String
-  fspId: ID
-  deliveryMechanismCode: String
 }
 
 type UpdatePaymentPlanMutation {
@@ -4741,6 +4486,8 @@ type UserNode implements Node {
   createdPaymentPlans(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
   createdFinancialServiceProviderXlsxTemplates(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderXlsxTemplateNodeConnection!
   createdFinancialServiceProviders(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderNodeConnection!
+  createdDeliveryMechanisms(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismPerPaymentPlanNodeConnection!
+  sentDeliveryMechanisms(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismPerPaymentPlanNodeConnection!
   createdTickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   assignedTickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   ticketNotes(offset: Int, before: String, after: String, first: Int, last: Int): TicketNoteNodeConnection!
@@ -4780,7 +4527,8 @@ enum UserStatus {
   INVITED
 }
 
-type VolumeByDeliveryMechanismNode {
+type VolumeByDeliveryMechanismNode implements Node {
+  id: ID!
   deliveryMechanism: DeliveryMechanismPerPaymentPlanNode
   volume: Float
   volumeUsd: Float

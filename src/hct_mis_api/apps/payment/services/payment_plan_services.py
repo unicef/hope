@@ -486,6 +486,7 @@ class PaymentPlanService:
         should_update_money_stats = False
         should_rebuild_list = False
         vulnerability_filter = False
+        old_targeting_criteria = None
 
         name = input_data.get("name")
         vulnerability_score_min = input_data.get("vulnerability_score_min")
@@ -551,7 +552,7 @@ class PaymentPlanService:
             targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input, program)
             if self.payment_plan.status == PaymentPlan.Status.TP_OPEN:
                 if self.payment_plan.targeting_criteria:
-                    self.payment_plan.targeting_criteria.delete()
+                    old_targeting_criteria = self.payment_plan.targeting_criteria
                 self.payment_plan.targeting_criteria = targeting_criteria
         if excluded_ids != self.payment_plan.excluded_ids:
             should_rebuild_list = True
@@ -602,6 +603,9 @@ class PaymentPlanService:
                 self.payment_plan.delivery_mechanism = delivery_mechanism
 
         self.payment_plan.save()
+        # remove old targeting_criteria
+        if old_targeting_criteria:
+            old_targeting_criteria.delete()
 
         # prevent race between commit transaction and using in task
         transaction.on_commit(

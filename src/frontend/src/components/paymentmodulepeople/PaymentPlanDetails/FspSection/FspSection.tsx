@@ -22,23 +22,9 @@ export function FspSection({
   const { paymentPlanId } = useParams();
   const { isActiveProgram } = useProgramContext();
 
-  const { deliveryMechanism, isFollowUp } = paymentPlan;
-  const showFspDisplay = Boolean(deliveryMechanism);
-  const shouldDisableSetUpFsp = (): boolean => {
-    if (paymentPlan.isFollowUp) {
-      return false;
-    }
-    if (!paymentPlan.totalEntitledQuantityUsd) {
-      return true;
-    }
-    if (!isActiveProgram) {
-      return true;
-    }
-    return false;
-  };
+  const { deliveryMechanism, isFollowUp, financialServiceProvider } = paymentPlan;
 
-  return showFspDisplay ? (
-    <Box m={5}>
+  return <Box m={5}>
       <ContainerColumnWithBorder>
         <Box
           display="flex"
@@ -75,30 +61,4 @@ export function FspSection({
         <VolumeByDeliveryMechanismSection paymentPlan={paymentPlan} />
       </ContainerColumnWithBorder>
     </Box>
-  ) : (
-    <Box m={5}>
-      <ContainerColumnWithBorder>
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-          mt={4}
-        >
-          <Typography variant="h6">{t('FSPs')}</Typography>
-          <Button
-            color="primary"
-            variant="contained"
-            disabled={shouldDisableSetUpFsp()}
-            data-cy="button-set-up-fsp"
-            component={Link}
-            to={`/${baseUrl}/payment-module/${
-              isFollowUp ? 'followup-payment-plans' : 'payment-plans'
-            }/${paymentPlanId}/setup-fsp/create`}
-          >
-            {t('Set up FSP')}
-          </Button>
-        </Box>
-      </ContainerColumnWithBorder>
-    </Box>
-  );
 }

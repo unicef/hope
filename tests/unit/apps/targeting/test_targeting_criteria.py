@@ -15,13 +15,16 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
+from hct_mis_api.apps.targeting.fixtures import (
+    TargetingCriteriaFactory,
+    TargetingCriteriaRuleFactory,
+)
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteria,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
     TargetingIndividualBlockRuleFilter,
     TargetingIndividualRuleFilterBlock,
-    TargetPopulation,
 )
 
 
@@ -148,7 +151,7 @@ class TestTargetingCriteriaIndividualRules(APITestCase):
         return targeting_criteria
 
     @classmethod
-    def create_criteria(cls, *args: Any, **kwargs: Any) -> TargetPopulation:
+    def create_criteria(cls, *args: Any, **kwargs: Any) -> TargetingCriteria:
         criteria = cls.get_targeting_criteria_for_filters(*args, **kwargs)
         PaymentPlanFactory(
             name="tp",
@@ -375,72 +378,85 @@ class TestTargetingCriteriaByIdQuery(APITestCase):
         return criteria
 
     def test_household_ids(self) -> None:
-        assert (
-            Household.objects.filter(
-                self.create_criteria(
-                    {
-                        "household_ids": f"{self.hh_1.unicef_id}",
-                        "individual_ids": "",
-                    }
-                ).get_query()
-            )
-            .distinct()
-            .count()
-            == 1
+        t_criteria = TargetingCriteriaFactory()
+        PaymentPlanFactory(
+            name="tp",
+            created_by=self.user,
+            business_area=self.business_area,
+            targeting_criteria=t_criteria,
         )
-        assert (
-            Household.objects.filter(
-                self.create_criteria(
-                    {
-                        "household_ids": f"{self.hh_3.unicef_id}, {self.hh_2.unicef_id}",
-                        "individual_ids": "",
-                    }
-                ).get_query()
-            )
-            .distinct()
-            .count()
-            == 2
+        TargetingCriteriaRuleFactory(
+            targeting_criteria=t_criteria,
+            **{
+                "household_ids": f"{self.hh_1.unicef_id}",
+                "individual_ids": "",
+            },
         )
+
+        assert Household.objects.filter(t_criteria.get_query()).distinct().count() == 1
+        t_criteria2 = TargetingCriteriaFactory()
+        PaymentPlanFactory(
+            name="tp",
+            created_by=self.user,
+            business_area=self.business_area,
+            targeting_criteria=t_criteria2,
+        )
+        TargetingCriteriaRuleFactory(
+            targeting_criteria=t_criteria2,
+            **{
+                "household_ids": f"{self.hh_3.unicef_id}, {self.hh_2.unicef_id}",
+                "individual_ids": "",
+            },
+        )
+        assert Household.objects.filter(t_criteria2.get_query()).distinct().count() == 2
 
     def test_individual_ids(self) -> None:
-        assert (
-            Household.objects.filter(
-                self.create_criteria(
-                    {
-                        "household_ids": "",
-                        "individual_ids": f"{self.hh_1.individuals.first().unicef_id}",
-                    }
-                ).get_query()
-            )
-            .distinct()
-            .count()
-            == 1
+        t_criteria = TargetingCriteriaFactory()
+        PaymentPlanFactory(
+            name="tp",
+            created_by=self.user,
+            business_area=self.business_area,
+            targeting_criteria=t_criteria,
         )
-        assert (
-            Household.objects.filter(
-                self.create_criteria(
-                    {
-                        "household_ids": "",
-                        "individual_ids": f"{self.hh_2.individuals.first().unicef_id}, {self.hh_1.individuals.first().unicef_id}",
-                    }
-                ).get_query()
-            )
-            .distinct()
-            .count()
-            == 2
+        TargetingCriteriaRuleFactory(
+            targeting_criteria=t_criteria,
+            **{
+                "household_ids": "",
+                "individual_ids": f"{self.hh_1.individuals.first().unicef_id}",
+            },
+        )
+        assert Household.objects.filter(t_criteria.get_query()).distinct().count() == 1
+        t_criteria2 = TargetingCriteriaFactory()
+        PaymentPlanFactory(
+            name="tp",
+            created_by=self.user,
+            business_area=self.business_area,
+            targeting_criteria=t_criteria2,
+        )
+        TargetingCriteriaRuleFactory(
+            targeting_criteria=t_criteria2,
+            **{
+                "household_ids": "",
+                "individual_ids": f"{self.hh_2.individuals.first().unicef_id}, {self.hh_1.individuals.first().unicef_id}",
+            },
         )
 
+        assert Household.objects.filter(t_criteria2.get_query()).distinct().count() == 2
+
     def test_household_and_individual_ids(self) -> None:
-        assert (
-            Household.objects.filter(
-                self.create_criteria(
-                    {
-                        "household_ids": f"{self.hh_1.unicef_id}, {self.hh_2.unicef_id}",
-                        "individual_ids": f"{self.hh_3.individuals.first().unicef_id}",
-                    }
-                ).get_query()
-            )
-            .distinct()
-            .count()
-            == 3
+        t_criteria = TargetingCriteriaFactory()
+        PaymentPlanFactory(
+            name="tp",
+            created_by=self.user,
+            business_area=self.business_area,
+            targeting_criteria=t_criteria,
         )
+        TargetingCriteriaRuleFactory(
+            targeting_criteria=t_criteria,
+            **{
+                "household_ids": f"{self.hh_1.unicef_id}, {self.hh_2.unicef_id}",
+                "individual_ids": f"{self.hh_3.individuals.first().unicef_id}",
+            },
+        )
+
+        assert Household.objects.filter(t_criteria.get_query()).distinct().count() == 3

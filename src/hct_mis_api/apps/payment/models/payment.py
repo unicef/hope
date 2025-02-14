@@ -220,10 +220,6 @@ class PaymentPlan(
         ACCEPTED = "ACCEPTED", "Accepted"
         FINISHED = "FINISHED", "Finished"
 
-        # remove after migration TP>PP
-        MIGRATION_BLOCKED = "MIGRATION_BLOCKED", "Migration Blocked"
-        MIGRATION_FAILED = "MIGRATION_FAILED", "Migration Failed"
-
     PRE_PAYMENT_PLAN_STATUSES = (
         Status.TP_OPEN,
         Status.TP_LOCKED,
@@ -372,20 +368,9 @@ class PaymentPlan(
         choices=BuildStatus.choices, default=None, protected=False, db_index=True, null=True, blank=True
     )
     built_at = models.DateTimeField(null=True, blank=True)
-    # TODO: remove this field after migrations
-    target_population = models.ForeignKey(
-        "targeting.TargetPopulation",
-        on_delete=models.SET_NULL,
-        related_name="payment_plans",
-        null=True,
-        blank=True,
-    )
-    # TODO: remove null=True after data migrations
     targeting_criteria = models.OneToOneField(
         "targeting.TargetingCriteria",
-        blank=True,
-        null=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
         related_name="payment_plan",
     )
     currency = models.CharField(max_length=4, choices=CURRENCY_CHOICES, blank=True, null=True)
@@ -762,7 +747,14 @@ class PaymentPlan(
 
     @property
     def has_empty_ids_criteria(self) -> bool:
-        return not bool(self.targeting_criteria.household_ids) and not bool(self.targeting_criteria.individual_ids)
+        has_hh_ids, has_ind_ids = False, False
+        for rule in self.targeting_criteria.rules.all():
+            if rule.household_ids:
+                has_hh_ids = True
+            if rule.individual_ids:
+                has_ind_ids = True
+
+        return not has_hh_ids and not has_ind_ids
 
     @property
     def excluded_beneficiaries_ids(self) -> List[str]:
@@ -1001,8 +993,6 @@ class PaymentPlan(
                 PaymentPlan.Status.TP_STEFICON_WAIT,
                 PaymentPlan.Status.TP_STEFICON_COMPLETED,
                 PaymentPlan.Status.TP_STEFICON_ERROR,
-                # TODO: remove after migrations TP>PP
-                PaymentPlan.Status.MIGRATION_BLOCKED,
             ]
         ],
     )
@@ -1021,8 +1011,6 @@ class PaymentPlan(
                 PaymentPlan.Status.TP_STEFICON_WAIT,
                 PaymentPlan.Status.TP_STEFICON_COMPLETED,
                 PaymentPlan.Status.TP_STEFICON_ERROR,
-                # TODO: remove after migrations TP>PP
-                PaymentPlan.Status.MIGRATION_BLOCKED,
             ]
         ],
     )
@@ -1041,8 +1029,6 @@ class PaymentPlan(
                 PaymentPlan.Status.TP_STEFICON_COMPLETED,
                 PaymentPlan.Status.TP_STEFICON_ERROR,
                 PaymentPlan.Status.TP_STEFICON_WAIT,
-                # TODO: remove after migrations TP>PP
-                PaymentPlan.Status.MIGRATION_BLOCKED,
             ]
         ],
     )

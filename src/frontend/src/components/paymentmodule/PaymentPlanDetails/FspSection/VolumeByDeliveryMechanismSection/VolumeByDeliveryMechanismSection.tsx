@@ -57,7 +57,7 @@ export const VolumeByDeliveryMechanismSection: FC<
   const { t } = useTranslation();
   const { volumeByDeliveryMechanism } = paymentPlan;
 
-  const mappedDeliveryMechanism = volumeByDeliveryMechanism.map(
+  const mappedDeliveryMechanism = volumeByDeliveryMechanism?.map(
     (vdm, index) => (
       <Grid
         item

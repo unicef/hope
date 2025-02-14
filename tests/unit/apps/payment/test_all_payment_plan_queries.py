@@ -21,6 +21,7 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.payment.fixtures import (
+    DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
@@ -32,7 +33,6 @@ from hct_mis_api.apps.payment.fixtures import (
 from hct_mis_api.apps.payment.models import (
     AcceptanceProcessThreshold,
     ApprovalProcess,
-    DeliveryMechanism,
     FinancialServiceProvider,
     Payment,
     PaymentHouseholdSnapshot,
@@ -41,6 +41,10 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerificationPlan,
 )
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory
+from hct_mis_api.apps.targeting.fixtures import (
+    TargetingCriteriaFactory,
+    TargetingCriteriaRuleFactory,
+)
 
 
 def create_child_payment_plans(pp: PaymentPlan, created_by: User) -> None:
@@ -161,8 +165,8 @@ class TestPaymentPlanQueries(APITestCase):
     """
 
     ALL_PAYMENT_PLANS_FILTER_QUERY = """
-    query AllPaymentPlans($businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $program: String, $programCycle: String) {
-        allPaymentPlans(businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantityFrom: $totalEntitledQuantityFrom, totalEntitledQuantityTo: $totalEntitledQuantityTo, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, program: $program, orderBy: "unicef_id", programCycle: $programCycle) {
+    query AllPaymentPlans($businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $program: String, $programCycle: String, $verificationStatus: [String], $serviceProvider: String, $deliveryTypes: [String]) {
+        allPaymentPlans(businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantityFrom: $totalEntitledQuantityFrom, totalEntitledQuantityTo: $totalEntitledQuantityTo, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, program: $program, orderBy: "unicef_id", programCycle: $programCycle, verificationStatus: $verificationStatus, serviceProvider: $serviceProvider, deliveryTypes: $deliveryTypes) {
         edges {
           node {
             dispersionEndDate
@@ -203,8 +207,8 @@ class TestPaymentPlanQueries(APITestCase):
         """
 
     ALL_PAYMENTS_QUERY = """
-    query AllPayments($paymentPlanId: String!, $businessArea: String!) {
-      allPayments(paymentPlanId: $paymentPlanId, businessArea: $businessArea, orderBy: "unicef_id") {
+    query AllPayments($paymentPlanId: String, $businessArea: String!, $householdId: String) {
+      allPayments(paymentPlanId: $paymentPlanId, businessArea: $businessArea, orderBy: "unicef_id", householdId: $householdId) {
         edgeCount
         edges {
           node {
@@ -284,6 +288,21 @@ class TestPaymentPlanQueries(APITestCase):
       }
     """
 
+    PAYMENT_PLAN_QUERY_WITH_TARGETING_CRITERIA = """
+    query PaymentPlan($id: ID!) {
+      paymentPlan(id: $id) {
+        name
+        status
+        targetingCriteria {
+          householdIds
+          individualIds
+          flagExcludeIfOnSanctionList
+          flagExcludeIfActiveAdjudicationTicket
+        }
+      }
+    }
+    """
+
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
@@ -297,6 +316,7 @@ class TestPaymentPlanQueries(APITestCase):
         )
 
         with freeze_time("2020-10-10"):
+            cash_dm = DeliveryMechanismFactory(code="cash", is_active=True)
             program = RealProgramFactory(
                 name="Test All PP QS",
                 cycle__start_date=timezone.datetime(2020, 9, 10, tzinfo=utc).date(),
@@ -311,9 +331,12 @@ class TestPaymentPlanQueries(APITestCase):
                 is_follow_up=False,
                 created_by=cls.user,
                 currency="PLN",
+                delivery_mechanism=cash_dm,
             )
             cls.pp.unicef_id = "PP-01"
             cls.pp.save()
+            referral_dm = DeliveryMechanismFactory(code="referral", is_active=True)
+            PaymentVerificationSummaryFactory(payment_plan=cls.pp, status="ACTIVE")
 
             hoh1 = IndividualFactory(household=None)
             hoh2 = IndividualFactory(household=None)
@@ -347,7 +370,6 @@ class TestPaymentPlanQueries(APITestCase):
                 communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
                 payment_gateway_id="test123",
             )
-            dm_cash = DeliveryMechanism.objects.get(code="cash")
             # create hard conflicted payment
             cls.pp_conflicted = PaymentPlanFactory(
                 name="PaymentPlan with conflicts",
@@ -357,7 +379,7 @@ class TestPaymentPlanQueries(APITestCase):
                 dispersion_end_date=cls.pp.dispersion_end_date - relativedelta(months=2),
                 created_by=cls.user,
                 currency="UAH",
-                delivery_mechanism=dm_cash,
+                delivery_mechanism=referral_dm,
                 financial_service_provider=cls.financial_service_provider,
             )
             cls.pp_conflicted.unicef_id = "PP-02"
@@ -452,8 +474,6 @@ class TestPaymentPlanQueries(APITestCase):
     def test_fetch_all_payment_plans_filters(self) -> None:
         just_random_program_cycle = ProgramCycleFactory(program=self.pp.program)
         for filter_data in [
-            {"search": self.pp.unicef_id},
-            {"status": self.pp.status},
             {
                 "totalEntitledQuantityFrom": float(self.pp_conflicted.total_entitled_quantity - 10),
                 "totalEntitledQuantityTo": float(self.pp_conflicted.total_entitled_quantity + 10),
@@ -464,6 +484,10 @@ class TestPaymentPlanQueries(APITestCase):
             },
             {"programCycle": encode_id_base64(self.pp.program_cycle.pk, "ProgramCycleNode")},
             {"programCycle": encode_id_base64(just_random_program_cycle.pk, "ProgramCycleNode")},
+            {"search": self.pp.unicef_id},
+            {"status": self.pp.status},
+            {"serviceProvider": "test"},
+            {"verificationStatus": ["ACTIVE", "FINISHED"]},
         ]:
             self.snapshot_graphql_request(
                 request_string=self.ALL_PAYMENT_PLANS_FILTER_QUERY,
@@ -474,6 +498,18 @@ class TestPaymentPlanQueries(APITestCase):
                     **filter_data,
                 },
             )
+
+    @freeze_time("2020-10-10")
+    def test_all_payment_plans_filter_by_delivery_types(self) -> None:
+        self.snapshot_graphql_request(
+            request_string=self.ALL_PAYMENT_PLANS_FILTER_QUERY,
+            context={"user": self.user},
+            variables={
+                "businessArea": "afghanistan",
+                "program": encode_id_base64(self.pp.program.pk, "Program"),
+                **{"deliveryTypes": ["cash", "referral"]},
+            },
+        )
 
     @freeze_time("2020-10-10")
     def test_filter_payment_plans_with_source_id(self) -> None:
@@ -640,7 +676,6 @@ class TestPaymentPlanQueries(APITestCase):
         }
         """
         payment_plan_id = str(self.pp.id)
-        PaymentVerificationSummaryFactory(payment_plan=self.pp)
         PaymentVerificationSummaryFactory(payment_plan=self.pp_conflicted)
         pvp = PaymentVerificationPlanFactory(payment_plan=self.pp)
         pvp2 = PaymentVerificationPlanFactory(payment_plan=self.pp_conflicted)
@@ -985,4 +1020,42 @@ class TestPaymentPlanQueries(APITestCase):
             request_string=self.PAYMENT_PLAN_QUERY,
             context={"user": user},
             variables={"businessArea": "afghanistan", "id": encoded_payment_plan_id},
+        )
+
+    @freeze_time("2020-10-10")
+    def test_all_payments_filter_by_household_id(self) -> None:
+        self.snapshot_graphql_request(
+            request_string=self.ALL_PAYMENTS_QUERY,
+            context={"user": self.user},
+            variables={
+                "businessArea": "afghanistan",
+                "householdId": encode_id_base64(self.p1.household_id, "Household"),
+            },
+        )
+
+    @freeze_time("2020-10-10")
+    def test_payment_plans_with_targeting_criteria(self) -> None:
+        payment_plan = PaymentPlanFactory(
+            name="Test PP with TargetingCriteria",
+            status=PaymentPlan.Status.TP_OPEN,
+            program_cycle=self.program_cycle,
+            dispersion_start_date=datetime(2020, 8, 10),
+            dispersion_end_date=datetime(2020, 12, 10),
+            is_follow_up=False,
+            created_by=self.user,
+            currency="PLN",
+        )
+        targeting_criteria = TargetingCriteriaFactory()
+        TargetingCriteriaRuleFactory(
+            targeting_criteria=targeting_criteria,
+            household_ids="HH-1, HH-2",
+            individual_ids="IND-01, IND-02",
+        )
+        payment_plan.targeting_criteria = targeting_criteria
+        payment_plan.save()
+
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLAN_QUERY_WITH_TARGETING_CRITERIA,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "id": encode_id_base64(payment_plan.id, "PaymentPlan")},
         )

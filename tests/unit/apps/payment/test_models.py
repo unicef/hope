@@ -52,7 +52,10 @@ from hct_mis_api.apps.program.models import ProgramCycle
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory
 from hct_mis_api.apps.steficon.models import Rule
-from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
+from hct_mis_api.apps.targeting.fixtures import (
+    TargetingCriteriaFactory,
+    TargetingCriteriaRuleFactory,
+)
 
 pytestmark = pytest.mark.django_db
 
@@ -324,8 +327,7 @@ class TestPaymentPlanModel(TestCase):
         self.assertEqual(pp.excluded_household_ids_targeting_level, [hh.unicef_id])
 
     def test_payment_plan_has_empty_criteria_property(self) -> None:
-        pp: PaymentPlan = PaymentPlanFactory(targeting_criteria=None, created_by=self.user)
-
+        pp: PaymentPlan = PaymentPlanFactory(created_by=self.user)
         self.assertTrue(pp.has_empty_criteria)
 
     def test_payment_plan_has_empty_ids_criteria_property(self) -> None:
@@ -376,6 +378,15 @@ class TestPaymentPlanModel(TestCase):
         self.assertEqual(pp.imported_file_name, "")
         self.assertIsNone(pp.imported_file)
         self.assertIsNone(pp.imported_file_date)
+
+    def test_has_empty_ids_criteria(self) -> None:
+        pp = PaymentPlanFactory(created_by=self.user)
+        TargetingCriteriaRuleFactory(
+            targeting_criteria=pp.targeting_criteria,
+            household_ids="HH-1, HH-2",
+            individual_ids="IND-01, IND-02",
+        )
+        self.assertFalse(pp.has_empty_ids_criteria)
 
 
 class TestPaymentModel(TestCase):

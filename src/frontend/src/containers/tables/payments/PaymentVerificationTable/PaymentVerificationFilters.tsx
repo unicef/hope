@@ -96,11 +96,13 @@ export const PaymentVerificationFilters = ({
         </Grid>
         <Grid item xs={3}>
           <SelectFilter
-            onChange={(e) => handleFilterChange('deliveryType', e.target.value)}
+            onChange={(e) =>
+              handleFilterChange('deliveryTypes', e.target.value)
+            }
             label="Delivery Mechanism"
             data-cy="filter-Modality"
             multiple
-            value={filter.deliveryType}
+            value={filter.deliveryTypes}
             fullWidth
             icon={<MonetizationOnIcon />}
           >

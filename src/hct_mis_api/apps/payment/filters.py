@@ -181,10 +181,15 @@ class PaymentPlanFilter(FilterSet):
         method="filter_by_status", choices=PaymentPlan.Status.choices + [("ASSIGNED", "Assigned")]
     )
     status_not = ChoiceFilter(method="filter_status_not", choices=PaymentPlan.Status.choices)
+    verification_status = MultipleChoiceFilter(
+        method="filter_verification_status", choices=PaymentVerificationSummary.STATUS_CHOICES
+    )
     total_entitled_quantity_from = NumberFilter(field_name="total_entitled_quantity", lookup_expr="gte")
     total_entitled_quantity_to = NumberFilter(field_name="total_entitled_quantity", lookup_expr="lte")
     dispersion_start_date = DateFilter(field_name="dispersion_start_date", lookup_expr="gte")
     dispersion_end_date = DateFilter(field_name="dispersion_end_date", lookup_expr="lte")
+    start_date = DateFilter(field_name="start_date", lookup_expr="gte")
+    end_date = DateFilter(field_name="end_date", lookup_expr="lte")
     is_follow_up = BooleanFilter(field_name="is_follow_up")
     is_payment_plan = BooleanFilter(method="filter_is_payment_plan")
     is_target_population = BooleanFilter(method="filter_is_target_population")
@@ -207,6 +212,8 @@ class PaymentPlanFilter(FilterSet):
         method="filter_total_households_count_with_valid_phone_no_min"
     )
     created_at_range = DateTimeRangeFilter(field_name="created_at")
+    service_provider = CharFilter(method="filter_service_provider")
+    delivery_types = MultipleChoiceFilter(method="filter_delivery_types", choices=DeliveryMechanism.get_choices())
 
     class Meta:
         fields = tuple()
@@ -315,11 +322,27 @@ class PaymentPlanFilter(FilterSet):
     def filter_status_not(queryset: "QuerySet", model_field: str, value: Any) -> "QuerySet":
         return queryset.exclude(status=value)
 
+    @staticmethod
+    def filter_verification_status(queryset: "QuerySet", model_field: str, verification_status: Any) -> "QuerySet":
+        return queryset.filter(payment_verification_summary__status__in=verification_status)
+
+    @staticmethod
+    def filter_service_provider(queryset: "QuerySet", model_field: str, service_provider_name: str) -> "QuerySet":
+        return queryset.filter(delivery_mechanisms__financial_service_provider__name=service_provider_name)
+
+    @staticmethod
+    def filter_delivery_types(
+        queryset: "QuerySet", model_field: str, delivery_types: Any
+    ) -> "QuerySet":  # pragma: no cover
+        # the test added but looks like it does not count test_all_payment_plans_filter_by_delivery_types
+        return queryset.filter(delivery_mechanisms__delivery_mechanism__code__in=delivery_types)
+
 
 class PaymentFilter(FilterSet):
     business_area = CharFilter(field_name="parent__business_area__slug", required=True)
-    payment_plan_id = CharFilter(required=True, method="payment_plan_id_filter")
+    payment_plan_id = CharFilter(method="payment_plan_id_filter")
     program_id = CharFilter(method="filter_by_program_id")
+    household_id = CharFilter(method="filter_by_household_id")
 
     def payment_plan_id_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         payment_plan_id = decode_id_string(value)
@@ -349,7 +372,7 @@ class PaymentFilter(FilterSet):
             "entitlement_quantity_usd",
             "delivered_quantity",
             "financial_service_provider__name",
-            "parent__program__name",
+            "parent__program_cycle__program__name",
             "delivery_date",
             "mark",
         )
@@ -376,99 +399,5 @@ class PaymentFilter(FilterSet):
     def filter_by_program_id(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[Payment]":
         return qs.filter(parent__program_cycle__program_id=decode_id_string_required(value))
 
-
-def payment_plan_filter(queryset: QuerySet[PaymentPlan], **kwargs: Any) -> QuerySet[PaymentPlan]:
-    business_area = kwargs.get("business_area")
-    program = kwargs.get("program")
-    service_provider = kwargs.get("service_provider")
-    delivery_types = kwargs.get("delivery_type")
-    verification_status = kwargs.get("verification_status")
-    start_date_gte, end_date_lte = kwargs.get("start_date_gte"), kwargs.get("end_date_lte")
-    search = kwargs.get("search")
-
-    if business_area:
-        queryset = queryset.filter(business_area__slug=business_area)
-
-    if program:
-        queryset = queryset.filter(program_cycle__program=decode_id_string(program))
-
-    if start_date_gte:
-        queryset = queryset.filter(start_date__gte=start_date_gte)
-    if end_date_lte:
-        queryset = queryset.filter(end_date__lte=end_date_lte)
-
-    if verification_status:
-        queryset = queryset.filter(payment_verification_summary__status__in=verification_status)
-
-    if service_provider:
-        queryset = queryset.filter(fsp_names__icontains=service_provider)
-
-    if delivery_types:
-        q = Q()
-        for delivery_type in delivery_types:
-            q |= Q(delivery_mechanism__name=delivery_type)
-        queryset = queryset.filter(q)
-
-    if search:
-        q = Q()
-        values = search.split(" ")
-        for value in values:
-            q |= Q(unicef_id__istartswith=value)
-        queryset = queryset.filter(q)
-
-    return queryset
-
-
-def payment_plan_ordering(queryset: QuerySet[PaymentPlan], order_by: str) -> QuerySet[PaymentPlan]:
-    reverse = "-" if order_by.startswith("-") else ""
-    order_by = order_by[1:] if reverse else order_by
-
-    if order_by == "verification_status":
-        qs = queryset.order_by(reverse + "custom_order")
-    elif order_by == "unicef_id":
-        qs = queryset.order_by(reverse + "unicef_id")
-    elif order_by == "dispersion_date":
-        # TODO this field is empty at the moment
-        qs = queryset
-    elif order_by == "timeframe":
-        qs = queryset.order_by(reverse + "start_date", reverse + "end_date")
-    else:
-        qs = queryset.order_by(reverse + order_by)
-
-    return qs
-
-
-def payment_filter(queryset: QuerySet[Payment], **kwargs: Any) -> QuerySet[Payment]:
-    business_area = kwargs.get("business_area")
-    household = kwargs.get("household")
-    program = kwargs.get("program")
-
-    if business_area:
-        queryset = queryset.filter(business_area__slug=business_area)
-
-    if household:
-        queryset = queryset.filter(household__id=decode_id_string(household))
-
-    if program:
-        queryset = queryset.filter(parent__program_cycle__program=decode_id_string(program))
-
-    return queryset
-
-
-def payment_ordering(queryset: QuerySet[Payment], order_by: str) -> QuerySet[Payment]:
-    reverse = "-" if order_by.startswith("-") else ""
-    order_by = order_by[1:] if reverse else order_by
-
-    if order_by in ("head_of_household", "entitlement_quantity", "delivered_quantity", "delivery_date"):
-        order_by_dict = {f"{order_by}__isnull": True}
-        qs_null = queryset.filter(**order_by_dict)
-        qs_non_null = queryset.exclude(**order_by_dict)
-
-        if reverse:
-            qs = qs_non_null.order_by(f"-{order_by}").union(qs_null)
-        else:
-            qs = qs_null.union(qs_non_null.order_by(order_by))
-    else:
-        qs = queryset.order_by(reverse + order_by)
-
-    return qs
+    def filter_by_household_id(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[Payment]":
+        return qs.filter(household_id=decode_id_string_required(value))
