@@ -833,9 +833,7 @@ def clear_cache_for_key(key: str) -> None:
     """remove cache if key starts with"""
     if hasattr(cache, "keys"):
         all_cache_keys = cache.keys(f"{key}*")
-        print(f"🔍 Found cache keys: {all_cache_keys}")
         for k in all_cache_keys:
-            print(f"🚀🚀🚀🚀🚀 Clearing cache for: {k}")
             cache.delete(k)
 
 
