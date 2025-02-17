@@ -104,7 +104,7 @@ class TestIndividualFlagQuery(APITestCase):
         ]
         create_household_and_individuals({"program": cls.program}, individuals_to_create)
         cls.create_user_role_with_permissions(
-            cls.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], cls.business_area
+            cls.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], cls.business_area, whole_business_area_access=True
         )
 
     @parameterized.expand(

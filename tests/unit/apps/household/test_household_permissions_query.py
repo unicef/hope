@@ -74,7 +74,7 @@ class TestHouseholdPermissionsQuery(APITestCase):
         cls.household.set_admin_areas(cls.area2)
 
         permissions = [Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS]
-        cls.create_user_role_with_permissions(cls.user, permissions, cls.business_area)
+        cls.create_user_role_with_permissions(cls.user, permissions, cls.business_area, whole_business_area_access=True)
 
     def test_unicef_partner_has_access_for_program(self) -> None:
         self._test_unicef_partner_has_access(self.id_to_base64(self.program_one.id, "ProgramNode"))

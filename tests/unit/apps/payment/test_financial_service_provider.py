@@ -62,7 +62,10 @@ class TestAllFinancialServiceProviders(APITestCase):
             Permissions.PM_LOCK_AND_UNLOCK_FSP,
         ]
         cls.create_user_role_with_permissions(
-            cls.user, permissions, BusinessArea.objects.get(slug=cls.BUSINESS_AREA_SLUG)
+            cls.user,
+            permissions,
+            BusinessArea.objects.get(slug=cls.BUSINESS_AREA_SLUG),
+            whole_business_area_access=True,
         )
         fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory(name="TestName123")
         fsps = FinancialServiceProviderFactory.create_batch(

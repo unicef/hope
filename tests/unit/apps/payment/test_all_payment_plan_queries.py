@@ -292,6 +292,7 @@ class TestPaymentPlanQueries(APITestCase):
             cls.user,
             [Permissions.PM_VIEW_LIST, Permissions.PM_VIEW_DETAILS, Permissions.ACTIVITY_LOG_VIEW],
             cls.business_area,
+            whole_business_area_access=True,
         )
 
         with freeze_time("2020-10-10"):
@@ -949,7 +950,7 @@ class TestPaymentPlanQueries(APITestCase):
         self, _: Any, permissions: List[Permissions], communication_channel: str
     ) -> None:
         user = UserFactory.create(username="abc")
-        self.create_user_role_with_permissions(user, permissions, self.business_area)
+        self.create_user_role_with_permissions(user, permissions, self.business_area, whole_business_area_access=True)
 
         payment_plan = PaymentPlanFactory(
             name="Test Finished PP",

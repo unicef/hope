@@ -120,7 +120,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
         ]
     )
     def test_mutation_creates_documents(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program, self.program)
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
             context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
@@ -155,7 +155,10 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
     )
     def test_mutation_creates_file_for_allowed_types(self, name: str, content_type: str) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_CREATE, Permissions.GRIEVANCE_DOCUMENTS_UPLOAD], self.business_area
+            self.user,
+            [Permissions.GRIEVANCES_CREATE, Permissions.GRIEVANCE_DOCUMENTS_UPLOAD],
+            self.business_area,
+            self.program,
         )
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
@@ -176,7 +179,10 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
     @parameterized.expand([("some_document.css", "text/css"), ("some_document.html", "text/html")])
     def test_mutation_raises_error_when_not_allowed_type_file_is_uploaded(self, name: str, content_type: str) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_CREATE, Permissions.GRIEVANCE_DOCUMENTS_UPLOAD], self.business_area
+            self.user,
+            [Permissions.GRIEVANCES_CREATE, Permissions.GRIEVANCE_DOCUMENTS_UPLOAD],
+            self.business_area,
+            self.program,
         )
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
@@ -203,7 +209,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
     def test_mutation_raises_error_when_uploaded_file_is_bigger_than_3mb(
         self, _: Any, permissions: List[Permissions]
     ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
             context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
@@ -231,7 +237,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
     def test_mutation_raises_error_when_total_size_of_uploaded_files_is_bigger_than_25mb(
         self, _: Any, permissions: List[Permissions]
     ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
             context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
@@ -260,7 +266,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
     def test_mutation_creates_single_document_for_existing_grievance_ticket(
         self, _: Any, permissions: List[Permissions]
     ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_GRIEVANCE_MUTATION,
@@ -290,7 +296,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
         self, _: Any, permissions: List[Permissions]
     ) -> None:
         self.maxDiff = None
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
         grievance_document = GrievanceDocumentFactory(grievance_ticket=self.ticket_2.ticket)
 
         self.snapshot_graphql_request(
@@ -321,7 +327,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
     def test_mutation_deletes_single_document_for_existing_grievance_ticket(
         self, _: Any, permissions: List[Permissions]
     ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
         grievance_document = GrievanceDocumentFactory(grievance_ticket=self.ticket_2.ticket)
 
         self.snapshot_graphql_request(
@@ -344,7 +350,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
     def test_mutation_creates_and_deletes_documents_for_existing_grievance_ticket(
         self, _: Any, permissions: List[Permissions]
     ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
         grievance_document = GrievanceDocumentFactory(grievance_ticket=self.ticket_2.ticket)
 
         self.snapshot_graphql_request(
@@ -375,7 +381,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
     def test_mutation_creates_and_updates_documents_for_existing_grievance_ticket(
         self, _: Any, permissions: List[Permissions]
     ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
         grievance_document = GrievanceDocumentFactory(grievance_ticket=self.ticket_2.ticket)
 
         self.snapshot_graphql_request(
@@ -414,7 +420,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
     def test_mutation_deletes_non_existing_document_for_existing_grievance_ticket(
         self, _: Any, permissions: List[Permissions]
     ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_GRIEVANCE_MUTATION,
@@ -436,7 +442,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
     def test_mutation_updates_non_existing_documents_for_existing_grievance_ticket(
         self, _: Any, permissions: List[Permissions]
     ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_GRIEVANCE_MUTATION,
@@ -464,7 +470,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
         ]
     )
     def test_mutation_creates_updates_deletes_documents(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
         grievance_document_to_update = GrievanceDocumentFactory(grievance_ticket=self.ticket_2.ticket)
 
         grievance_document_to_delete = GrievanceDocumentFactory(
@@ -510,7 +516,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
     def test_raises_error_when_mutation_updates_documents_above_25mb_limit(
         self, _: Any, permissions: List[Permissions]
     ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
         grievance_document = GrievanceDocumentFactory(grievance_ticket=self.ticket_2.ticket)
 
         self.snapshot_graphql_request(
@@ -549,7 +555,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
     def test_raises_error_when_mutation_updates_document_with_size_5mb(
         self, _: Any, permissions: List[Permissions]
     ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
         grievance_document = GrievanceDocumentFactory(grievance_ticket=self.ticket_2.ticket)
 
         self.snapshot_graphql_request(

@@ -311,6 +311,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             cls.user,
             cls.all_necessary_permissions,
             cls.business_area,
+            whole_business_area_access=True,
         )
         cls.program = ProgramFactory()
         cls.registration_data_import = RegistrationDataImportFactory(

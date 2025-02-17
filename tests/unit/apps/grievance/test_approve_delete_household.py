@@ -63,7 +63,7 @@ class TestApproveDeleteHousehold(APITestCase):
 
     def test_approve_delete_household(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_APPROVE_DATA_CHANGE], self.business_area
+            self.user, [Permissions.GRIEVANCES_APPROVE_DATA_CHANGE], self.business_area, whole_business_area_access=True
         )
         self.household_withdraw.refresh_from_db()
         self.household_test_1.refresh_from_db()

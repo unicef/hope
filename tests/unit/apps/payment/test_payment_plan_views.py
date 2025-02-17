@@ -129,7 +129,12 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         assert len(response_json) == 1
         assert response_json[0]["unicef_id"] == self.payment_plan1.unicef_id
 
-        create_partner_role_with_permissions(self.partner, [], self.afghanistan, self.program2)
+        create_partner_role_with_permissions(
+            self.partner,
+            [Permissions.PM_VIEW_LIST, Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
+            self.afghanistan,
+            self.program1,
+        )
 
         with CaptureQueriesContext(connection) as ctx:
             response = _test_list()
@@ -247,7 +252,16 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
             self.afghanistan,
             self.program1,
         )
-        create_partner_role_with_permissions(self.partner, [], self.afghanistan, self.program2)
+        create_partner_role_with_permissions(
+            self.partner,
+            [
+                Permissions.PM_VIEW_LIST,
+                Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
+                Permissions.PAYMENT_VIEW_LIST_MANAGERIAL,
+            ],
+            self.afghanistan,
+            self.program2,
+        )
         response = self._bulk_approve_action_response()
         assert response.status_code == status.HTTP_204_NO_CONTENT
         self.payment_plan1.refresh_from_db()
@@ -270,7 +284,12 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
             self.afghanistan,
             self.program1,
         )
-        create_partner_role_with_permissions(self.partner, [], self.afghanistan, self.program2)
+        create_partner_role_with_permissions(
+            self.partner,
+            [Permissions.PM_VIEW_LIST, Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
+            self.afghanistan,
+            self.program2,
+        )
         response = self._bulk_approve_action_response()
         assert response.status_code == status.HTTP_403_FORBIDDEN
         self.payment_plan1.refresh_from_db()

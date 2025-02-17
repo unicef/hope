@@ -76,7 +76,7 @@ class TestGrievanceAreaQuery(APITestCase):
     def test_admin2_null_is_filtered(self, _: Any, permissions: List[Permissions]) -> None:
         partner = PartnerFactory(name="NOT_UNICEF_1")
         user = UserFactory(partner=partner)
-        self.create_user_role_with_permissions(user, permissions, self.business_area)
+        self.create_user_role_with_permissions(user, permissions, self.business_area, whole_business_area_access=True)
 
         self.snapshot_graphql_request(
             request_string=ALL_GRIEVANCE_QUERY,
@@ -103,7 +103,7 @@ class TestGrievanceAreaQuery(APITestCase):
         self.create_partner_role_with_permissions(partner, [], self.business_area, self.program)
         self.set_admin_area_limits_in_program(partner, self.program, [self.doshi])
         user = UserFactory(partner=partner)
-        self.create_user_role_with_permissions(user, permissions, self.business_area)
+        self.create_user_role_with_permissions(user, permissions, self.business_area, self.program)
 
         self.snapshot_graphql_request(
             request_string=ALL_GRIEVANCE_QUERY,
@@ -132,7 +132,7 @@ class TestGrievanceAreaQuery(APITestCase):
         self.set_admin_area_limits_in_program(partner, self.program, [self.doshi, self.burka, self.quadis])
 
         user = UserFactory(partner=partner)
-        self.create_user_role_with_permissions(user, permissions, self.business_area)
+        self.create_user_role_with_permissions(user, permissions, self.business_area, self.program)
 
         self.snapshot_graphql_request(
             request_string=ALL_GRIEVANCE_QUERY,
@@ -158,7 +158,7 @@ class TestGrievanceAreaQuery(APITestCase):
     def test_grievance_ticket_are_filtered_when_partner_is_unicef(self, _: Any, permissions: List[Permissions]) -> None:
         partner = PartnerFactory(name="UNICEF_4")
         user = UserFactory(partner=partner)
-        self.create_user_role_with_permissions(user, permissions, self.business_area)
+        self.create_user_role_with_permissions(user, permissions, self.business_area, self.program)
 
         self.snapshot_graphql_request(
             request_string=ALL_GRIEVANCE_QUERY,
@@ -189,7 +189,7 @@ class TestGrievanceAreaQuery(APITestCase):
         self.set_admin_area_limits_in_program(partner, self.program, [self.doshi, self.burka, self.quadis])
 
         user = UserFactory(partner=partner)
-        self.create_user_role_with_permissions(user, permissions, self.business_area)
+        self.create_user_role_with_permissions(user, permissions, self.business_area, self.program)
 
         self.snapshot_graphql_request(
             request_string=ALL_GRIEVANCE_QUERY,

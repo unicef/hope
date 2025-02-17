@@ -55,7 +55,7 @@ class TestCreateSurvey(APITestCase):
         )
 
     def test_create_survey_without_permission(self) -> None:
-        self.create_user_role_with_permissions(self.user, [], self.business_area)
+        self.create_user_role_with_permissions(self.user, [], self.business_area, self.program)
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_SURVEY_MUTATION,
@@ -79,7 +79,7 @@ class TestCreateSurvey(APITestCase):
 
     def test_create_survey_without_target_population_and_program(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE], self.business_area
+            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE], self.business_area, self.program
         )
 
         self.snapshot_graphql_request(
@@ -103,7 +103,7 @@ class TestCreateSurvey(APITestCase):
 
     def test_create_survey(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE], self.business_area
+            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE], self.business_area, self.program
         )
 
         create_household({"size": 3})
@@ -136,7 +136,7 @@ class TestCreateSurvey(APITestCase):
 
     def test_create_survey_and_send_via_rapidpro(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE], self.business_area
+            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE], self.business_area, self.program
         )
 
         create_household({"size": 3})
@@ -240,7 +240,7 @@ class TestCreateSurvey(APITestCase):
 
     def test_create_survey_without_recipients(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE], self.business_area
+            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE], self.business_area, self.program
         )
 
         self.snapshot_graphql_request(

@@ -69,7 +69,9 @@ class TestDeleteVerificationMutation(APITestCase):
         ]
     )
     def test_delete_pending_verification_plan(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
         self.create_active_payment_verification_plan()
         payment_verification_plan = self.create_pending_payment_verification_plan()
 
@@ -90,7 +92,9 @@ class TestDeleteVerificationMutation(APITestCase):
         ]
     )
     def test_delete_active_verification_plan(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
         payment_verification_plan = self.create_active_payment_verification_plan()
         self.create_pending_payment_verification_plan()
 

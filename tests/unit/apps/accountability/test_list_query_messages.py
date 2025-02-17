@@ -137,7 +137,9 @@ class TestListQueryMessage(APITestCase):
     def test_list_communication_messages(
         self, _: str, permissions: Sequence[str], extra_filters: Union[Callable[[User], dict], dict]
     ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
 
         self.snapshot_graphql_request(
             request_string=self.QUERY,
@@ -167,7 +169,9 @@ class TestListQueryMessage(APITestCase):
         )
     )
     def test_list_communication_message_recipients(self, _: str, permissions: Sequence[str], variables: dict) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
 
         self.snapshot_graphql_request(
             request_string=self.QUERY_RECIPIENTS,

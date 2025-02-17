@@ -281,7 +281,7 @@ class TestCopyProgram(APITestCase):
 
     def test_copy_program_without_permissions(self) -> None:
         user = UserFactory.create()
-        self.create_user_role_with_permissions(user, [], self.business_area)
+        self.create_user_role_with_permissions(user, [], self.business_area, whole_business_area_access=True)
 
         self.snapshot_graphql_request(
             request_string=self.COPY_PROGRAM_MUTATION,
@@ -293,7 +293,9 @@ class TestCopyProgram(APITestCase):
     def test_copy_with_permissions(self) -> None:
         self.assertEqual(Household.objects.count(), 3)
         self.assertEqual(Individual.objects.count(), 4)
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area, whole_business_area_access=True
+        )
         self.assertIsNone(self.household1.household_collection)
         self.assertIsNone(self.individuals1[0].individual_collection)
         with self.captureOnCommitCallbacks(execute=True):
@@ -438,7 +440,9 @@ class TestCopyProgram(APITestCase):
         self.assertIsNone(copied_program.cycles.first().end_date)
 
     def test_copy_program_incompatible_collecting_type(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area, whole_business_area_access=True
+        )
         copy_data_incompatible = {**self.copy_data}
         copy_data_incompatible["programData"]["dataCollectingTypeCode"] = "partial"
         self.snapshot_graphql_request(
@@ -448,7 +452,9 @@ class TestCopyProgram(APITestCase):
         )
 
     def test_copy_program_with_existing_name(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area, whole_business_area_access=True
+        )
         copy_data_existing_name = {**self.copy_data}
         copy_data_existing_name["programData"]["name"] = "initial name"
         self.snapshot_graphql_request(
@@ -465,7 +471,9 @@ class TestCopyProgram(APITestCase):
         ]
     )
     def test_copy_program_with_partners(self, _: Any, partner_access: str) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area, whole_business_area_access=True
+        )
         area1 = AreaFactory(name="North Brianmouth", area_type=self.area_type_other, p_code="NORTH-B")
         area2 = AreaFactory(name="South Catherine", area_type=self.area_type_other, p_code="SOUTH-C")
         partner2 = PartnerFactory(name="New Partner")
@@ -542,7 +550,9 @@ class TestCopyProgram(APITestCase):
             )
 
     def test_copy_program_with_partners_all_partners_access(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area, whole_business_area_access=True
+        )
         self.copy_data["programData"]["partnerAccess"] = Program.ALL_PARTNERS_ACCESS
 
         self.snapshot_graphql_request(
@@ -591,7 +601,9 @@ class TestCopyProgram(APITestCase):
         )
 
     def test_copy_program_with_partners_none_partners_access(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area, whole_business_area_access=True
+        )
         self.copy_data["programData"]["partnerAccess"] = Program.NONE_PARTNERS_ACCESS
 
         self.snapshot_graphql_request(
@@ -622,7 +634,9 @@ class TestCopyProgram(APITestCase):
         )
 
     def test_copy_program_with_pdu_fields(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area, whole_business_area_access=True
+        )
         self.copy_data["programData"]["pduFields"] = [
             {
                 "label": "PDU Field 1",
@@ -664,7 +678,9 @@ class TestCopyProgram(APITestCase):
         self.assertEqual(Program.objects.get(name="copied name").pdu_fields.count(), 4)
 
     def test_copy_program_with_pdu_fields_invalid_data(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area, whole_business_area_access=True
+        )
         # pdu data with mismatched number of rounds and rounds names
         self.copy_data["programData"]["pduFields"] = [
             {
@@ -690,7 +706,9 @@ class TestCopyProgram(APITestCase):
         )
 
     def test_copy_program_with_pdu_fields_duplicated_field_names_in_input(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area, whole_business_area_access=True
+        )
         # pdu data with duplicated field names in the input
         self.copy_data["programData"]["pduFields"] = [
             {
@@ -716,7 +734,9 @@ class TestCopyProgram(APITestCase):
         )
 
     def test_copy_program_with_pdu_fields_existing_field_name_in_different_program(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area, whole_business_area_access=True
+        )
         # pdu data with field name that already exists in the database but in different program -> no fail
         pdu_data = PeriodicFieldDataFactory(
             subtype=PeriodicFieldData.DATE,

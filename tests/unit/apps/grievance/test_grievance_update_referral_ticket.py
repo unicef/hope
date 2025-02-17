@@ -76,7 +76,7 @@ class TestGrievanceUpdateReferralTicketQuery(APITestCase):
         ]
     )
     def test_update_referral_ticket_without_extras(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         input_data = self._prepare_input()
 
@@ -96,7 +96,7 @@ class TestGrievanceUpdateReferralTicketQuery(APITestCase):
         ]
     )
     def test_update_referral_ticket_with_household_extras(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         extras = {
             "household": self.id_to_base64(self.household.id, "HouseholdNode"),
@@ -119,7 +119,7 @@ class TestGrievanceUpdateReferralTicketQuery(APITestCase):
         ]
     )
     def test_update_referral_ticket_with_individual_extras(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         extras = {
             "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
@@ -144,7 +144,7 @@ class TestGrievanceUpdateReferralTicketQuery(APITestCase):
     def test_update_referral_ticket_with_household_and_individual_extras(
         self, _: Any, permissions: List[Permissions]
     ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         extras: Dict = {
             "household": self.id_to_base64(self.household.id, "HouseholdNode"),

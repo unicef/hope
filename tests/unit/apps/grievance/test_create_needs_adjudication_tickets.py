@@ -316,6 +316,7 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
             self.user,
             [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_BIOMETRIC_RESULTS],
             self.business_area,
+            self.program,
         )
         create_needs_adjudication_tickets_for_biometrics(
             DeduplicationEngineSimilarityPair.objects.filter(pk=self.dedup_engine_similarity_pair.pk),

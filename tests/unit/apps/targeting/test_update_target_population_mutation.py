@@ -218,7 +218,7 @@ class TestUpdateTargetPopulationMutation(APITestCase):
     def test_update_mutation_correct_variables(
         self, name: str, permissions: List[Permissions], population_index: int, should_be_updated: bool
     ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         variables: Dict = copy.deepcopy(VARIABLES)
         variables["updateTargetPopulationInput"]["id"] = self.id_to_base64(
@@ -253,7 +253,9 @@ class TestUpdateTargetPopulationMutation(APITestCase):
         ]
     )
     def test_fail_update(self, _: Any, variables: Dict) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_UPDATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.TARGETING_UPDATE], self.business_area, self.program
+        )
 
         variables = copy.deepcopy(variables)
         variables["updateTargetPopulationInput"]["id"] = self.id_to_base64(
@@ -277,7 +279,9 @@ class TestUpdateTargetPopulationMutation(APITestCase):
         assert "wrong" not in updated_target_population.name
 
     def test_update_name_unique_constraint(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_UPDATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.TARGETING_UPDATE], self.business_area, self.program
+        )
         variables = copy.deepcopy(VARIABLES)
         variables["updateTargetPopulationInput"]["id"] = self.id_to_base64(
             self.draft_target_population.id, "TargetPopulationNode"
@@ -302,7 +306,9 @@ class TestUpdateTargetPopulationMutation(APITestCase):
         )
 
     def test_fail_update_for_incorrect_status(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_UPDATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.TARGETING_UPDATE], self.business_area, self.program
+        )
         target_population_with_incorrect_status = TargetPopulation(
             name="target_population_with_incorrect_status",
             targeting_criteria=self.get_targeting_criteria_for_rule(
@@ -339,7 +345,9 @@ class TestUpdateTargetPopulationMutation(APITestCase):
         )
 
     def test_update_program_cycle_finished(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_UPDATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.TARGETING_UPDATE], self.business_area, self.program
+        )
         self.program_cycle.status = Program.FINISHED
         self.program_cycle.save()
 

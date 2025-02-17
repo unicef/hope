@@ -122,7 +122,9 @@ class TestReportingMutation(APITestCase):
     def test_create_report_with_no_extra_filters(
         self, _: Any, permissions: List[Permissions], report_type: str, date_to: date
     ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
         self.snapshot_graphql_request(
             request_string=self.CREATE_REPORT,
             context={"user": self.user},
@@ -143,7 +145,9 @@ class TestReportingMutation(APITestCase):
         ]
     )
     def test_restart_create_report(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
         self.snapshot_graphql_request(
             request_string=self.RESTART_CREATE_REPORT,
             context={"user": self.user},
@@ -156,7 +160,9 @@ class TestReportingMutation(APITestCase):
         )
 
     def test_restart_create_report_invalid_status_update_time(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.REPORTING_EXPORT], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.REPORTING_EXPORT], self.business_area, whole_business_area_access=True
+        )
         self.report.status = Report.COMPLETED
         self.report.save()
         self.snapshot_graphql_request(

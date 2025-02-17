@@ -77,7 +77,7 @@ class TestGrievanceUpdateNegativeFeedbackTicketQuery(APITestCase):
         ]
     )
     def test_update_negative_feedback_ticket_not_supported(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         self.snapshot_graphql_request(
             request_string=self.QUERY,
