@@ -7,6 +7,7 @@ import {
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Divider, Grid, Typography } from '@mui/material';
+import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import {
   getTargetingCriteriaVariables,
@@ -15,23 +16,23 @@ import {
   IndIdValidation,
 } from '@utils/targetingUtils';
 import { Field, FieldArray, Form, Formik } from 'formik';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import * as Yup from 'yup';
-import { Exclusions } from '../CreateTargetPopulation/Exclusions';
+import Exclusions from '../CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '../PaperContainer';
-import { EditTargetPopulationHeader } from './EditTargetPopulationHeader';
-import { AddFilterTargetingCriteriaDisplay } from '../TargetingCriteriaDisplay/AddFilterTargetingCriteriaDisplay';
-import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
-import { ReactElement } from 'react';
+import AddFilterTargetingCriteriaDisplay from '../TargetingCriteriaDisplay/AddFilterTargetingCriteriaDisplay';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import EditTargetPopulationHeader from './EditTargetPopulationHeader';
 
 interface EditTargetPopulationProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
   screenBeneficiary: boolean;
 }
 
-export const EditTargetPopulation = ({
+const EditTargetPopulation = ({
   paymentPlan,
   screenBeneficiary,
 }: EditTargetPopulationProps): ReactElement => {
@@ -209,3 +210,5 @@ export const EditTargetPopulation = ({
     </Formik>
   );
 };
+
+export default withErrorBoundary(EditTargetPopulation, 'EditTargetPopulation');

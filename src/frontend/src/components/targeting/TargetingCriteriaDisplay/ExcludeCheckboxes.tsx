@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FC } from 'react';
 import { useProgramContext } from 'src/programContext';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const NoWrapCheckbox = styled(FormControlLabel)`
   white-space: nowrap;
@@ -18,7 +19,7 @@ interface ExcludeCheckboxesProps {
   targetPopulation: any;
 }
 
-export const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
+const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
   isStandardDctType,
   isSocialDctType,
   screenBeneficiary,
@@ -175,3 +176,5 @@ export const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
     </Box>
   );
 };
+
+export default withErrorBoundary(ExcludeCheckboxes, 'ExcludeCheckboxes');
