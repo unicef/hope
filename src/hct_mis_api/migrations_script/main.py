@@ -60,7 +60,6 @@ if __name__ == "__main__":
         ("payment", "0009_migration"),
         ("payment", "0010_migration"),
         ("aurora", "0003_migration"),
-        ("account", "0003_migration"),
         ("accountability", "0004_migration"),
         ("registration_data", "0002_migration"),
     ]
