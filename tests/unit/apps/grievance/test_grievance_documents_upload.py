@@ -120,7 +120,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
         ]
     )
     def test_mutation_creates_documents(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program, self.program)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
             context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
