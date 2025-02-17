@@ -22,8 +22,9 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         user_permissions = [
             Permissions.RDI_VIEW_LIST,
         ]
-        partner = PartnerFactory(name="UNICEF")
-        cls.user = UserFactory(username="Hope_Test_DRF", password="HopePass", partner=partner, is_superuser=True)
+        unicef_partner = PartnerFactory(name="UNICEF")
+        unicef = PartnerFactory(name="UNICEF HQ", parent=unicef_partner)
+        cls.user = UserFactory(username="Hope_Test_DRF", password="HopePass", partner=unicef, is_superuser=True)
         permission_list = [perm.value for perm in user_permissions]
         role, created = Role.objects.update_or_create(name="TestName", defaults={"permissions": permission_list})
         user_role, _ = RoleAssignment.objects.get_or_create(user=cls.user, role=role, business_area=cls.business_area)
