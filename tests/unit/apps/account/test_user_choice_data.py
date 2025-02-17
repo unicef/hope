@@ -26,18 +26,20 @@ class RoleAssignmentsTest(APITestCase):
         partner_unicef, _ = Partner.objects.get_or_create(name="UNICEF")
 
         # UNICEF subpartner
-        unicef_afghanistan = PartnerFactory(name="UNICEF Partner in Afghanistan", parent=partner_unicef)
+        unicef_afghanistan = PartnerFactory(name=f"UNICEF Partner for {cls.business_area.slug}", parent=partner_unicef)
         cls.user = UserFactory(partner=unicef_afghanistan, username="unicef_user")
 
         # partner with role in BA
         partner_with_role = PartnerFactory(name="Partner with BA access")
 
-        # partner with role in BA but is a parent
+        # partner allowed in BA but is a parent
         parent_partner = PartnerFactory(name="Parent Partner with BA access")
         partner_with_role.parent = parent_partner
         partner_with_role.save()
 
-        for partner in Partner.objects.all():
+        parent_partner.allowed_business_areas.add(cls.business_area)
+
+        for partner in Partner.objects.exclude(id__in=[partner_unicef.id, parent_partner.id]):
             partner.allowed_business_areas.add(cls.business_area)
             cls.create_partner_role_with_permissions(partner, [], cls.business_area)
 

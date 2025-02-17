@@ -11,13 +11,19 @@ snapshots['RoleAssignmentsTest::test_user_choice_data 1'] = {
     'data': {
         'userPartnerChoices': [
             {
+                'name': 'Partner Without Role'
+            },
+            {
                 'name': 'Partner with BA access'
             },
             {
                 'name': 'UNHCR'
             },
             {
-                'name': 'UNICEF'
+                'name': 'UNICEF HQ'
+            },
+            {
+                'name': 'UNICEF Partner for afghanistan'
             },
             {
                 'name': 'WFP'
