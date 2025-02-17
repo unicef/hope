@@ -1,4 +1,4 @@
-import React, { FC, ReactNode } from 'react';
+import  { FC, ReactNode } from 'react';
 import { ErrorBoundary, ErrorBoundaryProps } from '@sentry/react';
 import { SomethingWentWrong } from '@containers/pages/somethingWentWrong/SomethingWentWrong';
 
@@ -19,7 +19,7 @@ export const UniversalErrorBoundary: FC<UniversalErrorBoundaryProps> = ({
       fallback={({ error: err }) => (
         <SomethingWentWrong
           pathname={location.pathname}
-          errorMessage={err.message}
+          errorMessage={(err as Error).message}
           component={componentName}
         />
       )}

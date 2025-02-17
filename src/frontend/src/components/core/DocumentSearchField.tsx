@@ -1,4 +1,4 @@
-import { Grid, MenuItem } from '@mui/material';
+import { Grid2 as Grid, MenuItem } from '@mui/material';
 import { SelectFilter } from '@core/SelectFilter';
 import { SearchTextField } from '@core/SearchTextField';
 import { ChoiceObject } from '@generated/graphql';
@@ -20,8 +20,8 @@ export const DocumentSearchField = ({
   const { t } = useTranslation();
 
   return (
-    <Grid container item xs={6} spacing={0}>
-      <Grid item xs={4}>
+    <Grid container  size={{ xs: 6 }} spacing={0}>
+      <Grid size={{ xs: 4 }}>
         <SelectFilter
           onChange={(e) => onChange('documentType', e.target.value)}
           label={t('Document Type')}
@@ -38,7 +38,7 @@ export const DocumentSearchField = ({
           ))}
         </SelectFilter>
       </Grid>
-      <Grid item xs={8}>
+      <Grid size={{ xs:8 }}>
         <SearchTextField
           value={number}
           label={t('Document Number')}

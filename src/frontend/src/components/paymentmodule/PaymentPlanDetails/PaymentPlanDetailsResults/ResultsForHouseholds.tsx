@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material';
+import { Grid2 as Grid } from '@mui/material';
 import {
   SummaryBorder,
   SummaryValue,
@@ -19,9 +19,9 @@ export const ResultsForHouseholds = ({
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   return (
-    <Grid item xs={4}>
+    <Grid size={{ xs: 4 }}>
       <Grid container spacing={0} justifyContent="flex-end">
-        <Grid item xs={6}>
+        <Grid size={{ xs:6 }}>
           <SummaryBorder>
             <LabelizedField
               label={`Total Number of ${beneficiaryGroup?.groupLabelPlural}`}
@@ -30,7 +30,7 @@ export const ResultsForHouseholds = ({
             </LabelizedField>
           </SummaryBorder>
         </Grid>
-        <Grid item xs={6}>
+        <Grid size={{ xs:6 }}>
           <SummaryBorder>
             <LabelizedField
               label={`Targeted ${beneficiaryGroup?.memberLabelPlural}`}
