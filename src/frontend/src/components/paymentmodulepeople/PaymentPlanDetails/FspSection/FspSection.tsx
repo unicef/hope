@@ -23,7 +23,7 @@ export function FspSection({
   const { isActiveProgram } = useProgramContext();
 
   const { deliveryMechanisms, isFollowUp } = paymentPlan;
-  const showFspDisplay = deliveryMechanisms.length;
+  const showFspDisplay = deliveryMechanisms?.length;
   const shouldDisableSetUpFsp = (): boolean => {
     if (paymentPlan.isFollowUp) {
       return false;

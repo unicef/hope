@@ -88,8 +88,6 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
             "start_date",
             "end_date",
             "description",
-            "ca_id",
-            "ca_hash_id",
             "business_area",
             "budget",
             "frequency_of_payments",
@@ -175,8 +173,6 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     )
     start_date = models.DateField(db_index=True)
     end_date = models.DateField(null=True, blank=True, db_index=True)
-    ca_id = CICharField(max_length=255, null=True, blank=True, db_index=True)
-    ca_hash_id = CICharField(max_length=255, null=True, blank=True, db_index=True)
     data_collecting_type = models.ForeignKey(
         "core.DataCollectingType", related_name="programs", on_delete=models.PROTECT
     )
@@ -385,12 +381,7 @@ class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, C
 
     @property
     def can_remove_cycle(self) -> bool:
-        return (
-            not self.target_populations.exists()
-            and not self.payment_plans.exists()
-            and self.program.cycles.count() > 1
-            and self.status == ProgramCycle.DRAFT
-        )
+        return not self.payment_plans.exists() and self.program.cycles.count() > 1 and self.status == ProgramCycle.DRAFT
 
     @property
     def total_entitled_quantity_usd(self) -> Decimal:

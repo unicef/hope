@@ -16,7 +16,6 @@ import { LockedTargetPopulationHeaderButtons } from './LockedTargetPopulationHea
 import { OpenTargetPopulationHeaderButtons } from './OpenTargetPopulationHeaderButtons';
 import { AdminButton } from '@core/AdminButton';
 import { ReactElement } from 'react';
-import { Alert } from '@mui/material';
 
 const HeaderWrapper = styled.div`
   display: flex;
@@ -103,18 +102,6 @@ export function TargetPopulationPageHeader({
         />
       );
       break;
-  }
-  if (
-    paymentPlan.status === PaymentPlanStatus.MigrationBlocked ||
-    paymentPlan.status === PaymentPlanStatus.MigrationFailed
-  ) {
-    buttons = (
-      <div>
-        <Alert severity="warning">
-          This targeting is currently undergoing a migration process. Please wait and avoid making any changes to it until this message disappears.
-        </Alert>
-      </div>
-    );
   }
   return (
     <PageHeader

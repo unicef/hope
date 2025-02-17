@@ -67,8 +67,6 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
     </BusinessArea>
     """
 
-    code_to_cash_assist_mapping = {"575RE00000": "SLVK"}
-    cash_assist_to_code_mapping = {v: k for k, v in code_to_cash_assist_mapping.items()}
     code = models.CharField(max_length=10, unique=True)
     slug = models.CharField(
         max_length=250,
@@ -166,10 +164,6 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
 
     def natural_key(self) -> Tuple[str]:
         return (self.code,)
-
-    @property
-    def cash_assist_code(self) -> str:
-        return self.code_to_cash_assist_mapping.get(self.code, self.code)
 
     @property
     def can_import_ocha_response_plans(self) -> bool:

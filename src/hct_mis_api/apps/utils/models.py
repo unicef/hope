@@ -405,7 +405,6 @@ class SignatureManager(models.Manager):
         bulk_create_payment_snapshot_data([x.id for x in created_objects])
         for obj in created_objects:
             obj.update_signature_hash()
-            # print(obj.signature_hash)
         super().bulk_update(created_objects, ["signature_hash"])
         return created_objects
 

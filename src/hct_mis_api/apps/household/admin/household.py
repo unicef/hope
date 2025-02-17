@@ -26,10 +26,7 @@ from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import JSONBSet, decode_id_string_required
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.admin.mixins import (
-    CustomTargetPopulationMixin,
-    HouseholdWithDrawnMixin,
-)
+from hct_mis_api.apps.household.admin.mixins import HouseholdWithDrawnMixin
 from hct_mis_api.apps.household.celery_tasks import (
     enroll_households_to_program_task,
     mass_withdraw_households_from_list_task,
@@ -203,7 +200,6 @@ class HouseholdAdmin(
     SmartFieldsetMixin,
     CursorPaginatorAdmin,
     HouseholdWithDrawnMixin,
-    CustomTargetPopulationMixin,
     HOPEModelAdminBase,
     IsOriginalAdminMixin,
     HouseholdWithdrawFromListMixin,
@@ -376,14 +372,6 @@ class HouseholdAdmin(
 
         active_individuals = hh.individuals(manager="all_objects").exclude(Q(duplicate=True) | Q(withdrawn=True))
         ghosts_individuals = hh.individuals(manager="all_objects").filter(Q(duplicate=True) | Q(withdrawn=True))
-        all_individuals = hh.individuals(manager="all_objects").all()
-        if hh.collect_individual_data:
-            if active_individuals.count() != hh.size:
-                warnings.append([messages.WARNING, "HH size does not match"])
-
-        else:
-            if all_individuals.count() > 1:
-                warnings.append([messages.ERROR, "Individual data not collected but members found"])
 
         if hh.size != total_in_ranges:
             warnings.append(
