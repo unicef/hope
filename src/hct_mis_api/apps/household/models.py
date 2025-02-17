@@ -41,10 +41,9 @@ from hct_mis_api.apps.utils.models import (
     ConcurrencyModel,
     InternalDataFieldModel,
     MergeStatusModel,
-    RepresentationManager,
+    PendingManager,
     SoftDeletableRepresentationMergeStatusModel,
     SoftDeletableRepresentationMergeStatusModelWithDate,
-    SoftDeletableRepresentationPendingManager,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
@@ -729,8 +728,6 @@ class Document(AbstractSyncable, SoftDeletableRepresentationMergeStatusModel, Ti
     class Meta:
         constraints = [
             # if document_type.unique_for_individual=True then document of this type must be unique for an individual
-            # is_original = True -> 1 original instance of document
-            # is_original = False -> 1 representation of document per program
             UniqueConstraint(
                 fields=["individual", "type", "country", "program"],
                 condition=Q(
@@ -747,7 +744,7 @@ class Document(AbstractSyncable, SoftDeletableRepresentationMergeStatusModel, Ti
             ),
             # document_number must be unique across all documents of the same type
             UniqueConstraint(
-                fields=["document_number", "type", "country", "program", "is_original"],
+                fields=["document_number", "type", "country", "program"],
                 condition=Q(Q(is_removed=False) & Q(status="VALID") & Q(rdi_merge_status=MergeStatusModel.MERGED)),
                 name="unique_if_not_removed_and_valid_for_representations",
             ),
@@ -1282,10 +1279,7 @@ class EntitlementCard(TimeStampedUUIDModel):
         on_delete=models.SET_NULL,
         null=True,
     )
-    is_original = models.BooleanField(db_index=True, default=False)
-
-    objects = RepresentationManager()
-    original_and_repr_objects = models.Manager()
+    objects = models.Manager()
 
 
 class XlsxUpdateFile(TimeStampedUUIDModel):
@@ -1329,7 +1323,7 @@ class BankAccountInfo(SoftDeletableRepresentationMergeStatusModelWithDate, TimeS
 
 
 class PendingHousehold(Household):
-    objects = SoftDeletableRepresentationPendingManager()
+    objects = PendingManager()
 
     @property
     def individuals(self) -> QuerySet:
@@ -1358,7 +1352,7 @@ class PendingHousehold(Household):
 
 
 class PendingIndividual(Individual):
-    objects = SoftDeletableRepresentationPendingManager()
+    objects = PendingManager()
 
     @property
     def households_and_roles(self) -> QuerySet:
@@ -1387,7 +1381,7 @@ class PendingIndividual(Individual):
 
 
 class PendingIndividualIdentity(IndividualIdentity):
-    objects = SoftDeletableRepresentationPendingManager()
+    objects = PendingManager()
 
     class Meta:
         proxy = True
@@ -1396,7 +1390,7 @@ class PendingIndividualIdentity(IndividualIdentity):
 
 
 class PendingDocument(Document):
-    objects = SoftDeletableRepresentationPendingManager()
+    objects = PendingManager()
 
     class Meta:
         proxy = True
@@ -1405,7 +1399,7 @@ class PendingDocument(Document):
 
 
 class PendingBankAccountInfo(BankAccountInfo):
-    objects = SoftDeletableRepresentationPendingManager()
+    objects = PendingManager()
 
     class Meta:
         proxy = True
@@ -1414,7 +1408,7 @@ class PendingBankAccountInfo(BankAccountInfo):
 
 
 class PendingIndividualRoleInHousehold(IndividualRoleInHousehold):
-    objects = SoftDeletableRepresentationPendingManager()
+    objects = PendingManager()
 
     class Meta:
         proxy = True

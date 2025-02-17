@@ -45,35 +45,9 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class RepresentationManager(models.Manager):
-    def get_queryset(self) -> "QuerySet":
-        return super().get_queryset().filter(is_original=False)
-
-
-class SoftDeletableRepresentationManager(SoftDeletableManager):
-    def get_queryset(self) -> "QuerySet":
-        return super().get_queryset().filter(is_original=False)
-
-
-# remove after data migration
-class IsOriginalManager(models.Manager):
-    def get_queryset(self) -> "QuerySet":
-        return super().get_queryset().filter(is_original=True)
-
-
 class SoftDeletableIsVisibleManager(SoftDeletableManager):
     def get_queryset(self) -> "QuerySet":
         return super().get_queryset().filter(is_visible=True)
-
-
-class SoftDeletableRepresentationMergedManager(SoftDeletableRepresentationManager):
-    def get_queryset(self) -> "QuerySet":
-        return super().get_queryset().filter(rdi_merge_status="MERGED")
-
-
-class SoftDeletableRepresentationPendingManager(SoftDeletableRepresentationManager):
-    def get_queryset(self) -> "QuerySet":
-        return super().get_queryset().filter(rdi_merge_status="PENDING")
 
 
 class MergedManager(models.Manager):
@@ -86,7 +60,7 @@ class PendingManager(models.Manager):
         return super().get_queryset().filter(rdi_merge_status="PENDING")
 
 
-class SoftDeletableIsOriginalManagerMixin:
+class SoftDeletableManagerMixin:
     """
     Manager that limits the queryset by default to show only not removed
     instances of model.
@@ -117,11 +91,7 @@ class SoftDeletableIsOriginalManagerMixin:
         if hasattr(self, "_hints"):
             kwargs["hints"] = self._hints
 
-        return self._queryset_class(**kwargs).filter(is_removed=False, is_original=True)
-
-
-class SoftDeletableIsOriginalManager(SoftDeletableIsOriginalManagerMixin, models.Manager):
-    pass
+        return self._queryset_class(**kwargs).filter(is_removed=False)
 
 
 class MergeStatusModel(models.Model):
@@ -147,17 +117,15 @@ class SoftDeletableRepresentationMergeStatusModel(MergeStatusModel):
     """
 
     is_removed = models.BooleanField(default=False)
-    is_original = models.BooleanField(db_index=True, default=False)
 
     class Meta:
         abstract = True
 
-    objects = SoftDeletableRepresentationMergedManager(_emit_deprecation_warnings=True)
-    all_merge_status_objects = SoftDeletableRepresentationManager()
-    available_objects = SoftDeletableRepresentationMergedManager()
+    objects = MergedManager()
+    all_merge_status_objects = SoftDeletableManager()
+    available_objects = MergedManager()
     all_objects = models.Manager()
-    original_and_repr_objects = SoftDeletableManager(_emit_deprecation_warnings=True)
-    pending_objects = SoftDeletableRepresentationPendingManager()
+    pending_objects = PendingManager()
 
     def delete(self, using: bool = None, soft: bool = True, *args: Any, **kwargs: Any) -> Any:  # type: ignore
         """

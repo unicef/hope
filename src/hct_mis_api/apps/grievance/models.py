@@ -82,22 +82,6 @@ class GrievanceTicketManager(models.Manager):
             (TicketComplaintDetails.objects.filter(Q(individual__in=individuals) | Q(household__in=households))),
         )
 
-    # remove 'is_original' after data migration
-    def get_queryset(self) -> "QuerySet":
-        return super().get_queryset().filter(is_original=False)
-
-
-class OriginalAndRepresentationsManager(models.Manager):
-    # TODO: remove after data migration
-    def get_queryset(self) -> "QuerySet":
-        return super().get_queryset()
-
-
-class OnlyOriginalManager(models.Manager):
-    # TODO: remove after data migration
-    def get_queryset(self) -> "QuerySet":
-        return super().get_queryset().filter(is_original=True)
-
 
 class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, UnicefIdentifiedModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
@@ -409,9 +393,6 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
     )
 
     objects = GrievanceTicketManager()
-    # TODO: remove after data migration
-    # added for migration purposes because 0062 call .objects()
-    default_for_migrations_fix = OriginalAndRepresentationsManager()
 
     def flatten(self, t: List[List]) -> List:
         return [item for sublist in t for item in sublist]
