@@ -10,8 +10,10 @@ from hct_mis_api.apps.household.models import (
     FEMALE,
     MALE,
     NON_BENEFICIARY,
+    NOT_COLLECTED,
+    OTHER,
     Household,
-    Individual, OTHER, NOT_COLLECTED,
+    Individual,
 )
 
 # Set of Individual fields which affects Household recalculation

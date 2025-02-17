@@ -467,7 +467,7 @@ class Household(
     male_children_disabled_count = models.PositiveIntegerField(default=None, null=True)
     female_children_disabled_count = models.PositiveIntegerField(default=None, null=True)
     other_sex_group_count = models.PositiveIntegerField(default=None, null=True)  # OTHER
-    unknown_sex_group_count = models.PositiveIntegerField(default=None, null=True)   # NOT_COLLECTED
+    unknown_sex_group_count = models.PositiveIntegerField(default=None, null=True)  # NOT_COLLECTED
 
     registration_data_import = models.ForeignKey(
         "registration_data.RegistrationDataImport",
