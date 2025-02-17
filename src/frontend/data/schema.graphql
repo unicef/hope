@@ -359,7 +359,6 @@ type BusinessAreaNode implements Node {
   deduplicationIgnoreWithdraw: Boolean!
   biometricDeduplicationThreshold: Float!
   customFields: JSONString!
-  partners: [PartnerNode!]!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   dataCollectingTypes(offset: Int, before: String, after: String, first: Int, last: Int): DataCollectingTypeNodeConnection!
   partnerSet: [PartnerNode!]!
@@ -4020,7 +4019,7 @@ type TicketHouseholdDataUpdateDetailsNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  household: HouseholdNode
+  household: HouseholdNode!
   householdData: Arg
 }
 
@@ -4040,7 +4039,7 @@ type TicketIndividualDataUpdateDetailsNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  individual: IndividualNode
+  individual: IndividualNode!
   individualData: Arg
   roleReassignData: JSONString!
 }
@@ -4433,7 +4432,6 @@ type UserBusinessAreaNode implements Node {
   deduplicationIgnoreWithdraw: Boolean!
   biometricDeduplicationThreshold: Float!
   customFields: JSONString!
-  partners: [PartnerNode!]!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   dataCollectingTypes(offset: Int, before: String, after: String, first: Int, last: Int): DataCollectingTypeNodeConnection!
   partnerSet: [PartnerNode!]!
@@ -4525,7 +4523,7 @@ type UserRoleNode {
   updatedAt: DateTime!
   businessArea: UserBusinessAreaNode!
   partner: PartnerNode
-  role: RoleNode!
+  role: RoleNode
   program: ProgramNode
   expiryDate: Date
   user: UserNode
