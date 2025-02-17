@@ -1,6 +1,6 @@
 import { Box, Button } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { Link, useLocation, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { SurveyDetails } from '@components/accountability/Surveys/SurveyDetails';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -22,13 +22,12 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { useProgramContext } from '../../../../programContext';
 import { AdminButton } from '@core/AdminButton';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
-export function SurveyDetailsPage(): ReactElement {
+function SurveyDetailsPage(): ReactElement {
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
-  const location = useLocation();
   const { id } = useParams();
   const { baseUrl } = useBaseUrl();
   const { isActiveProgram } = useProgramContext();
@@ -117,14 +116,7 @@ export function SurveyDetailsPage(): ReactElement {
   };
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'SurveyDetailsPage.tsx');
-      }}
-      componentName="SurveyDetailsPage"
-    >
+    <>
       <PageHeader
         title={`${survey.unicefId}`}
         breadCrumbs={
@@ -153,6 +145,7 @@ export function SurveyDetailsPage(): ReactElement {
           permissions,
         ) && <UniversalActivityLogTable objectId={id} />}
       </Box>
-    </UniversalErrorBoundary>
+    </>
   );
 }
+export default withErrorBoundary(SurveyDetailsPage, 'SurveyDetailsPage');

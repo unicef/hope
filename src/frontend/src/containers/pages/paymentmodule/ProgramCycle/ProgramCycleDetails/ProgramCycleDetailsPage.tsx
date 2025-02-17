@@ -1,4 +1,4 @@
-import React, { ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { decodeIdString, getFilterFromQueryParams } from '@utils/utils';
 import { useQuery } from '@tanstack/react-query';
 import { fetchProgramCycle } from '@api/programCycleApi';
@@ -11,7 +11,7 @@ import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { PaymentPlansTable } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansTable';
 import { PaymentPlansFilters } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansFilters';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const initialFilter = {
   search: '',
@@ -52,14 +52,7 @@ export const ProgramCycleDetailsPage = (): ReactElement => {
   if (isLoading) return null;
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'ProgramCycleDetailsPage.tsx');
-      }}
-      componentName="ProgramCycleDetailsPage"
-    >
+    <>
       <ProgramCycleDetailsHeader programCycle={data} />
       <ProgramCycleDetailsSection programCycle={data} />
       <TableWrapper>
@@ -81,6 +74,10 @@ export const ProgramCycleDetailsPage = (): ReactElement => {
           )}
         />
       </TableWrapper>
-    </UniversalErrorBoundary>
+    </>
   );
 };
+export default withErrorBoundary(
+  ProgramCycleDetailsPage,
+  'ProgramCycleDetailsPage',
+);
