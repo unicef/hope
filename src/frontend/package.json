@@ -111,7 +111,7 @@
     "@typescript-eslint/parser": "6.x",
     "babel-jest": "^29.7.0",
     "braces": "3.0.3",
-    "esbuild": "0.24.2",
+    "esbuild": "0.25.0",
     "esbuild-jest": "^0.5.0",
     "eslint": "^8.56.0",
     "eslint-config-airbnb": "^19.0.4",
