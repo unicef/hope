@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material';
+import { Grid2 as Grid } from '@mui/material';
 import { Field } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { GrievancesChoiceDataQuery } from '@generated/graphql';
@@ -101,7 +101,7 @@ export function Selection({
 
   return (
     <Grid container spacing={3}>
-      <Grid item xs={6}>
+      <Grid size={{ xs:6 }}>
         <Field
           name="category"
           label="Category"
@@ -117,7 +117,7 @@ export function Selection({
         />
       </Grid>
       {showIssueType(values) && (
-        <Grid item xs={6}>
+        <Grid size={{ xs:6 }}>
           <Field
             name="issueType"
             label="Issue Type"
@@ -131,13 +131,13 @@ export function Selection({
       {values.category && (
         <>
           <DividerLine />
-          <Grid item xs={6}>
+          <Grid size={{ xs:6 }}>
             <LabelizedField label={t('Category Description')}>
               {categoryDescription}
             </LabelizedField>
           </Grid>
           {issueTypeDescription && (
-            <Grid item xs={6}>
+            <Grid size={{ xs:6 }}>
               <LabelizedField label={t('Issue Type Description')}>
                 {issueTypeDescription}
               </LabelizedField>

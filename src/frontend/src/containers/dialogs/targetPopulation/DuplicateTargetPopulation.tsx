@@ -1,4 +1,4 @@
-import { Button, DialogContent, DialogTitle, Grid } from '@mui/material';
+import { Button, DialogContent, DialogTitle, Grid2 as Grid } from '@mui/material';
 import { Field, Formik } from 'formik';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
@@ -96,7 +96,7 @@ export const DuplicateTargetPopulation = ({
                 )}
               </DialogDescription>
               <Grid container spacing={4}>
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12 }}>
                   <Field
                     name="name"
                     fullWidth
@@ -106,7 +106,7 @@ export const DuplicateTargetPopulation = ({
                     component={FormikTextField}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12 }}>
                   <ProgramCycleAutocompleteRest
                     value={values.programCycleId}
                     onChange={async (e) => {
