@@ -180,8 +180,8 @@ class BaseComponents(Common):
 
     def selectGlobalProgramFilter(self, name: str) -> None:
         # TODO: remove this one after fix bug with cache
-        # self.getMenuUserProfile().click()
-        # self.getMenuItemClearCache().click()
+        self.getMenuUserProfile().click()
+        self.getMenuItemClearCache().click()
 
         self.getGlobalProgramFilter().click()
         self.getGlobalProgramFilterSearchInput().clear()
