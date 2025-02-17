@@ -1,4 +1,4 @@
-import { Grid, MenuItem } from '@mui/material';
+import { Grid2 as Grid, MenuItem } from '@mui/material';
 import GroupIcon from '@mui/icons-material/Group';
 import moment from 'moment';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -58,7 +58,7 @@ export function LookUpProgrammesFiltersSurveys({
       isOnPaper={false}
     >
       <Grid container alignItems="flex-end" spacing={3}>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SearchTextField
             label="Search"
             value={filter.search}
@@ -66,7 +66,7 @@ export function LookUpProgrammesFiltersSurveys({
             data-cy="filters-search"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             label="Status"
@@ -80,7 +80,7 @@ export function LookUpProgrammesFiltersSurveys({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <DatePickerFilter
             label="Start Date"
             dataCy="filters-start-date"
@@ -93,7 +93,7 @@ export function LookUpProgrammesFiltersSurveys({
             value={filter.startDate}
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <DatePickerFilter
             label="End Date"
             dataCy="filters-end-date"
@@ -106,7 +106,7 @@ export function LookUpProgrammesFiltersSurveys({
             value={filter.endDate}
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SelectFilter
             onChange={(e) => handleFilterChange('sector', e.target.value)}
             label="Sector"
@@ -121,7 +121,7 @@ export function LookUpProgrammesFiltersSurveys({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <NumberTextField
             topLabel={`Num. of ${beneficiaryGroup?.groupLabelPlural}`}
             placeholder="From"
@@ -133,7 +133,7 @@ export function LookUpProgrammesFiltersSurveys({
             icon={<GroupIcon />}
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <NumberTextField
             data-cy="filters-number-of-households-max"
             value={filter.numberOfHouseholdsMax}
@@ -144,7 +144,7 @@ export function LookUpProgrammesFiltersSurveys({
             icon={<GroupIcon />}
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <NumberTextField
             topLabel="Budget (USD)"
             data-cy="filters-budget-min"
@@ -153,7 +153,7 @@ export function LookUpProgrammesFiltersSurveys({
             onChange={(e) => handleFilterChange('budgetMin', e.target.value)}
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <NumberTextField
             value={filter.budgetMax}
             data-cy="filters-budget-max"
@@ -161,7 +161,7 @@ export function LookUpProgrammesFiltersSurveys({
             onChange={(e) => handleFilterChange('budgetMax', e.target.value)}
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SelectFilter
             onChange={(e) =>
               handleFilterChange('dataCollectingType', e.target.value)

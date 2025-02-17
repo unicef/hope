@@ -1,4 +1,4 @@
-import { Grid, Tooltip } from '@mui/material';
+import { Grid2 as Grid, Tooltip } from '@mui/material';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field, Form, useFormikContext } from 'formik';
 import { ReactElement, useMemo } from 'react';
@@ -88,7 +88,7 @@ export const ProgramForm = ({
   return (
     <Form>
       <Grid container spacing={3}>
-        <Grid item xs={6}>
+        <Grid size={{ xs:6 }}>
           <Field
             name="name"
             label={t('Programme Name')}
@@ -100,7 +100,7 @@ export const ProgramForm = ({
             data-cy="input-programme-name"
           />
         </Grid>
-        <Grid item xs={6}>
+        <Grid size={{ xs:6 }}>
           <Field
             name="programmeCode"
             label={t('Programme Code')}
@@ -112,7 +112,7 @@ export const ProgramForm = ({
             data-cy="input-programme-code"
           />
         </Grid>
-        <Grid item xs={6}>
+        <Grid size={{ xs:6 }}>
           <Field
             name="startDate"
             label={t('Start Date')}
@@ -123,7 +123,7 @@ export const ProgramForm = ({
             data-cy="input-start-date"
           />
         </Grid>
-        <Grid item xs={6}>
+        <Grid size={{ xs:6 }}>
           <Field
             name="endDate"
             label={t('End Date')}
@@ -137,7 +137,7 @@ export const ProgramForm = ({
             data-cy="input-end-date"
           />
         </Grid>
-        <Grid item xs={6}>
+        <Grid size={{ xs:6 }}>
           <Field
             name="sector"
             label={t('Sector')}
@@ -149,7 +149,7 @@ export const ProgramForm = ({
             data-cy="input-sector"
           />
         </Grid>
-        <Grid item xs={6}>
+        <Grid size={{ xs:6 }}>
           <Field
             name="dataCollectingTypeCode"
             label={t('Data Collecting Type')}
@@ -165,7 +165,7 @@ export const ProgramForm = ({
             data-cy="input-data-collecting-type"
           />
         </Grid>
-        <Grid item xs={6}>
+        <Grid size={{ xs:6 }}>
           <Tooltip
             title={
               !values.dataCollectingTypeCode
@@ -193,7 +193,7 @@ export const ProgramForm = ({
             </span>
           </Tooltip>
         </Grid>
-        <Grid item xs={12}>
+        <Grid size={{ xs: 12 }}>
           <Field
             name="description"
             label={t('Description')}
@@ -205,7 +205,7 @@ export const ProgramForm = ({
             data-cy="input-description"
           />
         </Grid>
-        <Grid item xs={6}>
+        <Grid size={{ xs:6 }}>
           <Field
             name="budget"
             label={t('Budget (USD)')}
@@ -217,7 +217,7 @@ export const ProgramForm = ({
             data-cy="input-budget"
           />
         </Grid>
-        <Grid item xs={6}>
+        <Grid size={{ xs:6 }}>
           <Field
             name="administrativeAreasOfImplementation"
             label={t('Administrative Areas of Implementation')}
@@ -228,7 +228,7 @@ export const ProgramForm = ({
             data-cy="input-admin-area"
           />
         </Grid>
-        <Grid item xs={6}>
+        <Grid size={{ xs:6 }}>
           <Field
             name="populationGoal"
             label={t('Population Goal (# of Individuals)')}
@@ -239,8 +239,8 @@ export const ProgramForm = ({
             data-cy="input-population-goal"
           />
         </Grid>
-        <Grid item xs={6} />
-        <Grid item xs={6}>
+        <Grid size={{ xs:6 }} />
+        <Grid size={{ xs:6 }}>
           <Field
             name="cashPlus"
             label={t('Cash+')}
@@ -249,8 +249,8 @@ export const ProgramForm = ({
             data-cy="input-cash-plus"
           />
         </Grid>
-        <Grid item xs={6} />
-        <Grid item xs={6}>
+        <Grid size={{ xs:6 }} />
+        <Grid size={{ xs:6 }}>
           <Field
             name="frequencyOfPayments"
             label={t('Frequency of Payment')}

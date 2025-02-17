@@ -9,7 +9,7 @@ import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { FormikDecimalField } from '@shared/Formik/FormikDecimalField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { Grid } from '@mui/material';
+import { Grid2 as Grid } from '@mui/material';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 
 const FlexWrapper = styled.div`
@@ -280,7 +280,7 @@ export const SubField: FC<SubFieldProps> = ({
       case 'PDU':
         return (
           <Grid container spacing={2}>
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <Field
                 name={`${baseName}.roundNumber`}
                 required
@@ -303,7 +303,7 @@ export const SubField: FC<SubFieldProps> = ({
                 data-cy="input-round-number"
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <Field
                 name={`${baseName}.isNull`}
                 label={t('Only Empty Values')}
@@ -312,7 +312,7 @@ export const SubField: FC<SubFieldProps> = ({
                 data-cy="input-include-null-round"
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               {renderFieldByType(
                 field.pduData?.subtype ||
                   field.fieldAttribute?.pduData?.subtype,
