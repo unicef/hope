@@ -5,7 +5,7 @@ from django.contrib.auth.models import AnonymousUser
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory, RoleFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import (
@@ -75,13 +75,19 @@ class TestAllProgramsQuery(APITestCase):
 
         cls.partner = PartnerFactory(name="WFP")
         cls.partner.allowed_business_areas.add(cls.business_area)
-        cls.create_partner_role_with_permissions(cls.partner, [], cls.business_area)
+        cls.create_partner_role_with_permissions(
+            cls.partner, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], cls.business_area
+        )
 
         cls.user = UserFactory.create(partner=cls.partner)
 
-        cls.unicef_partner = PartnerFactory(name="UNICEF")
-        other_partner = PartnerFactory(name="Other Partner")
-        other_partner.allowed_business_areas.add(cls.business_area)
+        unicef = PartnerFactory(name="UNICEF")
+        cls.unicef_partner = PartnerFactory(name="UNICEF HQ", parent=unicef)
+        cls.other_partner = PartnerFactory(name="Other Partner")
+        cls.other_partner.allowed_business_areas.add(cls.business_area)
+        cls.create_partner_role_with_permissions(
+            cls.other_partner, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], cls.business_area
+        )
 
         program_with_partner_access = ProgramFactory.create(
             name="Program with partner access",
@@ -90,9 +96,8 @@ class TestAllProgramsQuery(APITestCase):
             data_collecting_type=data_collecting_type,
             partner_access=Program.SELECTED_PARTNERS_ACCESS,
         )
-        ProgramPartnerThrough.objects.create(
-            program=program_with_partner_access,
-            partner=cls.partner,
+        cls.create_partner_role_with_permissions(
+            cls.partner, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], cls.business_area, program_with_partner_access
         )
 
         ProgramFactory.create(
@@ -112,17 +117,24 @@ class TestAllProgramsQuery(APITestCase):
             partner_access=Program.NONE_PARTNERS_ACCESS,
         )
 
-        program_without_partner_access = ProgramFactory.create(
-            name="Program without partner access",
+        program_wit_selected_partner_access = ProgramFactory.create(
+            name="Program with selected partner access",
             status=Program.ACTIVE,
             business_area=cls.business_area,
             data_collecting_type=data_collecting_type,
             partner_access=Program.SELECTED_PARTNERS_ACCESS,
         )
-        ProgramPartnerThrough.objects.create(
-            program=program_without_partner_access,
-            partner=other_partner,
+        cls.create_partner_role_with_permissions(
+            cls.other_partner, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], cls.business_area, program_wit_selected_partner_access
         )
+
+        # adjust "Role with all permissions" (for UNICEF HQ)
+        role_with_all_permissions = RoleFactory.create(name="Role with all permissions")
+        role_with_all_permissions.permissions = ["PROGRAMME_VIEW_LIST_AND_DETAILS"]
+        role_with_all_permissions.save()
+
+        cls.partner_no_permissions = PartnerFactory(name="Partner without permissions")
+        cls.partner_no_permissions.allowed_business_areas.add(cls.business_area)
 
     @parameterized.expand(
         [
@@ -131,7 +143,11 @@ class TestAllProgramsQuery(APITestCase):
         ]
     )
     def test_all_programs_query(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.user.partner = self.partner_no_permissions
+        self.user.save()
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area,
+        )
         self.snapshot_graphql_request(
             request_string=self.ALL_PROGRAMS_QUERY,
             context={
@@ -145,8 +161,32 @@ class TestAllProgramsQuery(APITestCase):
 
     def test_all_programs_query_unicef_partner(self) -> None:
         user = UserFactory.create(partner=self.unicef_partner)
-        # granting any role in the business area to the user; permission to view programs is inherited from the unicef partner
-        self.create_user_role_with_permissions(user, [Permissions.RDI_MERGE_IMPORT], self.business_area)
+        self.snapshot_graphql_request(
+            request_string=self.ALL_PROGRAMS_QUERY,
+            context={
+                "user": user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={"businessArea": self.business_area.slug, "orderBy": "name"},
+        )
+
+    def test_all_programs_query_first_partner(self) -> None:
+        user = UserFactory.create(partner=self.partner)
+        self.snapshot_graphql_request(
+            request_string=self.ALL_PROGRAMS_QUERY,
+            context={
+                "user": user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={"businessArea": self.business_area.slug, "orderBy": "name"},
+        )
+
+    def test_all_programs_query_other_partner(self) -> None:
+        user = UserFactory.create(partner=self.other_partner)
         self.snapshot_graphql_request(
             request_string=self.ALL_PROGRAMS_QUERY,
             context={
@@ -176,7 +216,9 @@ class TestAllProgramsQuery(APITestCase):
         )
 
         user = UserFactory.create(partner=self.unicef_partner)
-        self.create_user_role_with_permissions(user, [Permissions.RDI_MERGE_IMPORT], self.business_area)
+        self.create_user_role_with_permissions(
+            user, [Permissions.RDI_MERGE_IMPORT], self.business_area, whole_business_area_access=True
+        )
         self.snapshot_graphql_request(
             request_string=self.ALL_PROGRAMS_QUERY,
             context={
@@ -212,7 +254,9 @@ class TestAllProgramsQuery(APITestCase):
         )
 
         user = UserFactory.create(partner=self.unicef_partner)
-        self.create_user_role_with_permissions(user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], self.business_area)
+        self.create_user_role_with_permissions(
+            user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], self.business_area, whole_business_area_access=True
+        )
         self.snapshot_graphql_request(
             request_string=self.ALL_PROGRAMS_QUERY,
             context={
@@ -252,7 +296,10 @@ class TestAllProgramsQuery(APITestCase):
 
     def test_all_programs_with_cycles_filter(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], self.business_area
+            self.user,
+            [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+            self.business_area,
+            whole_business_area_access=True,
         )
         self.user.partner = self.unicef_partner
         self.user.save()
