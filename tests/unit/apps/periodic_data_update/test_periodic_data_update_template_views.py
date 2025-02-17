@@ -361,10 +361,10 @@ class TestPeriodicDataUpdateTemplateViews:
     ) -> None:
         self.set_up(api_client, afghanistan, id_to_base64)
         if access_to_program:
-            create_user_role_with_permissions(self.user,permissions,self.afghanistan, self.program1)
+            create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program1)
             create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan, self.program1)
         else:
-            create_user_role_with_permissions(self.user,permissions,self.afghanistan)
+            create_user_role_with_permissions(self.user, permissions, self.afghanistan)
             create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
 
         data = {
