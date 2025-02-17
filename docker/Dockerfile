@@ -86,7 +86,7 @@ ENTRYPOINT ["entrypoint.sh"]
 
 
 # Frontend builder
-FROM node:18.19.0-buster-slim AS frontend-builder
+FROM node:20-buster-slim AS frontend-builder
 
 WORKDIR /fe-build
 COPY ./src/frontend/package.json ./src/frontend/yarn.lock ./

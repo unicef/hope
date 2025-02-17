@@ -1,4 +1,4 @@
-import { Box, Checkbox, FormControlLabel, Grid, MenuItem } from '@mui/material';
+import { Box, Checkbox, FormControlLabel, Grid2 as Grid, MenuItem } from '@mui/material';
 import moment from 'moment';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -98,7 +98,7 @@ export function PaymentPlansFilters({
       applyHandler={handleApplyFilter}
     >
       <Grid container spacing={3} alignItems="flex-end">
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SearchTextField
             label={t('Search')}
             value={filter.search}
@@ -107,7 +107,7 @@ export function PaymentPlansFilters({
             data-cy="filter-search"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             variant="outlined"
@@ -123,7 +123,7 @@ export function PaymentPlansFilters({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <NumberTextField
             id="totalEntitledQuantityFromFilter"
             topLabel={t('Entitled Quantity')}
@@ -135,7 +135,7 @@ export function PaymentPlansFilters({
             data-cy="filters-total-entitled-quantity-from"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <NumberTextField
             id="totalEntitledQuantityToFilter"
             value={filter.totalEntitledQuantityTo}
@@ -152,7 +152,7 @@ export function PaymentPlansFilters({
             data-cy="filters-total-entitled-quantity-to"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <DatePickerFilter
             topLabel={t('Dispersion Date')}
             placeholder={t('From')}
@@ -176,7 +176,7 @@ export function PaymentPlansFilters({
             value={filter.dispersionStartDate}
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) =>
@@ -190,7 +190,7 @@ export function PaymentPlansFilters({
             minDateMessage={<span />}
           />
         </Grid>
-        <Grid item xs={12}>
+        <Grid size={{ xs: 12 }}>
           <Box ml={2}>
             <FormControlLabel
               control={

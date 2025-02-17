@@ -1,4 +1,4 @@
-import { Button, FormHelperText, Grid } from '@mui/material';
+import { Button, FormHelperText, Grid2 as Grid } from '@mui/material';
 import { AddCircleOutline } from '@mui/icons-material';
 import { FieldArray } from 'formik';
 import { useTranslation } from 'react-i18next';
@@ -32,7 +32,7 @@ export function NewDocumentationFieldArray({
                 setFieldValue={setFieldValue}
               />
             ))}
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <Button
                 data-cy="add-documentation"
                 color="primary"

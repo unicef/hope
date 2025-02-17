@@ -1,4 +1,4 @@
-import { Box, Grid, IconButton } from '@mui/material';
+import { Box, Grid2 as Grid, IconButton } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import Close from '@mui/icons-material/Close';
 import { useLocation } from 'react-router-dom';
@@ -74,7 +74,7 @@ export function EditPaymentChannelRow({
     </>
   ) : (
     <Fragment key={paymentChannel.id}>
-      <Grid item xs={4}>
+      <Grid size={{ xs: 4 }}>
         <DisabledDiv disabled={removed}>
           <LabelizedField
             label={t('Bank account number')}
@@ -82,7 +82,7 @@ export function EditPaymentChannelRow({
           />
         </DisabledDiv>
       </Grid>
-      <Grid item xs={3}>
+      <Grid size={{ xs: 3 }}>
         <DisabledDiv disabled={removed}>
           <LabelizedField
             label={t('Bank name')}
@@ -90,7 +90,7 @@ export function EditPaymentChannelRow({
           />
         </DisabledDiv>
       </Grid>
-      <Grid item xs={2}>
+      <Grid size={{ xs:2 }}>
         <DisabledDiv disabled={removed}>
           <LabelizedField
             label={t('Account holder name')}
@@ -98,7 +98,7 @@ export function EditPaymentChannelRow({
           />
         </DisabledDiv>
       </Grid>
-      <Grid item xs={2}>
+      <Grid size={{ xs:2 }}>
         <DisabledDiv disabled={removed}>
           <LabelizedField
             label={t('Bank branch name')}
@@ -106,7 +106,7 @@ export function EditPaymentChannelRow({
           />
         </DisabledDiv>
       </Grid>
-      <Grid item xs={1}>
+      <Grid size={{ xs:1 }}>
         {!removed ? (
           <Box display="flex" align-items="center">
             <IconButton

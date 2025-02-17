@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@mui/material';
+import { Grid2 as Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { formatNumber } from '@utils/utils';
@@ -26,13 +26,13 @@ export function GrievancesSection({
   return (
     <DashboardPaper title="Grievances and Feedback">
       <Grid container spacing={3}>
-        <Grid item xs={6}>
+        <Grid size={{ xs:6 }}>
           <CardTitleSmaller>{t('TOTAL NUMBER OF GRIEVANCES')}</CardTitleSmaller>
           <Typography variant="caption" data-cy="total-number-of-grievances">
             {formatNumber(data?.totalNumberOfGrievances)}
           </Typography>
         </Grid>
-        <Grid item xs={6}>
+        <Grid size={{ xs:6 }}>
           <CardTitleSmaller>{t('TOTAL NUMBER OF FEEDBACK')}</CardTitleSmaller>
           <Typography variant="caption" data-cy="total-number-of-feedback">
             {formatNumber(data?.totalNumberOfFeedback)}
