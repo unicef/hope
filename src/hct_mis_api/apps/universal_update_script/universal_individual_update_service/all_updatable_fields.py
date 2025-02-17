@@ -6,7 +6,7 @@ from typing import Dict, Tuple, Any
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.payment.models import DeliveryMechanism
-from hct_mis_api.apps.universal_update_script.universal_individual_update_script.validator_and_handlers import \
+from hct_mis_api.apps.universal_update_script.universal_individual_update_service.validator_and_handlers import \
     validate_string, handle_simple_field, validate_date, validate_phone_number, handle_boolean_field, \
     validate_boolean, validate_choices, validate_admin, validate_integer, validate_flex_field_string
 
@@ -49,7 +49,7 @@ individual_fields: Dict[str, Tuple[str, Any, Any]] = {
 }
 household_fields: Dict[str, Tuple[str, Any, Any]] = {
     "consent": ("consent", validate_boolean, handle_boolean_field),
-    "consent_sharing": ("consent_sharing", validate_boolean, handle_boolean_field),
+    # "consent_sharing": ("consent_sharing", validate_boolean, handle_boolean_field), # TODO handle multiselect
     "residence_status": ("residence_status", validate_choices, handle_simple_field),
     "country_origin": ("country_origin", validate_string, handle_simple_field),
     # "country": ("country", validate_string, handle_simple_field), # TODO: Handle country

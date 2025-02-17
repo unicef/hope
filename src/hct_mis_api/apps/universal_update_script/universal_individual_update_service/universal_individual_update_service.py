@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from io import BytesIO
 from typing import Any, List, Tuple
 
@@ -22,12 +23,14 @@ from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
 )
 from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
 from hct_mis_api.apps.universal_update_script.models import UniversalUpdate
-from hct_mis_api.apps.universal_update_script.universal_individual_update_script.all_updatable_fields import \
+from hct_mis_api.apps.universal_update_script.universal_individual_update_service.all_updatable_fields import \
     household_fields, individual_fields, get_document_fields, get_individual_flex_fields, get_wallet_fields
+from hct_mis_api.apps.universal_update_script.universal_individual_update_service.validator_and_handlers import \
+    get_generator_handler
 from hct_mis_api.apps.utils.elasticsearch_utils import populate_index
 
 
-class UniversalIndividualUpdateEngine:
+class UniversalIndividualUpdateService:
     def __init__(
             self,
             universal_update: UniversalUpdate,
@@ -82,7 +85,7 @@ class UniversalIndividualUpdateEngine:
         errors = []
         for field, (name, validator, _handler) in self.household_fields.items():
             value = row[headers.index(field)]
-            error = validator(value, name, row, self.business_area, self.program)
+            error = validator(value, name, Household, self.business_area, self.program)
             if error:
                 errors.append(f"Row: {row_index} - {error}")
         return errors
@@ -95,7 +98,7 @@ class UniversalIndividualUpdateEngine:
         errors = []
         for field, (name, validator, _handler) in self.individual_fields.items():
             value = row[headers.index(field)]
-            error = validator(value, name, row, self.business_area, self.program)
+            error = validator(value, name, Individual, self.business_area, self.program)
             if error:  # pragma: no cover
                 errors.append(f"Row: {row_index} - {error}")
         return errors
@@ -142,7 +145,8 @@ class UniversalIndividualUpdateEngine:
         for row in sheet.iter_rows(min_row=2, values_only=True):
             row_index += 1
             if (row_index - 2) % self.batch_size == 0:
-                self.print_message(f"Validating row {row_index - 2} to {row_index - 2 + self.batch_size} Indivduals")
+                self.print_message(
+                    f"Validating row {row_index - 2} to {min(row_index - 2 + self.batch_size, sheet.max_row - 1)} Indivduals")
             unicef_id = row[headers.index("unicef_id")]
             individuals_queryset = Individual.objects.filter(
                 unicef_id=unicef_id, business_area=self.business_area, program=self.program
@@ -284,7 +288,8 @@ class UniversalIndividualUpdateEngine:
         for row in sheet.iter_rows(min_row=2, values_only=True):
             row_index += 1
             if (row_index - 2) % self.batch_size == 0:
-                self.print_message(f"Updating row {row_index - 2} to {row_index - 2 + self.batch_size} Individuals")
+                self.print_message(
+                    f"Updating row {row_index - 2} to {min(row_index - 2 + self.batch_size, sheet.max_row - 1)} Individuals")
             unicef_id = row[headers.index("unicef_id")]
             individual = (
                 Individual.objects.select_related("household")
@@ -349,15 +354,18 @@ class UniversalIndividualUpdateEngine:
         households_to_update.clear()
         individuals_to_update.clear()
 
+    def get_excel_value(self, value):
+        return get_generator_handler(value)(value)
+
     def get_individual_row(self, individual):
         row = [individual.unicef_id]
         household = individual.household
         for field_data in self.individual_fields.values():
-            row.append(getattr(individual, field_data[0]))
+            row.append(self.get_excel_value(getattr(individual, field_data[0])))
         for field_data in self.individual_flex_fields.values():
-            row.append(individual.flex_fields.get(field_data[0]))
+            row.append(self.get_excel_value(individual.flex_fields.get(field_data[0])))
         for field_data in self.household_fields.values():
-            row.append(getattr(household, field_data[0]))
+            row.append(self.get_excel_value(getattr(household, field_data[0])))
         all_documents = individual.documents.all()
         for (document_no_column, _) in self.document_fields:
             document = [x for x in all_documents if x.type_id == self.document_types[document_no_column].id]
@@ -376,13 +384,14 @@ class UniversalIndividualUpdateEngine:
                 raise ValueError("Multiple wallets found")
             if len(wallet) == 1:
                 for field_name in data_fields:
-                    row.append(wallet[0].data.get(field_name))
+                    value = wallet[0].data.get(field_name)
+                    row.append(self.get_excel_value(value))
             else:
                 for _ in data_fields:
                     row.append(None)
         return row
 
-    def create_xlsx_template(self):
+    def generate_xlsx_template(self):
         columns = ["unicef_id"]
 
         for column_name in self.individual_fields.keys():
@@ -410,9 +419,12 @@ class UniversalIndividualUpdateEngine:
             program=self.universal_update.program,
             unicef_id__in=self.universal_update.unicef_ids.split(",")
         )
+        individuals_length = len(individuals)
 
-        # Append each individual's row directly
-        for individual in individuals:
+        for index, individual in enumerate(individuals):
+            if (index) % self.batch_size == 0:
+                self.print_message(
+                    f"Generating row {index} to {min(index + self.batch_size, individuals_length)}")
             row_data = self.get_individual_row(individual)
             ws.append(row_data)
 
@@ -420,6 +432,8 @@ class UniversalIndividualUpdateEngine:
         wb.save(output)
         output.seek(0)
 
+        self.print_message(
+            f"Generating Finished")
         return output
 
     @transaction.atomic

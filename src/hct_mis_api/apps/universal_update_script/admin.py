@@ -10,14 +10,14 @@ from django.http import HttpRequest, HttpResponseRedirect, HttpResponse
 from django.template.response import TemplateResponse
 
 from .models import UniversalUpdate, DocumentType, DeliveryMechanism, Program
-from .universal_individual_update_script.all_updatable_fields import (
+from .universal_individual_update_service.all_updatable_fields import (
     individual_fields,
     get_individual_flex_fields,
     household_fields,
 )
-from .universal_individual_update_script.universal_individual_update_script import UniversalIndividualUpdateEngine
+from .universal_individual_update_service.universal_individual_update_service import UniversalIndividualUpdateService
 from ..utils.admin import HOPEModelAdminBase
-from .celery_tasks import run_universal_update
+from .celery_tasks import run_universal_individual_update, generate_universal_individual_update_template
 
 
 class ArrayFieldFilteredSelectMultiple(FilteredSelectMultiple):
@@ -96,10 +96,10 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
     filter_horizontal = ('document_types', 'delivery_mechanisms',)
     autocomplete_fields = ('program',)
     list_display = ('id', 'program', 'update_file', 'created_at', 'updated_at')
-    readonly_fields = ('saved_logs', 'logs_property', 'backup_snapshot',)
+    readonly_fields = ('saved_logs', 'logs_property', 'backup_snapshot',"task_status","template_file","curr_async_result_id")
     fieldsets = (
         (None, {
-            'fields': ('program', 'update_file',"unicef_ids"),
+            'fields': ('program','template_file', 'update_file',"unicef_ids", 'task_status',"curr_async_result_id"),
         }),
         ('Field Configuration', {
             'fields': ('individual_fields', 'individual_flex_fields_fields', 'household_fields','document_types', 'delivery_mechanisms'),
@@ -116,29 +116,21 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
         return obj.logs or "-"
     logs_property.short_description = "Live Logs"
 
+    def task_status(self, obj):
+        return obj.celery_status or "-"
+    task_status.short_description = "Task Status"
+
     @button(label="Generate Excel Template")
     def generate_xlsx_template(self, request, pk):
         universal_update = self.get_object(request, pk)
-        engine = UniversalIndividualUpdateEngine(
-            universal_update,
-            ignore_empty_values=True,
-            deduplicate_es=False,
-            deduplicate_documents=False,
-        )
-        xlsx_file = engine.create_xlsx_template()
-        xlsx_file.seek(0)
-        content = xlsx_file.read()
-        response = HttpResponse(
-            content,
-            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
-        response["Content-Disposition"] = 'attachment; filename="update_template.xlsx"'
-        return response
+        universal_update.queue(generate_universal_individual_update_template)
+        self.message_user(request, f"Gnerating Excel Template Task Scheduled")
+        return None
 
 
     @button(label="Start Universal Update Task")
     def start_universal_update_task(self, request, pk):
         universal_update = self.get_object(request, pk)
-        result = run_universal_update.delay(str(universal_update.id))
-        self.message_user(request, f"Celery task scheduled with task id: {result.id}")
+        universal_update.queue(run_universal_individual_update)
+        self.message_user(request, f"Universal individual update task scheduled")
         return None

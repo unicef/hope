@@ -22,6 +22,7 @@ class UniversalUpdate(TimeStampedModel, CeleryEnabledModel, ):
     household_fields = ArrayField(base_field=models.CharField(max_length=255), default=list)
     document_types = models.ManyToManyField(DocumentType, blank=True)
     delivery_mechanisms = models.ManyToManyField(DeliveryMechanism, blank=True)
+    template_file = models.FileField(blank=True, null=True)
     update_file = models.FileField(blank=True, null=True)
 
     program = models.ForeignKey(Program, on_delete=models.CASCADE)
