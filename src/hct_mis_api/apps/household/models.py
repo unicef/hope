@@ -379,6 +379,8 @@ class Household(
             "male_age_group_12_17_disabled_count",
             "male_age_group_18_59_disabled_count",
             "male_age_group_60_disabled_count",
+            "other_sex_group_count",
+            "unknown_sex_group_count",
             "registration_data_import",
             "programs",
             "returnee",
@@ -464,6 +466,8 @@ class Household(
     children_disabled_count = models.PositiveIntegerField(default=None, null=True)
     male_children_disabled_count = models.PositiveIntegerField(default=None, null=True)
     female_children_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    other_sex_group_count = models.PositiveIntegerField(default=None, null=True)  # OTHER
+    unknown_sex_group_count = models.PositiveIntegerField(default=None, null=True)   # NOT_COLLECTED
 
     registration_data_import = models.ForeignKey(
         "registration_data.RegistrationDataImport",
