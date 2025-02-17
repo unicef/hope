@@ -53,10 +53,6 @@ class Message(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     # Recipients Lookup criteria
     households = models.ManyToManyField("household.Household", related_name="messages", blank=True)
-    # TODO: deprecated will remove after data migrations
-    target_population = models.ForeignKey(
-        "targeting.TargetPopulation", related_name="messages", blank=True, null=True, on_delete=models.SET_NULL
-    )
     payment_plan = models.ForeignKey(
         "payment.PaymentPlan", related_name="messages", blank=True, null=True, on_delete=models.SET_NULL
     )
@@ -252,10 +248,6 @@ class Survey(UnicefIdentifiedModel, AdminUrlMixin, TimeStampedUUIDModel):
         verbose_name=_("Created by"),
     )
     recipients = models.ManyToManyField("household.Household", related_name="surveys", blank=True)
-    # TODO: deprecated will remove after data migrations
-    target_population = models.ForeignKey(
-        "targeting.TargetPopulation", related_name="surveys", blank=True, null=True, on_delete=models.SET_NULL
-    )
     payment_plan = models.ForeignKey(
         "payment.PaymentPlan", related_name="surveys", blank=True, null=True, on_delete=models.SET_NULL
     )

@@ -17,7 +17,6 @@ from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.core.utils import CaIdIterator
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import (
     EntitlementCardFactory,
@@ -163,7 +162,6 @@ class RealProgramFactory(DjangoModelFactory):
         model = Program
 
     business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
-    ca_id = factory.Iterator(CaIdIterator("PRG"))
     name = factory.Faker(
         "sentence",
         nb_words=6,

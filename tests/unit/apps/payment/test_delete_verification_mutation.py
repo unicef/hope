@@ -15,10 +15,6 @@ from hct_mis_api.apps.payment.fixtures import (
 )
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetPopulationFactory,
-)
 
 
 class TestDeleteVerificationMutation(APITestCase):
@@ -48,11 +44,6 @@ class TestDeleteVerificationMutation(APITestCase):
 
         cls.program = ProgramFactory(business_area=cls.business_area)
         cls.program.admin_areas.set(Area.objects.order_by("?")[:3])
-        cls.target_population = TargetPopulationFactory(
-            created_by=cls.user,
-            targeting_criteria=(TargetingCriteriaFactory()),
-            business_area=cls.business_area,
-        )
         cls.payment_plan = PaymentPlanFactory(
             name="TEST",
             program_cycle=cls.program.cycles.first(),

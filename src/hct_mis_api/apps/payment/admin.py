@@ -20,6 +20,7 @@ from adminfilters.querystring import QueryStringFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
     DeliveryMechanismData,
@@ -37,6 +38,7 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin
 from hct_mis_api.apps.utils.security import is_root
 
@@ -65,8 +67,10 @@ class PaymentVerificationPlanAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
         "error",
     )
     list_filter = (
-        ("status", ChoicesFieldComboFilter),
+        ("payment_plan__program_cycle__program__business_area", AutoCompleteFilter),
+        ("payment_plan__program_cycle__program", AutoCompleteFilter),
         ("payment_plan", AutoCompleteFilter),
+        ("status", ChoicesFieldComboFilter),
         ("verification_channel", ChoicesFieldComboFilter),
         "sampling",
         "xlsx_file_exporting",
@@ -131,6 +135,8 @@ class PaymentVerificationAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
     )
 
     list_filter = (
+        ("payment_verification_plan__payment_plan__program_cycle__program__business_area", AutoCompleteFilter),
+        ("payment_verification_plan__payment_plan__program_cycle__program", AutoCompleteFilter),
         DepotManager,
         QueryStringFilter,
         ("status", ChoicesFieldComboFilter),
@@ -176,6 +182,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
     )
     list_filter = (
         ("business_area", AutoCompleteFilter),
+        ("program_cycle__program", AutoCompleteFilter),
         ("program_cycle__program__id", ValueFilter),
         ("currency", AutoCompleteFilter),
         ("status", ChoicesFieldComboFilter),
@@ -200,6 +207,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         "source_payment_plan",
     )
     search_fields = ("id", "unicef_id", "name")
+    date_hierarchy = "updated_at"
 
     def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return is_root(request)
@@ -528,11 +536,27 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
 
 @admin.register(DeliveryMechanismData)
 class DeliveryMechanismDataAdmin(HOPEModelAdminBase):
-    list_display = ("individual", "delivery_mechanism", "is_valid")
+    list_display = ("individual", "get_business_area", "get_program", "delivery_mechanism", "is_valid")
+
     raw_id_fields = ("delivery_mechanism", "individual", "possible_duplicate_of")
     readonly_fields = ("possible_duplicate_of", "unique_key", "signature_hash", "validation_errors")
     search_fields = ("individual__unicef_id",)
-    list_filter = (("delivery_mechanism", AutoCompleteFilter), "is_valid")
+    list_filter = (
+        ("individual__program__business_area", AutoCompleteFilter),
+        ("individual__program", AutoCompleteFilter),
+        ("individual", AutoCompleteFilter),
+        ("delivery_mechanism", AutoCompleteFilter),
+        "is_valid",
+    )
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
+        return super().get_queryset(request).select_related("individual__program__business_area")
+
+    def get_business_area(self, obj: DeliveryMechanismData) -> BusinessArea:
+        return obj.individual.program.business_area
+
+    def get_program(self, obj: DeliveryMechanismData) -> Program:
+        return obj.individual.program
 
 
 @admin.register(DeliveryMechanism)

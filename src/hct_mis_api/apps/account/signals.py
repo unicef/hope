@@ -24,7 +24,6 @@ def post_save_pre_delete_role_assignment(sender: Any, instance: User, *args: Any
 
 @receiver(pre_save, sender=get_user_model())
 def pre_save_user(sender: Any, instance: User, *args: Any, **kwargs: Any) -> None:
-    instance.available_for_export = True
     instance.last_modify_date = timezone.now()
 
 

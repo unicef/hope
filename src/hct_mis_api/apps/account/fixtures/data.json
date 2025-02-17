@@ -57,7 +57,6 @@
     "status": "INVITED",
     "partner": 2,
     "email": "root@root.com",
-    "available_for_export": true,
     "custom_fields": {},
     "job_title": "",
     "ad_uuid": null,

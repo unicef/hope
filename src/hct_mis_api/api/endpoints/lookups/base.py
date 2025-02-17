@@ -10,7 +10,6 @@ from hct_mis_api.api.endpoints.serializers import CountrySerializer
 from hct_mis_api.api.filters import CountryFilter
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.models import (
-    COLLECT_TYPES,
     IDENTIFICATION_TYPE_CHOICE,
     MARITAL_STATUS_CHOICE,
     OBSERVED_DISABILITY_CHOICE,
@@ -62,11 +61,6 @@ class ObservedDisability(HOPEAPIView):
 class Relationship(HOPEAPIView):
     def get(self, request: "Request", format: Optional[Any] = None) -> Response:
         return Response(dict(RELATIONSHIP_CHOICE))
-
-
-class DataCollectingPolicy(HOPEAPIView):
-    def get(self, request: "Request", format: Optional[Any] = None) -> Response:
-        return Response(dict(COLLECT_TYPES[1:]))
 
 
 class Roles(HOPEAPIView):
