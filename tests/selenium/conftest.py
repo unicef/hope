@@ -321,6 +321,17 @@ def login(browser: Chrome) -> Chrome:
     browser.find_element(By.ID, password).send_keys("testtest2")
     browser.find_element(By.XPATH, loginButton).click()
     browser.get(f"{browser.live_server.url}/")
+
+    # Clear cache
+    WebDriverWait(browser, 10).until(
+        EC.visibility_of_element_located(
+            (By.CSS_SELECTOR, 'button[data-cy="menu-user-profile"]')
+        )).click()
+    WebDriverWait(browser, 10).until(
+        EC.visibility_of_element_located(
+            (By.CSS_SELECTOR, 'li[data-cy="menu-item-clear-cache"]')
+        )).click()
+
     from django.core.cache import cache
 
     cache.clear()
