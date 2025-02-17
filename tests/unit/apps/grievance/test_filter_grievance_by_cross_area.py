@@ -110,13 +110,8 @@ class TestCrossAreaFilter(APITestCase):
 
         # testing different access requirements
         cls.partner_without_area_restrictions = PartnerFactory(name="Partner without area restrictions")
-        program_partner_through_without_area_restrictions = ProgramPartnerThrough.objects.create(
-            program=cls.program, partner=cls.partner_without_area_restrictions
-        )
-        program_partner_through_without_area_restrictions.full_area_access = True
-        program_partner_through_without_area_restrictions.save()
+
         cls.partner_with_area_restrictions = PartnerFactory(name="Partner with area restrictions")
-        cls.create_partner_role_with_permissions(cls.partner_with_area_restrictions, [], cls.business_area, cls.program)
         cls.set_admin_area_limits_in_program(
             cls.partner_with_area_restrictions, cls.program, [cls.admin_area1, cls.admin_area2]
         )
@@ -128,6 +123,7 @@ class TestCrossAreaFilter(APITestCase):
             user_without_permission,
             [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
@@ -152,6 +148,7 @@ class TestCrossAreaFilter(APITestCase):
                 Permissions.GRIEVANCES_CROSS_AREA_FILTER,
             ],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
@@ -171,6 +168,7 @@ class TestCrossAreaFilter(APITestCase):
             self.user,
             [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
             self.business_area,
+            self.program,
         )
 
         self.needs_adjudication_ticket_cross_area.refresh_from_db()
@@ -195,6 +193,7 @@ class TestCrossAreaFilter(APITestCase):
             self.user,
             [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
@@ -220,6 +219,7 @@ class TestCrossAreaFilter(APITestCase):
                 Permissions.GRIEVANCES_CROSS_AREA_FILTER,
             ],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
