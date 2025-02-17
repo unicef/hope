@@ -3,7 +3,8 @@
 exports[`components/dashboard/PaymentVerificationSection should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-blHHSb gWCsLz css-1ps6pg7-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-FEMpB kVtMga css-1gtchvp-MuiPaper-root"
+    style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
   >
     <div
       class="MuiBox-root css-i3pbo"
@@ -14,14 +15,14 @@ exports[`components/dashboard/PaymentVerificationSection should render 1`] = `
       class="MuiBox-root css-1hw29i9"
     >
       <h6
-        class="MuiTypography-root MuiTypography-subtitle2 css-ati914-MuiTypography-root"
+        class="MuiTypography-root MuiTypography-subtitle2 css-1ypmsg6-MuiTypography-root"
       >
         0
          
         Households contacted
       </h6>
       <span
-        class="MuiTypography-root MuiTypography-caption css-1sn4lm3-MuiTypography-root"
+        class="MuiTypography-root MuiTypography-caption css-mpaqru-MuiTypography-root"
       >
         0
         %

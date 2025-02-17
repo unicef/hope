@@ -34,7 +34,7 @@ import { useArrayToDict } from '@hooks/useArrayToDict';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { Box, Button, FormHelperText, Grid } from '@mui/material';
+import { Box, Button, FormHelperText, Grid2 as Grid } from '@mui/material';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
@@ -364,7 +364,7 @@ export const CreateGrievancePage = (): ReactElement => {
                 }
               />
               <Grid container spacing={3}>
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12 }}>
                   <NewTicket>
                     <InnerBoxPadding>
                       <ContainerColumnWithBorder>
@@ -460,11 +460,11 @@ export const CreateGrievancePage = (): ReactElement => {
                   </NewTicket>
                 </Grid>
                 {activeStep === GrievanceSteps.Selection && (
-                  <Grid item xs={12}>
+                  <Grid size={{ xs: 12 }}>
                     <NewTicket>
                       <Grid container spacing={3}>
                         <TicketsAlreadyExist values={values} />
-                        <Grid item xs={6}>
+                        <Grid size={{ xs:6 }}>
                           <OtherRelatedTicketsCreate values={values} />
                         </Grid>
                       </Grid>

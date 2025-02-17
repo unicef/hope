@@ -29,8 +29,7 @@ const muiTheme = createTheme({
 });
 
 export const FONT = 'Roboto';
-export const theme = {
-  ...muiTheme,
+export const theme = Object.assign({}, muiTheme, {
   spacing: muiTheme.spacing,
   drawer: {
     width: 270,
@@ -76,6 +75,8 @@ export const theme = {
       text-transform: uppercase;
     `,
   },
-};
+});
 
 export type MiśTheme = typeof theme;
+
+export default theme;

@@ -6,31 +6,31 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
     class="MuiBox-root css-j7qwjs"
   >
     <div
-      class="sc-fAUdSK sssgi"
+      class="sc-fLDLck fNdpDo"
     >
       <h6
-        class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
+        class="MuiTypography-root MuiTypography-h6 css-66ugg1-MuiTypography-root"
       >
         Volume by Delivery Mechanism
       </h6>
        
     </div>
     <div
-      class="sc-dntaoT ecSOzH"
+      class="sc-dycHyt bmMgQK"
     >
       <div
-        class="MuiGrid-root MuiGrid-container css-1bzpx2o-MuiGrid-root"
+        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-188izze-MuiGrid2-root"
       >
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
         >
           <div
-            class="sc-egkSDF kXVZsL"
+            class="sc-dVBluf hxwbZa"
             color="#D8E1EE"
           >
             <div>
               <span
-                class="sc-blHHSb dUfUKp"
+                class="sc-FEMpB ddgbkI"
                 color="textSecondary"
               >
                 Cash (Test FSP 1)
@@ -39,7 +39,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
                 data-cy="label-Cash (Test FSP 1)"
               >
                 <span
-                  class="sc-gtLWhw dynQwi"
+                  class="sc-gjcoXW fZsJNd"
                   color="textSecondary"
                 >
                   424 USD (424 USD)
@@ -50,13 +50,13 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-container css-1e2bu2o-MuiGrid-root"
+        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-xg0rmm-MuiGrid2-root"
       >
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
         >
           <div
-            class="sc-ivxoEo hVnFaw"
+            class="sc-jbAkgO buaZnu"
           >
             <canvas
               height="0"
