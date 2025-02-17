@@ -30,10 +30,10 @@ export function FspSection({
         </Box>
         <Grid container spacing={3}>
           <>
-            <Grid key={deliveryMechanism.name} item xs={3}>
+            <Grid key={`${deliveryMechanism?.name}-${financialServiceProvider?.name}`} item xs={3}>
               <LabelizedField
-                label={deliveryMechanism.name}
-                value={financialServiceProvider.name}
+                label={deliveryMechanism?.name || '-'}
+                value={financialServiceProvider?.name || '-'}
               />
             </Grid>
           </>

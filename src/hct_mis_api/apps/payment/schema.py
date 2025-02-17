@@ -530,7 +530,8 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
     has_fsp_delivery_mechanism_xlsx_template = graphene.Boolean()
     imported_file_name = graphene.String()
     payments_conflicts_count = graphene.Int()
-    delivery_mechanism = DeliveryMechanismPerPaymentPlanNode
+    delivery_mechanism = graphene.Field(DeliveryMechanismNode)
+    financial_service_provider = graphene.Field(FinancialServiceProviderNode)
     volume_by_delivery_mechanism = graphene.List(VolumeByDeliveryMechanismNode)
     split_choices = graphene.List(ChoiceObject)
     verification_plans = DjangoPermissionFilterConnectionField(
