@@ -150,14 +150,11 @@ class TestPeriodicDataUpdateTemplateViews:
         id_to_base64: Callable,
     ) -> None:
         self.set_up(api_client, afghanistan, id_to_base64)
-        create_user_role_with_permissions(
-            self.user,
-            permissions,
-            self.afghanistan,
-        )
         if access_to_program:
+            create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program1)
             create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan, self.program1)
         else:
+            create_user_role_with_permissions(self.user, permissions, self.afghanistan)
             create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
 
         response = self.client.get(self.url_list)
@@ -255,15 +252,11 @@ class TestPeriodicDataUpdateTemplateViews:
         id_to_base64: Callable,
     ) -> None:
         self.set_up(api_client, afghanistan, id_to_base64)
-        create_user_role_with_permissions(
-            self.user,
-            permissions,
-            self.afghanistan,
-        )
-        create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
         if access_to_program:
+            create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program2)
             create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan, self.program2)
         else:
+            create_user_role_with_permissions(self.user, permissions, self.afghanistan)
             create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
 
         response = self.client.get(self.url_detail_pdu_template_program2)
@@ -367,15 +360,11 @@ class TestPeriodicDataUpdateTemplateViews:
         id_to_base64: Callable,
     ) -> None:
         self.set_up(api_client, afghanistan, id_to_base64)
-        create_user_role_with_permissions(
-            self.user,
-            permissions,
-            self.afghanistan,
-        )
-        create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
         if access_to_program:
+            create_user_role_with_permissions(self.user,permissions,self.afghanistan, self.program1)
             create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan, self.program1)
         else:
+            create_user_role_with_permissions(self.user,permissions,self.afghanistan)
             create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
 
         data = {
@@ -528,15 +517,11 @@ class TestPeriodicDataUpdateTemplateViews:
         id_to_base64: Callable,
     ) -> None:
         self.set_up(api_client, afghanistan, id_to_base64)
-        create_user_role_with_permissions(
-            self.user,
-            permissions,
-            self.afghanistan,
-        )
-        create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
         if access_to_program:
+            create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program1)
             create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan, self.program1)
         else:
+            create_user_role_with_permissions(self.user, permissions, self.afghanistan)
             create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
 
         self.pdu_template1.status = PeriodicDataUpdateTemplate.Status.TO_EXPORT
@@ -667,15 +652,11 @@ class TestPeriodicDataUpdateTemplateViews:
         id_to_base64: Callable,
     ) -> None:
         self.set_up(api_client, afghanistan, id_to_base64)
-        create_user_role_with_permissions(
-            self.user,
-            permissions,
-            self.afghanistan,
-        )
-        create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
         if access_to_program:
-            create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan, self.program2)
+            create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program1)
+            create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan, self.program1)
         else:
+            create_user_role_with_permissions(self.user, permissions, self.afghanistan)
             create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
 
         self.pdu_template1.status = PeriodicDataUpdateTemplate.Status.EXPORTED
