@@ -8,7 +8,7 @@ from hct_mis_api.apps.account.admin.forms import (
     RoleAssignmentAdminForm,
     RoleAssignmentInlineFormSet,
 )
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory, UserFactory
 from hct_mis_api.apps.account.models import (
     IncompatibleRoles,
     Role,
@@ -63,12 +63,12 @@ class RoleAssignmentsTest(TestCase):
 
     def test_assign_multiple_roles_for_user_at_the_same_time(self) -> None:
         data = {
-            "user_roles-TOTAL_FORMS": "2",
-            "user_roles-INITIAL_FORMS": "0",
-            "user_roles-0-role": self.role_1.id,
-            "user_roles-1-role": self.role_2.id,
-            "user_roles-0-business_area": self.business_area_afg.id,
-            "user_roles-1-business_area": self.business_area_afg.id,
+            "role_assignments-TOTAL_FORMS": "2",
+            "role_assignments-INITIAL_FORMS": "0",
+            "role_assignments-0-role": self.role_1.id,
+            "role_assignments-1-role": self.role_2.id,
+            "role_assignments-0-business_area": self.business_area_afg.id,
+            "role_assignments-1-business_area": self.business_area_afg.id,
         }
         RoleAssignmentFormSet = inlineformset_factory(
             User, RoleAssignment, fields=("__all__"), formset=RoleAssignmentInlineFormSet
@@ -80,12 +80,12 @@ class RoleAssignmentsTest(TestCase):
         IncompatibleRoles.objects.create(role_one=self.role_1, role_two=self.role_2)
 
         data = {
-            "user_roles-TOTAL_FORMS": "2",
-            "user_roles-INITIAL_FORMS": "0",
-            "user_roles-0-role": self.role_1.id,
-            "user_roles-1-role": self.role_2.id,
-            "user_roles-0-business_area": self.business_area_afg.id,
-            "user_roles-1-business_area": self.business_area_afg.id,
+            "role_assignments-TOTAL_FORMS": "2",
+            "role_assignments-INITIAL_FORMS": "0",
+            "role_assignments-0-role": self.role_1.id,
+            "role_assignments-1-role": self.role_2.id,
+            "role_assignments-0-business_area": self.business_area_afg.id,
+            "role_assignments-1-business_area": self.business_area_afg.id,
         }
         RoleAssignmentFormSet = inlineformset_factory(
             User, RoleAssignment, fields=("__all__"), formset=RoleAssignmentInlineFormSet
@@ -138,7 +138,7 @@ class RoleAssignmentsTest(TestCase):
         # empty list
         self.assertEqual(
             user_not_unicef_partner.permissions_in_business_area(self.business_area_afg.slug),
-            [],
+            set(),
         )
         self.assertNotIn(
             Permissions.RDI_VIEW_LIST.value,
@@ -149,7 +149,7 @@ class RoleAssignmentsTest(TestCase):
             user_not_unicef_partner.permissions_in_business_area(self.business_area_afg.slug),
         )
 
-    def test_unicef_partner_has_permission_from_user_and_default_permission(self) -> None:
+    def test_unicef_partner_hq_has_permission_from_user_and_role_with_all_permissions(self) -> None:
         partner = PartnerFactory(name="UNICEF")
         unicef_hq = PartnerFactory(name="UNICEF HQ", parent=partner)
         user = UserFactory(partner=unicef_hq)
@@ -159,6 +159,35 @@ class RoleAssignmentsTest(TestCase):
         self.assertIn(
             Permissions.GRIEVANCES_CREATE.value, user.permissions_in_business_area(self.business_area_afg.slug)
         )
+
+        # assert role with all permissions
+        role_with_all_permissions = RoleFactory(name="Role with all permissions")
+        permissions = [
+            Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST,
+            Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
+            Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+        ]
+        role_with_all_permissions.permissions = [permission.value for permission in permissions]
+        role_with_all_permissions.save()
+
+        for permission in permissions:
+            self.assertIn(permission.value, user.permissions_in_business_area(self.business_area_afg.slug))
+
+        self.assertNotIn(
+            Permissions.GRIEVANCES_UPDATE.value, user.permissions_in_business_area(self.business_area_afg.slug)
+        )
+
+    def test_unicef_partner_per_ba_has_permission_from_user_and_role_with_default_permissions(self) -> None:
+        partner = PartnerFactory(name="UNICEF")
+        unicef_in_afg = PartnerFactory(name=f"UNICEF Partner for {self.business_area_afg.slug}", parent=partner)
+        user = UserFactory(partner=unicef_in_afg)
+        role = Role.objects.create(name="111", permissions=[Permissions.GRIEVANCES_CREATE.value])
+        RoleAssignment.objects.create(role=role, business_area=self.business_area_afg, user=user)
+
+        self.assertIn(
+            Permissions.GRIEVANCES_CREATE.value, user.permissions_in_business_area(self.business_area_afg.slug)
+        )
+
         for permission in DEFAULT_PERMISSIONS_IS_UNICEF_PARTNER:
             self.assertIn(permission.value, user.permissions_in_business_area(self.business_area_afg.slug))
 
