@@ -12,7 +12,7 @@ import { getFilterFromQueryParams } from '@utils/utils';
 import { ReportingFilters } from '../../tables/ReportingTable/ReportingFilters';
 import { ReportingTable } from '../../tables/ReportingTable/ReportingTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const initialFilter = {
   type: '',
@@ -22,7 +22,7 @@ const initialFilter = {
   onlyMy: false,
 };
 
-export function ReportingPage(): ReactElement {
+function ReportingPage(): ReactElement {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
   const permissions = usePermissions();
@@ -49,14 +49,7 @@ export function ReportingPage(): ReactElement {
     return <PermissionDenied />;
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'ReportingPage.tsx');
-      }}
-      componentName="ReportingPage"
-    >
+    <>
       <PageHeader title={t('Reporting')}>
         <NewReportForm />
       </PageHeader>
@@ -74,6 +67,7 @@ export function ReportingPage(): ReactElement {
         choicesData={choicesData}
         meData={meData}
       />
-    </UniversalErrorBoundary>
+    </>
   );
 }
+export default withErrorBoundary(ReportingPage, 'ReportingPage');

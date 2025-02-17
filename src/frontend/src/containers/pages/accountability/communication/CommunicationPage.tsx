@@ -16,7 +16,7 @@ import { CommunicationTable } from '../../../tables/Communication/CommunicationT
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { useProgramContext } from '../../../../programContext';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 export function CommunicationPage(): ReactElement {
   const { baseUrl } = useBaseUrl();
@@ -53,14 +53,7 @@ export function CommunicationPage(): ReactElement {
   if (!choicesData) return null;
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'CommunicationDetailsPage.tsx');
-      }}
-      componentName="CommunicationDetailsPage"
-    >
+    <>
       <PageHeader title={t('Communication')}>
         <ButtonTooltip
           variant="contained"
@@ -88,6 +81,8 @@ export function CommunicationPage(): ReactElement {
           permissions,
         )}
       />
-    </UniversalErrorBoundary>
+    </>
   );
 }
+
+export default withErrorBoundary(CommunicationPage, 'CommunicationPage');

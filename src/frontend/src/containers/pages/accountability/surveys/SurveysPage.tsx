@@ -1,27 +1,27 @@
-import { ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
-import { useSurveysChoiceDataQuery } from '@generated/graphql';
 import { CreateSurveyMenu } from '@components/accountability/Surveys/CreateSurveyMenu';
 import { SurveysFilters } from '@components/accountability/Surveys/SurveysTable/SurveysFilters';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
+import { useSurveysChoiceDataQuery } from '@generated/graphql';
+import { usePermissions } from '@hooks/usePermissions';
+import { getFilterFromQueryParams } from '@utils/utils';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import {
   hasPermissionInModule,
   PERMISSIONS,
 } from '../../../../config/permissions';
-import { usePermissions } from '@hooks/usePermissions';
-import { getFilterFromQueryParams } from '@utils/utils';
 import { SurveysTable } from '../../../tables/Surveys/SurveysTable/SurveysTable';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
-export function SurveysPage(): ReactElement {
+function SurveysPage(): ReactElement {
   const permissions = usePermissions();
+  const location = useLocation();
   const { t } = useTranslation();
   const { data: choicesData } = useSurveysChoiceDataQuery({
     fetchPolicy: 'cache-and-network',
   });
-  const location = useLocation();
   const initialFilter = {
     search: '',
     targetPopulation: '',
@@ -52,14 +52,7 @@ export function SurveysPage(): ReactElement {
   );
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'SurveysPage.tsx');
-      }}
-      componentName="SurveysPage"
-    >
+    <>
       <PageHeader title={t('Surveys')}>
         <CreateSurveyMenu />
       </PageHeader>
@@ -75,6 +68,7 @@ export function SurveysPage(): ReactElement {
         canViewDetails={canViewDetails}
         choicesData={choicesData}
       />
-    </UniversalErrorBoundary>
+    </>
   );
 }
+export default withErrorBoundary(SurveysPage, 'SurveysPage');

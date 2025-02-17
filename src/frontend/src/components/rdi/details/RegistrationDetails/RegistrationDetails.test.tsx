@@ -1,6 +1,6 @@
 import { fakeRegistrationDetailedFragment } from '../../../../../fixtures/registration/fakeRegistrationDetailedFragment';
 import { render } from '../../../../testUtils/testUtils';
-import { RegistrationDetails } from './RegistrationDetails';
+import RegistrationDetails from './RegistrationDetails';
 
 describe('components/rdi/details/RegistrationDetails', () => {
   it('should render', () => {
