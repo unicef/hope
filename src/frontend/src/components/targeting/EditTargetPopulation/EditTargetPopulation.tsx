@@ -64,7 +64,7 @@ export const EditTargetPopulation = ({
   if (targetingCriteriaCopy.length > 0) {
     targetingCriteriaCopy[0].deliveryMechanism =
       paymentPlan.deliveryMechanism?.code;
-    targetingCriteriaCopy[0].fsp = paymentPlan.deliveryMechanism?.fsp.id;
+    targetingCriteriaCopy[0].fsp = paymentPlan.financialServiceProvider?.id;
   }
 
   const initialValues = {

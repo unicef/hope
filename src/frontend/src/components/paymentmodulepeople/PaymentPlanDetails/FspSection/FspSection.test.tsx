@@ -7,7 +7,6 @@ describe('components/paymentmodule/PaymentPlanDetails/FspSection', () => {
   it('should render Set Up FSP', () => {
     const { container } = render(
       <FspSection
-        baseUrl={fakeBaseUrl}
         paymentPlan={{ ...fakeApolloPaymentPlan, deliveryMechanism: null }}
       />,
     );
@@ -16,7 +15,7 @@ describe('components/paymentmodule/PaymentPlanDetails/FspSection', () => {
 
   it('should render Edit FSP', () => {
     const { container } = render(
-      <FspSection baseUrl={fakeBaseUrl} paymentPlan={fakeApolloPaymentPlan} />,
+      <FspSection paymentPlan={fakeApolloPaymentPlan} />,
     );
     expect(container).toMatchSnapshot();
   });
