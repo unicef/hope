@@ -364,7 +364,7 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
             raise PermissionDenied("Permission Denied")
         if object_instance.household_id and object_instance.household.admin_area_id:
             # check if user has access to the area
-            area_limits = user.partner.get_area_limits_for_program(program_id)
+            area_limits = user.partner.get_area_limits_for_program(object_instance.program_id)
             if area_limits.exists():
                 household = object_instance.household
                 areas_from_household = [
@@ -539,7 +539,7 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
             raise PermissionDenied("Permission Denied")
         if object_instance.admin_area_id:
             # check if user has access to the area
-            area_limits = user.partner.get_area_limits_for_program(program_id)
+            area_limits = user.partner.get_area_limits_for_program(object_instance.program_id)
             if area_limits.exists():
                 areas_from_household = [
                     object_instance.admin1_id,
