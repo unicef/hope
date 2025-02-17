@@ -29,7 +29,7 @@ def business_area_created(sender: Any, instance: BusinessArea, created: bool, **
     """
     if created:
         # TODO: remove this part
-        unicef_1 = Partner.objects.get_or_create(name="UNICEF")
+        unicef_1, _ = Partner.objects.get_or_create(name="UNICEF")
         Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER, parent=unicef_1)
         # end of todo
 
