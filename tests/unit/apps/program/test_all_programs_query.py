@@ -5,7 +5,7 @@ from django.contrib.auth.models import AnonymousUser
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory, RoleFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import (
@@ -19,7 +19,7 @@ from hct_mis_api.apps.program.fixtures import (
     ProgramCycleFactory,
     ProgramFactory,
 )
-from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
@@ -125,7 +125,10 @@ class TestAllProgramsQuery(APITestCase):
             partner_access=Program.SELECTED_PARTNERS_ACCESS,
         )
         cls.create_partner_role_with_permissions(
-            cls.other_partner, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], cls.business_area, program_wit_selected_partner_access
+            cls.other_partner,
+            [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+            cls.business_area,
+            program_wit_selected_partner_access,
         )
 
         # adjust "Role with all permissions" (for UNICEF HQ)
@@ -146,7 +149,9 @@ class TestAllProgramsQuery(APITestCase):
         self.user.partner = self.partner_no_permissions
         self.user.save()
         self.create_user_role_with_permissions(
-            self.user, permissions, self.business_area,
+            self.user,
+            permissions,
+            self.business_area,
         )
         self.snapshot_graphql_request(
             request_string=self.ALL_PROGRAMS_QUERY,

@@ -115,6 +115,7 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
                 Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
             ],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
@@ -151,6 +152,7 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
                 Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER,
             ],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
@@ -186,6 +188,7 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
                 Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
             ],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
@@ -226,6 +229,7 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
                 Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
             ],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
@@ -264,6 +268,7 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
                 Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
             ],
             self.business_area,
+            self.program,
         )
 
         _, individuals = create_household(
@@ -315,6 +320,7 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
                 Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
             ],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
@@ -356,6 +362,7 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
                 Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
             ],
             self.business_area,
+            whole_business_area_access=True,
         )
 
         self.snapshot_graphql_request(
@@ -394,6 +401,7 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
                 Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER,
             ],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
@@ -427,6 +435,7 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
                 Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER,
             ],
             self.business_area,
+            whole_business_area_access=True,
         )
 
         self.snapshot_graphql_request(
@@ -457,6 +466,7 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
                 Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
             ],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
@@ -502,6 +512,7 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
                 Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER,
             ],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(

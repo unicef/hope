@@ -1,6 +1,6 @@
 from django.conf import settings
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import (
@@ -33,7 +33,8 @@ class TestIndividualPermissionsQuery(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        cls.unicef_partner = PartnerFactory(name="UNICEF")
+        unicef = PartnerFactory(name="UNICEF")
+        cls.unicef_partner = PartnerFactory(name="UNICEF HQ", parent=unicef)
         cls.not_unicef_partner = PartnerFactory(name="NOT_UNICEF")
         cls.user = UserFactory()
         cls.business_area = create_afghanistan()
@@ -76,8 +77,10 @@ class TestIndividualPermissionsQuery(APITestCase):
         cls.household.save()
         cls.household.set_admin_areas(cls.area2)
 
-        permissions = [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS]
-        cls.create_user_role_with_permissions(cls.user, permissions, cls.business_area)
+        # adjust "Role with all permissions" for UNICEF HQ
+        role_with_all_permissions = RoleFactory(name="Role with all permissions")
+        role_with_all_permissions.permissions = ["POPULATION_VIEW_INDIVIDUALS_DETAILS"]
+        role_with_all_permissions.save()
 
     def test_unicef_partner_has_access_for_program(self) -> None:
         self._test_unicef_partner_has_access(self.id_to_base64(self.program_one.id, "ProgramNode"))
@@ -110,7 +113,12 @@ class TestIndividualPermissionsQuery(APITestCase):
         self._test_not_unicef_partner_with_program_and_with_full_admin_area_has_access("all")
 
     def _test_not_unicef_partner_with_program_and_with_full_admin_area_has_access(self, program: str) -> None:
-        self.create_partner_role_with_permissions(self.not_unicef_partner, [], self.business_area, self.program_one)
+        self.create_partner_role_with_permissions(
+            self.not_unicef_partner,
+            [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS],
+            self.business_area,
+            self.program_one,
+        )
         self.user.partner = self.not_unicef_partner
         self.user.save()
 
@@ -135,7 +143,12 @@ class TestIndividualPermissionsQuery(APITestCase):
         self._test_not_unicef_partner_with_program_and_with_correct_admin_area_has_access("all")
 
     def _test_not_unicef_partner_with_program_and_with_correct_admin_area_has_access(self, program: str) -> None:
-        self.create_partner_role_with_permissions(self.not_unicef_partner, [], self.business_area, self.program_one)
+        self.create_partner_role_with_permissions(
+            self.not_unicef_partner,
+            [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS],
+            self.business_area,
+            self.program_one,
+        )
         self.set_admin_area_limits_in_program(self.not_unicef_partner, self.program_one, [self.area2])
 
         self.user.partner = self.not_unicef_partner
@@ -164,7 +177,12 @@ class TestIndividualPermissionsQuery(APITestCase):
         self._test_not_unicef_partner_with_program_and_with_wrong_admin_area_doesnt_have_access("all")
 
     def _test_not_unicef_partner_with_program_and_with_wrong_admin_area_doesnt_have_access(self, program: str) -> None:
-        self.create_partner_role_with_permissions(self.not_unicef_partner, [], self.business_area, self.program_one)
+        self.create_partner_role_with_permissions(
+            self.not_unicef_partner,
+            [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS],
+            self.business_area,
+            self.program_one,
+        )
         self.set_admin_area_limits_in_program(self.not_unicef_partner, self.program_one, [self.area3])
         self.user.partner = self.not_unicef_partner
         self.user.save()

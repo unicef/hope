@@ -161,7 +161,7 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
     def test_registration_data_import_datahub_upload(
         self, _: Any, permissions: List[Permissions], should_have_import_data: bool, file_valid: bool
     ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
         if file_valid:
             file = self.valid_file
         else:
@@ -206,7 +206,7 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
             number_of_households=3,
             number_of_individuals=6,
         )
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
         self.create_partner_role_with_permissions(self.user.partner, [], program.business_area, program)
         self.snapshot_graphql_request(
             request_string=self.CREATE_REGISTRATION_DATA_IMPORT,
@@ -229,7 +229,9 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
             number_of_individuals=6,
             status=ImportData.STATUS_VALIDATION_ERROR,
         )
-        self.create_user_role_with_permissions(self.user, [Permissions.RDI_IMPORT_DATA], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.RDI_IMPORT_DATA], self.business_area, self.program
+        )
         self.create_partner_role_with_permissions(self.user.partner, [], program.business_area, program)
         self.snapshot_graphql_request(
             request_string=self.CREATE_REGISTRATION_DATA_IMPORT,
@@ -251,7 +253,7 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
         ]
     )
     def test_save_kobo_project_import_data_async(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         with mock.patch(
             "hct_mis_api.apps.registration_datahub.mutations.pull_kobo_submissions_task.delay"

@@ -130,7 +130,9 @@ class TestApproveTargetPopulationMutation(APITestCase):
         ]
     )
     def test_approve_target_population(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
         self.snapshot_graphql_request(
             request_string=self.APPROVE_TARGET_MUTATION,
             context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
@@ -140,7 +142,9 @@ class TestApproveTargetPopulationMutation(APITestCase):
         )
 
     def test_approve_fail_target_population(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_LOCK], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.TARGETING_LOCK], self.business_area, self.program
+        )
 
         self.snapshot_graphql_request(
             request_string=self.APPROVE_TARGET_MUTATION,
@@ -251,7 +255,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
         ]
     )
     def test_unapprove_target_population(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         self.snapshot_graphql_request(
             request_string=self.UNAPPROVE_TARGET_MUTATION,
@@ -265,7 +269,9 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
         )
 
     def test_unapprove_fail_target_population(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_UNLOCK], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.TARGETING_UNLOCK], self.business_area, self.program
+        )
 
         self.snapshot_graphql_request(
             request_string=self.UNAPPROVE_TARGET_MUTATION,
@@ -383,7 +389,9 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         return targeting_criteria
 
     def test_finalize_target_population_with_final_criteria(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_SEND], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.TARGETING_SEND], self.business_area, self.program
+        )
 
         self.snapshot_graphql_request(
             request_string=self.FINALIZE_TARGET_MUTATION,
@@ -403,7 +411,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         ]
     )
     def test_finalize_target_population(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         self.snapshot_graphql_request(
             request_string=self.FINALIZE_TARGET_MUTATION,
@@ -412,7 +420,9 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         )
 
     def test_finalize_fail_target_population(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_SEND], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.TARGETING_SEND], self.business_area, self.program
+        )
 
         self.snapshot_graphql_request(
             request_string=self.FINALIZE_TARGET_MUTATION,

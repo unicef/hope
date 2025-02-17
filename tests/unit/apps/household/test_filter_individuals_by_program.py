@@ -80,8 +80,6 @@ class TestFilterIndividualsByProgram(APITestCase):
         cls.business_area = create_afghanistan()
         cls.program1 = ProgramFactory(name="Test program ONE", business_area=cls.business_area, status="ACTIVE")
         cls.program2 = ProgramFactory(name="Test program TWO", business_area=cls.business_area, status="ACTIVE")
-        cls.create_partner_role_with_permissions(cls.partner, [], cls.business_area, cls.program1)
-        cls.create_partner_role_with_permissions(cls.partner, [], cls.business_area, cls.program2)
 
         household_one = HouseholdFactory.build(business_area=cls.business_area, program=cls.program1)
         household_two = HouseholdFactory.build(business_area=cls.business_area, program=cls.program2)

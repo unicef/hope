@@ -95,7 +95,7 @@ class TestTicketNotes(APITestCase):
         ]
     )
     def test_create_ticket_note(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         input_data = {
             "noteInput": {

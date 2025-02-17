@@ -47,9 +47,8 @@ class TestRegistrationDataProgramPopulationImportMutations(APITestCase):
 
     def _create_user_with_permissions(self) -> Any:
         user = UserFactory(partner=self.partner)
-        self.create_user_role_with_permissions(user, [Permissions.RDI_IMPORT_DATA], self.afghanistan)
-        self.create_partner_role_with_permissions(
-            self.partner, [], self.import_from_program.business_area, self.import_to_program
+        self.create_user_role_with_permissions(
+            user, [Permissions.RDI_IMPORT_DATA], self.afghanistan, self.import_to_program
         )
         return user
 
@@ -84,10 +83,7 @@ class TestRegistrationDataProgramPopulationImportMutations(APITestCase):
     )
     def test_registration_data_import_create(self, _: Any, permissions: List[Permissions]) -> None:
         user = UserFactory(partner=self.partner)
-        self.create_user_role_with_permissions(user, permissions, self.afghanistan)
-        self.create_partner_role_with_permissions(
-            self.partner, [], self.import_from_program.business_area, self.import_to_program
-        )
+        self.create_user_role_with_permissions(user, permissions, self.afghanistan, self.import_to_program)
         self.household, self.individuals = create_household_and_individuals(
             household_data={"program": self.import_from_program},
             individuals_data=[{}, {}],
@@ -124,8 +120,9 @@ class TestRegistrationDataProgramPopulationImportMutations(APITestCase):
         self.import_from_program.beneficiary_group = beneficiary_group2
         self.import_from_program.save()
 
-        self.create_user_role_with_permissions(user, [Permissions.RDI_IMPORT_DATA], self.afghanistan)
-        self.update_partner_access_to_program(self.partner, self.import_to_program)
+        self.create_user_role_with_permissions(
+            user, [Permissions.RDI_IMPORT_DATA], self.afghanistan, self.import_to_program
+        )
         self.household, self.individuals = create_household_and_individuals(
             household_data={"program": self.import_from_program},
             individuals_data=[{}, {}],
@@ -154,8 +151,9 @@ class TestRegistrationDataProgramPopulationImportMutations(APITestCase):
         self.import_from_program.beneficiary_group = beneficiary_group1
         self.import_from_program.save()
 
-        self.create_user_role_with_permissions(user, [Permissions.RDI_IMPORT_DATA], self.afghanistan)
-        self.update_partner_access_to_program(self.partner, self.import_to_program)
+        self.create_user_role_with_permissions(
+            user, [Permissions.RDI_IMPORT_DATA], self.afghanistan, self.import_to_program
+        )
         self.household, self.individuals = create_household_and_individuals(
             household_data={"program": self.import_from_program},
             individuals_data=[{}, {}],
@@ -182,8 +180,9 @@ class TestRegistrationDataProgramPopulationImportMutations(APITestCase):
         self.import_to_program.data_collecting_type = not_compatible_data_collecting_type
         self.import_to_program.save()
 
-        self.create_user_role_with_permissions(user, [Permissions.RDI_IMPORT_DATA], self.afghanistan)
-        self.update_partner_access_to_program(self.partner, self.import_to_program)
+        self.create_user_role_with_permissions(
+            user, [Permissions.RDI_IMPORT_DATA], self.afghanistan, self.import_to_program
+        )
         self.household, self.individuals = create_household_and_individuals(
             household_data={"program": self.import_from_program},
             individuals_data=[{}, {}],
@@ -270,8 +269,9 @@ class TestRegistrationDataProgramPopulationImportMutations(APITestCase):
 
     def test_registration_data_import_create_program_with_ids_filter(self) -> None:
         user = UserFactory(partner=self.partner)
-        self.create_user_role_with_permissions(user, [Permissions.RDI_IMPORT_DATA], self.afghanistan)
-        self.update_partner_access_to_program(self.partner, self.import_to_program)
+        self.create_user_role_with_permissions(
+            user, [Permissions.RDI_IMPORT_DATA], self.afghanistan, self.import_to_program
+        )
 
         self.household_1, self.individuals_1 = create_household_and_individuals(
             household_data={"program": self.import_from_program},

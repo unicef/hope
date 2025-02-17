@@ -321,7 +321,7 @@ class TestHouseholdAreaQuery(APITestCase):
         unicef_hq = PartnerFactory(name="UNICEF HQ", parent=partner)
         user = UserFactory(partner=unicef_hq)
         self.create_user_role_with_permissions(
-            user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], self.business_area_afghanistan
+            user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], self.business_area_afghanistan, self.program
         )
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,

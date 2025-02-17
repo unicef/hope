@@ -135,7 +135,7 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
     def test_update_payment_verification_ticket_with_new_received_amount_extras(
         self, _: Any, permissions: List[Permissions]
     ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         extras = {"newReceivedAmount": 1234.99, "newStatus": PaymentVerification.STATUS_RECEIVED}
         input_data = self._prepare_input(extras)
@@ -159,7 +159,7 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
         # update status for approval
         self.ticket.ticket.status = GrievanceTicket.STATUS_FOR_APPROVAL
         self.ticket.ticket.save()
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         input_data = {
             "grievanceTicketId": self.id_to_base64(self.ticket.ticket.id, "GrievanceTicketNode"),
