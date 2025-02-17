@@ -324,13 +324,11 @@ def login(browser: Chrome) -> Chrome:
 
     # Clear cache
     WebDriverWait(browser, 10).until(
-        EC.visibility_of_element_located(
-            (By.CSS_SELECTOR, 'button[data-cy="menu-user-profile"]')
-        )).click()
+        EC.visibility_of_element_located((By.CSS_SELECTOR, 'button[data-cy="menu-user-profile"]'))
+    ).click()
     WebDriverWait(browser, 10).until(
-        EC.visibility_of_element_located(
-            (By.CSS_SELECTOR, 'li[data-cy="menu-item-clear-cache"]')
-        )).click()
+        EC.visibility_of_element_located((By.CSS_SELECTOR, 'li[data-cy="menu-item-clear-cache"]'))
+    ).click()
 
     from django.core.cache import cache
 
