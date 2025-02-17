@@ -254,8 +254,6 @@ class Query(graphene.ObjectType):
         return (
             get_user_model()
             .objects.prefetch_related("role_assignments")
-            .filter(
-                is_superuser=False, role_assignments__business_area__slug=business_area_slug
-            )
+            .filter(is_superuser=False, role_assignments__business_area__slug=business_area_slug)
             .exists()
         )
