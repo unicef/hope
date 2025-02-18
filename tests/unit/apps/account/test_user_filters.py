@@ -180,7 +180,7 @@ class TestUserFilter(APITestCase):
             variables={
                 "businessArea": "afghanistan",
                 "program": encode_id_base64_required(self.program.id, "Program"),
-                "orderBy": "partner",
+                "orderBy": "user",
             },
             context={"user": self.user},
         )
@@ -188,6 +188,6 @@ class TestUserFilter(APITestCase):
     def test_users_by_roles(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.ALL_USERS_QUERY_FILTER_BY_ROLES,
-            variables={"businessArea": "afghanistan", "roles": [str(self.role.id)], "orderBy": "partner"},
+            variables={"businessArea": "afghanistan", "roles": [str(self.role.id)], "orderBy": "user"},
             context={"user": self.user},
         )
