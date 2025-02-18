@@ -45,6 +45,7 @@ def create_unhcr_partner() -> None:
     """
     partner_unhcr = PartnerFactory(name="UNHCR")
     afghanistan = BusinessArea.objects.get(slug="afghanistan")
+    partner_unhcr.role_assignments.all().delete()
     partner_unhcr.allowed_business_areas.add(afghanistan)
     RoleAssignmentFactory(
         partner=partner_unhcr,
@@ -490,7 +491,10 @@ class TestBusinessAreas:
         pageProgrammeManagement.choosePartnerOption("UNHCR")
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
-        pageProgrammeDetails.wait_for_text("UNHCR", pageProgrammeDetails.labelPartnerName)
+
+        pageProgrammeDetails.wait_for_text_in_any_element("UNHCR", pageProgrammeDetails.labelPartnerName)
+        pageProgrammeDetails.wait_for_text_in_any_element("TEST", pageProgrammeDetails.labelPartnerName)
+
         assert "Business Area" in pageProgrammeDetails.getLabelAreaAccess().text
 
     @pytest.mark.parametrize(
@@ -625,7 +629,9 @@ class TestAdminAreas:
         sleep(1)
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
-        pageProgrammeDetails.wait_for_text("UNHCR", pageProgrammeDetails.labelPartnerName)
+        pageProgrammeDetails.wait_for_text_in_any_element("UNHCR", pageProgrammeDetails.labelPartnerName)
+        pageProgrammeDetails.wait_for_text_in_any_element("TEST", pageProgrammeDetails.labelPartnerName)
+
         assert "1" in pageProgrammeDetails.getLabelAdminArea1().text
         assert "15" in pageProgrammeDetails.getLabelAdminArea2().text
 
