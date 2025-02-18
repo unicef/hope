@@ -25,6 +25,7 @@ snapshots['TestUserFilter::test_users_by_business_area 1'] = {
                                 'role': {
                                     'name': 'Role with all permissions',
                                     'permissions': [
+                                        'PROGRAMME_VIEW_LIST'
                                     ]
                                 }
                             }

@@ -136,6 +136,10 @@ class TestUserFilter(APITestCase):
         business_area = create_afghanistan()
         partner_unicef = PartnerFactory(name="UNICEF")
         unicef_hq = PartnerFactory(name=settings.UNICEF_HQ_PARTNER, parent=partner_unicef)
+        role_with_all_permissions = RoleFactory(name="Role with all permissions")
+        role_with_all_permissions.permissions = ["PROGRAMME_VIEW_LIST"]
+        role_with_all_permissions.save()
+
         cls.program = ProgramFactory(name="Test Program")
 
         # user with UNICEF partner without role in BA
