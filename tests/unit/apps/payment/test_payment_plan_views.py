@@ -121,7 +121,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
             self.user,
             [Permissions.PM_VIEW_LIST, Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
             self.afghanistan,
-            self.program1,
+            program=self.program1,
         )
         response = self.client.get(self.url)
         assert response.status_code == status.HTTP_200_OK
@@ -133,15 +133,20 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
             self.partner,
             [Permissions.PM_VIEW_LIST, Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
             self.afghanistan,
-            self.program1,
+            program=self.program2,
         )
+
+        response = self.client.get(self.url)
+        assert response.status_code == status.HTTP_200_OK
+        response_json = response.json()["results"]
+        assert len(response_json) == 2
 
         with CaptureQueriesContext(connection) as ctx:
             response = _test_list()
             etag = response.headers["etag"]
 
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 26
+            assert len(ctx.captured_queries) == 10
 
         # Test that reoccurring request use cached data
         with CaptureQueriesContext(connection) as ctx:
@@ -149,7 +154,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
             etag_second_call = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
             assert etag_second_call == etag
-            assert len(ctx.captured_queries) == 12
+            assert len(ctx.captured_queries) == 10
 
     def test_list_payment_plans_approval_process_data(
         self,
