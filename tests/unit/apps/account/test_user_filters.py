@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.cache import cache
 
 from hct_mis_api.apps.account.fixtures import (
     PartnerFactory,
@@ -136,7 +137,7 @@ class TestUserFilter(APITestCase):
         business_area = create_afghanistan()
         partner_unicef = PartnerFactory(name="UNICEF")
         unicef_hq = PartnerFactory(name=settings.UNICEF_HQ_PARTNER, parent=partner_unicef)
-        role_with_all_permissions = RoleFactory(name="Role with all permissions")
+        role_with_all_permissions = unicef_hq.role_assignments.filter(business_area=business_area).first().role
         role_with_all_permissions.permissions = ["PROGRAMME_VIEW_LIST"]
         role_with_all_permissions.save()
 
@@ -198,6 +199,7 @@ class TestUserFilter(APITestCase):
         )
 
     def test_users_by_roles(self) -> None:
+        cache.clear()
         self.snapshot_graphql_request(
             request_string=self.ALL_USERS_QUERY_FILTER_BY_ROLES,
             variables={"businessArea": "afghanistan", "roles": [str(self.role.id)], "orderBy": "email"},
