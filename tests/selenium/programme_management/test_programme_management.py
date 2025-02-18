@@ -49,6 +49,7 @@ def create_unhcr_partner() -> None:
     """
     partner_unhcr = PartnerFactory(name="UNHCR")
     afghanistan = BusinessArea.objects.get(slug="afghanistan")
+    partner_unhcr.allowed_business_areas.add(afghanistan)
     RoleAssignmentFactory(
         partner=partner_unhcr,
         business_area=afghanistan,

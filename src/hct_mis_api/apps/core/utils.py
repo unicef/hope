@@ -46,8 +46,6 @@ if TYPE_CHECKING:
     from openpyxl.worksheet.worksheet import Worksheet
 
     from hct_mis_api.apps.account.models import User
-    from hct_mis_api.apps.core.models import BusinessArea
-    from hct_mis_api.apps.program.models import Program
 
 
 logger = logging.getLogger(__name__)
@@ -92,23 +90,6 @@ def get_program_id_from_headers(headers: Union[Dict, "HttpHeaders"]) -> Optional
     program_id = headers.get("Program")
     program_id = decode_id_string(program_id) if program_id != "all" and program_id != "undefined" else None
     return program_id
-
-
-# TODO: change
-def get_selected_program(request: Any) -> Optional["Program"]:
-    if hasattr(request, "data") and isinstance(request.data, dict):  # GraphQL Request
-        program = request.data.get("variables", {}).get("program")
-    elif isinstance(request.GET, dict):  # REST API Request
-        program = request.GET.get("program")
-    return program
-
-
-def get_selected_business_area(request: Any) -> Optional["BusinessArea"]:
-    if hasattr(request, "data") and isinstance(request.data, dict):  # GraphQL Request
-        program = request.data.get("variables", {}).get("business_area")
-    elif isinstance(request.GET, dict):  # REST API Request
-        program = request.GET.get("business_area")
-    return program
 
 
 def unique_slugify(
@@ -654,6 +635,7 @@ def chart_permission_decorator(
     @functools.wraps(chart_resolve)
     def resolve_f(*args: Any, **kwargs: Any) -> Any:
         from hct_mis_api.apps.core.models import BusinessArea
+        from hct_mis_api.apps.program.models import Program
 
         _, resolve_info = args
         if resolve_info.context.user.is_authenticated:
