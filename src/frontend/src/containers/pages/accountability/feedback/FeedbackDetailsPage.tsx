@@ -1,8 +1,8 @@
 import { Grid2 as Grid } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { useFeedbackQuery } from '@generated/graphql';
-import { FeedbackDetailsToolbar } from '@components/accountability/Feedback/FeedbackDetailsToolbar';
-import { LinkedGrievance } from '@components/accountability/Feedback/LinkedGrievance/LinkedGrievance';
+import FeedbackDetailsToolbar from '@components/accountability/Feedback/FeedbackDetailsToolbar';
+import LinkedGrievance from '@components/accountability/Feedback/LinkedGrievance/LinkedGrievance';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';

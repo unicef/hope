@@ -8,8 +8,6 @@ import {
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { GrievanceDetailsToolbar } from '@components/grievances/GrievanceDetailsToolbar';
-import { GrievancesApproveSection } from '@components/grievances/GrievancesApproveSection/GrievancesApproveSection';
-import { GrievancesDetails } from '@components/grievances/GrievancesDetails/GrievancesDetails';
 import { GrievancesSidebar } from '@components/grievances/GrievancesSidebar/GrievancesSidebar';
 import { Notes } from '@components/grievances/Notes/Notes';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
@@ -20,6 +18,8 @@ import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogT
 import { grievancePermissions } from './grievancePermissions';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import GrievancesApproveSection from '@components/grievances/GrievancesApproveSection/GrievancesApproveSection';
+import GrievancesDetails from '@components/grievances/GrievancesDetails/GrievancesDetails';
 
 const GrievancesDetailsPage = (): ReactElement => {
   const { id } = useParams();

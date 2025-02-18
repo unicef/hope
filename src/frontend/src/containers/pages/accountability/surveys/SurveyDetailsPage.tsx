@@ -1,7 +1,6 @@
 import { Box, Button } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
-import { SurveyDetails } from '@components/accountability/Surveys/SurveyDetails';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
@@ -24,6 +23,7 @@ import { useProgramContext } from '../../../../programContext';
 import { AdminButton } from '@core/AdminButton';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import SurveyDetails from '@components/accountability/Surveys/SurveyDetails';
 
 function SurveyDetailsPage(): ReactElement {
   const { showMessage } = useSnackbar();

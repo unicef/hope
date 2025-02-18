@@ -5,13 +5,7 @@ import { LoadingButton } from '@components/core/LoadingButton';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
-import { AddIndividualDataChange } from '@components/grievances/AddIndividualDataChange';
 import { CreateGrievanceStepper } from '@components/grievances/CreateGrievance/CreateGrievanceStepper/CreateGrievanceStepper';
-import { Description } from '@components/grievances/CreateGrievance/Description/Description';
-import { Selection } from '@components/grievances/CreateGrievance/Selection/Selection';
-import { Verification } from '@components/grievances/CreateGrievance/Verification/Verification';
-import { EditHouseholdDataChange } from '@components/grievances/EditHouseholdDataChange/EditHouseholdDataChange';
-import { EditIndividualDataChange } from '@components/grievances/EditIndividualDataChange/EditIndividualDataChange';
 import { LookUpHouseholdIndividualSelection } from '@components/grievances/LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividualSelection';
 import { OtherRelatedTicketsCreate } from '@components/grievances/OtherRelatedTicketsCreate';
 import { TicketsAlreadyExist } from '@components/grievances/TicketsAlreadyExist';
@@ -52,8 +46,14 @@ import {
   hasPermissions,
 } from '../../../config/permissions';
 import { useProgramContext } from 'src/programContext';
-import { EditPeopleDataChange } from '@components/grievances/EditPeopleDataChange/EditPeopleDataChange';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import AddIndividualDataChange from '@components/grievances/AddIndividualDataChange';
+import Verification from '@components/grievances/CreateGrievance/Verification/Verification';
+import EditHouseholdDataChange from '@components/grievances/EditHouseholdDataChange/EditHouseholdDataChange';
+import EditIndividualDataChange from '@components/grievances/EditIndividualDataChange/EditIndividualDataChange';
+import EditPeopleDataChange from '@components/grievances/EditPeopleDataChange/EditPeopleDataChange';
+import Selection from '@components/grievances/CreateGrievance/Selection/Selection';
+import Description from '@components/grievances/CreateGrievance/Description/Description';
 
 const InnerBoxPadding = styled.div`
   .MuiPaper-root {
