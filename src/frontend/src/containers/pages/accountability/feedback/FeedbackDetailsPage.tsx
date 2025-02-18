@@ -1,7 +1,6 @@
 import { Grid2 as Grid } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { useFeedbackQuery } from '@generated/graphql';
-import { FeedbackDetails } from '@components/accountability/Feedback/FeedbackDetails/FeedbackDetails';
 import { FeedbackDetailsToolbar } from '@components/accountability/Feedback/FeedbackDetailsToolbar';
 import { LinkedGrievance } from '@components/accountability/Feedback/LinkedGrievance/LinkedGrievance';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -12,6 +11,7 @@ import { isPermissionDeniedError } from '@utils/utils';
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import FeedbackDetails from '@components/accountability/Feedback/FeedbackDetails/FeedbackDetails';
 
 function FeedbackDetailsPage(): ReactElement {
   const { id } = useParams();
