@@ -4,7 +4,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid,
+  Grid2 as Grid,
   List,
   ListItem,
   Typography,
@@ -78,9 +78,9 @@ export function ResultsForPeople({
         </Title>
         <ContentWrapper>
           <Grid container>
-            <Grid item xs={4}>
+            <Grid size={{ xs: 4 }}>
               <Grid container spacing={0} justifyContent="flex-start">
-                <Grid item xs={6}>
+                <Grid size={{ xs: 6 }}>
                   <FieldBorder color={colors.femaleChildren}>
                     <LabelizedField
                       label={t('Female Children')}
@@ -88,7 +88,7 @@ export function ResultsForPeople({
                     />
                   </FieldBorder>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid size={{ xs: 6 }}>
                   <FieldBorder color={colors.femaleAdult}>
                     <LabelizedField
                       label={t('Female Adults')}
@@ -96,7 +96,7 @@ export function ResultsForPeople({
                     />
                   </FieldBorder>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid size={{ xs: 6 }}>
                   <FieldBorder color={colors.maleChildren}>
                     <LabelizedField
                       label={t('Male Children')}
@@ -104,7 +104,7 @@ export function ResultsForPeople({
                     />
                   </FieldBorder>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid size={{ xs: 6 }}>
                   <FieldBorder color={colors.maleAdult}>
                     <LabelizedField
                       label={t('Male Adults')}
@@ -114,14 +114,14 @@ export function ResultsForPeople({
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item xs={4}>
+            <Grid size={{ xs: 4 }}>
               <Grid
                 container
                 spacing={0}
                 justifyContent="flex-start"
                 alignItems="center"
               >
-                <Grid item xs={6}>
+                <Grid size={{ xs: 6 }}>
                   <SummaryBorder>
                     <>
                       <LabelizedField
@@ -202,9 +202,9 @@ export function ResultsForPeople({
                 </Grid> */}
               </Grid>
             </Grid>
-            <Grid item xs={4}>
+            <Grid size={{ xs: 4 }}>
               <Grid container spacing={0} justifyContent="flex-end">
-                <Grid item xs={6}>
+                <Grid size={{ xs: 6 }}>
                   <SummaryBorder>
                     <LabelizedField label={t('Total Number of People')}>
                       <SummaryValue>

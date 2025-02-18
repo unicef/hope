@@ -1,5 +1,5 @@
 import { Typography } from '@mui/material';
-import Grid from '@mui/material/Grid';
+import Grid from '@mui/material/Grid2';
 import Paper from '@mui/material/Paper';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -44,7 +44,7 @@ export const RegistrationIndividualAdditionalRegistrationInformation = ({
     ([key, value]: [string, string | string[]]) => {
       if (key in flexAttributesDict === false) {
         return (
-          <Grid item xs={4} key={key}>
+          <Grid size={{ xs:4 }} key={key}>
             <LabelizedField label={key} value={value}>
               {value}
             </LabelizedField>
@@ -73,7 +73,7 @@ export const RegistrationIndividualAdditionalRegistrationInformation = ({
         newValue = value;
       }
       return (
-        <Grid item xs={4} key={key}>
+        <Grid size={{ xs:4 }} key={key}>
           <LabelizedField label={label} value={newValue}>
             {children}
           </LabelizedField>

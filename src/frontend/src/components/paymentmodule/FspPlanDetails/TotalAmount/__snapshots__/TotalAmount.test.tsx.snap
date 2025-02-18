@@ -6,16 +6,17 @@ exports[`components/paymentmodule/FspPlanDetails/TotalAmount should render 1`] =
     class="MuiBox-root css-zwiamn"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-blHHSb kPa-dfK css-1ps6pg7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-FEMpB iyPpzz css-1gtchvp-MuiPaper-root"
+      style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
     >
       <div
         class="MuiBox-root css-1yuhvjn"
       >
         <div
-          class="sc-gtLWhw gZjOlD"
+          class="sc-gjcoXW eUaiRk"
         >
           <h6
-            class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-h6 css-66ugg1-MuiTypography-root"
           >
             Total Amount
             (PLN)

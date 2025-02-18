@@ -6,7 +6,7 @@ import {
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { Box, Divider, Grid, Typography } from '@mui/material';
+import { Box, Divider, Grid2 as Grid, Typography } from '@mui/material';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import {
   getTargetingCriteriaVariables,
@@ -167,7 +167,7 @@ export const EditTargetPopulation = ({
               <Typography variant="h6">{t('Targeting Criteria')}</Typography>
             </Box>
             <Grid container mb={5}>
-              <Grid item xs={6}>
+              <Grid size={{ xs:6 }}>
                 <ProgramCycleAutocompleteRest
                   value={values.programCycleId}
                   onChange={async (e) => {
@@ -181,7 +181,7 @@ export const EditTargetPopulation = ({
               </Grid>
             </Grid>
             <Grid container>
-              <Grid item xs={6}>
+              <Grid size={{ xs:6 }}>
                 <Field
                   name="name"
                   label={t('Target Population Name')}

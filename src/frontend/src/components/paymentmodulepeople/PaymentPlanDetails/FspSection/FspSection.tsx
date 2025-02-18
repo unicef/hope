@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Button, Grid2 as Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { PaymentPlanQuery } from '@generated/graphql';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
@@ -11,14 +11,13 @@ interface FspSectionProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export function FspSection({
-  paymentPlan,
-}: FspSectionProps): ReactElement {
+export function FspSection({ paymentPlan }: FspSectionProps): ReactElement {
   const { t } = useTranslation();
 
   const { deliveryMechanism, financialServiceProvider } = paymentPlan;
 
-  return <Box m={5}>
+  return (
+    <Box m={5}>
       <ContainerColumnWithBorder>
         <Box
           display="flex"
@@ -30,7 +29,10 @@ export function FspSection({
         </Box>
         <Grid container spacing={3}>
           <>
-            <Grid key={`${deliveryMechanism?.name}-${financialServiceProvider?.name}`} item xs={3}>
+            <Grid
+              key={`${deliveryMechanism?.name}-${financialServiceProvider?.name}`}
+              size={{ xs: 3 }}
+            >
               <LabelizedField
                 label={deliveryMechanism?.name || '-'}
                 value={financialServiceProvider?.name || '-'}
@@ -41,5 +43,6 @@ export function FspSection({
         <DividerLine />
         <VolumeByDeliveryMechanismSection paymentPlan={paymentPlan} />
       </ContainerColumnWithBorder>
-    </Box>;
+    </Box>
+  );
 }

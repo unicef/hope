@@ -1,4 +1,4 @@
-import { Box, Button, Grid } from '@mui/material';
+import { Box, Button, Grid2 as Grid } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { Field, FieldArray } from 'formik';
 import { FC, useEffect } from 'react';
@@ -73,7 +73,7 @@ export const PartnersStep: FC<PartnersStepProps> = ({
   return (
     <>
       <Box display="flex" justifyContent="space-between" mt={2}>
-        <Grid item xs={6}>
+        <Grid size={{ xs:6 }}>
           <Field
             name="partnerAccess"
             label={t('Who should have access to the program?')}
