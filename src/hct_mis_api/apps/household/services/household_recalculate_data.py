@@ -10,6 +10,8 @@ from hct_mis_api.apps.household.models import (
     FEMALE,
     MALE,
     NON_BENEFICIARY,
+    NOT_COLLECTED,
+    OTHER,
     Household,
     Individual,
 )
@@ -73,6 +75,8 @@ def recalculate_data(
     children_disabled_count = Q(birth_date__gt=date_18_years_ago) & disabled_disability
     female_children_disabled_count = Q(birth_date__gt=date_18_years_ago) & female_disability_beneficiary
     male_children_disabled_count = Q(birth_date__gt=date_18_years_ago) & male_disability_beneficiary
+    other_sex_group_count = Q(sex=OTHER)
+    unknown_sex_group_count = Q(sex=NOT_COLLECTED)
 
     age_groups = household.individuals.aggregate(
         female_age_group_0_5_count=Count("id", distinct=True, filter=Q(female_beneficiary & to_6_years)),
@@ -168,6 +172,16 @@ def recalculate_data(
             "id",
             distinct=True,
             filter=male_children_disabled_count,
+        ),
+        other_sex_group_count=Count(
+            "id",
+            distinct=True,
+            filter=other_sex_group_count,
+        ),
+        unknown_sex_group_count=Count(
+            "id",
+            distinct=True,
+            filter=unknown_sex_group_count,
         ),
     )
     updated_fields = ["child_hoh", "fchild_hoh", "updated_at"]
