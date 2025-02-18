@@ -14,6 +14,29 @@ snapshots['TestUserFilter::test_users_by_business_area 1'] = {
                 {
                     'node': {
                         'partner': {
+                            'name': 'UNICEF HQ'
+                        },
+                        'partnerRoles': [
+                            {
+                                'businessArea': {
+                                    'name': 'Afghanistan'
+                                },
+                                'program': None,
+                                'role': {
+                                    'name': 'Role with all permissions',
+                                    'permissions': [
+                                    ]
+                                }
+                            }
+                        ],
+                        'userRoles': [
+                        ],
+                        'username': 'unicef_user_without_role'
+                    }
+                },
+                {
+                    'node': {
+                        'partner': {
                             'name': 'Partner With Test Role'
                         },
                         'partnerRoles': [
@@ -66,29 +89,6 @@ snapshots['TestUserFilter::test_users_by_business_area 1'] = {
                 {
                     'node': {
                         'partner': {
-                            'name': 'UNICEF HQ'
-                        },
-                        'partnerRoles': [
-                            {
-                                'businessArea': {
-                                    'name': 'Afghanistan'
-                                },
-                                'program': None,
-                                'role': {
-                                    'name': 'Role with all permissions',
-                                    'permissions': [
-                                    ]
-                                }
-                            }
-                        ],
-                        'userRoles': [
-                        ],
-                        'username': 'unicef_user_without_role'
-                    }
-                },
-                {
-                    'node': {
-                        'partner': {
                             'name': 'Default Empty Partner'
                         },
                         'partnerRoles': [
@@ -122,17 +122,17 @@ snapshots['TestUserFilter::test_users_by_program 1'] = {
                 {
                     'node': {
                         'partner': {
-                            'name': 'Partner With Test Role'
+                            'name': 'UNICEF HQ'
                         },
-                        'username': 'user_with_partner_with_test_role'
+                        'username': 'unicef_user_without_role'
                     }
                 },
                 {
                     'node': {
                         'partner': {
-                            'name': 'UNICEF HQ'
+                            'name': 'Partner With Test Role'
                         },
-                        'username': 'unicef_user_without_role'
+                        'username': 'user_with_partner_with_test_role'
                     }
                 },
                 {
