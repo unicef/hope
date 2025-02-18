@@ -14,7 +14,30 @@ snapshots['TestUserFilter::test_users_by_business_area 1'] = {
                 {
                     'node': {
                         'partner': {
-                            'name': 'UNICEF'
+                            'name': 'UNICEF HQ'
+                        },
+                        'partnerRoles': [
+                            {
+                                'businessArea': {
+                                    'name': 'Afghanistan'
+                                },
+                                'program': None,
+                                'role': {
+                                    'name': 'Role with all permissions',
+                                    'permissions': [
+                                    ]
+                                }
+                            }
+                        ],
+                        'userRoles': [
+                        ],
+                        'username': 'unicef_user_without_role'
+                    }
+                },
+                {
+                    'node': {
+                        'partner': {
+                            'name': 'Default Empty Partner'
                         },
                         'partnerRoles': [
                         ],
@@ -23,9 +46,38 @@ snapshots['TestUserFilter::test_users_by_business_area 1'] = {
                                 'businessArea': {
                                     'name': 'Afghanistan'
                                 },
+                                'program': None,
                                 'role': {
                                     'name': 'Test Role',
-                                    'permissions': None
+                                    'permissions': [
+                                        'USER_MANAGEMENT_VIEW_LIST'
+                                    ]
+                                }
+                            }
+                        ],
+                        'username': 'user_with_test_role_in_whole_ba'
+                    }
+                },
+                {
+                    'node': {
+                        'partner': {
+                            'name': 'Default Empty Partner'
+                        },
+                        'partnerRoles': [
+                        ],
+                        'userRoles': [
+                            {
+                                'businessArea': {
+                                    'name': 'Afghanistan'
+                                },
+                                'program': {
+                                    'name': 'Different Program'
+                                },
+                                'role': {
+                                    'name': 'Test Role',
+                                    'permissions': [
+                                        'USER_MANAGEMENT_VIEW_LIST'
+                                    ]
                                 }
                             }
                         ],
@@ -42,18 +94,15 @@ snapshots['TestUserFilter::test_users_by_business_area 1'] = {
                                 'businessArea': {
                                     'name': 'Afghanistan'
                                 },
-                                'roles': [
-                                    {
-                                        'name': 'Test Role',
-                                        'permissions': None
-                                    },
-                                    {
-                                        'name': 'User Management View Role',
-                                        'permissions': [
-                                            'USER_MANAGEMENT_VIEW_LIST'
-                                        ]
-                                    }
-                                ]
+                                'program': {
+                                    'name': 'Test Program'
+                                },
+                                'role': {
+                                    'name': 'Test Role',
+                                    'permissions': [
+                                        'USER_MANAGEMENT_VIEW_LIST'
+                                    ]
+                                }
                             }
                         ],
                         'userRoles': [
@@ -73,9 +122,17 @@ snapshots['TestUserFilter::test_users_by_program 1'] = {
                 {
                     'node': {
                         'partner': {
-                            'name': 'UNICEF'
+                            'name': 'UNICEF HQ'
                         },
-                        'username': 'user_with_test_role'
+                        'username': 'unicef_user_without_role'
+                    }
+                },
+                {
+                    'node': {
+                        'partner': {
+                            'name': 'Default Empty Partner'
+                        },
+                        'username': 'user_with_test_role_in_whole_ba'
                     }
                 },
                 {
@@ -84,7 +141,7 @@ snapshots['TestUserFilter::test_users_by_program 1'] = {
                             'name': 'Partner With Test Role'
                         },
                         'username': 'user_with_partner_with_test_role'
-                    },
+                    }
                 }
             ]
         }
@@ -98,7 +155,7 @@ snapshots['TestUserFilter::test_users_by_roles 1'] = {
                 {
                     'node': {
                         'partner': {
-                            'name': 'UNICEF'
+                            'name': 'Default Empty Partner'
                         },
                         'partnerRoles': [
                         ],
@@ -107,9 +164,38 @@ snapshots['TestUserFilter::test_users_by_roles 1'] = {
                                 'businessArea': {
                                     'name': 'Afghanistan'
                                 },
+                                'program': None,
                                 'role': {
                                     'name': 'Test Role',
-                                    'permissions': None
+                                    'permissions': [
+                                        'USER_MANAGEMENT_VIEW_LIST'
+                                    ]
+                                }
+                            }
+                        ],
+                        'username': 'user_with_test_role_in_whole_ba'
+                    }
+                },
+                {
+                    'node': {
+                        'partner': {
+                            'name': 'Default Empty Partner'
+                        },
+                        'partnerRoles': [
+                        ],
+                        'userRoles': [
+                            {
+                                'businessArea': {
+                                    'name': 'Afghanistan'
+                                },
+                                'program': {
+                                    'name': 'Different Program'
+                                },
+                                'role': {
+                                    'name': 'Test Role',
+                                    'permissions': [
+                                        'USER_MANAGEMENT_VIEW_LIST'
+                                    ]
                                 }
                             }
                         ],
@@ -126,18 +212,15 @@ snapshots['TestUserFilter::test_users_by_roles 1'] = {
                                 'businessArea': {
                                     'name': 'Afghanistan'
                                 },
-                                'roles': [
-                                    {
-                                        'name': 'Test Role',
-                                        'permissions': None
-                                    },
-                                    {
-                                        'name': 'User Management View Role',
-                                        'permissions': [
-                                            'USER_MANAGEMENT_VIEW_LIST'
-                                        ]
-                                    }
-                                ]
+                                'program': {
+                                    'name': 'Test Program'
+                                },
+                                'role': {
+                                    'name': 'Test Role',
+                                    'permissions': [
+                                        'USER_MANAGEMENT_VIEW_LIST'
+                                    ]
+                                }
                             }
                         ],
                         'userRoles': [
