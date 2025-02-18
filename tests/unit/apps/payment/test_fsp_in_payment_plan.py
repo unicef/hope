@@ -1063,9 +1063,11 @@ class TestVolumeByDeliveryMechanism(APITestCase):
 class TestValidateFSPPerDeliveryMechanism(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        print("Before Setup")
         super().setUpTestData()
         base_setup(cls)
         payment_plan_setup(cls)
+        print("After Setup")
 
     def test_chosen_delivery_mechanism_not_supported_by_fsp(self) -> None:
         dm1 = DeliveryMechanismPerPaymentPlanFactory(
