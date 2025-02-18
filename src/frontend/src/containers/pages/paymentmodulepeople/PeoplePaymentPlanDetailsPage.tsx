@@ -10,7 +10,6 @@ import { ReconciliationSummary } from '@components/paymentmodule/PaymentPlanDeta
 import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
 import { ExcludeSection } from '@components/paymentmodulepeople/PaymentPlanDetails/ExcludeSection';
 import { PeoplePaymentPlanDetailsResults } from '@components/paymentmodulepeople/PaymentPlanDetails/PeoplePaymentPlanDetailsResults';
-import { PeoplePaymentsTable } from '@containers/tables/paymentmodulePeople/PeoplePaymentsTable';
 import {
   PaymentPlanBackgroundActionStatus,
   PaymentPlanStatus,
@@ -24,6 +23,7 @@ import { ReactElement, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
+import PeoplePaymentsTable from '@containers/tables/paymentmodulePeople/PeoplePaymentsTable/PeoplePaymentsTable';
 
 export const PeoplePaymentPlanDetailsPage = (): ReactElement => {
   const { paymentPlanId } = useParams();

@@ -5,7 +5,7 @@ import { useMeQuery, useReportChoiceDataQuery } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
-import { NewReportForm } from '@components/reporting/NewReportForm';
+import NewReportForm from '@components/reporting/NewReportForm';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';

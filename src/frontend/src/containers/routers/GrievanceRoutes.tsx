@@ -1,9 +1,9 @@
 import { useRoutes } from 'react-router-dom';
-import { EditFeedbackPage } from '../pages/accountability/feedback/EditFeedbackPage';
-import { CreateGrievancePage } from '../pages/grievances/CreateGrievancePage';
-import { EditGrievancePage } from '../pages/grievances/EditGrievancePage';
-import { GrievancesDetailsPage } from '../pages/grievances/GrievancesDetailsPage/GrievancesDetailsPage';
-import { GrievancesTablePage } from '../pages/grievances/GrievancesTablePage';
+import EditFeedbackPage from '../pages/accountability/feedback/EditFeedbackPage';
+import CreateGrievancePage from '../pages/grievances/CreateGrievancePage';
+import EditGrievancePage from '../pages/grievances/EditGrievancePage';
+import GrievancesDetailsPage from '../pages/grievances/GrievancesDetailsPage/GrievancesDetailsPage';
+import GrievancesTablePage from '../pages/grievances/GrievancesTablePage';
 import { ReactElement } from 'react';
 import CreateFeedbackPage from '@containers/pages/accountability/feedback/CreateFeedbackPage';
 import FeedbackDetailsPage from '@containers/pages/accountability/feedback/FeedbackDetailsPage';

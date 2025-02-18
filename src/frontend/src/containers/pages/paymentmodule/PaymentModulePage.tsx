@@ -7,9 +7,9 @@ import { TableWrapper } from '@components/core/TableWrapper';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
-import { PaymentPlansTable } from '../../tables/paymentmodule/PaymentPlansTable';
 import { PaymentPlansFilters } from '../../tables/paymentmodule/PaymentPlansTable/PaymentPlansFilters';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import PaymentPlansTable from '@containers/tables/paymentmodule/PaymentPlansTable/PaymentPlansTable';
 
 const initialFilter = {
   search: '',

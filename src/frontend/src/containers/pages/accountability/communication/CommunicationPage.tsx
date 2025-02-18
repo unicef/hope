@@ -12,11 +12,11 @@ import {
 } from '../../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
-import { CommunicationTable } from '../../../tables/Communication/CommunicationTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { useProgramContext } from '../../../../programContext';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import CommunicationTable from '@containers/tables/Communication/CommunicationTable/CommunicationTable';
 
 export function CommunicationPage(): ReactElement {
   const { baseUrl } = useBaseUrl();

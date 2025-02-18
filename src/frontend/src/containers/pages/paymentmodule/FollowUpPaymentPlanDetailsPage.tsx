@@ -17,8 +17,8 @@ import { isPermissionDeniedError } from '@utils/utils';
 import { ReactElement, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { PaymentsTable } from '../../tables/paymentmodule/PaymentsTable';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
+import PaymentsTable from '@containers/tables/paymentmodule/PaymentsTable/PaymentsTable';
 
 export function FollowUpPaymentPlanDetailsPage(): ReactElement {
   const { paymentPlanId } = useParams();

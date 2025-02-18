@@ -11,7 +11,7 @@ import {
 import { Field, Formik } from 'formik';
 import { ReactElement, ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
 import {
@@ -47,7 +47,6 @@ import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { FeedbackSteps } from '@utils/constants';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { useProgramContext } from 'src/programContext';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 
@@ -143,7 +142,6 @@ export const validationSchemaWithSteps = (currentStep: number): unknown => {
 
 function CreateFeedbackPage(): ReactElement {
   const navigate = useNavigate();
-  const location = useLocation();
   const { t } = useTranslation();
   const { baseUrl, businessArea, isAllPrograms, programId } = useBaseUrl();
   const permissions = usePermissions();

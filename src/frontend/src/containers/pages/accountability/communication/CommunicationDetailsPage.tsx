@@ -12,7 +12,7 @@ import { useAccountabilityCommunicationMessageQuery } from '@generated/graphql';
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
 import { CommunicationDetails } from '@components/accountability/Communication/CommunicationDetails';
 import { CommunicationMessageDetails } from '@components/accountability/Communication/CommunicationMessageDetails';
-import { RecipientsTable } from '../../../tables/Communication/RecipientsTable/RecipientsTable';
+import RecipientsTable from '../../../tables/Communication/RecipientsTable/RecipientsTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AdminButton } from '@core/AdminButton';
 import { ReactElement } from 'react';

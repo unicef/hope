@@ -15,7 +15,7 @@ import { useConfirmation } from '@core/ConfirmationDialog';
 import { LoadingButton } from '@core/LoadingButton';
 import { PageHeader } from '@core/PageHeader';
 import { useProgramContext } from '../../../programContext';
-import { MergeRegistrationDataImportDialog } from './MergeRegistrationDataImportDialog';
+import MergeRegistrationDataImportDialog from './MergeRegistrationDataImportDialog';
 import { RerunDedupe } from './RerunDedupe';
 import { RefuseRdiForm } from './refuseRdiForm';
 import { AdminButton } from '@core/AdminButton';

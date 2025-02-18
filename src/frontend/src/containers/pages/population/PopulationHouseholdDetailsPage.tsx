@@ -32,8 +32,8 @@ import { CollectorsTable } from '@containers/tables/population/CollectorsTable';
 import { HouseholdMembersTable } from '@containers/tables/population/HouseholdMembersTable';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
-import { PaymentsHouseholdTable } from '@containers/tables/payments/PaymentsHouseholdTable';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import PaymentsHouseholdTable from '@containers/tables/payments/PaymentsHouseholdTable/PaymentsHouseholdTable';
 
 const Container = styled.div`
   padding: 20px;

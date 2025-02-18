@@ -8,13 +8,13 @@ import {
 import { usePermissions } from '@hooks/usePermissions';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
-import { FeedbackTable } from '@containers/tables/Feedback';
 import { FeedbackFilters } from '@components/accountability/Feedback/FeedbackTable/FeedbackFilters';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { useProgramContext } from '../../../../programContext';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import FeedbackTable from '@containers/tables/Feedback/FeedbackTable';
 
 function FeedbackPage(): ReactElement {
   const { baseUrl, isAllPrograms } = useBaseUrl();

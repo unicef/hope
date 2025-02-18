@@ -39,8 +39,8 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { ReactElement } from 'react';
 import { IndividualDeliveryMechanisms } from '@components/population/IndividualDeliveryMechanisms';
-import { PaymentsPeopleTable } from '@containers/tables/payments/PaymentsPeopleTable';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import PaymentsPeopleTable from '@containers/tables/payments/PaymentsPeopleTable/PaymentsPeopleTable';
 
 const Container = styled.div`
   padding: 20px 20px 00px 20px;

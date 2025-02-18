@@ -2,7 +2,7 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ProgramDetails } from '@components/programs/ProgramDetails/ProgramDetails';
-import { ProgramCyclesTableProgramDetails } from '@containers/tables/ProgramCycle/ProgramCyclesTableProgramDetails';
+import ProgramCyclesTableProgramDetails from '@containers/tables/ProgramCycle/ProgramCyclesTableProgramDetails';
 import {
   ProgramStatus,
   useBusinessAreaDataQuery,
