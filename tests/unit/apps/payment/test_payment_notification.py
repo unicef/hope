@@ -383,10 +383,6 @@ class TestPaymentNotification(APITestCase):
             self.user_action_user,
             f"{timezone.now():%-d %B %Y}",
         )
-        self.assertEqual(
-            payment_notification.user_recipients.count(),
-            20,
-        )
         for recipient in [
             self.user_with_partner_unicef_hq,
             self.user_with_partner_unicef_in_ba,
@@ -417,6 +413,11 @@ class TestPaymentNotification(APITestCase):
                 recipient,
                 payment_notification.user_recipients.all(),
             )
+
+        self.assertEqual(
+            payment_notification.user_recipients.count(),
+            20,
+        )
 
         # action user should be excluded from recipients
         self.assertNotIn(
