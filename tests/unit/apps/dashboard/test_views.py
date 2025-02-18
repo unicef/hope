@@ -68,7 +68,7 @@ def test_dashboard_data_view_access_granted(
     business_area = setup_client["business_area"]
     list_url = setup_client["list_url"]
 
-    role = RoleFactory(name="Dashboard Viewer", permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    role = RoleFactory(name="Dashboard Viewer", permissions=[Permissions.DASHBOARD_VIEW_COUNTRY.value])
     RoleAssignment.objects.create(user=user, role=role, business_area=business_area)
 
     response = client.get(list_url)
@@ -154,7 +154,7 @@ def test_dashboard_report_view_context_with_permission(afghanistan: BusinessArea
     Test that the DashboardReportView includes the correct context data when the user has permission.
     """
     user = UserFactory()
-    role = RoleFactory(name="Dashboard Viewer", permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    role = RoleFactory(name="Dashboard Viewer", permissions=[Permissions.DASHBOARD_VIEW_COUNTRY.value])
     RoleAssignment.objects.create(user=user, role=role, business_area=afghanistan)
     request = rf.get(reverse("api:dashboard", kwargs={"business_area_slug": afghanistan.slug}))
     request.user = user
@@ -203,7 +203,7 @@ def test_dashboard_data_view_permissions(
     url = setup_client[expected_url_key]
 
     if permission_granted:
-        role = RoleFactory(name="Dashboard Viewer", permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+        role = RoleFactory(name="Dashboard Viewer", permissions=[Permissions.DASHBOARD_VIEW_COUNTRY.value])
         assigned_area = "global" if business_area_slug == "global" else business_area
         RoleAssignment.objects.create(user=user, role=role, business_area=assigned_area)
 
