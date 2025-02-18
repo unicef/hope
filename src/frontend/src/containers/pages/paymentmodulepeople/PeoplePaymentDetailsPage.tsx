@@ -13,13 +13,13 @@ import {
   useCashAssistUrlPrefixQuery,
   usePaymentQuery,
 } from '@generated/graphql';
-import { PaymentDetails } from '@components/paymentmodule/PaymentDetails';
 import { RevertForceFailedButton } from '@components/paymentmodule/RevertForceFailedButton';
 import { ForceFailedButton } from '@components/paymentmodule/ForceFailedButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AdminButton } from '@core/AdminButton';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { PaymentDetails } from '@components/paymentmodulepeople/PaymentDetails';
 
 export const PeoplePaymentDetailsPage = (): ReactElement => {
   const { t } = useTranslation();

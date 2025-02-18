@@ -8,7 +8,7 @@ import {
 import { usePermissions } from '@hooks/usePermissions';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
-import { FeedbackFilters } from '@components/accountability/Feedback/FeedbackTable/FeedbackFilters';
+import FeedbackFilters from '@components/accountability/Feedback/FeedbackTable/FeedbackFilters';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ButtonTooltip } from '@components/core/ButtonTooltip';

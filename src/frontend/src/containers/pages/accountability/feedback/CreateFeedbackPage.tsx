@@ -22,8 +22,6 @@ import {
   useCreateFeedbackTicketMutation,
   useFeedbackIssueTypeChoicesQuery,
 } from '@generated/graphql';
-import { HouseholdQuestionnaire } from '@components/accountability/Feedback/HouseholdQuestionnaire/HouseholdQuestionnaire';
-import { IndividualQuestionnaire } from '@components/accountability/Feedback/IndividualQuestionnnaire/IndividualQuestionnaire';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
 import { LabelizedField } from '@components/core/LabelizedField';
@@ -49,6 +47,8 @@ import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { FeedbackSteps } from '@utils/constants';
 import { useProgramContext } from 'src/programContext';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import HouseholdQuestionnaire from '@components/grievances/HouseholdQuestionnaire/HouseholdQuestionnaire';
+import IndividualQuestionnaire from '@components/grievances/IndividualQuestionnnaire/IndividualQuestionnaire';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
