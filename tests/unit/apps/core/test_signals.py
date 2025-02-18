@@ -15,9 +15,9 @@ class TestSignalCreateBusinessArea(TestCase):
         cls.unicef_hq = PartnerFactory(name="UNICEF HQ", parent=cls.partner_unicef)
 
     def test_signal_add_partner_role(self) -> None:
-        self.assertEqual(Partner.objects.count(), 1)
+        partner_count = Partner.objects.count()
         new_ba = BusinessArea.objects.create(name="Test Business Area", code="TBA", active=True)
-        self.assertEqual(Partner.objects.count(), 2)
+        self.assertEqual(Partner.objects.count(), partner_count + 1)
 
         new_partner = Partner.objects.filter(name=f"UNICEF Partner for {new_ba.slug}").first()
         self.assertIsNotNone(new_partner)
