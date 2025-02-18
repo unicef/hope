@@ -7,7 +7,6 @@ from hct_mis_api.apps.account.fixtures import (
     UserFactory,
 )
 from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.utils import encode_id_base64_required
@@ -34,6 +33,9 @@ class TestUserFilter(APITestCase):
             businessArea {
               name
             }
+            program {
+              name
+            }
             role {
               name
               permissions
@@ -43,7 +45,10 @@ class TestUserFilter(APITestCase):
             businessArea {
               name
             }
-            roles {
+            program {
+              name
+            }
+            role {
               name
               permissions
             }
@@ -98,6 +103,9 @@ class TestUserFilter(APITestCase):
               businessArea {
                 name
               }
+              program {
+                name
+              }
               role {
                 name
                 permissions
@@ -107,7 +115,10 @@ class TestUserFilter(APITestCase):
               businessArea {
                 name
               }
-              roles {
+              program {
+                name
+              }
+              role {
                 name
                 permissions
               }
@@ -134,19 +145,25 @@ class TestUserFilter(APITestCase):
         partner_without_ba_role = PartnerFactory(name="Partner Without Access")
         UserFactory(partner=partner_without_ba_role, username="user_without_BA_role")
 
-        cls.role = RoleFactory(name="Test Role")
+        cls.role = RoleFactory(name="Test Role", permissions=["USER_MANAGEMENT_VIEW_LIST"])
 
-        # user with role in BA
+        # user with role in BA in different program
         user_with_test_role = UserFactory(username="user_with_test_role", partner=None)
-        RoleAssignmentFactory(user=user_with_test_role, role=cls.role, business_area=business_area)
+        RoleAssignmentFactory(
+            user=user_with_test_role,
+            role=cls.role,
+            business_area=business_area,
+            program=ProgramFactory(name="Different Program", business_area=business_area),
+        )
+
+        # user with role in whole BA
+        user_with_test_role_in_whole_ba = UserFactory(username="user_with_test_role_in_whole_ba", partner=None)
+        RoleAssignmentFactory(user=user_with_test_role_in_whole_ba, role=cls.role, business_area=business_area)
 
         # user with partner with role in BA and access to program
         partner_with_test_role = PartnerFactory(name="Partner With Test Role")
-        cls.create_partner_role_with_permissions(
-            partner=partner_with_test_role,
-            permissions=[Permissions.USER_MANAGEMENT_VIEW_LIST],
-            business_area=business_area,
-            program=cls.program,
+        RoleAssignmentFactory(
+            partner=partner_with_test_role, role=cls.role, business_area=business_area, program=cls.program
         )
         cls.user = UserFactory(username="user_with_partner_with_test_role", partner=partner_with_test_role)
 

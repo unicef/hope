@@ -95,7 +95,7 @@ class UsersFilter(FilterSet):
                 role_assignments__role__id=value,
                 role_assignments__business_area__slug=business_area_slug,
             ) | Q(
-                partner__role_assignments__roles__id=value,
-                partner__role_assignments__business_areas__slug=business_area_slug,
+                partner__role_assignments__role__id=value,
+                partner__role_assignments__business_area__slug=business_area_slug,
             )
         return qs.filter(q_obj)
