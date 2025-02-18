@@ -335,9 +335,6 @@ def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: A
 
     program = Program.objects.filter(id=get_program_id_from_headers(kwargs)).first()
     obj = program or business_area
-    print("CHECK PERMISSION HERE1122")
-    print([permission.name for permission in permissions])
-    print(obj)
     return any(user.has_perm(permission.name, obj) for permission in permissions)
 
 
@@ -562,9 +559,6 @@ class BaseMutationPermissionMixin:
             if business_area is None:
                 return cls.raise_permission_denied_error(raise_error=raise_error)
         program = Program.objects.filter(id=get_program_id_from_headers(info.context.headers)).first()
-        print("JHjkdhljksad")
-        print(program)
-        print(info.context.user)
 
         if not any(
             [
