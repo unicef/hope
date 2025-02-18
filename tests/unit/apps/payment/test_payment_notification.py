@@ -417,12 +417,12 @@ class TestPaymentNotification(APITestCase):
                 print(self.program.id)
                 print(
                     recipient.role_assignments.all().values_list(
-                        "role__permissions", "business_area__slug", "program_id", flat=True
+                        "role__permissions", "business_area__slug", "program_id"
                     )
                 )
                 print(
                     recipient.partner.role_assignments.all().values_list(
-                        "role__permissions", "business_area__slug", "program_id", flat=True
+                        "role__permissions", "business_area__slug", "program_id"
                     )
                 )
             self.assertIn(
