@@ -75,7 +75,9 @@ class TestInvalidatePermissionsCacheForUserIfExpiredRoleTask:
 
         self.role_assignment_user1.expiry_date = (timezone.now() - timedelta(days=1)).date()
         self.role_assignment_user1.save()
-        self.version_key_user1_before += 1  # increased version from signal
+
+        version_key_user1_after_update = self._get_cache_version(self.user1)
+        assert version_key_user1_after_update == self.version_key_user1_before + 2
 
         result = invalidate_permissions_cache_for_user_if_expired_role()
         assert len(mock_invalidate_cache.call_args_list) == 2  # called second time now
@@ -85,7 +87,7 @@ class TestInvalidatePermissionsCacheForUserIfExpiredRoleTask:
         assert self.user1 in affected_users
         assert result is True
 
-        assert self._get_cache_version(self.user1) == self.version_key_user1_before + 1
+        assert self._get_cache_version(self.user1) == version_key_user1_after_update + 1
         assert self._get_cache_version(self.user2) == self.version_key_user2_before
 
     @patch("hct_mis_api.apps.account.celery_tasks._invalidate_user_permissions_cache")
@@ -95,8 +97,15 @@ class TestInvalidatePermissionsCacheForUserIfExpiredRoleTask:
         self.role_assignment_user1.save()
         self.role_assignment_user2.expiry_date = (timezone.now() - timedelta(days=1)).date()
         self.role_assignment_user2.save()
-        self.version_key_user1_before += 1  # increased version from signal
-        self.version_key_user2_before += 1  # increased version from signal
+
+        version_key_user1_after_update = self._get_cache_version(self.user1)
+        version_key_user2_after_update = self._get_cache_version(self.user2)
+
+        assert version_key_user1_after_update == self.version_key_user1_before + 2
+        assert version_key_user2_after_update == self.version_key_user2_before + 2
+        # increased by additional 2 signals:
+        # * signal on the  RoleAssignment
+        # * signal on User update triggered because of cascade delete of the RoleAssignment
 
         result = invalidate_permissions_cache_for_user_if_expired_role()
         mock_invalidate_cache.assert_called_once()
@@ -107,8 +116,8 @@ class TestInvalidatePermissionsCacheForUserIfExpiredRoleTask:
         assert self.user2 in affected_users
         assert result is True
 
-        assert self._get_cache_version(self.user1) == self.version_key_user1_before + 1
-        assert self._get_cache_version(self.user2) == self.version_key_user2_before + 1
+        assert self._get_cache_version(self.user1) == version_key_user1_after_update + 1
+        assert self._get_cache_version(self.user2) == version_key_user2_after_update + 1
 
     @patch("hct_mis_api.apps.account.celery_tasks._invalidate_user_permissions_cache")
     def test_invalidate_permissions_cache_role_on_partner(self, mock_invalidate_cache: Any) -> None:
@@ -137,8 +146,13 @@ class TestInvalidatePermissionsCacheForUserIfExpiredRoleTask:
         self.role_assignment_user1.save()
         self.role_assignment_user2.expiry_date = (timezone.now() - timedelta(days=1)).date()
         self.role_assignment_user2.save()
-        self.version_key_user1_before += 2  # increased version from signals (on user + partner)
-        self.version_key_user2_before += 1  # increased version from signal
+
+        self.version_key_user1_before += 1  # increased version from signal on partner
+
+        version_key_user1_after_update = self._get_cache_version(self.user1)
+        version_key_user2_after_update = self._get_cache_version(self.user2)
+        assert version_key_user1_after_update == self.version_key_user1_before + 2
+        assert version_key_user2_after_update == self.version_key_user2_before + 2
 
         result = invalidate_permissions_cache_for_user_if_expired_role()
         mock_invalidate_cache.assert_called_once()
@@ -149,8 +163,8 @@ class TestInvalidatePermissionsCacheForUserIfExpiredRoleTask:
         assert self.user2 in affected_users
         assert result is True
 
-        assert self._get_cache_version(self.user1) == self.version_key_user1_before + 1
-        assert self._get_cache_version(self.user2) == self.version_key_user2_before + 1
+        assert self._get_cache_version(self.user1) == version_key_user1_after_update + 1
+        assert self._get_cache_version(self.user2) == version_key_user2_after_update + 1
 
     def _get_cache_version(self, user: User) -> int:
         version_key = get_user_permissions_version_key(user)
