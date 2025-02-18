@@ -29,6 +29,7 @@ import { StatusBox } from '@core/StatusBox';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import { getGrievanceDetailsPath } from '../utils/createGrievanceUtils';
 import { Bold } from '@components/core/Bold';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -53,7 +54,7 @@ interface LinkedTicketsModalProps {
   issueTypeChoicesData;
 }
 
-export function LinkedTicketsModal({
+function LinkedTicketsModal({
   ticket,
   categoryChoices,
   statusChoices,
@@ -199,3 +200,5 @@ export function LinkedTicketsModal({
     </>
   );
 }
+
+export default withErrorBoundary(LinkedTicketsModal, 'LinkedTicketsModal');

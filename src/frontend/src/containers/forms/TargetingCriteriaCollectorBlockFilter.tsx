@@ -1,9 +1,10 @@
 import { AllCollectorFieldsAttributesQuery } from '@generated/graphql';
 import { FieldChooser } from '@components/targeting/FieldChooser';
-import { SubField } from '@components/targeting/SubField';
+import SubField from '@components/targeting/SubField';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
-export function TargetingCriteriaCollectorBlockFilter({
+function TargetingCriteriaCollectorBlockFilter({
   blockIndex,
   index,
   data,
@@ -46,3 +47,8 @@ export function TargetingCriteriaCollectorBlockFilter({
     </div>
   );
 }
+
+export default withErrorBoundary(
+  TargetingCriteriaCollectorBlockFilter,
+  'TargetingCriteriaCollectorBlockFilter',
+);

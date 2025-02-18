@@ -18,7 +18,7 @@ import { IndividualsListTable } from '../../tables/population/IndividualsListTab
 import { Tabs, Tab } from '@core/Tabs';
 import { PeriodicDataUpdates } from '@components/periodicDataUpdates/PeriodicDataUpdates';
 import { useProgramContext } from 'src/programContext';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 export const HouseholdMembersPage = (): ReactElement => {
   const { t } = useTranslation();
@@ -82,51 +82,28 @@ export const HouseholdMembersPage = (): ReactElement => {
   if (!canViewHouseholdMembersPage) return <PermissionDenied />;
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'HouseholdMembersPage.tsx');
-      }}
-      componentName="HouseholdMembersPage"
-    >
-      <>
-        <PageHeader
-          title={beneficiaryGroup?.memberLabelPlural}
-          tabs={
-            <Tabs
-              value={currentTab}
-              onChange={(_, newValue) => {
-                setCurrentTab(newValue);
-              }}
-            >
-              <Tab
-                data-cy="tab-individuals"
-                label={beneficiaryGroup?.memberLabelPlural}
-              />
-              {programHasPdu ? (
-                canViewPDUListAndDetails ? (
-                  <Tab
-                    data-cy="tab-periodic-data-updates"
-                    label="Periodic Data Updates"
-                  />
-                ) : (
-                  <Tooltip title={t('Permission Denied')}>
-                    <span>
-                      <Tab
-                        disabled
-                        data-cy="tab-periodic-data-updates"
-                        label="Periodic Data Updates"
-                      />
-                    </span>
-                  </Tooltip>
-                )
+    <>
+      <PageHeader
+        title={beneficiaryGroup?.memberLabelPlural}
+        tabs={
+          <Tabs
+            value={currentTab}
+            onChange={(_, newValue) => {
+              setCurrentTab(newValue);
+            }}
+          >
+            <Tab
+              data-cy="tab-individuals"
+              label={beneficiaryGroup?.memberLabelPlural}
+            />
+            {programHasPdu ? (
+              canViewPDUListAndDetails ? (
+                <Tab
+                  data-cy="tab-periodic-data-updates"
+                  label="Periodic Data Updates"
+                />
               ) : (
-                <Tooltip
-                  title={t(
-                    'Programme does not have defined fields for periodic updates',
-                  )}
-                >
+                <Tooltip title={t('Permission Denied')}>
                   <span>
                     <Tab
                       disabled
@@ -135,46 +112,61 @@ export const HouseholdMembersPage = (): ReactElement => {
                     />
                   </span>
                 </Tooltip>
-              )}
-            </Tabs>
-          }
-        />
-        <Fade in={true} timeout={500} key={currentTab}>
-          <Box>
-            {currentTab === 0 ? (
-              <>
-                <IndividualsFilter
-                  filter={filter}
-                  choicesData={individualChoicesData}
-                  setFilter={setFilter}
-                  initialFilter={initialFilter}
-                  appliedFilter={appliedFilter}
-                  setAppliedFilter={setAppliedFilter}
-                />
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  data-cy="page-details-container"
-                >
-                  <IndividualsListTable
-                    filter={appliedFilter}
-                    businessArea={businessArea}
-                    choicesData={householdChoicesData}
-                    canViewDetails={hasPermissions(
-                      PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_DETAILS,
-                      permissions,
-                    )}
-                  />
-                </Box>
-              </>
-            ) : canViewPDUListAndDetails ? (
-              <PeriodicDataUpdates />
+              )
             ) : (
-              <PermissionDenied />
+              <Tooltip
+                title={t(
+                  'Programme does not have defined fields for periodic updates',
+                )}
+              >
+                <span>
+                  <Tab
+                    disabled
+                    data-cy="tab-periodic-data-updates"
+                    label="Periodic Data Updates"
+                  />
+                </span>
+              </Tooltip>
             )}
-          </Box>
-        </Fade>
-      </>
-    </UniversalErrorBoundary>
+          </Tabs>
+        }
+      />
+      <Fade in={true} timeout={500} key={currentTab}>
+        <Box>
+          {currentTab === 0 ? (
+            <>
+              <IndividualsFilter
+                filter={filter}
+                choicesData={individualChoicesData}
+                setFilter={setFilter}
+                initialFilter={initialFilter}
+                appliedFilter={appliedFilter}
+                setAppliedFilter={setAppliedFilter}
+              />
+              <Box
+                display="flex"
+                flexDirection="column"
+                data-cy="page-details-container"
+              >
+                <IndividualsListTable
+                  filter={appliedFilter}
+                  businessArea={businessArea}
+                  choicesData={householdChoicesData}
+                  canViewDetails={hasPermissions(
+                    PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_DETAILS,
+                    permissions,
+                  )}
+                />
+              </Box>
+            </>
+          ) : canViewPDUListAndDetails ? (
+            <PeriodicDataUpdates />
+          ) : (
+            <PermissionDenied />
+          )}
+        </Box>
+      </Fade>
+    </>
   );
 };
+export default withErrorBoundary(HouseholdMembersPage, 'HouseholdMembersPage');

@@ -1,12 +1,12 @@
 import { useRoutes } from 'react-router-dom';
-import { PopulationHouseholdDetailsPage } from '../pages/population/PopulationHouseholdDetailsPage';
-import { PopulationHouseholdPage } from '../pages/population/PopulationHouseholdPage';
-import { PopulationIndividualsDetailsPage } from '../pages/population/PopulationIndividualsDetailsPage';
-import { PeoplePage } from '@containers/pages/people/PeoplePage';
-import { PeopleDetailsPage } from '@containers/pages/people/PeopleDetailsPage';
 import { NewTemplatePage } from '@containers/pages/householdMembers/NewTemplatePage';
 import { HouseholdMembersPage } from '@containers/pages/population/HouseholdMembersPage';
 import { ReactElement } from 'react';
+import PeopleDetailsPage from '@containers/pages/people/PeopleDetailsPage';
+import PeoplePage from '@containers/pages/people/PeoplePage';
+import PopulationHouseholdDetailsPage from '@containers/pages/population/PopulationHouseholdDetailsPage';
+import PopulationHouseholdPage from '@containers/pages/population/PopulationHouseholdPage';
+import PopulationIndividualsDetailsPage from '@containers/pages/population/PopulationIndividualsDetailsPage';
 
 export const PopulationRoutes = (): ReactElement => {
   const populationRoutes = [

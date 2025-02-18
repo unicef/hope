@@ -9,7 +9,8 @@ import {
 import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalTable } from '../UniversalTable';
 import { headCells } from './ProgrammesHeadCells';
-import { ProgrammesTableRow } from './ProgrammesTableRow';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import ProgrammesTableRow from './ProgrammesTableRow';
 
 interface ProgrammesTableProps {
   businessArea: string;
@@ -17,7 +18,7 @@ interface ProgrammesTableProps {
   choicesData: ProgrammeChoiceDataQuery;
 }
 
-export function ProgrammesTable({
+function ProgrammesTable({
   businessArea,
   filter,
   choicesData,
@@ -38,24 +39,27 @@ export function ProgrammesTable({
     dataCollectingType: filter.dataCollectingType,
   };
   return (
-    <TableWrapper>
-      <UniversalTable<
-        AllProgramsForTableQuery['allPrograms']['edges'][number]['node'],
-        AllProgramsForTableQueryVariables
-      >
-        title={t('Programmes')}
-        headCells={headCells}
-        query={useAllProgramsForTableQuery}
-        queriedObjectName="allPrograms"
-        initialVariables={initialVariables}
-        renderRow={(row) => (
-          <ProgrammesTableRow
-            key={row.id}
-            program={row}
-            choicesData={choicesData}
-          />
-        )}
-      />
-    </TableWrapper>
+    <>
+      <TableWrapper>
+        <UniversalTable<
+          AllProgramsForTableQuery['allPrograms']['edges'][number]['node'],
+          AllProgramsForTableQueryVariables
+        >
+          title={t('Programmes')}
+          headCells={headCells}
+          query={useAllProgramsForTableQuery}
+          queriedObjectName="allPrograms"
+          initialVariables={initialVariables}
+          renderRow={(row) => (
+            <ProgrammesTableRow
+              key={row.id}
+              program={row}
+              choicesData={choicesData}
+            />
+          )}
+        />
+      </TableWrapper>
+    </>
   );
 }
+export default withErrorBoundary(ProgrammesTable, 'ProgrammesTable');

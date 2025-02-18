@@ -16,7 +16,7 @@ import { useProgramQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { TargetPopulationForPeopleTable } from '@containers/tables/targeting/TargetPopulationForPeopleTable';
 import { TargetPopulationForPeopleFilters } from '@components/targeting/TargetPopulationForPeopleFilters';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const initialFilter = {
   name: '',
@@ -27,7 +27,7 @@ const initialFilter = {
   createdAtRangeMax: '',
 };
 
-export const TargetPopulationsPage = (): ReactElement => {
+const TargetPopulationsPage = (): ReactElement => {
   const location = useLocation();
   const { t } = useTranslation();
   const permissions = usePermissions();
@@ -57,44 +57,40 @@ export const TargetPopulationsPage = (): ReactElement => {
   }
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'TargetPopulationsPage.tsx');
-      }}
-      componentName="TargetPopulationsPage"
-    >
-      <>
-        <PageHeader title={t('Targeting')}>
-          <>
-            <IconButton
-              onClick={() => setToggleInfo(true)}
-              color="primary"
-              aria-label="Targeting Information"
-              data-cy="button-target-population-info"
-            >
-              <Info />
-            </IconButton>
-            <TargetingInfoDialog open={isInfoOpen} setOpen={setToggleInfo} />
-            {canCreate && <CreateTPMenu />}
-          </>
-        </PageHeader>
-        <Filters
-          filter={filter}
-          setFilter={setFilter}
-          initialFilter={initialFilter}
-          appliedFilter={appliedFilter}
-          setAppliedFilter={setAppliedFilter}
-        />
-        <Table
-          filter={appliedFilter}
-          canViewDetails={hasPermissions(
-            PERMISSIONS.TARGETING_VIEW_DETAILS,
-            permissions,
-          )}
-        />
-      </>
-    </UniversalErrorBoundary>
+    <>
+      <PageHeader title={t('Targeting')}>
+        <>
+          <IconButton
+            onClick={() => setToggleInfo(true)}
+            color="primary"
+            aria-label="Targeting Information"
+            data-cy="button-target-population-info"
+          >
+            <Info />
+          </IconButton>
+          <TargetingInfoDialog open={isInfoOpen} setOpen={setToggleInfo} />
+          {canCreate && <CreateTPMenu />}
+        </>
+      </PageHeader>
+      <Filters
+        filter={filter}
+        setFilter={setFilter}
+        initialFilter={initialFilter}
+        appliedFilter={appliedFilter}
+        setAppliedFilter={setAppliedFilter}
+      />
+      <Table
+        filter={appliedFilter}
+        canViewDetails={hasPermissions(
+          PERMISSIONS.TARGETING_VIEW_DETAILS,
+          permissions,
+        )}
+      />
+    </>
   );
 };
+
+export default withErrorBoundary(
+  TargetPopulationsPage,
+  'TargetPopulationsPage',
+);

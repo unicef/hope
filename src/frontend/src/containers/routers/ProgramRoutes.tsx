@@ -1,10 +1,10 @@
 import { useRoutes } from 'react-router-dom';
-import { ProgramDetailsPage } from '../pages/program/ProgramDetailsPage';
-import { ProgramsPage } from '../pages/program/ProgramsPage';
-import { CreateProgramPage } from '../pages/program/CreateProgramPage';
-import { EditProgramPage } from '../pages/program/EditProgramPage';
-import { DuplicateProgramPage } from '../pages/program/DuplicateProgramPage';
 import { ReactElement } from 'react';
+import CreateProgramPage from '@containers/pages/program/CreateProgramPage';
+import DuplicateProgramPage from '@containers/pages/program/DuplicateProgramPage';
+import EditProgramPage from '@containers/pages/program/EditProgramPage';
+import ProgramDetailsPage from '@containers/pages/program/ProgramDetailsPage';
+import ProgramsPage from '@containers/pages/program/ProgramsPage';
 
 export const ProgramRoutes = (): ReactElement => {
   const programRoutes = [

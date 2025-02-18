@@ -1,4 +1,4 @@
-import { PhotoModal } from '@core/PhotoModal/PhotoModal';
+import PhotoModal from '@core/PhotoModal/PhotoModal';
 import {
   IndividualDetailedFragment,
   useIndividualPhotosQuery,

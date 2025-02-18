@@ -19,6 +19,7 @@ import { DedupeBox, OptionType } from '../DedupeBox';
 import { Title } from '@core/Title';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 export const BigValueContainer = styled.div`
   padding: ${({ theme }) => theme.spacing(6)};
@@ -52,7 +53,7 @@ interface RegistrationDetailsProps {
   isSocialWorkerProgram?: boolean;
 }
 
-export function RegistrationDetails({
+function RegistrationDetails({
   registration,
   isSocialWorkerProgram,
 }: RegistrationDetailsProps): ReactElement {
@@ -236,3 +237,5 @@ export function RegistrationDetails({
     </ContainerColumnWithBorder>
   );
 }
+
+export default withErrorBoundary(RegistrationDetails, 'RegistrationDetails');

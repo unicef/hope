@@ -2,7 +2,7 @@ import { render } from '../../../testUtils/testUtils';
 import { fakeGrievanceTicket } from '../../../../fixtures/grievances/fakeGrievanceTicket';
 import { fakeGrievancesChoices } from '../../../../fixtures/grievances/fakeGrievancesChoices';
 import { fakeBaseUrl } from '../../../../fixtures/core/fakeBaseUrl';
-import { GrievancesDetails } from './GrievancesDetails';
+import GrievancesDetails from './GrievancesDetails';
 
 describe('components/grievances/GrievancesDetails', () => {
   it('should render', () => {

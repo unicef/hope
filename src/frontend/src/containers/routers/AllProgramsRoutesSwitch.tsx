@@ -1,7 +1,7 @@
 import { useRoutes } from 'react-router-dom';
 import { ActivityLogPage } from '../pages/core/MainActivityLogPage';
-import { ReportingDetailsPage } from '../pages/reporting/ReportingDetailsPage';
-import { ReportingPage } from '../pages/reporting/ReportingPage';
+import ReportingDetailsPage from '../pages/reporting/ReportingDetailsPage';
+import ReportingPage from '../pages/reporting/ReportingPage';
 import { GrievanceRoutes } from './GrievanceRoutes';
 import { ProgramRoutes } from './ProgramRoutes';
 import { ManagerialConsolePage } from '@containers/pages/managerialConsole/ManagerialConsolePage';

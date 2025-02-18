@@ -13,6 +13,7 @@ import { ImportedIndividualsTableRow } from './ImportedIndividualsTableRow';
 import { useProgramContext } from 'src/programContext';
 import { adjustHeadCells } from '@utils/utils';
 import { headCells as mergedIndividualHeadCells } from './MergedIndividualsTableHeadCells';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface ImportedIndividualsTableProps {
   rdi;
@@ -27,7 +28,7 @@ interface ImportedIndividualsTableProps {
   isMerged: boolean;
 }
 
-export function ImportedIndividualsTable({
+function ImportedIndividualsTable({
   rdi,
   rdiId,
   isOnPaper = false,
@@ -90,6 +91,7 @@ export function ImportedIndividualsTable({
           </Grid>
         </Grid>
       )}
+
       {isMerged ? (
         <UniversalTable<IndividualMinimalFragment, AllIndividualsQueryVariables>
           title={title}
@@ -130,3 +132,8 @@ export function ImportedIndividualsTable({
     </div>
   );
 }
+
+export default withErrorBoundary(
+  ImportedIndividualsTable,
+  'ImportedIndividualsTable',
+);

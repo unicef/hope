@@ -11,12 +11,9 @@ import { ImportedHouseholdTableRow } from './ImportedHouseholdTableRow';
 import { headCells as mergedHeadCells } from './MergedHouseholdTableHeadCells';
 import { useProgramContext } from 'src/programContext';
 import { adjustHeadCells } from '@utils/utils';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
-export function ImportedHouseholdTable({
-  rdi,
-  businessArea,
-  isMerged,
-}): ReactElement {
+function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
   const initialVariables = {
     rdiId: rdi.id,
     businessArea,
@@ -92,3 +89,8 @@ export function ImportedHouseholdTable({
     />
   );
 }
+
+export default withErrorBoundary(
+  ImportedHouseholdTable,
+  'ImportedHouseholdTable',
+);
