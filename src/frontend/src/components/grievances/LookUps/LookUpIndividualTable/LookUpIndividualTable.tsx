@@ -92,6 +92,7 @@ export function LookUpIndividualTable({
     excludedId: excludedId || ticket?.individual?.id || null,
     program: isAllPrograms ? filter.program : programId,
     isActiveProgram: filter.programState === 'active' ? true : null,
+    withdrawn: false,
   };
 
   const replacements = {
