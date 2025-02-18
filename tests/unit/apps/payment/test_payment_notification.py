@@ -383,6 +383,7 @@ class TestPaymentNotification(APITestCase):
             self.user_action_user,
             f"{timezone.now():%-d %B %Y}",
         )
+
         for recipient in [
             self.user_with_partner_unicef_hq,
             self.user_with_partner_unicef_in_ba,
@@ -409,6 +410,21 @@ class TestPaymentNotification(APITestCase):
             self.user_with_no_permissions_partner_with_action_permissions,
             self.user_with_no_permissions_partner_with_action_permissions_in_whole_ba,
         ]:
+            if recipient not in payment_notification.user_recipients.all():
+                print("not in recipients")
+                print(recipient)
+                print(recipient.partner.name)
+                print(self.program.id)
+                print(
+                    recipient.role_assignments.all().values_list(
+                        "role__permissions", "business_area__slug", "program_id", flat=True
+                    )
+                )
+                print(
+                    recipient.partner.role_assignments.all().values_list(
+                        "role__permissions", "business_area__slug", "program_id", flat=True
+                    )
+                )
             self.assertIn(
                 recipient,
                 payment_notification.user_recipients.all(),
