@@ -135,6 +135,7 @@ class TestHouseholdAreaQuery(APITestCase):
         partner = PartnerFactory(name="NOT_UNICEF_1")
         user = UserFactory(partner=partner)
         # No access to any admin area
+        area_limits = self.set_admin_area_limits_in_program(user.partner, self.program, [AreaFactory(name="No Admin Area")])
         self.create_user_role_with_permissions(user, permissions, self.business_area_afghanistan, program=self.program)
 
         self.snapshot_graphql_request(
