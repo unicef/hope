@@ -148,7 +148,9 @@ class TestUserFilter(APITestCase):
         cls.role = RoleFactory(name="Test Role", permissions=["USER_MANAGEMENT_VIEW_LIST"])
 
         # user with role in BA in different program
-        user_with_test_role = UserFactory(username="user_with_test_role", partner=None, email="user_with_test_role@email.com")
+        user_with_test_role = UserFactory(
+            username="user_with_test_role", partner=None, email="user_with_test_role@email.com"
+        )
         RoleAssignmentFactory(
             user=user_with_test_role,
             role=cls.role,
@@ -157,7 +159,9 @@ class TestUserFilter(APITestCase):
         )
 
         # user with role in whole BA
-        user_with_test_role_in_whole_ba = UserFactory(username="user_with_test_role_in_whole_ba", partner=None, email="user_with_test_role_in_whole_ba@email.com")
+        user_with_test_role_in_whole_ba = UserFactory(
+            username="user_with_test_role_in_whole_ba", partner=None, email="user_with_test_role_in_whole_ba@email.com"
+        )
         RoleAssignmentFactory(user=user_with_test_role_in_whole_ba, role=cls.role, business_area=business_area)
 
         # user with partner with role in BA and access to program
@@ -165,7 +169,11 @@ class TestUserFilter(APITestCase):
         RoleAssignmentFactory(
             partner=partner_with_test_role, role=cls.role, business_area=business_area, program=cls.program
         )
-        cls.user = UserFactory(username="user_with_partner_with_test_role", partner=partner_with_test_role, email="user_with_partner_with_test_role@email.com")
+        cls.user = UserFactory(
+            username="user_with_partner_with_test_role",
+            partner=partner_with_test_role,
+            email="user_with_partner_with_test_role@email.com",
+        )
 
     def test_users_by_business_area(self) -> None:
         self.snapshot_graphql_request(
