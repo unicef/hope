@@ -1,31 +1,9 @@
-import { LookUpSelectionCommunication } from '@components/accountability/Communication/LookUpsCommunication/LookUpSelectionCommunication';
-import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
-import { useConfirmation } from '@components/core/ConfirmationDialog';
-import { FormikEffect } from '@components/core/FormikEffect';
-import { LoadingButton } from '@components/core/LoadingButton';
-import { PageHeader } from '@components/core/PageHeader';
-import { PermissionDenied } from '@components/core/PermissionDenied';
-import { TabPanel } from '@components/core/TabPanel';
-import withErrorBoundary from '@components/core/withErrorBoundary';
-import { PaperContainer } from '@components/targeting/PaperContainer';
-import {
-  AccountabilityCommunicationMessageSampleSizeQueryVariables,
-  CreateAccountabilityCommunicationMessageMutationVariables,
-  SamplingChoices,
-  useAccountabilityCommunicationMessageSampleSizeLazyQuery,
-  useAllAdminAreasQuery,
-  useCreateAccountabilityCommunicationMessageMutation,
-  useSurveyAvailableFlowsLazyQuery,
-} from '@generated/graphql';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { usePermissions } from '@hooks/usePermissions';
-import { useSnackbar } from '@hooks/useSnackBar';
 import {
   Box,
   Button,
   FormControlLabel,
   FormHelperText,
-  Grid,
+  Grid2 as Grid,
   Radio,
   RadioGroup,
   Step,
@@ -33,13 +11,6 @@ import {
   Stepper,
   Typography,
 } from '@mui/material';
-import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
-import { FormikMultiSelectField } from '@shared/Formik/FormikMultiSelectField';
-import { FormikSelectField } from '@shared/Formik/FormikSelectField';
-import { FormikSliderField } from '@shared/Formik/FormikSliderField';
-import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { CommunicationSteps, CommunicationTabsValues } from '@utils/constants';
-import { getPercentage } from '@utils/utils';
 import { Field, Form, Formik } from 'formik';
 import {
   ReactElement,
@@ -52,7 +23,36 @@ import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
+import {
+  AccountabilityCommunicationMessageSampleSizeQueryVariables,
+  CreateAccountabilityCommunicationMessageMutationVariables,
+  SamplingChoices,
+  useAccountabilityCommunicationMessageSampleSizeLazyQuery,
+  useAllAdminAreasQuery,
+  useCreateAccountabilityCommunicationMessageMutation,
+  useSurveyAvailableFlowsLazyQuery,
+} from '@generated/graphql';
+import { LookUpSelectionCommunication } from '@components/accountability/Communication/LookUpsCommunication/LookUpSelectionCommunication';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { useConfirmation } from '@components/core/ConfirmationDialog';
+import { FormikEffect } from '@components/core/FormikEffect';
+import { LoadingButton } from '@components/core/LoadingButton';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { TabPanel } from '@components/core/TabPanel';
+import { PaperContainer } from '@components/targeting/PaperContainer';
 import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
+import { FormikMultiSelectField } from '@shared/Formik/FormikMultiSelectField';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
+import { FormikSliderField } from '@shared/Formik/FormikSliderField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { CommunicationSteps, CommunicationTabsValues } from '@utils/constants';
+import { getPercentage } from '@utils/utils';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const steps = ['Recipients Look up', 'Sample Size', 'Details'];
 const SampleSizeTabs = ['Full List', 'Random Sampling'];
@@ -344,7 +344,7 @@ const CreateCommunicationPage = (): ReactElement => {
             }
           />
           <PaperContainer>
-            <Grid xs={9} item>
+            <Grid size={{ xs: 9 }}>
               <Stepper activeStep={activeStep}>
                 {steps.map((label) => {
                   const stepProps: { completed?: boolean } = {};
@@ -506,9 +506,9 @@ const CreateCommunicationPage = (): ReactElement => {
 
                           <Grid container>
                             {values.ageCheckbox && (
-                              <Grid item xs={12}>
+                              <Grid size={{ xs: 12 }}>
                                 <Grid container>
-                                  <Grid item xs={4}>
+                                  <Grid size={{ xs: 4 }}>
                                     <Field
                                       name="filterAgeMin"
                                       label={t('Minimum Age')}
@@ -517,7 +517,7 @@ const CreateCommunicationPage = (): ReactElement => {
                                       component={FormikTextField}
                                     />
                                   </Grid>
-                                  <Grid item xs={4}>
+                                  <Grid size={{ xs: 4 }}>
                                     <Field
                                       name="filterAgeMax"
                                       label={t('Maximum Age')}
@@ -530,7 +530,7 @@ const CreateCommunicationPage = (): ReactElement => {
                               </Grid>
                             )}
                             {values.sexCheckbox && (
-                              <Grid item xs={5}>
+                              <Grid size={{ xs: 5 }}>
                                 <Field
                                   name="filterSex"
                                   label={t('Gender')}
@@ -582,7 +582,7 @@ const CreateCommunicationPage = (): ReactElement => {
                 <>
                   <Border />
                   <Box my={3}>
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                       <Field
                         name="title"
                         required
@@ -594,7 +594,7 @@ const CreateCommunicationPage = (): ReactElement => {
                       />
                     </Grid>
                   </Box>
-                  <Grid item xs={12}>
+                  <Grid size={{ xs: 12 }}>
                     <Field
                       name="body"
                       required
@@ -646,4 +646,7 @@ const CreateCommunicationPage = (): ReactElement => {
   );
 };
 
-export default withErrorBoundary(CreateCommunicationPage, 'CommunicationPage');
+export default withErrorBoundary(
+  CreateCommunicationPage,
+  'CreateCommunicationPage',
+);

@@ -9,13 +9,16 @@ import type { PaginatedAreaTypeList } from '../models/PaginatedAreaTypeList';
 import type { PaginatedBeneficiaryGroupList } from '../models/PaginatedBeneficiaryGroupList';
 import type { PaginatedBusinessAreaList } from '../models/PaginatedBusinessAreaList';
 import type { PaginatedCountryList } from '../models/PaginatedCountryList';
+import type { PaginatedOrganizationList } from '../models/PaginatedOrganizationList';
 import type { PaginatedPaymentPlanList } from '../models/PaginatedPaymentPlanList';
 import type { PaginatedPeriodicDataUpdateTemplateListList } from '../models/PaginatedPeriodicDataUpdateTemplateListList';
 import type { PaginatedPeriodicDataUpdateUploadListList } from '../models/PaginatedPeriodicDataUpdateUploadListList';
 import type { PaginatedPeriodicFieldList } from '../models/PaginatedPeriodicFieldList';
 import type { PaginatedProgramCycleListList } from '../models/PaginatedProgramCycleListList';
 import type { PaginatedProgramGlobalList } from '../models/PaginatedProgramGlobalList';
+import type { PaginatedProjectList } from '../models/PaginatedProjectList';
 import type { PaginatedRegistrationDataImportListList } from '../models/PaginatedRegistrationDataImportListList';
+import type { PaginatedRegistrationList } from '../models/PaginatedRegistrationList';
 import type { PaginatedTargetPopulationListList } from '../models/PaginatedTargetPopulationListList';
 import type { PatchedProgramCycleUpdate } from '../models/PatchedProgramCycleUpdate';
 import type { PatchedRDI } from '../models/PatchedRDI';
@@ -1222,16 +1225,6 @@ export class RestService {
      * @returns any No response body
      * @throws ApiError
      */
-    public static restLookupsDatacollectingpolicyRetrieve(): CancelablePromise<any> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/rest/lookups/datacollectingpolicy/',
-        });
-    }
-    /**
-     * @returns any No response body
-     * @throws ApiError
-     */
     public static restLookupsDocumentRetrieve(): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -1344,6 +1337,78 @@ export class RestService {
                 'status': status,
                 'updated_at_after': updatedAtAfter,
                 'updated_at_before': updatedAtBefore,
+            },
+        });
+    }
+    /**
+     * @param limit Number of results to return per page.
+     * @param offset The initial index from which to return the results.
+     * @returns PaginatedOrganizationList
+     * @throws ApiError
+     */
+    public static restSystemsAuroraOfficesList(
+        limit?: number,
+        offset?: number,
+    ): CancelablePromise<PaginatedOrganizationList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/systems/aurora/offices/',
+            query: {
+                'limit': limit,
+                'offset': offset,
+            },
+        });
+    }
+    /**
+     * @param limit Number of results to return per page.
+     * @param offset The initial index from which to return the results.
+     * @param orgPk
+     * @param orgSlug
+     * @returns PaginatedProjectList
+     * @throws ApiError
+     */
+    public static restSystemsAuroraProjectsList(
+        limit?: number,
+        offset?: number,
+        orgPk?: string,
+        orgSlug?: string,
+    ): CancelablePromise<PaginatedProjectList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/systems/aurora/projects/',
+            query: {
+                'limit': limit,
+                'offset': offset,
+                'org_pk': orgPk,
+                'org_slug': orgSlug,
+            },
+        });
+    }
+    /**
+     * @param limit Number of results to return per page.
+     * @param offset The initial index from which to return the results.
+     * @param orgPk
+     * @param orgSlug
+     * @param programmePk
+     * @returns PaginatedRegistrationList
+     * @throws ApiError
+     */
+    public static restSystemsAuroraRegistrationsList(
+        limit?: number,
+        offset?: number,
+        orgPk?: string,
+        orgSlug?: string,
+        programmePk?: string,
+    ): CancelablePromise<PaginatedRegistrationList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/systems/aurora/registrations/',
+            query: {
+                'limit': limit,
+                'offset': offset,
+                'org_pk': orgPk,
+                'org_slug': orgSlug,
+                'programme_pk': programmePk,
             },
         });
     }

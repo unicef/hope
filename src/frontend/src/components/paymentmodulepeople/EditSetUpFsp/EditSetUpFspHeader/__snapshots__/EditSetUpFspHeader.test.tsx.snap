@@ -3,24 +3,24 @@
 exports[`components/paymentmodule/EditSetUpFsp/EditSetUpFspHeader should render 1`] = `
 <div>
   <div
-    class="css-14yyz2y"
+    class="css-1x0er1"
     data-cy="page-header-container"
   >
     <div
-      class="css-1dm7nei"
+      class="css-n88ekr"
     >
       <div
-        class="css-175cn9v"
+        class="css-ozdmop"
       >
         <div>
           <div
             class="MuiBox-root css-70qvj9"
           >
             <div
-              class="css-1ukvkn"
+              class="css-9dlhcl"
             >
               <h5
-                class="MuiTypography-root MuiTypography-h5 css-ag7rrr-MuiTypography-root"
+                class="MuiTypography-root MuiTypography-h5 css-16xl4zq-MuiTypography-root"
                 data-cy="page-header-title"
               >
                 Edit Set up FSP
@@ -33,12 +33,12 @@ exports[`components/paymentmodule/EditSetUpFsp/EditSetUpFspHeader should render 
           </div>
         </div>
         <div
-          class="css-70qvj9"
+          class="css-yeouz0"
         />
       </div>
     </div>
     <div
-      class="css-l30346"
+      class="css-8hfbf4"
     />
   </div>
 </div>

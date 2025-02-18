@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Grid2 as Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
@@ -95,9 +95,9 @@ function RegistrationDetails({
   let numbersComponent: ReactElement;
   if (isSocialWorkerProgram) {
     numbersComponent = (
-      <Grid item xs={4}>
+      <Grid size={{ xs: 4 }}>
         <Grid container>
-          <Grid item xs={6}>
+          <Grid size={{ xs:6 }}>
             <BigValueContainer>
               <LabelizedField
                 label={t('Total Number of Registered People')}
@@ -112,9 +112,9 @@ function RegistrationDetails({
     );
   } else {
     numbersComponent = (
-      <Grid item xs={'auto'}>
+      <Grid size={{ xs: 'auto' }}>
         <Grid container>
-          <Grid item xs={6}>
+          <Grid size={{ xs:6 }}>
             <BigValueContainer>
               <LabelizedField
                 label={`Total Number of ${beneficiaryGroup?.groupLabelPlural}`}
@@ -124,7 +124,7 @@ function RegistrationDetails({
               </LabelizedField>
             </BigValueContainer>
           </Grid>
-          <Grid item xs={6}>
+          <Grid size={{ xs:6 }}>
             <BigValueContainer>
               <LabelizedField
                 label={`Total Number of ${beneficiaryGroup?.memberLabelPlural}`}
@@ -145,9 +145,9 @@ function RegistrationDetails({
       </Title>
       <OverviewContainer>
         <Grid alignItems="center" container>
-          <Grid item xs={'auto'}>
+          <Grid size={{ xs: 'auto' }}>
             <Grid container spacing={3}>
-              <Grid item xs={6}>
+              <Grid size={{ xs:6 }}>
                 <Box display="flex" flexDirection="column">
                   <LabelizedField label={t('status')}>
                     <StatusBox
@@ -161,7 +161,7 @@ function RegistrationDetails({
                 </Box>
               </Grid>
               {registration?.biometricDeduplicationEnabled && (
-                <Grid item xs={6}>
+                <Grid size={{ xs:6 }}>
                   <Box display="flex" flexDirection="column">
                     <LabelizedField
                       label={t('Biometrics Deduplication Status')}
@@ -179,13 +179,13 @@ function RegistrationDetails({
                   </Box>
                 </Grid>
               )}
-              <Grid item xs={6}>
+              <Grid size={{ xs:6 }}>
                 <LabelizedField
                   label={t('Source of Data')}
                   value={registration?.dataSource}
                 />
               </Grid>
-              <Grid item xs={6}>
+              <Grid size={{ xs:6 }}>
                 <LabelizedField
                   label={t('Import Date')}
                   value={
@@ -195,7 +195,7 @@ function RegistrationDetails({
                   }
                 />
               </Grid>
-              <Grid item xs={6}>
+              <Grid size={{ xs:6 }}>
                 <LabelizedField
                   label={t('Imported by')}
                   value={renderImportedBy()}
@@ -203,7 +203,7 @@ function RegistrationDetails({
               </Grid>
               {registration.status === RegistrationDataImportStatus.Refused &&
               registration.refuseReason ? (
-                <Grid item xs={6}>
+                <Grid size={{ xs:6 }}>
                   <LabelizedField
                     label={t('Refuse Reason')}
                     value={registration?.refuseReason}
@@ -214,15 +214,15 @@ function RegistrationDetails({
           </Grid>
           {numbersComponent}
           {registration.status === 'DEDUPLICATION_FAILED' ? null : (
-            <Grid item xs={'auto'}>
+            <Grid size={{ xs: 'auto' }}>
               <Grid container direction="column">
-                <Grid container item xs={12} spacing={3}>
-                  <Grid item xs={4}></Grid>
-                  <Grid item xs={4}>
+                <Grid container  size={{ xs: 12 }} spacing={3}>
+                  <Grid size={{ xs:4 }}></Grid>
+                  <Grid size={{ xs: 4 }}>
                     <BoldGrey>{t('Biographical')}</BoldGrey>
                   </Grid>
                   {registration.biometricDeduplicationEnabled && (
-                    <Grid item xs={4}>
+                    <Grid size={{ xs: 4 }}>
                       <BoldGrey>{t('Biometrics')}</BoldGrey>
                     </Grid>
                   )}

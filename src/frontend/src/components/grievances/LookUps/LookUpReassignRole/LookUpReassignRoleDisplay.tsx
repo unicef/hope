@@ -1,5 +1,5 @@
 import EditIcon from '@mui/icons-material/Edit';
-import { Box, Grid } from '@mui/material';
+import { Box, Grid2 as Grid } from '@mui/material';
 import { ReactElement } from 'react';
 import { useProgramContext } from 'src/programContext';
 import { BlueText, LightGrey, StyledBox } from '../LookUpStyles';
@@ -21,7 +21,7 @@ export function LookUpReassignRoleDisplay({
   return (
     <StyledBox>
       <Grid container>
-        <Grid item>
+        <Grid>
           <Box display="flex" flexDirection="column">
             <span>
               {`${beneficiaryGroup?.groupLabel} ID`}:
@@ -33,10 +33,10 @@ export function LookUpReassignRoleDisplay({
             </span>
           </Box>
         </Grid>
-        <Grid item>
+        <Grid>
           <Box p={2}>
             <Grid container justifyContent="center" alignItems="center">
-              <Grid item>
+              <Grid>
                 {disabled ? null : (
                   <LightGrey>
                     <EditIcon

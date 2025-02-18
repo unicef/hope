@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@mui/material';
+import { Grid2 as Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import {
   paymentPlanStatusToColor,
@@ -30,7 +30,7 @@ function TargetPopulationDetails({
       </Title>
       <OverviewContainer>
         <Grid data-cy="details-grid" container spacing={6}>
-          <Grid item xs={4}>
+          <Grid size={{ xs: 4 }}>
             <LabelizedField label={t('Status')}>
               <StatusBox
                 dataCy="target-population-status"
@@ -40,21 +40,21 @@ function TargetPopulationDetails({
               />
             </LabelizedField>
           </Grid>
-          <Grid item xs={4}>
+          <Grid size={{ xs: 4 }}>
             <LabelizedField
               dataCy="created-by"
               label={t('created by')}
               value={`${createdBy.firstName} ${createdBy.lastName}`}
             />
           </Grid>
-          <Grid item xs={4}>
+          <Grid size={{ xs: 4 }}>
             <LabelizedField
               dataCy="program-name"
               label={t('Programme')}
               value={programName}
             />
           </Grid>
-          <Grid item xs={4}>
+          <Grid size={{ xs: 4 }}>
             <LabelizedField
               dataCy="programme-cycle-title"
               label={t('Programme Cycle')}

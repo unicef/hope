@@ -12,8 +12,8 @@ class OrganizationListVersionsKeyBit(KeyBitBase):
     def get_data(
         self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
     ) -> str:
-        version_key = f"{Organization.objects.latest('updated_at').updated_at}:{Organization.objects.all().count()}:{self.specific_view_cache_key}"
-        version = get_or_create_cache_key(version_key, 1)
+        version_key = f"{self.specific_view_cache_key}:{Organization.objects.latest('updated_at').updated_at}:{Organization.objects.all().count()}"
+        version = get_or_create_cache_key(version_key, version_key)
         return str(version)
 
 
@@ -23,8 +23,8 @@ class ProjectListVersionsKeyBit(KeyBitBase):
     def get_data(
         self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
     ) -> str:
-        version_key = f"{Project.objects.latest('updated_at').updated_at}:{Project.objects.all().count()}:{self.specific_view_cache_key}"
-        version = get_or_create_cache_key(version_key, 1)
+        version_key = f"{self.specific_view_cache_key}:{Project.objects.latest('updated_at').updated_at}:{Project.objects.all().count()}"
+        version = get_or_create_cache_key(version_key, version_key)
         return str(version)
 
 
@@ -34,8 +34,8 @@ class RegistrationListVersionsKeyBit(KeyBitBase):
     def get_data(
         self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
     ) -> str:
-        version_key = f"{Registration.objects.latest('updated_at').updated_at}:{Registration.objects.all().count()}:{self.specific_view_cache_key}"
-        version = get_or_create_cache_key(version_key, 1)
+        version_key = f"{self.specific_view_cache_key}:{Registration.objects.latest('updated_at').updated_at}:{Registration.objects.all().count()}"
+        version = get_or_create_cache_key(version_key, version_key)
         return str(version)
 
 

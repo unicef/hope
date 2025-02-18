@@ -3,7 +3,7 @@ import {
   Button,
   FormControlLabel,
   FormHelperText,
-  Grid,
+  Grid2 as Grid,
   Radio,
   RadioGroup,
   Step,
@@ -392,7 +392,7 @@ const CreateSurveyPage = (): ReactElement => {
               }
             />
             <PaperContainer>
-              <Grid xs={12} item>
+              <Grid size={{ xs: 12 }} >
                 <Stepper activeStep={activeStep}>
                   {steps.map((label) => {
                     const stepProps: { completed?: boolean } = {};
@@ -535,9 +535,9 @@ const CreateSurveyPage = (): ReactElement => {
 
                           <Grid container>
                             {values.ageCheckbox && (
-                              <Grid item xs={12}>
+                              <Grid size={{ xs: 12 }}>
                                 <Grid container>
-                                  <Grid item xs={4}>
+                                  <Grid size={{ xs: 4 }}>
                                     <Field
                                       name="filterAgeMin"
                                       label={t('Minimum Age')}
@@ -546,7 +546,7 @@ const CreateSurveyPage = (): ReactElement => {
                                       component={FormikTextField}
                                     />
                                   </Grid>
-                                  <Grid item xs={4}>
+                                  <Grid size={{ xs: 4 }}>
                                     <Field
                                       name="filterAgeMax"
                                       label={t('Maximum Age')}
@@ -559,7 +559,7 @@ const CreateSurveyPage = (): ReactElement => {
                               </Grid>
                             )}
                             {values.sexCheckbox && (
-                              <Grid item xs={5}>
+                              <Grid size={{ xs:5 }}>
                                 <Field
                                   name="filterSex"
                                   label={t('Gender')}
@@ -609,7 +609,7 @@ const CreateSurveyPage = (): ReactElement => {
                   <>
                     <Border />
                     <Box my={3}>
-                      <Grid item xs={12}>
+                      <Grid size={{ xs: 12 }}>
                         {category === SurveyCategory.RapidPro ? (
                           <Field
                             name="title"
@@ -635,7 +635,7 @@ const CreateSurveyPage = (): ReactElement => {
                     </Box>
                     {category === SurveyCategory.Sms && (
                       <Box my={3}>
-                        <Grid item xs={12}>
+                        <Grid size={{ xs: 12 }}>
                           <Field
                             name="body"
                             required
@@ -649,7 +649,7 @@ const CreateSurveyPage = (): ReactElement => {
                         </Grid>
                       </Box>
                     )}
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                       <Box
                         pb={3}
                         pt={3}

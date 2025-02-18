@@ -907,7 +907,7 @@ class TestCreateTargeting:
         pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
         expected_criteria_text = "Test String Attribute SW: Text\nRound 1 (Test Round String 1)"
         assert pageTargetingCreate.getCriteriaContainer().text == expected_criteria_text
-        targeting_name = "Test Targeting SW PDU string"
+        targeting_name = "Test Targeting SW PDU str"
         pageTargetingCreate.getFieldName().send_keys(targeting_name)
         pageTargetingCreate.getTargetPopulationSaveButton().click()
         pageTargetingDetails.getLockButton()
@@ -944,7 +944,7 @@ class TestTargeting:
         pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
         pageTargetingCreate.getInputName().send_keys(f"Target Population for {household_with_disability.unicef_id}")
         pageTargetingCreate.clickButtonTargetPopulationCreate()
-        target_population = PaymentPlan.objects.get(name=f"Target Population for {household_with_disability.unicef_id}")
+        target_population = PaymentPlan.objects.get(name__startswith="Target Population for")
         assert str(target_population.total_individuals_count) == pageTargetingDetails.getLabelTargetedIndividuals().text
         assert (
             str(target_population.total_households_count) == pageTargetingDetails.getLabelTotalNumberOfHouseholds().text

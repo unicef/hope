@@ -1,4 +1,4 @@
-import { Grid, MenuItem } from '@mui/material';
+import { Grid2 as Grid, MenuItem } from '@mui/material';
 import GroupIcon from '@mui/icons-material/Group';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -59,94 +59,88 @@ const RegistrationFilters = ({
   }
 
   return (
-    <>
-      <FiltersSection
-        clearHandler={handleClearFilter}
-        applyHandler={handleApplyFilter}
-      >
-        <Grid container alignItems="flex-end" spacing={3}>
-          <Grid item xs={4}>
-            <SearchTextField
-              label={t('Search')}
-              value={filter.search}
-              onChange={(e) => handleFilterChange('search', e.target.value)}
-              data-cy="filter-search"
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <AssigneeAutocomplete
-              name="importedBy"
-              label={t('Imported By')}
-              filter={filter}
-              value={filter.importedBy}
-              data-cy="filter-imported-by"
-              setFilter={setFilter}
-              initialFilter={initialFilter}
-              appliedFilter={appliedFilter}
-              setAppliedFilter={setAppliedFilter}
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <SelectFilter
-              value={filter.status}
-              label={t('Status')}
-              onChange={(e) => handleFilterChange('status', e.target.value)}
-              data-cy="filter-status"
-            >
-              {registrationChoicesData.registrationDataStatusChoices.map(
-                (item) => (
-                  <MenuItem key={item.value} value={item.value}>
-                    {item.name}
-                  </MenuItem>
-                ),
-              )}
-            </SelectFilter>
-          </Grid>
-          <Grid item xs={3}>
-            <NumberTextField
-              id="minFilter"
-              topLabel={`Num. of ${beneficiaryGroup?.groupLabelPlural}`}
-              value={filter.sizeMin}
-              placeholder="From"
-              icon={<GroupIcon />}
-              onChange={(e) => handleFilterChange('sizeMin', e.target.value)}
-              data-cy="filter-size-min"
-            />
-          </Grid>
-          <Grid item xs={3}>
-            <NumberTextField
-              id="maxFilter"
-              value={filter.sizeMax}
-              placeholder="To"
-              icon={<GroupIcon />}
-              onChange={(e) => handleFilterChange('sizeMax', e.target.value)}
-              data-cy="filter-size-max"
-            />
-          </Grid>
-          <Grid item xs={3}>
-            <DatePickerFilter
-              topLabel={t('Import Date')}
-              placeholder={t('From')}
-              onChange={(date) =>
-                handleFilterChange('importDateRangeMin', date)
-              }
-              value={filter.importDateRangeMin}
-              dataCy="filter-import-date-range-min"
-            />
-          </Grid>
-          <Grid item xs={3}>
-            <DatePickerFilter
-              placeholder={t('To')}
-              onChange={(date) =>
-                handleFilterChange('importDateRangeMax', date)
-              }
-              value={filter.importDateRangeMax}
-              dataCy="filter-import-date-range-max"
-            />
-          </Grid>
+    <FiltersSection
+      clearHandler={handleClearFilter}
+      applyHandler={handleApplyFilter}
+    >
+      <Grid container alignItems="flex-end" spacing={3}>
+        <Grid size={{ xs: 4 }}>
+          <SearchTextField
+            label={t('Search')}
+            value={filter.search}
+            onChange={(e) => handleFilterChange('search', e.target.value)}
+            data-cy="filter-search"
+          />
         </Grid>
-      </FiltersSection>
-    </>
+        <Grid size={{ xs: 4 }}>
+          <AssigneeAutocomplete
+            name="importedBy"
+            label={t('Imported By')}
+            filter={filter}
+            value={filter.importedBy}
+            data-cy="filter-imported-by"
+            setFilter={setFilter}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
+          />
+        </Grid>
+        <Grid size={{ xs: 4 }}>
+          <SelectFilter
+            value={filter.status}
+            label={t('Status')}
+            onChange={(e) => handleFilterChange('status', e.target.value)}
+            data-cy="filter-status"
+          >
+            {registrationChoicesData.registrationDataStatusChoices.map(
+              (item) => (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.name}
+                </MenuItem>
+              ),
+            )}
+          </SelectFilter>
+        </Grid>
+        <Grid size={{ xs: 3 }}>
+          <NumberTextField
+            id="minFilter"
+            topLabel={`Num. of ${beneficiaryGroup?.groupLabelPlural}`}
+            value={filter.sizeMin}
+            placeholder="From"
+            icon={<GroupIcon />}
+            onChange={(e) => handleFilterChange('sizeMin', e.target.value)}
+            data-cy="filter-size-min"
+          />
+        </Grid>
+        <Grid size={{ xs: 3 }}>
+          <NumberTextField
+            id="maxFilter"
+            value={filter.sizeMax}
+            placeholder="To"
+            icon={<GroupIcon />}
+            onChange={(e) => handleFilterChange('sizeMax', e.target.value)}
+            data-cy="filter-size-max"
+          />
+        </Grid>
+        <Grid size={{ xs: 3 }}>
+          <DatePickerFilter
+            topLabel={t('Import Date')}
+            placeholder={t('From')}
+            onChange={(date) => handleFilterChange('importDateRangeMin', date)}
+            value={filter.importDateRangeMin}
+            dataCy="filter-import-date-range-min"
+          />
+        </Grid>
+        <Grid size={{ xs: 3 }}>
+          <DatePickerFilter
+            placeholder={t('To')}
+            onChange={(date) => handleFilterChange('importDateRangeMax', date)}
+            value={filter.importDateRangeMax}
+            dataCy="filter-import-date-range-max"
+          />
+        </Grid>
+      </Grid>
+    </FiltersSection>
   );
 };
 
