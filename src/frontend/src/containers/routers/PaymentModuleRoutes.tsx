@@ -1,18 +1,12 @@
 import { useRoutes } from 'react-router-dom';
 import { EditFollowUpPaymentPlanPage } from '../pages/paymentmodule/EditFollowUpPaymentPlanPage';
-import { EditFollowUpSetUpFspPage } from '../pages/paymentmodule/EditFollowUpSetUpFspPage';
 import { EditPaymentPlanPage } from '../pages/paymentmodule/EditPaymentPlanPage';
-import { EditSetUpFspPage } from '../pages/paymentmodule/EditSetUpFspPage';
 import { FollowUpPaymentPlanDetailsPage } from '../pages/paymentmodule/FollowUpPaymentPlanDetailsPage';
 import { PaymentDetailsPage } from '../pages/paymentmodule/PaymentDetailsPage';
 import { PaymentModulePage } from '../pages/paymentmodule/PaymentModulePage';
-import { SetUpFspPage } from '../pages/paymentmodule/SetUpFspPage';
-import { SetUpFollowUpFspPage } from '../pages/paymentmodule/SetUpFollowUpFspPage';
 import { useProgramContext } from '../../programContext';
 import { PeoplePaymentModulePage } from '@containers/pages/paymentmodulepeople/PeoplePaymentModulePage';
 import { EditPeopleFollowUpPaymentPlanPage } from '@containers/pages/paymentmodulepeople/EditPeopleFollowUpPaymentPlanPage';
-import { EditPeopleFollowUpSetUpFspPage } from '@containers/pages/paymentmodulepeople/EditPeopleFollowUpSetUpFspPage';
-import { SetUpPeopleFollowUpFspPage } from '@containers/pages/paymentmodulepeople/SetUpPeopleFollowUpFspPage';
 import { PeoplePaymentDetailsPage } from '@containers/pages/paymentmodulepeople/PeoplePaymentDetailsPage';
 import { PeoplePaymentPlanDetailsPage } from '@containers/pages/paymentmodulepeople/PeoplePaymentPlanDetailsPage';
 import { PeopleFollowUpPaymentPlanDetailsPage } from '@containers/pages/paymentmodulepeople/PeopleFollowUpPaymentPlanDetailsPage';
@@ -47,14 +41,6 @@ export const PaymentModuleRoutes = (): ReactElement => {
                 path: 'edit',
                 element: <EditPaymentPlanPage />,
               },
-              {
-                path: 'setup-fsp/edit',
-                element: <EditSetUpFspPage />,
-              },
-              {
-                path: 'setup-fsp/create',
-                element: <SetUpFspPage />,
-              },
             ],
           },
         ],
@@ -69,14 +55,6 @@ export const PaymentModuleRoutes = (): ReactElement => {
           {
             path: 'edit',
             element: <EditPeopleFollowUpPaymentPlanPage />,
-          },
-          {
-            path: 'setup-fsp/edit',
-            element: <EditPeopleFollowUpSetUpFspPage />,
-          },
-          {
-            path: 'setup-fsp/create',
-            element: <SetUpPeopleFollowUpFspPage />,
           },
         ],
       },
@@ -145,14 +123,6 @@ export const PaymentModuleRoutes = (): ReactElement => {
                 path: 'edit',
                 element: <EditPaymentPlanPage />,
               },
-              {
-                path: 'setup-fsp/edit',
-                element: <EditSetUpFspPage />,
-              },
-              {
-                path: 'setup-fsp/create',
-                element: <SetUpFspPage />,
-              },
             ],
           },
         ],
@@ -167,14 +137,6 @@ export const PaymentModuleRoutes = (): ReactElement => {
           {
             path: 'edit',
             element: <EditFollowUpPaymentPlanPage />,
-          },
-          {
-            path: 'setup-fsp/edit',
-            element: <EditFollowUpSetUpFspPage />,
-          },
-          {
-            path: 'setup-fsp/create',
-            element: <SetUpFollowUpFspPage />,
           },
         ],
       },

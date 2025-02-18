@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from django import forms
 from django.contrib import admin, messages
@@ -24,7 +24,6 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
     DeliveryMechanismData,
-    DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FspXlsxTemplatePerDeliveryMechanism,
@@ -46,6 +45,53 @@ if TYPE_CHECKING:
     from uuid import UUID
 
     from django.forms import Form
+
+
+class ArrayFieldWidget(forms.Textarea):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        self.delimiter = kwargs.pop("delimiter", ",")
+        super().__init__(*args, **kwargs)
+
+    def format_value(self, value: Any) -> str:
+        if value is None:
+            return ""
+        if isinstance(value, list):
+            # Join list items with newline instead of comma for each value to be in a new line
+            return "\n".join(str(v) for v in value)
+        return value
+
+    def value_from_datadict(self, data: Any, files: Any, name: Any) -> List[str]:
+        value = data.get(name, "")
+        if not value:
+            return []
+        # Split by newline and strip any extra spaces
+        return [v.strip() for v in value.splitlines()]
+
+
+class CommaSeparatedArrayField(forms.Field):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        self.base_field = forms.CharField()
+        self.widget = ArrayFieldWidget()
+        self.delimiter = kwargs.pop("delimiter", ",")
+        super().__init__(*args, **kwargs)
+
+    def prepare_value(self, value: Any) -> str:
+        if isinstance(value, list):
+            # Prepare value to be displayed as a newline-separated string
+            return "\n".join(str(self.base_field.prepare_value(v)) for v in value)
+        return value
+
+    def to_python(self, value: Any) -> List[str]:
+        if not value:
+            return []
+        if isinstance(value, list):
+            return value
+        return [self.base_field.to_python(v) for v in value.splitlines()]
+
+    def validate(self, value: Any) -> None:
+        super().validate(value)
+        for item in value:
+            self.base_field.validate(item)
 
 
 @admin.register(PaymentVerificationPlan)
@@ -287,36 +333,6 @@ class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdm
         return False
 
 
-@admin.register(DeliveryMechanismPerPaymentPlan)
-class DeliveryMechanismPerPaymentPlanAdmin(HOPEModelAdminBase):
-    list_display = (
-        "financial_service_provider",
-        "delivery_mechanism",
-        "delivery_mechanism_order",
-        "payment_plan",
-        "status",
-        "created_by",
-        "sent_date",
-        "sent_to_payment_gateway",
-    )
-    raw_id_fields = ("payment_plan", "financial_service_provider", "created_by", "sent_by", "delivery_mechanism")
-    list_filter = (
-        ("financial_service_provider", AutoCompleteFilter),
-        ("delivery_mechanism", AutoCompleteFilter),
-        ("payment_plan", AutoCompleteFilter),
-        ("created_by", AutoCompleteFilter),
-        "sent_to_payment_gateway",
-    )
-    search_fields = ("financial_service_provider__name", "payment_plan__unicef_id")
-
-    def get_queryset(self, request: HttpRequest) -> "QuerySet":
-        return (
-            super()
-            .get_queryset(request)
-            .select_related("payment_plan", "financial_service_provider", "created_by", "sent_by", "delivery_mechanism")
-        )
-
-
 @admin.register(FinancialServiceProviderXlsxTemplate)
 class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
     list_display = (
@@ -437,6 +453,8 @@ class FspXlsxTemplatePerDeliveryMechanismAdmin(HOPEModelAdminBase):
 
 
 class FinancialServiceProviderAdminForm(forms.ModelForm):
+    required_fields = CommaSeparatedArrayField()
+
     @staticmethod
     def locked_payment_plans_for_fsp(obj: FinancialServiceProvider) -> QuerySet[PaymentPlan]:
         return PaymentPlan.objects.filter(
@@ -446,7 +464,7 @@ class FinancialServiceProviderAdminForm(forms.ModelForm):
                     PaymentPlan.Status.FINISHED,
                 ],
             ),
-            delivery_mechanisms__financial_service_provider=obj,
+            delivery_mechanism__financial_service_provider=obj,
         ).distinct()
 
     def clean(self) -> Optional[Dict[str, Any]]:
@@ -503,10 +521,10 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
         ("communication_channel", "fsp_xlsx_templates"),
         ("data_transfer_configuration",),
         ("allowed_business_areas",),
+        ("payment_gateway_id", "required_fields"),
     )
     readonly_fields = ("fsp_xlsx_templates", "data_transfer_configuration")
     inlines = (FspXlsxTemplatePerDeliveryMechanismAdminInline,)
-    exclude = ("delivery_mechanisms_choices",)
 
     def fsp_xlsx_templates(self, obj: FinancialServiceProvider) -> str:
         return format_html(
@@ -559,11 +577,22 @@ class DeliveryMechanismDataAdmin(HOPEModelAdminBase):
         return obj.individual.program
 
 
+class DeliveryMechanismAdminForm(forms.ModelForm):
+    optional_fields = CommaSeparatedArrayField()
+    required_fields = CommaSeparatedArrayField()
+    unique_fields = CommaSeparatedArrayField()
+
+    class Meta:
+        model = DeliveryMechanism
+        fields = "__all__"
+
+
 @admin.register(DeliveryMechanism)
 class DeliveryMechanismAdmin(HOPEModelAdminBase):
     list_display = ("code", "name", "is_active", "transfer_type")
     search_fields = ("code", "name")
     list_filter = ("is_active", "transfer_type")
+    form = DeliveryMechanismAdminForm
 
 
 @admin.register(PaymentPlanSupportingDocument)

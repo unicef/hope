@@ -102,7 +102,7 @@ export const PaymentPlanDetailsPage = (): ReactElement => {
               />
             )}
             {shouldDisplayFsp && (
-              <FspSection baseUrl={baseUrl} paymentPlan={paymentPlan} />
+              <FspSection paymentPlan={paymentPlan} />
             )}
             <ExcludeSection paymentPlan={paymentPlan} />
             <SupportingDocumentsSection paymentPlan={paymentPlan} />

@@ -7,6 +7,8 @@ export const CREATE_PAYMENT_PLAN = gql`
     $targetingCriteria: TargetingCriteriaObjectType!
     $excludedIds: String!
     $exclusionReason: String
+    $fspId: ID
+    $deliveryMechanismCode: String
   ) {
     createPaymentPlan(
       input: {
@@ -15,6 +17,8 @@ export const CREATE_PAYMENT_PLAN = gql`
         targetingCriteria: $targetingCriteria
         excludedIds: $excludedIds
         exclusionReason: $exclusionReason
+        fspId: $fspId
+        deliveryMechanismCode: $deliveryMechanismCode
       }
     ) {
       paymentPlan {
