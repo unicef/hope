@@ -1,6 +1,6 @@
 from django.conf import settings
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory, UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import (
@@ -74,10 +74,11 @@ class TestHouseholdPermissionsQuery(APITestCase):
         cls.household.set_admin_areas(cls.area2)
 
         # adjust "Role with all permissions" for UNICEF HQ
-        role_with_all_permissions = cls.unicef_partner.role_assignments.filter(business_area=cls.business_area).first().role
+        role_with_all_permissions = (
+            cls.unicef_partner.role_assignments.filter(business_area=cls.business_area).first().role
+        )
         role_with_all_permissions.permissions = ["POPULATION_VIEW_HOUSEHOLDS_DETAILS"]
         role_with_all_permissions.save()
-
 
     def test_unicef_partner_has_access_for_program(self) -> None:
         self._test_unicef_partner_has_access(self.id_to_base64(self.program_one.id, "ProgramNode"))
