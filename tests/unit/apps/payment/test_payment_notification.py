@@ -72,8 +72,10 @@ class TestPaymentNotification(APITestCase):
         ]
 
         # Adjust Role with all permissions
-        role_with_all_permissions = RoleFactory(name="Role with all permissions")
-        role_with_all_permissions.permissions = [perm.value for perm in Permissions]
+        role_with_all_permissions = (
+            partner_unicef_hq.role_assignments.filter(business_area=cls.business_area).first().role
+        )
+        role_with_all_permissions.permissions = [perm.value for perm in action_permissions_list]
         role_with_all_permissions.save()
 
         # grant permissions to user performing the action - action user should be excluded from recipients
@@ -384,6 +386,11 @@ class TestPaymentNotification(APITestCase):
             f"{timezone.now():%-d %B %Y}",
         )
 
+        self.assertEqual(
+            payment_notification.user_recipients.count(),
+            20,
+        )
+
         for recipient in [
             self.user_with_partner_unicef_hq,
             self.user_with_partner_unicef_in_ba,
@@ -410,30 +417,10 @@ class TestPaymentNotification(APITestCase):
             self.user_with_no_permissions_partner_with_action_permissions,
             self.user_with_no_permissions_partner_with_action_permissions_in_whole_ba,
         ]:
-            if recipient not in payment_notification.user_recipients.all():
-                print("not in recipients")
-                print(recipient)
-                print(recipient.partner.name)
-                print(self.program.id)
-                print(
-                    recipient.role_assignments.all().values_list(
-                        "role__permissions", "business_area__slug", "program_id"
-                    )
-                )
-                print(
-                    recipient.partner.role_assignments.all().values_list(
-                        "role__permissions", "business_area__slug", "program_id"
-                    )
-                )
             self.assertIn(
                 recipient,
                 payment_notification.user_recipients.all(),
             )
-
-        self.assertEqual(
-            payment_notification.user_recipients.count(),
-            20,
-        )
 
         # action user should be excluded from recipients
         self.assertNotIn(
