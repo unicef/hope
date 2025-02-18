@@ -127,6 +127,8 @@ class GrievanceTicketNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObje
         user = info.context.user
         # when selected All programs in GPF program_id is None
         program_id: Optional[str] = get_program_id_from_headers(info.context.headers)
+        program = Program.objects.filter(id=program_id).first()
+        scope = program or business_area
 
         if object_instance.category == GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE:
             perm = Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE.value
@@ -137,25 +139,20 @@ class GrievanceTicketNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObje
             creator_perm = Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR.value
             owner_perm = Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER.value
 
-        check_creator = object_instance.created_by == user and user.has_permission(
-            creator_perm, business_area, program_id
-        )
-        check_assignee = object_instance.assigned_to == user and user.has_permission(
-            owner_perm, business_area, program_id
-        )
+        check_creator = object_instance.created_by == user and user.has_perm(creator_perm, scope)
+        check_assignee = object_instance.assigned_to == user and user.has_perm(owner_perm, scope)
         partner = user.partner
-        has_partner_area_access = partner.is_unicef
         ticket_program_id = str(object_instance.programs.first().id) if object_instance.programs.first() else None
-        if not partner.is_unicef:
-            if not object_instance.admin2 or not ticket_program_id:
-                # admin2 is empty or non-program ticket -> no restrictions for admin area
-                has_partner_area_access = True
-            else:
-                has_partner_area_access = partner.has_area_access(
-                    area_id=object_instance.admin2.id, program_id=ticket_program_id
-                )
+        ticket_program = Program.objects.filter(id=ticket_program_id).first()
+        if not object_instance.admin2 or not ticket_program_id:
+            # admin2 is empty or non-program ticket -> no restrictions for admin area
+            has_partner_area_access = True
+        else:
+            has_partner_area_access = partner.has_area_access(
+                area_id=object_instance.admin2.id, program_id=ticket_program_id
+            )
         if (
-            user.has_permission(perm, business_area, ticket_program_id) or check_creator or check_assignee
+            user.has_perm(perm, ticket_program or business_area) or check_creator or check_assignee
         ) and has_partner_area_access:
             return None
 
@@ -576,17 +573,27 @@ class Query(graphene.ObjectType):
 
         queryset = queryset.prefetch_related(*to_prefetch)
 
-        # Full access to all AdminAreas if is_unicef
-        # and ignore filtering for Cross Area tickets
-        if not user.partner.is_unicef and not (
+        # Ignore filtering for Cross Area tickets
+        if not (
             kwargs.get("is_cross_area", False)
             and program_id
-            and user.partner.has_full_area_access_in_program(program_id)
+            and not user.partner.has_area_limits_in_program(program_id)
         ):
             queryset = filter_grievance_tickets_based_on_partner_areas_2(
-                queryset, user.partner, business_area_id, program_id
+                queryset,
+                user,
+                business_area_id,
+                program_id,
+                [
+                    Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                    Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
+                    Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
+                    Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                    Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
+                    Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
+                    *POPULATION_DETAILS,
+                ],
             )
-
         if program_id is None:
             queryset = queryset | (
                 GrievanceTicket.objects.select_related("admin2", "assigned_to", "created_by")
@@ -613,12 +620,13 @@ class Query(graphene.ObjectType):
             return False
         business_area = BusinessArea.objects.get(slug=info.context.headers.get("Business-Area"))
         program_id = get_program_id_from_headers(info.context.headers)
+        program = Program.objects.filter(id=get_program_id_from_headers(info.context.headers)).first()
 
         perm = Permissions.GRIEVANCES_CROSS_AREA_FILTER.value
 
-        return user.has_permission(perm, business_area, program_id) and user.partner.has_full_area_access_in_program(
-            program_id
-        )
+        # Access to the cross-area filter, in addition to the standard permissions check,
+        # is available only if user does not have ANY area limits in the program (has full-area-access)
+        return user.has_perm(perm, program or business_area) and not user.partner.has_area_limits_in_program(program_id)
 
     def resolve_grievance_ticket_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(GrievanceTicket.STATUS_CHOICES)

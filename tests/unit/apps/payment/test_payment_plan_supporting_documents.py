@@ -11,7 +11,7 @@ from rest_framework import status
 from rest_framework.test import APIClient, APIRequestFactory
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.account.models import Role, UserRole
+from hct_mis_api.apps.account.models import Role, RoleAssignment
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.payment.api.serializers import (
@@ -112,7 +112,7 @@ class PaymentPlanSupportingDocumentUploadViewTests(TestCase):
         role, created = Role.objects.update_or_create(
             name="TestName", defaults={"permissions": [Permissions.PM_UPLOAD_SUPPORTING_DOCUMENT.value]}
         )
-        user_role, _ = UserRole.objects.get_or_create(user=cls.user, role=role, business_area=cls.business_area)
+        user_role, _ = RoleAssignment.objects.get_or_create(user=cls.user, role=role, business_area=cls.business_area)
         cls.payment_plan = PaymentPlanFactory(
             status=PaymentPlan.Status.OPEN,
         )
@@ -172,7 +172,7 @@ class PaymentPlanSupportingDocumentViewTests(TestCase):
                 ]
             },
         )
-        user_role, _ = UserRole.objects.get_or_create(user=cls.user, role=role, business_area=cls.business_area)
+        user_role, _ = RoleAssignment.objects.get_or_create(user=cls.user, role=role, business_area=cls.business_area)
         cls.payment_plan = PaymentPlanFactory(
             status=PaymentPlan.Status.OPEN,
         )

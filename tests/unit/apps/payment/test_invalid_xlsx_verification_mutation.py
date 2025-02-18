@@ -83,7 +83,9 @@ class TestXlsxVerificationMarkAsInvalid(APITestCase):
     def test_export_xlsx_payment_verification_plan(
         self, _: Any, permissions: List[Permissions], download_status: str
     ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
         self.xlsx_file.was_downloaded = download_status
         self.xlsx_file.save()
 

@@ -28,16 +28,16 @@ class RoleAdminForm(forms.ModelForm):
     )
 
     class Meta:
-        model = account_models.UserRole
+        model = account_models.RoleAssignment
         fields = "__all__"
 
 
-class UserRoleAdminForm(forms.ModelForm):
+class RoleAssignmentAdminForm(forms.ModelForm):
     role = forms.ModelChoiceField(account_models.Role.objects.order_by("name"))
     business_area = forms.ModelChoiceField(BusinessArea.objects.filter(is_split=False))
 
     class Meta:
-        model = account_models.UserRole
+        model = account_models.RoleAssignment
         fields = "__all__"
 
     def clean(self) -> None:
@@ -51,14 +51,12 @@ class UserRoleAdminForm(forms.ModelForm):
         account_models.IncompatibleRoles.objects.validate_user_role(user, business_area, role)
 
 
-class UserRoleInlineFormSet(forms.BaseInlineFormSet):
-    model = account_models.UserRole
+class RoleAssignmentInlineFormSet(forms.BaseInlineFormSet):
+    model = account_models.RoleAssignment
 
     def add_fields(self, form: "forms.Form", index: Optional[int]) -> None:
         super().add_fields(form, index)
-        form.fields["business_area"].choices = [
-            (str(x.id), str(x)) for x in BusinessArea.objects.filter(is_split=False)
-        ]
+        form.fields["role"].required = True
 
     def clean(self) -> None:
         super().clean()

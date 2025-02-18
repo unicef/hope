@@ -94,7 +94,9 @@ class TestXlsxVerificationImport(APITestCase):
         ]
     )
     def test_export_received_from_pending(self, _: Any, initial_status: str, result: Any) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.PAYMENT_VERIFICATION_IMPORT], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PAYMENT_VERIFICATION_IMPORT], self.business_area, whole_business_area_access=True
+        )
 
         self.verification.payment_record_verifications.all().update(status=initial_status)
         export_service = XlsxVerificationExportService(self.verification)

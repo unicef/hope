@@ -56,6 +56,23 @@ export function opacityToHex(opacity: number): string {
   return Math.floor(opacity * 0xff).toString(16);
 }
 
+export const isPartnerVisible = (partnerName: string): boolean => {
+  if (!partnerName) return false;
+  return (
+    !partnerName.startsWith('UNICEF Partner for') && partnerName !== 'UNICEF HQ'
+  );
+};
+
+export function mapPartnerChoicesWithoutUnicef(choices, selectedPartners) {
+  return choices
+    .filter((partner) => isPartnerVisible(partner.name))
+    .map((partner) => ({
+      value: partner.value,
+      label: partner.name,
+      disabled: selectedPartners.some((p) => p.id === partner.value),
+    }));
+}
+
 export function periodicDataUpdatesStatusToColor(
   theme: typeof themeObj,
   status: string,

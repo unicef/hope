@@ -2,12 +2,16 @@ import re
 from random import randint
 from typing import Dict, List, Optional
 
-from django.conf import settings
 from django.db import transaction
 from django.db.models import Q, QuerySet
 from django.utils import timezone
 
-from hct_mis_api.apps.account.models import Partner, User
+from hct_mis_api.apps.account.models import (
+    AdminAreaLimitedTo,
+    Partner,
+    RoleAssignment,
+    User,
+)
 from hct_mis_api.apps.core.models import DataCollectingType, FlexibleAttribute
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
@@ -23,7 +27,7 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hct_mis_api.apps.program.models import Program, ProgramCycle, ProgramPartnerThrough
+from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.program.validators import validate_data_collecting_type
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.utils.elasticsearch_utils import populate_index
@@ -523,34 +527,53 @@ def create_program_partner_access(
     partners_data: List, program: Program, partner_access: Optional[str] = None
 ) -> List[Dict]:
     if partner_access == Program.ALL_PARTNERS_ACCESS:
-        partners = Partner.objects.filter(business_areas=program.business_area).exclude(
-            name=settings.DEFAULT_EMPTY_PARTNER
-        )
+        # create full-area-access for all allowed partners; UNICEF subpartners already have access to all programs in BA
+        partners = Partner.objects.filter(allowed_business_areas=program.business_area).exclude(parent__name="UNICEF")
         partners_data = [{"partner": partner.id, "areas": []} for partner in partners]
 
     for partner_data in partners_data:
-        program_partner, _ = ProgramPartnerThrough.objects.get_or_create(
-            program=program,
-            partner_id=partner_data["partner"],
+        #  TODO: temporary solution to avoid getting role from user's input
+        #   which is planned to be applied later outside this ticket.
+        existing_roles_for_partner_in_this_ba = (
+            RoleAssignment.objects.filter(
+                partner_id=partner_data["partner"],
+                business_area=program.business_area,
+            )
+            .values_list("role_id", flat=True)
+            .distinct()
         )
-        if areas := partner_data.get("areas"):
-            program_partner.areas.set(Area.objects.filter(id__in=areas))
-            program_partner.full_area_access = False
-            program_partner.save(update_fields=["full_area_access"])
+        for role_id in existing_roles_for_partner_in_this_ba:
+            RoleAssignment.objects.get_or_create(
+                partner_id=partner_data["partner"],
+                business_area=program.business_area,
+                program=program,
+                role_id=role_id,
+            )
+        if areas := partner_data.get("areas"):  # create area limits if it is not a full-area-access
+            area_limits, _ = AdminAreaLimitedTo.objects.get_or_create(
+                partner_id=partner_data["partner"],
+                program=program,
+            )
+            area_limits.areas.set(Area.objects.filter(id__in=areas))
         else:
-            # full area access
-            program_partner.full_area_access = True
-            program_partner.save(update_fields=["full_area_access"])
+            # remove area limits if it is updated to full-area-access
+            if area_limits := AdminAreaLimitedTo.objects.filter(
+                partner_id=partner_data["partner"],
+                program=program,
+            ).first():
+                area_limits.delete()
+
     return partners_data
 
 
 def remove_program_partner_access(partners_data: List, program: Program) -> None:
     partner_ids = [partner_data["partner"] for partner_data in partners_data]
-    existing_program_partner_access = ProgramPartnerThrough.objects.filter(
+    existing_partner_role_assignments = RoleAssignment.objects.filter(
+        business_area=program.business_area,
         program=program,
     )
-    removed_partner_access = existing_program_partner_access.exclude(
-        Q(partner_id__in=partner_ids) | Q(partner__name="UNICEF")
+    removed_partner_access = existing_partner_role_assignments.exclude(
+        Q(partner_id__in=partner_ids) | Q(partner__parent__name="UNICEF")
     )
     removed_partner_access.delete()
 

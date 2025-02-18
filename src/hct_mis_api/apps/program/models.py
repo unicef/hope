@@ -40,7 +40,7 @@ from hct_mis_api.apps.utils.validators import (
 )
 
 
-class ProgramPartnerThrough(TimeStampedUUIDModel):
+class ProgramPartnerThrough(TimeStampedUUIDModel):  # TODO: remove after migration to RoleAssignment
     program = models.ForeignKey(
         "Program",
         on_delete=models.CASCADE,

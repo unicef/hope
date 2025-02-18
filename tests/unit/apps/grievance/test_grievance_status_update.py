@@ -82,7 +82,9 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         ]
     )
     def test_grievance_status_change(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
 
         variables = {
             "status": GrievanceTicket.STATUS_ASSIGNED,
@@ -104,7 +106,9 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         ]
     )
     def test_grievance_status_change_fail(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
 
         variables = {
             "status": GrievanceTicket.STATUS_CLOSED,
@@ -126,7 +130,9 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         ]
     )
     def test_grievance_assign_user(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
 
         grievance_ticket = GrievanceTicket.objects.create(
             description="Test",
