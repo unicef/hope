@@ -28,7 +28,6 @@ class PartnerForGrievanceTest(APITestCase):
         cls.program_for_household = ProgramFactory(
             name="Test Program for Household", status=Program.DRAFT, business_area=cls.business_area
         )
-        cls.program_any = ProgramFactory(name="Test Program Any", status=Program.DRAFT, business_area=cls.business_area)
         cls.household, individuals = create_household_and_individuals(
             household_data={
                 "business_area": cls.business_area,
@@ -64,16 +63,16 @@ class PartnerForGrievanceTest(APITestCase):
             partner_with_access_to_test_program_for_hh, [], cls.business_area, cls.program_for_household
         )
 
-        # partner with access to Test Program Any - should be returned if  neither program nor household/individual is passed
-        # (because it has access to ANY program in this BA)
-        partner_with_access_to_test_program_any = PartnerFactory(name="Partner with with access to Test Program Any")
+        # partner with access to all programs - should be returned if neither program nor household/individual is passed
+        # or if any program is passed or if household/individual is passed
+        # (because it has access to all programs in this BA)
+        partner_with_access_to_all_programs = PartnerFactory(name="Partner with with access to All Programs")
         cls.create_partner_role_with_permissions(
-            partner_with_access_to_test_program_any, [], cls.business_area, cls.program_any
+            partner_with_access_to_all_programs, [], cls.business_area, whole_business_area_access=True
         )
 
-        # partner without access to any program in this BA (but with role, which should not matter) - should not be returned in any case
-        partner_without_program_access = PartnerFactory(name="Partner Without Program Access")
-        cls.create_partner_role_with_permissions(partner_without_program_access, [], cls.business_area)
+        # partner without access to any program in this BA - should not be returned in any case
+        PartnerFactory(name="Partner Without Program Access")
 
     def test_partner_choices_with_program(self) -> None:
         self.snapshot_graphql_request(
