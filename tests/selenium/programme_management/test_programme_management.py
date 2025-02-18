@@ -15,11 +15,7 @@ from hct_mis_api.apps.account.fixtures import (
 )
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
-from hct_mis_api.apps.core.models import (
-    BusinessArea,
-    BusinessAreaPartnerThrough,
-    DataCollectingType,
-)
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
@@ -49,6 +45,7 @@ def create_unhcr_partner() -> None:
     """
     partner_unhcr = PartnerFactory(name="UNHCR")
     afghanistan = BusinessArea.objects.get(slug="afghanistan")
+    partner_unhcr.role_assignments.all().delete()
     partner_unhcr.allowed_business_areas.add(afghanistan)
     RoleAssignmentFactory(
         partner=partner_unhcr,
@@ -494,7 +491,10 @@ class TestBusinessAreas:
         pageProgrammeManagement.choosePartnerOption("UNHCR")
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
-        pageProgrammeDetails.wait_for_text("UNHCR", pageProgrammeDetails.labelPartnerName)
+
+        pageProgrammeDetails.wait_for_text_in_any_element("UNHCR", pageProgrammeDetails.labelPartnerName)
+        pageProgrammeDetails.wait_for_text_in_any_element("TEST", pageProgrammeDetails.labelPartnerName)
+
         assert "Business Area" in pageProgrammeDetails.getLabelAreaAccess().text
 
     @pytest.mark.parametrize(
@@ -629,7 +629,9 @@ class TestAdminAreas:
         sleep(1)
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
-        pageProgrammeDetails.wait_for_text("UNHCR", pageProgrammeDetails.labelPartnerName)
+        pageProgrammeDetails.wait_for_text_in_any_element("UNHCR", pageProgrammeDetails.labelPartnerName)
+        pageProgrammeDetails.wait_for_text_in_any_element("TEST", pageProgrammeDetails.labelPartnerName)
+
         assert "1" in pageProgrammeDetails.getLabelAdminArea1().text
         assert "15" in pageProgrammeDetails.getLabelAdminArea2().text
 
@@ -862,11 +864,7 @@ class TestManualCalendar:
         partner1 = Partner.objects.create(name="Test Partner 1")
         partner2 = Partner.objects.create(name="Test Partner 2")
         role = RoleFactory(name="Role in BA")
-        ba_partner_through, _ = BusinessAreaPartnerThrough.objects.get_or_create(
-            business_area=BusinessArea.objects.get(slug="afghanistan"),
-            partner=partner1,
-        )
-        ba_partner_through.roles.set([role])
+        RoleAssignmentFactory(role=role, partner=partner1, business_area=BusinessArea.objects.get(slug="afghanistan"))
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
         # Create Programme
