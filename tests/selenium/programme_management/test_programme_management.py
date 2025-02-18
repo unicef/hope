@@ -15,11 +15,7 @@ from hct_mis_api.apps.account.fixtures import (
 )
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
-from hct_mis_api.apps.core.models import (
-    BusinessArea,
-    BusinessAreaPartnerThrough,
-    DataCollectingType,
-)
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
@@ -862,11 +858,7 @@ class TestManualCalendar:
         partner1 = Partner.objects.create(name="Test Partner 1")
         partner2 = Partner.objects.create(name="Test Partner 2")
         role = RoleFactory(name="Role in BA")
-        ba_partner_through, _ = BusinessAreaPartnerThrough.objects.get_or_create(
-            business_area=BusinessArea.objects.get(slug="afghanistan"),
-            partner=partner1,
-        )
-        ba_partner_through.roles.set([role])
+        RoleAssignmentFactory(role=role, partner=partner1, business_area=BusinessArea.objects.get(slug="afghanistan"))
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
         # Create Programme
