@@ -19,11 +19,13 @@ def superuser(request: pytest.FixtureRequest, partner_unicef: Partner) -> User:
 def role(request: pytest.FixtureRequest) -> Role:
     return RoleFactory(name="Role")
 
+
 @pytest.mark.django_db(transaction=True)
 def test_role_perm_matrix(django_app: DjangoTestApp, superuser: pytest.FixtureRequest) -> None:
     url = reverse("admin:account_role_matrix")
     res = django_app.get(url, user=superuser)
     assert res.status_code == 200
+
 
 @pytest.mark.django_db(transaction=True)
 def test_role_sync(django_app: DjangoTestApp, superuser: User, role: Role) -> None:
