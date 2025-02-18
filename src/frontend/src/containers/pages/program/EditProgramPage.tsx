@@ -22,7 +22,11 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Fade } from '@mui/material';
-import { decodeIdString, mapPartnerChoices } from '@utils/utils';
+import {
+  decodeIdString,
+  mapPartnerChoicesWithoutUnicef,
+  isPartnerVisible,
+} from '@utils/utils';
 import { Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -252,7 +256,7 @@ export const EditProgramPage = (): ReactElement => {
     partners:
       partners.length > 0
         ? partners
-            .filter((partner) => partner.name !== 'UNICEF')
+            .filter((partner) => isPartnerVisible(partner.name))
             .map((partner) => ({
               id: partner.id,
               areas: partner.areas.map((area) => decodeIdString(area.id)),
@@ -417,7 +421,7 @@ export const EditProgramPage = (): ReactElement => {
           validationSchema={editPartnersValidationSchema(t)}
         >
           {({ submitForm, values, setFieldValue }) => {
-            const mappedPartnerChoices = mapPartnerChoices(
+            const mappedPartnerChoices = mapPartnerChoicesWithoutUnicef(
               userPartnerChoices,
               values.partners,
             );
