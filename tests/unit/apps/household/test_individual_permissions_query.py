@@ -77,7 +77,7 @@ class TestIndividualPermissionsQuery(APITestCase):
         cls.household.set_admin_areas(cls.area2)
 
         # adjust "Role with all permissions" for UNICEF HQ
-        role_with_all_permissions = RoleFactory(name="Role with all permissions")
+        role_with_all_permissions = cls.unicef_partner.role_assignments.filter(business_area=cls.business_area).first().role
         role_with_all_permissions.permissions = ["POPULATION_VIEW_INDIVIDUALS_DETAILS"]
         role_with_all_permissions.save()
 
