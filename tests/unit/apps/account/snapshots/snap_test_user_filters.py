@@ -14,6 +14,58 @@ snapshots['TestUserFilter::test_users_by_business_area 1'] = {
                 {
                     'node': {
                         'partner': {
+                            'name': 'Partner With Test Role'
+                        },
+                        'partnerRoles': [
+                            {
+                                'businessArea': {
+                                    'name': 'Afghanistan'
+                                },
+                                'program': {
+                                    'name': 'Test Program'
+                                },
+                                'role': {
+                                    'name': 'Test Role',
+                                    'permissions': [
+                                        'USER_MANAGEMENT_VIEW_LIST'
+                                    ]
+                                }
+                            }
+                        ],
+                        'userRoles': [
+                        ],
+                        'username': 'user_with_partner_with_test_role'
+                    }
+                },
+                {
+                    'node': {
+                        'partner': {
+                            'name': 'Default Empty Partner'
+                        },
+                        'partnerRoles': [
+                        ],
+                        'userRoles': [
+                            {
+                                'businessArea': {
+                                    'name': 'Afghanistan'
+                                },
+                                'program': {
+                                    'name': 'Different Program'
+                                },
+                                'role': {
+                                    'name': 'Test Role',
+                                    'permissions': [
+                                        'USER_MANAGEMENT_VIEW_LIST'
+                                    ]
+                                }
+                            }
+                        ],
+                        'username': 'user_with_test_role'
+                    }
+                },
+                {
+                    'node': {
+                        'partner': {
                             'name': 'UNICEF HQ'
                         },
                         'partnerRoles': [
@@ -57,6 +109,74 @@ snapshots['TestUserFilter::test_users_by_business_area 1'] = {
                         ],
                         'username': 'user_with_test_role_in_whole_ba'
                     }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestUserFilter::test_users_by_program 1'] = {
+    'data': {
+        'allUsers': {
+            'edges': [
+                {
+                    'node': {
+                        'partner': {
+                            'name': 'Partner With Test Role'
+                        },
+                        'username': 'user_with_partner_with_test_role'
+                    }
+                },
+                {
+                    'node': {
+                        'partner': {
+                            'name': 'UNICEF HQ'
+                        },
+                        'username': 'unicef_user_without_role'
+                    }
+                },
+                {
+                    'node': {
+                        'partner': {
+                            'name': 'Default Empty Partner'
+                        },
+                        'username': 'user_with_test_role_in_whole_ba'
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestUserFilter::test_users_by_roles 1'] = {
+    'data': {
+        'allUsers': {
+            'edges': [
+                {
+                    'node': {
+                        'partner': {
+                            'name': 'Partner With Test Role'
+                        },
+                        'partnerRoles': [
+                            {
+                                'businessArea': {
+                                    'name': 'Afghanistan'
+                                },
+                                'program': {
+                                    'name': 'Test Program'
+                                },
+                                'role': {
+                                    'name': 'Test Role',
+                                    'permissions': [
+                                        'USER_MANAGEMENT_VIEW_LIST'
+                                    ]
+                                }
+                            }
+                        ],
+                        'userRoles': [
+                        ],
+                        'username': 'user_with_partner_with_test_role'
+                    }
                 },
                 {
                     'node': {
@@ -84,74 +204,6 @@ snapshots['TestUserFilter::test_users_by_business_area 1'] = {
                         'username': 'user_with_test_role'
                     }
                 },
-                {
-                    'node': {
-                        'partner': {
-                            'name': 'Partner With Test Role'
-                        },
-                        'partnerRoles': [
-                            {
-                                'businessArea': {
-                                    'name': 'Afghanistan'
-                                },
-                                'program': {
-                                    'name': 'Test Program'
-                                },
-                                'role': {
-                                    'name': 'Test Role',
-                                    'permissions': [
-                                        'USER_MANAGEMENT_VIEW_LIST'
-                                    ]
-                                }
-                            }
-                        ],
-                        'userRoles': [
-                        ],
-                        'username': 'user_with_partner_with_test_role'
-                    }
-                }
-            ]
-        }
-    }
-}
-
-snapshots['TestUserFilter::test_users_by_program 1'] = {
-    'data': {
-        'allUsers': {
-            'edges': [
-                {
-                    'node': {
-                        'partner': {
-                            'name': 'UNICEF HQ'
-                        },
-                        'username': 'unicef_user_without_role'
-                    }
-                },
-                {
-                    'node': {
-                        'partner': {
-                            'name': 'Default Empty Partner'
-                        },
-                        'username': 'user_with_test_role_in_whole_ba'
-                    }
-                },
-                {
-                    'node': {
-                        'partner': {
-                            'name': 'Partner With Test Role'
-                        },
-                        'username': 'user_with_partner_with_test_role'
-                    }
-                }
-            ]
-        }
-    }
-}
-
-snapshots['TestUserFilter::test_users_by_roles 1'] = {
-    'data': {
-        'allUsers': {
-            'edges': [
                 {
                     'node': {
                         'partner': {
@@ -174,58 +226,6 @@ snapshots['TestUserFilter::test_users_by_roles 1'] = {
                             }
                         ],
                         'username': 'user_with_test_role_in_whole_ba'
-                    }
-                },
-                {
-                    'node': {
-                        'partner': {
-                            'name': 'Partner With Test Role'
-                        },
-                        'partnerRoles': [
-                            {
-                                'businessArea': {
-                                    'name': 'Afghanistan'
-                                },
-                                'program': {
-                                    'name': 'Test Program'
-                                },
-                                'role': {
-                                    'name': 'Test Role',
-                                    'permissions': [
-                                        'USER_MANAGEMENT_VIEW_LIST'
-                                    ]
-                                }
-                            }
-                        ],
-                        'userRoles': [
-                        ],
-                        'username': 'user_with_partner_with_test_role'
-                    }
-                },
-                {
-                    'node': {
-                        'partner': {
-                            'name': 'Default Empty Partner'
-                        },
-                        'partnerRoles': [
-                        ],
-                        'userRoles': [
-                            {
-                                'businessArea': {
-                                    'name': 'Afghanistan'
-                                },
-                                'program': {
-                                    'name': 'Different Program'
-                                },
-                                'role': {
-                                    'name': 'Test Role',
-                                    'permissions': [
-                                        'USER_MANAGEMENT_VIEW_LIST'
-                                    ]
-                                }
-                            }
-                        ],
-                        'username': 'user_with_test_role'
                     }
                 }
             ]
