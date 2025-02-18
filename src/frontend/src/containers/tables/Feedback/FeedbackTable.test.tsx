@@ -3,8 +3,7 @@ import { act } from 'react';
 
 import wait from 'waait';
 import { fakeApolloAllFeedbacks } from '../../../../fixtures/feedback/fakeApolloAllFeedbacks';
-import { ApolloLoadingLink, render } from '../../../testUtils/testUtils';
-import { ApolloLink } from '@apollo/client';
+import { render } from '../../../testUtils/testUtils';
 import FeedbackTable from './FeedbackTable';
 
 describe('containers/tables//Feedback/FeedbackTable', () => {

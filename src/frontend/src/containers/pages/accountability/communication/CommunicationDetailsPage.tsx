@@ -10,13 +10,13 @@ import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
 import { useAccountabilityCommunicationMessageQuery } from '@generated/graphql';
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
-import { CommunicationDetails } from '@components/accountability/Communication/CommunicationDetails';
-import { CommunicationMessageDetails } from '@components/accountability/Communication/CommunicationMessageDetails';
 import RecipientsTable from '../../../tables/Communication/RecipientsTable/RecipientsTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AdminButton } from '@core/AdminButton';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import CommunicationMessageDetails from '@components/accountability/Communication/CommunicationMessageDetails';
+import CommunicationDetails from '@components/accountability/Communication/CommunicationDetails';
 
 function CommunicationDetailsPage(): ReactElement {
   const { t } = useTranslation();
