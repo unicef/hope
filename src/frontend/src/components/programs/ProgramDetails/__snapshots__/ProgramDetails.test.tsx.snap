@@ -315,62 +315,6 @@ exports[`components/ProgramDetails should render 1`] = `
         </div>
       </div>
     </div>
-    <div
-      class="sc-gjcoXW jQCndt"
-    >
-      <div
-        class="sc-dVBluf cFSYVV"
-      />
-    </div>
-    <div
-      class="sc-hRDKVd kCcppZ"
-    >
-      <h6
-        class="MuiTypography-root MuiTypography-h6 css-66ugg1-MuiTypography-root"
-      >
-        Programme Partners
-      </h6>
-    </div>
-    <div
-      class="sc-jbAkgO jpddxj"
-    >
-      <div
-        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-6 css-ipzchf-MuiGrid2-root"
-      >
-        <div
-          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-12 css-1j0u08r-MuiGrid2-root"
-        >
-          <div
-            class="sc-jUkaYT gZUtd MuiBox-root css-bo4s1r"
-          >
-            <h6
-              class="MuiTypography-root MuiTypography-h6 css-66ugg1-MuiTypography-root"
-              data-cy="label-partner-name"
-            />
-            <div
-              data-cy="labelized-field-container-area-access-field"
-            >
-              <span
-                class="sc-fLDLck ivXKQK"
-                color="textSecondary"
-              >
-                Area Access
-              </span>
-              <div
-                data-cy="label-Area Access"
-              >
-                <span
-                  class="sc-dycHyt kguSQI"
-                  color="textSecondary"
-                >
-                  Business Area
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </div>
 `;
