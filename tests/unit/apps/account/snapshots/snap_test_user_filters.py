@@ -179,32 +179,6 @@ snapshots['TestUserFilter::test_users_by_roles 1'] = {
                 {
                     'node': {
                         'partner': {
-                            'name': 'Default Empty Partner'
-                        },
-                        'partnerRoles': [
-                        ],
-                        'userRoles': [
-                            {
-                                'businessArea': {
-                                    'name': 'Afghanistan'
-                                },
-                                'program': {
-                                    'name': 'Different Program'
-                                },
-                                'role': {
-                                    'name': 'Test Role',
-                                    'permissions': [
-                                        'USER_MANAGEMENT_VIEW_LIST'
-                                    ]
-                                }
-                            }
-                        ],
-                        'username': 'user_with_test_role'
-                    }
-                },
-                {
-                    'node': {
-                        'partner': {
                             'name': 'Partner With Test Role'
                         },
                         'partnerRoles': [
@@ -226,6 +200,32 @@ snapshots['TestUserFilter::test_users_by_roles 1'] = {
                         'userRoles': [
                         ],
                         'username': 'user_with_partner_with_test_role'
+                    }
+                },
+                {
+                    'node': {
+                        'partner': {
+                            'name': 'Default Empty Partner'
+                        },
+                        'partnerRoles': [
+                        ],
+                        'userRoles': [
+                            {
+                                'businessArea': {
+                                    'name': 'Afghanistan'
+                                },
+                                'program': {
+                                    'name': 'Different Program'
+                                },
+                                'role': {
+                                    'name': 'Test Role',
+                                    'permissions': [
+                                        'USER_MANAGEMENT_VIEW_LIST'
+                                    ]
+                                }
+                            }
+                        ],
+                        'username': 'user_with_test_role'
                     }
                 }
             ]
