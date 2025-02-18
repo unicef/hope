@@ -1,8 +1,8 @@
-import { Box, Checkbox, Collapse, Grid, IconButton } from '@mui/material';
+import { Box, Checkbox, Collapse, Grid2 as Grid, IconButton } from '@mui/material';
 import { ArrowDropDown, ArrowRight } from '@mui/icons-material';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { TreeItem, TreeView } from '@mui/x-tree-view';
+import { TreeItem, SimpleTreeView } from '@mui/x-tree-view';
 import { Field } from 'formik';
 import { FC, ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -85,7 +85,7 @@ export const ProgramPartnerCard: FC<ProgramPartnerCardProps> = ({
   const renderNode = (node: AreaTreeNode): ReactElement => (
     <TreeItem
       key={node.id}
-      nodeId={node.id}
+      itemId={node.id}
       label={
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <Checkbox
@@ -160,7 +160,7 @@ export const ProgramPartnerCard: FC<ProgramPartnerCardProps> = ({
             ) && (
               <Grid container>
                 {Object.keys(allAreasTreeDataGroupedByLevel).map((level) => (
-                  <Grid key={level} item xs={4}>
+                  <Grid key={level} size={{ xs: 4 }}>
                     <LabelizedField
                       dataCy={`Admin-Areas-${level}-field`}
                       label={`Admin Areas ${level}`}
@@ -183,15 +183,14 @@ export const ProgramPartnerCard: FC<ProgramPartnerCardProps> = ({
       </Box>
       <Collapse in={isAdminAreaExpanded}>
         <Box style={{ maxHeight: '30vh', overflow: 'auto', width: '50%' }}>
-          <TreeView
+          <SimpleTreeView
             multiSelect
-            defaultCollapseIcon={<ExpandMoreIcon />}
-            defaultExpandIcon={<ChevronRightIcon />}
-            defaultExpanded={(values.partners[index]?.areas || []).map(String)}
-            defaultSelected={(values.partners[index]?.areas || []).map(String)}
+            slots={{ expandIcon: ChevronRightIcon, collapseIcon: ExpandMoreIcon }}
+            defaultExpandedItems={(values.partners[index]?.areas || []).map(String)}
+            defaultSelectedItems={(values.partners[index]?.areas || []).map(String)}
           >
             {allAreasTree.length > 0 && allAreasTree.map(renderNode)}
-          </TreeView>
+          </SimpleTreeView>
         </Box>
       </Collapse>
     </Box>
@@ -212,7 +211,7 @@ export const ProgramPartnerCard: FC<ProgramPartnerCardProps> = ({
   return (
     <Grid container direction="column">
       <Box display="flex" justifyContent="space-between">
-        <Grid item xs={6}>
+        <Grid size={{ xs:6 }}>
           <Field
             name={`partners[${index}].id`}
             label={t('Partner')}
@@ -234,7 +233,7 @@ export const ProgramPartnerCard: FC<ProgramPartnerCardProps> = ({
       <Box mt={2}>
         <BiggestText>{t('Area Access')}</BiggestText>
       </Box>
-      <Grid item xs={6}>
+      <Grid size={{ xs:6 }}>
         <Field
           name={`partners[${index}].areaAccess`}
           required={values.partners[index]?.id !== ''}

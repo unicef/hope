@@ -40,7 +40,7 @@ export function LockFspPaymentPlan({
     );
 
   const canLockFsp =
-    paymentPlan.deliveryMechanisms.length > 0 &&
+    paymentPlan?.deliveryMechanisms?.length > 0 &&
     hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK_FSP, permissions);
 
   return (

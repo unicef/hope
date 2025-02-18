@@ -1,6 +1,6 @@
 import { Field } from 'formik';
 import { useTranslation } from 'react-i18next';
-import { Box, Checkbox, FormControlLabel, Grid } from '@mui/material';
+import { Box, Checkbox, FormControlLabel, Grid2 as Grid } from '@mui/material';
 import styled from 'styled-components';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FC } from 'react';
@@ -34,7 +34,7 @@ export const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
       {isDetailsPage ? (
         <Box mt={3} p={3}>
           <Grid container spacing={3}>
-            <Grid item xs={6}>
+            <Grid size={{ xs:6 }}>
               {isStandardDctType && (
                 <NoWrapCheckbox
                   disabled
@@ -72,7 +72,7 @@ export const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
                 />
               )}
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={{ xs:6 }}>
               {screenBeneficiary && isSocialDctType && (
                 <NoWrapCheckbox
                   disabled
@@ -118,7 +118,7 @@ export const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
         <Box mt={3} p={3}>
           <Grid container spacing={3}>
             {isStandardDctType && (
-              <Grid item xs={6}>
+              <Grid size={{ xs:6 }}>
                 <Field
                   name="flagExcludeIfActiveAdjudicationTicket"
                   label={t(
@@ -131,7 +131,7 @@ export const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
               </Grid>
             )}
             {isSocialDctType && (
-              <Grid item xs={6}>
+              <Grid size={{ xs:6 }}>
                 <Field
                   name="flagExcludeIfActiveAdjudicationTicket"
                   label={t(
@@ -144,7 +144,7 @@ export const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
               </Grid>
             )}
             {screenBeneficiary && isStandardDctType && (
-              <Grid item xs={6}>
+              <Grid size={{ xs:6 }}>
                 <Field
                   name="flagExcludeIfOnSanctionList"
                   label={t(
@@ -157,7 +157,7 @@ export const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
               </Grid>
             )}
             {screenBeneficiary && isSocialDctType && (
-              <Grid item xs={6}>
+              <Grid size={{ xs:6 }}>
                 <Field
                   name="flagExcludeIfOnSanctionList"
                   label={t(

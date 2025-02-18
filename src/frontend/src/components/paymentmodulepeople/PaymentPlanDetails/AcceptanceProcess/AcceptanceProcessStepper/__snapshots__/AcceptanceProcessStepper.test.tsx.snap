@@ -3,20 +3,20 @@
 exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcessStepper should render default step Sent for Approval Date 1`] = `
 <div>
   <div
-    class="MuiStepper-root MuiStepper-horizontal css-m5vj9m-MuiStepper-root"
+    class="MuiStepper-root MuiStepper-horizontal css-ibtndc-MuiStepper-root"
   >
     <div
-      class="MuiStep-root MuiStep-horizontal Mui-completed css-1bw0nnu-MuiStep-root"
+      class="MuiStep-root MuiStep-horizontal Mui-completed css-mlh15c-MuiStep-root"
     >
       <span
-        class="MuiStepLabel-root MuiStepLabel-horizontal css-ascpo7-MuiStepLabel-root"
+        class="MuiStepLabel-root MuiStepLabel-horizontal css-3yr9gi-MuiStepLabel-root"
       >
         <span
-          class="MuiStepLabel-iconContainer Mui-completed css-vnkopk-MuiStepLabel-iconContainer"
+          class="MuiStepLabel-iconContainer Mui-completed css-1b2ju2j-MuiStepLabel-iconContainer"
         >
           <svg
             aria-hidden="true"
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root Mui-completed css-1job3b0-MuiSvgIcon-root-MuiStepIcon-root"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root Mui-completed css-srhhdk-MuiSvgIcon-root-MuiStepIcon-root"
             data-testid="CheckCircleIcon"
             focusable="false"
             viewBox="0 0 24 24"
@@ -27,10 +27,10 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
           </svg>
         </span>
         <span
-          class="MuiStepLabel-labelContainer css-1vyamtt-MuiStepLabel-labelContainer"
+          class="MuiStepLabel-labelContainer css-p8xe3-MuiStepLabel-labelContainer"
         >
           <span
-            class="MuiStepLabel-label Mui-completed css-16iqojc-MuiStepLabel-label"
+            class="MuiStepLabel-label Mui-completed css-1o0xnkz-MuiStepLabel-label"
           >
             Approval (1/1)
           </span>
@@ -38,99 +38,79 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
       </span>
     </div>
     <div
-      class="MuiStepConnector-root MuiStepConnector-horizontal Mui-active css-j5w0w9-MuiStepConnector-root"
+      class="MuiStepConnector-root MuiStepConnector-horizontal Mui-completed css-9ydz1a-MuiStepConnector-root"
     >
       <span
-        class="MuiStepConnector-line MuiStepConnector-lineHorizontal css-z7uhs0-MuiStepConnector-line"
+        class="MuiStepConnector-line MuiStepConnector-lineHorizontal css-14ncu80-MuiStepConnector-line"
       />
     </div>
     <div
-      class="MuiStep-root MuiStep-horizontal css-1bw0nnu-MuiStep-root"
+      class="MuiStep-root MuiStep-horizontal Mui-completed css-mlh15c-MuiStep-root"
     >
       <span
-        class="MuiStepLabel-root MuiStepLabel-horizontal css-ascpo7-MuiStepLabel-root"
+        class="MuiStepLabel-root MuiStepLabel-horizontal css-3yr9gi-MuiStepLabel-root"
       >
         <span
-          class="MuiStepLabel-iconContainer Mui-active css-vnkopk-MuiStepLabel-iconContainer"
+          class="MuiStepLabel-iconContainer Mui-completed css-1b2ju2j-MuiStepLabel-iconContainer"
         >
           <svg
             aria-hidden="true"
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root Mui-active css-1job3b0-MuiSvgIcon-root-MuiStepIcon-root"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root Mui-completed css-srhhdk-MuiSvgIcon-root-MuiStepIcon-root"
+            data-testid="CheckCircleIcon"
             focusable="false"
             viewBox="0 0 24 24"
           >
-            <circle
-              cx="12"
-              cy="12"
-              r="12"
+            <path
+              d="M12 0a12 12 0 1 0 0 24 12 12 0 0 0 0-24zm-2 17l-5-5 1.4-1.4 3.6 3.6 7.6-7.6L19 8l-9 9z"
             />
-            <text
-              class="MuiStepIcon-text css-117w1su-MuiStepIcon-text"
-              dominant-baseline="central"
-              text-anchor="middle"
-              x="12"
-              y="12"
-            >
-              2
-            </text>
           </svg>
         </span>
         <span
-          class="MuiStepLabel-labelContainer css-1vyamtt-MuiStepLabel-labelContainer"
+          class="MuiStepLabel-labelContainer css-p8xe3-MuiStepLabel-labelContainer"
         >
           <span
-            class="MuiStepLabel-label Mui-active css-16iqojc-MuiStepLabel-label"
+            class="MuiStepLabel-label Mui-completed css-1o0xnkz-MuiStepLabel-label"
           >
-            Authorization (0/1)
+            Authorization (1/1)
           </span>
         </span>
       </span>
     </div>
     <div
-      class="MuiStepConnector-root MuiStepConnector-horizontal Mui-disabled css-j5w0w9-MuiStepConnector-root"
+      class="MuiStepConnector-root MuiStepConnector-horizontal Mui-active Mui-completed css-9ydz1a-MuiStepConnector-root"
     >
       <span
-        class="MuiStepConnector-line MuiStepConnector-lineHorizontal css-z7uhs0-MuiStepConnector-line"
+        class="MuiStepConnector-line MuiStepConnector-lineHorizontal css-14ncu80-MuiStepConnector-line"
       />
     </div>
     <div
-      class="MuiStep-root MuiStep-horizontal css-1bw0nnu-MuiStep-root"
+      class="MuiStep-root MuiStep-horizontal Mui-completed css-mlh15c-MuiStep-root"
     >
       <span
-        class="MuiStepLabel-root MuiStepLabel-horizontal Mui-disabled css-ascpo7-MuiStepLabel-root"
+        class="MuiStepLabel-root MuiStepLabel-horizontal css-3yr9gi-MuiStepLabel-root"
       >
         <span
-          class="MuiStepLabel-iconContainer Mui-disabled css-vnkopk-MuiStepLabel-iconContainer"
+          class="MuiStepLabel-iconContainer Mui-active Mui-completed css-1b2ju2j-MuiStepLabel-iconContainer"
         >
           <svg
             aria-hidden="true"
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root css-1job3b0-MuiSvgIcon-root-MuiStepIcon-root"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root Mui-active Mui-completed css-srhhdk-MuiSvgIcon-root-MuiStepIcon-root"
+            data-testid="CheckCircleIcon"
             focusable="false"
             viewBox="0 0 24 24"
           >
-            <circle
-              cx="12"
-              cy="12"
-              r="12"
+            <path
+              d="M12 0a12 12 0 1 0 0 24 12 12 0 0 0 0-24zm-2 17l-5-5 1.4-1.4 3.6 3.6 7.6-7.6L19 8l-9 9z"
             />
-            <text
-              class="MuiStepIcon-text css-117w1su-MuiStepIcon-text"
-              dominant-baseline="central"
-              text-anchor="middle"
-              x="12"
-              y="12"
-            >
-              3
-            </text>
           </svg>
         </span>
         <span
-          class="MuiStepLabel-labelContainer css-1vyamtt-MuiStepLabel-labelContainer"
+          class="MuiStepLabel-labelContainer css-p8xe3-MuiStepLabel-labelContainer"
         >
           <span
-            class="MuiStepLabel-label Mui-disabled css-16iqojc-MuiStepLabel-label"
+            class="MuiStepLabel-label Mui-active Mui-completed css-1o0xnkz-MuiStepLabel-label"
           >
-            Finance Release (0/1)
+            Finance Release (1/1)
           </span>
         </span>
       </span>
@@ -142,20 +122,20 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
 exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcessStepper should render step Sent for Approval Date 1`] = `
 <div>
   <div
-    class="MuiStepper-root MuiStepper-horizontal css-m5vj9m-MuiStepper-root"
+    class="MuiStepper-root MuiStepper-horizontal css-ibtndc-MuiStepper-root"
   >
     <div
-      class="MuiStep-root MuiStep-horizontal Mui-completed css-1bw0nnu-MuiStep-root"
+      class="MuiStep-root MuiStep-horizontal Mui-completed css-mlh15c-MuiStep-root"
     >
       <span
-        class="MuiStepLabel-root MuiStepLabel-horizontal css-ascpo7-MuiStepLabel-root"
+        class="MuiStepLabel-root MuiStepLabel-horizontal css-3yr9gi-MuiStepLabel-root"
       >
         <span
-          class="MuiStepLabel-iconContainer Mui-completed css-vnkopk-MuiStepLabel-iconContainer"
+          class="MuiStepLabel-iconContainer Mui-completed css-1b2ju2j-MuiStepLabel-iconContainer"
         >
           <svg
             aria-hidden="true"
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root Mui-completed css-1job3b0-MuiSvgIcon-root-MuiStepIcon-root"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root Mui-completed css-srhhdk-MuiSvgIcon-root-MuiStepIcon-root"
             data-testid="CheckCircleIcon"
             focusable="false"
             viewBox="0 0 24 24"
@@ -166,10 +146,10 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
           </svg>
         </span>
         <span
-          class="MuiStepLabel-labelContainer css-1vyamtt-MuiStepLabel-labelContainer"
+          class="MuiStepLabel-labelContainer css-p8xe3-MuiStepLabel-labelContainer"
         >
           <span
-            class="MuiStepLabel-label Mui-completed css-16iqojc-MuiStepLabel-label"
+            class="MuiStepLabel-label Mui-completed css-1o0xnkz-MuiStepLabel-label"
           >
             Approval (1/1)
           </span>
@@ -177,99 +157,79 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
       </span>
     </div>
     <div
-      class="MuiStepConnector-root MuiStepConnector-horizontal Mui-active css-j5w0w9-MuiStepConnector-root"
+      class="MuiStepConnector-root MuiStepConnector-horizontal Mui-completed css-9ydz1a-MuiStepConnector-root"
     >
       <span
-        class="MuiStepConnector-line MuiStepConnector-lineHorizontal css-z7uhs0-MuiStepConnector-line"
+        class="MuiStepConnector-line MuiStepConnector-lineHorizontal css-14ncu80-MuiStepConnector-line"
       />
     </div>
     <div
-      class="MuiStep-root MuiStep-horizontal css-1bw0nnu-MuiStep-root"
+      class="MuiStep-root MuiStep-horizontal Mui-completed css-mlh15c-MuiStep-root"
     >
       <span
-        class="MuiStepLabel-root MuiStepLabel-horizontal css-ascpo7-MuiStepLabel-root"
+        class="MuiStepLabel-root MuiStepLabel-horizontal css-3yr9gi-MuiStepLabel-root"
       >
         <span
-          class="MuiStepLabel-iconContainer Mui-active css-vnkopk-MuiStepLabel-iconContainer"
+          class="MuiStepLabel-iconContainer Mui-completed css-1b2ju2j-MuiStepLabel-iconContainer"
         >
           <svg
             aria-hidden="true"
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root Mui-active css-1job3b0-MuiSvgIcon-root-MuiStepIcon-root"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root Mui-completed css-srhhdk-MuiSvgIcon-root-MuiStepIcon-root"
+            data-testid="CheckCircleIcon"
             focusable="false"
             viewBox="0 0 24 24"
           >
-            <circle
-              cx="12"
-              cy="12"
-              r="12"
+            <path
+              d="M12 0a12 12 0 1 0 0 24 12 12 0 0 0 0-24zm-2 17l-5-5 1.4-1.4 3.6 3.6 7.6-7.6L19 8l-9 9z"
             />
-            <text
-              class="MuiStepIcon-text css-117w1su-MuiStepIcon-text"
-              dominant-baseline="central"
-              text-anchor="middle"
-              x="12"
-              y="12"
-            >
-              2
-            </text>
           </svg>
         </span>
         <span
-          class="MuiStepLabel-labelContainer css-1vyamtt-MuiStepLabel-labelContainer"
+          class="MuiStepLabel-labelContainer css-p8xe3-MuiStepLabel-labelContainer"
         >
           <span
-            class="MuiStepLabel-label Mui-active css-16iqojc-MuiStepLabel-label"
+            class="MuiStepLabel-label Mui-completed css-1o0xnkz-MuiStepLabel-label"
           >
-            Authorization (0/1)
+            Authorization (1/1)
           </span>
         </span>
       </span>
     </div>
     <div
-      class="MuiStepConnector-root MuiStepConnector-horizontal Mui-disabled css-j5w0w9-MuiStepConnector-root"
+      class="MuiStepConnector-root MuiStepConnector-horizontal Mui-active Mui-completed css-9ydz1a-MuiStepConnector-root"
     >
       <span
-        class="MuiStepConnector-line MuiStepConnector-lineHorizontal css-z7uhs0-MuiStepConnector-line"
+        class="MuiStepConnector-line MuiStepConnector-lineHorizontal css-14ncu80-MuiStepConnector-line"
       />
     </div>
     <div
-      class="MuiStep-root MuiStep-horizontal css-1bw0nnu-MuiStep-root"
+      class="MuiStep-root MuiStep-horizontal Mui-completed css-mlh15c-MuiStep-root"
     >
       <span
-        class="MuiStepLabel-root MuiStepLabel-horizontal Mui-disabled css-ascpo7-MuiStepLabel-root"
+        class="MuiStepLabel-root MuiStepLabel-horizontal css-3yr9gi-MuiStepLabel-root"
       >
         <span
-          class="MuiStepLabel-iconContainer Mui-disabled css-vnkopk-MuiStepLabel-iconContainer"
+          class="MuiStepLabel-iconContainer Mui-active Mui-completed css-1b2ju2j-MuiStepLabel-iconContainer"
         >
           <svg
             aria-hidden="true"
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root css-1job3b0-MuiSvgIcon-root-MuiStepIcon-root"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root Mui-active Mui-completed css-srhhdk-MuiSvgIcon-root-MuiStepIcon-root"
+            data-testid="CheckCircleIcon"
             focusable="false"
             viewBox="0 0 24 24"
           >
-            <circle
-              cx="12"
-              cy="12"
-              r="12"
+            <path
+              d="M12 0a12 12 0 1 0 0 24 12 12 0 0 0 0-24zm-2 17l-5-5 1.4-1.4 3.6 3.6 7.6-7.6L19 8l-9 9z"
             />
-            <text
-              class="MuiStepIcon-text css-117w1su-MuiStepIcon-text"
-              dominant-baseline="central"
-              text-anchor="middle"
-              x="12"
-              y="12"
-            >
-              3
-            </text>
           </svg>
         </span>
         <span
-          class="MuiStepLabel-labelContainer css-1vyamtt-MuiStepLabel-labelContainer"
+          class="MuiStepLabel-labelContainer css-p8xe3-MuiStepLabel-labelContainer"
         >
           <span
-            class="MuiStepLabel-label Mui-disabled css-16iqojc-MuiStepLabel-label"
+            class="MuiStepLabel-label Mui-active Mui-completed css-1o0xnkz-MuiStepLabel-label"
           >
-            Finance Release (0/1)
+            Finance Release (1/1)
           </span>
         </span>
       </span>
@@ -281,20 +241,20 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
 exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcessStepper should render step Sent for Authorization Date 1`] = `
 <div>
   <div
-    class="MuiStepper-root MuiStepper-horizontal css-m5vj9m-MuiStepper-root"
+    class="MuiStepper-root MuiStepper-horizontal css-ibtndc-MuiStepper-root"
   >
     <div
-      class="MuiStep-root MuiStep-horizontal Mui-completed css-1bw0nnu-MuiStep-root"
+      class="MuiStep-root MuiStep-horizontal Mui-completed css-mlh15c-MuiStep-root"
     >
       <span
-        class="MuiStepLabel-root MuiStepLabel-horizontal css-ascpo7-MuiStepLabel-root"
+        class="MuiStepLabel-root MuiStepLabel-horizontal css-3yr9gi-MuiStepLabel-root"
       >
         <span
-          class="MuiStepLabel-iconContainer Mui-completed css-vnkopk-MuiStepLabel-iconContainer"
+          class="MuiStepLabel-iconContainer Mui-completed css-1b2ju2j-MuiStepLabel-iconContainer"
         >
           <svg
             aria-hidden="true"
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root Mui-completed css-1job3b0-MuiSvgIcon-root-MuiStepIcon-root"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root Mui-completed css-srhhdk-MuiSvgIcon-root-MuiStepIcon-root"
             data-testid="CheckCircleIcon"
             focusable="false"
             viewBox="0 0 24 24"
@@ -305,10 +265,10 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
           </svg>
         </span>
         <span
-          class="MuiStepLabel-labelContainer css-1vyamtt-MuiStepLabel-labelContainer"
+          class="MuiStepLabel-labelContainer css-p8xe3-MuiStepLabel-labelContainer"
         >
           <span
-            class="MuiStepLabel-label Mui-completed css-16iqojc-MuiStepLabel-label"
+            class="MuiStepLabel-label Mui-completed css-1o0xnkz-MuiStepLabel-label"
           >
             Approval (1/1)
           </span>
@@ -316,99 +276,79 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
       </span>
     </div>
     <div
-      class="MuiStepConnector-root MuiStepConnector-horizontal Mui-active css-j5w0w9-MuiStepConnector-root"
+      class="MuiStepConnector-root MuiStepConnector-horizontal Mui-completed css-9ydz1a-MuiStepConnector-root"
     >
       <span
-        class="MuiStepConnector-line MuiStepConnector-lineHorizontal css-z7uhs0-MuiStepConnector-line"
+        class="MuiStepConnector-line MuiStepConnector-lineHorizontal css-14ncu80-MuiStepConnector-line"
       />
     </div>
     <div
-      class="MuiStep-root MuiStep-horizontal css-1bw0nnu-MuiStep-root"
+      class="MuiStep-root MuiStep-horizontal Mui-completed css-mlh15c-MuiStep-root"
     >
       <span
-        class="MuiStepLabel-root MuiStepLabel-horizontal css-ascpo7-MuiStepLabel-root"
+        class="MuiStepLabel-root MuiStepLabel-horizontal css-3yr9gi-MuiStepLabel-root"
       >
         <span
-          class="MuiStepLabel-iconContainer Mui-active css-vnkopk-MuiStepLabel-iconContainer"
+          class="MuiStepLabel-iconContainer Mui-completed css-1b2ju2j-MuiStepLabel-iconContainer"
         >
           <svg
             aria-hidden="true"
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root Mui-active css-1job3b0-MuiSvgIcon-root-MuiStepIcon-root"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root Mui-completed css-srhhdk-MuiSvgIcon-root-MuiStepIcon-root"
+            data-testid="CheckCircleIcon"
             focusable="false"
             viewBox="0 0 24 24"
           >
-            <circle
-              cx="12"
-              cy="12"
-              r="12"
+            <path
+              d="M12 0a12 12 0 1 0 0 24 12 12 0 0 0 0-24zm-2 17l-5-5 1.4-1.4 3.6 3.6 7.6-7.6L19 8l-9 9z"
             />
-            <text
-              class="MuiStepIcon-text css-117w1su-MuiStepIcon-text"
-              dominant-baseline="central"
-              text-anchor="middle"
-              x="12"
-              y="12"
-            >
-              2
-            </text>
           </svg>
         </span>
         <span
-          class="MuiStepLabel-labelContainer css-1vyamtt-MuiStepLabel-labelContainer"
+          class="MuiStepLabel-labelContainer css-p8xe3-MuiStepLabel-labelContainer"
         >
           <span
-            class="MuiStepLabel-label Mui-active css-16iqojc-MuiStepLabel-label"
+            class="MuiStepLabel-label Mui-completed css-1o0xnkz-MuiStepLabel-label"
           >
-            Authorization (0/1)
+            Authorization (1/1)
           </span>
         </span>
       </span>
     </div>
     <div
-      class="MuiStepConnector-root MuiStepConnector-horizontal Mui-disabled css-j5w0w9-MuiStepConnector-root"
+      class="MuiStepConnector-root MuiStepConnector-horizontal Mui-active Mui-completed css-9ydz1a-MuiStepConnector-root"
     >
       <span
-        class="MuiStepConnector-line MuiStepConnector-lineHorizontal css-z7uhs0-MuiStepConnector-line"
+        class="MuiStepConnector-line MuiStepConnector-lineHorizontal css-14ncu80-MuiStepConnector-line"
       />
     </div>
     <div
-      class="MuiStep-root MuiStep-horizontal css-1bw0nnu-MuiStep-root"
+      class="MuiStep-root MuiStep-horizontal Mui-completed css-mlh15c-MuiStep-root"
     >
       <span
-        class="MuiStepLabel-root MuiStepLabel-horizontal Mui-disabled css-ascpo7-MuiStepLabel-root"
+        class="MuiStepLabel-root MuiStepLabel-horizontal css-3yr9gi-MuiStepLabel-root"
       >
         <span
-          class="MuiStepLabel-iconContainer Mui-disabled css-vnkopk-MuiStepLabel-iconContainer"
+          class="MuiStepLabel-iconContainer Mui-active Mui-completed css-1b2ju2j-MuiStepLabel-iconContainer"
         >
           <svg
             aria-hidden="true"
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root css-1job3b0-MuiSvgIcon-root-MuiStepIcon-root"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root Mui-active Mui-completed css-srhhdk-MuiSvgIcon-root-MuiStepIcon-root"
+            data-testid="CheckCircleIcon"
             focusable="false"
             viewBox="0 0 24 24"
           >
-            <circle
-              cx="12"
-              cy="12"
-              r="12"
+            <path
+              d="M12 0a12 12 0 1 0 0 24 12 12 0 0 0 0-24zm-2 17l-5-5 1.4-1.4 3.6 3.6 7.6-7.6L19 8l-9 9z"
             />
-            <text
-              class="MuiStepIcon-text css-117w1su-MuiStepIcon-text"
-              dominant-baseline="central"
-              text-anchor="middle"
-              x="12"
-              y="12"
-            >
-              3
-            </text>
           </svg>
         </span>
         <span
-          class="MuiStepLabel-labelContainer css-1vyamtt-MuiStepLabel-labelContainer"
+          class="MuiStepLabel-labelContainer css-p8xe3-MuiStepLabel-labelContainer"
         >
           <span
-            class="MuiStepLabel-label Mui-disabled css-16iqojc-MuiStepLabel-label"
+            class="MuiStepLabel-label Mui-active Mui-completed css-1o0xnkz-MuiStepLabel-label"
           >
-            Finance Release (0/1)
+            Finance Release (1/1)
           </span>
         </span>
       </span>
@@ -420,20 +360,20 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
 exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcessStepper should render step Sent for Finance Release Date 1`] = `
 <div>
   <div
-    class="MuiStepper-root MuiStepper-horizontal css-m5vj9m-MuiStepper-root"
+    class="MuiStepper-root MuiStepper-horizontal css-ibtndc-MuiStepper-root"
   >
     <div
-      class="MuiStep-root MuiStep-horizontal Mui-completed css-1bw0nnu-MuiStep-root"
+      class="MuiStep-root MuiStep-horizontal Mui-completed css-mlh15c-MuiStep-root"
     >
       <span
-        class="MuiStepLabel-root MuiStepLabel-horizontal css-ascpo7-MuiStepLabel-root"
+        class="MuiStepLabel-root MuiStepLabel-horizontal css-3yr9gi-MuiStepLabel-root"
       >
         <span
-          class="MuiStepLabel-iconContainer Mui-completed css-vnkopk-MuiStepLabel-iconContainer"
+          class="MuiStepLabel-iconContainer Mui-completed css-1b2ju2j-MuiStepLabel-iconContainer"
         >
           <svg
             aria-hidden="true"
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root Mui-completed css-1job3b0-MuiSvgIcon-root-MuiStepIcon-root"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root Mui-completed css-srhhdk-MuiSvgIcon-root-MuiStepIcon-root"
             data-testid="CheckCircleIcon"
             focusable="false"
             viewBox="0 0 24 24"
@@ -444,10 +384,10 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
           </svg>
         </span>
         <span
-          class="MuiStepLabel-labelContainer css-1vyamtt-MuiStepLabel-labelContainer"
+          class="MuiStepLabel-labelContainer css-p8xe3-MuiStepLabel-labelContainer"
         >
           <span
-            class="MuiStepLabel-label Mui-completed css-16iqojc-MuiStepLabel-label"
+            class="MuiStepLabel-label Mui-completed css-1o0xnkz-MuiStepLabel-label"
           >
             Approval (1/1)
           </span>
@@ -455,99 +395,79 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
       </span>
     </div>
     <div
-      class="MuiStepConnector-root MuiStepConnector-horizontal Mui-active css-j5w0w9-MuiStepConnector-root"
+      class="MuiStepConnector-root MuiStepConnector-horizontal Mui-completed css-9ydz1a-MuiStepConnector-root"
     >
       <span
-        class="MuiStepConnector-line MuiStepConnector-lineHorizontal css-z7uhs0-MuiStepConnector-line"
+        class="MuiStepConnector-line MuiStepConnector-lineHorizontal css-14ncu80-MuiStepConnector-line"
       />
     </div>
     <div
-      class="MuiStep-root MuiStep-horizontal css-1bw0nnu-MuiStep-root"
+      class="MuiStep-root MuiStep-horizontal Mui-completed css-mlh15c-MuiStep-root"
     >
       <span
-        class="MuiStepLabel-root MuiStepLabel-horizontal css-ascpo7-MuiStepLabel-root"
+        class="MuiStepLabel-root MuiStepLabel-horizontal css-3yr9gi-MuiStepLabel-root"
       >
         <span
-          class="MuiStepLabel-iconContainer Mui-active css-vnkopk-MuiStepLabel-iconContainer"
+          class="MuiStepLabel-iconContainer Mui-completed css-1b2ju2j-MuiStepLabel-iconContainer"
         >
           <svg
             aria-hidden="true"
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root Mui-active css-1job3b0-MuiSvgIcon-root-MuiStepIcon-root"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root Mui-completed css-srhhdk-MuiSvgIcon-root-MuiStepIcon-root"
+            data-testid="CheckCircleIcon"
             focusable="false"
             viewBox="0 0 24 24"
           >
-            <circle
-              cx="12"
-              cy="12"
-              r="12"
+            <path
+              d="M12 0a12 12 0 1 0 0 24 12 12 0 0 0 0-24zm-2 17l-5-5 1.4-1.4 3.6 3.6 7.6-7.6L19 8l-9 9z"
             />
-            <text
-              class="MuiStepIcon-text css-117w1su-MuiStepIcon-text"
-              dominant-baseline="central"
-              text-anchor="middle"
-              x="12"
-              y="12"
-            >
-              2
-            </text>
           </svg>
         </span>
         <span
-          class="MuiStepLabel-labelContainer css-1vyamtt-MuiStepLabel-labelContainer"
+          class="MuiStepLabel-labelContainer css-p8xe3-MuiStepLabel-labelContainer"
         >
           <span
-            class="MuiStepLabel-label Mui-active css-16iqojc-MuiStepLabel-label"
+            class="MuiStepLabel-label Mui-completed css-1o0xnkz-MuiStepLabel-label"
           >
-            Authorization (0/1)
+            Authorization (1/1)
           </span>
         </span>
       </span>
     </div>
     <div
-      class="MuiStepConnector-root MuiStepConnector-horizontal Mui-disabled css-j5w0w9-MuiStepConnector-root"
+      class="MuiStepConnector-root MuiStepConnector-horizontal Mui-active Mui-completed css-9ydz1a-MuiStepConnector-root"
     >
       <span
-        class="MuiStepConnector-line MuiStepConnector-lineHorizontal css-z7uhs0-MuiStepConnector-line"
+        class="MuiStepConnector-line MuiStepConnector-lineHorizontal css-14ncu80-MuiStepConnector-line"
       />
     </div>
     <div
-      class="MuiStep-root MuiStep-horizontal css-1bw0nnu-MuiStep-root"
+      class="MuiStep-root MuiStep-horizontal Mui-completed css-mlh15c-MuiStep-root"
     >
       <span
-        class="MuiStepLabel-root MuiStepLabel-horizontal Mui-disabled css-ascpo7-MuiStepLabel-root"
+        class="MuiStepLabel-root MuiStepLabel-horizontal css-3yr9gi-MuiStepLabel-root"
       >
         <span
-          class="MuiStepLabel-iconContainer Mui-disabled css-vnkopk-MuiStepLabel-iconContainer"
+          class="MuiStepLabel-iconContainer Mui-active Mui-completed css-1b2ju2j-MuiStepLabel-iconContainer"
         >
           <svg
             aria-hidden="true"
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root css-1job3b0-MuiSvgIcon-root-MuiStepIcon-root"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root Mui-active Mui-completed css-srhhdk-MuiSvgIcon-root-MuiStepIcon-root"
+            data-testid="CheckCircleIcon"
             focusable="false"
             viewBox="0 0 24 24"
           >
-            <circle
-              cx="12"
-              cy="12"
-              r="12"
+            <path
+              d="M12 0a12 12 0 1 0 0 24 12 12 0 0 0 0-24zm-2 17l-5-5 1.4-1.4 3.6 3.6 7.6-7.6L19 8l-9 9z"
             />
-            <text
-              class="MuiStepIcon-text css-117w1su-MuiStepIcon-text"
-              dominant-baseline="central"
-              text-anchor="middle"
-              x="12"
-              y="12"
-            >
-              3
-            </text>
           </svg>
         </span>
         <span
-          class="MuiStepLabel-labelContainer css-1vyamtt-MuiStepLabel-labelContainer"
+          class="MuiStepLabel-labelContainer css-p8xe3-MuiStepLabel-labelContainer"
         >
           <span
-            class="MuiStepLabel-label Mui-disabled css-16iqojc-MuiStepLabel-label"
+            class="MuiStepLabel-label Mui-active Mui-completed css-1o0xnkz-MuiStepLabel-label"
           >
-            Finance Release (0/1)
+            Finance Release (1/1)
           </span>
         </span>
       </span>

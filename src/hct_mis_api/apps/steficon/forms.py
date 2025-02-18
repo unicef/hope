@@ -10,6 +10,7 @@ from django.db.models import Q
 from django.forms import HiddenInput, Media, Textarea
 from django.utils.translation import gettext_lazy as _
 
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.steficon.config import config
 from hct_mis_api.apps.steficon.interpreters import Interpreter, mapping
 from hct_mis_api.apps.steficon.models import Rule, RuleCommit
@@ -114,9 +115,7 @@ class TPModelChoiceField(forms.ModelChoiceField):
         limit_choices_to: Union[Union[Q, Dict[str, Any]], "_ChoicesCallable", None] = None,
         **kwargs: Any,
     ) -> None:
-        from hct_mis_api.apps.targeting.models import TargetPopulation
-
-        queryset = TargetPopulation.objects.all()
+        queryset = PaymentPlan.objects.all()
         super().__init__(
             queryset,
             empty_label=empty_label,
