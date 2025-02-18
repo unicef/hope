@@ -988,6 +988,12 @@ class TestPaymentPlanQueries(APITestCase):
         self, _: Any, permissions: List[Permissions], communication_channel: str
     ) -> None:
         user = UserFactory.create(username="abc")
+
+        # necessary permissions
+        self.create_user_role_with_permissions(
+            user, [Permissions.PM_VIEW_DETAILS], self.business_area, whole_business_area_access=True
+        )
+
         self.create_user_role_with_permissions(user, permissions, self.business_area, whole_business_area_access=True)
 
         payment_plan = PaymentPlanFactory(
