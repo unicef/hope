@@ -1,6 +1,5 @@
-import { Box, TextField, CircularProgress } from '@mui/material';
-import Autocomplete from '@mui/lab/Autocomplete';
-import React, { useState, useEffect, ReactElement } from 'react';
+import { Autocomplete, Box, TextField, CircularProgress } from '@mui/material';
+import  { useState, useEffect, ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useAllAdminAreasQuery } from '@generated/graphql';

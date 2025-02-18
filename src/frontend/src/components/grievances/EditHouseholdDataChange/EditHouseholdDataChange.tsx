@@ -1,4 +1,4 @@
-import { Button, Grid, Typography } from '@mui/material';
+import { Button, Grid2 as Grid, Typography } from '@mui/material';
 import { AddCircleOutline } from '@mui/icons-material';
 import { FieldArray } from 'formik';
 import { useLocation } from 'react-router-dom';
@@ -90,7 +90,7 @@ export function EditHouseholdDataChange({
                     values={values}
                   />
                 ))}
-                <Grid item xs={4}>
+                <Grid size={{ xs: 4 }}>
                   <Button
                     color="primary"
                     startIcon={<AddCircleOutline />}

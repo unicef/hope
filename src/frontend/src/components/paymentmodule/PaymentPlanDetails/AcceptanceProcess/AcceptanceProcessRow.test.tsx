@@ -7,7 +7,9 @@ describe('components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptan
     const { container } = render(
       <AcceptanceProcessRow
         paymentPlan={fakeApolloPaymentPlan}
-        acceptanceProcess={fakeApolloPaymentPlan.approvalProcess.edges[0].node}
+        acceptanceProcess={
+          fakeApolloPaymentPlan?.approvalProcess?.edges[0]?.node
+        }
       />,
     );
     expect(container).toMatchSnapshot();

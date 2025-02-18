@@ -1,9 +1,9 @@
 import { MouseEvent, ReactElement, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
-  AllPaymentRecordsAndPaymentsQueryVariables,
-  PaymentRecordAndPaymentNode,
-  useAllPaymentRecordsAndPaymentsQuery,
+  AllPaymentsForTableQueryVariables,
+  PaymentNode,
+  useAllPaymentsForTableQuery,
 } from '@generated/graphql';
 import { UniversalTable } from '@containers/tables/UniversalTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -24,7 +24,7 @@ export function LookUpPaymentRecordTable({
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const initialVariables = {
-    household: initialValues?.selectedHousehold?.id,
+    householdId: initialValues?.selectedHousehold?.id,
     businessArea,
     program: programId === 'all' ? null : programId,
   };
@@ -62,13 +62,10 @@ export function LookUpPaymentRecordTable({
 
   if (isEditTicket) {
     return (
-      <UniversalTable<
-        PaymentRecordAndPaymentNode,
-        AllPaymentRecordsAndPaymentsQueryVariables
-      >
+      <UniversalTable<PaymentNode, AllPaymentsForTableQueryVariables>
         headCells={headCells}
-        query={useAllPaymentRecordsAndPaymentsQuery}
-        queriedObjectName="allPaymentRecordsAndPayments"
+        query={useAllPaymentsForTableQuery}
+        queriedObjectName="allPayments"
         initialVariables={initialVariables}
         renderRow={(row) => (
           <LookUpPaymentRecordTableRow
@@ -83,13 +80,10 @@ export function LookUpPaymentRecordTable({
     );
   }
   return (
-    <UniversalTable<
-      PaymentRecordAndPaymentNode,
-      AllPaymentRecordsAndPaymentsQueryVariables
-    >
+    <UniversalTable<PaymentNode, AllPaymentsForTableQueryVariables>
       headCells={headCells}
-      query={useAllPaymentRecordsAndPaymentsQuery}
-      queriedObjectName="allPaymentRecordsAndPayments"
+      query={useAllPaymentsForTableQuery}
+      queriedObjectName="allPayments"
       initialVariables={initialVariables}
       onSelectAllClick={handleSelectAllCheckboxesClick}
       numSelected={numSelected}

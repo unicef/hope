@@ -1,6 +1,6 @@
 import AssignmentIndRoundedIcon from '@mui/icons-material/AssignmentIndRounded';
 import GroupIcon from '@mui/icons-material/Group';
-import { Grid, MenuItem } from '@mui/material';
+import { Grid2 as Grid, MenuItem } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { HouseholdChoiceDataQuery } from '@generated/graphql';
@@ -66,7 +66,7 @@ export function LookUpHouseholdFiltersCommunication({
       isOnPaper={false}
     >
       <Grid container alignItems="flex-end" spacing={3}>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SearchTextField
             label={t('Search')}
             value={filter.search}
@@ -75,7 +75,7 @@ export function LookUpHouseholdFiltersCommunication({
             data-cy="hh-filters-search"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SelectFilter
             onChange={(e) =>
               handleFilterChange('residenceStatus', e.target.value)
@@ -93,7 +93,7 @@ export function LookUpHouseholdFiltersCommunication({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <AdminAreaAutocomplete
             name="admin2"
             level={2}
@@ -106,7 +106,7 @@ export function LookUpHouseholdFiltersCommunication({
             dataCy="hh-filters-admin2"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <NumberTextField
             topLabel={`${beneficiaryGroup?.groupLabel} Size`}
             value={filter.householdSizeMin}
@@ -119,7 +119,7 @@ export function LookUpHouseholdFiltersCommunication({
             data-cy="hh-filters-household-size-from"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <NumberTextField
             value={filter.householdSizeMax}
             placeholder={t('To')}
@@ -131,7 +131,7 @@ export function LookUpHouseholdFiltersCommunication({
             data-cy="hh-filters-household-size-to"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SelectFilter
             onChange={(e) => handleFilterChange('orderBy', e.target.value)}
             label={t('Sort by')}
@@ -145,7 +145,7 @@ export function LookUpHouseholdFiltersCommunication({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SelectFilter
             onChange={(e) => handleFilterChange('withdrawn', e.target.value)}
             label={t('Status')}

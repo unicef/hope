@@ -17,7 +17,7 @@ import { decodeIdString, today } from '@utils/utils';
 import moment from 'moment';
 import * as Yup from 'yup';
 import { GreyText } from '@core/GreyText';
-import Grid from '@mui/material/Grid';
+import Grid from '@mui/material/Grid2';
 import { LabelizedField } from '@core/LabelizedField';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
@@ -144,7 +144,7 @@ export const UpdateProgramCycle = ({
               </GreyText>
             </DialogDescription>
             <Grid container spacing={3}>
-              <Grid item xs={6}>
+              <Grid size={{ xs:6 }}>
                 <LabelizedField
                   data-cy="previous-program-cycle-title"
                   label={t('Programme Cycle Title')}
@@ -152,7 +152,7 @@ export const UpdateProgramCycle = ({
                   {values.title}
                 </LabelizedField>
               </Grid>
-              <Grid item xs={6}>
+              <Grid size={{ xs:6 }}>
                 <LabelizedField
                   data-cy="previous-program-cycle-start-date"
                   label={t('Start Date')}
@@ -160,7 +160,7 @@ export const UpdateProgramCycle = ({
                   {values.start_date}
                 </LabelizedField>
               </Grid>
-              <Grid item xs={6}>
+              <Grid size={{ xs:6 }}>
                 <Field
                   name="end_date"
                   label={t('End Date')}

@@ -30,7 +30,7 @@ describe('components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptan
     const { container } = render(
       <AcceptanceProcessStepper
         acceptanceProcess={{
-          ...fakeApolloPaymentPlan.approvalProcess.edges[0].node,
+          ...fakeApolloPaymentPlan?.approvalProcess?.edges[0]?.node,
           sentForAuthorizationDate: '2020-01-01',
         }}
       />,

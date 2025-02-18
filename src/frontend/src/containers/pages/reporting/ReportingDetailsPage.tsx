@@ -1,4 +1,4 @@
-import { Button, Grid, Typography } from '@mui/material';
+import { Button, Grid2 as Grid, Typography } from '@mui/material';
 import { GetApp } from '@mui/icons-material';
 import CheckIcon from '@mui/icons-material/Check';
 import EmailIcon from '@mui/icons-material/Email';
@@ -101,7 +101,7 @@ export function ReportingDetailsPage(): ReactElement {
   const FieldsArray: {
     label: string;
     value: ReactElement | string;
-    size: boolean | 3 | 6 | 8 | 11 | 'auto' | 1 | 2 | 4 | 5 | 7 | 9 | 10 | 12;
+    size: number
   }[] = [
     {
       label: t('STATUS'),
@@ -253,7 +253,7 @@ export function ReportingDetailsPage(): ReactElement {
         <OverviewContainer>
           <Grid container spacing={6}>
             {FieldsArray.map((el) => (
-              <Grid key={el.label} item xs={el.size}>
+              <Grid key={el.label} size={{ xs: el.size }}>
                 <LabelizedField label={el.label}>{el.value}</LabelizedField>
               </Grid>
             ))}
