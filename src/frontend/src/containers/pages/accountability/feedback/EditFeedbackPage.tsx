@@ -1,12 +1,8 @@
-import { BlackLink } from '@components/core/BlackLink';
-import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
-import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
-import { LabelizedField } from '@components/core/LabelizedField';
-import { LoadingButton } from '@components/core/LoadingButton';
-import { LoadingComponent } from '@components/core/LoadingComponent';
-import { PageHeader } from '@components/core/PageHeader';
-import { PermissionDenied } from '@components/core/PermissionDenied';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { Box, Button, Divider, Grid2 as Grid } from '@mui/material';
+import { Field, Formik } from 'formik';
+import { useTranslation } from 'react-i18next';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import * as Yup from 'yup';
 import {
   UpdateFeedbackInput,
   useAllProgramsForChoicesQuery,
@@ -15,24 +11,28 @@ import {
   useFeedbackQuery,
   useUpdateFeedbackTicketMutation,
 } from '@generated/graphql';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { usePermissions } from '@hooks/usePermissions';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { Box, Button, Divider, Grid } from '@mui/material';
-import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
-import { FormikSelectField } from '@shared/Formik/FormikSelectField';
-import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { Field, Formik } from 'formik';
-import { ReactElement } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { useProgramContext } from 'src/programContext';
-import * as Yup from 'yup';
+import { BlackLink } from '@components/core/BlackLink';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
+import { LabelizedField } from '@components/core/LabelizedField';
+import { LoadingButton } from '@components/core/LoadingButton';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
 import {
   PERMISSIONS,
   hasPermissionInModule,
   hasPermissions,
 } from '../../../../config/permissions';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
+import { useProgramContext } from 'src/programContext';
+import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 export const validationSchema = Yup.object().shape({
   issueType: Yup.string().required('Issue Type is required').nullable(),
@@ -44,7 +44,7 @@ export const validationSchema = Yup.object().shape({
   comments: Yup.string().nullable(),
 });
 
-export const EditFeedbackPage = (): ReactElement => {
+const EditFeedbackPage = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { id } = useParams();
@@ -193,18 +193,18 @@ export const EditFeedbackPage = (): ReactElement => {
             </Box>
           </PageHeader>
           <Grid container spacing={3}>
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <Box p={3}>
                 <ContainerColumnWithBorder>
                   <Box p={3}>
                     <Box mb={3}>
-                      <Grid container item xs={6} spacing={6}>
-                        <Grid item xs={6}>
+                      <Grid container size={{ xs: 6 }} spacing={6}>
+                        <Grid size={{ xs: 6 }}>
                           <LabelizedField label={t('Category')}>
                             {t('Feedback')}
                           </LabelizedField>
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid size={{ xs: 6 }}>
                           <LabelizedField label={t('Issue Type')}>
                             {feedback.issueType === 'POSITIVE_FEEDBACK'
                               ? 'Positive Feedback'
@@ -212,8 +212,8 @@ export const EditFeedbackPage = (): ReactElement => {
                           </LabelizedField>
                         </Grid>
                       </Grid>
-                      <Grid container xs={6} spacing={6}>
-                        <Grid item xs={6}>
+                      <Grid container size={{ xs: 6 }} spacing={6}>
+                        <Grid size={{ xs: 6 }}>
                           <LabelizedField
                             label={t(`${beneficiaryGroup?.groupLabel} ID`)}
                           >
@@ -235,7 +235,7 @@ export const EditFeedbackPage = (): ReactElement => {
                             )}
                           </LabelizedField>
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid size={{ xs: 6 }}>
                           <LabelizedField
                             label={t(`${beneficiaryGroup?.memberLabel} ID`)}
                           >
@@ -263,7 +263,7 @@ export const EditFeedbackPage = (): ReactElement => {
                       </Box>
                     </Box>
                     <Grid container spacing={3}>
-                      <Grid item xs={12}>
+                      <Grid size={{ xs: 12 }}>
                         <Field
                           name="description"
                           multiline
@@ -274,7 +274,7 @@ export const EditFeedbackPage = (): ReactElement => {
                           component={FormikTextField}
                         />
                       </Grid>
-                      <Grid item xs={12}>
+                      <Grid size={{ xs: 12 }}>
                         <Field
                           name="comments"
                           multiline
@@ -284,7 +284,7 @@ export const EditFeedbackPage = (): ReactElement => {
                           component={FormikTextField}
                         />
                       </Grid>
-                      <Grid item xs={6}>
+                      <Grid size={{ xs: 6 }}>
                         <Field
                           name="admin2"
                           variant="outlined"
@@ -292,7 +292,7 @@ export const EditFeedbackPage = (): ReactElement => {
                           disabled={Boolean(feedback.admin2?.id)}
                         />
                       </Grid>
-                      <Grid item xs={6}>
+                      <Grid size={{ xs: 6 }}>
                         <Field
                           name="area"
                           fullWidth
@@ -301,7 +301,7 @@ export const EditFeedbackPage = (): ReactElement => {
                           component={FormikTextField}
                         />
                       </Grid>
-                      <Grid item xs={6}>
+                      <Grid size={{ xs: 6 }}>
                         <Field
                           name="language"
                           multiline
@@ -311,7 +311,7 @@ export const EditFeedbackPage = (): ReactElement => {
                           component={FormikTextField}
                         />
                       </Grid>
-                      <Grid item xs={3}>
+                      <Grid size={{ xs: 3 }}>
                         <Field
                           name="program"
                           label={t('Programme Name')}

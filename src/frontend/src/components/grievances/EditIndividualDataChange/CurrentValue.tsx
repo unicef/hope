@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material';
+import { Grid2 as Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { AllAddIndividualFieldsQuery } from '@generated/graphql';
@@ -47,14 +47,14 @@ export function CurrentValue({
       break;
     case 'IMAGE':
       return isNewTicket ? (
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <GrievanceFlexFieldPhotoModalNewIndividual
             flexField={field}
             individualId={values?.selectedIndividual?.id || null}
           />
         </Grid>
       ) : (
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <GrievanceFlexFieldPhotoModal isCurrent isIndividual field={field} />
         </Grid>
       );
@@ -62,7 +62,7 @@ export function CurrentValue({
       displayValue = value;
   }
   return (
-    <Grid item xs={3}>
+    <Grid size={{ xs: 3 }}>
       <LabelizedField label="Current Value" value={displayValue} />
     </Grid>
   );

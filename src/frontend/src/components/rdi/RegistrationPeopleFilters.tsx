@@ -1,4 +1,4 @@
-import { Grid, MenuItem } from '@mui/material';
+import { Grid2 as Grid, MenuItem } from '@mui/material';
 import GroupIcon from '@mui/icons-material/Group';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -61,7 +61,7 @@ const RegistrationPeopleFilters = ({
       applyHandler={handleApplyFilter}
     >
       <Grid container alignItems="flex-end" spacing={3}>
-        <Grid item xs={4}>
+        <Grid size={{ xs: 4 }}>
           <SearchTextField
             label={t('Search')}
             value={filter.search}
@@ -69,7 +69,7 @@ const RegistrationPeopleFilters = ({
             data-cy="filter-search"
           />
         </Grid>
-        <Grid item xs={4}>
+        <Grid size={{ xs: 4 }}>
           <AssigneeAutocomplete
             name="importedBy"
             label={t('Imported By')}
@@ -82,7 +82,7 @@ const RegistrationPeopleFilters = ({
             setAppliedFilter={setAppliedFilter}
           />
         </Grid>
-        <Grid item xs={4}>
+        <Grid size={{ xs: 4 }}>
           <SelectFilter
             value={filter.status}
             label={t('Status')}
@@ -98,7 +98,7 @@ const RegistrationPeopleFilters = ({
             )}
           </SelectFilter>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <NumberTextField
             id="minFilter"
             topLabel={t('Num. of People')}
@@ -109,7 +109,7 @@ const RegistrationPeopleFilters = ({
             data-cy="filter-size-min"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <NumberTextField
             id="maxFilter"
             value={filter.sizeMax}
@@ -119,7 +119,7 @@ const RegistrationPeopleFilters = ({
             data-cy="filter-size-max"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <DatePickerFilter
             topLabel={t('Import Date')}
             placeholder={t('From')}
@@ -128,7 +128,7 @@ const RegistrationPeopleFilters = ({
             dataCy="filter-import-date-range-min"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) => handleFilterChange('importDateRangeMax', date)}

@@ -1,10 +1,9 @@
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { PermissionDenied } from '@components/core/PermissionDenied';
-import withErrorBoundary from '@components/core/withErrorBoundary';
-import { CreateTargetPopulationHeader } from '@components/targeting/CreateTargetPopulation/CreateTargetPopulationHeader';
-import { Exclusions } from '@components/targeting/CreateTargetPopulation/Exclusions';
+import CreateTargetPopulationHeader from '@components/targeting/CreateTargetPopulation/CreateTargetPopulationHeader';
+import Exclusions from '@components/targeting/CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '@components/targeting/PaperContainer';
-import { AddFilterTargetingCriteriaDisplay } from '@components/targeting/TargetingCriteriaDisplay/AddFilterTargetingCriteriaDisplay';
+import AddFilterTargetingCriteriaDisplay from '@components/targeting/TargetingCriteriaDisplay/AddFilterTargetingCriteriaDisplay';
 import {
   useBusinessAreaDataQuery,
   useCreateTpMutation,
@@ -12,7 +11,7 @@ import {
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { Box, Divider, Grid, Typography } from '@mui/material';
+import { Box, Divider, Grid2 as Grid, Typography } from '@mui/material';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 import {
@@ -25,7 +24,8 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import * as Yup from 'yup';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const CreateTargetPopulationPage = (): ReactElement => {
   const { t } = useTranslation();
@@ -119,7 +119,7 @@ const CreateTargetPopulationPage = (): ReactElement => {
                 <Typography variant="h6">{t('Targeting Criteria')}</Typography>
               </Box>
               <Grid container mb={5}>
-                <Grid item xs={6}>
+                <Grid size={{ xs: 6 }}>
                   <ProgramCycleAutocompleteRest
                     value={values.programCycleId}
                     onChange={async (e) => {
@@ -132,7 +132,7 @@ const CreateTargetPopulationPage = (): ReactElement => {
                 </Grid>
               </Grid>
               <Grid container>
-                <Grid item xs={6}>
+                <Grid size={{ xs: 6 }}>
                   <Field
                     name="name"
                     label={t('Target Population Name')}

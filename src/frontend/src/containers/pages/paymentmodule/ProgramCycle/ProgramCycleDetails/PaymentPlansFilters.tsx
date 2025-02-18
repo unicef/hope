@@ -10,7 +10,7 @@ import { createHandleApplyFilterChange } from '@utils/utils';
 import { ContainerWithBorder } from '@core/ContainerWithBorder';
 import { Title } from '@core/Title';
 import { MenuItem, Typography } from '@mui/material';
-import Grid from '@mui/material/Grid';
+import Grid from '@mui/material/Grid2';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { NumberTextField } from '@core/NumberTextField';
@@ -92,7 +92,7 @@ export const PaymentPlansFilters = ({
           <Typography variant="h6">{t('Payment Plans Filters')}</Typography>
         </Title>
         <Grid container spacing={3} alignItems="flex-end">
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <SearchTextField
               label={t('Search')}
               value={filter.search}
@@ -100,7 +100,7 @@ export const PaymentPlansFilters = ({
               onChange={(e) => handleFilterChange('search', e.target.value)}
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <SelectFilter
               onChange={(e) => handleFilterChange('status', e.target.value)}
               variant="outlined"
@@ -118,7 +118,7 @@ export const PaymentPlansFilters = ({
               })}
             </SelectFilter>
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <Box display="flex" flexDirection="column">
               <NumberTextField
                 id="totalEntitledQuantityFromFilter"
@@ -134,7 +134,7 @@ export const PaymentPlansFilters = ({
               />
             </Box>
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <NumberTextField
               id="totalEntitledQuantityToFilter"
               value={filter.totalEntitledQuantityTo}
@@ -150,7 +150,7 @@ export const PaymentPlansFilters = ({
               }
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <DatePickerFilter
               topLabel={t('Dispersion Date')}
               placeholder={t('From')}
@@ -174,7 +174,7 @@ export const PaymentPlansFilters = ({
               value={filter.dispersionStartDate}
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <DatePickerFilter
               placeholder={t('To')}
               onChange={(date) =>

@@ -1,6 +1,5 @@
-import Autocomplete from '@mui/lab/Autocomplete';
 import { ReactElement, useEffect, useState } from 'react';
-import { TextField } from '@mui/material';
+import { Autocomplete, TextField } from '@mui/material';
 
 export function FormikAsyncAutocomplete({
   field,

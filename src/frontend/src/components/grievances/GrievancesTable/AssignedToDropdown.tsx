@@ -1,7 +1,6 @@
 import { FC, useEffect, useState } from 'react';
-import Autocomplete from '@mui/lab/Autocomplete';
 import styled from 'styled-components';
-import { TextField } from '@mui/material';
+import { TextField, Autocomplete } from '@mui/material';
 import { useDebounce } from '@hooks/useDebounce';
 import { useProgramContext } from '../../../programContext';
 import { AllUsersForFiltersQuery } from '@generated/graphql';

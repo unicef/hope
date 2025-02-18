@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material';
+import { Grid2 as Grid } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import {
   useGrievancesChoiceDataQuery,
@@ -21,7 +21,7 @@ import { grievancePermissions } from './grievancePermissions';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 
-export const GrievancesDetailsPage = (): ReactElement => {
+const GrievancesDetailsPage = (): ReactElement => {
   const { id } = useParams();
   const permissions = usePermissions();
   const { data: currentUserData, loading: currentUserDataLoading } =

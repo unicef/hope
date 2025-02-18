@@ -3,49 +3,50 @@
 exports[`containers/tables/rdi/RegistrationDataImportTable should render loading 1`] = `
 <div>
   <div
-    class="sc-blHHSb czsBqi"
+    class="sc-FEMpB kLrWFX"
   >
     <div
-      class="sc-ixGGxD bFnwdh"
+      class="sc-hRDKVd lnQjmV"
     >
       <div
-        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-khLCKb iRXenP css-1ps6pg7-MuiPaper-root"
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-jBIHhB hbtPNr css-1gtchvp-MuiPaper-root"
+        style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
       >
         <div
-          class="MuiTableContainer-root sc-jwIPbr css-rorn0c-MuiTableContainer-root"
+          class="MuiTableContainer-root sc-jHswkR css-70zvr5-MuiTableContainer-root"
         >
           <div
-            class="sc-cHqXqK euLMoZ MuiBox-root css-0"
+            class="sc-cSaEAk hChnVp MuiBox-root css-0"
           >
             <div
-              class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1w02pvu-MuiToolbar-root"
+              class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-16wdp7y-MuiToolbar-root"
             >
               <h6
-                class="MuiTypography-root MuiTypography-h6 css-cdr39q-MuiTypography-root"
+                class="MuiTypography-root MuiTypography-h6 css-15aaxeb-MuiTypography-root"
                 data-cy="table-title"
               >
                 List of Imports (0)
               </h6>
             </div>
             <div
-              class="sc-cHqXqK euLMoZ MuiBox-root css-1ruxp1v"
+              class="sc-cSaEAk hChnVp MuiBox-root css-1ruxp1v"
             />
           </div>
           <table
-            class="MuiTable-root sc-dstKZu sc-jtQUzJ inqucy cpgMYb css-b1kpk9-MuiTable-root"
+            class="MuiTable-root sc-cMqPwU sc-jZTQcj fsSCTO kxOFyj css-14k3lwa-MuiTable-root"
           >
             <thead
-              class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
+              class="MuiTableHead-root css-1a7iywq-MuiTableHead-root"
             >
               <tr
-                class="MuiTableRow-root MuiTableRow-head css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root MuiTableRow-head css-1o8lslm-MuiTableRow-root"
               >
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1e9a4b0-MuiTableCell-root"
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-ghWlax fIFOXT css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -53,7 +54,7 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render loading
                     Title
                     <svg
                       aria-hidden="true"
-                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
                       data-testid="ArrowDownwardIcon"
                       focusable="false"
                       viewBox="0 0 24 24"
@@ -65,11 +66,11 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render loading
                   </span>
                 </th>
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1e9a4b0-MuiTableCell-root"
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-ghWlax fIFOXT css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -77,7 +78,7 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render loading
                     Status
                     <svg
                       aria-hidden="true"
-                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
                       data-testid="ArrowDownwardIcon"
                       focusable="false"
                       viewBox="0 0 24 24"
@@ -90,24 +91,24 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render loading
                 </th>
                 <th
                   aria-sort="descending"
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1e9a4b0-MuiTableCell-root"
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root Mui-active sc-ghWlax fIFOXT css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root Mui-active MuiTableSortLabel-directionDesc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
                   >
                     Import Date
                     <span
-                      class="sc-ivxoEo lesVvk"
+                      class="sc-jbAkgO fOmVWG"
                     >
                       sorted descending
                     </span>
                     <svg
                       aria-hidden="true"
-                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionDesc css-3l415a-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionDesc css-asweb8-MuiSvgIcon-root-MuiTableSortLabel-icon"
                       data-testid="ArrowDownwardIcon"
                       focusable="false"
                       viewBox="0 0 24 24"
@@ -119,22 +120,22 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render loading
                   </span>
                 </th>
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1e9a4b0-MuiTableCell-root"
                   scope="col"
                 >
                   <span
-                    class="sc-kLhKbu dUAYNZ"
+                    class="sc-kfeOyU geVRDn"
                     data-cy="table-label"
                   >
                     Biometric Deduplicated
                   </span>
                 </th>
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight MuiTableCell-paddingNone MuiTableCell-sizeMedium css-m1xwsv-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight MuiTableCell-paddingNone MuiTableCell-sizeMedium css-15k8h9-MuiTableCell-root"
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-ghWlax fIFOXT css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -142,7 +143,7 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render loading
                     Num. of People
                     <svg
                       aria-hidden="true"
-                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
                       data-testid="ArrowDownwardIcon"
                       focusable="false"
                       viewBox="0 0 24 24"
@@ -154,11 +155,11 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render loading
                   </span>
                 </th>
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1e9a4b0-MuiTableCell-root"
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-ghWlax fIFOXT css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -166,7 +167,7 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render loading
                     Imported by
                     <svg
                       aria-hidden="true"
-                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
                       data-testid="ArrowDownwardIcon"
                       focusable="false"
                       viewBox="0 0 24 24"
@@ -178,11 +179,11 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render loading
                   </span>
                 </th>
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1e9a4b0-MuiTableCell-root"
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-ghWlax fIFOXT css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -190,7 +191,7 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render loading
                     Data Source
                     <svg
                       aria-hidden="true"
-                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
                       data-testid="ArrowDownwardIcon"
                       focusable="false"
                       viewBox="0 0 24 24"
@@ -204,144 +205,144 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render loading
               </tr>
             </thead>
             <tbody
-              class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
+              class="MuiTableBody-root css-gmh7jj-MuiTableBody-root"
             >
               <tr
-                class="MuiTableRow-root sc-keTIit gpxSVY css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-dpBQxM bTZcYF css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom cgBuor css-1dc80h3-MuiTableCell-root"
                   colspan="7"
                 >
                   <span
-                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-3sr0vz-MuiSkeleton-root"
                     style="width: 100%; height: 70px;"
                   />
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-keTIit gpxSVY css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-dpBQxM bTZcYF css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom cgBuor css-1dc80h3-MuiTableCell-root"
                   colspan="7"
                 >
                   <span
-                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-3sr0vz-MuiSkeleton-root"
                     style="width: 100%; height: 70px;"
                   />
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-keTIit gpxSVY css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-dpBQxM bTZcYF css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom cgBuor css-1dc80h3-MuiTableCell-root"
                   colspan="7"
                 >
                   <span
-                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-3sr0vz-MuiSkeleton-root"
                     style="width: 100%; height: 70px;"
                   />
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-keTIit gpxSVY css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-dpBQxM bTZcYF css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom cgBuor css-1dc80h3-MuiTableCell-root"
                   colspan="7"
                 >
                   <span
-                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-3sr0vz-MuiSkeleton-root"
                     style="width: 100%; height: 70px;"
                   />
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-keTIit gpxSVY css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-dpBQxM bTZcYF css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom cgBuor css-1dc80h3-MuiTableCell-root"
                   colspan="7"
                 >
                   <span
-                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-3sr0vz-MuiSkeleton-root"
                     style="width: 100%; height: 70px;"
                   />
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-keTIit gpxSVY css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-dpBQxM bTZcYF css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom cgBuor css-1dc80h3-MuiTableCell-root"
                   colspan="7"
                 >
                   <span
-                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-3sr0vz-MuiSkeleton-root"
                     style="width: 100%; height: 70px;"
                   />
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-keTIit gpxSVY css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-dpBQxM bTZcYF css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom cgBuor css-1dc80h3-MuiTableCell-root"
                   colspan="7"
                 >
                   <span
-                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-3sr0vz-MuiSkeleton-root"
                     style="width: 100%; height: 70px;"
                   />
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-keTIit gpxSVY css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-dpBQxM bTZcYF css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom cgBuor css-1dc80h3-MuiTableCell-root"
                   colspan="7"
                 >
                   <span
-                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-3sr0vz-MuiSkeleton-root"
                     style="width: 100%; height: 70px;"
                   />
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-keTIit gpxSVY css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-dpBQxM bTZcYF css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom cgBuor css-1dc80h3-MuiTableCell-root"
                   colspan="7"
                 >
                   <span
-                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-3sr0vz-MuiSkeleton-root"
                     style="width: 100%; height: 70px;"
                   />
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-keTIit gpxSVY css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-dpBQxM bTZcYF css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom cgBuor css-1dc80h3-MuiTableCell-root"
                   colspan="7"
                 >
                   <span
-                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-3sr0vz-MuiSkeleton-root"
                     style="width: 100%; height: 70px;"
                   />
                 </td>
@@ -350,31 +351,30 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render loading
           </table>
         </div>
         <div
-          class="MuiTablePagination-root css-jtlhu6-MuiTablePagination-root"
+          class="MuiTablePagination-root css-7mt0f-MuiTablePagination-root"
           data-cy="table-pagination"
         >
           <div
-            class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular MuiTablePagination-toolbar css-wogcmv-MuiToolbar-root-MuiTablePagination-toolbar"
+            class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular MuiTablePagination-toolbar css-nphfye-MuiToolbar-root-MuiTablePagination-toolbar"
           >
             <div
-              class="MuiTablePagination-spacer css-1psng7p-MuiTablePagination-spacer"
+              class="MuiTablePagination-spacer css-1wtxofq-MuiTablePagination-spacer"
             />
             <p
-              class="MuiTablePagination-selectLabel css-pdct74-MuiTablePagination-selectLabel"
-              id=":r4:"
+              class="MuiTablePagination-selectLabel css-s09cke-MuiTablePagination-selectLabel"
+              id=":r8:"
             >
               Rows per page:
             </p>
             <div
-              class="MuiInputBase-root MuiInputBase-colorPrimary MuiTablePagination-input css-16c50h-MuiInputBase-root-MuiTablePagination-select"
+              class="MuiInputBase-root MuiInputBase-colorPrimary MuiTablePagination-select MuiSelect-root MuiTablePagination-input css-oegngy-MuiInputBase-root-MuiTablePagination-select"
             >
               <div
-                aria-controls=":r5:"
                 aria-expanded="false"
                 aria-haspopup="listbox"
-                aria-labelledby=":r4: :r3:"
-                class="MuiSelect-select MuiTablePagination-select MuiSelect-standard MuiInputBase-input css-194a1fa-MuiSelect-select-MuiInputBase-input"
-                id=":r3:"
+                aria-labelledby=":r8: :r7:"
+                class="MuiSelect-select MuiTablePagination-select MuiSelect-standard MuiInputBase-input css-mmygx2-MuiSelect-select-MuiInputBase-input"
+                id=":r7:"
                 role="combobox"
                 tabindex="0"
               >
@@ -383,13 +383,13 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render loading
               <input
                 aria-hidden="true"
                 aria-invalid="false"
-                class="MuiSelect-nativeInput css-yf8vq0-MuiSelect-nativeInput"
+                class="MuiSelect-nativeInput css-j0riat-MuiSelect-nativeInput"
                 tabindex="-1"
                 value="10"
               />
               <svg
                 aria-hidden="true"
-                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiTablePagination-selectIcon MuiSelect-iconStandard css-pqjvzy-MuiSvgIcon-root-MuiSelect-icon"
+                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiTablePagination-selectIcon MuiSelect-iconStandard css-1gpuzre-MuiSvgIcon-root-MuiSelect-icon"
                 data-testid="ArrowDropDownIcon"
                 focusable="false"
                 viewBox="0 0 24 24"
@@ -400,7 +400,7 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render loading
               </svg>
             </div>
             <p
-              class="MuiTablePagination-displayedRows css-levciy-MuiTablePagination-displayedRows"
+              class="MuiTablePagination-displayedRows css-11cfq65-MuiTablePagination-displayedRows"
             >
               0–0 of 0
             </p>
@@ -409,14 +409,15 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render loading
             >
               <button
                 aria-label="previous page"
-                class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-sizeMedium css-78trlr-MuiButtonBase-root-MuiIconButton-root"
+                class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-sizeMedium css-53g0n7-MuiButtonBase-root-MuiIconButton-root"
                 disabled=""
+                id=":ra:"
                 tabindex="-1"
                 type="button"
               >
                 <svg
                   aria-hidden="true"
-                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root"
+                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1umw9bq-MuiSvgIcon-root"
                   data-testid="KeyboardArrowLeftIcon"
                   focusable="false"
                   viewBox="0 0 24 24"
@@ -428,14 +429,15 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render loading
               </button>
               <button
                 aria-label="next page"
-                class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-sizeMedium css-78trlr-MuiButtonBase-root-MuiIconButton-root"
+                class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-sizeMedium css-53g0n7-MuiButtonBase-root-MuiIconButton-root"
                 disabled=""
+                id=":rb:"
                 tabindex="-1"
                 type="button"
               >
                 <svg
                   aria-hidden="true"
-                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root"
+                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1umw9bq-MuiSvgIcon-root"
                   data-testid="KeyboardArrowRightIcon"
                   focusable="false"
                   viewBox="0 0 24 24"
@@ -457,49 +459,50 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render loading
 exports[`containers/tables/rdi/RegistrationDataImportTable should render with data 1`] = `
 <div>
   <div
-    class="sc-blHHSb czsBqi"
+    class="sc-FEMpB kLrWFX"
   >
     <div
-      class="sc-ixGGxD bFnwdh"
+      class="sc-hRDKVd lnQjmV"
     >
       <div
-        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-khLCKb iRXenP css-1ps6pg7-MuiPaper-root"
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-jBIHhB hbtPNr css-1gtchvp-MuiPaper-root"
+        style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
       >
         <div
-          class="MuiTableContainer-root sc-jwIPbr css-rorn0c-MuiTableContainer-root"
+          class="MuiTableContainer-root sc-jHswkR css-70zvr5-MuiTableContainer-root"
         >
           <div
-            class="sc-cHqXqK euLMoZ MuiBox-root css-0"
+            class="sc-cSaEAk hChnVp MuiBox-root css-0"
           >
             <div
-              class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1w02pvu-MuiToolbar-root"
+              class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-16wdp7y-MuiToolbar-root"
             >
               <h6
-                class="MuiTypography-root MuiTypography-h6 css-cdr39q-MuiTypography-root"
+                class="MuiTypography-root MuiTypography-h6 css-15aaxeb-MuiTypography-root"
                 data-cy="table-title"
               >
                 List of Imports (1)
               </h6>
             </div>
             <div
-              class="sc-cHqXqK euLMoZ MuiBox-root css-1ruxp1v"
+              class="sc-cSaEAk hChnVp MuiBox-root css-1ruxp1v"
             />
           </div>
           <table
-            class="MuiTable-root sc-dstKZu sc-jtQUzJ inqucy cpgMYb css-b1kpk9-MuiTable-root"
+            class="MuiTable-root sc-cMqPwU sc-jZTQcj fsSCTO kxOFyj css-14k3lwa-MuiTable-root"
           >
             <thead
-              class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
+              class="MuiTableHead-root css-1a7iywq-MuiTableHead-root"
             >
               <tr
-                class="MuiTableRow-root MuiTableRow-head css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root MuiTableRow-head css-1o8lslm-MuiTableRow-root"
               >
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1e9a4b0-MuiTableCell-root"
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-ghWlax fIFOXT css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -507,7 +510,7 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                     Title
                     <svg
                       aria-hidden="true"
-                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
                       data-testid="ArrowDownwardIcon"
                       focusable="false"
                       viewBox="0 0 24 24"
@@ -519,11 +522,11 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                   </span>
                 </th>
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1e9a4b0-MuiTableCell-root"
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-ghWlax fIFOXT css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -531,7 +534,7 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                     Status
                     <svg
                       aria-hidden="true"
-                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
                       data-testid="ArrowDownwardIcon"
                       focusable="false"
                       viewBox="0 0 24 24"
@@ -544,24 +547,24 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                 </th>
                 <th
                   aria-sort="descending"
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1e9a4b0-MuiTableCell-root"
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root Mui-active sc-ghWlax fIFOXT css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root Mui-active MuiTableSortLabel-directionDesc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
                   >
                     Import Date
                     <span
-                      class="sc-ivxoEo lesVvk"
+                      class="sc-jbAkgO fOmVWG"
                     >
                       sorted descending
                     </span>
                     <svg
                       aria-hidden="true"
-                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionDesc css-3l415a-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionDesc css-asweb8-MuiSvgIcon-root-MuiTableSortLabel-icon"
                       data-testid="ArrowDownwardIcon"
                       focusable="false"
                       viewBox="0 0 24 24"
@@ -573,22 +576,22 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                   </span>
                 </th>
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1e9a4b0-MuiTableCell-root"
                   scope="col"
                 >
                   <span
-                    class="sc-kLhKbu dUAYNZ"
+                    class="sc-kfeOyU geVRDn"
                     data-cy="table-label"
                   >
                     Biometric Deduplicated
                   </span>
                 </th>
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight MuiTableCell-paddingNone MuiTableCell-sizeMedium css-m1xwsv-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight MuiTableCell-paddingNone MuiTableCell-sizeMedium css-15k8h9-MuiTableCell-root"
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-ghWlax fIFOXT css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -596,7 +599,7 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                     Num. of People
                     <svg
                       aria-hidden="true"
-                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
                       data-testid="ArrowDownwardIcon"
                       focusable="false"
                       viewBox="0 0 24 24"
@@ -608,11 +611,11 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                   </span>
                 </th>
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1e9a4b0-MuiTableCell-root"
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-ghWlax fIFOXT css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -620,7 +623,7 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                     Imported by
                     <svg
                       aria-hidden="true"
-                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
                       data-testid="ArrowDownwardIcon"
                       focusable="false"
                       viewBox="0 0 24 24"
@@ -632,11 +635,11 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                   </span>
                 </th>
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1e9a4b0-MuiTableCell-root"
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-ghWlax fIFOXT css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-gNZgCX hbdzQn css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -644,7 +647,7 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                     Data Source
                     <svg
                       aria-hidden="true"
-                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
                       data-testid="ArrowDownwardIcon"
                       focusable="false"
                       viewBox="0 0 24 24"
@@ -658,156 +661,156 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
               </tr>
             </thead>
             <tbody
-              class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
+              class="MuiTableBody-root css-gmh7jj-MuiTableBody-root"
             >
               <tr
-                class="MuiTableRow-root sc-keTIit gpxSVY css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-dpBQxM bTZcYF css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom cgBuor css-1dc80h3-MuiTableCell-root"
                   colspan="7"
                 >
                   <span
-                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-3sr0vz-MuiSkeleton-root"
                     style="width: 100%; height: 70px;"
                   />
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-keTIit gpxSVY css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-dpBQxM bTZcYF css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom cgBuor css-1dc80h3-MuiTableCell-root"
                   colspan="7"
                 >
                   <span
-                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-3sr0vz-MuiSkeleton-root"
                     style="width: 100%; height: 70px;"
                   />
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-keTIit gpxSVY css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-dpBQxM bTZcYF css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom cgBuor css-1dc80h3-MuiTableCell-root"
                   colspan="7"
                 >
                   <span
-                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-3sr0vz-MuiSkeleton-root"
                     style="width: 100%; height: 70px;"
                   />
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-keTIit gpxSVY css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-dpBQxM bTZcYF css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom cgBuor css-1dc80h3-MuiTableCell-root"
                   colspan="7"
                 >
                   <span
-                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-3sr0vz-MuiSkeleton-root"
                     style="width: 100%; height: 70px;"
                   />
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-keTIit gpxSVY css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-dpBQxM bTZcYF css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom cgBuor css-1dc80h3-MuiTableCell-root"
                   colspan="7"
                 >
                   <span
-                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-3sr0vz-MuiSkeleton-root"
                     style="width: 100%; height: 70px;"
                   />
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-keTIit gpxSVY css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-dpBQxM bTZcYF css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom cgBuor css-1dc80h3-MuiTableCell-root"
                   colspan="7"
                 >
                   <span
-                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-3sr0vz-MuiSkeleton-root"
                     style="width: 100%; height: 70px;"
                   />
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-keTIit gpxSVY css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-dpBQxM bTZcYF css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom cgBuor css-1dc80h3-MuiTableCell-root"
                   colspan="7"
                 >
                   <span
-                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-3sr0vz-MuiSkeleton-root"
                     style="width: 100%; height: 70px;"
                   />
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-keTIit gpxSVY css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-dpBQxM bTZcYF css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom cgBuor css-1dc80h3-MuiTableCell-root"
                   colspan="7"
                 >
                   <span
-                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-3sr0vz-MuiSkeleton-root"
                     style="width: 100%; height: 70px;"
                   />
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-keTIit gpxSVY css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-dpBQxM bTZcYF css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom cgBuor css-1dc80h3-MuiTableCell-root"
                   colspan="7"
                 >
                   <span
-                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-3sr0vz-MuiSkeleton-root"
                     style="width: 100%; height: 70px;"
                   />
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root MuiTableRow-hover sc-fFoeYl ejKsda css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root MuiTableRow-hover sc-fuExOL eSrLjK css-1o8lslm-MuiTableRow-root"
                 role="checkbox"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
                 >
                   <a
-                    class="sc-dprtRQ iggTlj"
+                    class="sc-dVupuq evfwVf"
                     href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/registration-data-import/UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6NGQxMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDAw"
                   >
                     Test Import
                   </a>
                 </td>
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
                 >
                   <div
-                    class="sc-gQaihK hjXnKu"
+                    class="sc-gjXmFk hNDEmk"
                   >
                     <div
-                      class="sc-iuUfFv iBJkBq status-box-container"
+                      class="sc-hORkcV hBraoM status-box-container"
                       data-cy="status-container"
                     >
                       IN REVIEW
@@ -815,7 +818,7 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                   </div>
                 </td>
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
                 >
                   <time
                     datetime="1695984749562"
@@ -824,30 +827,30 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                   </time>
                 </td>
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignCenter MuiTableCell-sizeMedium css-1yhpg23-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignCenter MuiTableCell-sizeMedium css-14y13q2-MuiTableCell-root"
                 />
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-177gid-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-3ssuu9-MuiTableCell-root"
                 >
                   3
                 </td>
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
                 >
                   Tiffany Glenn
                 </td>
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
                 >
                   API
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-keTIit gpxSVY css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-jUkaYT gWbgaU css-1o8lslm-MuiTableRow-root"
                 style="height: 70px;"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-dpBQxM bTZcYF css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-deSjom cgBuor css-1dc80h3-MuiTableCell-root"
                   colspan="7"
                 />
               </tr>
@@ -855,30 +858,29 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
           </table>
         </div>
         <div
-          class="MuiTablePagination-root css-jtlhu6-MuiTablePagination-root"
+          class="MuiTablePagination-root css-7mt0f-MuiTablePagination-root"
           data-cy="table-pagination"
         >
           <div
-            class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular MuiTablePagination-toolbar css-wogcmv-MuiToolbar-root-MuiTablePagination-toolbar"
+            class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular MuiTablePagination-toolbar css-nphfye-MuiToolbar-root-MuiTablePagination-toolbar"
           >
             <div
-              class="MuiTablePagination-spacer css-1psng7p-MuiTablePagination-spacer"
+              class="MuiTablePagination-spacer css-1wtxofq-MuiTablePagination-spacer"
             />
             <p
-              class="MuiTablePagination-selectLabel css-pdct74-MuiTablePagination-selectLabel"
+              class="MuiTablePagination-selectLabel css-s09cke-MuiTablePagination-selectLabel"
               id=":r1:"
             >
               Rows per page:
             </p>
             <div
-              class="MuiInputBase-root MuiInputBase-colorPrimary MuiTablePagination-input css-16c50h-MuiInputBase-root-MuiTablePagination-select"
+              class="MuiInputBase-root MuiInputBase-colorPrimary MuiTablePagination-select MuiSelect-root MuiTablePagination-input css-oegngy-MuiInputBase-root-MuiTablePagination-select"
             >
               <div
-                aria-controls=":r2:"
                 aria-expanded="false"
                 aria-haspopup="listbox"
                 aria-labelledby=":r1: :r0:"
-                class="MuiSelect-select MuiTablePagination-select MuiSelect-standard MuiInputBase-input css-194a1fa-MuiSelect-select-MuiInputBase-input"
+                class="MuiSelect-select MuiTablePagination-select MuiSelect-standard MuiInputBase-input css-mmygx2-MuiSelect-select-MuiInputBase-input"
                 id=":r0:"
                 role="combobox"
                 tabindex="0"
@@ -888,13 +890,13 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
               <input
                 aria-hidden="true"
                 aria-invalid="false"
-                class="MuiSelect-nativeInput css-yf8vq0-MuiSelect-nativeInput"
+                class="MuiSelect-nativeInput css-j0riat-MuiSelect-nativeInput"
                 tabindex="-1"
                 value="10"
               />
               <svg
                 aria-hidden="true"
-                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiTablePagination-selectIcon MuiSelect-iconStandard css-pqjvzy-MuiSvgIcon-root-MuiSelect-icon"
+                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiTablePagination-selectIcon MuiSelect-iconStandard css-1gpuzre-MuiSvgIcon-root-MuiSelect-icon"
                 data-testid="ArrowDropDownIcon"
                 focusable="false"
                 viewBox="0 0 24 24"
@@ -905,7 +907,7 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
               </svg>
             </div>
             <p
-              class="MuiTablePagination-displayedRows css-levciy-MuiTablePagination-displayedRows"
+              class="MuiTablePagination-displayedRows css-11cfq65-MuiTablePagination-displayedRows"
             >
               1–1 of 1
             </p>
@@ -914,14 +916,15 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
             >
               <button
                 aria-label="previous page"
-                class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-sizeMedium css-78trlr-MuiButtonBase-root-MuiIconButton-root"
+                class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-sizeMedium css-53g0n7-MuiButtonBase-root-MuiIconButton-root"
                 disabled=""
+                id=":r5:"
                 tabindex="-1"
                 type="button"
               >
                 <svg
                   aria-hidden="true"
-                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root"
+                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1umw9bq-MuiSvgIcon-root"
                   data-testid="KeyboardArrowLeftIcon"
                   focusable="false"
                   viewBox="0 0 24 24"
@@ -933,14 +936,15 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
               </button>
               <button
                 aria-label="next page"
-                class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-sizeMedium css-78trlr-MuiButtonBase-root-MuiIconButton-root"
+                class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-sizeMedium css-53g0n7-MuiButtonBase-root-MuiIconButton-root"
                 disabled=""
+                id=":r6:"
                 tabindex="-1"
                 type="button"
               >
                 <svg
                   aria-hidden="true"
-                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root"
+                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1umw9bq-MuiSvgIcon-root"
                   data-testid="KeyboardArrowRightIcon"
                   focusable="false"
                   viewBox="0 0 24 24"

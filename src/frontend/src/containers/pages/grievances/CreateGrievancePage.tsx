@@ -5,7 +5,6 @@ import { LoadingButton } from '@components/core/LoadingButton';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
-import withErrorBoundary from '@components/core/withErrorBoundary';
 import { AddIndividualDataChange } from '@components/grievances/AddIndividualDataChange';
 import { CreateGrievanceStepper } from '@components/grievances/CreateGrievance/CreateGrievanceStepper/CreateGrievanceStepper';
 import { Description } from '@components/grievances/CreateGrievance/Description/Description';
@@ -13,7 +12,6 @@ import { Selection } from '@components/grievances/CreateGrievance/Selection/Sele
 import { Verification } from '@components/grievances/CreateGrievance/Verification/Verification';
 import { EditHouseholdDataChange } from '@components/grievances/EditHouseholdDataChange/EditHouseholdDataChange';
 import { EditIndividualDataChange } from '@components/grievances/EditIndividualDataChange/EditIndividualDataChange';
-import { EditPeopleDataChange } from '@components/grievances/EditPeopleDataChange/EditPeopleDataChange';
 import { LookUpHouseholdIndividualSelection } from '@components/grievances/LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividualSelection';
 import { OtherRelatedTicketsCreate } from '@components/grievances/OtherRelatedTicketsCreate';
 import { TicketsAlreadyExist } from '@components/grievances/TicketsAlreadyExist';
@@ -36,7 +34,7 @@ import { useArrayToDict } from '@hooks/useArrayToDict';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { Box, Button, FormHelperText, Grid } from '@mui/material';
+import { Box, Button, FormHelperText, Grid2 as Grid } from '@mui/material';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
@@ -47,13 +45,15 @@ import { Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import {
   PERMISSIONS,
   hasPermissionInModule,
   hasPermissions,
 } from '../../../config/permissions';
+import { useProgramContext } from 'src/programContext';
+import { EditPeopleDataChange } from '@components/grievances/EditPeopleDataChange/EditPeopleDataChange';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const InnerBoxPadding = styled.div`
   .MuiPaper-root {
@@ -74,10 +74,10 @@ function EmptyComponent(): ReactElement {
   return null;
 }
 
-export const CreateGrievancePage = (): ReactElement => {
+const CreateGrievancePage = (): ReactElement => {
+  const location = useLocation();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const location = useLocation();
   const { baseUrl, businessArea, programId, isAllPrograms } = useBaseUrl();
   const { isSocialDctType } = useProgramContext();
   const permissions = usePermissions();
@@ -354,7 +354,7 @@ export const CreateGrievancePage = (): ReactElement => {
               }
             />
             <Grid container spacing={3}>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <NewTicket>
                   <InnerBoxPadding>
                     <ContainerColumnWithBorder>
@@ -450,11 +450,11 @@ export const CreateGrievancePage = (): ReactElement => {
                 </NewTicket>
               </Grid>
               {activeStep === GrievanceSteps.Selection && (
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12 }}>
                   <NewTicket>
                     <Grid container spacing={3}>
                       <TicketsAlreadyExist values={values} />
-                      <Grid item xs={6}>
+                      <Grid size={{ xs: 6 }}>
                         <OtherRelatedTicketsCreate values={values} />
                       </Grid>
                     </Grid>

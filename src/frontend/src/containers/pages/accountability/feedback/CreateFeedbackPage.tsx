@@ -1,3 +1,27 @@
+import {
+  Box,
+  Button,
+  FormHelperText,
+  Grid2 as Grid,
+  Step,
+  StepLabel,
+  Stepper,
+  Typography,
+} from '@mui/material';
+import { Field, Formik } from 'formik';
+import { ReactElement, ReactNode, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
+import * as Yup from 'yup';
+import {
+  CreateFeedbackInput,
+  FeedbackIssueType,
+  useAllProgramsForChoicesQuery,
+  useAllUsersQuery,
+  useCreateFeedbackTicketMutation,
+  useFeedbackIssueTypeChoicesQuery,
+} from '@generated/graphql';
 import { HouseholdQuestionnaire } from '@components/accountability/Feedback/HouseholdQuestionnaire/HouseholdQuestionnaire';
 import { IndividualQuestionnaire } from '@components/accountability/Feedback/IndividualQuestionnnaire/IndividualQuestionnaire';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
@@ -8,47 +32,24 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 import { OverviewContainer } from '@components/core/OverviewContainer';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
-import withErrorBoundary from '@components/core/withErrorBoundary';
 import { Consent } from '@components/grievances/Consent';
 import { LookUpHouseholdIndividualSelection } from '@components/grievances/LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividualSelection';
-import {
-  CreateFeedbackInput,
-  FeedbackIssueType,
-  useAllProgramsForChoicesQuery,
-  useAllUsersQuery,
-  useCreateFeedbackTicketMutation,
-  useFeedbackIssueTypeChoicesQuery,
-} from '@generated/graphql';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { usePermissions } from '@hooks/usePermissions';
-import { useSnackbar } from '@hooks/useSnackBar';
-import {
-  Box,
-  Button,
-  FormHelperText,
-  Grid,
-  Step,
-  StepLabel,
-  Stepper,
-  Typography,
-} from '@mui/material';
-import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
-import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
-import { FormikSelectField } from '@shared/Formik/FormikSelectField';
-import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { FeedbackSteps } from '@utils/constants';
-import { Field, Formik } from 'formik';
-import { ReactElement, ReactNode, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router-dom';
-import { useProgramContext } from 'src/programContext';
-import styled from 'styled-components';
-import * as Yup from 'yup';
 import {
   PERMISSIONS,
   hasPermissionInModule,
   hasPermissions,
 } from '../../../../config/permissions';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
+import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { FeedbackSteps } from '@utils/constants';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { useProgramContext } from 'src/programContext';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -142,6 +143,7 @@ export const validationSchemaWithSteps = (currentStep: number): unknown => {
 
 function CreateFeedbackPage(): ReactElement {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslation();
   const { baseUrl, businessArea, isAllPrograms, programId } = useBaseUrl();
   const permissions = usePermissions();
@@ -289,7 +291,7 @@ function CreateFeedbackPage(): ReactElement {
               }
             />
             <Grid container spacing={3}>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <NewTicket>
                   <InnerBoxPadding>
                     <ContainerColumnWithBorder>
@@ -310,12 +312,12 @@ function CreateFeedbackPage(): ReactElement {
                       </NoRootPadding>
                       {activeStep === FeedbackSteps.Selection && (
                         <Grid container spacing={3}>
-                          <Grid item xs={6}>
+                          <Grid size={{ xs: 6 }}>
                             <LabelizedField label={t('Category')}>
                               {t('Feedback')}
                             </LabelizedField>
                           </Grid>
-                          <Grid item xs={6}>
+                          <Grid size={{ xs: 6 }}>
                             <Field
                               name="issueType"
                               label="Issue Type"
@@ -389,12 +391,12 @@ function CreateFeedbackPage(): ReactElement {
                           <OverviewContainer>
                             <Box p={6}>
                               <Grid container spacing={6}>
-                                <Grid item xs={6}>
+                                <Grid size={{ xs: 6 }}>
                                   <LabelizedField label={t('Category')}>
                                     {t('Feedback')}
                                   </LabelizedField>
                                 </Grid>
-                                <Grid item xs={6}>
+                                <Grid size={{ xs: 6 }}>
                                   <LabelizedField label={t('Issue Type')}>
                                     {values.issueType ===
                                     FeedbackIssueType.PositiveFeedback
@@ -402,14 +404,14 @@ function CreateFeedbackPage(): ReactElement {
                                       : 'Negative Feedback'}
                                   </LabelizedField>
                                 </Grid>
-                                <Grid item xs={6}>
+                                <Grid size={{ xs: 6 }}>
                                   <LabelizedField
                                     label={t(`${beneficiaryGroup?.groupLabel}`)}
                                   >
                                     {values.selectedHousehold?.unicefId}
                                   </LabelizedField>
                                 </Grid>
-                                <Grid item xs={6}>
+                                <Grid size={{ xs: 6 }}>
                                   <LabelizedField
                                     label={t(
                                       `${beneficiaryGroup?.memberLabel}`,
@@ -424,7 +426,7 @@ function CreateFeedbackPage(): ReactElement {
                           <BoxWithBorderBottom />
                           <BoxPadding />
                           <Grid container spacing={3}>
-                            <Grid item xs={12}>
+                            <Grid size={{ xs: 12 }}>
                               <Field
                                 name="description"
                                 multiline
@@ -436,7 +438,7 @@ function CreateFeedbackPage(): ReactElement {
                                 data-cy="input-description"
                               />
                             </Grid>
-                            <Grid item xs={12}>
+                            <Grid size={{ xs: 12 }}>
                               <Field
                                 name="comments"
                                 multiline
@@ -447,7 +449,7 @@ function CreateFeedbackPage(): ReactElement {
                                 data-cy="input-comments"
                               />
                             </Grid>
-                            <Grid item xs={6}>
+                            <Grid size={{ xs: 6 }}>
                               <Field
                                 name="admin2"
                                 variant="outlined"
@@ -458,7 +460,7 @@ function CreateFeedbackPage(): ReactElement {
                                 )}
                               />
                             </Grid>
-                            <Grid item xs={6}>
+                            <Grid size={{ xs: 6 }}>
                               <Field
                                 name="area"
                                 fullWidth
@@ -468,7 +470,7 @@ function CreateFeedbackPage(): ReactElement {
                                 data-cy="input-area"
                               />
                             </Grid>
-                            <Grid item xs={6}>
+                            <Grid size={{ xs: 6 }}>
                               <Field
                                 name="language"
                                 multiline
@@ -479,7 +481,7 @@ function CreateFeedbackPage(): ReactElement {
                                 data-cy="input-languages"
                               />
                             </Grid>
-                            <Grid item xs={3}>
+                            <Grid size={{ xs: 3 }}>
                               <Field
                                 name="program"
                                 label={t('Programme Name')}
@@ -540,4 +542,5 @@ function CreateFeedbackPage(): ReactElement {
     </Formik>
   );
 }
+
 export default withErrorBoundary(CreateFeedbackPage, 'CreateFeedbackPage');

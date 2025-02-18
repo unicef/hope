@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material';
+import { Grid2 as Grid } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { useFeedbackQuery } from '@generated/graphql';
 import { FeedbackDetails } from '@components/accountability/Feedback/FeedbackDetails/FeedbackDetails';

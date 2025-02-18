@@ -1,5 +1,4 @@
-import { TextField } from '@mui/material';
-import Autocomplete from '@mui/lab/Autocomplete';
+import { TextField, Autocomplete } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import get from 'lodash/get';
 import { useCurrencyChoicesQuery } from '@generated/graphql';

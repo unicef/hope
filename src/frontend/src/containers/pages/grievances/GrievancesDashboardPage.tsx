@@ -1,4 +1,4 @@
-import { Box, Grid } from '@mui/material';
+import { Box, Grid2 as Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
@@ -56,7 +56,7 @@ function GrievancesDashboardPage(): ReactElement {
       <PageHeader title={t('Grievance Dashboard')} />
       <TableWrapper>
         <Grid container spacing={2}>
-          <Grid item xs={4}>
+          <Grid size={{ xs: 4 }}>
             <Box>
               <GrievanceDashboardCard
                 topLabel={t('TOTAL NUMBER OF TICKETS')}
@@ -95,7 +95,7 @@ function GrievancesDashboardPage(): ReactElement {
               <TicketsByStatusSection data={ticketsByStatus} />
             </Box>
           </Grid>
-          <Grid item xs={8}>
+          <Grid size={{ xs:8 }}>
             <Box ml={3}>
               <TicketsByCategorySection data={ticketsByCategory} />
             </Box>
