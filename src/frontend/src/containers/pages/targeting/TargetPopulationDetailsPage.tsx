@@ -1,7 +1,7 @@
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { TargetPopulationCore } from '@components/targeting/TargetPopulationCore';
-import { TargetPopulationDetails } from '@components/targeting/TargetPopulationDetails';
+import TargetPopulationDetails from '@components/targeting/TargetPopulationDetails';
 import {
   PaymentPlanBuildStatus,
   useBusinessAreaDataQuery,

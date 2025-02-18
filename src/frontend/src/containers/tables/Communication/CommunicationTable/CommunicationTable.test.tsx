@@ -4,7 +4,7 @@ import { act } from 'react';
 import wait from 'waait';
 import { fakeApolloAllCommunicationMessages } from '../../../../../fixtures/communication/fakeApolloAllCommunicationMessages';
 import { ApolloLoadingLink, render } from '../../../../testUtils/testUtils';
-import { CommunicationTable } from './CommunicationTable';
+import CommunicationTable from './CommunicationTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
 describe('containers/tables//Communication/CommunicationTable', () => {

@@ -8,10 +8,10 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
-import { PaymentVerificationTable } from '../../tables/payments/PaymentVerificationTable';
-import { PaymentVerificationFilters } from '../../tables/payments/PaymentVerificationTable/PaymentVerificationFilters';
+import PaymentVerificationFilters from '../../tables/payments/PaymentVerificationTable/PaymentVerificationFilters';
 import { PaymentPlanStatus } from '@generated/graphql';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import PaymentVerificationTable from '@containers/tables/payments/PaymentVerificationTable/PaymentVerificationTable';
 
 const initialFilter = {
   status: [PaymentPlanStatus.Finished, PaymentPlanStatus.Accepted],

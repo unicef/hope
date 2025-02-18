@@ -8,7 +8,6 @@ import { ReconciliationSummary } from '@components/paymentmodule/PaymentPlanDeta
 import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
 import { PaymentPlanDetails } from '@containers/pages/paymentmodule/ProgramCycle/PaymentPlanDetails/PaymentPlanDetails';
 import { PaymentPlanDetailsHeader } from '@containers/pages/paymentmodule/ProgramCycle/PaymentPlanDetails/PaymentPlanDetailsHeader';
-import { PaymentsTable } from '@containers/tables/paymentmodule/PaymentsTable';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { PermissionDenied } from '@core/PermissionDenied';
@@ -24,6 +23,7 @@ import { isPermissionDeniedError } from '@utils/utils';
 import { ReactElement, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
+import PaymentsTable from '@containers/tables/paymentmodule/PaymentsTable/PaymentsTable';
 
 const PaymentPlanDetailsPage = (): ReactElement => {
   const { paymentPlanId } = useParams();

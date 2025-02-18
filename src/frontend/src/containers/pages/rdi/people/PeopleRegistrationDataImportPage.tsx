@@ -3,7 +3,7 @@ import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RegistrationDataImportCreateDialog } from '@components/rdi/create/RegistrationDataImportCreateDialog';
-import { RegistrationPeopleFilters } from '@components/rdi/RegistrationPeopleFilters';
+import RegistrationPeopleFilters from '@components/rdi/RegistrationPeopleFilters';
 import { RegistrationDataImportForPeopleTable } from '@containers/tables/rdi/RegistrationDataImportForPeopleTable';
 import { ButtonTooltip } from '@core/ButtonTooltip';
 import { useDeduplicationFlagsQuery } from '@generated/graphql';

@@ -7,7 +7,7 @@ import {
 } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
-import { EditTargetPopulation } from '@components/targeting/EditTargetPopulation/EditTargetPopulation';
+import EditTargetPopulation from '@components/targeting/EditTargetPopulation/EditTargetPopulation';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
