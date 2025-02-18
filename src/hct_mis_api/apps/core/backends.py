@@ -58,8 +58,9 @@ class PermissionsBackend(BaseBackend):
         if (
             program
             and not RoleAssignment.objects.filter(
-                Q(partner=user.partner)
-                | Q(user=user) & Q(business_area=business_area) & (Q(program=None) | Q(program=program))
+                (Q(partner=user.partner) | Q(user=user))
+                & Q(business_area=business_area)
+                & (Q(program=None) | Q(program=program))
             )
             .exclude(expiry_date__lt=timezone.now())
             .exists()
