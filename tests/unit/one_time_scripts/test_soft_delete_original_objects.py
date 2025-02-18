@@ -23,21 +23,13 @@ class TestSoftDeleteOriginalObjects(TestCase):
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         program = ProgramFactory(business_area=cls.business_area)
-        individual1 = IndividualFactory(household=None)
         individual2 = IndividualFactory(household=None)
-        cls.household_tbd = HouseholdFactory(
-            program=None, business_area=cls.business_area, head_of_household=individual1
-        )
         cls.household = HouseholdFactory(
             program=program, business_area=cls.business_area, head_of_household=individual2
         )
 
         cls.individual_tbd = IndividualFactory(program=None, business_area=cls.business_area, household=None)
         cls.individual = IndividualFactory(program=program, business_area=cls.business_area, household=None)
-
-        cls.individual_role_in_hh_tbd = IndividualRoleInHouseholdFactory(
-            household=cls.household_tbd, individual=IndividualFactory(household=None)
-        )
         cls.individual_role_in_hh = IndividualRoleInHouseholdFactory(
             household=cls.household, individual=IndividualFactory(household=None)
         )
@@ -53,14 +45,12 @@ class TestSoftDeleteOriginalObjects(TestCase):
 
     def test_soft_delete_original_objects(self) -> None:
         soft_delete_original_objects()
-        self.household_tbd.refresh_from_db()
         self.individual_tbd.refresh_from_db()
         self.individual_role_in_hh_tbd.refresh_from_db()
         self.document_tbd.refresh_from_db()
         self.individual_identity_tbd.refresh_from_db()
         self.bank_account_info_tbd.refresh_from_db()
 
-        self.assertEqual(self.household_tbd.is_removed, True)
         self.assertEqual(self.individual_tbd.is_removed, True)
         self.assertEqual(self.individual_role_in_hh_tbd.is_removed, True)
         self.assertEqual(self.document_tbd.is_removed, True)

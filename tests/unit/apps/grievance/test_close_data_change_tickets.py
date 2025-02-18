@@ -119,7 +119,6 @@ class TestCloseDataChangeTickets(APITestCase):
         household_one.registration_data_import.program = program_one
         household_one.registration_data_import.save()
         household_one.program = program_one
-        household_one.programs.add(program_one)
 
         household_two = HouseholdFactory.build(admin_area=cls.admin_area_1, program=cls.program)
         household_two.household_collection.save()
@@ -127,7 +126,6 @@ class TestCloseDataChangeTickets(APITestCase):
         household_two.registration_data_import.program = program_one
         household_two.registration_data_import.save()
         household_two.program = program_one
-        household_two.programs.add(program_one)
 
         cls.individuals_to_create = [
             {

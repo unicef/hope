@@ -163,9 +163,9 @@ class GenerateReportContentHelpers:
             cls._format_date(household.first_registration_date),
             cls._format_date(household.last_registration_date),
             household.org_name_enumerator,
+            household.program,
         ]
-        for program in household.programs.all():
-            row.append(program.name)
+
         return tuple(row)
 
     @staticmethod

@@ -262,7 +262,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         )
 
     def adjust_program_size(self) -> None:
-        self.household_count = self.household_set.count()
+        self.household_count = self.households.count()
         self.individual_count = self.individuals.count()
 
     @property
