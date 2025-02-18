@@ -31,7 +31,7 @@ import { programValidationSchema } from '@components/programs/CreateProgram/prog
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { useProgramContext } from 'src/programContext';
 import { omit } from 'lodash';
-import { mapPartnerChoices } from '@utils/utils';
+import { mapPartnerChoicesWithoutUnicef } from '@utils/utils';
 
 export const CreateProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -254,7 +254,7 @@ export const CreateProgramPage = (): ReactElement => {
           errors,
           setErrors,
         }) => {
-          const mappedPartnerChoices = mapPartnerChoices(
+          const mappedPartnerChoices = mapPartnerChoicesWithoutUnicef(
             userPartnerChoices,
             values.partners,
           );
