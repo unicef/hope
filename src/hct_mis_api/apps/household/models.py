@@ -524,7 +524,7 @@ class Household(
 
     family_id = models.CharField(max_length=100, blank=True, null=True)  # eDopomoga household id
     storage_obj = models.ForeignKey(StorageFile, on_delete=models.SET_NULL, blank=True, null=True)
-    program = models.ForeignKey("program.Program", db_index=True, on_delete=models.PROTECT, related_name="programs")
+    program = models.ForeignKey("program.Program", db_index=True, on_delete=models.PROTECT, related_name="households")
     copied_from = models.ForeignKey(
         "self",
         null=True,
