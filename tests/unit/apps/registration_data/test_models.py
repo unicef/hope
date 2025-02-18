@@ -90,7 +90,8 @@ class TestRegistrationDataModels(TestCase):
 
     def test_imported_individual_identity_str(self) -> None:
         self.assertEqual(
-            str(self.imported_individual_identity), f"UNICEF {self.imported_individual_3.unicef_id} 123456789"
+            str(self.imported_individual_identity),
+            f"UNICEF HQ [Sub-Partner of UNICEF] {self.imported_individual_3.unicef_id} 123456789",
         )
 
     def test_bulk_update_household_size(self) -> None:
