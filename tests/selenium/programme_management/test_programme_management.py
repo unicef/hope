@@ -8,7 +8,11 @@ from selenium import webdriver
 from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
 
-from hct_mis_api.apps.account.fixtures import RoleFactory
+from hct_mis_api.apps.account.fixtures import (
+    PartnerFactory,
+    RoleAssignmentFactory,
+    RoleFactory,
+)
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import (
@@ -34,6 +38,23 @@ pytestmark = pytest.mark.django_db()
 def create_programs() -> None:
     create_program("Test Programm")
     yield
+
+
+@pytest.fixture(autouse=True)
+def create_unhcr_partner() -> None:
+    """
+    This factory is needed due to the temporary solution applied on program mutation -
+    partner needs to already hold any role in the business area to get this role for the new program.
+    This can be reverted after changing the temporary solution to receive role in the mutation input.
+    """
+    partner_unhcr = PartnerFactory(name="UNHCR")
+    afghanistan = BusinessArea.objects.get(slug="afghanistan")
+    RoleAssignmentFactory(
+        partner=partner_unhcr,
+        business_area=afghanistan,
+        role=RoleFactory(name="Role for UNHCR"),
+        program=ProgramFactory(name="Program for UNHCR"),
+    )
 
 
 def create_program(
