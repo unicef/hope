@@ -21,14 +21,12 @@ from .fixtures import *  # noqa: ABS101, F403, F401
 
 @pytest.fixture(autouse=True)
 def create_unicef_partner() -> None:
-    print("UNICEF created")
     unicef, _ = Partner.objects.get_or_create(name="UNICEF")
     yield Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER, parent=unicef)
 
 
 @pytest.fixture(scope="class", autouse=True)
 def create_unicef_partner_session(django_db_setup: Any, django_db_blocker: Any) -> None:
-    print("UNICEF created session")
     with django_db_blocker.unblock():
         unicef, _ = Partner.objects.get_or_create(name="UNICEF")
         Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER, parent=unicef)
