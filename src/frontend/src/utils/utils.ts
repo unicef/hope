@@ -58,7 +58,7 @@ export function opacityToHex(opacity: number): string {
 
 export function mapPartnerChoices(choices, selectedPartners) {
   return choices
-    .filter((partner) => !partner.name.startsWith('UNICEF Partner for'))
+    .filter((partner) => !partner.name.startsWith('UNICEF Partner for') && partner.name !== "UNICEF HQ")
     .map((partner) => ({
       value: partner.value,
       label: partner.name,
