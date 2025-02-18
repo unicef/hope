@@ -56,9 +56,16 @@ export function opacityToHex(opacity: number): string {
   return Math.floor(opacity * 0xff).toString(16);
 }
 
-export function mapPartnerChoices(choices, selectedPartners) {
+export const isPartnerVisible = (partnerName: string): boolean => {
+  if (!partnerName) return false;
+  return (
+    !partnerName.startsWith('UNICEF Partner for') && partnerName !== 'UNICEF HQ'
+  );
+};
+
+export function mapPartnerChoicesWithoutUnicef(choices, selectedPartners) {
   return choices
-    .filter((partner) => !partner.name.startsWith('UNICEF Partner for') && partner.name !== 'UNICEF HQ')
+    .filter((partner) => isPartnerVisible(partner.name))
     .map((partner) => ({
       value: partner.value,
       label: partner.name,

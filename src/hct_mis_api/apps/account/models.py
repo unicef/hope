@@ -470,7 +470,7 @@ class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
         super().save(*args, **kwargs)
 
     def __str__(self) -> str:
-        role_holder = self.user if self.user else self.partner
+        role_holder = self.user or self.partner
         return f"{role_holder} {self.role} in {self.business_area}"
 
 

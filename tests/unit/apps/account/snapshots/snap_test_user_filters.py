@@ -25,6 +25,7 @@ snapshots['TestUserFilter::test_users_by_business_area 1'] = {
                                 'role': {
                                     'name': 'Role with all permissions',
                                     'permissions': [
+                                        'PROGRAMME_VIEW_LIST'
                                     ]
                                 }
                             }
@@ -37,16 +38,16 @@ snapshots['TestUserFilter::test_users_by_business_area 1'] = {
                 {
                     'node': {
                         'partner': {
-                            'name': 'Default Empty Partner'
+                            'name': 'Partner With Test Role'
                         },
                         'partnerRoles': [
-                        ],
-                        'userRoles': [
                             {
                                 'businessArea': {
                                     'name': 'Afghanistan'
                                 },
-                                'program': None,
+                                'program': {
+                                    'name': 'Test Program'
+                                },
                                 'role': {
                                     'name': 'Test Role',
                                     'permissions': [
@@ -55,7 +56,9 @@ snapshots['TestUserFilter::test_users_by_business_area 1'] = {
                                 }
                             }
                         ],
-                        'username': 'user_with_test_role_in_whole_ba'
+                        'userRoles': [
+                        ],
+                        'username': 'user_with_partner_with_test_role'
                     }
                 },
                 {
@@ -87,16 +90,16 @@ snapshots['TestUserFilter::test_users_by_business_area 1'] = {
                 {
                     'node': {
                         'partner': {
-                            'name': 'Partner With Test Role'
+                            'name': 'Default Empty Partner'
                         },
                         'partnerRoles': [
+                        ],
+                        'userRoles': [
                             {
                                 'businessArea': {
                                     'name': 'Afghanistan'
                                 },
-                                'program': {
-                                    'name': 'Test Program'
-                                },
+                                'program': None,
                                 'role': {
                                     'name': 'Test Role',
                                     'permissions': [
@@ -105,9 +108,7 @@ snapshots['TestUserFilter::test_users_by_business_area 1'] = {
                                 }
                             }
                         ],
-                        'userRoles': [
-                        ],
-                        'username': 'user_with_partner_with_test_role'
+                        'username': 'user_with_test_role_in_whole_ba'
                     }
                 }
             ]
@@ -130,17 +131,17 @@ snapshots['TestUserFilter::test_users_by_program 1'] = {
                 {
                     'node': {
                         'partner': {
-                            'name': 'Default Empty Partner'
+                            'name': 'Partner With Test Role'
                         },
-                        'username': 'user_with_test_role_in_whole_ba'
+                        'username': 'user_with_partner_with_test_role'
                     }
                 },
                 {
                     'node': {
                         'partner': {
-                            'name': 'Partner With Test Role'
+                            'name': 'Default Empty Partner'
                         },
-                        'username': 'user_with_partner_with_test_role'
+                        'username': 'user_with_test_role_in_whole_ba'
                     }
                 }
             ]
@@ -155,16 +156,16 @@ snapshots['TestUserFilter::test_users_by_roles 1'] = {
                 {
                     'node': {
                         'partner': {
-                            'name': 'Default Empty Partner'
+                            'name': 'Partner With Test Role'
                         },
                         'partnerRoles': [
-                        ],
-                        'userRoles': [
                             {
                                 'businessArea': {
                                     'name': 'Afghanistan'
                                 },
-                                'program': None,
+                                'program': {
+                                    'name': 'Test Program'
+                                },
                                 'role': {
                                     'name': 'Test Role',
                                     'permissions': [
@@ -173,7 +174,9 @@ snapshots['TestUserFilter::test_users_by_roles 1'] = {
                                 }
                             }
                         ],
-                        'username': 'user_with_test_role_in_whole_ba'
+                        'userRoles': [
+                        ],
+                        'username': 'user_with_partner_with_test_role'
                     }
                 },
                 {
@@ -205,16 +208,16 @@ snapshots['TestUserFilter::test_users_by_roles 1'] = {
                 {
                     'node': {
                         'partner': {
-                            'name': 'Partner With Test Role'
+                            'name': 'Default Empty Partner'
                         },
                         'partnerRoles': [
+                        ],
+                        'userRoles': [
                             {
                                 'businessArea': {
                                     'name': 'Afghanistan'
                                 },
-                                'program': {
-                                    'name': 'Test Program'
-                                },
+                                'program': None,
                                 'role': {
                                     'name': 'Test Role',
                                     'permissions': [
@@ -223,9 +226,7 @@ snapshots['TestUserFilter::test_users_by_roles 1'] = {
                                 }
                             }
                         ],
-                        'userRoles': [
-                        ],
-                        'username': 'user_with_partner_with_test_role'
+                        'username': 'user_with_test_role_in_whole_ba'
                     }
                 }
             ]
