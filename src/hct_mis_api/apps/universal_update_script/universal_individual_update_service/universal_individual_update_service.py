@@ -69,7 +69,7 @@ class UniversalIndividualUpdateService:
         for document_no_column_name, _ in get_document_fields():
             key = self.document_types[document_no_column_name].key
             if key in universal_update.document_types.values_list("key", flat=True):
-                self.document_fields.append((document_no_column_name, f"{document_no_column_name}_country_i_c"))
+                self.document_fields.append((document_no_column_name, f"{key}_country_i_c"))
         self.deliver_mechanism_data_fields = {
             delivery_mechanism_name: data
             for delivery_mechanism_name, data in get_wallet_fields().items()
@@ -428,7 +428,6 @@ class UniversalIndividualUpdateService:
 
         wb = openpyxl.Workbook()
         ws = wb.active
-
         ws.append(columns)
 
         individuals = Individual.objects.filter(

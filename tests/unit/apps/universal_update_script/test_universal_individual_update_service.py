@@ -85,10 +85,15 @@ def individual(program: Program, admin1: Area, admin2: Area) -> Individual:
 
 
 @pytest.fixture
-def document_national_id(individual: Individual, program: Program) -> Document:
+def document_national_id(individual: Individual, program: Program, poland: Country) -> Document:
     document_type = DocumentType.objects.create(key="national_id", label="National ID")
     return Document.objects.create(
-        individual=individual, program=program, type=document_type, document_number="Test 123"
+        individual=individual,
+        program=program,
+        type=document_type,
+        document_number="Test 123",
+        rdi_merge_status=Document.MERGED,
+        country=poland,
     )
 
 
@@ -112,14 +117,13 @@ class TestUniversalIndividualUpdateService:
         birth_date_old = individual.birth_date
         address_old = individual.household.address
         admin1_old = individual.household.admin1
-        # document_number_old = document_national_id.document_number
+        document_number_old = document_national_id.document_number
         universal_update = UniversalUpdate(program=program)
         universal_update.unicef_ids = individual.unicef_id
         universal_update.individual_fields = ["given_name", "sex", "birth_date"]
         universal_update.household_fields = ["address", "admin1"]
         universal_update.save()
         universal_update.document_types.add(DocumentType.objects.first())
-        print(DocumentType.objects.first())
         service = UniversalIndividualUpdateService(universal_update)
         template_file = service.generate_xlsx_template()
         universal_update.refresh_from_db()
@@ -153,11 +157,10 @@ Deduplicating individuals Elasticsearch
 Deduplicating documents
 Update successful
 """
-        # print(document_national_id.document_number)
         assert universal_update.saved_logs == expected_update_log
         assert individual.given_name == given_name_old
         assert individual.sex == sex_old
         assert individual.birth_date == birth_date_old
         assert individual.household.address == address_old
         assert individual.household.admin1 == admin1_old
-        # assert document_national_id.document_number == document_number_old TODO fix this
+        assert document_national_id.document_number == document_number_old
