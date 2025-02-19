@@ -92,11 +92,11 @@ jobs:
       run: |
           zip -r output.zip src
 
-    - name: Upload zipped folder
-      uses: actions/upload-artifact@v4
-      with:
-          name: zipped-folder
-          path: output.zip
+    #- name: Upload zipped folder
+    #  uses: actions/upload-artifact@v4
+    #  with:
+    #      name: zipped-folder
+    #      path: output.zip
     - name: Veracode Pipeline
       id: pipeline-scan
       uses: veracode/Veracode-pipeline-scan-action@v1.0.18
@@ -127,6 +127,7 @@ jobs:
       continue-on-error: true
       env:
        SRCCLR_API_TOKEN: ${{ secrets.SRCCLR_API_TOKEN }}
+       SRCCLR_SCAN_COLLECTORS: "npm, yarn, pip, pipenv"
       run: |
         curl -sSL  https://download.sourceclear.com/ci.sh | bash -s scan src --allow-dirty
 
