@@ -11,6 +11,7 @@ from django.urls import reverse
 import pytest
 from django_webtest import DjangoTestApp
 
+from hct_mis_api.apps.account.admin import PartnerAdmin
 from hct_mis_api.apps.account.admin.user_role import (
     RoleAssignmentAdmin,
     RoleAssignmentInline,
@@ -177,3 +178,67 @@ class RoleAssignmentAdminTest(TestCase):
     def test_check_publish_permission(self) -> None:
         request = self.get_mock_request()
         self.assertFalse(self.admin.check_publish_permission(request))
+
+
+class PartnerAdminTest(TestCase):
+    def setUp(self) -> None:
+        request = RequestFactory()
+        self.site = AdminSite()
+        self.admin = PartnerAdmin(model=Partner, admin_site=self.site)
+        self.request = request.get("/")
+        self.request.user = UserFactory(username="testuser", is_staff=True, is_superuser=True)
+
+        self.business_area = create_afghanistan()
+        self.unicef = PartnerFactory(name="UNICEF")
+        self.unicef_subpartner = PartnerFactory(parent=self.unicef)
+        self.parent_partner = PartnerFactory(name="Normal Parent")
+        self.partner = PartnerFactory(name="Normal Partner", parent=self.parent_partner)
+
+    def test_get_inline_instances(self) -> None:
+        inline_instances = self.admin.get_inline_instances(self.request)
+        self.assertEqual(inline_instances, [])
+
+        inline_instances = self.admin.get_inline_instances(self.request, self.partner)
+        self.assertEqual(len(inline_instances), 1)
+        self.assertIsInstance(inline_instances[0], RoleAssignmentInline)
+
+    def test_get_readonly_fields(self) -> None:
+        readonly_fields = self.admin.get_readonly_fields(self.request)
+        self.assertEqual(readonly_fields, ["sub_partners"])
+
+        readonly_fields = self.admin.get_readonly_fields(self.request, self.partner)
+        self.assertEqual(readonly_fields, ["sub_partners"])
+
+        readonly_fields = self.admin.get_readonly_fields(self.request, self.unicef)
+        self.assertEqual(readonly_fields, ["sub_partners", "name", "parent"])
+
+        readonly_fields = self.admin.get_readonly_fields(self.request, self.unicef_subpartner)
+        self.assertEqual(readonly_fields, ["sub_partners", "name", "parent"])
+
+    def test_get_form_no_obj(self) -> None:
+        form = self.admin.get_form(self.request)
+        # level 0
+        self.assertIn(self.unicef, form.base_fields["parent"].queryset)
+        self.assertIn(self.parent_partner, form.base_fields["parent"].queryset)
+        # level 1
+        self.assertNotIn(self.unicef_subpartner, form.base_fields["parent"].queryset)
+        self.assertNotIn(self.partner, form.base_fields["parent"].queryset)
+
+    def test_get_form_unicef_subpartner(self) -> None:
+        form = self.admin.get_form(self.request, self.unicef_subpartner)
+        self.assertNotIn("parent", form.base_fields)
+
+    def test_get_form_unicef(self) -> None:
+        form = self.admin.get_form(self.request, self.unicef)
+        self.assertNotIn("parent", form.base_fields)
+
+    def test_get_form_parent_partner(self) -> None:
+        form = self.admin.get_form(self.request, self.parent_partner)
+        self.assertQuerysetEqual(form.base_fields["parent"].queryset, Partner.objects.none())
+
+    def test_get_form_partner(self) -> None:
+        form = self.admin.get_form(self.request, self.partner)
+        self.assertIn(self.unicef, form.base_fields["parent"].queryset)
+        self.assertIn(self.parent_partner, form.base_fields["parent"].queryset)
+        self.assertNotIn(self.unicef_subpartner, form.base_fields["parent"].queryset)
+        self.assertNotIn(self.partner, form.base_fields["parent"].queryset)
