@@ -5,7 +5,6 @@ from django.contrib import admin
 from django.db.models import QuerySet
 from django.http import HttpRequest
 
-from adminactions.export import ForeignKeysCollector
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.combo import AllValuesComboFilter
 
@@ -111,16 +110,3 @@ class RoleAssignmentAdmin(HOPEModelAdminBase):
 
     def check_publish_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return False
-
-    def _get_data(self, record: Any) -> str:
-        roles = Role.objects.all()
-        collector = ForeignKeysCollector(None)
-        objs = []
-        for qs in [roles]:
-            objs.extend(qs)
-        objs.extend(account_models.RoleAssignment.objects.filter(pk=record.pk))
-        collector.collect(objs)
-        serializer = self.get_serializer("json")
-        return serializer.serialize(
-            collector.data, use_natural_foreign_keys=True, use_natural_primary_keys=True, indent=3
-        )
