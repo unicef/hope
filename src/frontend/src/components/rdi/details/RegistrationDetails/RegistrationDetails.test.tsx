@@ -1,3 +1,4 @@
+import { MemoryRouter } from 'react-router-dom';
 import { fakeRegistrationDetailedFragment } from '../../../../../fixtures/registration/fakeRegistrationDetailedFragment';
 import { render } from '../../../../testUtils/testUtils';
 import RegistrationDetails from './RegistrationDetails';

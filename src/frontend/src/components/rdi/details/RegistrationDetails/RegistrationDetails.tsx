@@ -97,7 +97,7 @@ function RegistrationDetails({
     numbersComponent = (
       <Grid size={{ xs: 4 }}>
         <Grid container>
-          <Grid size={{ xs:6 }}>
+          <Grid size={{ xs: 6 }}>
             <BigValueContainer>
               <LabelizedField
                 label={t('Total Number of Registered People')}
@@ -114,7 +114,7 @@ function RegistrationDetails({
     numbersComponent = (
       <Grid size={{ xs: 'auto' }}>
         <Grid container>
-          <Grid size={{ xs:6 }}>
+          <Grid size={{ xs: 6 }}>
             <BigValueContainer>
               <LabelizedField
                 label={`Total Number of ${beneficiaryGroup?.groupLabelPlural}`}
@@ -124,7 +124,7 @@ function RegistrationDetails({
               </LabelizedField>
             </BigValueContainer>
           </Grid>
-          <Grid size={{ xs:6 }}>
+          <Grid size={{ xs: 6 }}>
             <BigValueContainer>
               <LabelizedField
                 label={`Total Number of ${beneficiaryGroup?.memberLabelPlural}`}
@@ -147,7 +147,7 @@ function RegistrationDetails({
         <Grid alignItems="center" container>
           <Grid size={{ xs: 'auto' }}>
             <Grid container spacing={3}>
-              <Grid size={{ xs:6 }}>
+              <Grid size={{ xs: 6 }}>
                 <Box display="flex" flexDirection="column">
                   <LabelizedField label={t('status')}>
                     <StatusBox
@@ -161,7 +161,7 @@ function RegistrationDetails({
                 </Box>
               </Grid>
               {registration?.biometricDeduplicationEnabled && (
-                <Grid size={{ xs:6 }}>
+                <Grid size={{ xs: 6 }}>
                   <Box display="flex" flexDirection="column">
                     <LabelizedField
                       label={t('Biometrics Deduplication Status')}
@@ -179,13 +179,13 @@ function RegistrationDetails({
                   </Box>
                 </Grid>
               )}
-              <Grid size={{ xs:6 }}>
+              <Grid size={{ xs: 6 }}>
                 <LabelizedField
                   label={t('Source of Data')}
                   value={registration?.dataSource}
                 />
               </Grid>
-              <Grid size={{ xs:6 }}>
+              <Grid size={{ xs: 6 }}>
                 <LabelizedField
                   label={t('Import Date')}
                   value={
@@ -195,7 +195,7 @@ function RegistrationDetails({
                   }
                 />
               </Grid>
-              <Grid size={{ xs:6 }}>
+              <Grid size={{ xs: 6 }}>
                 <LabelizedField
                   label={t('Imported by')}
                   value={renderImportedBy()}
@@ -203,7 +203,7 @@ function RegistrationDetails({
               </Grid>
               {registration.status === RegistrationDataImportStatus.Refused &&
               registration.refuseReason ? (
-                <Grid size={{ xs:6 }}>
+                <Grid size={{ xs: 6 }}>
                   <LabelizedField
                     label={t('Refuse Reason')}
                     value={registration?.refuseReason}
@@ -216,8 +216,8 @@ function RegistrationDetails({
           {registration.status === 'DEDUPLICATION_FAILED' ? null : (
             <Grid size={{ xs: 'auto' }}>
               <Grid container direction="column">
-                <Grid container  size={{ xs: 12 }} spacing={3}>
-                  <Grid size={{ xs:4 }}></Grid>
+                <Grid container size={{ xs: 12 }} spacing={3}>
+                  <Grid size={{ xs: 4 }}></Grid>
                   <Grid size={{ xs: 4 }}>
                     <BoldGrey>{t('Biographical')}</BoldGrey>
                   </Grid>
