@@ -1,17 +1,22 @@
 import json
 import tempfile
+
 from django.core.files.base import ContentFile
+
 from openpyxl import load_workbook
+
 from hct_mis_api.apps.core.utils import chunks
 from hct_mis_api.apps.household.models import Household, Individual
+from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
+    get_household_snapshot,
+)
 from hct_mis_api.apps.universal_update_script.models import UniversalUpdate
-from hct_mis_api.one_time_scripts.ukraine_update_script import get_household_snapshot
 
 
 def get_unicef_ids_from_sheet(ws):
     header = next(ws.iter_rows(min_row=1, max_row=1, values_only=True))
     try:
-        col_index = header.index('unicef_id') + 1
+        col_index = header.index("unicef_id") + 1
     except ValueError:
         raise ValueError("The column 'unicef_id' was not found in the header row.")
     return [row[col_index - 1] for row in ws.iter_rows(min_row=2, values_only=True)]
@@ -23,7 +28,7 @@ def get_unicef_ids_from_workbook(workbook, sheet_name=None):
 
 
 def create_and_save_snapshot_chunked(universal_update: UniversalUpdate):
-    universal_update.update_file.open('rb')
+    universal_update.update_file.open("rb")
     workbook = load_workbook(universal_update.update_file, data_only=True)
     unicef_ids = get_unicef_ids_from_workbook(workbook)
 
@@ -31,32 +36,37 @@ def create_and_save_snapshot_chunked(universal_update: UniversalUpdate):
     db_count = Individual.objects.filter(unicef_id__in=unicef_ids, program_id=program_id).count()
     if db_count != len(unicef_ids):
         unicef_ids_from_db = list(
-            Individual.objects.filter(unicef_id__in=unicef_ids, program_id=program_id)
-            .values_list('unicef_id', flat=True)
+            Individual.objects.filter(unicef_id__in=unicef_ids, program_id=program_id).values_list(
+                "unicef_id", flat=True
+            )
         )
         diff = set(unicef_ids) - set(unicef_ids_from_db)
         raise Exception("Some unicef ids are not in the program: " + str(diff))
 
     household_ids = list(
         Individual.objects.filter(unicef_id__in=unicef_ids, program_id=program_id)
-        .distinct('household_id')
-        .values_list('household_id', flat=True)
+        .distinct("household_id")
+        .values_list("household_id", flat=True)
     )
 
-    with tempfile.NamedTemporaryFile(mode='w+', delete=False, suffix='.json') as tmp_file:
+    with tempfile.NamedTemporaryFile(mode="w+", delete=False, suffix=".json") as tmp_file:
         tmp_file.write("[\n")
         first_item = True
         chunk_size = 10
         length = len(household_ids)
         index = 0
         for id_chunk in chunks(household_ids, chunk_size):
-            message = f"Creating backup snapshot for  records {index} to {min(index + chunk_size, length)} out of {length}"
+            message = (
+                f"Creating backup snapshot for  records {index} to {min(index + chunk_size, length)} out of {length}"
+            )
             universal_update.save_logs(message)
             print(message)
             index += 1
-            households = Household.objects.filter(id__in=id_chunk).select_related('head_of_household'
-                                                                                  ).prefetch_related('individuals',
-                                                                                                     'individuals_and_roles')
+            households = (
+                Household.objects.filter(id__in=id_chunk)
+                .select_related("head_of_household")
+                .prefetch_related("individuals", "individuals_and_roles")
+            )
             for household in households:
                 snapshot = get_household_snapshot(household)
                 if not first_item:

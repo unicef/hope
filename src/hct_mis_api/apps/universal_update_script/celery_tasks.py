@@ -2,17 +2,19 @@ import traceback
 
 from django.core.cache import cache
 from django.core.files.base import ContentFile
-from django.db import transaction
+
+from celery.exceptions import SoftTimeLimitExceeded
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.universal_update_script.models import UniversalUpdate
-from hct_mis_api.apps.universal_update_script.universal_individual_update_service.create_backup_snapshot import \
-    create_and_save_snapshot_chunked
-from hct_mis_api.apps.universal_update_script.universal_individual_update_service.universal_individual_update_service import \
-    UniversalIndividualUpdateService
+from hct_mis_api.apps.universal_update_script.universal_individual_update_service.create_backup_snapshot import (
+    create_and_save_snapshot_chunked,
+)
+from hct_mis_api.apps.universal_update_script.universal_individual_update_service.universal_individual_update_service import (
+    UniversalIndividualUpdateService,
+)
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.sentry import sentry_tags
-from celery.exceptions import SoftTimeLimitExceeded
 
 SOFT_TIME_LIMIT = 30 * 60
 HARD_TIME_LIMIT = 35 * 60
@@ -38,8 +40,9 @@ def run_universal_individual_update(self, universal_update_id: str) -> str:
         # import time
         # time.sleep(30)
         universal_update.save_logs("Update was started")
-        engine = UniversalIndividualUpdateService(universal_update, ignore_empty_values=True, deduplicate_es=True,
-                                                 deduplicate_documents=True)
+        engine = UniversalIndividualUpdateService(
+            universal_update, ignore_empty_values=True, deduplicate_es=True, deduplicate_documents=True
+        )
         engine.execute()
         return RESULT_SUCCESS
     except SoftTimeLimitExceeded:

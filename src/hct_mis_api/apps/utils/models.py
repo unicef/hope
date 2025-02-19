@@ -208,7 +208,7 @@ class SoftDeletableRepresentationMergeStatusModelWithDate(SoftDeletableRepresent
         abstract = True
 
     def delete(  # type: ignore
-            self, using: Any = None, keep_parents: bool = False, soft: bool = True, *args: Any, **kwargs: Any
+        self, using: Any = None, keep_parents: bool = False, soft: bool = True, *args: Any, **kwargs: Any
     ) -> Tuple[int, Dict[str, int]]:
         """
         Soft delete object (set its ``is_removed`` field to True).
@@ -246,7 +246,7 @@ class SoftDeletionTreeModel(TimeStampedUUIDModel, MPTTModel):
     all_objects = models.Manager()
 
     def delete(
-            self, using: Optional[Any] = None, soft: bool = True, *args: Any, **kwargs: Any
+        self, using: Optional[Any] = None, soft: bool = True, *args: Any, **kwargs: Any
     ) -> Optional[Tuple[int, dict[str, int]]]:
         """
         Soft delete object (set its ``is_removed`` field to True).
@@ -361,7 +361,7 @@ class SoftDeletableDefaultManagerModel(models.Model):
     objects = models.Manager()
 
     def delete(
-            self, using: Any = None, keep_parents: bool = False, soft: bool = True, *args: Any, **kwargs: Any
+        self, using: Any = None, keep_parents: bool = False, soft: bool = True, *args: Any, **kwargs: Any
     ) -> Tuple[int, dict[str, int]]:
         """
         Soft delete object (set its ``is_removed`` field to True).

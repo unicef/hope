@@ -1,10 +1,9 @@
-from collections.abc import Iterable
 from io import BytesIO
 from typing import Any, List, Tuple
 
-import openpyxl
-from django.core.files.base import ContentFile
 from django.db import transaction
+
+import openpyxl
 from openpyxl import load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
@@ -23,21 +22,27 @@ from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
 )
 from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
 from hct_mis_api.apps.universal_update_script.models import UniversalUpdate
-from hct_mis_api.apps.universal_update_script.universal_individual_update_service.all_updatable_fields import \
-    household_fields, individual_fields, get_document_fields, get_individual_flex_fields, get_wallet_fields
-from hct_mis_api.apps.universal_update_script.universal_individual_update_service.validator_and_handlers import \
-    get_generator_handler
+from hct_mis_api.apps.universal_update_script.universal_individual_update_service.all_updatable_fields import (
+    get_document_fields,
+    get_individual_flex_fields,
+    get_wallet_fields,
+    household_fields,
+    individual_fields,
+)
+from hct_mis_api.apps.universal_update_script.universal_individual_update_service.validator_and_handlers import (
+    get_generator_handler,
+)
 from hct_mis_api.apps.utils.elasticsearch_utils import populate_index
 
 
 class UniversalIndividualUpdateService:
     def __init__(
-            self,
-            universal_update: UniversalUpdate,
-            ignore_empty_values: bool = True,
-            deduplicate_es: bool = True,
-            deduplicate_documents: bool = True,
-            batch_size: int = 100,
+        self,
+        universal_update: UniversalUpdate,
+        ignore_empty_values: bool = True,
+        deduplicate_es: bool = True,
+        deduplicate_documents: bool = True,
+        batch_size: int = 100,
     ) -> None:
         self.universal_update = universal_update
         self.business_area = universal_update.program.business_area
@@ -45,22 +50,31 @@ class UniversalIndividualUpdateService:
         self.file_path = universal_update.update_file
         document_types = DocumentType.objects.filter()
         self.document_types = {f"{document_type.key}_no_i_c": document_type for document_type in document_types}
-        self.household_fields = {column_name: data for column_name, data in household_fields.items() if
-                                 data[0] in universal_update.household_fields}
-        self.individual_fields = {column_name: data for column_name, data in individual_fields.items() if
-                                  data[0] in universal_update.individual_fields}
-        self.individual_flex_fields = {column_name: data for column_name, data in get_individual_flex_fields().items()
-                                       if
-                                       data[0] in universal_update.individual_flex_fields_fields}
+        self.household_fields = {
+            column_name: data
+            for column_name, data in household_fields.items()
+            if data[0] in universal_update.household_fields
+        }
+        self.individual_fields = {
+            column_name: data
+            for column_name, data in individual_fields.items()
+            if data[0] in universal_update.individual_fields
+        }
+        self.individual_flex_fields = {
+            column_name: data
+            for column_name, data in get_individual_flex_fields().items()
+            if data[0] in universal_update.individual_flex_fields_fields
+        }
         self.document_fields = []
         for document_no_column_name, _ in get_document_fields():
             key = self.document_types[document_no_column_name].key
-            if key in universal_update.document_types.values_list('key', flat=True):
+            if key in universal_update.document_types.values_list("key", flat=True):
                 self.document_fields.append((document_no_column_name, f"{document_no_column_name}_country_i_c"))
-        self.deliver_mechanism_data_fields = {delivery_mechanism_name: data for delivery_mechanism_name, data in
-                                              get_wallet_fields().items() if
-                                              delivery_mechanism_name in universal_update.delivery_mechanisms.values_list(
-                                                  'code', flat=True)}
+        self.deliver_mechanism_data_fields = {
+            delivery_mechanism_name: data
+            for delivery_mechanism_name, data in get_wallet_fields().items()
+            if delivery_mechanism_name in universal_update.delivery_mechanisms.values_list("code", flat=True)
+        }
         self.ignore_empty_values = ignore_empty_values
         self.deduplicate_es = deduplicate_es
         self.deduplicate_documents = deduplicate_documents
@@ -78,7 +92,7 @@ class UniversalIndividualUpdateService:
         print(text)
 
     def validate_household_fields(
-            self, row: Tuple[Any, ...], headers: List[str], household: Any, row_index: int
+        self, row: Tuple[Any, ...], headers: List[str], household: Any, row_index: int
     ) -> List[str]:
         if self.household_fields is None:
             return []
@@ -91,7 +105,7 @@ class UniversalIndividualUpdateService:
         return errors
 
     def validate_individual_fields(
-            self, row: Tuple[Any, ...], headers: List[str], individual: Individual, row_index: int
+        self, row: Tuple[Any, ...], headers: List[str], individual: Individual, row_index: int
     ) -> List[str]:
         if self.individual_fields is None:
             return []
@@ -104,7 +118,7 @@ class UniversalIndividualUpdateService:
         return errors
 
     def validate_individual_flex_fields(
-            self, row: Tuple[Any, ...], headers: List[str], individual: Individual, row_index: int
+        self, row: Tuple[Any, ...], headers: List[str], individual: Individual, row_index: int
     ) -> List[str]:
         errors = []
         if self.individual_flex_fields is None:
@@ -117,7 +131,7 @@ class UniversalIndividualUpdateService:
         return errors
 
     def validate_documents(
-            self, row: Tuple[Any, ...], headers: List[str], individual: Individual, row_index: int
+        self, row: Tuple[Any, ...], headers: List[str], individual: Individual, row_index: int
     ) -> List[str]:
         if self.document_fields is None:
             return []
@@ -146,7 +160,8 @@ class UniversalIndividualUpdateService:
             row_index += 1
             if (row_index - 2) % self.batch_size == 0:
                 self.print_message(
-                    f"Validating row {row_index - 2} to {min(row_index - 2 + self.batch_size, sheet.max_row - 1)} Indivduals")
+                    f"Validating row {row_index - 2} to {min(row_index - 2 + self.batch_size, sheet.max_row - 1)} Indivduals"
+                )
             unicef_id = row[headers.index("unicef_id")]
             individuals_queryset = Individual.objects.filter(
                 unicef_id=unicef_id, business_area=self.business_area, program=self.program
@@ -199,7 +214,7 @@ class UniversalIndividualUpdateService:
             individual.flex_fields[name] = handled_value
 
     def handle_documents_update(
-            self, row: Tuple[Any, ...], headers: List[str], individual: Individual
+        self, row: Tuple[Any, ...], headers: List[str], individual: Individual
     ) -> Tuple[list, list]:
         documents_to_update = []
         documents_to_create = []
@@ -235,7 +250,7 @@ class UniversalIndividualUpdateService:
         return documents_to_update, documents_to_create
 
     def handle_deliver_mechanism_data_update(
-            self, row: Tuple[Any, ...], headers: List[str], individual: Individual
+        self, row: Tuple[Any, ...], headers: List[str], individual: Individual
     ) -> None:
         if self.deliver_mechanism_data_fields is None:
             return
@@ -289,7 +304,8 @@ class UniversalIndividualUpdateService:
             row_index += 1
             if (row_index - 2) % self.batch_size == 0:
                 self.print_message(
-                    f"Updating row {row_index - 2} to {min(row_index - 2 + self.batch_size, sheet.max_row - 1)} Individuals")
+                    f"Updating row {row_index - 2} to {min(row_index - 2 + self.batch_size, sheet.max_row - 1)} Individuals"
+                )
             unicef_id = row[headers.index("unicef_id")]
             individual = (
                 Individual.objects.select_related("household")
@@ -329,14 +345,14 @@ class UniversalIndividualUpdateService:
         return individual_ids
 
     def batch_update(
-            self,
-            document_fields_to_update: list,
-            documents_to_create: list,
-            documents_to_update: list,
-            household_fields_to_update: list,
-            households_to_update: list,
-            individual_fields_to_update: list,
-            individuals_to_update: list,
+        self,
+        document_fields_to_update: list,
+        documents_to_create: list,
+        documents_to_update: list,
+        household_fields_to_update: list,
+        households_to_update: list,
+        individual_fields_to_update: list,
+        individuals_to_update: list,
     ) -> None:
         Document.objects.bulk_update(documents_to_update, document_fields_to_update)
         Document.objects.bulk_create(documents_to_create)
@@ -367,7 +383,7 @@ class UniversalIndividualUpdateService:
         for field_data in self.household_fields.values():
             row.append(self.get_excel_value(getattr(household, field_data[0])))
         all_documents = individual.documents.all()
-        for (document_no_column, _) in self.document_fields:
+        for document_no_column, _ in self.document_fields:
             document = [x for x in all_documents if x.type_id == self.document_types[document_no_column].id]
             if len(document) > 1:
                 raise ValueError("Multiple documents found")
@@ -416,15 +432,13 @@ class UniversalIndividualUpdateService:
         ws.append(columns)
 
         individuals = Individual.objects.filter(
-            program=self.universal_update.program,
-            unicef_id__in=self.universal_update.unicef_ids.split(",")
+            program=self.universal_update.program, unicef_id__in=self.universal_update.unicef_ids.split(",")
         )
         individuals_length = len(individuals)
 
         for index, individual in enumerate(individuals):
             if (index) % self.batch_size == 0:
-                self.print_message(
-                    f"Generating row {index} to {min(index + self.batch_size, individuals_length)}")
+                self.print_message(f"Generating row {index} to {min(index + self.batch_size, individuals_length)}")
             row_data = self.get_individual_row(individual)
             ws.append(row_data)
 
@@ -432,8 +446,7 @@ class UniversalIndividualUpdateService:
         wb.save(output)
         output.seek(0)
 
-        self.print_message(
-            f"Generating Finished")
+        self.print_message("Generating Finished")
         return output
 
     @transaction.atomic

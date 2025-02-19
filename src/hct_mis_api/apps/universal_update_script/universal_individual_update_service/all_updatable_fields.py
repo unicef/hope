@@ -1,14 +1,23 @@
 """
 This is static by design, it could be made dynamic by fetching the fields from the model itself.
 """
-from typing import Dict, Tuple, Any
+from typing import Any, Dict, Tuple
 
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.payment.models import DeliveryMechanism
-from hct_mis_api.apps.universal_update_script.universal_individual_update_service.validator_and_handlers import \
-    validate_string, handle_simple_field, validate_date, validate_phone_number, handle_boolean_field, \
-    validate_boolean, validate_choices, validate_admin, validate_integer, validate_flex_field_string
+from hct_mis_api.apps.universal_update_script.universal_individual_update_service.validator_and_handlers import (
+    handle_boolean_field,
+    handle_simple_field,
+    validate_admin,
+    validate_boolean,
+    validate_choices,
+    validate_date,
+    validate_flex_field_string,
+    validate_integer,
+    validate_phone_number,
+    validate_string,
+)
 
 individual_fields: Dict[str, Tuple[str, Any, Any]] = {
     # "photo": ("photo", validate_string, handle_simple_field), # TODO: Handle photo
@@ -73,20 +82,38 @@ household_fields: Dict[str, Tuple[str, Any, Any]] = {
     "male_age_group_18_59_count": ("male_age_group_18_59_count", validate_integer, handle_simple_field),
     "male_age_group_60_count": ("male_age_group_60_count", validate_integer, handle_simple_field),
     "female_age_group_0_5_disabled_count": (
-        "female_age_group_0_5_disabled_count", validate_integer, handle_simple_field),
+        "female_age_group_0_5_disabled_count",
+        validate_integer,
+        handle_simple_field,
+    ),
     "female_age_group_6_11_disabled_count": (
-        "female_age_group_6_11_disabled_count", validate_integer, handle_simple_field),
+        "female_age_group_6_11_disabled_count",
+        validate_integer,
+        handle_simple_field,
+    ),
     "female_age_group_12_17_disabled_count": (
-        "female_age_group_12_17_disabled_count", validate_integer, handle_simple_field),
+        "female_age_group_12_17_disabled_count",
+        validate_integer,
+        handle_simple_field,
+    ),
     "female_age_group_18_59_disabled_count": (
-        "female_age_group_18_59_disabled_count", validate_integer, handle_simple_field),
+        "female_age_group_18_59_disabled_count",
+        validate_integer,
+        handle_simple_field,
+    ),
     "female_age_group_60_disabled_count": ("female_age_group_60_disabled_count", validate_integer, handle_simple_field),
     "male_age_group_0_5_disabled_count": ("male_age_group_0_5_disabled_count", validate_integer, handle_simple_field),
     "male_age_group_6_11_disabled_count": ("male_age_group_6_11_disabled_count", validate_integer, handle_simple_field),
     "male_age_group_12_17_disabled_count": (
-        "male_age_group_12_17_disabled_count", validate_integer, handle_simple_field),
+        "male_age_group_12_17_disabled_count",
+        validate_integer,
+        handle_simple_field,
+    ),
     "male_age_group_18_59_disabled_count": (
-        "male_age_group_18_59_disabled_count", validate_integer, handle_simple_field),
+        "male_age_group_18_59_disabled_count",
+        validate_integer,
+        handle_simple_field,
+    ),
     "male_age_group_60_disabled_count": ("male_age_group_60_disabled_count", validate_integer, handle_simple_field),
     "children_count": ("children_count", validate_integer, handle_simple_field),
     "male_children_count": ("male_children_count", validate_integer, handle_simple_field),
@@ -109,9 +136,13 @@ household_fields: Dict[str, Tuple[str, Any, Any]] = {
 def get_individual_flex_fields():
     flex_fields_dict = dict()
     for flexible_attribute in FlexibleAttribute.objects.filter(
-            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL):
-        flex_fields_dict[
-            f"flex_ind__{flexible_attribute.name}"] = flexible_attribute.name, validate_flex_field_string, handle_simple_field,
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
+    ):
+        flex_fields_dict[f"flex_ind__{flexible_attribute.name}"] = (
+            flexible_attribute.name,
+            validate_flex_field_string,
+            handle_simple_field,
+        )
     return flex_fields_dict
 
 

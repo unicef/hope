@@ -1,7 +1,3 @@
-from typing import Optional, Any
-
-from django import forms
-from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.postgres.fields import ArrayField
 from django.core.cache import cache
 from django.db import models
@@ -12,13 +8,12 @@ from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.models import CeleryEnabledModel, TimeStampedModel
 
 
-
-
-
-class UniversalUpdate(TimeStampedModel, CeleryEnabledModel, ):
+class UniversalUpdate(
+    TimeStampedModel,
+    CeleryEnabledModel,
+):
     individual_fields = ArrayField(base_field=models.CharField(max_length=255), default=list)
-    individual_flex_fields_fields = ArrayField(base_field=models.CharField(max_length=255),
-                                                                default=list)
+    individual_flex_fields_fields = ArrayField(base_field=models.CharField(max_length=255), default=list)
     household_fields = ArrayField(base_field=models.CharField(max_length=255), default=list)
     document_types = models.ManyToManyField(DocumentType, blank=True)
     delivery_mechanisms = models.ManyToManyField(DeliveryMechanism, blank=True)
@@ -30,7 +25,6 @@ class UniversalUpdate(TimeStampedModel, CeleryEnabledModel, ):
     saved_logs = models.TextField(blank=True, null=True)
     unicef_ids = models.TextField(blank=True, null=True)
 
-    celery_task_name = ""
     @property
     def logs(self):
         if cache.get(f"{self.id}_logs"):

@@ -1,17 +1,15 @@
-from collections import defaultdict
 from datetime import date
 from typing import Any, Optional
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import timezone_datetime
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.models import SEX_CHOICE
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.phone import is_valid_phone_number
 
 
 def handle_date_field(
-        value: Any, name: str, household: Any, business_area: BusinessArea, program: Program
+    value: Any, name: str, household: Any, business_area: BusinessArea, program: Program
 ) -> Optional[date]:
     if value is None or value == "":
         return None
@@ -29,7 +27,7 @@ def handle_boolean_field(value: Any, name: str, household: Any, business_area: B
 
 
 def handle_admin_field(
-        value: Any, name: str, household: Any, business_area: BusinessArea, program: Program
+    value: Any, name: str, household: Any, business_area: BusinessArea, program: Program
 ) -> Optional[Area]:
     if value is None or value == "":
         return None
@@ -37,7 +35,7 @@ def handle_admin_field(
 
 
 def validate_admin(
-        value: Any, name: str, model_class: Any, business_area: BusinessArea, program: Program
+    value: Any, name: str, model_class: Any, business_area: BusinessArea, program: Program
 ) -> Optional[str]:
     if value is None or value == "":
         return None
@@ -48,13 +46,13 @@ def validate_admin(
 
 
 def validate_string(
-        value: Any, name: str, model_class: Any, business_area: BusinessArea, program: Program
+    value: Any, name: str, model_class: Any, business_area: BusinessArea, program: Program
 ) -> Optional[str]:
     return None
 
 
 def validate_date(
-        value: Any, name: str, model_class: Any, business_area: BusinessArea, program: Program
+    value: Any, name: str, model_class: Any, business_area: BusinessArea, program: Program
 ) -> Optional[str]:
     if value is None or value == "":
         return None
@@ -65,8 +63,9 @@ def validate_date(
     return None
 
 
-def validate_integer(value: Any, name: str, model_class: Any, business_area: BusinessArea, program: Program) -> \
-        Optional[str]:
+def validate_integer(
+    value: Any, name: str, model_class: Any, business_area: BusinessArea, program: Program
+) -> Optional[str]:
     if value is None or value == "":
         return None
     try:
@@ -77,7 +76,7 @@ def validate_integer(value: Any, name: str, model_class: Any, business_area: Bus
 
 
 def validate_phone_number(
-        value: Any, name: str, model_class: Any, business_area: BusinessArea, program: Program
+    value: Any, name: str, model_class: Any, business_area: BusinessArea, program: Program
 ) -> Optional[str]:
     if value is None or value == "":
         return None
@@ -95,7 +94,7 @@ def _get_field_choices_values(model_class, field_name):
 
 
 def validate_choices(
-        value: Any, name: str, model_class: Any, business_area: BusinessArea, program: Program
+    value: Any, name: str, model_class: Any, business_area: BusinessArea, program: Program
 ) -> Optional[str]:
     if value is None or value == "":
         return None
@@ -107,7 +106,7 @@ def validate_choices(
 
 
 def validate_boolean(
-        value: Any, name: str, model_class: Any, business_area: BusinessArea, program: Program
+    value: Any, name: str, model_class: Any, business_area: BusinessArea, program: Program
 ) -> Optional[str]:
     if value is None or value == "":
         return None
@@ -119,7 +118,7 @@ def validate_boolean(
 
 
 def validate_flex_field_string(
-        value: Any, name: str, model_class: Any, business_area: BusinessArea, program: Program
+    value: Any, name: str, model_class: Any, business_area: BusinessArea, program: Program
 ) -> Optional[str]:
     return None
 
@@ -127,12 +126,15 @@ def validate_flex_field_string(
 def boolean_generator_handler(value: Any) -> Any:
     return "TRUE" if value else "FALSE"
 
+
 def simple_generator_handler(value: Any) -> Any:
     return value
+
 
 GENERATOR_TYPE_HANDLER = {
     bool: boolean_generator_handler,
 }
+
 
 def get_generator_handler(value: Any):
     return GENERATOR_TYPE_HANDLER.get(type(value), simple_generator_handler)
