@@ -508,6 +508,7 @@ class UploadRDITests(HOPEApiTestCase):
     def test_upload_multiple_errors(self) -> None:
         data = {
             "name": "aaaa",
+            "program": str(self.program.id),
             "households": [
                 {
                     "residence_status": "",

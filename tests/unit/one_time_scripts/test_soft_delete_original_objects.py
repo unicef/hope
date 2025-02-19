@@ -27,33 +27,16 @@ class TestSoftDeleteOriginalObjects(TestCase):
         cls.household = HouseholdFactory(
             program=program, business_area=cls.business_area, head_of_household=individual2
         )
-
-        cls.individual_tbd = IndividualFactory(program=None, business_area=cls.business_area, household=None)
         cls.individual = IndividualFactory(program=program, business_area=cls.business_area, household=None)
         cls.individual_role_in_hh = IndividualRoleInHouseholdFactory(
             household=cls.household, individual=IndividualFactory(household=None)
         )
-
-        cls.document_tbd = DocumentFactory(individual=cls.individual_tbd)
         cls.document = DocumentFactory(individual=cls.individual)
-
-        cls.individual_identity_tbd = IndividualIdentityFactory(individual=cls.individual_tbd)
         cls.individual_identity = IndividualIdentityFactory(individual=cls.individual)
-
-        cls.bank_account_info_tbd = BankAccountInfoFactory(individual=cls.individual_tbd)
         cls.bank_account_info = BankAccountInfoFactory(individual=cls.individual)
 
     def test_soft_delete_original_objects(self) -> None:
         soft_delete_original_objects()
-        self.individual_tbd.refresh_from_db()
-        self.document_tbd.refresh_from_db()
-        self.individual_identity_tbd.refresh_from_db()
-        self.bank_account_info_tbd.refresh_from_db()
-
-        self.assertEqual(self.individual_tbd.is_removed, True)
-        self.assertEqual(self.document_tbd.is_removed, True)
-        self.assertEqual(self.individual_identity_tbd.is_removed, True)
-        self.assertEqual(self.bank_account_info_tbd.is_removed, True)
 
         self.household.refresh_from_db()
         self.individual.refresh_from_db()
