@@ -379,8 +379,10 @@ class Household(
             "male_age_group_12_17_disabled_count",
             "male_age_group_18_59_disabled_count",
             "male_age_group_60_disabled_count",
+            "other_sex_group_count",
+            "unknown_sex_group_count",
             "registration_data_import",
-            "programs",
+            "program",
             "returnee",
             "flex_fields",
             "first_registration_date",
@@ -437,33 +439,35 @@ class Household(
             Through model will contain the role (ROLE_CHOICE) they are connected with on.""",
         related_name="represented_households",
     )
-    female_age_group_0_5_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_6_11_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_12_17_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_18_59_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_60_count = models.PositiveIntegerField(default=None, null=True)
-    pregnant_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_0_5_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_6_11_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_12_17_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_18_59_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_60_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_0_5_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_6_11_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_12_17_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_18_59_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_60_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_0_5_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_6_11_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_12_17_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_18_59_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_60_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    children_count = models.PositiveIntegerField(default=None, null=True)
-    male_children_count = models.PositiveIntegerField(default=None, null=True)
-    female_children_count = models.PositiveIntegerField(default=None, null=True)
-    children_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    male_children_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    female_children_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    female_age_group_0_5_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    female_age_group_6_11_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    female_age_group_12_17_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    female_age_group_18_59_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    female_age_group_60_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    pregnant_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    male_age_group_0_5_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    male_age_group_6_11_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    male_age_group_12_17_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    male_age_group_18_59_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    male_age_group_60_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    female_age_group_0_5_disabled_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    female_age_group_6_11_disabled_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    female_age_group_12_17_disabled_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    female_age_group_18_59_disabled_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    female_age_group_60_disabled_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    male_age_group_0_5_disabled_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    male_age_group_6_11_disabled_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    male_age_group_12_17_disabled_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    male_age_group_18_59_disabled_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    male_age_group_60_disabled_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    children_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    male_children_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    female_children_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    children_disabled_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    male_children_disabled_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    female_children_disabled_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    other_sex_group_count = models.PositiveIntegerField(default=None, null=True, blank=True)  # OTHER
+    unknown_sex_group_count = models.PositiveIntegerField(default=None, null=True, blank=True)  # NOT_COLLECTED
 
     registration_data_import = models.ForeignKey(
         "registration_data.RegistrationDataImport",
@@ -472,11 +476,6 @@ class Household(
         null=True,
         on_delete=models.CASCADE,
     )
-    programs = models.ManyToManyField(
-        "program.Program",
-        related_name="households",
-        blank=True,
-    )  # TODO: remove after migration
     returnee = models.BooleanField(null=True)
     flex_fields = JSONField(default=dict, blank=True)
     first_registration_date = models.DateTimeField()
@@ -529,9 +528,7 @@ class Household(
 
     family_id = models.CharField(max_length=100, blank=True, null=True)  # eDopomoga household id
     storage_obj = models.ForeignKey(StorageFile, on_delete=models.SET_NULL, blank=True, null=True)
-    program = models.ForeignKey(
-        "program.Program", null=True, blank=True, db_index=True, on_delete=models.SET_NULL
-    )  # TODO Add later related name, when no clash with programs, set null=False after migration
+    program = models.ForeignKey("program.Program", db_index=True, on_delete=models.PROTECT, related_name="households")
     copied_from = models.ForeignKey(
         "self",
         null=True,
@@ -1034,9 +1031,7 @@ class Individual(
     blockchain_name = models.CharField(max_length=64, blank=True, default="")
     wallet_address = models.CharField(max_length=128, blank=True, default="")
 
-    program = models.ForeignKey(
-        "program.Program", null=True, blank=True, db_index=True, related_name="individuals", on_delete=models.SET_NULL
-    )  # TODO set null=False after migration
+    program = models.ForeignKey("program.Program", db_index=True, related_name="individuals", on_delete=models.PROTECT)
     copied_from = models.ForeignKey(
         "self",
         null=True,
