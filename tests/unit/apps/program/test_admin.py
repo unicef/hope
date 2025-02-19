@@ -1,6 +1,5 @@
 from django.urls import reverse
 
-import pytest
 from django_webtest import WebTest
 
 from hct_mis_api.apps.account.fixtures import (
@@ -44,7 +43,6 @@ class ProgramAdminTest(WebTest):
         RoleAssignment.objects.all().delete()
         RoleAssignmentFactory(partner=cls.partner_with_role, program=cls.program, business_area=cls.business_area)
 
-    @pytest.mark.django_db(transaction=True)
     def test_area_limits_get_request(self) -> None:
         response = self.app.get(self.url, user=self.user)
         self.assertEqual(response.status_code, 200)
@@ -59,7 +57,6 @@ class ProgramAdminTest(WebTest):
         self.assertQuerysetEqual(response.context["partners"], Partner.objects.filter(id=self.partner_with_role.id))
         self.assertIn("program", response.context)
 
-    @pytest.mark.django_db(transaction=True)
     def test_area_limits_post_request_create(self) -> None:
         self.app.post(
             self.url,
@@ -80,7 +77,6 @@ class ProgramAdminTest(WebTest):
             Area.objects.filter(id__in=[self.admin_area1.id, self.admin_area2.id]),
         )
 
-    @pytest.mark.django_db(transaction=True)
     def test_area_limits_post_request_edit(self) -> None:
         area_limit = AdminAreaLimitedTo.objects.create(partner=self.partner_with_role, program=self.program)
         area_limit.areas.set([self.admin_area1, self.admin_area2, self.admin_area3])
@@ -102,7 +98,6 @@ class ProgramAdminTest(WebTest):
             Area.objects.filter(id__in=[self.admin_area1.id]),
         )
 
-    @pytest.mark.django_db(transaction=True)
     def test_area_limits_post_request_delete(self) -> None:
         area_limit = AdminAreaLimitedTo.objects.create(partner=self.partner_with_role, program=self.program)
         area_limit.areas.set([self.admin_area1, self.admin_area2, self.admin_area3])
