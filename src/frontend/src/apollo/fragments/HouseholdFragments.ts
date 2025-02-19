@@ -11,6 +11,8 @@ export const householdMinimal = gql`
     maleChildrenCount
     femaleChildrenCount
     childrenDisabledCount
+    otherSexGroupCount
+    unknownSexGroupCount
     size
     totalCashReceived
     totalCashReceivedUsd
