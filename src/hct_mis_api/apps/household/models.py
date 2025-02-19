@@ -541,8 +541,6 @@ class Household(
         "this field will contain the household it was copied from.",
     )
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True)
-    is_migration_handled = models.BooleanField(default=False)
-    migrated_at = models.DateTimeField(null=True, blank=True)
     collect_type = models.CharField(choices=CollectType.choices, default=CollectType.STANDARD.value, max_length=8)
 
     kobo_submission_uuid = models.UUIDField(null=True, default=None)
@@ -706,8 +704,6 @@ class Document(AbstractSyncable, SoftDeletableRepresentationMergeStatusModel, Ti
     cleared_by = models.ForeignKey("account.User", null=True, on_delete=models.SET_NULL)
     issuance_date = models.DateTimeField(null=True, blank=True)
     expiry_date = models.DateTimeField(null=True, blank=True, db_index=True)
-
-    is_migration_handled = models.BooleanField(default=False)
     copied_from = models.ForeignKey(
         "self",
         null=True,
@@ -776,7 +772,6 @@ class IndividualIdentity(SoftDeletableRepresentationMergeStatusModel, TimeStampe
     )
     country = models.ForeignKey("geo.Country", null=True, on_delete=models.PROTECT)
     number = models.CharField(max_length=255)
-    is_migration_handled = models.BooleanField(default=False)
     copied_from = models.ForeignKey(
         "self",
         null=True,
@@ -809,8 +804,6 @@ class IndividualRoleInHousehold(SoftDeletableRepresentationMergeStatusModel, Tim
         blank=True,
         choices=ROLE_CHOICE,
     )
-    is_migration_handled = models.BooleanField(default=False)
-    migrated_at = models.DateTimeField(null=True, blank=True)
     copied_from = models.ForeignKey(
         "self",
         null=True,
@@ -1045,8 +1038,6 @@ class Individual(
         "this field will contain the individual it was copied from.",
     )
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True)
-    is_migration_handled = models.BooleanField(default=False)
-    migrated_at = models.DateTimeField(null=True, blank=True)
     mis_unicef_id = models.CharField(max_length=255, null=True)
 
     vector_column = SearchVectorField(null=True)

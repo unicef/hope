@@ -348,10 +348,6 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
     ignored = models.BooleanField(default=False, db_index=True)
     extras = JSONField(blank=True, default=dict)
     comments = models.TextField(blank=True, null=True)
-
-    is_original = models.BooleanField(db_index=True, default=False)
-    is_migration_handled = models.BooleanField(default=False)
-    migrated_at = models.DateTimeField(null=True, blank=True)
     copied_from = models.ForeignKey(
         "self",
         null=True,
