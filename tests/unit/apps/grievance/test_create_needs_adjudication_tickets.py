@@ -44,7 +44,6 @@ class TestCreateNeedsAdjudicationTickets(APITestCase):
         cls.household.registration_data_import.imported_by.save()
         cls.household.registration_data_import.program = program
         cls.household.registration_data_import.save()
-        cls.household.programs.add(program)
         cls.individuals_to_create = [
             {
                 "full_name": "test name",
@@ -153,12 +152,10 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
         cls.household.registration_data_import.imported_by.save()
         cls.household.registration_data_import.program = program
         cls.household.registration_data_import.save()
-        cls.household.programs.add(program)
         cls.household2.household_collection.save()
         cls.household2.registration_data_import.imported_by.save()
         cls.household2.registration_data_import.program = program
         cls.household2.registration_data_import.save()
-        cls.household2.programs.add(program)
         cls.rdi = cls.household.registration_data_import
         individuals_to_create = [
             {

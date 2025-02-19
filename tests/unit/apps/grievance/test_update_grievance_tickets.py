@@ -123,7 +123,6 @@ class TestUpdateGrievanceTickets(APITestCase):
         household_one.registration_data_import.imported_by.save()
         household_one.registration_data_import.program = cls.program
         household_one.registration_data_import.save()
-        household_one.programs.add(cls.program)
 
         cls.individuals_to_create = [
             {

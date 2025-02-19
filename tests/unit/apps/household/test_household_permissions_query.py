@@ -67,7 +67,7 @@ class TestHouseholdPermissionsQuery(APITestCase):
         cls.area2 = AreaFactory(name="City Test2", area_type=area_type_level_2, p_code="TEST0101", parent=area1)
         cls.area3 = AreaFactory(name="City Test3", area_type=area_type_level_2, p_code="TEST0102", parent=area1)
         cls.household, _ = create_household(
-            {"size": 2, "address": "Lorem Ipsum 2", "country_origin": country_origin},
+            {"size": 2, "address": "Lorem Ipsum 2", "country_origin": country_origin, "program": cls.program_one},
         )
         cls.household.program = cls.program_one
         cls.household.save()
