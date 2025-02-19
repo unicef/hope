@@ -88,6 +88,8 @@ class RdiMergeTask:
         "male_age_group_12_17_disabled_count",
         "male_age_group_18_59_disabled_count",
         "male_age_group_60_disabled_count",
+        "other_sex_group_count",
+        "unknown_sex_group_count",
         "first_registration_date",
         "last_registration_date",
         "flex_fields",
