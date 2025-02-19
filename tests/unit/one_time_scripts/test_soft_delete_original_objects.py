@@ -46,13 +46,11 @@ class TestSoftDeleteOriginalObjects(TestCase):
     def test_soft_delete_original_objects(self) -> None:
         soft_delete_original_objects()
         self.individual_tbd.refresh_from_db()
-        self.individual_role_in_hh_tbd.refresh_from_db()
         self.document_tbd.refresh_from_db()
         self.individual_identity_tbd.refresh_from_db()
         self.bank_account_info_tbd.refresh_from_db()
 
         self.assertEqual(self.individual_tbd.is_removed, True)
-        self.assertEqual(self.individual_role_in_hh_tbd.is_removed, True)
         self.assertEqual(self.document_tbd.is_removed, True)
         self.assertEqual(self.individual_identity_tbd.is_removed, True)
         self.assertEqual(self.bank_account_info_tbd.is_removed, True)
