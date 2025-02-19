@@ -98,5 +98,4 @@ class UsersFilter(FilterSet):
                 partner__role_assignments__role__id=value,
                 partner__role_assignments__business_area__slug=business_area_slug,
             )
-        print(qs.filter(q_obj))
         return qs.filter(q_obj)
