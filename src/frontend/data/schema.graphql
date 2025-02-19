@@ -1534,7 +1534,6 @@ type HouseholdNode implements Node {
   otherSexGroupCount: Int
   unknownSexGroupCount: Int
   registrationDataImport: RegistrationDataImportNode
-  programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   returnee: Boolean
   flexFields: FlexFieldsScalar
   firstRegistrationDate: DateTime!
@@ -1557,7 +1556,7 @@ type HouseholdNode implements Node {
   totalCashReceivedUsd: Decimal
   totalCashReceived: Decimal
   familyId: String
-  program: ProgramNode
+  program: ProgramNode!
   copiedFrom: HouseholdNode
   originUnicefId: String
   isMigrationHandled: Boolean!
@@ -1914,7 +1913,7 @@ type IndividualNode implements Node {
   walletName: String!
   blockchainName: String!
   walletAddress: String!
-  program: ProgramNode
+  program: ProgramNode!
   copiedFrom: IndividualNode
   originUnicefId: String
   isMigrationHandled: Boolean!
@@ -2917,7 +2916,6 @@ type ProgramNode implements Node {
   biometricDeduplicationEnabled: Boolean!
   pduFields: [PeriodicFieldNode]
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
-  householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   registrationImports(offset: Int, before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!

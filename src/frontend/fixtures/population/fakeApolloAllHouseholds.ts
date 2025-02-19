@@ -49,10 +49,7 @@ export const fakeApolloAllHouseholds = [
                 totalCashReceived: null,
                 currency: '',
                 lastRegistrationDate: '2020-08-22T00:00:00',
-                programs: {
-                  edges: [],
-                  __typename: 'ProgramNodeConnection',
-                },
+                program: null,
                 __typename: 'HouseholdNode',
               },
               __typename: 'HouseholdNodeEdge',
