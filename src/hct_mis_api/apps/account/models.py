@@ -389,6 +389,12 @@ class HorizontalChoiceArrayField(ArrayField):
 
 
 class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
+    """
+    Model to represent the assignment of a role to a user or partner within a specific business area or program.
+    When program is NULL, the role is assigned to the user or partner in all programs within the business area.
+    This model also associates the role with an expiry date and a group, if applicable.
+    """
+
     business_area = models.ForeignKey("core.BusinessArea", related_name="role_assignments", on_delete=models.CASCADE)
     user = models.ForeignKey(
         "account.User", related_name="role_assignments", on_delete=models.CASCADE, null=True, blank=True
