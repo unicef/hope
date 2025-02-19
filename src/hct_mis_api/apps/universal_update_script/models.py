@@ -26,17 +26,17 @@ class UniversalUpdate(
     unicef_ids = models.TextField(blank=True, null=True)
 
     @property
-    def logs(self):
+    def logs(self) -> str:
         if cache.get(f"{self.id}_logs"):
             return cache.get(f"{self.id}_logs")
         return self.saved_logs
 
-    def save_logs(self, log):
+    def save_logs(self, log: str) -> None:
         self.saved_logs += f"{log}\n"
         cache.set(f"{self.id}_logs", self.saved_logs)
         self.save()
 
-    def clear_logs(self):
+    def clear_logs(self) -> None:
         self.saved_logs = ""
         cache.delete(f"{self.id}_logs")
         self.save()

@@ -370,10 +370,10 @@ class UniversalIndividualUpdateService:
         households_to_update.clear()
         individuals_to_update.clear()
 
-    def get_excel_value(self, value):
+    def get_excel_value(self, value: Any) -> Any:
         return get_generator_handler(value)(value)
 
-    def get_individual_row(self, individual):
+    def get_individual_row(self, individual: Individual) -> list[Any]:
         row = [individual.unicef_id]
         household = individual.household
         for field_data in self.individual_fields.values():
@@ -407,7 +407,7 @@ class UniversalIndividualUpdateService:
                     row.append(None)
         return row
 
-    def generate_xlsx_template(self):
+    def generate_xlsx_template(self) -> BytesIO:
         columns = ["unicef_id"]
 
         for column_name in self.individual_fields.keys():

@@ -1,5 +1,7 @@
 from datetime import date
-from typing import Any, Optional
+from typing import Any, Callable, Optional, Type
+
+from django.db.models import Model
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import timezone_datetime
@@ -86,7 +88,7 @@ def validate_phone_number(
     return None
 
 
-def _get_field_choices_values(model_class, field_name):
+def _get_field_choices_values(model_class: Type[Model], field_name: str) -> list[tuple[str, str]]:
     field = model_class._meta.get_field(field_name)
     if field.choices:
         return [key for key, display in field.choices]
@@ -136,5 +138,5 @@ GENERATOR_TYPE_HANDLER = {
 }
 
 
-def get_generator_handler(value: Any):
+def get_generator_handler(value: Any) -> Callable:
     return GENERATOR_TYPE_HANDLER.get(type(value), simple_generator_handler)

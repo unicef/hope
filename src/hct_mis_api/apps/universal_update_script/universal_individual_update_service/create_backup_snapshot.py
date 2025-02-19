@@ -1,9 +1,12 @@
 import json
 import tempfile
+from typing import Optional
 
 from django.core.files.base import ContentFile
 
 from openpyxl import load_workbook
+from openpyxl.workbook import Workbook
+from openpyxl.worksheet.worksheet import Worksheet
 
 from hct_mis_api.apps.core.utils import chunks
 from hct_mis_api.apps.household.models import Household, Individual
@@ -13,7 +16,7 @@ from hct_mis_api.apps.payment.services.payment_household_snapshot_service import
 from hct_mis_api.apps.universal_update_script.models import UniversalUpdate
 
 
-def get_unicef_ids_from_sheet(ws):
+def _get_unicef_ids_from_sheet(ws: Worksheet) -> list[str]:
     header = next(ws.iter_rows(min_row=1, max_row=1, values_only=True))
     try:
         col_index = header.index("unicef_id") + 1
@@ -22,15 +25,15 @@ def get_unicef_ids_from_sheet(ws):
     return [row[col_index - 1] for row in ws.iter_rows(min_row=2, values_only=True)]
 
 
-def get_unicef_ids_from_workbook(workbook, sheet_name=None):
+def _get_unicef_ids_from_workbook(workbook: Workbook, sheet_name: Optional[str] = None) -> list[str]:
     ws = workbook[sheet_name] if sheet_name else workbook.active
-    return get_unicef_ids_from_sheet(ws)
+    return _get_unicef_ids_from_sheet(ws)
 
 
-def create_and_save_snapshot_chunked(universal_update: UniversalUpdate):
+def create_and_save_snapshot_chunked(universal_update: UniversalUpdate) -> None:
     universal_update.update_file.open("rb")
     workbook = load_workbook(universal_update.update_file, data_only=True)
-    unicef_ids = get_unicef_ids_from_workbook(workbook)
+    unicef_ids = _get_unicef_ids_from_workbook(workbook)
 
     program_id = universal_update.program_id
     db_count = Individual.objects.filter(unicef_id__in=unicef_ids, program_id=program_id).count()

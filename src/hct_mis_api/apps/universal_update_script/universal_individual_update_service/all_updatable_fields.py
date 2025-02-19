@@ -1,7 +1,9 @@
 """
 This is static by design, it could be made dynamic by fetching the fields from the model itself.
 """
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, List, Tuple, Type
+
+from django.db.models import Model
 
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.household.models import DocumentType
@@ -133,7 +135,7 @@ household_fields: Dict[str, Tuple[str, Any, Any]] = {
 }
 
 
-def get_individual_flex_fields():
+def get_individual_flex_fields() -> dict[Any, Any]:
     flex_fields_dict = dict()
     for flexible_attribute in FlexibleAttribute.objects.filter(
         associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
@@ -146,11 +148,11 @@ def get_individual_flex_fields():
     return flex_fields_dict
 
 
-def get_document_fields():
+def get_document_fields() -> list[Any]:
     return [(f"{x}_no_i_c", f"{x}_country_i_c") for x in DocumentType.objects.values_list("key", flat=True)]
 
 
-def get_wallet_fields():
+def get_wallet_fields() -> dict[Any, Any]:
     deliver_mechanism_data_fields = {}
     for delivery_mechanism in DeliveryMechanism.objects.all():
         wallet_fields = []
@@ -163,7 +165,7 @@ def get_wallet_fields():
     return deliver_mechanism_data_fields
 
 
-def _get_db_fields(model_class):
+def _get_db_fields(model_class: Type[Model]) -> List[str]:
     """
     Returns a list of field names that correspond to the columns stored
     in the model's database table, excluding related fields.

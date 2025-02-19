@@ -603,7 +603,7 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
         except Exception as e:
             return str(e)
 
-    def queue(self, task_handler: Callable[[Any], Any] = None) -> Optional[str]:
+    def queue(self, task_handler: Optional[Callable[[Any], Any]] = None) -> Optional[str]:
         if self.celery_status not in self.CELERY_STATUS_SCHEDULED:
             if not task_handler:
                 res = self.task_handler.delay(self.pk)

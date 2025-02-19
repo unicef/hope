@@ -1,7 +1,11 @@
+from typing import Any, Iterator, Tuple
+
 from django import forms
 from django.contrib import admin
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.postgres.forms import SimpleArrayField
+from django.db.models import QuerySet
+from django.http import HttpRequest
 
 from admin_extra_buttons.decorators import button
 
@@ -23,33 +27,34 @@ from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 
 class ArrayFieldFilteredSelectMultiple(FilteredSelectMultiple):
-    def format_value(self, value):
+    def format_value(self, value: str) -> list[str]:  # type: ignore
         """Return selected values as a list."""
+        processed_value = []
         if value is None and self.allow_multiple_selected:
             return []
         elif self.allow_multiple_selected:
-            value = [v for v in value.split(",")]
+            processed_value = [v for v in value.split(",")]
 
         if not isinstance(value, (tuple, list)):
-            value = [value]
+            processed_value = [value]
 
-        results = [str(v) if v is not None else "" for v in value]
+        results = [str(v) if v is not None else "" for v in processed_value]
         return results
 
 
 class UniversalUpdateAdminForm(forms.ModelForm):
     individual_fields = SimpleArrayField(
-        base_field=forms.CharField(max_length=255),
+        base_field=forms.CharField(max_length=255),  # type: ignore
         widget=ArrayFieldFilteredSelectMultiple("Individual Fields", is_stacked=False),
         required=False,
     )
     individual_flex_fields_fields = SimpleArrayField(
-        base_field=forms.CharField(max_length=255),
+        base_field=forms.CharField(max_length=255),  # type: ignore
         widget=ArrayFieldFilteredSelectMultiple("Individual Flex Fields", is_stacked=False),
         required=False,
     )
     household_fields = SimpleArrayField(
-        base_field=forms.CharField(max_length=255),
+        base_field=forms.CharField(max_length=255),  # type: ignore
         widget=ArrayFieldFilteredSelectMultiple("Household Fields", is_stacked=False),
         required=False,
     )
@@ -62,8 +67,8 @@ class UniversalUpdateAdminForm(forms.ModelForm):
             "delivery_mechanisms": FilteredSelectMultiple("Delivery Mechanisms", is_stacked=False),
         }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, *args: list[Any], **kwargs: dict[Any, Any]) -> None:
+        super().__init__(*args, **kwargs)  # type: ignore
         self.fields["individual_fields"].widget.choices = list(self.get_dynamic_individual_fields_choices())
         self.fields["individual_flex_fields_fields"].widget.choices = list(
             self.get_dynamic_individual_flex_fields_choices()
@@ -72,22 +77,22 @@ class UniversalUpdateAdminForm(forms.ModelForm):
         self.fields["document_types"].queryset = self.get_dynamic_document_types_queryset()
         self.fields["delivery_mechanisms"].queryset = self.get_dynamic_delivery_mechanisms_queryset()
 
-    def get_dynamic_individual_fields_choices(self):
+    def get_dynamic_individual_fields_choices(self) -> Iterator[Tuple[str, str]]:
         for field_data in individual_fields.values():
             yield (field_data[0], field_data[0])
 
-    def get_dynamic_individual_flex_fields_choices(self):
+    def get_dynamic_individual_flex_fields_choices(self) -> Iterator[Tuple[str, str]]:
         for field_data in get_individual_flex_fields().values():
             yield (field_data[0], field_data[0])
 
-    def get_dynamic_household_fields_choices(self):
+    def get_dynamic_household_fields_choices(self) -> Iterator[Tuple[str, str]]:
         for field_data in household_fields.values():
             yield (field_data[0], field_data[0])
 
-    def get_dynamic_document_types_queryset(self):
+    def get_dynamic_document_types_queryset(self) -> QuerySet[DocumentType]:
         return DocumentType.objects.all()
 
-    def get_dynamic_delivery_mechanisms_queryset(self):
+    def get_dynamic_delivery_mechanisms_queryset(self) -> QuerySet[DeliveryMechanism]:
         return DeliveryMechanism.objects.all()
 
 
@@ -148,25 +153,25 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
         ),
     )
 
-    def logs_property(self, obj):
+    def logs_property(self, obj: UniversalUpdate) -> str:
         return obj.logs or "-"
 
     logs_property.short_description = "Live Logs"
 
-    def task_status(self, obj):
+    def task_status(self, obj: UniversalUpdate) -> str:
         return obj.celery_status or "-"
 
     task_status.short_description = "Task Status"
 
     @button(label="Generate Excel Template")
-    def generate_xlsx_template(self, request, pk):
+    def generate_xlsx_template(self, request: HttpRequest, pk: str) -> None:
         universal_update = self.get_object(request, pk)
         universal_update.queue(generate_universal_individual_update_template)
         self.message_user(request, "Gnerating Excel Template Task Scheduled")
         return None
 
     @button(label="Start Universal Update Task")
-    def start_universal_update_task(self, request, pk):
+    def start_universal_update_task(self, request: HttpRequest, pk: str) -> None:
         universal_update = self.get_object(request, pk)
         universal_update.queue(run_universal_individual_update)
         self.message_user(request, "Universal individual update task scheduled")

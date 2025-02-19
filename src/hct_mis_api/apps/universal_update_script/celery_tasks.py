@@ -24,10 +24,10 @@ RESULT_SUCCESS = "success"
 RESULT_FAILED = "failed"
 
 
-@app.task(bind=True, acks_late=True, soft_time_limit=SOFT_TIME_LIMIT, time_limit=HARD_TIME_LIMIT)
+@app.task(acks_late=True, soft_time_limit=SOFT_TIME_LIMIT, time_limit=HARD_TIME_LIMIT)
 @log_start_and_end
 @sentry_tags
-def run_universal_individual_update(self, universal_update_id: str) -> str:
+def run_universal_individual_update(universal_update_id: str) -> str:
     universal_update = UniversalUpdate.objects.get(id=universal_update_id)
     lock_id = f"lock:run_universal_individual_update:{universal_update_id}"
     lock = cache.lock(lock_id, timeout=HARD_TIME_LIMIT)
@@ -37,8 +37,6 @@ def run_universal_individual_update(self, universal_update_id: str) -> str:
         universal_update.clear_logs()
         universal_update.save_logs("Creating backup snapshot was started")
         create_and_save_snapshot_chunked(universal_update)
-        # import time
-        # time.sleep(30)
         universal_update.save_logs("Update was started")
         engine = UniversalIndividualUpdateService(
             universal_update, ignore_empty_values=True, deduplicate_es=True, deduplicate_documents=True
@@ -56,10 +54,10 @@ def run_universal_individual_update(self, universal_update_id: str) -> str:
         lock.release()
 
 
-@app.task(bind=True, acks_late=True, soft_time_limit=SOFT_TIME_LIMIT, time_limit=HARD_TIME_LIMIT)
+@app.task(acks_late=True, soft_time_limit=SOFT_TIME_LIMIT, time_limit=HARD_TIME_LIMIT)
 @log_start_and_end
 @sentry_tags
-def generate_universal_individual_update_template(self, universal_update_id: str) -> str:
+def generate_universal_individual_update_template(universal_update_id: str) -> str:
     universal_update = UniversalUpdate.objects.get(id=universal_update_id)
     lock_id = f"lock:generate_universal_individual_update_template:{universal_update_id}"
     lock = cache.lock(lock_id, timeout=HARD_TIME_LIMIT)
@@ -67,8 +65,6 @@ def generate_universal_individual_update_template(self, universal_update_id: str
         return RESULT_LOCKED
     try:
         universal_update.clear_logs()
-        # import time
-        # time.sleep(30)
         universal_update.save_logs("Update was started")
         engine = UniversalIndividualUpdateService(universal_update)
         template_file = engine.generate_xlsx_template()
