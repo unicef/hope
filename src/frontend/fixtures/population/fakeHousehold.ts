@@ -96,7 +96,6 @@ export const fakeHousehold = {
         'UHJvZ3JhbU5vZGU6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtZmFjZWIwMGMwMDAw',
       name: 'Test Program',
       __typename: 'ProgramNode',
-    },
   },
   __typename: 'HouseholdNode',
   activeIndividualsCount: 1,
