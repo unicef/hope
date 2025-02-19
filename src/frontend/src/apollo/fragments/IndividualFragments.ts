@@ -78,13 +78,9 @@ export const individualMinimal = gql`
         level
         pCode
       }
-      programs {
-        edges {
-          node {
-            id
-            name
-          }
-        }
+      program {
+        id
+        name
       }
       totalCashReceivedUsd
       lastRegistrationDate

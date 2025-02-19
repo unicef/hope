@@ -382,7 +382,7 @@ class Household(
             "other_sex_group_count",
             "unknown_sex_group_count",
             "registration_data_import",
-            "programs",
+            "program",
             "returnee",
             "flex_fields",
             "first_registration_date",
@@ -1031,9 +1031,7 @@ class Individual(
     blockchain_name = models.CharField(max_length=64, blank=True, default="")
     wallet_address = models.CharField(max_length=128, blank=True, default="")
 
-    program = models.ForeignKey(
-        "program.Program", null=True, blank=True, db_index=True, related_name="individuals", on_delete=models.SET_NULL
-    )  # TODO set null=False after migration
+    program = models.ForeignKey("program.Program", db_index=True, related_name="individuals", on_delete=models.PROTECT)
     copied_from = models.ForeignKey(
         "self",
         null=True,

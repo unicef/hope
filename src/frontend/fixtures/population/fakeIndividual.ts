@@ -59,18 +59,10 @@ export const fakeIndividual = {
       pCode: 'AF1115',
       __typename: 'AreaNode',
     },
-    programs: {
-      edges: [
-        {
-          node: {
-            id: 'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
-            name: 'Surface campaign practice actually about about will what.',
-            __typename: 'ProgramNode',
-          },
-          __typename: 'ProgramNodeEdge',
-        },
-      ],
-      __typename: 'ProgramNodeConnection',
+    program: {
+        id: 'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
+        name: 'Surface campaign practice actually about about will what.',
+        __typename: 'ProgramNode',
     },
     __typename: 'HouseholdNode',
     address: '938 Luna Cliffs Apt. 551\nJameschester, SC 24934',

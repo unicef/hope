@@ -22,4 +22,10 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='households',
                                     to='program.program'),
         ),
+        migrations.AlterField(
+            model_name='individual',
+            name='program',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='individuals',
+                                    to='program.program', db_index=True),
+        ),
     ]
