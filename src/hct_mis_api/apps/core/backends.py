@@ -17,6 +17,11 @@ from hct_mis_api.apps.program.models import Program
 
 
 class PermissionsBackend(BaseBackend):
+    """
+    Custom permissions backend that fetches permissions from the User's Groups
+    and the RoleAssignments for the User or their Partner.
+    """
+
     def get_all_permissions(self, user: User, obj: Optional[Model] = None) -> set[str]:  # type: ignore
         filters: dict[str, Any]
         if not obj:
@@ -69,7 +74,7 @@ class PermissionsBackend(BaseBackend):
 
         """
         The permissions are fetched from:
-        * the user's Group
+        * the user's Groups
         * RoleAssignment - where they can be stored either on the Group or on the Role
           and assigned either to the User or to their Partner
         """
