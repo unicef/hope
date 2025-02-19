@@ -1,5 +1,6 @@
 from django.urls import reverse
 
+import pytest
 from django_webtest import WebTest
 
 from hct_mis_api.apps.account.fixtures import (
@@ -12,6 +13,8 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+
+pytestmark = pytest.mark.django_db(transaction=True)
 
 
 class ProgramAdminTest(WebTest):
