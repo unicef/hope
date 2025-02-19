@@ -56,22 +56,22 @@ def test_role_sync(django_app: DjangoTestApp, superuser: User, role: Role) -> No
 
 class RoleAssignmentInlineTest(TestCase):
     def setUp(self) -> None:
-        self.factory = RequestFactory()
+        self.request = RequestFactory()
         self.site = AdminSite()
         self.admin = RoleAssignmentInline(parent_model=Partner, admin_site=self.site)
 
         self.user = UserFactory()
-        self.parent = PartnerFactory(name="UNICEF")
-        self.partner = PartnerFactory(parent=self.parent)
-        self.parent_without_parent = PartnerFactory(parent=None, name="Parent without parent")
+        self.unicef_parent = PartnerFactory(name="UNICEF")
+        self.unicef_subpartner = PartnerFactory(parent=self.unicef_parent)
+        self.partner_without_parent = PartnerFactory(parent=None, name="Parent without parent")
         self.business_area = create_afghanistan()
         self.other_ba = BusinessAreaFactory(name="Ukraine")
-        self.partner.allowed_business_areas.set([self.business_area])
+        self.unicef_subpartner.allowed_business_areas.set([self.business_area])
         self.role = RoleFactory(is_available_for_partner=True)
         self.role_not_available = RoleFactory(is_available_for_partner=False)
 
     def get_mock_request(self, object_id: Any = None) -> Union[WSGIRequest, WSGIRequest]:
-        request = self.factory.get("/")
+        request = self.request.get("/")
         request.resolver_match = MagicMock()
         request.resolver_match.kwargs = {"object_id": str(object_id) if object_id else None}
         request.user = MagicMock()
@@ -79,7 +79,7 @@ class RoleAssignmentInlineTest(TestCase):
         return request
 
     def test_formfield_for_foreignkey_business_area(self) -> None:
-        request = self.get_mock_request(object_id=self.partner.id)
+        request = self.get_mock_request(object_id=self.unicef_subpartner.id)
 
         field = self.admin.formfield_for_foreignkey(RoleAssignment._meta.get_field("business_area"), request)
         self.assertIn(self.business_area, field.queryset)
@@ -92,7 +92,7 @@ class RoleAssignmentInlineTest(TestCase):
         self.assertIn(self.other_ba, field.queryset)
 
     def test_formfield_for_foreignkey_role(self) -> None:
-        request = self.get_mock_request(object_id=self.partner.id)
+        request = self.get_mock_request(object_id=self.unicef_subpartner.id)
 
         field = self.admin.formfield_for_foreignkey(RoleAssignment._meta.get_field("role"), request)
         self.assertIn(self.role, field.queryset)
@@ -105,39 +105,39 @@ class RoleAssignmentInlineTest(TestCase):
         self.assertIn(self.role_not_available, field.queryset)
 
     def test_has_add_permission(self) -> None:
-        request = self.get_mock_request(object_id=self.partner.id)
-        self.assertFalse(self.admin.has_add_permission(request, self.partner))
+        request = self.get_mock_request(object_id=self.unicef_subpartner.id)
+        self.assertFalse(self.admin.has_add_permission(request, self.unicef_subpartner))
 
-        self.assertFalse(self.admin.has_add_permission(request, self.parent))
+        self.assertFalse(self.admin.has_add_permission(request, self.unicef_parent))
 
-        self.assertTrue(self.admin.has_add_permission(request, self.parent_without_parent))
+        self.assertTrue(self.admin.has_add_permission(request, self.partner_without_parent))
 
         self.assertTrue(self.admin.has_add_permission(request, self.user))
 
     def test_has_change_permission(self) -> None:
-        request = self.get_mock_request(object_id=self.partner.id)
-        self.assertFalse(self.admin.has_change_permission(request, self.partner))
+        request = self.get_mock_request(object_id=self.unicef_subpartner.id)
+        self.assertFalse(self.admin.has_change_permission(request, self.unicef_subpartner))
 
-        self.assertTrue(self.admin.has_change_permission(request, self.parent))
+        self.assertTrue(self.admin.has_change_permission(request, self.unicef_parent))
 
-        self.assertTrue(self.admin.has_change_permission(request, self.parent_without_parent))
+        self.assertTrue(self.admin.has_change_permission(request, self.partner_without_parent))
 
         self.assertTrue(self.admin.has_change_permission(request, self.user))
 
     def test_has_delete_permission(self) -> None:
-        request = self.get_mock_request(object_id=self.partner.id)
-        self.assertFalse(self.admin.has_delete_permission(request, self.partner))
+        request = self.get_mock_request(object_id=self.unicef_subpartner.id)
+        self.assertFalse(self.admin.has_delete_permission(request, self.unicef_subpartner))
 
-        self.assertTrue(self.admin.has_delete_permission(request, self.parent))
+        self.assertTrue(self.admin.has_delete_permission(request, self.unicef_parent))
 
-        self.assertTrue(self.admin.has_delete_permission(request, self.parent_without_parent))
+        self.assertTrue(self.admin.has_delete_permission(request, self.partner_without_parent))
 
         self.assertTrue(self.admin.has_delete_permission(request, self.user))
 
 
 class RoleAssignmentAdminTest(TestCase):
     def setUp(self) -> None:
-        self.factory = RequestFactory()
+        self.request = RequestFactory()
         self.site = AdminSite()
         self.admin = RoleAssignmentAdmin(model=RoleAssignment, admin_site=self.site)
 
@@ -152,7 +152,7 @@ class RoleAssignmentAdminTest(TestCase):
 
     def get_mock_request(self, user: Optional[User] = None) -> Union[WSGIRequest, WSGIRequest]:
         """Helper to create a mock request"""
-        request = self.factory.get("/")
+        request = self.request.get("/")
         request.user = user if user else self.user
         return request
 
