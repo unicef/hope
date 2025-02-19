@@ -127,12 +127,12 @@ jobs:
       continue-on-error: true
       env:
        SRCCLR_API_TOKEN: ${{ secrets.SRCCLR_API_TOKEN }}
-       SRCCLR_SCAN_COLLECTORS: "npm, yarn, pip, pipenv"
+       SRCCLR_SCAN_COLLECTORS: "yarn, pip"
       run: |
         echo "Scanning JS Project"
-        curl -sSL  https://download.sourceclear.com/ci.sh | bash -s scan src/frontend --allow-dirty
+        curl -sSL  https://download.sourceclear.com/ci.sh | bash -s scan src/frontend/ --allow-dirty
         echo "Scanning Python Project"
-        curl -sSL  https://download.sourceclear.com/ci.sh | bash -s scan src/hct_mis_api --allow-dirty
+        curl -sSL  https://download.sourceclear.com/ci.sh | bash -s scan src/hct_mis_api/ --allow-dirty
     - name: DockerHub login
       uses: docker/login-action@v3
       with:
