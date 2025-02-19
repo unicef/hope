@@ -144,7 +144,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
               class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
             >
               <div
-                class="sc-deSjom jyAOSU"
+                class="sc-eiwqOE eTWafa"
               >
                 <div
                   data-cy="labelized-field-container-households"
@@ -163,7 +163,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                       color="textSecondary"
                     >
                       <div
-                        class="sc-jHswkR fURjFP"
+                        class="sc-dPKAra feoYCh"
                       >
                         2
                       </div>
@@ -176,7 +176,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
               class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
             >
               <div
-                class="sc-deSjom jyAOSU"
+                class="sc-eiwqOE eTWafa"
               >
                 <div
                   data-cy="labelized-field-container-individuals"
@@ -195,7 +195,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                       color="textSecondary"
                     >
                       <div
-                        class="sc-jHswkR fURjFP"
+                        class="sc-dPKAra feoYCh"
                       >
                         6
                       </div>
@@ -222,7 +222,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                 class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
               >
                 <span
-                  class="sc-jZTQcj gPbfcs"
+                  class="sc-gjXmFk chCOXp"
                 >
                   Biographical
                 </span>
