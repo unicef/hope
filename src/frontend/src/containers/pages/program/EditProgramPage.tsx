@@ -60,18 +60,19 @@ export const EditProgramPage = (): ReactElement => {
   const { data: pdusubtypeChoicesData, loading: pdusubtypeChoicesLoading } =
     usePduSubtypeChoicesDataQuery();
 
-  const [updateProgramDetails] = useUpdateProgramMutation({
-    refetchQueries: [
-      {
-        query: ALL_LOG_ENTRIES_QUERY,
-        variables: {
-          objectId: decodeIdString(id),
-          count: 5,
-          businessArea,
+  const [updateProgramDetails, { loading: loadingUpdate }] =
+    useUpdateProgramMutation({
+      refetchQueries: [
+        {
+          query: ALL_LOG_ENTRIES_QUERY,
+          variables: {
+            objectId: decodeIdString(id),
+            count: 5,
+            businessArea,
+          },
         },
-      },
-    ],
-  });
+      ],
+    });
 
   const [updateProgramPartners] = useUpdateProgramPartnersMutation({
     refetchQueries: [
@@ -345,7 +346,6 @@ export const EditProgramPage = (): ReactElement => {
             errors,
             setErrors,
           }) => {
-
             const handleNextStep = async () => {
               await handleNext({
                 validateForm,
@@ -437,6 +437,7 @@ export const EditProgramPage = (): ReactElement => {
                       submitForm={submitForm}
                       setFieldValue={setFieldValue}
                       programId={id}
+                      loading={loadingUpdate}
                     />
                   </div>
                 </Fade>
