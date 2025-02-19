@@ -100,7 +100,6 @@ def validate_choices(
 ) -> Optional[str]:
     if value is None or value == "":
         return None
-    print(model_class)
     choices = _get_field_choices_values(model_class, name)
     if value not in choices:
         return f"Invalid value {value} for column {name} allowed values are {choices}"
@@ -135,6 +134,7 @@ def simple_generator_handler(value: Any) -> Any:
 
 GENERATOR_TYPE_HANDLER = {
     bool: boolean_generator_handler,
+    Area: lambda value: value.p_code,
 }
 
 

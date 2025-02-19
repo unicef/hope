@@ -9,6 +9,7 @@ from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.payment.models import DeliveryMechanism
 from hct_mis_api.apps.universal_update_script.universal_individual_update_service.validator_and_handlers import (
+    handle_admin_field,
     handle_boolean_field,
     handle_simple_field,
     validate_admin,
@@ -67,10 +68,10 @@ household_fields: Dict[str, Tuple[str, Any, Any]] = {
     "address": ("address", validate_string, handle_simple_field),
     "zip_code": ("zip_code", validate_string, handle_simple_field),
     "admin_area": ("admin_area", validate_string, handle_simple_field),
-    "admin1": ("admin1", validate_admin, handle_simple_field),
-    "admin2": ("admin2", validate_string, handle_simple_field),
-    "admin3": ("admin3", validate_string, handle_simple_field),
-    "admin4": ("admin4", validate_string, handle_simple_field),
+    "admin1": ("admin1", validate_admin, handle_admin_field),
+    "admin2": ("admin2", validate_string, handle_admin_field),
+    "admin3": ("admin3", validate_string, handle_admin_field),
+    "admin4": ("admin4", validate_string, handle_admin_field),
     "size": ("size", validate_integer, handle_simple_field),
     "female_age_group_0_5_count": ("female_age_group_0_5_count", validate_integer, handle_simple_field),
     "female_age_group_6_11_count": ("female_age_group_6_11_count", validate_integer, handle_simple_field),

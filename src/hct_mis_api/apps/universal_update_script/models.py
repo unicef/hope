@@ -22,7 +22,7 @@ class UniversalUpdate(
 
     program = models.ForeignKey(Program, on_delete=models.CASCADE)
     backup_snapshot = models.FileField(blank=True, null=True)
-    saved_logs = models.TextField(blank=True, null=True)
+    saved_logs = models.TextField(blank=True, null=True, default="")
     unicef_ids = models.TextField(blank=True, null=True)
 
     @property
