@@ -600,7 +600,6 @@ class UploadRDITests(HOPEApiTestCase):
                         ]
                     },
                 ],
-                "program": ["This field is required."],
             },
             f"""
 ==== RESULT ====
