@@ -144,7 +144,7 @@ export const api = {
 
 export type Params = Record<string, any>;
 
-export const handleApiResponse = async <T>(apiCall: Promise<T>): Promise<T> => {
+export const handleApiResponse = async (apiCall) => {
   try {
     const response = await apiCall;
     return response;
