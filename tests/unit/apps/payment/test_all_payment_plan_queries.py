@@ -33,6 +33,7 @@ from hct_mis_api.apps.payment.fixtures import (
 from hct_mis_api.apps.payment.models import (
     AcceptanceProcessThreshold,
     ApprovalProcess,
+    DeliveryMechanism,
     FinancialServiceProvider,
     Payment,
     PaymentHouseholdSnapshot,
@@ -316,7 +317,7 @@ class TestPaymentPlanQueries(APITestCase):
         )
 
         with freeze_time("2020-10-10"):
-            cash_dm = DeliveryMechanismFactory(code="cash", is_active=True)
+            cash_dm = DeliveryMechanism.objects.get(code="cash")
             program = RealProgramFactory(
                 name="Test All PP QS",
                 cycle__start_date=timezone.datetime(2020, 9, 10, tzinfo=utc).date(),
