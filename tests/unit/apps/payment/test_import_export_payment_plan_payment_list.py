@@ -119,7 +119,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             delivery_mechanism=cls.dm_cash,
             delivery_mechanism_order=1,
         )
-        program.households.set(Household.objects.all().values_list("id", flat=True))
+        program.households.set(Household.objects.all())
         for household in program.households.all():
             PaymentFactory(
                 parent=cls.payment_plan, household=household, financial_service_provider=cls.fsp_1, currency="PLN"

@@ -51,7 +51,7 @@ export const CreateProgramPage = (): ReactElement => {
   const { data: pdusubtypeChoicesData, loading: pdusubtypeChoicesLoading } =
     usePduSubtypeChoicesDataQuery();
 
-  const [mutate] = useCreateProgramMutation({
+  const [mutate, { loading: loadingCreate }] = useCreateProgramMutation({
     refetchQueries: () => [
       { query: ALL_PROGRAMS_QUERY, variables: { businessArea } },
     ],
@@ -353,6 +353,7 @@ export const CreateProgramPage = (): ReactElement => {
                         setStep={setStep}
                         submitForm={submitForm}
                         setFieldValue={setFieldValue}
+                        loading={loadingCreate}
                       />
                     )}
                   </div>
