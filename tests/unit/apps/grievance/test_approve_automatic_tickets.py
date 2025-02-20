@@ -168,6 +168,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
         household_one = HouseholdFactory.build(
             registration_data_import__imported_by__partner=partner,
             program=program_one,
+            admin2=cls.admin_area_1,
         )
         household_one.household_collection.save()
         household_one.registration_data_import.imported_by.save()
@@ -273,7 +274,9 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
         ]
     )
     def test_approve_system_flagging(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
 
         self.snapshot_graphql_request(
             request_string=self.APPROVE_SYSTEM_FLAGGING_MUTATION,
@@ -294,7 +297,9 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
         ]
     )
     def test_approve_needs_adjudication(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
 
         self.snapshot_graphql_request(
             request_string=self.APPROVE_NEEDS_ADJUDICATION_MUTATION,
@@ -319,7 +324,9 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
     def test_approve_needs_adjudication_should_allow_uncheck_selected_individual(
         self, _: Any, permissions: List[Permissions]
     ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
 
         self.snapshot_graphql_request(
             request_string=self.APPROVE_NEEDS_ADJUDICATION_MUTATION,
@@ -333,7 +340,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
         )
 
     def test_approve_needs_adjudication_allows_multiple_selected_individuals_without_permission(self) -> None:
-        self.create_user_role_with_permissions(self.user, [], self.business_area)
+        self.create_user_role_with_permissions(self.user, [], self.business_area, whole_business_area_access=True)
 
         grievance_ticket_id = self.id_to_base64(self.needs_adjudication_grievance_ticket.id, "GrievanceTicketNode")
         response = self.approve_multiple_needs_adjudication_ticket(grievance_ticket_id)
@@ -342,7 +349,10 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
 
     def test_approve_needs_adjudication_allows_multiple_selected_individuals_with_permission(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE], self.business_area
+            self.user,
+            [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE],
+            self.business_area,
+            whole_business_area_access=True,
         )
 
         grievance_ticket_id = self.id_to_base64(self.needs_adjudication_grievance_ticket.id, "GrievanceTicketNode")
@@ -371,7 +381,10 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
 
     def test_approve_needs_adjudication_new_input_fields(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE], self.business_area
+            self.user,
+            [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE],
+            self.business_area,
+            whole_business_area_access=True,
         )
 
         self.needs_adjudication_grievance_ticket.refresh_from_db()

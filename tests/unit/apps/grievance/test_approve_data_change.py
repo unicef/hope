@@ -304,7 +304,9 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
         ]
     )
     def test_approve_add_individual(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
 
         self.snapshot_graphql_request(
             request_string=self.APPROVE_ADD_INDIVIDUAL_MUTATION,
@@ -325,7 +327,9 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
         ]
     )
     def test_approve_update_individual(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
 
         self.snapshot_graphql_request(
             request_string=self.APPROVE_INDIVIDUAL_DATA_CHANGE_GRIEVANCE_MUTATION,
@@ -361,7 +365,9 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
         ]
     )
     def test_approve_update_household(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
 
         self.snapshot_graphql_request(
             request_string=self.APPROVE_HOUSEHOLD_DATA_CHANGE_GRIEVANCE_MUTATION,

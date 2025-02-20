@@ -14,7 +14,7 @@ from django.urls import reverse
 from graphql import GraphQLError
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.account.models import Role, User, UserRole
+from hct_mis_api.apps.account.models import Role, RoleAssignment, User
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import (
@@ -556,7 +556,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         user = User.objects.create_superuser(username="admin", password="password", email="admin@example.com")
         permission_list = [Permissions.PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE.name]
         role, created = Role.objects.update_or_create(name="LOL", defaults={"permissions": permission_list})
-        user_role, _ = UserRole.objects.get_or_create(user=user, role=role, business_area=self.business_area)
+        user_role, _ = RoleAssignment.objects.get_or_create(user=user, role=role, business_area=self.business_area)
         decimal_flexible_attribute = FlexibleAttribute(
             type=FlexibleAttribute.DECIMAL,
             name="flex_decimal_i_f",

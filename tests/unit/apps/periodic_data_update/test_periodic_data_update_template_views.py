@@ -147,18 +147,15 @@ class TestPeriodicDataUpdateTemplateViews:
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
         create_partner_role_with_permissions: Callable,
-        update_partner_access_to_program: Callable,
         id_to_base64: Callable,
     ) -> None:
         self.set_up(api_client, afghanistan, id_to_base64)
-        create_user_role_with_permissions(
-            self.user,
-            permissions,
-            self.afghanistan,
-        )
-        create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
         if access_to_program:
-            update_partner_access_to_program(self.partner, self.program1)
+            create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program1)
+            create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan, self.program1)
+        else:
+            create_user_role_with_permissions(self.user, permissions, self.afghanistan)
+            create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
 
         response = self.client.get(self.url_list)
         assert response.status_code == expected_status
@@ -252,18 +249,15 @@ class TestPeriodicDataUpdateTemplateViews:
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
         create_partner_role_with_permissions: Callable,
-        update_partner_access_to_program: Callable,
         id_to_base64: Callable,
     ) -> None:
         self.set_up(api_client, afghanistan, id_to_base64)
-        create_user_role_with_permissions(
-            self.user,
-            permissions,
-            self.afghanistan,
-        )
-        create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
         if access_to_program:
-            update_partner_access_to_program(self.partner, self.program2)
+            create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program2)
+            create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan, self.program2)
+        else:
+            create_user_role_with_permissions(self.user, permissions, self.afghanistan)
+            create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
 
         response = self.client.get(self.url_detail_pdu_template_program2)
         assert response.status_code == expected_status
@@ -363,18 +357,15 @@ class TestPeriodicDataUpdateTemplateViews:
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
         create_partner_role_with_permissions: Callable,
-        update_partner_access_to_program: Callable,
         id_to_base64: Callable,
     ) -> None:
         self.set_up(api_client, afghanistan, id_to_base64)
-        create_user_role_with_permissions(
-            self.user,
-            permissions,
-            self.afghanistan,
-        )
-        create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
         if access_to_program:
-            update_partner_access_to_program(self.partner, self.program1)
+            create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program1)
+            create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan, self.program1)
+        else:
+            create_user_role_with_permissions(self.user, permissions, self.afghanistan)
+            create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
 
         data = {
             "rounds_data": [
@@ -523,18 +514,15 @@ class TestPeriodicDataUpdateTemplateViews:
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
         create_partner_role_with_permissions: Callable,
-        update_partner_access_to_program: Callable,
         id_to_base64: Callable,
     ) -> None:
         self.set_up(api_client, afghanistan, id_to_base64)
-        create_user_role_with_permissions(
-            self.user,
-            permissions,
-            self.afghanistan,
-        )
-        create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
         if access_to_program:
-            update_partner_access_to_program(self.partner, self.program1)
+            create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program1)
+            create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan, self.program1)
+        else:
+            create_user_role_with_permissions(self.user, permissions, self.afghanistan)
+            create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
 
         self.pdu_template1.status = PeriodicDataUpdateTemplate.Status.TO_EXPORT
         self.pdu_template1.save()
@@ -661,18 +649,15 @@ class TestPeriodicDataUpdateTemplateViews:
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
         create_partner_role_with_permissions: Callable,
-        update_partner_access_to_program: Callable,
         id_to_base64: Callable,
     ) -> None:
         self.set_up(api_client, afghanistan, id_to_base64)
-        create_user_role_with_permissions(
-            self.user,
-            permissions,
-            self.afghanistan,
-        )
-        create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
         if access_to_program:
-            update_partner_access_to_program(self.partner, self.program1)
+            create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program1)
+            create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan, self.program1)
+        else:
+            create_user_role_with_permissions(self.user, permissions, self.afghanistan)
+            create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
 
         self.pdu_template1.status = PeriodicDataUpdateTemplate.Status.EXPORTED
 

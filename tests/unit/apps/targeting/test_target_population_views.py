@@ -99,7 +99,6 @@ class TestTargetPopulationViews:
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
         create_partner_role_with_permissions: Callable,
-        update_partner_access_to_program: Callable,
         id_to_base64: Callable,
     ) -> None:
         self.set_up(api_client, afghanistan, id_to_base64)
@@ -108,9 +107,12 @@ class TestTargetPopulationViews:
             permissions,
             self.afghanistan,
         )
-        create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
         if access_to_program:
-            update_partner_access_to_program(self.partner, self.program1)
+            create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program1)
+            create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan, self.program1)
+        else:
+            create_user_role_with_permissions(self.user, permissions, self.afghanistan)
+            create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
 
         response = self.client.get(self.url_list)
         assert response.status_code == expected_status
@@ -223,7 +225,7 @@ class TestTargetPopulationViews:
 
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 12
+            assert len(ctx.captured_queries) == 15
 
         # Test that reoccurring requests use cached data
         with CaptureQueriesContext(connection) as ctx:
@@ -232,7 +234,7 @@ class TestTargetPopulationViews:
 
             etag_second_call = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 5
+            assert len(ctx.captured_queries) == 3
 
             assert etag_second_call == etag
 
@@ -245,7 +247,7 @@ class TestTargetPopulationViews:
 
             etag_call_after_update = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 12
+            assert len(ctx.captured_queries) == 10
 
             assert etag_call_after_update != etag
 
@@ -256,6 +258,6 @@ class TestTargetPopulationViews:
 
             etag_call_after_update_second_call = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 5
+            assert len(ctx.captured_queries) == 3
 
             assert etag_call_after_update_second_call == etag_call_after_update

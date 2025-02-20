@@ -86,7 +86,9 @@ class TestReportsQuery(APITestCase):
         ]
     )
     def test_reports_query_all(self, _: Any, permissions: List[Permissions], query_string: str) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
 
         self.snapshot_graphql_request(
             request_string=query_string,
@@ -100,7 +102,9 @@ class TestReportsQuery(APITestCase):
         ]
     )
     def test_report_query_single(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
 
         self.snapshot_graphql_request(
             request_string=REPORT_QUERY,

@@ -30,7 +30,7 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory, ProgramFactory
-from hct_mis_api.apps.program.models import Program, ProgramCycle, ProgramPartnerThrough
+from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 
@@ -112,11 +112,8 @@ class TestUpdateProgram(APITestCase):
         cls.partner = PartnerFactory(name="WFP")
         cls.user = UserFactory.create(partner=cls.partner)
 
-        cls.unicef_partner = PartnerFactory(name="UNICEF")
-        unicef_program, _ = ProgramPartnerThrough.objects.get_or_create(
-            program=cls.program,
-            partner=cls.unicef_partner,
-        )
+        unicef = PartnerFactory(name="UNICEF")
+        cls.unicef_partner = PartnerFactory(name="UNICEF HQ", parent=unicef)
 
         country_afg = CountryFactory(name="Afghanistan")
         country_afg.business_areas.set([cls.business_area])
@@ -124,8 +121,6 @@ class TestUpdateProgram(APITestCase):
 
         cls.area_in_afg_1 = AreaFactory(name="Area in AFG 1", area_type=area_type_afg, p_code="AREA-IN-AFG1")
         cls.area_in_afg_2 = AreaFactory(name="Area in AFG 2", area_type=area_type_afg, p_code="AREA-IN-AFG2")
-
-        unicef_program.areas.set([cls.area_in_afg_1, cls.area_in_afg_2])
 
         # pdu fields
         cls.pdu_data_to_be_removed = PeriodicFieldDataFactory(
@@ -188,7 +183,9 @@ class TestUpdateProgram(APITestCase):
     def test_update_program_authenticated(
         self, _: Any, permissions: List[Permissions], should_be_updated: bool
     ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
@@ -212,7 +209,9 @@ class TestUpdateProgram(APITestCase):
             assert updated_program.name == "initial name"
 
     def test_update_active_program_with_dct(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.business_area, whole_business_area_access=True
+        )
         data_collecting_type = DataCollectingType.objects.get(code="full_collection")
         data_collecting_type.limit_to.add(self.business_area)
         Program.objects.filter(id=self.program.id).update(
@@ -237,7 +236,9 @@ class TestUpdateProgram(APITestCase):
         self.assertEqual(self.program.data_collecting_type.code, "full_collection")
 
     def test_update_draft_not_empty_program_with_dct(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.business_area, whole_business_area_access=True
+        )
         data_collecting_type = DataCollectingType.objects.get(code="full_collection")
         data_collecting_type.limit_to.add(self.business_area)
         create_household(household_args={"program": self.program})
@@ -261,7 +262,9 @@ class TestUpdateProgram(APITestCase):
         )
         dct.limit_to.add(self.business_area)
 
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.business_area, whole_business_area_access=True
+        )
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
@@ -281,7 +284,9 @@ class TestUpdateProgram(APITestCase):
         )
         dct.limit_to.add(self.business_area)
 
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.business_area, whole_business_area_access=True
+        )
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
@@ -301,7 +306,9 @@ class TestUpdateProgram(APITestCase):
             **{"label": "Test Wrong BA", "code": "test_wrong_ba", "description": "Test Wrong BA"}
         )
         dct.limit_to.add(other_ba)
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_CREATE], self.business_area, whole_business_area_access=True
+        )
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
@@ -317,7 +324,9 @@ class TestUpdateProgram(APITestCase):
 
     def test_update_program_beneficiary_group(self) -> None:
         beneficiary_group2 = BeneficiaryGroupFactory(name="Other Group", master_detail=True)
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.business_area, whole_business_area_access=True
+        )
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
@@ -333,7 +342,9 @@ class TestUpdateProgram(APITestCase):
 
     def test_update_program_beneficiary_group_when_imported_population(self) -> None:
         beneficiary_group2 = BeneficiaryGroupFactory(name="Other Group", master_detail=True)
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.business_area, whole_business_area_access=True
+        )
         RegistrationDataImportFactory(program=self.program)
 
         self.snapshot_graphql_request(
@@ -349,7 +360,9 @@ class TestUpdateProgram(APITestCase):
         )
 
     def test_update_program_incompatible_beneficiary_group(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.business_area, whole_business_area_access=True
+        )
 
         beneficiary_group = BeneficiaryGroupFactory(name="Social", master_detail=False)
 
@@ -366,7 +379,9 @@ class TestUpdateProgram(APITestCase):
         )
 
     def test_update_program_when_finished(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.business_area, whole_business_area_access=True
+        )
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
@@ -381,7 +396,9 @@ class TestUpdateProgram(APITestCase):
         )
 
     def test_update_program_with_programme_code(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.business_area, whole_business_area_access=True
+        )
 
         self.graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
@@ -400,7 +417,9 @@ class TestUpdateProgram(APITestCase):
         self.assertEqual(program.programme_code, "AB/2")
 
     def test_update_program_without_programme_code(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.business_area, whole_business_area_access=True
+        )
 
         self.program.programme_code = ""
         self.program.save()
@@ -422,7 +441,9 @@ class TestUpdateProgram(APITestCase):
         self.assertEqual(len(program.programme_code), 4)
 
     def test_update_program_with_duplicated_programme_code_among_the_same_business_area(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.business_area, whole_business_area_access=True
+        )
 
         ProgramFactory(programme_code="ABC2", business_area=self.business_area)
         self.program.programme_code = "ABC3"
@@ -447,7 +468,10 @@ class TestUpdateProgram(APITestCase):
 
     def test_update_program_with_pdu_fields(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_UPDATE, Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], self.business_area
+            self.user,
+            [Permissions.PROGRAMME_UPDATE, Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+            self.business_area,
+            whole_business_area_access=True,
         )
 
         # get details to check the pdu fields
@@ -528,7 +552,9 @@ class TestUpdateProgram(APITestCase):
         self.assertIsNotNone(FlexibleAttribute.objects.filter(name="pdu_field_to_be_preserved").first())
 
     def test_update_program_with_pdu_fields_invalid_data(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.business_area, whole_business_area_access=True
+        )
         update_data = {
             "programData": {
                 "id": self.id_to_base64(self.program.id, "ProgramNode"),
@@ -573,7 +599,9 @@ class TestUpdateProgram(APITestCase):
         )
 
     def test_update_program_with_pdu_fields_duplicated_field_names_in_input(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.business_area, whole_business_area_access=True
+        )
         # pdu data with duplicated field names in the input
         update_data = {
             "programData": {
@@ -619,7 +647,9 @@ class TestUpdateProgram(APITestCase):
         )
 
     def test_update_program_with_pdu_fields_existing_field_name_for_new_field(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.business_area, whole_business_area_access=True
+        )
         # pdu data with NEW field with name that already exists in the database but in different program -> no fail
         pdu_data = PeriodicFieldDataFactory(
             subtype=PeriodicFieldData.DATE,
@@ -676,7 +706,9 @@ class TestUpdateProgram(APITestCase):
         )
 
     def test_update_program_with_pdu_fields_existing_field_name_for_updated_field(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.business_area, whole_business_area_access=True
+        )
         # pdu data with UPDATED field with name that already exists in the database but in different program -> no fail
         pdu_data = PeriodicFieldDataFactory(
             subtype=PeriodicFieldData.DATE,
@@ -733,7 +765,9 @@ class TestUpdateProgram(APITestCase):
         )
 
     def test_update_program_with_pdu_fields_program_has_RDI(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.business_area, whole_business_area_access=True
+        )
         RegistrationDataImportFactory(program=self.program)
         update_data = {
             "programData": {
@@ -768,7 +802,9 @@ class TestUpdateProgram(APITestCase):
 
     def test_update_program_with_pdu_fields_program_has_RDI_new_field(self) -> None:
         # new field will NOT be added
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.business_area, whole_business_area_access=True
+        )
         RegistrationDataImportFactory(program=self.program)
         update_data = {
             "programData": {
@@ -797,7 +833,9 @@ class TestUpdateProgram(APITestCase):
 
     def test_update_program_with_pdu_fields_program_has_RDI_update_pdu_field(self) -> None:
         # field will NOT be updated, no field will be removed
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.business_area, whole_business_area_access=True
+        )
         RegistrationDataImportFactory(program=self.program)
         update_data = {
             "programData": {
@@ -827,7 +865,9 @@ class TestUpdateProgram(APITestCase):
 
     def test_update_program_with_pdu_fields_program_has_RDI_invalid_data_decrease_rounds(self) -> None:
         # round number CANNOT be decreased for Program with RDI
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.business_area, whole_business_area_access=True
+        )
         RegistrationDataImportFactory(program=self.program)
         update_data = {
             "programData": {
@@ -857,7 +897,9 @@ class TestUpdateProgram(APITestCase):
 
     def test_update_program_with_pdu_fields_program_has_RDI_invalid_data_changed_existing_rounds_names(self) -> None:
         # names of existing rounds cannot be updated
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.business_area, whole_business_area_access=True
+        )
         RegistrationDataImportFactory(program=self.program)
         update_data = {
             "programData": {
@@ -886,7 +928,9 @@ class TestUpdateProgram(APITestCase):
         )
 
     def test_update_program_increase_rounds_program_has_RDI(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.business_area, whole_business_area_access=True
+        )
         RegistrationDataImportFactory(program=self.program)
         _, individuals = create_household_and_individuals(
             household_data={"business_area": self.business_area, "program": self.program},
@@ -964,7 +1008,9 @@ class TestUpdateProgram(APITestCase):
     def test_finish_active_program_with_not_finished_program_cycle_or_end_date(
         self, mock_delete_deduplication_set: Mock
     ) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_FINISH], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_FINISH], self.business_area, whole_business_area_access=True
+        )
         Program.objects.filter(id=self.program.id).update(status=Program.ACTIVE)
         self.program.refresh_from_db()
         self.assertEqual(self.program.status, Program.ACTIVE)
@@ -1026,7 +1072,9 @@ class TestUpdateProgram(APITestCase):
         mock_delete_deduplication_set.assert_called_once_with("12bc7994-9467-4f27-9954-d75a67d0e909")
 
     def test_update_program_end_date_validation(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.business_area, whole_business_area_access=True
+        )
         Program.objects.filter(id=self.program.id).update(status=Program.ACTIVE, end_date=None)
         self.program.refresh_from_db()
         self.assertEqual(self.program.status, Program.ACTIVE)

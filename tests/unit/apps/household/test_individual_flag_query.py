@@ -43,7 +43,7 @@ class TestIndividualFlagQuery(APITestCase):
         cls.user = UserFactory(partner=partner)
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.program = ProgramFactory(status="ACTIVE")
-        cls.update_partner_access_to_program(partner, cls.program)
+        cls.create_partner_role_with_permissions(partner, [], cls.business_area, cls.program)
 
         individuals_to_create: List[Dict] = [
             {
@@ -104,7 +104,7 @@ class TestIndividualFlagQuery(APITestCase):
         ]
         create_household_and_individuals({"program": cls.program}, individuals_to_create)
         cls.create_user_role_with_permissions(
-            cls.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], cls.business_area
+            cls.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], cls.business_area, whole_business_area_access=True
         )
 
     @parameterized.expand(

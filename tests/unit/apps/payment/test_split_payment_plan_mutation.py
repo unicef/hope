@@ -45,7 +45,9 @@ class TestSplitPaymentPlan(APITestCase):
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory.create()
-        cls.create_user_role_with_permissions(cls.user, [Permissions.PM_SPLIT], cls.business_area)
+        cls.create_user_role_with_permissions(
+            cls.user, [Permissions.PM_SPLIT], cls.business_area, whole_business_area_access=True
+        )
         generate_delivery_mechanisms()
 
     @patch("hct_mis_api.apps.payment.models.PaymentPlanSplit.MAX_CHUNKS")

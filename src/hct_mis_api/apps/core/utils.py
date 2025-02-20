@@ -47,6 +47,7 @@ if TYPE_CHECKING:
 
     from hct_mis_api.apps.account.models import User
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -634,15 +635,14 @@ def chart_permission_decorator(
     @functools.wraps(chart_resolve)
     def resolve_f(*args: Any, **kwargs: Any) -> Any:
         from hct_mis_api.apps.core.models import BusinessArea
+        from hct_mis_api.apps.program.models import Program
 
         _, resolve_info = args
         if resolve_info.context.user.is_authenticated:
             business_area_slug = kwargs.get("business_area_slug", "global")
             business_area = BusinessArea.objects.filter(slug=business_area_slug).first()
-            program_id = get_program_id_from_headers(resolve_info.context.headers)
-            if any(
-                resolve_info.context.user.has_permission(per.name, business_area, program_id) for per in permissions
-            ):
+            program = Program.objects.filter(id=get_program_id_from_headers(resolve_info.context.headers)).first()
+            if any(resolve_info.context.user.has_perm(per.name, program or business_area) for per in permissions):
                 return chart_resolve(*args, **kwargs)
             log_and_raise("Permission Denied")
 
