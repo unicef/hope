@@ -65,7 +65,7 @@ class TestDetails(TestCase):
         response_nok = self.api_client.get(f"/api/hh-status?tax_id={tax_id}&business_area_code=non-existent")
         self.assertEqual(response_nok.status_code, 404)
 
-    def test_filtering_business_area_code_with_registration_id(self) -> None:
+    def test_filtering_business_area_code_with_detail_id(self) -> None:
         rdi = RegistrationDataImportFactory(business_area=self.business_area)
         pending_household = PendingHouseholdFactory(registration_data_import=rdi)
         pending_individual = PendingIndividualFactory(household=pending_household, relationship=HEAD)
@@ -78,16 +78,14 @@ class TestDetails(TestCase):
             household=pending_household,
         )
 
-        registration_id = pending_household.detail_id
+        detail_id = pending_household.detail_id
 
         response_ok = self.api_client.get(
-            f"/api/hh-status?registration_id={registration_id}&business_area_code={self.business_area.code}"
+            f"/api/hh-status?detail_id={detail_id}&business_area_code={self.business_area.code}"
         )
         self.assertEqual(response_ok.status_code, 200)
 
-        response_nok = self.api_client.get(
-            f"/api/hh-status?registration_id={registration_id}&business_area_code=non-existent"
-        )
+        response_nok = self.api_client.get(f"/api/hh-status?detail_id={detail_id}&business_area_code=non-existent")
         self.assertEqual(response_nok.status_code, 404)
 
     def test_getting_non_existent_individual(self) -> None:
@@ -204,7 +202,7 @@ class TestDetails(TestCase):
         self.assertEqual(datetime.datetime.fromisoformat(info["date"].replace("Z", "")).date(), payment.delivery_date)
 
     def test_getting_non_existent_household(self) -> None:
-        response = self.api_client.get("/api/hh-status?registration_id=non-existent")
+        response = self.api_client.get("/api/hh-status?detail_id=non-existent")
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()["status"], "not found")
 
@@ -220,9 +218,9 @@ class TestDetails(TestCase):
             household=pending_household,
         )
 
-        registration_id = pending_household.detail_id
+        detail_id = pending_household.detail_id
 
-        response = self.api_client.get(f"/api/hh-status?registration_id={registration_id}")
+        response = self.api_client.get(f"/api/hh-status?detail_id={detail_id}")
         self.assertEqual(response.status_code, 200)
         data = response.json()
         info = data["info"]
