@@ -989,7 +989,7 @@ class TestPaymentPlanServices(APITestCase):
             status=PaymentPlan.Status.OPEN,
             currency="AMD",
             delivery_mechanism=self.dm_transfer_to_account,
-            financial_serive_provider=self.fsp,
+            financial_service_provider=self.fsp,
         )
         PaymentPlanService(payment_plan).update({"currency": "PLN"})
         payment_plan.refresh_from_db()

@@ -473,8 +473,8 @@ class PaymentGatewayService:
         payment_plans = PaymentPlan.objects.filter(
             splits__sent_to_payment_gateway=True,
             status=PaymentPlan.Status.ACCEPTED,
-            delivery_mechanism__financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-            delivery_mechanism__financial_service_provider__payment_gateway_id__isnull=False,
+            financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            financial_service_provider__payment_gateway_id__isnull=False,
         ).distinct()
 
         for payment_plan in payment_plans:

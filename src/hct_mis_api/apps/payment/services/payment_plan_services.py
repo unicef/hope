@@ -362,7 +362,6 @@ class PaymentPlanService:
 
     @staticmethod
     def create_payments(payment_plan: PaymentPlan) -> None:
-        dmppp = getattr(payment_plan, "delivery_mechanism", None)
         pp_split = payment_plan.splits.first()
         payments_to_create = []
         households = payment_plan.household_list
@@ -383,9 +382,9 @@ class PaymentPlanService:
                 logging.exception(msg)
                 raise GraphQLError(msg)
 
-            if dmppp:
+            if payment_plan.delivery_mechanism:
                 wallet, created = DeliveryMechanismData.objects.get_or_create(
-                    individual_id=collector_id, delivery_mechanism=dmppp.delivery_mechanism
+                    individual_id=collector_id, delivery_mechanism=payment_plan.delivery_mechanism
                 )
                 if created:
                     wallet.validate()
@@ -403,9 +402,11 @@ class PaymentPlanService:
                     household_id=household["pk"],
                     head_of_household_id=household["head_of_household"],
                     collector_id=collector_id,
-                    financial_service_provider_id=dmppp.financial_service_provider_id if dmppp else None,
-                    delivery_type_id=dmppp.delivery_mechanism_id if dmppp else None,
-                    has_valid_wallet=wallet.is_valid_for_fsp(dmppp.financial_service_provider) if dmppp else True,
+                    financial_service_provider=payment_plan.financial_service_provider,
+                    delivery_type=payment_plan.delivery_mechanism,
+                    has_valid_wallet=wallet.is_valid_for_fsp(payment_plan.financial_service_provider)
+                    if payment_plan.financial_service_provider
+                    else True,
                 )
             )
         try:

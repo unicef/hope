@@ -446,8 +446,8 @@ class TestPaymentGatewayService(APITestCase):
             "errors": None,
         }, 200
 
-        self.dm.delivery_mechanism = self.dm_cash_over_the_counter
-        self.dm.save()
+        self.pp.delivery_mechanism = self.dm_cash_over_the_counter
+        self.pp.save()
         PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
         post_mock.assert_called_once_with(
             "payment_instructions/123/add_records/",

@@ -425,10 +425,10 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         export_service.export_per_fsp(self.user)
         self.assertFalse(self.payment_plan.program.is_social_worker_program)
 
-        delivery_mechanism_per_payment_plan = self.payment_plan.delivery_mechanism
-        fsp = delivery_mechanism_per_payment_plan.financial_service_provider
+        delivery_mechanism = self.payment_plan.delivery_mechanism
+        fsp = self.payment_plan.financial_service_provider
         _, ws_fsp = export_service.open_workbook(fsp.name)
-        fsp_xlsx_template = export_service.get_template(fsp, delivery_mechanism_per_payment_plan.delivery_mechanism)
+        fsp_xlsx_template = export_service.get_template(fsp, delivery_mechanism)
         template_column_list = export_service.prepare_headers(fsp_xlsx_template)
         self.assertEqual(
             len(template_column_list),
@@ -458,7 +458,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         fsp_xlsx_template.refresh_from_db()
 
         _, ws_fsp = export_service.open_workbook(fsp.name)
-        fsp_xlsx_template = export_service.get_template(fsp, delivery_mechanism_per_payment_plan.delivery_mechanism)
+        fsp_xlsx_template = export_service.get_template(fsp, delivery_mechanism)
 
         template_column_list = export_service.prepare_headers(fsp_xlsx_template)
         fsp_xlsx_template.refresh_from_db()

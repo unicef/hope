@@ -254,7 +254,7 @@ class TestPaymentCeleryTask(TestCase):
             background_action_status=PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING,
             program_cycle=self.program.cycles.first(),
             created_by=self.user,
-            financial_service_prvider=self.financial_service_provider,
+            financial_service_provider=self.financial_service_provider,
             delivery_mechanism=self.dm_cash,
         )
         fsp_template = FinancialServiceProviderXlsxTemplateFactory()
@@ -280,7 +280,7 @@ class TestPaymentCeleryTask(TestCase):
             background_action_status=PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING,
             program_cycle=self.program.cycles.first(),
             created_by=self.user,
-            financial_service_prvider=self.financial_service_provider,
+            financial_service_provider=self.financial_service_provider,
             delivery_mechanism=self.dm_cash,
         )
         fsp_template = FinancialServiceProviderXlsxTemplateFactory()
