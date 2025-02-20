@@ -2,7 +2,8 @@ import { useTranslation } from 'react-i18next';
 import {
   AllIndividualsForPopulationTableQueryVariables,
   AllIndividualsQueryVariables,
-  IndividualNode, IndividualRdiMergeStatus,
+  IndividualNode,
+  IndividualRdiMergeStatus,
   useAllIndividualsForPopulationTableQuery,
 } from '@generated/graphql';
 import { TableWrapper } from '@components/core/TableWrapper';

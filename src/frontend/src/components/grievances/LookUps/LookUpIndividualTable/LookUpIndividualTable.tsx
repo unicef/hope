@@ -1,7 +1,8 @@
 import styled from 'styled-components';
 import {
   AllIndividualsForPopulationTableQuery,
-  AllIndividualsForPopulationTableQueryVariables, IndividualRdiMergeStatus,
+  AllIndividualsForPopulationTableQueryVariables,
+  IndividualRdiMergeStatus,
   useAllIndividualsForPopulationTableQuery,
 } from '@generated/graphql';
 import { UniversalTable } from '@containers/tables/UniversalTable';
