@@ -195,11 +195,7 @@ class TestHouseholdQuery(APITestCase):
                     "program": program,
                 },
             )
-            household.programs.add(program)
             household.save()
-            # added for testing migrate_data_to_representations script
-            if family_size == 14:
-                household.programs.add(cls.program_one)
 
             area_type_level_1 = AreaTypeFactory(
                 name="State1",

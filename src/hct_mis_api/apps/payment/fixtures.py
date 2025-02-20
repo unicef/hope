@@ -395,8 +395,6 @@ def create_payment_verification_plan_with_status(
             {"registration_data_import": registration_data_import},
         )
 
-        household.programs.add(program)
-
         currency = getattr(payment_plan, "currency", None)
         if currency is None:
             currency = "PLN"

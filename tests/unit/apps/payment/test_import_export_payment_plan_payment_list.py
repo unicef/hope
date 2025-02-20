@@ -120,7 +120,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         )
         cls.split = PaymentPlanSplitFactory(payment_plan=cls.payment_plan)
 
-        program.households.set(Household.objects.all().values_list("id", flat=True))
+        program.households.set(Household.objects.all())
         for household in program.households.all():
             PaymentFactory(
                 parent=cls.payment_plan,

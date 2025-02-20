@@ -36,17 +36,15 @@ class TestHouseholdDeliveredQuantitiesQuery(APITestCase):
         cls.user = UserFactory(partner=partner)
 
         business_area = create_afghanistan()
+        program = ProgramFactory.create(name="Test program ONE", business_area=business_area)
         household, _ = create_household(
             {
                 "size": 2,
                 "address": "Lorem Ipsum",
                 "country_origin": geo_models.Country.objects.filter(iso_code2="PL").first(),
+                "program": program,
             }
         )
-        program = ProgramFactory.create(name="Test program ONE", business_area=business_area)
-
-        household.programs.add(program)
-        household.program = program
         household.save()
 
         PaymentFactory(
