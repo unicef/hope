@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import {
   AllIndividualsForPopulationTableQueryVariables,
   AllIndividualsQueryVariables,
-  IndividualNode,
+  IndividualNode, IndividualRdiMergeStatus,
   useAllIndividualsForPopulationTableQuery,
 } from '@generated/graphql';
 import { TableWrapper } from '@components/core/TableWrapper';
@@ -42,6 +42,7 @@ export const PeopleListTable = ({
       max: dateToIsoString(filter.lastRegistrationDateMax, 'endOfDay'),
     }),
     program: programId,
+    rdiMergeStatus: IndividualRdiMergeStatus.Merged,
   };
 
   return (
