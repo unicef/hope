@@ -21,7 +21,6 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
@@ -336,7 +335,7 @@ class TestPaymentPlanQueries(APITestCase):
             )
             cls.pp.unicef_id = "PP-01"
             cls.pp.save()
-            referral_dm = DeliveryMechanismFactory(code="referral", is_active=True)
+            referral_dm = DeliveryMechanism.objects.get(code="referral")
             PaymentVerificationSummaryFactory(payment_plan=cls.pp, status="ACTIVE")
 
             hoh1 = IndividualFactory(household=None)
