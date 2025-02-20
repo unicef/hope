@@ -323,6 +323,10 @@ class TestPaymentPlanQueries(APITestCase):
                 cycle__end_date=timezone.datetime(2020, 11, 10, tzinfo=utc).date(),
             )
             cls.program_cycle = program.cycles.first()
+            cls.financial_service_provider = FinancialServiceProviderFactory(
+                communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+                payment_gateway_id="test123",
+            )
             cls.pp = PaymentPlanFactory(
                 name="Main Payment Plan",
                 program_cycle=cls.program_cycle,
@@ -332,6 +336,7 @@ class TestPaymentPlanQueries(APITestCase):
                 created_by=cls.user,
                 currency="PLN",
                 delivery_mechanism=cash_dm,
+                financial_service_provider=cls.financial_service_provider,
             )
             cls.pp.unicef_id = "PP-01"
             cls.pp.save()
@@ -365,10 +370,6 @@ class TestPaymentPlanQueries(APITestCase):
                 delivered_quantity_usd=100.00,
                 currency="PLN",
                 fsp_auth_code=None,
-            )
-            cls.financial_service_provider = FinancialServiceProviderFactory(
-                communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
-                payment_gateway_id="test123",
             )
             # create hard conflicted payment
             cls.pp_conflicted = PaymentPlanFactory(

@@ -166,7 +166,7 @@ mutation ChooseDeliveryMechanismsForPaymentPlan($input: ChooseDeliveryMechanisms
     chooseDeliveryMechanismsForPaymentPlan(input: $input) {
         paymentPlan {
             id
-            deliveryMechanisms {
+            deliveryMechanism {
                 order
                 name
             }
@@ -198,7 +198,7 @@ mutation AssignFspToDeliveryMechanism($paymentPlanId: ID!, $mappings: [FSPToDeli
     }) {
         paymentPlan {
             id
-            deliveryMechanisms {
+            deliveryMechanism {
                 name
                 order
                 fsp {
@@ -451,6 +451,7 @@ class TestPaymentPlanReconciliation(APITestCase):
                     },
                 },
             )
+            print(create_payment_plan_response)
             assert mock_prepare_payment_plan_task.on_commit.call_count == 1
             mock_prepare_payment_plan_task.on_commit.call_args[0][0]()  # call real func
 
@@ -1144,7 +1145,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         financial_service_provider1 = FinancialServiceProviderFactory(
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX
         )
-        financial_service_provider1.delivery_mechanisms.add(self.dm_cash)
+        financial_service_provider1.delivery_mechanisms.add(dm_cash)
         pp = PaymentPlanFactory(
             status=PaymentPlan.Status.ACCEPTED,
             created_by=self.user,

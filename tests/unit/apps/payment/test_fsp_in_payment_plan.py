@@ -96,9 +96,6 @@ def base_setup(cls: Any) -> None:
 
 def payment_plan_setup(cls: Any) -> None:
     targeting_criteria = TargetingCriteriaFactory()
-
-    cls.encoded_payment_plan_id = encode_id_base64(cls.payment_plan.id, "PaymentPlan")
-
     cls.santander_fsp = FinancialServiceProviderFactory(
         name="Santander",
         distribution_limit=None,
@@ -111,6 +108,18 @@ def payment_plan_setup(cls: Any) -> None:
     cls.santander_fsp.delivery_mechanisms.set([cls.dm_transfer, cls.dm_cash, cls.dm_transfer_to_digital_wallet])
     cls.santander_fsp.allowed_business_areas.add(cls.business_area)
     cls.encoded_santander_fsp_id = encode_id_base64(cls.santander_fsp.id, "FinancialServiceProvider")
+
+    cls.payment_plan = PaymentPlanFactory(
+        total_households_count=4,
+        targeting_criteria=targeting_criteria,
+        status=PaymentPlan.Status.LOCKED,
+        program_cycle=cls.program.cycles.first(),
+        created_by=cls.user,
+        delivery_mechanism=cls.dm_transfer,
+        financial_service_provider=cls.santander_fsp,
+    )
+
+    cls.encoded_payment_plan_id = encode_id_base64(cls.payment_plan.id, "PaymentPlan")
 
     cls.bank_of_america_fsp = FinancialServiceProviderFactory(
         name="Bank of America",
@@ -129,16 +138,6 @@ def payment_plan_setup(cls: Any) -> None:
     cls.bank_of_europe_fsp.delivery_mechanisms.set([cls.dm_voucher, cls.dm_transfer, cls.dm_cash])
     cls.bank_of_europe_fsp.allowed_business_areas.add(cls.business_area)
     cls.encoded_bank_of_europe_fsp_id = encode_id_base64(cls.bank_of_europe_fsp.id, "FinancialServiceProvider")
-
-    cls.payment_plan = PaymentPlanFactory(
-        total_households_count=4,
-        targeting_criteria=targeting_criteria,
-        status=PaymentPlan.Status.LOCKED,
-        program_cycle=cls.program.cycles.first(),
-        created_by=cls.user,
-        delivery_mechanism=cls.dm_transfer,
-        financial_service_provider=cls.santander_fsp,
-    )
 
     FspXlsxTemplatePerDeliveryMechanismFactory(
         financial_service_provider=cls.santander_fsp, delivery_mechanism=cls.dm_transfer

@@ -476,7 +476,7 @@ class PaymentPlanService:
                 delivery_mechanism = get_object_or_404(DeliveryMechanism, code=delivery_mechanism_code)
                 payment_plan.financial_service_provider = fsp
                 payment_plan.delivery_mechanism = delivery_mechanism
-                payment_plan.save(updte_fields=["financial_service_provider", "delivery_mechanism"])
+                payment_plan.save(update_fields=["financial_service_provider", "delivery_mechanism"])
 
             transaction.on_commit(lambda: prepare_payment_plan_task.delay(str(payment_plan.id)))
 
