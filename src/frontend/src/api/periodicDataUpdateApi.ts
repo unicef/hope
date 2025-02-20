@@ -34,7 +34,7 @@ export const fetchPeriodicDataUpdateUpdates = async (
 export const fetchPeriodicDataUpdateTemplateDetails = async (
   businessAreaSlug: string,
   programId: string,
-  templateId: string,
+  templateId: number,
 ): Promise<PeriodicDataUpdateTemplateDetail> => {
   return handleApiResponse(
     api.get(
@@ -94,7 +94,7 @@ export const uploadPeriodicDataUpdateTemplate = async (
 export const fetchPeriodicDataUpdateUploadDetails = async (
   businessAreaSlug: string,
   programId: string,
-  uploadId: string,
+  uploadId: number,
 ): Promise<PeriodicDataUpdateUploadDetail> => {
   return handleApiResponse(
     api.get(
