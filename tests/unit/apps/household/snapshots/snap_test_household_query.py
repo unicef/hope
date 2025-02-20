@@ -363,7 +363,7 @@ snapshots['TestHouseholdQuery::test_query_households_by_national_id_no_filter_1_
     ]
 }
 
-snapshots['TestHouseholdQuery::test_query_households_by_registration_id_filter_0_with_permission 1'] = {
+snapshots['TestHouseholdQuery::test_query_households_by_detail_id_filter_0_with_permission 1'] = {
     'data': {
         'allHouseholds': {
             'edges': [
@@ -379,7 +379,7 @@ snapshots['TestHouseholdQuery::test_query_households_by_registration_id_filter_0
     }
 }
 
-snapshots['TestHouseholdQuery::test_query_households_by_registration_id_filter_1_with_permission_wrong_type_in_search 1'] = {
+snapshots['TestHouseholdQuery::test_query_households_by_detail_id_filter_1_with_permission_wrong_type_in_search 1'] = {
     'data': {
         'allHouseholds': {
             'edges': [
@@ -388,7 +388,7 @@ snapshots['TestHouseholdQuery::test_query_households_by_registration_id_filter_1
     }
 }
 
-snapshots['TestHouseholdQuery::test_query_households_by_registration_id_filter_2_without_permission 1'] = {
+snapshots['TestHouseholdQuery::test_query_households_by_detail_id_filter_2_without_permission 1'] = {
     'data': {
         'allHouseholds': None
     },
