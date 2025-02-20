@@ -148,9 +148,9 @@ export const handleApiResponse = async <T>(apiCall: Promise<T>): Promise<T> => {
   try {
     const response = await apiCall;
     return response;
-  } catch (error) {
-    console.error('API call failed:', error);
-    throw error;
+  } catch (error: any) {
+    console.error('API call failed:', error.message || error);
+    throw new Error(`API call failed: ${error.message || 'Unknown error'}`);
   }
 };
 
