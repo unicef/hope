@@ -4015,7 +4015,7 @@ type TicketHouseholdDataUpdateDetailsNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  household: HouseholdNode
+  household: HouseholdNode!
   householdData: Arg
 }
 
@@ -4035,7 +4035,7 @@ type TicketIndividualDataUpdateDetailsNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  individual: IndividualNode
+  individual: IndividualNode!
   individualData: Arg
   roleReassignData: JSONString!
 }
