@@ -141,3 +141,20 @@ export const api = {
     return;
   },
 };
+
+export type Params = Record<string, any>;
+
+export const handleApiResponse = async <T>(apiCall: Promise<T>): Promise<T> => {
+  try {
+    const response = await apiCall;
+    return response;
+  } catch (error) {
+    console.error('API call failed:', error);
+    throw error;
+  }
+};
+
+export const handleMutationError = (error: any, action: string): never => {
+  const errorMessage = error?.message || 'An unknown error occurred';
+  throw new Error(`Failed to ${action}: ${errorMessage}`);
+};

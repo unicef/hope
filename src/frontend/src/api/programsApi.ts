@@ -1,5 +1,6 @@
-import { api } from './api';
+import { api, handleApiResponse } from './api';
 
+//TODO: Add generated types
 interface BeneficiaryGroup {
   id: string;
   name: string;
@@ -20,5 +21,5 @@ export interface PaginatedListResponse<T> {
 export const fetchBeneficiaryGroups = async (): Promise<
   PaginatedListResponse<BeneficiaryGroup>
 > => {
-  return api.get('beneficiary-groups/');
+  return handleApiResponse(api.get('beneficiary-groups/'));
 };
