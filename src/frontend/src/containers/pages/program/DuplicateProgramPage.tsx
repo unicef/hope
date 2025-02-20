@@ -42,7 +42,7 @@ export const DuplicateProgramPage = (): ReactElement => {
   const { id } = useParams();
   const location = useLocation();
   const permissions = usePermissions();
-  const [mutate] = useCopyProgramMutation();
+  const [mutate, { loading: loadingCopy }] = useCopyProgramMutation();
   const [step, setStep] = useState(0);
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea } = useBaseUrl();
@@ -384,6 +384,7 @@ export const DuplicateProgramPage = (): ReactElement => {
                           submitForm={submitForm}
                           setFieldValue={setFieldValue}
                           programId={id}
+                          loading={loadingCopy}
                         />
                       )}
                     </div>
