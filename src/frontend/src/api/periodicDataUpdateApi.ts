@@ -1,4 +1,4 @@
-import { api } from './api';
+import { api, handleApiResponse, Params } from './api';
 import { PaginatedPeriodicDataUpdateTemplateListList } from '@restgenerated/models/PaginatedPeriodicDataUpdateTemplateListList';
 import { PeriodicDataUpdateUploadList } from '@restgenerated/models/PeriodicDataUpdateUploadList';
 import { PeriodicDataUpdateTemplateDetail } from '@restgenerated/models/PeriodicDataUpdateTemplateDetail';
@@ -8,36 +8,39 @@ import { PaginatedPeriodicFieldList } from '@restgenerated/models/PaginatedPerio
 export const fetchPeriodicDataUpdateTemplates = async (
   businessAreaSlug: string,
   programId: string,
-  params = {},
+  params: Params = {},
 ): Promise<PaginatedPeriodicDataUpdateTemplateListList> => {
-  const response = await api.get(
-    `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/`,
-    params,
+  return handleApiResponse(
+    api.get(
+      `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/`,
+      params,
+    ),
   );
-  return response;
 };
 
 export const fetchPeriodicDataUpdateUpdates = async (
-  businessAreaSlug,
-  programId,
-  params = {},
+  businessAreaSlug: string,
+  programId: string,
+  params: Params = {},
 ): Promise<PeriodicDataUpdateUploadList> => {
-  const response = await api.get(
-    `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-uploads/`,
-    params,
+  return handleApiResponse(
+    api.get(
+      `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-uploads/`,
+      params,
+    ),
   );
-  return response;
 };
 
 export const fetchPeriodicDataUpdateTemplateDetails = async (
-  businessAreaSlug,
-  programId,
-  templateId,
+  businessAreaSlug: string,
+  programId: string,
+  templateId: string,
 ): Promise<PeriodicDataUpdateTemplateDetail> => {
-  const response = await api.get(
-    `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/${templateId}/`,
+  return handleApiResponse(
+    api.get(
+      `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/${templateId}/`,
+    ),
   );
-  return response;
 };
 
 export const exportPeriodicDataUpdateTemplate = async (
@@ -45,11 +48,12 @@ export const exportPeriodicDataUpdateTemplate = async (
   programId: string,
   templateId: string,
 ): Promise<any> => {
-  const response = await api.post(
-    `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/${templateId}/export/`,
-    {},
+  return handleApiResponse(
+    api.post(
+      `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/${templateId}/export/`,
+      {},
+    ),
   );
-  return response;
 };
 
 export const fetchPeriodicDataUpdateTemplate = async (
@@ -57,20 +61,21 @@ export const fetchPeriodicDataUpdateTemplate = async (
   programId: string,
   templateId: string,
 ): Promise<any> => {
-  const response = await api.get(
-    `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/${templateId}/download/`,
-    {},
-    `Periodic_Data_Update_Template_${templateId}`,
+  return handleApiResponse(
+    api.get(
+      `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/${templateId}/download/`,
+      {},
+      `Periodic_Data_Update_Template_${templateId}`,
+    ),
   );
-  return response;
 };
 
 export const uploadPeriodicDataUpdateTemplate = async (
   businessAreaSlug: string,
   programId: string,
   file: File,
-  additionalParams: Record<string, any> = {},
-) => {
+  additionalParams: Params = {},
+): Promise<any> => {
   const formData = new FormData();
   formData.append('file', file);
 
@@ -78,50 +83,54 @@ export const uploadPeriodicDataUpdateTemplate = async (
     formData.append(key, additionalParams[key]);
   });
 
-  const response = await api.post(
-    `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-uploads/upload/`,
-    formData,
+  return handleApiResponse(
+    api.post(
+      `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-uploads/upload/`,
+      formData,
+    ),
   );
-  return response;
 };
 
 export const fetchPeriodicDataUpdateUploadDetails = async (
-  businessAreaSlug,
-  programId,
-  uploadId,
+  businessAreaSlug: string,
+  programId: string,
+  uploadId: string,
 ): Promise<PeriodicDataUpdateUploadDetail> => {
-  const response = await api.get(
-    `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-uploads/${uploadId}/`,
+  return handleApiResponse(
+    api.get(
+      `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-uploads/${uploadId}/`,
+    ),
   );
-  return response;
 };
 
 export const createPeriodicDataUpdateTemplate = async (
   businessAreaSlug: string,
   programId: string,
-  roundsData: Record<string, any>,
-  filters: Record<string, any> | null,
-) => {
+  roundsData: Params,
+  filters: Params | null,
+): Promise<any> => {
   const payload = {
     rounds_data: roundsData,
     filters: filters,
   };
 
-  const response = await api.post(
-    `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/`,
-    payload,
+  return handleApiResponse(
+    api.post(
+      `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/`,
+      payload,
+    ),
   );
-  return response;
 };
 
 export const fetchPeriodicFields = async (
   businessAreaSlug: string,
   programId: string,
-  params = {},
+  params: Params = {},
 ): Promise<PaginatedPeriodicFieldList> => {
-  const response = await api.get(
-    `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-fields/`,
-    params,
+  return handleApiResponse(
+    api.get(
+      `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-fields/`,
+      params,
+    ),
   );
-  return response;
 };
