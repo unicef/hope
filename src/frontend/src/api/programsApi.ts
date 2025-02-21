@@ -45,3 +45,33 @@ export const fetchProgram = async (
 //     'create program',
 //   );
 // };
+
+//TODO: Add generated types
+interface ProgramsParams {
+  active?: boolean;
+  business_area?: string;
+  limit?: number;
+  offset?: number;
+  ordering?: string;
+  status?: 'ACTIVE' | 'DRAFT' | 'FINISHED';
+  updated_at_after?: string;
+  updated_at_before?: string;
+}
+
+interface Program {
+  // Define the properties of a Program here
+}
+
+interface PaginatedListResponse<T> {
+  count: number;
+  next?: string;
+  previous?: string;
+  results: T[];
+}
+
+export const fetchPrograms = async (
+  params: ProgramsParams,
+): Promise<PaginatedListResponse<Program>> => {
+  const queryString = new URLSearchParams(params as any).toString();
+  return handleApiResponse(api.get(`/api/rest/programs/?${queryString}`));
+};
