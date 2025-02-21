@@ -58,7 +58,7 @@ class NewFeedback(BaseComponents):
     inputQuestionnaire_months_displaced_h_f = 'span[data-cy="input-questionnaire_months_displaced_h_f"]'
     labelLengthOfTimeSinceArrival = 'div[data-cy="label-LENGTH OF TIME SINCE ARRIVAL"]'
     inputQuestionnaire_fullname = 'span[data-cy="input-questionnaire_fullName"]'
-    labelIndividualFullName = 'div[data-cy="label-Member Full Name"]'
+    labelIndividualFullName = 'div[data-cy="label-Member full name"]'
     inputQuestionnaire_birthdate = 'span[data-cy="input-questionnaire_birthDate"]'
     labelBirthDate = 'div[data-cy="label-Birth Date"]'
     inputQuestionnaire_phoneno = 'span[data-cy="input-questionnaire_phoneNo"]'

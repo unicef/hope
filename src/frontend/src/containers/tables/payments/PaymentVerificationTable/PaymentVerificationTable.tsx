@@ -10,13 +10,14 @@ import { dateToIsoString } from '@utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './PaymentVerificationHeadCells';
 import { PaymentVerificationTableRow } from './PaymentVerificationTableRow';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface PaymentVerificationTableProps {
   filter?;
   businessArea: string;
   canViewDetails: boolean;
 }
-export function PaymentVerificationTable({
+function PaymentVerificationTable({
   filter,
   canViewDetails,
   businessArea,
@@ -50,3 +51,8 @@ export function PaymentVerificationTable({
     />
   );
 }
+
+export default withErrorBoundary(
+  PaymentVerificationTable,
+  'PaymentVerificationTable',
+);

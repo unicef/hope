@@ -24,6 +24,7 @@ import { ReactElement, useState } from 'react';
 import { Fragment } from 'react/jsx-runtime';
 import { t } from 'i18next';
 import { useProgramContext } from 'src/programContext';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface CriteriaElementProps {
   alternative?: boolean;
@@ -492,3 +493,5 @@ export function Criteria({
     </CriteriaElement>
   );
 }
+
+export default withErrorBoundary(Criteria, 'Criteria');
