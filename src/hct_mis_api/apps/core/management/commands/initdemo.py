@@ -60,7 +60,7 @@ from django.utils import timezone
 
 import elasticsearch
 
-from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
+from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment, User
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.payment.fixtures import (
     generate_delivery_mechanisms,
@@ -119,10 +119,10 @@ class Command(BaseCommand):
 
         # Load fixtures
         fixtures = [
+            "apps/account/fixtures/initial.json",
             "apps/geo/fixtures/data.json",
             "apps/core/fixtures/data.json",
             "apps/account/fixtures/data.json",
-            "apps/core/fixtures/businessareapartnerthrough.json",
             "apps/program/fixtures/data.json",
             "apps/registration_data/fixtures/data.json",
             "apps/household/fixtures/documenttype.json",
@@ -156,7 +156,6 @@ class Command(BaseCommand):
         # Load more fixtures
         additional_fixtures = [
             "apps/core/fixtures/pdu.json",
-            "apps/program/fixtures/programpartnerthrough.json",
             "apps/grievance/fixtures/data.json",
         ]
         self.stdout.write("Loading additional fixtures...")
@@ -188,6 +187,7 @@ class Command(BaseCommand):
             role_with_all_perms = Role.objects.get(name="Role with all permissions")
             afghanistan = BusinessArea.objects.get(slug="afghanistan")
             partner = Partner.objects.get(name="UNICEF")
+            unicef_hq = Partner.objects.get(name=settings.UNICEF_HQ_PARTNER, parent=partner)
 
             combined_email_list: List[str] = [email.strip() for email in email_list + tester_list if email.strip()]
 
@@ -195,8 +195,8 @@ class Command(BaseCommand):
                 self.stdout.write("Creating users...")
                 for email in combined_email_list:
                     try:
-                        user = User.objects.create_user(email, email, "password", partner=partner)
-                        UserRole.objects.create(
+                        user = User.objects.create_user(email, email, "password", partner=unicef_hq)
+                        RoleAssignment.objects.create(
                             user=user,
                             role=role_with_all_perms,
                             business_area=afghanistan,

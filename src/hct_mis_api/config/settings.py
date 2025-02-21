@@ -279,6 +279,7 @@ PASSWORD_RESET_TIMEOUT = 60 * 60 * 24 * 31
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 7
 
 AUTHENTICATION_BACKENDS = [
+    "hct_mis_api.apps.core.backends.PermissionsBackend",
     "django.contrib.auth.backends.ModelBackend",
     "social_core.backends.azuread_tenant.AzureADTenantOAuth2",
 ]
@@ -478,6 +479,7 @@ FLOWER_ADDRESS = env("FLOWER_ADDRESS")
 
 ADMIN_SYNC_CONFIG = "admin_sync.conf.DjangoConstance"
 DEFAULT_EMPTY_PARTNER = "Default Empty Partner"
+UNICEF_HQ_PARTNER = "UNICEF HQ"
 X_FRAME_OPTIONS = "SAMEORIGIN"
 
 

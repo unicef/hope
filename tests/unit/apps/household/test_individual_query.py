@@ -59,6 +59,14 @@ class TestIndividualQuery(APITestCase):
             phoneNo
             phoneNoValid
             birthDate
+            program {
+              name
+            }
+            household {
+              adminArea {
+                pCode
+              }
+            }
           }
         }
       }
@@ -290,9 +298,11 @@ class TestIndividualQuery(APITestCase):
         )
 
         cls.household_one.set_admin_areas(cls.area2)
+        cls.household_2.set_admin_areas(cls.area2)
 
-        cls.update_partner_access_to_program(cls.partner, cls.program, [cls.household_one.admin_area])
-        cls.update_partner_access_to_program(cls.partner, cls.program_draft, [cls.household_one.admin_area])
+        cls.area_other = AreaFactory(name="City Test Other", p_code="areaother")
+        cls.household_2.set_admin_areas(cls.area_other)
+
         # just add one PENDING Ind to be sure filters works correctly
         IndividualFactory(
             **{
@@ -646,11 +656,113 @@ class TestIndividualQuery(APITestCase):
             variables={"admin2": [encode_id_base64(self.area2.id, "AreaNode")]},
         )
 
-    def test_individual_query_all_for_all_programs(self) -> None:
+    def test_individual_query_all_for_all_programs_permission_in_whole_ba(self) -> None:
         self.create_user_role_with_permissions(
             self.user,
             [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST],
             self.business_area,
+            whole_business_area_access=True,
+        )  # permission in whole ba
+
+        self.snapshot_graphql_request(
+            request_string=self.ALL_INDIVIDUALS_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+        )
+
+    def test_individual_query_all_for_all_programs_permission_in_specific_programs_1(self) -> None:
+        self.create_partner_role_with_permissions(
+            self.partner, [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], self.business_area, self.program
+        )
+
+        self.snapshot_graphql_request(
+            request_string=self.ALL_INDIVIDUALS_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+        )
+
+    def test_individual_query_all_for_all_programs_permission_in_specific_programs_2(self) -> None:
+        self.create_partner_role_with_permissions(
+            self.partner, [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], self.business_area, self.program_other
+        )
+
+        self.snapshot_graphql_request(
+            request_string=self.ALL_INDIVIDUALS_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+        )
+
+    def test_individual_query_all_for_all_programs_permission_in_specific_programs_3(self) -> None:
+        for program in [self.program, self.program_other]:
+            self.create_partner_role_with_permissions(
+                self.partner, [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], self.business_area, program
+            )
+
+        self.snapshot_graphql_request(
+            request_string=self.ALL_INDIVIDUALS_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+        )
+
+    def test_individual_query_all_for_all_programs_area_restrictions_1(self) -> None:
+        for program in [self.program, self.program_other]:
+            self.create_partner_role_with_permissions(
+                self.partner, [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], self.business_area, program
+            )
+            self.set_admin_area_limits_in_program(self.partner, program, [self.area1])
+
+        self.snapshot_graphql_request(
+            request_string=self.ALL_INDIVIDUALS_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+        )
+
+    def test_individual_query_all_for_all_programs_area_restrictions_2(self) -> None:
+        for program in [self.program, self.program_other]:
+            self.create_partner_role_with_permissions(
+                self.partner, [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], self.business_area, program
+            )
+            self.set_admin_area_limits_in_program(self.partner, program, [self.area_other])
+
+        self.snapshot_graphql_request(
+            request_string=self.ALL_INDIVIDUALS_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+        )
+
+    def test_individual_query_all_for_all_programs_user_and_partner_permissions(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user,
+            [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST],
+            self.business_area,
+            program=self.program_other,
+        )
+        self.create_partner_role_with_permissions(
+            self.partner, [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], self.business_area, self.program
         )
 
         self.snapshot_graphql_request(
@@ -876,14 +988,14 @@ class TestIndividualWithDeliveryMechanismsDataQuery(APITestCase):
             (
                 "with_permissions",
                 [
-                    Permissions.POPULATION_VIEW_INDIVIDUALS_LIST,
+                    Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS,
                     Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION,
                 ],
             ),
             (
                 "without_permissions",
                 [
-                    Permissions.POPULATION_VIEW_INDIVIDUALS_LIST,
+                    Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS,
                 ],
             ),
         ]

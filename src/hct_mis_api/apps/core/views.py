@@ -55,7 +55,7 @@ def trigger_error(request: HttpRequest) -> HttpResponse:
 @login_required
 def download_dashboard_report(request: HttpRequest, report_id: "UUID") -> Any:
     report = get_object_or_404(DashboardReport, id=report_id)
-    if not request.user.has_permission(Permissions.DASHBOARD_EXPORT.name, report.business_area):
+    if not request.user.has_perm(Permissions.DASHBOARD_EXPORT.name, report.business_area):
         logger.error("Permission Denied: You need dashboard export permission to access this file")
         raise PermissionDenied("Permission Denied: You need dashboard export permission to access this file")
     return redirect(report.file.url)

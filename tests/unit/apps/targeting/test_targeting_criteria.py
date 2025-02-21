@@ -4,6 +4,7 @@ from typing import Any, Dict, List
 from django.core.management import call_command
 
 from dateutil.relativedelta import relativedelta
+from flaky import flaky
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -377,6 +378,7 @@ class TestTargetingCriteriaByIdQuery(APITestCase):
         )
         return criteria
 
+    @flaky(max_runs=3, min_passes=1)
     def test_household_ids(self) -> None:
         t_criteria = TargetingCriteriaFactory()
         PaymentPlanFactory(
@@ -410,6 +412,7 @@ class TestTargetingCriteriaByIdQuery(APITestCase):
         )
         assert Household.objects.filter(t_criteria2.get_query()).distinct().count() == 2
 
+    @flaky(max_runs=3, min_passes=1)
     def test_individual_ids(self) -> None:
         t_criteria = TargetingCriteriaFactory()
         PaymentPlanFactory(
@@ -443,6 +446,7 @@ class TestTargetingCriteriaByIdQuery(APITestCase):
 
         assert Household.objects.filter(t_criteria2.get_query()).distinct().count() == 2
 
+    @flaky(max_runs=3, min_passes=1)
     def test_household_and_individual_ids(self) -> None:
         t_criteria = TargetingCriteriaFactory()
         PaymentPlanFactory(

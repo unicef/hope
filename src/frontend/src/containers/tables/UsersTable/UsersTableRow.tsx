@@ -21,17 +21,15 @@ export const UsersTableRow = ({ user }: UsersTableRowProps): ReactElement => {
 
   const mappedRoles = user?.userRoles?.map((el) => (
     <p key={el.role.name}>
-      {el.businessArea.name} / {el.role.name}
+      {el.businessArea.name} / {el.program?.name || 'All'} / {el.role.name}
     </p>
   ));
 
-  const mappedPartnerRoles = user?.partnerRoles?.map((el) =>
-    el.roles.map((role) => (
-      <p key={role.name}>
-        {el.businessArea.name} / {role.name}
-      </p>
-    )),
-  );
+  const mappedPartnerRoles = user?.partnerRoles?.map((el) => (
+    <p key={el.role.name}>
+      {el.businessArea.name} / {el.program?.name || 'All'} / {el.role.name}
+    </p>
+  ));
 
   return (
     <>
@@ -66,7 +64,7 @@ export const UsersTableRow = ({ user }: UsersTableRowProps): ReactElement => {
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={2}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box margin={1} data-cy="country-role">
-              <GreyText>Country / Role</GreyText>
+              <GreyText>Country / Program / Role</GreyText>
             </Box>
             <Box margin={1} data-cy="mapped-country-role">
               {mappedRoles.length ? mappedRoles : 'No roles assigned.'}

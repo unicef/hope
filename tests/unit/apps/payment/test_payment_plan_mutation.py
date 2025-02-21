@@ -140,7 +140,9 @@ class TestPaymentPlanMutation(APITestCase):
     def test_create_targeting_mutation(
         self, _: Any, permissions: List[Permissions], mock_get_exchange_rate: Any
     ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
         self.snapshot_graphql_request(
             request_string=CREATE_PAYMENT_PLAN_MUTATION,
             context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},

@@ -56,8 +56,6 @@ class TestFilterHouseholdsByProgram(APITestCase):
         cls.business_area = create_afghanistan()
         cls.program1 = ProgramFactory(name="Test program ONE", business_area=cls.business_area, status="ACTIVE")
         cls.program2 = ProgramFactory(name="Test program TWO", business_area=cls.business_area, status="ACTIVE")
-        cls.update_partner_access_to_program(cls.partner, cls.program1)
-        cls.update_partner_access_to_program(cls.partner, cls.program2)
         create_household({"program": cls.program1})
         create_household({"program": cls.program1})
         create_household({"program": cls.program2})
@@ -69,7 +67,7 @@ class TestFilterHouseholdsByProgram(APITestCase):
         ]
     )
     def test_filter_households(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program1)
 
         headers = {
             "Business-Area": self.business_area.slug,

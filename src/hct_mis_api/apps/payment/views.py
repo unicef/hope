@@ -30,7 +30,7 @@ def download_payment_verification_plan(  # type: ignore
 ]:
     payment_verification_plan_id = decode_id_string(verification_id)
     payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
-    if not request.user.has_permission(
+    if not request.user.has_perm(
         Permissions.PAYMENT_VERIFICATION_EXPORT.value, payment_verification_plan.business_area
     ):
         raise PermissionDenied("Permission Denied: User does not have correct permission.")
@@ -58,7 +58,7 @@ def download_payment_plan_payment_list(  # type: ignore # missing return
     payment_plan_id_str = decode_id_string(payment_plan_id)
     payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id_str)
 
-    if not request.user.has_permission(Permissions.PM_VIEW_LIST.value, payment_plan.business_area):
+    if not request.user.has_perm(Permissions.PM_VIEW_LIST.value, payment_plan.business_area):
         raise PermissionDenied("Permission Denied: User does not have correct permission.")
 
     if payment_plan.status not in (PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
@@ -79,7 +79,7 @@ def download_payment_plan_summary_pdf(  # type: ignore # missing return
     payment_plan_id_str = decode_id_string(payment_plan_id)
     payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id_str)
 
-    if not request.user.has_permission(Permissions.PM_EXPORT_PDF_SUMMARY.value, payment_plan.business_area):
+    if not request.user.has_perm(Permissions.PM_EXPORT_PDF_SUMMARY.value, payment_plan.business_area):
         raise PermissionDenied("Permission Denied: User does not have correct permission.")
 
     if payment_plan.status not in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
