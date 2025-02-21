@@ -6,9 +6,10 @@ import styled from 'styled-components';
 import { useProgrammeChoiceDataQuery } from '@generated/graphql';
 import { SurveyTabsValues } from '@utils/constants';
 import { getFilterFromQueryParams } from '@utils/utils';
-import { LookUpProgrammesFiltersSurveys } from './LookUpProgrammesFiltersSurveys';
-import { LookUpSelectionTablesSurveys } from './LookUpSelectionTablesSurveys';
-import { LookUpTargetPopulationFiltersSurveys } from './LookUpTargetPopulationFiltersSurveys';
+import LookUpProgrammesFiltersSurveys from './LookUpProgrammesFiltersSurveys';
+import LookUpSelectionTablesSurveys from './LookUpSelectionTablesSurveys';
+import LookUpTargetPopulationFiltersSurveys from './LookUpTargetPopulationFiltersSurveys';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const surveysTabs = ['Programme', 'Target Population'];
 
@@ -157,3 +158,8 @@ export function LookUpSelectionSurveys({
     </Box>
   );
 }
+
+export default withErrorBoundary(
+  LookUpSelectionSurveys,
+  'LookUpSelectionSurveys',
+);

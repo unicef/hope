@@ -20,6 +20,7 @@ import { NewIdentityFieldArray } from './NewIdentityFieldArray';
 import { ExistingPaymentChannelFieldArray } from './ExistingPaymentChannelFieldArray';
 import { NewPaymentChannelFieldArray } from './NewPaymentChannelFieldArray';
 import { useProgramContext } from 'src/programContext';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -33,7 +34,7 @@ export interface EditIndividualDataChangeProps {
   field;
 }
 
-export function EditIndividualDataChange({
+function EditIndividualDataChange({
   values,
   setFieldValue,
 }: EditIndividualDataChangeProps): ReactElement {
@@ -195,3 +196,8 @@ export function EditIndividualDataChange({
     </>
   );
 }
+
+export default withErrorBoundary(
+  EditIndividualDataChange,
+  'EditIndividualDataChange',
+);
