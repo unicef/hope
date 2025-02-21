@@ -4,7 +4,7 @@ import {
   AllEditPeopleFieldsQuery,
   useHouseholdFlexFieldsQuery,
 } from '@generated/graphql';
-import { PhotoModal } from '@core/PhotoModal/PhotoModal';
+import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { ReactElement } from 'react';
 
 export interface GrievanceFlexFieldPhotoModalNewHouseholdProps {

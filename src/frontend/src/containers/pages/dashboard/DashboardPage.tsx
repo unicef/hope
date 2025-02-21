@@ -1,21 +1,21 @@
-import { Typography } from '@mui/material';
-import { ChangeEvent, ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
-import { useDashboardYearsChoiceDataQuery } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
+import { TabPanel } from '@components/core/TabPanel';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { DashboardFilters } from '@components/dashboard/DashboardFilters';
 import { DashboardPaper } from '@components/dashboard/DashboardPaper';
-import { Tabs, Tab } from '@core/Tabs';
-import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
+import { Tab, Tabs } from '@core/Tabs';
+import { useDashboardYearsChoiceDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
+import { Typography } from '@mui/material';
 import { getFilterFromQueryParams } from '@utils/utils';
+import { ChangeEvent, ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
+import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { DashboardYearPage } from './DashboardYearPage';
-import { TabPanel } from '@components/core/TabPanel';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 export function DashboardPage(): ReactElement {
   const { t } = useTranslation();
@@ -65,16 +65,8 @@ export function DashboardPage(): ReactElement {
   );
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'DashboardPage.tsx');
-      }}
-      componentName="DashboardPage"
-    >
-      <PageHeader tabs={tabs} title={t('Dashboard')}>
-      </PageHeader>
+    <>
+      <PageHeader tabs={tabs} title={t('Dashboard')}></PageHeader>
       {hasPermissionToView ? (
         <>
           {!isGlobal ? (
@@ -104,6 +96,7 @@ export function DashboardPage(): ReactElement {
       ) : (
         <PermissionDenied />
       )}
-    </UniversalErrorBoundary>
+    </>
   );
 }
+export default withErrorBoundary(DashboardPage, 'DashboardPage');
