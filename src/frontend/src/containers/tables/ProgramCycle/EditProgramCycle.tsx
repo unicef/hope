@@ -35,6 +35,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ProgramQuery } from '@generated/graphql';
 import type { DefaultError } from '@tanstack/query-core';
 import { useSnackbar } from '@hooks/useSnackBar';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface MutationError extends DefaultError {
   data: any;
@@ -45,7 +46,7 @@ interface EditProgramCycleProps {
   program: ProgramQuery['program'];
 }
 
-export const EditProgramCycle = ({
+const EditProgramCycle = ({
   programCycle,
   program,
 }: EditProgramCycleProps): ReactElement => {
@@ -244,3 +245,5 @@ export const EditProgramCycle = ({
     </>
   );
 };
+
+export default withErrorBoundary(EditProgramCycle, 'EditProgramCycle');

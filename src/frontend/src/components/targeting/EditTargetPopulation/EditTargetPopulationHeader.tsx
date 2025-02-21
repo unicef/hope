@@ -6,6 +6,7 @@ import { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { LoadingButton } from '@core/LoadingButton';
 import { PageHeader } from '@core/PageHeader';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface EditTargetPopulationProps {
   handleSubmit: () => Promise<void>;
@@ -15,7 +16,7 @@ interface EditTargetPopulationProps {
   loading: boolean;
 }
 
-export const EditTargetPopulationHeader = ({
+const EditTargetPopulationHeader = ({
   handleSubmit,
   values,
   baseUrl,
@@ -84,3 +85,8 @@ export const EditTargetPopulationHeader = ({
     </PageHeader>
   );
 };
+
+export default withErrorBoundary(
+  EditTargetPopulationHeader,
+  'EditTargetPopulationHeader',
+);
