@@ -19,6 +19,7 @@ import { DedupeBox, OptionType } from '../DedupeBox';
 import { Title } from '@core/Title';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 export const BigValueContainer = styled.div`
   padding: ${({ theme }) => theme.spacing(6)};
@@ -52,7 +53,7 @@ interface RegistrationDetailsProps {
   isSocialWorkerProgram?: boolean;
 }
 
-export function RegistrationDetails({
+function RegistrationDetails({
   registration,
   isSocialWorkerProgram,
 }: RegistrationDetailsProps): ReactElement {
@@ -96,7 +97,7 @@ export function RegistrationDetails({
     numbersComponent = (
       <Grid size={{ xs: 4 }}>
         <Grid container>
-          <Grid size={{ xs:6 }}>
+          <Grid size={{ xs: 6 }}>
             <BigValueContainer>
               <LabelizedField
                 label={t('Total Number of Registered People')}
@@ -113,7 +114,7 @@ export function RegistrationDetails({
     numbersComponent = (
       <Grid size={{ xs: 'auto' }}>
         <Grid container>
-          <Grid size={{ xs:6 }}>
+          <Grid size={{ xs: 6 }}>
             <BigValueContainer>
               <LabelizedField
                 label={`Total Number of ${beneficiaryGroup?.groupLabelPlural}`}
@@ -123,7 +124,7 @@ export function RegistrationDetails({
               </LabelizedField>
             </BigValueContainer>
           </Grid>
-          <Grid size={{ xs:6 }}>
+          <Grid size={{ xs: 6 }}>
             <BigValueContainer>
               <LabelizedField
                 label={`Total Number of ${beneficiaryGroup?.memberLabelPlural}`}
@@ -146,7 +147,7 @@ export function RegistrationDetails({
         <Grid alignItems="center" container>
           <Grid size={{ xs: 'auto' }}>
             <Grid container spacing={3}>
-              <Grid size={{ xs:6 }}>
+              <Grid size={{ xs: 6 }}>
                 <Box display="flex" flexDirection="column">
                   <LabelizedField label={t('status')}>
                     <StatusBox
@@ -160,7 +161,7 @@ export function RegistrationDetails({
                 </Box>
               </Grid>
               {registration?.biometricDeduplicationEnabled && (
-                <Grid size={{ xs:6 }}>
+                <Grid size={{ xs: 6 }}>
                   <Box display="flex" flexDirection="column">
                     <LabelizedField
                       label={t('Biometrics Deduplication Status')}
@@ -178,13 +179,13 @@ export function RegistrationDetails({
                   </Box>
                 </Grid>
               )}
-              <Grid size={{ xs:6 }}>
+              <Grid size={{ xs: 6 }}>
                 <LabelizedField
                   label={t('Source of Data')}
                   value={registration?.dataSource}
                 />
               </Grid>
-              <Grid size={{ xs:6 }}>
+              <Grid size={{ xs: 6 }}>
                 <LabelizedField
                   label={t('Import Date')}
                   value={
@@ -194,7 +195,7 @@ export function RegistrationDetails({
                   }
                 />
               </Grid>
-              <Grid size={{ xs:6 }}>
+              <Grid size={{ xs: 6 }}>
                 <LabelizedField
                   label={t('Imported by')}
                   value={renderImportedBy()}
@@ -202,7 +203,7 @@ export function RegistrationDetails({
               </Grid>
               {registration.status === RegistrationDataImportStatus.Refused &&
               registration.refuseReason ? (
-                <Grid size={{ xs:6 }}>
+                <Grid size={{ xs: 6 }}>
                   <LabelizedField
                     label={t('Refuse Reason')}
                     value={registration?.refuseReason}
@@ -215,8 +216,8 @@ export function RegistrationDetails({
           {registration.status === 'DEDUPLICATION_FAILED' ? null : (
             <Grid size={{ xs: 'auto' }}>
               <Grid container direction="column">
-                <Grid container  size={{ xs: 12 }} spacing={3}>
-                  <Grid size={{ xs:4 }}></Grid>
+                <Grid container size={{ xs: 12 }} spacing={3}>
+                  <Grid size={{ xs: 4 }}></Grid>
                   <Grid size={{ xs: 4 }}>
                     <BoldGrey>{t('Biographical')}</BoldGrey>
                   </Grid>
@@ -236,3 +237,5 @@ export function RegistrationDetails({
     </ContainerColumnWithBorder>
   );
 }
+
+export default withErrorBoundary(RegistrationDetails, 'RegistrationDetails');

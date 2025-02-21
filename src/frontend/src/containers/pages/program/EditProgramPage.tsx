@@ -37,10 +37,10 @@ import {
   editPartnersValidationSchema,
   editProgramDetailsValidationSchema,
 } from '@components/programs/CreateProgram/editProgramValidationSchema';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { omit } from 'lodash';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
-export const EditProgramPage = (): ReactElement => {
+const EditProgramPage = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { id } = useParams();
@@ -313,14 +313,7 @@ export const EditProgramPage = (): ReactElement => {
   ];
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'EditProgramPage.tsx');
-      }}
-      componentName="EditProgramPage"
-    >
+    <>
       <PageHeader
         title={`${t('Edit Programme')}: (${name})`}
         breadCrumbs={
@@ -447,6 +440,7 @@ export const EditProgramPage = (): ReactElement => {
           }}
         </Formik>
       )}
-    </UniversalErrorBoundary>
+    </>
   );
 };
+export default withErrorBoundary(EditProgramPage, 'EditProgramPage');

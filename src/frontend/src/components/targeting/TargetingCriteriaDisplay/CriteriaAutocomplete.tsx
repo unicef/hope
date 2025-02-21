@@ -2,6 +2,7 @@ import { forwardRef, ReactElement, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import get from 'lodash/get';
 import { Autocomplete, Paper, TextField } from '@mui/material';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: 100%;
@@ -10,7 +11,7 @@ interface Option {
   labelEn: string;
 }
 
-export function CriteriaAutocomplete({ field, ...otherProps }): ReactElement {
+function CriteriaAutocomplete({ field, ...otherProps }): ReactElement {
   const [open, setOpen] = useState(false);
   const [newValue, setNewValue] = useState(null);
   const [choicesWithoutDuplicates, setChoicesWithoutDuplicates] = useState();
@@ -87,3 +88,5 @@ export function CriteriaAutocomplete({ field, ...otherProps }): ReactElement {
     />
   );
 }
+
+export default withErrorBoundary(CriteriaAutocomplete, 'CriteriaAutocomplete');

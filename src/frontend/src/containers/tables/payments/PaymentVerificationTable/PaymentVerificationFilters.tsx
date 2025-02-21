@@ -8,6 +8,7 @@ import { SelectFilter } from '@components/core/SelectFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { FiltersSection } from '@components/core/FiltersSection';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface PaymentVerificationFiltersProps {
   filter;
@@ -16,7 +17,7 @@ interface PaymentVerificationFiltersProps {
   appliedFilter;
   setAppliedFilter: (filter) => void;
 }
-export const PaymentVerificationFilters = ({
+const PaymentVerificationFilters = ({
   filter,
   setFilter,
   initialFilter,
@@ -135,3 +136,8 @@ export const PaymentVerificationFilters = ({
     </FiltersSection>
   );
 };
+
+export default withErrorBoundary(
+  PaymentVerificationFilters,
+  'PaymentVerificationFilters',
+);
