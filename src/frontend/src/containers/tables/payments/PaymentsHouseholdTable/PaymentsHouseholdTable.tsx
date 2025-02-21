@@ -12,6 +12,7 @@ import { adjustHeadCells } from '@utils/utils';
 import { useProgramContext } from 'src/programContext';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { headCells } from './PaymentsHouseholdTableHeadCells';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface PaymentsHouseholdTableProps {
   household?: HouseholdNode;
@@ -19,7 +20,7 @@ interface PaymentsHouseholdTableProps {
   businessArea: string;
   canViewPaymentRecordDetails: boolean;
 }
-export function PaymentsHouseholdTable({
+function PaymentsHouseholdTable({
   household,
   openInNewTab = false,
   businessArea,
@@ -67,3 +68,7 @@ export function PaymentsHouseholdTable({
     />
   );
 }
+export default withErrorBoundary(
+  PaymentsHouseholdTable,
+  'PaymentsHouseholdTable',
+);

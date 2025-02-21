@@ -4,12 +4,13 @@ import styled from 'styled-components';
 import { PaperContainer } from '../PaperContainer';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const Label = styled.p`
   color: #b1b1b5;
 `;
 
-export function EmptyTargetingCriteria(): ReactElement {
+function EmptyTargetingCriteria(): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
@@ -22,3 +23,8 @@ export function EmptyTargetingCriteria(): ReactElement {
     </PaperContainer>
   );
 }
+
+export default withErrorBoundary(
+  EmptyTargetingCriteria,
+  'EmptyTargetingCriteria',
+);

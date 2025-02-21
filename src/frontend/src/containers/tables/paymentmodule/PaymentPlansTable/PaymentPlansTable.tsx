@@ -11,13 +11,14 @@ import { PaymentPlanTableRow } from './PaymentPlanTableRow';
 import { headCells } from './PaymentPlansHeadCells';
 import { useProgramContext } from 'src/programContext';
 import { adjustHeadCells } from '@utils/utils';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface PaymentPlansTableProps {
   filter;
   canViewDetails: boolean;
 }
 
-export function PaymentPlansTable({
+function PaymentPlansTable({
   filter,
   canViewDetails,
 }: PaymentPlansTableProps): ReactElement {
@@ -67,3 +68,5 @@ export function PaymentPlansTable({
     />
   );
 }
+
+export default withErrorBoundary(PaymentPlansTable, 'PaymentPlansTable');
