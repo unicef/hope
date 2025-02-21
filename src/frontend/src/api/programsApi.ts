@@ -1,5 +1,4 @@
 import { api, handleApiResponse } from './api';
-import { Program } from '@restgenerated/models/Program';
 // import { ProgramCreate } from '@restgenerated/models/ProgramCreate';
 
 //TODO: Add generated types
@@ -13,18 +12,21 @@ interface BeneficiaryGroup {
   master_detail: boolean;
 }
 
-export interface PaginatedListResponse<T> {
-  count: number;
-  next?: string;
-  previous?: string;
-  results: T[];
-}
-
 export const fetchBeneficiaryGroups = async (): Promise<
   PaginatedListResponse<BeneficiaryGroup>
 > => {
   return handleApiResponse(api.get('beneficiary-groups/'));
 };
+
+interface Program {
+  id: string;
+  name: string;
+  description: string;
+  status: string;
+  business_area: string;
+  created_at: string;
+  updated_at: string;
+}
 
 export const fetchProgram = async (
   businessArea: string,
