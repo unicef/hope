@@ -40,7 +40,9 @@ def get_individual(tax_id: str, business_area_code: Optional[str]) -> PendingInd
     raise Exception("Document with given tax_id not found")
 
 
-def get_household(registration_id: str, business_area_code: Optional[str]) -> Union[PendingHousehold, Household]:
+def get_household(
+    registration_id: str, business_area_code: Optional[str]
+) -> Optional[Union[PendingHousehold, Household]]:
     kobo_asset_value = _prepare_kobo_asset_id_value(registration_id)
     households = (
         Household.objects.all()
@@ -50,7 +52,7 @@ def get_household(registration_id: str, business_area_code: Optional[str]) -> Un
     if households.count() > 1:
         raise Exception(f"Multiple households ({households.count()}) with given registration_id found")
     if households.count() == 1:
-        return households.first()  # type: ignore
+        return households.first()
 
     if business_area_code is None:
         pending_households_by_business_area = PendingHousehold.objects.all()

@@ -108,7 +108,7 @@ class MergeStatusModel(models.Model):
         abstract = True
 
 
-class SoftDeletableRepresentationMergeStatusModel(MergeStatusModel):
+class SoftDeletableMergeStatusModel(MergeStatusModel):
     """
     An abstract base class model with a ``is_removed`` field that
     marks entries that are not going to be used anymore, but are
@@ -116,27 +116,32 @@ class SoftDeletableRepresentationMergeStatusModel(MergeStatusModel):
     Default manager returns only not-removed entries.
     """
 
-    is_removed = models.BooleanField(default=False)
+    is_removed = models.BooleanField(default=False, db_index=True)
+    removed_date = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         abstract = True
 
-    objects = MergedManager()
-    all_merge_status_objects = SoftDeletableManager()
-    available_objects = MergedManager()
-    all_objects = models.Manager()
-    pending_objects = PendingManager()
+    objects: models.Manager = MergedManager()
+    all_merge_status_objects: models.Manager = SoftDeletableManager()
+    available_objects: models.Manager = MergedManager()
+    all_objects: models.Manager = models.Manager()
+    pending_objects: models.Manager = PendingManager()
 
-    def delete(self, using: bool = None, soft: bool = True, *args: Any, **kwargs: Any) -> Any:  # type: ignore
+    def delete(
+        self, using: Any = None, keep_parents: bool = False, soft: bool = True, *args: Any, **kwargs: Any
+    ) -> Tuple[int, Dict[str, int]]:
         """
         Soft delete object (set its ``is_removed`` field to True).
         Actually delete object if setting ``soft`` to False.
         """
         if soft:
             self.is_removed = True
-            self.save(using=using)  # type: ignore
-        else:
-            return super().delete(using=using, *args, **kwargs)
+            self.removed_date = timezone.now()
+            self.save(using=using)
+            return 1, {self._meta.label: 1}
+
+        return models.Model.delete(self, using=using, *args, **kwargs)
 
 
 class AdminUrlMixin:
@@ -159,36 +164,6 @@ class TimeStampedUUIDModel(UUIDModel):
 
     class Meta:
         abstract = True
-
-
-class SoftDeletableRepresentationMergeStatusModelWithDate(SoftDeletableRepresentationMergeStatusModel):
-    """
-    An abstract base class model with a ``is_removed`` field that
-    marks entries that are not going to be used anymore, but are
-    kept in db for any reason.
-    Default manager returns only not-removed entries.
-    """
-
-    is_removed = models.BooleanField(default=False, db_index=True)
-    removed_date = models.DateTimeField(null=True, blank=True)
-
-    class Meta:
-        abstract = True
-
-    def delete(  # type: ignore
-        self, using: Any = None, keep_parents: bool = False, soft: bool = True, *args: Any, **kwargs: Any
-    ) -> Tuple[int, Dict[str, int]]:
-        """
-        Soft delete object (set its ``is_removed`` field to True).
-        Actually delete object if setting ``soft`` to False.
-        """
-        if soft:
-            self.is_removed = True
-            self.removed_date = timezone.now()
-            self.save(using=using)
-            return 1, {self._meta.label: 1}
-
-        return models.Model.delete(self, using=using, *args, **kwargs)
 
 
 class SoftDeletionTreeManager(TreeManager):

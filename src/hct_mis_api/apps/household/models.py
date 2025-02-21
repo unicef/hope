@@ -42,8 +42,7 @@ from hct_mis_api.apps.utils.models import (
     InternalDataFieldModel,
     MergeStatusModel,
     PendingManager,
-    SoftDeletableRepresentationMergeStatusModel,
-    SoftDeletableRepresentationMergeStatusModelWithDate,
+    SoftDeletableMergeStatusModel,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
@@ -326,7 +325,7 @@ class HouseholdCollection(UnicefIdentifiedModel):
 
 class Household(
     InternalDataFieldModel,
-    SoftDeletableRepresentationMergeStatusModelWithDate,
+    SoftDeletableMergeStatusModel,
     TimeStampedUUIDModel,
     AbstractSyncable,
     ConcurrencyModel,
@@ -680,7 +679,7 @@ class DocumentType(TimeStampedUUIDModel):
         return list(cls.objects.all().only("key").values_list("key", flat=True))
 
 
-class Document(AbstractSyncable, SoftDeletableRepresentationMergeStatusModel, TimeStampedUUIDModel):
+class Document(AbstractSyncable, SoftDeletableMergeStatusModel, TimeStampedUUIDModel):
     STATUS_PENDING = "PENDING"
     STATUS_VALID = "VALID"
     STATUS_NEED_INVESTIGATION = "NEED_INVESTIGATION"
@@ -762,7 +761,7 @@ class Document(AbstractSyncable, SoftDeletableRepresentationMergeStatusModel, Ti
         self.save()
 
 
-class IndividualIdentity(SoftDeletableRepresentationMergeStatusModel, TimeStampedModel):
+class IndividualIdentity(SoftDeletableMergeStatusModel, TimeStampedModel):
     individual = models.ForeignKey("Individual", related_name="identities", on_delete=models.CASCADE)
     partner = models.ForeignKey(
         "account.Partner",
@@ -788,7 +787,7 @@ class IndividualIdentity(SoftDeletableRepresentationMergeStatusModel, TimeStampe
         return f"{self.partner} {self.individual} {self.number}"
 
 
-class IndividualRoleInHousehold(SoftDeletableRepresentationMergeStatusModel, TimeStampedUUIDModel, AbstractSyncable):
+class IndividualRoleInHousehold(SoftDeletableMergeStatusModel, TimeStampedUUIDModel, AbstractSyncable):
     individual = models.ForeignKey(
         "household.Individual",
         on_delete=models.CASCADE,
@@ -835,7 +834,7 @@ class IndividualCollection(UnicefIdentifiedModel):
 
 class Individual(
     InternalDataFieldModel,
-    SoftDeletableRepresentationMergeStatusModelWithDate,
+    SoftDeletableMergeStatusModel,
     TimeStampedUUIDModel,
     AbstractSyncable,
     ConcurrencyModel,
@@ -1282,7 +1281,7 @@ class XlsxUpdateFile(TimeStampedUUIDModel):
     program = models.ForeignKey("program.Program", null=True, on_delete=models.CASCADE)
 
 
-class BankAccountInfo(SoftDeletableRepresentationMergeStatusModelWithDate, TimeStampedUUIDModel, AbstractSyncable):
+class BankAccountInfo(SoftDeletableMergeStatusModel, TimeStampedUUIDModel, AbstractSyncable):
     individual = models.ForeignKey(
         "household.Individual",
         related_name="bank_account_info",
