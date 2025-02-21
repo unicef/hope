@@ -1,4 +1,6 @@
-import { api, handleApiResponse } from './api';
+import { api, handleApiResponse, postRequest } from './api';
+import { Program } from '@restgenerated/models/Program';
+// import { ProgramCreate } from '@restgenerated/models/ProgramCreate';
 
 //TODO: Add generated types
 interface BeneficiaryGroup {
@@ -23,3 +25,23 @@ export const fetchBeneficiaryGroups = async (): Promise<
 > => {
   return handleApiResponse(api.get('beneficiary-groups/'));
 };
+
+export const fetchProgram = async (
+  businessArea: string,
+  programId: string,
+): Promise<Program> => {
+  return handleApiResponse(api.get(`${businessArea}/programs/${programId}/`));
+};
+
+//TODO add types
+
+// export const createProgram = async (
+//   businessArea: string,
+//   body: ProgramCreate,
+// ): Promise<ProgramCreateResponse> => {
+//   return postRequest<ProgramCreateResponse>(
+//     `${businessArea}/program/create/`,
+//     body,
+//     'create program',
+//   );
+// };
