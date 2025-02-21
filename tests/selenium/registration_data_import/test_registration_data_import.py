@@ -98,6 +98,11 @@ def unicef_partner() -> Partner:
 
 
 @pytest.fixture
+def unicef_hq() -> Partner:
+    yield PartnerFactory(name="UNICEF HQ", parent=PartnerFactory(name="UNICEF"))
+
+
+@pytest.fixture
 def unhcr_partner() -> Partner:
     yield PartnerFactory(name="UNHCR")
 

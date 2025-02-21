@@ -100,7 +100,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        update_partner_access_to_program: Callable,
+        create_partner_role_with_permissions: Callable,
         id_to_base64: Callable,
     ) -> None:
         def _test_list() -> Any:
@@ -121,7 +121,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
             self.user,
             [Permissions.PM_VIEW_LIST, Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
             self.afghanistan,
-            self.program1,
+            program=self.program1,
         )
         response = self.client.get(self.url)
         assert response.status_code == status.HTTP_200_OK
@@ -129,14 +129,24 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         assert len(response_json) == 1
         assert response_json[0]["unicef_id"] == self.payment_plan1.unicef_id
 
-        update_partner_access_to_program(self.partner, self.program2)
+        create_partner_role_with_permissions(
+            self.partner,
+            [Permissions.PM_VIEW_LIST, Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
+            self.afghanistan,
+            program=self.program2,
+        )
+
+        response = self.client.get(self.url)
+        assert response.status_code == status.HTTP_200_OK
+        response_json = response.json()["results"]
+        assert len(response_json) == 2
 
         with CaptureQueriesContext(connection) as ctx:
             response = _test_list()
             etag = response.headers["etag"]
 
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 26
+            assert len(ctx.captured_queries) == 10
 
         # Test that reoccurring request use cached data
         with CaptureQueriesContext(connection) as ctx:
@@ -144,7 +154,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
             etag_second_call = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
             assert etag_second_call == etag
-            assert len(ctx.captured_queries) == 12
+            assert len(ctx.captured_queries) == 10
 
     def test_list_payment_plans_approval_process_data(
         self,
@@ -233,7 +243,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        update_partner_access_to_program: Callable,
+        create_partner_role_with_permissions: Callable,
         id_to_base64: Callable,
     ) -> None:
         self.set_up(api_client, afghanistan, id_to_base64)
@@ -247,7 +257,16 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
             self.afghanistan,
             self.program1,
         )
-        update_partner_access_to_program(self.partner, self.program2)
+        create_partner_role_with_permissions(
+            self.partner,
+            [
+                Permissions.PM_VIEW_LIST,
+                Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
+                Permissions.PAYMENT_VIEW_LIST_MANAGERIAL,
+            ],
+            self.afghanistan,
+            self.program2,
+        )
         response = self._bulk_approve_action_response()
         assert response.status_code == status.HTTP_204_NO_CONTENT
         self.payment_plan1.refresh_from_db()
@@ -260,7 +279,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        update_partner_access_to_program: Callable,
+        create_partner_role_with_permissions: Callable,
         id_to_base64: Callable,
     ) -> None:
         self.set_up(api_client, afghanistan, id_to_base64)
@@ -270,7 +289,12 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
             self.afghanistan,
             self.program1,
         )
-        update_partner_access_to_program(self.partner, self.program2)
+        create_partner_role_with_permissions(
+            self.partner,
+            [Permissions.PM_VIEW_LIST, Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
+            self.afghanistan,
+            self.program2,
+        )
         response = self._bulk_approve_action_response()
         assert response.status_code == status.HTTP_403_FORBIDDEN
         self.payment_plan1.refresh_from_db()

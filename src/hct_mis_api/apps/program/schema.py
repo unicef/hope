@@ -32,7 +32,7 @@ from hct_mis_api.apps.account.permissions import (
 from hct_mis_api.apps.account.schema import PartnerNode
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
-from hct_mis_api.apps.core.models import DataCollectingType
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.core.schema import (
     ChoiceObject,
     DataCollectingTypeNode,
@@ -132,7 +132,8 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     def resolve_partners(program: Program, info: Any, **kwargs: Any) -> QuerySet[Partner]:
         return (
             Partner.objects.filter(
-                program_partner_through__program=program,
+                Q(role_assignments__program=program)
+                | (Q(role_assignments__program=None) & Q(role_assignments__business_area=program.business_area))
             )
             .annotate(partner_program=Value(program.id))
             .order_by("name")
@@ -244,13 +245,14 @@ class Query(graphene.ObjectType):
         if not info.context.headers.get("Business-Area"):
             raise GraphQLError("Not found header Business-Area")
         user = info.context.user
+        business_area = BusinessArea.objects.filter(slug=info.context.headers.get("Business-Area").lower()).first()
+        allowed_programs = Program.objects.filter(id__in=user.get_program_ids_for_business_area(business_area.id))
         filters = {
-            "business_area__slug": info.context.headers.get("Business-Area").lower(),
+            "business_area": business_area,
             "data_collecting_type__deprecated": False,
             "data_collecting_type__isnull": False,
+            "id__in": allowed_programs.values_list("id", flat=True),
         }
-        if not user.partner.is_unicef:
-            filters.update({"id__in": user.partner.programs.values_list("id", flat=True)})
         return (
             Program.objects.filter(**filters)
             .exclude(data_collecting_type__code="unknown")

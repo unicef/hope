@@ -19,8 +19,8 @@ from hct_mis_api.apps.account.models import (
     USER_STATUS_CHOICES,
     Partner,
     Role,
+    RoleAssignment,
     User,
-    UserRole,
 )
 from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
@@ -29,9 +29,13 @@ from hct_mis_api.apps.account.permissions import (
     hopeOneOfPermissionClass,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
-from hct_mis_api.apps.core.models import BusinessArea, BusinessAreaPartnerThrough
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.schema import ChoiceObject
-from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object
+from hct_mis_api.apps.core.utils import (
+    decode_id_string,
+    get_program_id_from_headers,
+    to_choice_object,
+)
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.geo.schema import AreaNode
 from hct_mis_api.apps.household.models import Household, Individual
@@ -45,7 +49,7 @@ if TYPE_CHECKING:
     from graphene import Node
 
 
-def permissions_resolver(user_roles: "QuerySet[UserRole]") -> Set:
+def permissions_resolver(user_roles: "QuerySet[RoleAssignment]") -> Set:
     all_user_roles = user_roles
     permissions_set = set()
     for user_role in all_user_roles:
@@ -54,9 +58,9 @@ def permissions_resolver(user_roles: "QuerySet[UserRole]") -> Set:
     return permissions_set
 
 
-class UserRoleNode(DjangoObjectType):
+class RoleAssignmentNode(DjangoObjectType):
     class Meta:
-        model = UserRole
+        model = RoleAssignment
         exclude = ("id", "user")
 
 
@@ -68,7 +72,13 @@ class RoleNode(DjangoObjectType):
 
 class PartnerRoleNode(DjangoObjectType):
     class Meta:
-        model = BusinessAreaPartnerThrough
+        model = RoleAssignment
+        exclude = ("id",)
+
+
+class UserRoleNode(DjangoObjectType):
+    class Meta:
+        model = RoleAssignment
         exclude = ("id",)
 
 
@@ -102,13 +112,24 @@ class PartnerType(DjangoObjectType):
 
 class UserNode(DjangoObjectType):
     business_areas = DjangoFilterConnectionField(UserBusinessAreaNode)
+    permissions_in_scope = graphene.List(graphene.String)
     partner_roles = graphene.List(PartnerRoleNode)
+    user_roles = graphene.List(UserRoleNode)
 
     def resolve_business_areas(self, info: Any) -> "QuerySet[BusinessArea]":
         return info.context.user.business_areas
 
     def resolve_partner_roles(self, info: Any) -> "QuerySet[Role]":
-        return self.partner.business_area_partner_through.all()
+        return self.partner.role_assignments.order_by("business_area__slug")
+
+    def resolve_user_roles(self, info: Any) -> "QuerySet[Role]":
+        return self.role_assignments.order_by("business_area__slug")
+
+    def resolve_permissions_in_scope(self, info: Any) -> Set:
+        user = info.context.user
+        program_id = get_program_id_from_headers(info.context.headers)
+        business_area_slug = info.context.headers.get("Business-Area")
+        return user.permissions_in_business_area(business_area_slug, program_id)
 
     class Meta:
         model = get_user_model()
@@ -157,13 +178,13 @@ class PartnerNode(DjangoObjectType):
         model = Partner
 
     def resolve_areas(self, info: Any) -> "List[Area]":
-        return self.program_partner_through.get(program_id=self.partner_program).areas.all().order_by("name")
+        return self.get_areas_for_program(self.partner_program).order_by("name")
 
     def resolve_area_access(self, info: Any, **kwargs: Any) -> str:
-        if self.program_partner_through.get(program_id=self.partner_program).full_area_access:
-            return "BUSINESS_AREA"
-        else:
+        if self.has_area_limits_in_program(self.partner_program):
             return "ADMIN_AREA"
+        else:
+            return "BUSINESS_AREA"
 
 
 class Query(graphene.ObjectType):
@@ -205,14 +226,13 @@ class Query(graphene.ObjectType):
 
     def resolve_user_partner_choices(self, info: Any) -> List[Dict[str, Any]]:
         business_area_slug = info.context.headers.get("Business-Area")
-        unicef = Partner.objects.get(name="UNICEF")
         return to_choice_object(
             list(
                 Partner.objects.exclude(name=settings.DEFAULT_EMPTY_PARTNER)
-                .filter(business_areas__slug=business_area_slug)
+                .filter(allowed_business_areas__slug=business_area_slug)
+                .exclude(id__in=Partner.objects.filter(parent__isnull=False).values_list("parent_id", flat=True))
                 .values_list("id", "name")
             )
-            + [(unicef.id, unicef.name)]  # unicef partner is always available
         )
 
     def resolve_partner_for_grievance_choices(
@@ -233,7 +253,7 @@ class Query(graphene.ObjectType):
     def resolve_has_available_users_to_export(self, info: Any, business_area_slug: str) -> bool:
         return (
             get_user_model()
-            .objects.prefetch_related("user_roles")
-            .filter(is_superuser=False, user_roles__business_area__slug=business_area_slug)
+            .objects.prefetch_related("role_assignments")
+            .filter(is_superuser=False, role_assignments__business_area__slug=business_area_slug)
             .exists()
         )

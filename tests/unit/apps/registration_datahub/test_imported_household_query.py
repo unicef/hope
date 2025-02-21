@@ -18,7 +18,6 @@ from hct_mis_api.apps.household.fixtures import (
     PendingIndividualFactory,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import ProgramPartnerThrough
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
@@ -57,11 +56,6 @@ class TestImportedHouseholdQuery(APITestCase):
         cls.partner = PartnerFactory(name="TEST1")
         cls.user = UserFactory.create(partner=cls.partner)
         cls.program = ProgramFactory(name="Program_1", status="ACTIVE")
-        ProgramPartnerThrough.objects.create(
-            program=cls.program,
-            partner=cls.partner,
-            full_area_access=True,
-        )
         sizes_list = (2, 4, 5, 1, 3, 11, 14)
         cls.households = [
             HouseholdFactory(
@@ -90,7 +84,7 @@ class TestImportedHouseholdQuery(APITestCase):
         ]
     )
     def test_imported_household_query_all(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         self.snapshot_graphql_request(
             request_string=self.ALL_IMPORTED_HOUSEHOLD_QUERY,
@@ -116,7 +110,7 @@ class TestImportedHouseholdQuery(APITestCase):
         ]
     )
     def test_imported_household_query_single(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         self.snapshot_graphql_request(
             request_string=self.IMPORTED_HOUSEHOLD_QUERY,
@@ -143,7 +137,9 @@ class TestImportedHouseholdQuery(APITestCase):
         ]
     )
     def test_imported_household_query(self, field_name: str, value: Any) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.RDI_VIEW_DETAILS], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.RDI_VIEW_DETAILS], self.business_area, self.program
+        )
         country = CountryFactory()
         hh = PendingHouseholdFactory(country=country, unicef_id="HH-123", program=self.program)
         setattr(hh, field_name, value)

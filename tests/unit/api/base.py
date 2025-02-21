@@ -46,7 +46,7 @@ class HOPEApiTestCase(APITestCase):
             name="c",
             permissions=[p.name for p in cls.user_permissions],
         )
-        user.user_roles.create(role=cls.role, business_area=cls.business_area)
+        user.role_assignments.create(role=cls.role, business_area=cls.business_area)
 
         cls.token = APITokenFactory(
             user=user,

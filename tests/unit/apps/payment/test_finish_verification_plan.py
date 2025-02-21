@@ -6,7 +6,11 @@ from django.test import TestCase, override_settings
 
 from constance.test import override_config
 
-from hct_mis_api.apps.account.fixtures import RoleFactory, UserFactory, UserRoleFactory
+from hct_mis_api.apps.account.fixtures import (
+    RoleAssignmentFactory,
+    RoleFactory,
+    UserFactory,
+)
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import GrievanceTicket
@@ -37,7 +41,7 @@ class TestFinishVerificationPlan(TestCase):
         payment_record_amount = 10
         user = UserFactory()
         role = RoleFactory(name="Releaser")
-        UserRoleFactory(user=user, role=role, business_area=business_area)
+        RoleAssignmentFactory(user=user, role=role, business_area=business_area)
 
         afghanistan_areas_qs = Area.objects.filter(area_type__area_level=2, area_type__country__iso_code3="AFG")
 

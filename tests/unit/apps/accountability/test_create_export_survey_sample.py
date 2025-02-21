@@ -33,13 +33,13 @@ mutation ExportSurveySample($surveyId: ID!) {
         partner = PartnerFactory(name="Partner")
         cls.user = UserFactory(first_name="John", last_name="Wick", partner=partner)
         cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
+        cls.create_partner_role_with_permissions(partner, [], cls.business_area, cls.program)
         cls.payment_plan = PaymentPlanFactory(
             business_area=cls.business_area,
             name="Test Target Population",
             created_by=cls.user,
             program_cycle=cls.program.cycles.first(),
         )
-        cls.update_partner_access_to_program(partner, cls.program)
 
         households = [create_household()[0] for _ in range(14)]
         for hh in households:
@@ -51,7 +51,7 @@ mutation ExportSurveySample($surveyId: ID!) {
         cls.survey = SurveyFactory(title="Test survey", payment_plan=cls.payment_plan, created_by=cls.user)
 
     def test_create_export_survey_sample_without_permissions(self) -> None:
-        self.create_user_role_with_permissions(self.user, [], self.business_area)
+        self.create_user_role_with_permissions(self.user, [], self.business_area, self.program)
 
         self.snapshot_graphql_request(
             request_string=self.MUTATION,
@@ -73,7 +73,7 @@ mutation ExportSurveySample($surveyId: ID!) {
     )
     def test_create_export_survey_sample_with_valid_survey_id(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS], self.business_area
+            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS], self.business_area, self.program
         )
 
         self.snapshot_graphql_request(
@@ -96,7 +96,7 @@ mutation ExportSurveySample($surveyId: ID!) {
     )
     def test_create_export_survey_sample_with_invalid_survey_id(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS], self.business_area
+            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS], self.business_area, self.program
         )
 
         self.snapshot_graphql_request(

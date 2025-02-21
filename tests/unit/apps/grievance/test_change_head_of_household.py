@@ -86,7 +86,10 @@ class TestChangeHeadOfHousehold(APITestCase):
         )
 
         cls.create_user_role_with_permissions(
-            cls.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], cls.business_area
+            cls.user,
+            [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK],
+            cls.business_area,
+            whole_business_area_access=True,
         )
         rebuild_search_index()
 

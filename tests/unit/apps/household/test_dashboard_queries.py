@@ -81,7 +81,9 @@ class TestDashboardQueries(APITestCase):
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory()
-        cls.create_user_role_with_permissions(cls.user, [Permissions.DASHBOARD_VIEW_COUNTRY], cls.business_area)
+        cls.create_user_role_with_permissions(
+            cls.user, [Permissions.DASHBOARD_VIEW_COUNTRY], cls.business_area, whole_business_area_access=True
+        )
 
         cls.program_one = ProgramFactory(
             name="Test program ONE",

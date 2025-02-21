@@ -311,6 +311,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             cls.user,
             cls.all_necessary_permissions,
             cls.business_area,
+            whole_business_area_access=True,
         )
         cls.program = ProgramFactory()
         cls.registration_data_import = RegistrationDataImportFactory(
@@ -415,7 +416,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         encoded_payment_plan_id = create_payment_plan_response["data"]["createPaymentPlan"]["paymentPlan"]["id"]
         payment_plan_id = decode_id_string(encoded_payment_plan_id)
 
-        self.update_partner_access_to_program(self.user.partner, program)
+        self.create_partner_role_with_permissions(self.user.partner, [], program.business_area, program)
 
         locked_pp_response = self.graphql_request(
             request_string=PAYMENT_PLAN_ACTION_MUTATION,

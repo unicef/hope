@@ -42,7 +42,9 @@ class TestSurveyQueries(APITestCase):
         ]
     )
     def test_query_list(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
 
         survey = SurveyFactory(payment_plan=self.payment_plan, created_by=self.user)
         survey.recipients.set(self.households)
