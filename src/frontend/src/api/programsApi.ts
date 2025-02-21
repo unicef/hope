@@ -1,4 +1,4 @@
-import { api, handleApiResponse, postRequest } from './api';
+import { api, handleApiResponse } from './api';
 import { Program } from '@restgenerated/models/Program';
 // import { ProgramCreate } from '@restgenerated/models/ProgramCreate';
 
