@@ -11,6 +11,7 @@ import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface LookUpProgrammesFiltersSurveysProps {
   filter;
@@ -20,7 +21,7 @@ interface LookUpProgrammesFiltersSurveysProps {
   appliedFilter;
   setAppliedFilter: (filter) => void;
 }
-export function LookUpProgrammesFiltersSurveys({
+function LookUpProgrammesFiltersSurveys({
   filter,
   choicesData,
   setFilter,
@@ -181,3 +182,8 @@ export function LookUpProgrammesFiltersSurveys({
     </FiltersSection>
   );
 }
+
+export default withErrorBoundary(
+  LookUpProgrammesFiltersSurveys,
+  'LookUpProgrammesFiltersSurveys',
+);
