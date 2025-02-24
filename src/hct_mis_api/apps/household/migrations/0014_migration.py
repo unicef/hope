@@ -6,8 +6,8 @@ def migrate_registration_id_to_detail_id(apps, schema_editor):
     Household = apps.get_model("household", "Household")
     Individual = apps.get_model("household", "Individual")
 
-    Individual.objects.filter(registration_id__isnull=False, detail_id__isnull=True).update(detail_id=models.F("registration_id"))
-    Household.objects.filter(registration_id__isnull=False, detail_id__isnull=True).update(detail_id=models.F("registration_id"))
+    Individual.all_objects.filter(registration_id__isnull=False, detail_id__isnull=True).update(detail_id=models.F("registration_id"))
+    Household.all_objects.filter(registration_id__isnull=False, detail_id__isnull=True).update(detail_id=models.F("registration_id"))
 
 
 class Migration(migrations.Migration):

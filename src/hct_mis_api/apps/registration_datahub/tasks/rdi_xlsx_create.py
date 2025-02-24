@@ -705,7 +705,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 individual.phone_no_valid = is_valid_phone_number(str(individual.phone_no))
             if individual.phone_no_alternative:
                 individual.phone_no_alternative_valid = is_valid_phone_number(str(individual.phone_no_alternative))
-            if individual.household:
+            if individual.household and not individual.detail_id:
                 individual.detail_id = individual.household.detail_id
 
     @transaction.atomic
