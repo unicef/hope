@@ -159,11 +159,11 @@ export const handleMutationError = (error: any, action: string): never => {
   throw new Error(`Failed to ${action}: ${errorMessage}`);
 };
 
-export const postRequest = async <T>(
+export const postRequest = async (
   url: string,
   body: any,
   errorMessage: string,
-): Promise<T> => {
+) => {
   try {
     const response = await api.post(url, body);
     return response.data as T;
