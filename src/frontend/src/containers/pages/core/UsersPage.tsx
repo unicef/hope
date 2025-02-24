@@ -10,7 +10,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { UsersTable } from '../../tables/UsersTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const initialFilter = {
   search: '',
@@ -19,7 +19,7 @@ const initialFilter = {
   status: '',
 };
 
-export function UsersPage(): ReactElement {
+function UsersPage(): ReactElement {
   const { businessArea } = useBaseUrl();
   const permissions = usePermissions();
   const { t } = useTranslation();
@@ -37,14 +37,7 @@ export function UsersPage(): ReactElement {
     return <PermissionDenied />;
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'UsersPage.tsx');
-      }}
-      componentName="UsersPage"
-    >
+    <>
       <PageHeader title={t('Programme Users')}>
         <>
           <Button
@@ -67,6 +60,8 @@ export function UsersPage(): ReactElement {
         setAppliedFilter={setAppliedFilter}
       />
       <UsersTable filter={appliedFilter} />
-    </UniversalErrorBoundary>
+    </>
   );
 }
+
+export default withErrorBoundary(UsersPage, 'UsersPage');

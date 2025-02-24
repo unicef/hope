@@ -1,4 +1,4 @@
-import {  Grid2 as Grid, Typography } from '@mui/material';
+import { Grid2 as Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { AccountabilityCommunicationMessageQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -10,12 +10,13 @@ import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface CommunicationDetailsProps {
   message: AccountabilityCommunicationMessageQuery['accountabilityCommunicationMessage'];
 }
 
-export function CommunicationDetails({
+function CommunicationDetails({
   message,
 }: CommunicationDetailsProps): ReactElement {
   const { t } = useTranslation();
@@ -69,3 +70,5 @@ export function CommunicationDetails({
     </ContainerColumnWithBorder>
   );
 }
+
+export default withErrorBoundary(CommunicationDetails, 'CommunicationDetails');

@@ -10,6 +10,7 @@ import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './PaymentsPeopleTableHeadCells';
 import { PaymentsPeopleTableRow } from './PaymentsPeopleTableRow';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface PaymentsPeopleTableProps {
   household?: HouseholdNode;
@@ -17,7 +18,7 @@ interface PaymentsPeopleTableProps {
   businessArea: string;
   canViewPaymentRecordDetails: boolean;
 }
-export function PaymentsPeopleTable({
+function PaymentsPeopleTable({
   household,
   openInNewTab = false,
   businessArea,
@@ -50,3 +51,5 @@ export function PaymentsPeopleTable({
     />
   );
 }
+
+export default withErrorBoundary(PaymentsPeopleTable, 'PaymentsPeopleTable');

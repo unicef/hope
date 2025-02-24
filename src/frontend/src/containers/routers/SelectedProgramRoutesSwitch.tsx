@@ -1,8 +1,5 @@
 import { useRoutes } from 'react-router-dom';
 import { ActivityLogPage } from '../pages/core/MainActivityLogPage';
-import { UsersPage } from '../pages/core/UsersPage';
-import { ReportingDetailsPage } from '../pages/reporting/ReportingDetailsPage';
-import { ReportingPage } from '../pages/reporting/ReportingPage';
 import { GrievanceRoutes } from './GrievanceRoutes';
 import { PaymentModuleRoutes } from './PaymentModuleRoutes';
 import { PaymentVerificationRoutes } from './PaymentVerificationRoutes';
@@ -13,6 +10,9 @@ import { TargetingRoutes } from './TargetingRoutes';
 import { AccountabilityRoutes } from './AccountabilityRoutes';
 import { ReactElement } from 'react';
 import { NewDashboardPage } from '@containers/pages/dashboard/NewDashboardPage';
+import UsersPage from '@containers/pages/core/UsersPage';
+import ReportingDetailsPage from '@containers/pages/reporting/ReportingDetailsPage';
+import ReportingPage from '@containers/pages/reporting/ReportingPage';
 
 export const SelectedProgramRoutesSwitch = (): ReactElement => {
   const routes = useRoutes([

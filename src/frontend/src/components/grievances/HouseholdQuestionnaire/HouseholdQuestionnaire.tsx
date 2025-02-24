@@ -8,12 +8,13 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AllHouseholdsQuery, useHouseholdLazyQuery } from '@generated/graphql';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { useProgramContext } from 'src/programContext';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface HouseholdQuestionnaireProps {
   values;
 }
 
-export function HouseholdQuestionnaire({
+function HouseholdQuestionnaire({
   values,
 }: HouseholdQuestionnaireProps): ReactElement {
   const { baseUrl } = useBaseUrl();
@@ -139,3 +140,8 @@ export function HouseholdQuestionnaire({
     </Grid>
   );
 }
+
+export default withErrorBoundary(
+  HouseholdQuestionnaire,
+  'HouseholdQuestionnaire',
+);

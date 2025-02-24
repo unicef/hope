@@ -8,6 +8,7 @@ import styled from 'styled-components';
 import { Dialog } from '@containers/dialogs/Dialog';
 import { PhotoModalFooter } from './PhotoModalFooter';
 import { PhotoModalHeader } from './PhotoModalHeader';
+import withErrorBoundary from '../withErrorBoundary';
 
 export const StyledLink = styled(Link)`
   color: #000;
@@ -42,7 +43,7 @@ export const MiniImage = styled.div<MiniImageProps>`
   background-size: cover;
 `;
 
-export function PhotoModal({
+function PhotoModal({
   src,
   linkText,
   variant = 'picture',
@@ -162,3 +163,5 @@ export function PhotoModal({
     </>
   );
 }
+
+export default withErrorBoundary(PhotoModal, 'PhotoModal');
