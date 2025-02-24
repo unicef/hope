@@ -9,7 +9,6 @@ import {
   Popper,
 } from '@mui/material';
 import styled from 'styled-components';
-import { MeQuery } from '@generated/graphql';
 import { clearCache } from '@utils/utils';
 import { getClient } from '../apollo/client';
 import React, { ReactElement, useState, useRef, useEffect } from 'react';
@@ -23,7 +22,7 @@ const MenuButtonText = styled.span`
   margin-left: ${({ theme }) => theme.spacing(2)};
 `;
 interface UserProfileMenuProps {
-  meData: MeQuery;
+  meData;
 }
 export function UserProfileMenu({
   meData,
