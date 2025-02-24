@@ -166,7 +166,7 @@ export const postRequest = async (
 ) => {
   try {
     const response = await api.post(url, body);
-    return response.data as T;
+    return response.data;
   } catch (error) {
     handleMutationError(error, errorMessage);
     throw error;
