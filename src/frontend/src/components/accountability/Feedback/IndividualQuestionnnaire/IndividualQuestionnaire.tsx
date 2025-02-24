@@ -6,12 +6,13 @@ import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { ContentLink } from '@core/ContentLink';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface IndividualQuestionnaireProps {
   values;
 }
 
-export const IndividualQuestionnaire = ({
+const IndividualQuestionnaire = ({
   values,
 }: IndividualQuestionnaireProps): ReactElement => {
   const { t } = useTranslation();
@@ -70,3 +71,8 @@ export const IndividualQuestionnaire = ({
     </Grid>
   );
 };
+
+export default withErrorBoundary(
+  IndividualQuestionnaire,
+  'IndividualQuestionnaire',
+);

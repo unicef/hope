@@ -24,7 +24,7 @@ import {
 import { Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { hasPermissionInModule } from '../../../config/permissions';
 import { BaseSection } from '@components/core/BaseSection';
 import { ProgramFieldSeriesStep } from '@components/programs/CreateProgram/ProgramFieldSeriesStep';
@@ -32,15 +32,14 @@ import {
   handleNext,
   ProgramStepper,
 } from '@components/programs/CreateProgram/ProgramStepper';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { omit } from 'lodash';
 import { editProgramDetailsValidationSchema } from '@components/programs/CreateProgram/editProgramValidationSchema';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
-export const DuplicateProgramPage = (): ReactElement => {
+const DuplicateProgramPage = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { id } = useParams();
-  const location = useLocation();
   const permissions = usePermissions();
   const [mutate, { loading: loadingCopy }] = useCopyProgramMutation();
   const [step, setStep] = useState(0);
@@ -277,14 +276,6 @@ export const DuplicateProgramPage = (): ReactElement => {
     : undefined;
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'DuplicateProgramPage.tsx');
-      }}
-      componentName="DuplicateProgramPage"
-    >
       <Formik
         initialValues={initialValues}
         onSubmit={(values) => {
@@ -306,95 +297,94 @@ export const DuplicateProgramPage = (): ReactElement => {
             userPartnerChoices,
             values.partners,
           );
+        const handleNextStep = async () => {
+          await handleNext({
+            validateForm,
+            stepFields,
+            step,
+            setStep,
+            setFieldTouched,
+            values,
+            setErrors,
+          });
+        };
 
-          const handleNextStep = async () => {
-            await handleNext({
-              validateForm,
-              stepFields,
-              step,
-              setStep,
-              setFieldTouched,
-              values,
-              setErrors,
-            });
-          };
-
-          return (
-            <>
-              <PageHeader
-                title={`${t('Copy of Programme')}: (${name})`}
-                breadCrumbs={
-                  hasPermissionInModule(
-                    'PROGRAMME_VIEW_LIST_AND_DETAILS',
-                    permissions,
-                  )
-                    ? breadCrumbsItems
-                    : null
-                }
-              />
-              <BaseSection
-                title={stepTitle}
-                description={stepDescription}
-                stepper={
-                  <ProgramStepper
-                    step={step}
-                    setStep={setStep}
-                    stepsData={stepsData}
-                  />
-                }
-              >
-                <Box p={3}>
-                  <Fade in={step === 0} timeout={600}>
-                    <div>
-                      {step === 0 && (
-                        <DetailsStep
-                          values={values}
-                          handleNext={handleNextStep}
-                          programId={id}
-                          errors={errors}
-                        />
-                      )}
-                    </div>
-                  </Fade>
-                  <Fade in={step === 1} timeout={600}>
-                    <div>
-                      {step === 1 && (
-                        <ProgramFieldSeriesStep
-                          values={values}
-                          handleNext={handleNextStep}
-                          step={step}
-                          setStep={setStep}
-                          pdusubtypeChoicesData={pdusubtypeChoicesData}
-                          errors={errors}
-                          programId={id}
-                          setFieldValue={setFieldValue}
-                        />
-                      )}
-                    </div>
-                  </Fade>
-                  <Fade in={step === 2} timeout={600}>
-                    <div>
-                      {step === 2 && (
-                        <PartnersStep
-                          values={values}
-                          allAreasTreeData={allAreasTree}
-                          partnerChoices={mappedPartnerChoices}
-                          step={step}
-                          setStep={setStep}
-                          submitForm={submitForm}
-                          setFieldValue={setFieldValue}
-                          programId={id}
-                          loading={loadingCopy}
-                        />
-                      )}
-                    </div>
-                  </Fade>
-                </Box>
-              </BaseSection>
-            </>
-          );
-        }}
-      </Formik>
-    </UniversalErrorBoundary>
+        return (
+          <>
+            <PageHeader
+              title={`${t('Copy of Programme')}: (${name})`}
+              breadCrumbs={
+                hasPermissionInModule(
+                  'PROGRAMME_VIEW_LIST_AND_DETAILS',
+                  permissions,
+                )
+                  ? breadCrumbsItems
+                  : null
+              }
+            />
+            <BaseSection
+              title={stepTitle}
+              description={stepDescription}
+              stepper={
+                <ProgramStepper
+                  step={step}
+                  setStep={setStep}
+                  stepsData={stepsData}
+                />
+              }
+            >
+              <Box p={3}>
+                <Fade in={step === 0} timeout={600}>
+                  <div>
+                    {step === 0 && (
+                      <DetailsStep
+                        values={values}
+                        handleNext={handleNextStep}
+                        programId={id}
+                        errors={errors}
+                      />
+                    )}
+                  </div>
+                </Fade>
+                <Fade in={step === 1} timeout={600}>
+                  <div>
+                    {step === 1 && (
+                      <ProgramFieldSeriesStep
+                        values={values}
+                        handleNext={handleNextStep}
+                        step={step}
+                        setStep={setStep}
+                        pdusubtypeChoicesData={pdusubtypeChoicesData}
+                        errors={errors}
+                        programId={id}
+                        setFieldValue={setFieldValue}
+                      />
+                    )}
+                  </div>
+                </Fade>
+                <Fade in={step === 2} timeout={600}>
+                  <div>
+                    {step === 2 && (
+                      <PartnersStep
+                        values={values}
+                        allAreasTreeData={allAreasTree}
+                        partnerChoices={mappedPartnerChoices}
+                        step={step}
+                        setStep={setStep}
+                        submitForm={submitForm}
+                        setFieldValue={setFieldValue}
+                        programId={id}
+                        loading={loadingCopy}
+                      />
+                    )}
+                  </div>
+                </Fade>
+              </Box>
+            </BaseSection>
+          </>
+        );
+      }}
+    </Formik>
   );
 };
+export default withErrorBoundary(DuplicateProgramPage, 'DuplicateProgramPage');
