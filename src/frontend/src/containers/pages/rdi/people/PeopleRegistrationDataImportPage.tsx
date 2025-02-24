@@ -1,22 +1,22 @@
+import { runDeduplicationDataImports } from '@api/rdiApi';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { RegistrationDataImportCreateDialog } from '@components/rdi/create/RegistrationDataImportCreateDialog';
+import RegistrationPeopleFilters from '@components/rdi/RegistrationPeopleFilters';
+import { RegistrationDataImportForPeopleTable } from '@containers/tables/rdi/RegistrationDataImportForPeopleTable';
+import { ButtonTooltip } from '@core/ButtonTooltip';
+import { useDeduplicationFlagsQuery } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { Box } from '@mui/material';
+import { useMutation } from '@tanstack/react-query';
+import { getFilterFromQueryParams } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import { PageHeader } from '@components/core/PageHeader';
-import { PermissionDenied } from '@components/core/PermissionDenied';
-import { RegistrationDataImportCreateDialog } from '@components/rdi/create/RegistrationDataImportCreateDialog';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { usePermissions } from '@hooks/usePermissions';
-import { getFilterFromQueryParams } from '@utils/utils';
-import { RegistrationDataImportForPeopleTable } from '@containers/tables/rdi/RegistrationDataImportForPeopleTable';
-import { RegistrationPeopleFilters } from '@components/rdi/RegistrationPeopleFilters';
-import { Box } from '@mui/material';
-import { useMutation } from '@tanstack/react-query';
-import { runDeduplicationDataImports } from '@api/rdiApi';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { useDeduplicationFlagsQuery } from '@generated/graphql';
-import { ButtonTooltip } from '@core/ButtonTooltip';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 const initialFilter = {
   search: '',
@@ -28,7 +28,7 @@ const initialFilter = {
   importDateRangeMax: '',
 };
 
-export function PeopleRegistrationDataImportPage(): ReactElement {
+function PeopleRegistrationDataImportPage(): ReactElement {
   const location = useLocation();
   const permissions = usePermissions();
   const { t } = useTranslation();
@@ -91,14 +91,7 @@ export function PeopleRegistrationDataImportPage(): ReactElement {
     </PageHeader>
   );
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'PeopleRegistrationDataImportPage.tsx');
-      }}
-      componentName="PeopleRegistrationDataImportPage"
-    >
+    <>
       {toolbar}
       <RegistrationPeopleFilters
         filter={filter}
@@ -114,6 +107,10 @@ export function PeopleRegistrationDataImportPage(): ReactElement {
           permissions,
         )}
       />
-    </UniversalErrorBoundary>
+    </>
   );
 }
+export default withErrorBoundary(
+  PeopleRegistrationDataImportPage,
+  'PeopleRegistrationDataImportPage',
+);

@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { GrievanceTicketQuery } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
-import { PhotoModal } from '@core/PhotoModal/PhotoModal';
+import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { DocumentationField } from './DocumentationField';
 
 interface DisabledDivProps {
@@ -47,7 +47,7 @@ export function EditDocumentationRow({
         setFieldValue={setFieldValue}
         isEdited={isEdited}
       />
-      <Grid size={{ xs:1 }} />
+      <Grid size={{ xs: 1 }} />
       <Grid>
         <Button
           onClick={() => {
@@ -72,13 +72,13 @@ export function EditDocumentationRow({
         </DisabledDiv>
       </Grid>
       {document.contentType.includes('image') ? (
-        <Grid size={{ xs:1 }}>
+        <Grid size={{ xs: 1 }}>
           <PhotoModal showRotate={false} src={document.filePath} />
         </Grid>
       ) : (
-        <Grid size={{ xs:1 }} />
+        <Grid size={{ xs: 1 }} />
       )}
-      <Grid size={{ xs:1 }}>
+      <Grid size={{ xs: 1 }}>
         {!removed ? (
           <Box ml={2} display="flex" align-items="center">
             <IconButton

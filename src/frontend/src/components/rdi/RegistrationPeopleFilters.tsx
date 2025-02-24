@@ -11,6 +11,7 @@ import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { FiltersSection } from '@core/FiltersSection';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface RegistrationFiltersProps {
   filter;
@@ -20,7 +21,7 @@ interface RegistrationFiltersProps {
   setAppliedFilter: (filter) => void;
 }
 
-export const RegistrationPeopleFilters = ({
+const RegistrationPeopleFilters = ({
   filter,
   setFilter,
   initialFilter,
@@ -139,3 +140,8 @@ export const RegistrationPeopleFilters = ({
     </FiltersSection>
   );
 };
+
+export default withErrorBoundary(
+  RegistrationPeopleFilters,
+  'RegistrationPeopleFilters',
+);

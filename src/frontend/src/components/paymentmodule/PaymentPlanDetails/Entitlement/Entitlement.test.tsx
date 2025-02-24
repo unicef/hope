@@ -4,7 +4,7 @@ import wait from 'waait';
 import { fakeApolloAllSteficonRules } from '../../../../../fixtures/steficon/fakeApolloAllSteficonRules';
 import { fakeApolloPaymentPlan } from '../../../../../fixtures/paymentmodule/fakeApolloPaymentPlan';
 import { render } from '../../../../testUtils/testUtils';
-import { Entitlement } from './Entitlement';
+import Entitlement from './Entitlement';
 import { PERMISSIONS } from '../../../../config/permissions';
 
 describe('components/paymentmodule/PaymentPlanDetails/Entitlement', () => {
