@@ -10,7 +10,6 @@ import {
   FeedbackDocument,
   FeedbackQuery,
   useCreateFeedbackMsgMutation,
-  useMeQuery,
 } from '@generated/graphql';
 import { LoadingButton } from '@core/LoadingButton';
 import { OverviewContainerColumn } from '@core/OverviewContainerColumn';
@@ -18,6 +17,8 @@ import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 
 const Name = styled.span`
   font-size: 16px;
@@ -43,8 +44,12 @@ interface MessagesProps {
 
 function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
   const { t } = useTranslation();
-  const { data: meData, loading: meLoading } = useMeQuery({
-    fetchPolicy: 'cache-and-network',
+
+  const { data: meData, isLoading: meLoading } = useQuery({
+    queryKey: ['profile'],
+    queryFn: () => {
+      return RestService.restProfileRetrieve();
+    },
   });
 
   const { id } = useParams();

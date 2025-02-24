@@ -15,5 +15,6 @@ export type Program = {
     cash_plus: boolean;
     population_goal: number;
     data_collecting_type: number;
+    beneficiary_group: string;
 };
 
