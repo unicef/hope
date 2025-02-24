@@ -26,22 +26,4 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(migrate_registration_id_to_detail_id, reverse_code=migrations.RunPython.noop),
-        migrations.RemoveField(
-            model_name='household',
-            name='registration_id',
-        ),
-        migrations.RemoveField(
-            model_name='individual',
-            name='registration_id',
-        ),
-        migrations.AlterField(
-            model_name='household',
-            name='detail_id',
-            field=models.CharField(blank=True, help_text='Kobo asset ID, Xlsx row ID, Aurora registration ID', max_length=150, null=True),
-        ),
-        migrations.AlterField(
-            model_name='individual',
-            name='detail_id',
-            field=models.CharField(blank=True, help_text='Kobo asset ID, Xlsx row ID, Aurora registration ID', max_length=150, null=True),
-        ),
     ]
