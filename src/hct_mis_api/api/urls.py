@@ -6,11 +6,11 @@ from drf_spectacular.views import (
     SpectacularSwaggerView,
 )
 
-from hct_mis_api.apps.account.api.views import UserProfileView
 from hct_mis_api.api import endpoints
 from hct_mis_api.api.endpoints.base import ConstanceSettingsAPIView
 from hct_mis_api.api.endpoints.program.views import ProgramGlobalListView
 from hct_mis_api.api.router import APIRouter
+from hct_mis_api.apps.account.api.views import UserProfileView
 from hct_mis_api.contrib.aurora.views import (
     OrganizationListView,
     ProjectListView,
