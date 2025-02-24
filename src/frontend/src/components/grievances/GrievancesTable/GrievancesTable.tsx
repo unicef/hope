@@ -8,7 +8,6 @@ import {
   useAllGrievanceTicketQuery,
   useAllUsersForFiltersLazyQuery,
   useGrievancesChoiceDataQuery,
-  useMeQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useDebounce } from '@hooks/useDebounce';
@@ -37,6 +36,8 @@ import { BulkAssignModal } from './bulk/BulkAssignModal';
 import { BulkSetPriorityModal } from './bulk/BulkSetPriorityModal';
 import { BulkSetUrgencyModal } from './bulk/BulkSetUrgencyModal';
 import { useProgramContext } from 'src/programContext';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 
 interface GrievancesTableProps {
   filter;
@@ -135,8 +136,16 @@ export const GrievancesTable = ({
 
   const { data: choicesData, loading: choicesLoading } =
     useGrievancesChoiceDataQuery();
-  const { data: currentUserData, loading: currentUserDataLoading } =
-    useMeQuery();
+
+  const { data: currentUserData, isLoading: currentUserDataLoading } = useQuery(
+    {
+      queryKey: ['profile'],
+      queryFn: () => {
+        return RestService.restProfileRetrieve();
+      },
+    },
+  );
+
   const permissions = usePermissions();
 
   if (choicesLoading || currentUserDataLoading) return <LoadingComponent />;

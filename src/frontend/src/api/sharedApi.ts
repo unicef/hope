@@ -9,3 +9,7 @@ export const fetchAreas = async (
     api.get(`${businessArea}/geo/areas/?${queryParams}`),
   );
 };
+
+export const fetchMe = async () => {
+  return handleApiResponse(api.get('profile'));
+};
