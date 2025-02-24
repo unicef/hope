@@ -497,13 +497,6 @@ class Household(
     detail_id = models.CharField(
         max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora registration ID"
     )
-    # registration_id = CICharField(
-    #     max_length=100,
-    #     blank=True,
-    #     null=True,
-    #     db_index=True,
-    #     verbose_name=_("Kobo asset ID, Xlsx row ID, Aurora registration ID"),
-    # )
     program_registration_id = CICharField(
         max_length=100,
         blank=True,
@@ -1013,12 +1006,6 @@ class Individual(
     detail_id = models.CharField(
         max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora registration ID"
     )
-    # registration_id = CICharField(
-    #     max_length=100,
-    #     blank=True,
-    #     null=True,
-    #     verbose_name=_("Aurora Registration Id"),
-    # )
     program_registration_id = CICharField(
         max_length=100, blank=True, null=True, verbose_name=_("Beneficiary Program Registration Id")
     )
