@@ -190,7 +190,7 @@ const EditGrievancePage = (): ReactElement => {
     [id: number]: string;
   } = choicesToDict(choicesData.grievanceTicketCategoryChoices);
 
-  const currentUserId = currentUserData.me.id;
+  const currentUserId = currentUserData.id;
   const ticket = ticketData.grievanceTicket;
 
   const isCreator = ticket.createdBy?.id === currentUserId;

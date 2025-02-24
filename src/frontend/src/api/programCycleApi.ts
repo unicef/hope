@@ -70,16 +70,6 @@ export const fetchProgramCycles = async (
   );
 };
 
-export const fetchProgramCycle = async (
-  businessArea: string,
-  programId: string,
-  programCycleId: string,
-): Promise<ProgramCycle> => {
-  return handleApiResponse(
-    api.get(`${businessArea}/programs/${programId}/cycles/${programCycleId}/`),
-  );
-};
-
 export interface ProgramCycleCreate {
   title: string;
   start_date: string;

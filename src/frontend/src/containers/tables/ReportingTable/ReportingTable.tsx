@@ -30,7 +30,7 @@ export function ReportingTable({
     createdTo: dateToIsoString(filter.createdTo, 'endOfDay'),
     reportType: filter.type,
     status: filter.status,
-    createdBy: filter.onlyMy ? meData.me.id : null,
+    createdBy: filter.onlyMy ? meData.id : null,
   };
   const typeChoices: {
     [id: number]: string;
