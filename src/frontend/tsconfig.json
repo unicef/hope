@@ -38,11 +38,15 @@
     "src",
     "__tests__",
     "jest",
-    "vite.config.ts",
     "tsconfig.json",
     ".eslintrc.cjs",
     "jest.config"
   ],
-  "exclude": ["node_modules", "frontend/jest", "src/restgenerated"],
+  "exclude": [
+    "node_modules",
+    "frontend/jest",
+    "src/restgenerated",
+    "vite.config.ts"
+  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

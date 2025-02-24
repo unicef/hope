@@ -1,22 +1,4 @@
-import { api, handleApiResponse, handleMutationError, Params } from './api';
-import { PaymentPlan } from '@restgenerated/models/PaymentPlan';
-
-export const fetchPaymentPlansManagerial = async (
-  businessAreaSlug: string,
-  params: Params = {},
-): Promise<PaymentPlan[]> => {
-  const paramsWithNoLimit = {
-    ...params,
-    limit: 10000,
-    offset: 0,
-  };
-  return handleApiResponse(
-    api.get(
-      `${businessAreaSlug}/payments/payment-plans-managerial/`,
-      paramsWithNoLimit,
-    ),
-  );
-};
+import { api, handleApiResponse, handleMutationError } from './api';
 
 interface BulkActionPaymentPlansManagerialProps {
   businessAreaSlug: string;
