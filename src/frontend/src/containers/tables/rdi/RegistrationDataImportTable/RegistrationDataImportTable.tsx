@@ -1,19 +1,20 @@
-import { ReactElement } from 'react';
-import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import { TableWrapper } from '@components/core/TableWrapper';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import {
   AllRegistrationDataImportsQueryVariables,
   RegistrationDataImportNode,
   useAllRegistrationDataImportsQuery,
   useDeduplicationFlagsQuery,
 } from '@generated/graphql';
-import { TableWrapper } from '@components/core/TableWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { adjustHeadCells, dateToIsoString, decodeIdString } from '@utils/utils';
+import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useProgramContext } from 'src/programContext';
+import styled from 'styled-components';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './RegistrationDataImportTableHeadCells';
 import { RegistrationDataImportTableRow } from './RegistrationDataImportTableRow';
-import { useProgramContext } from 'src/programContext';
 
 interface RegistrationDataImportProps {
   filter;
@@ -32,7 +33,7 @@ const NoTableStyling = styled.div`
   }
 `;
 
-export function RegistrationDataImportTable({
+function RegistrationDataImportTable({
   filter,
   canViewDetails,
   enableRadioButton,
@@ -137,9 +138,17 @@ export function RegistrationDataImportTable({
       />
     </TableWrapper>
   );
-  return noTableStyling ? (
-    <NoTableStyling>{renderTable()}</NoTableStyling>
-  ) : (
-    renderTable()
+  return (
+    <>
+      {noTableStyling ? (
+        <NoTableStyling>{renderTable()}</NoTableStyling>
+      ) : (
+        renderTable()
+      )}
+    </>
   );
 }
+export default withErrorBoundary(
+  RegistrationDataImportTable,
+  'RegistrationDataImportTable',
+);

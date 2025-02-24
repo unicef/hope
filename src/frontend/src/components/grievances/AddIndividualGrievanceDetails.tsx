@@ -17,8 +17,9 @@ import { Title } from '@core/Title';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement, ReactNode } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
-export function AddIndividualGrievanceDetails({
+function AddIndividualGrievanceDetails({
   ticket,
   canApproveDataChange,
 }: {
@@ -190,3 +191,7 @@ export function AddIndividualGrievanceDetails({
     </ApproveBox>
   );
 }
+export default withErrorBoundary(
+  AddIndividualGrievanceDetails,
+  'AddIndividualGrievanceDetails',
+);

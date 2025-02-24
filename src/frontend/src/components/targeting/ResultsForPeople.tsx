@@ -8,6 +8,7 @@ import { FieldBorder } from '@core/FieldBorder';
 import { Pie } from 'react-chartjs-2';
 import { ReactElement } from 'react';
 import { PaymentPlanBuildStatus, PaymentPlanQuery } from '@generated/graphql';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const colors = {
   femaleChildren: '#5F02CF',
@@ -50,9 +51,7 @@ interface ResultsProps {
   targetPopulation: PaymentPlanQuery['paymentPlan'];
 }
 
-export function ResultsForPeople({
-  targetPopulation,
-}: ResultsProps): ReactElement {
+function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
   const { t } = useTranslation();
   if (targetPopulation.buildStatus !== PaymentPlanBuildStatus.Ok) {
     return null;
@@ -168,3 +167,5 @@ export function ResultsForPeople({
     </div>
   );
 }
+
+export default withErrorBoundary(ResultsForPeople, 'ResultsForPeople');

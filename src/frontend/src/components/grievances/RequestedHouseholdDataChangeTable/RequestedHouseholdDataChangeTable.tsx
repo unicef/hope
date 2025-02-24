@@ -15,6 +15,7 @@ import {
 import { LoadingComponent } from '@core/LoadingComponent';
 import { householdDataRow } from './householdDataRow';
 import { handleSelected } from '../utils/helpers';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface RequestedHouseholdDataChangeTableProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
@@ -27,7 +28,7 @@ export const StyledTable = styled(Table)`
   min-width: 100px;
 `;
 
-export function RequestedHouseholdDataChangeTable({
+function RequestedHouseholdDataChangeTable({
   setFieldValue,
   ticket,
   isEdit,
@@ -117,3 +118,7 @@ export function RequestedHouseholdDataChangeTable({
     </StyledTable>
   );
 }
+export default withErrorBoundary(
+  RequestedHouseholdDataChangeTable,
+  'RequestedHouseholdDataChangeTable',
+);
