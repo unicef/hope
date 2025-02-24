@@ -104,7 +104,7 @@ function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
     newNote: Yup.string().required(t('Note cannot be empty')),
   });
 
-  const myName = `${meData.me.firstName || meData.me.email}`;
+  const myName = `${meData.firstName || meData.email}`;
 
   return (
     <Grid size={{ xs: 8 }}>
@@ -139,7 +139,7 @@ function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
                     <Grid size={{ xs: 10 }}>
                       <Grid size={{ xs: 12 }}>
                         <Box display="flex" justifyContent="space-between">
-                          <Name>{renderUserName(meData.me)}</Name>
+                          <Name>{renderUserName(meData)}</Name>
                         </Box>
                       </Grid>
                       <Grid size={{ xs: 12 }}>

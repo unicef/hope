@@ -1,47 +1,4 @@
 import { api, handleApiResponse, Params } from './api';
-import { PaginatedPeriodicDataUpdateTemplateListList } from '@restgenerated/models/PaginatedPeriodicDataUpdateTemplateListList';
-import { PeriodicDataUpdateUploadList } from '@restgenerated/models/PeriodicDataUpdateUploadList';
-import { PeriodicDataUpdateTemplateDetail } from '@restgenerated/models/PeriodicDataUpdateTemplateDetail';
-import { PeriodicDataUpdateUploadDetail } from '@restgenerated/models/PeriodicDataUpdateUploadDetail';
-import { PaginatedPeriodicFieldList } from '@restgenerated/models/PaginatedPeriodicFieldList';
-
-export const fetchPeriodicDataUpdateTemplates = async (
-  businessAreaSlug: string,
-  programId: string,
-  params: Params = {},
-): Promise<PaginatedPeriodicDataUpdateTemplateListList> => {
-  return handleApiResponse(
-    api.get(
-      `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/`,
-      params,
-    ),
-  );
-};
-
-export const fetchPeriodicDataUpdateUpdates = async (
-  businessAreaSlug: string,
-  programId: string,
-  params: Params = {},
-): Promise<PeriodicDataUpdateUploadList> => {
-  return handleApiResponse(
-    api.get(
-      `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-uploads/`,
-      params,
-    ),
-  );
-};
-
-export const fetchPeriodicDataUpdateTemplateDetails = async (
-  businessAreaSlug: string,
-  programId: string,
-  templateId: number,
-): Promise<PeriodicDataUpdateTemplateDetail> => {
-  return handleApiResponse(
-    api.get(
-      `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/${templateId}/`,
-    ),
-  );
-};
 
 export const exportPeriodicDataUpdateTemplate = async (
   businessAreaSlug: string,
@@ -91,18 +48,6 @@ export const uploadPeriodicDataUpdateTemplate = async (
   );
 };
 
-export const fetchPeriodicDataUpdateUploadDetails = async (
-  businessAreaSlug: string,
-  programId: string,
-  uploadId: number,
-): Promise<PeriodicDataUpdateUploadDetail> => {
-  return handleApiResponse(
-    api.get(
-      `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-uploads/${uploadId}/`,
-    ),
-  );
-};
-
 export const createPeriodicDataUpdateTemplate = async (
   businessAreaSlug: string,
   programId: string,
@@ -118,19 +63,6 @@ export const createPeriodicDataUpdateTemplate = async (
     api.post(
       `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/`,
       payload,
-    ),
-  );
-};
-
-export const fetchPeriodicFields = async (
-  businessAreaSlug: string,
-  programId: string,
-  params: Params = {},
-): Promise<PaginatedPeriodicFieldList> => {
-  return handleApiResponse(
-    api.get(
-      `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-fields/`,
-      params,
     ),
   );
 };

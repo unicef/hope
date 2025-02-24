@@ -89,8 +89,8 @@ export function UserProfileMenu({
         onClick={handleToggle}
         data-cy="menu-user-profile"
       >
-        <Avatar alt={meData.me.email} src="/static/images/avatar/1.jpg" />
-        <MenuButtonText> {meData.me.email}</MenuButtonText>
+        <Avatar alt={meData.email} src="/static/images/avatar/1.jpg" />
+        <MenuButtonText> {meData.email}</MenuButtonText>
       </UserProfileButton>
       <Popper
         open={open}

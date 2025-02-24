@@ -162,7 +162,7 @@ export const GrievancesTable = ({
   const issueTypeChoicesData = choicesData.grievanceTicketIssueTypeChoices;
   const priorityChoicesData = choicesData.grievanceTicketPriorityChoices;
   const urgencyChoicesData = choicesData.grievanceTicketUrgencyChoices;
-  const currentUserId = currentUserData.me.id;
+  const currentUserId = currentUserData.id;
 
   const getCanViewDetailsOfTicket = (
     ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
