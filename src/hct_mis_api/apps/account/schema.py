@@ -111,7 +111,6 @@ class PartnerType(DjangoObjectType):
 
 
 class UserNode(DjangoObjectType):
-    # TODO: rewrite...
     business_areas = DjangoFilterConnectionField(UserBusinessAreaNode)
     permissions_in_scope = graphene.List(graphene.String)
     partner_roles = graphene.List(PartnerRoleNode)
