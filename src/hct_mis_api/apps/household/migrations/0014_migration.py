@@ -3,11 +3,19 @@
 from django.db import migrations, models
 
 def migrate_registration_id_to_detail_id(apps, schema_editor):
+    PendingHousehold = apps.get_model("household", "PendingHousehold")
+    PendingIndividual = apps.get_model("household", "PendingIndividual")
     Household = apps.get_model("household", "Household")
     Individual = apps.get_model("household", "Individual")
 
-    Individual.all_objects.filter(registration_id__isnull=False, detail_id__isnull=True).update(detail_id=models.F("registration_id"))
-    Household.all_objects.filter(registration_id__isnull=False, detail_id__isnull=True).update(detail_id=models.F("registration_id"))
+    PendingIndividual.objects.filter(registration_id__isnull=False, detail_id__isnull=True).update(
+        detail_id=models.F("registration_id"))
+    PendingHousehold.objects.filter(registration_id__isnull=False, detail_id__isnull=True).update(
+        detail_id=models.F("registration_id"))
+    Individual.objects.filter(registration_id__isnull=False, detail_id__isnull=True).update(
+        detail_id=models.F("registration_id"))
+    Household.objects.filter(registration_id__isnull=False, detail_id__isnull=True).update(
+        detail_id=models.F("registration_id"))
 
 
 class Migration(migrations.Migration):
