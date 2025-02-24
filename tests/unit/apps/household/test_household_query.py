@@ -330,6 +330,8 @@ class TestHouseholdQuery(APITestCase):
           }
         }
         """
+        household.detail_id = None
+        household.enumerator_rec_id = None
 
         if field_name is not None:
             setattr(household, field_name, field_value)
