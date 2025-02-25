@@ -52,6 +52,7 @@
     "cross-spawn": "^7.0.3",
     "date-fns": "^4.1.0",
     "eslint-import-resolver-alias": "^1.1.2",
+    "eslint-plugin-jest": "^28.11.0",
     "formik": "^2.4.5",
     "glob": "^9.0.0",
     "graphql": "^16.8.1",
@@ -125,6 +126,6 @@
     "prettier": "3.4.2",
     "react-test-renderer": "^19.0.0",
     "ts-jest": "^29.2.6",
-    "typescript": "^5.7.3"
+    "typescript": "^5.5.4"
   }
 }
