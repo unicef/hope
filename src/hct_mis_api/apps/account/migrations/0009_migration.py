@@ -263,7 +263,7 @@ def migrate_unicef_partners(apps, schema_editor):
     unicef_hq, _ = Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER)
     unicef_hq.allowed_business_areas.set(BusinessArea.objects.all())
 
-    for business_area in BusinessArea.objects.all():
+    for business_area in BusinessArea.objects.exclude(slug="global"):
         unicef_subpartner , _ = Partner.objects.get_or_create(
             name=f"UNICEF Partner for {business_area.slug}"
         )
@@ -294,34 +294,33 @@ def migrate_unicef_partners(apps, schema_editor):
 
     # handle UNICEF users
 
-    # UNICEF users with roles in multiple Business Areas will be assigned to UNICEF HQ
+    # UNICEF users with no roles or role only in GLOBAL will be assigned to default empty partner
+    empty_partner, _ = Partner.objects.get_or_create(name=settings.DEFAULT_EMPTY_PARTNER)
     User.objects.filter(partner=unicef_partner).annotate(
         ba_count=Count("role_assignments__business_area", distinct=True)
-    ).filter(ba_count__gt=1).update(partner=unicef_hq)
+    ).filter(Q(ba_count=0) | Q(ba_count=1, role_assignments__business_area__slug="global")).update(partner=empty_partner)
 
     # UNICEF users with roles in single Business Area will be assigned to UNICEF Sub-partner for that Business Area
     unicef_users_in_single_ba = (
         User.objects.filter(partner=unicef_partner)
         .annotate(ba_count=Count("role_assignments__business_area", distinct=True))
-        .filter(ba_count=1)
+        .filter(Q(ba_count=1) | (Q(role_assignments__business_area__slug="global") & Q(ba_count=2)))
     )
 
     unicef_subpartners = {
-        ba.slug: Partner.objects.get(name=f"UNICEF Partner for {ba.slug}") for ba in BusinessArea.objects.all()
+        ba.slug: Partner.objects.get(name=f"UNICEF Partner for {ba.slug}") for ba in BusinessArea.objects.exclude(slug="global")
     }
-
-    for ba in unicef_users_in_single_ba.values_list("role_assignments__business_area__slug", flat=True).distinct():
+    for ba in RoleAssignment.objects.filter(user__in=unicef_users_in_single_ba).exclude(business_area__slug="global").values_list("business_area__slug", flat=True).distinct():
         unicef_users = unicef_users_in_single_ba.filter(role_assignments__business_area__slug=ba)
         unicef_users.update(partner=unicef_subpartners[ba])
 
-    # UNICEF users with no roles will be assigned to default empty partner
-    empty_partner, _ = Partner.objects.get_or_create(name=settings.DEFAULT_EMPTY_PARTNER)
-    User.objects.filter(partner=unicef_partner).annotate(
-        ba_count=Count("role_assignments__business_area", distinct=True)
-    ).filter(ba_count=0).update(partner=empty_partner)
-
     unicef_subpartners_ids = [unicef_subpartner.id for unicef_subpartner in unicef_subpartners.values()]
     Partner.objects.filter(id__in=[unicef_hq.id, *unicef_subpartners_ids]).update(parent=unicef_partner)
+
+    # UNICEF users with roles in multiple Business Areas will be assigned to UNICEF HQ
+    User.objects.filter(partner=unicef_partner).annotate(
+        ba_count=Count("role_assignments__business_area", distinct=True)
+    ).filter(ba_count__gt=1).update(partner=unicef_hq)
 
 
 class Migration(migrations.Migration):

@@ -302,12 +302,10 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
 
     @property
     def business_areas(self) -> QuerySet[BusinessArea]:
-        return (
-            BusinessArea.objects.filter(Q(role_assignments__user=self) | Q(role_assignments__partner__user=self))
-            .exclude(role_assignments__expiry_date__lt=timezone.now())
-            .exclude(active=False)
-            .distinct()
+        role_assignments = RoleAssignment.objects.filter(Q(user=self) | Q(partner__user=self)).exclude(
+            expiry_date__lt=timezone.now()
         )
+        return BusinessArea.objects.filter(role_assignments__in=role_assignments).exclude(active=False).distinct()
 
     @test_conditional(lru_cache())
     def cached_role_assignments(self) -> QuerySet["RoleAssignment"]:

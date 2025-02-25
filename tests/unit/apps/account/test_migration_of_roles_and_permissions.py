@@ -39,6 +39,8 @@ class MigrateUserRolesTest(TestCase):
 
         cls.business_area_afg = BusinessAreaFactory(name="Afghanistan", slug="afghanistan", code="AFG", active=True)
         cls.business_area_ukr = BusinessAreaFactory(name="Ukraine", slug="ukraine", code="UKR", active=True)
+        cls.business_area_syria = BusinessAreaFactory(name="Syria", slug="syria", code="SYR", active=True)
+        cls.business_area_global = BusinessAreaFactory(name="Global", slug="global", code="GLOBAL", active=True)
 
         # remove partners that were created in signal for creating BAs - to keep the data as it was before changes
         Partner.objects.filter(parent__name="UNICEF").delete()
@@ -65,7 +67,11 @@ class MigrateUserRolesTest(TestCase):
         cls.user_unicef_in_afg = UserFactory(partner=cls.partner_unicef)
         cls.user_unicef_in_ukr = UserFactory(partner=cls.partner_unicef)
         cls.unicef_user_hq = UserFactory(partner=cls.partner_unicef)
+        # unicef_user_without_any_role - no role, partner UNICEF
         cls.unicef_user_without_any_role = UserFactory(partner=cls.partner_unicef)
+        cls.user_unicef_only_global = UserFactory(partner=cls.partner_unicef)
+        cls.user_unicef_in_syria_and_global = UserFactory(partner=cls.partner_unicef)
+        cls.unicef_user_hq_with_global = UserFactory(partner=cls.partner_unicef)
 
         # users under custom partners
         cls.partner_1 = PartnerFactory(name="Partner 1")
@@ -111,7 +117,39 @@ class MigrateUserRolesTest(TestCase):
             user=cls.unicef_user_hq,
             role=cls.role_2,
         )
-        # unicef_user_without_any_role - no role, partner UNICEF
+        # user_unicef_only_global - role in Global, partner UNICEF
+        RoleAssignment.objects.create(
+            business_area=cls.business_area_global,
+            user=cls.user_unicef_only_global,
+            role=cls.role_1,
+        )
+        # user_unicef_in_syria_and_global - role in Syria and Global, partner UNICEF
+        RoleAssignment.objects.create(
+            business_area=cls.business_area_syria,
+            user=cls.user_unicef_in_syria_and_global,
+            role=cls.role_1,
+        )
+        RoleAssignment.objects.create(
+            business_area=cls.business_area_global,
+            user=cls.user_unicef_in_syria_and_global,
+            role=cls.role_1,
+        )
+        # unicef_user_hq_with_global - roles in Afghanistan, Ukraine and Global, partner UNICEF
+        RoleAssignment.objects.create(
+            business_area=cls.business_area_afg,
+            user=cls.unicef_user_hq_with_global,
+            role=cls.role_1,
+        )
+        RoleAssignment.objects.create(
+            business_area=cls.business_area_ukr,
+            user=cls.unicef_user_hq_with_global,
+            role=cls.role_2,
+        )
+        RoleAssignment.objects.create(
+            business_area=cls.business_area_global,
+            user=cls.unicef_user_hq_with_global,
+            role=cls.role_1,
+        )
 
         # UNICEF has access to all programs
         ProgramPartnerThrough.objects.create(
@@ -469,7 +507,7 @@ class MigrateUserRolesTest(TestCase):
         self.assertEqual(self.partner_empty.role_assignments.count(), 0)
 
     def test_unicef_partners_migration(self) -> None:
-        self.assertEqual(self.partner_unicef.user_set.count(), 4)
+        self.assertEqual(self.partner_unicef.user_set.count(), 7)
 
         # call all 3 functions to check the final result
         data_migration.migrate_user_roles(apps, None)
@@ -480,18 +518,26 @@ class MigrateUserRolesTest(TestCase):
         self.user_unicef_in_ukr.refresh_from_db()
         self.unicef_user_hq.refresh_from_db()
         self.unicef_user_without_any_role.refresh_from_db()
+        self.user_unicef_only_global.refresh_from_db()
+        self.user_unicef_in_syria_and_global.refresh_from_db()
+        self.unicef_user_hq_with_global.refresh_from_db()
 
         # check UNICEF subpartners creation
-        self.assertEqual(Partner.objects.filter(parent=self.partner_unicef).count(), 3)
+        self.assertEqual(Partner.objects.filter(parent=self.partner_unicef).count(), 4)
         self.assertEqual(self.partner_unicef.user_set.count(), 0)
 
         unicef_in_afg = Partner.objects.filter(name="UNICEF Partner for afghanistan").first()
         unicef_in_ukr = Partner.objects.filter(name="UNICEF Partner for ukraine").first()
+        unicef_in_syria = Partner.objects.filter(name="UNICEF Partner for syria").first()
         unicef_hq = Partner.objects.filter(name="UNICEF HQ").first()
+        unicef_global = Partner.objects.filter(name="UNICEF Partner for global").first()
 
         self.assertIsNotNone(unicef_in_afg)
         self.assertIsNotNone(unicef_in_ukr)
         self.assertIsNotNone(unicef_hq)
+        self.assertIsNotNone(unicef_in_syria)
+        # unicef_global should be created
+        self.assertIsNone(unicef_global)
 
         self.assertEqual(
             unicef_in_afg.parent,
@@ -532,6 +578,24 @@ class MigrateUserRolesTest(TestCase):
             self.partner_empty,
         )
 
+        # user_unicef_only_global - has role only in Global -> should be under Default Empty Partner
+        self.assertEqual(
+            self.user_unicef_only_global.partner,
+            self.partner_empty,
+        )
+
+        # user_unicef_in_syria_and_global - has roles in Afg and Global -> should be under UNICEF Partner for Afg
+        self.assertEqual(
+            self.user_unicef_in_syria_and_global.partner,
+            unicef_in_syria,
+        )
+
+        # unicef_user_hq_with_global - has roles in Afg, Ukr and Global -> should be under UNICEF HQ
+        self.assertEqual(
+            self.unicef_user_hq_with_global.partner,
+            unicef_hq,
+        )
+
         # UNICEF subpartners per BA should be allowed in specific BA; UNICEF HQ should be allowed in all
         self.assertEqual(
             unicef_in_afg.allowed_business_areas.count(),
@@ -553,7 +617,7 @@ class MigrateUserRolesTest(TestCase):
 
         self.assertEqual(
             unicef_hq.allowed_business_areas.count(),
-            2,
+            4,
         )
         self.assertTrue(self.business_area_afg in unicef_hq.allowed_business_areas.all())
         self.assertTrue(self.business_area_ukr in unicef_hq.allowed_business_areas.all())
@@ -585,7 +649,7 @@ class MigrateUserRolesTest(TestCase):
 
         self.assertEqual(
             unicef_hq.role_assignments.count(),
-            2,
+            3,
         )
         self.assertEqual(
             unicef_hq.role_assignments.all()[0].role,
