@@ -10,6 +10,8 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.fixtures import (
     DocumentTypeFactory,
+    HouseholdFactory,
+    IndividualFactory,
     PendingDocumentFactory,
     PendingHouseholdFactory,
     PendingIndividualFactory,
@@ -227,3 +229,39 @@ class TestDetails(TestCase):
         self.assertEqual(info["status"], "imported")
         self.assertEqual(info["date"], _time(pending_household.updated_at))
         self.assertTrue("individual" not in info)
+
+    def test_getting_household_with_status_paid(self) -> None:
+        detail_id = "HOPE-2022530111222"
+        household = HouseholdFactory(detail_id=detail_id)
+        individual = IndividualFactory(household=household, relationship=HEAD)
+        individual.head_of_household = individual
+        individual.save()
+        payment = PaymentFactory(household=household, delivered_quantity=1000, collector=individual)
+        response = self.api_client.get(f"/api/hh-status?detail_id={detail_id}")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        info = data["info"]
+        self.assertEqual(info["status"], "paid")
+        self.assertEqual(info["date"], _time(payment.delivery_date))
+        self.assertTrue("individual" not in info)
+
+    def test_query_params_validation(self) -> None:
+        response = self.api_client.get("/api/hh-status?detail_id=xxx?tax_id=yyy")
+        print(response)
+        self.assertEqual(response.status_code, 404)
+
+        response = self.api_client.get("/api/hh-status")
+        self.assertEqual(response.status_code, 404)
+
+    def test_households_count_gt_1(self) -> None:
+        detail_id = "123"
+
+        PendingHouseholdFactory(detail_id=detail_id)
+        PendingHouseholdFactory(detail_id=detail_id)
+        response = self.api_client.get(f"/api/hh-status?detail_id={detail_id}")
+        self.assertEqual(response.status_code, 404)
+
+        HouseholdFactory(detail_id=detail_id)
+        HouseholdFactory(detail_id=detail_id)
+        response = self.api_client.get(f"/api/hh-status?detail_id={detail_id}")
+        self.assertEqual(response.status_code, 404)
