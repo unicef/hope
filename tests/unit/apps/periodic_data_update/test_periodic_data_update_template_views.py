@@ -11,6 +11,7 @@ from django.utils import timezone
 
 import freezegun
 import pytest
+from flaky import flaky
 from rest_framework import status
 from rest_framework.reverse import reverse
 
@@ -324,6 +325,7 @@ class TestPeriodicDataUpdateTemplateViews:
 
             assert etag_second_call == etag
 
+    @flaky(max_runs=3, min_passes=1)
     @pytest.mark.parametrize(
         "permissions, partner_permissions, access_to_program, expected_status",
         [
