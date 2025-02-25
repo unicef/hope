@@ -246,8 +246,7 @@ class TestDetails(TestCase):
         self.assertTrue("individual" not in info)
 
     def test_query_params_validation(self) -> None:
-        response = self.api_client.get("/api/hh-status?detail_id=xxx?tax_id=yyy")
-        print(response)
+        response = self.api_client.get("/api/hh-status?detail_id=xxx&tax_id=yyy")
         self.assertEqual(response.status_code, 404)
 
         response = self.api_client.get("/api/hh-status")
