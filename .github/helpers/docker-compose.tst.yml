@@ -28,7 +28,7 @@ services:
 
   valkey:
     restart: unless-stopped
-    image: valkey:8.0.2-alpine
+    image: valkey/valkey:8.0.2-alpine
 
   elasticsearch:
     image: unicef/hct-elasticsearch
