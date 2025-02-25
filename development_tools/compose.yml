@@ -188,4 +188,4 @@ services:
       - PYTHONUNBUFFERED=1
     depends_on:
       - celery-worker
-      - redis
+      - valkey
