@@ -10,13 +10,15 @@ import {
   FeedbackDocument,
   FeedbackQuery,
   useCreateFeedbackMsgMutation,
-  useMeQuery,
 } from '@generated/graphql';
 import { LoadingButton } from '@core/LoadingButton';
 import { OverviewContainerColumn } from '@core/OverviewContainerColumn';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 
 const Name = styled.span`
   font-size: 16px;
@@ -40,13 +42,14 @@ interface MessagesProps {
   canAddMessage: boolean;
 }
 
-export function Messages({
-  messages,
-  canAddMessage,
-}: MessagesProps): ReactElement {
+function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
   const { t } = useTranslation();
-  const { data: meData, loading: meLoading } = useMeQuery({
-    fetchPolicy: 'cache-and-network',
+
+  const { data: meData, isLoading: meLoading } = useQuery({
+    queryKey: ['profile'],
+    queryFn: () => {
+      return RestService.restProfileRetrieve();
+    },
   });
 
   const { id } = useParams();
@@ -63,10 +66,10 @@ export function Messages({
     noteId: string,
   ): ReactElement => (
     <Grid container key={noteId}>
-      <Grid size={{ xs:2 }}>
+      <Grid size={{ xs: 2 }}>
         <Avatar alt={`${name} picture`} src="/static/images/avatar/1.jpg" />
       </Grid>
-      <Grid size={{ xs:10 }}>
+      <Grid size={{ xs: 10 }}>
         <Grid size={{ xs: 12 }}>
           <Box display="flex" justifyContent="space-between">
             <Name>{name}</Name>
@@ -101,10 +104,10 @@ export function Messages({
     newNote: Yup.string().required(t('Note cannot be empty')),
   });
 
-  const myName = `${meData.me.firstName || meData.me.email}`;
+  const myName = `${meData.firstName || meData.email}`;
 
   return (
-    <Grid size={{ xs:8 }}>
+    <Grid size={{ xs: 8 }}>
       <Box p={3}>
         <Formik
           initialValues={initialValues}
@@ -130,13 +133,13 @@ export function Messages({
                 {mappedMessages}
                 {canAddMessage && (
                   <Grid container>
-                    <Grid size={{ xs:2 }}>
+                    <Grid size={{ xs: 2 }}>
                       <Avatar src={myName} alt={myName} />
                     </Grid>
-                    <Grid size={{ xs:10 }}>
+                    <Grid size={{ xs: 10 }}>
                       <Grid size={{ xs: 12 }}>
                         <Box display="flex" justifyContent="space-between">
-                          <Name>{renderUserName(meData.me)}</Name>
+                          <Name>{renderUserName(meData)}</Name>
                         </Box>
                       </Grid>
                       <Grid size={{ xs: 12 }}>
@@ -178,3 +181,5 @@ export function Messages({
     </Grid>
   );
 }
+
+export default withErrorBoundary(Messages, 'Messages');

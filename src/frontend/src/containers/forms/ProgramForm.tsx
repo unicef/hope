@@ -11,16 +11,17 @@ import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { useQuery } from '@tanstack/react-query';
-import { fetchBeneficiaryGroups } from '@api/programsApi';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { RestService } from '@restgenerated/services/RestService';
 
 interface ProgramFormPropTypes {
   values;
   programHasRdi?: boolean;
 }
 
-export const ProgramForm = ({
+const ProgramForm = ({
   values,
   programHasRdi,
 }: ProgramFormPropTypes): ReactElement => {
@@ -31,7 +32,7 @@ export const ProgramForm = ({
 
   const { data: beneficiaryGroupsData } = useQuery({
     queryKey: ['beneficiaryGroups'],
-    queryFn: async () => fetchBeneficiaryGroups(),
+    queryFn: () => RestService.restBeneficiaryGroupsList(),
   });
 
   const { setFieldValue } = useFormikContext();
@@ -88,7 +89,7 @@ export const ProgramForm = ({
   return (
     <Form>
       <Grid container spacing={3}>
-        <Grid size={{ xs:6 }}>
+        <Grid size={{ xs: 6 }}>
           <Field
             name="name"
             label={t('Programme Name')}
@@ -100,7 +101,7 @@ export const ProgramForm = ({
             data-cy="input-programme-name"
           />
         </Grid>
-        <Grid size={{ xs:6 }}>
+        <Grid size={{ xs: 6 }}>
           <Field
             name="programmeCode"
             label={t('Programme Code')}
@@ -112,7 +113,7 @@ export const ProgramForm = ({
             data-cy="input-programme-code"
           />
         </Grid>
-        <Grid size={{ xs:6 }}>
+        <Grid size={{ xs: 6 }}>
           <Field
             name="startDate"
             label={t('Start Date')}
@@ -123,7 +124,7 @@ export const ProgramForm = ({
             data-cy="input-start-date"
           />
         </Grid>
-        <Grid size={{ xs:6 }}>
+        <Grid size={{ xs: 6 }}>
           <Field
             name="endDate"
             label={t('End Date')}
@@ -137,7 +138,7 @@ export const ProgramForm = ({
             data-cy="input-end-date"
           />
         </Grid>
-        <Grid size={{ xs:6 }}>
+        <Grid size={{ xs: 6 }}>
           <Field
             name="sector"
             label={t('Sector')}
@@ -149,7 +150,7 @@ export const ProgramForm = ({
             data-cy="input-sector"
           />
         </Grid>
-        <Grid size={{ xs:6 }}>
+        <Grid size={{ xs: 6 }}>
           <Field
             name="dataCollectingTypeCode"
             label={t('Data Collecting Type')}
@@ -165,7 +166,7 @@ export const ProgramForm = ({
             data-cy="input-data-collecting-type"
           />
         </Grid>
-        <Grid size={{ xs:6 }}>
+        <Grid size={{ xs: 6 }}>
           <Tooltip
             title={
               !values.dataCollectingTypeCode
@@ -205,7 +206,7 @@ export const ProgramForm = ({
             data-cy="input-description"
           />
         </Grid>
-        <Grid size={{ xs:6 }}>
+        <Grid size={{ xs: 6 }}>
           <Field
             name="budget"
             label={t('Budget (USD)')}
@@ -217,7 +218,7 @@ export const ProgramForm = ({
             data-cy="input-budget"
           />
         </Grid>
-        <Grid size={{ xs:6 }}>
+        <Grid size={{ xs: 6 }}>
           <Field
             name="administrativeAreasOfImplementation"
             label={t('Administrative Areas of Implementation')}
@@ -228,7 +229,7 @@ export const ProgramForm = ({
             data-cy="input-admin-area"
           />
         </Grid>
-        <Grid size={{ xs:6 }}>
+        <Grid size={{ xs: 6 }}>
           <Field
             name="populationGoal"
             label={t('Population Goal (# of Individuals)')}
@@ -239,8 +240,8 @@ export const ProgramForm = ({
             data-cy="input-population-goal"
           />
         </Grid>
-        <Grid size={{ xs:6 }} />
-        <Grid size={{ xs:6 }}>
+        <Grid size={{ xs: 6 }} />
+        <Grid size={{ xs: 6 }}>
           <Field
             name="cashPlus"
             label={t('Cash+')}
@@ -249,8 +250,8 @@ export const ProgramForm = ({
             data-cy="input-cash-plus"
           />
         </Grid>
-        <Grid size={{ xs:6 }} />
-        <Grid size={{ xs:6 }}>
+        <Grid size={{ xs: 6 }} />
+        <Grid size={{ xs: 6 }}>
           <Field
             name="frequencyOfPayments"
             label={t('Frequency of Payment')}
@@ -264,3 +265,5 @@ export const ProgramForm = ({
     </Form>
   );
 };
+
+export default withErrorBoundary(ProgramForm, 'ProgramForm');

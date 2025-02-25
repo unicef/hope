@@ -1,6 +1,15 @@
-import { Box } from '@mui/material';
-import { useLocation, useParams } from 'react-router-dom';
-import styled from 'styled-components';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { IndividualAdditionalRegistrationInformation } from '@components/population/IndividualAdditionalRegistrationInformation/IndividualAdditionalRegistrationInformation';
+import { IndividualBioData } from '@components/population/IndividualBioData/IndividualBioData';
+import { IndividualDeliveryMechanisms } from '@components/population/IndividualDeliveryMechanisms';
+import { IndividualFlags } from '@components/population/IndividualFlags';
+import { IndividualPhotoModal } from '@components/population/IndividualPhotoModal';
+import { ProgrammeTimeSeriesFields } from '@components/population/ProgrammeTimeSeriesFields';
+import { AdminButton } from '@core/AdminButton';
 import {
   IndividualNode,
   useAllIndividualsFlexFieldsAttributesQuery,
@@ -8,28 +17,19 @@ import {
   useHouseholdChoiceDataQuery,
   useIndividualQuery,
 } from '@generated/graphql';
-import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
-import { LoadingComponent } from '@components/core/LoadingComponent';
-import { PageHeader } from '@components/core/PageHeader';
-import { PermissionDenied } from '@components/core/PermissionDenied';
-import { IndividualBioData } from '@components/population/IndividualBioData/IndividualBioData';
-import { IndividualFlags } from '@components/population/IndividualFlags';
-import { IndividualPhotoModal } from '@components/population/IndividualPhotoModal';
-import { IndividualAdditionalRegistrationInformation } from '@components/population/IndividualAdditionalRegistrationInformation/IndividualAdditionalRegistrationInformation';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
-import { isPermissionDeniedError } from '@utils/utils';
-import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
-import { AdminButton } from '@core/AdminButton';
-import { ProgrammeTimeSeriesFields } from '@components/population/ProgrammeTimeSeriesFields';
-import { fetchPeriodicFields } from '@api/periodicDataUpdateApi';
+import { Box } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
-import { IndividualDeliveryMechanisms } from '@components/population/IndividualDeliveryMechanisms';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
-import { useProgramContext } from 'src/programContext';
+import { isPermissionDeniedError } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation, useParams } from 'react-router-dom';
+import { useProgramContext } from 'src/programContext';
+import styled from 'styled-components';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
+import { RestService } from '@restgenerated/services/RestService';
 
 const Container = styled.div`
   padding: 20px;
@@ -40,7 +40,7 @@ const Container = styled.div`
   }
 `;
 
-export const PopulationIndividualsDetailsPage = (): ReactElement => {
+const PopulationIndividualsDetailsPage = (): ReactElement => {
   const { id } = useParams();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
@@ -70,7 +70,10 @@ export const PopulationIndividualsDetailsPage = (): ReactElement => {
     useQuery({
       queryKey: ['periodicFields', businessArea, programId],
       queryFn: () =>
-        fetchPeriodicFields(businessArea, programId, { limit: 1000 }),
+        RestService.restProgramsPeriodicDataUpdatePeriodicFieldsList(
+          businessArea,
+          programId,
+        ),
     });
 
   if (
@@ -116,14 +119,7 @@ export const PopulationIndividualsDetailsPage = (): ReactElement => {
   const { individual } = data;
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'PopulationIndividualsDetailsPage.tsx');
-      }}
-      componentName="PopulationIndividualsDetailsPage"
-    >
+    <>
       <PageHeader
         title={`${t(`${beneficiaryGroup?.memberLabel} ID`)}: ${individual?.unicefId}`}
         breadCrumbs={
@@ -170,6 +166,10 @@ export const PopulationIndividualsDetailsPage = (): ReactElement => {
           <UniversalActivityLogTable objectId={individual?.id} />
         )}
       </Container>
-    </UniversalErrorBoundary>
+    </>
   );
 };
+export default withErrorBoundary(
+  PopulationIndividualsDetailsPage,
+  'PopulationIndividualsDetailsPage',
+);

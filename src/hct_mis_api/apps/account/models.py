@@ -264,7 +264,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             ).values_list("program_id", flat=True)
         return [str(program_id) for program_id in programs_ids]
 
-    def permissions_in_business_area(self, business_area_slug: str, program_id: Optional[UUID] = None) -> set:
+    def permissions_in_business_area(self, business_area_slug: str, program_id: Union[UUID, str, None] = None) -> set:
         """
         return list of permissions for the given business area and program,
         retrieved from RoleAssignments of the user and their partner
@@ -305,7 +305,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         role_assignments = RoleAssignment.objects.filter(Q(user=self) | Q(partner__user=self)).exclude(
             expiry_date__lt=timezone.now()
         )
-        return BusinessArea.objects.filter(role_assignments__in=role_assignments).distinct()
+        return BusinessArea.objects.filter(role_assignments__in=role_assignments).exclude(active=False).distinct()
 
     @test_conditional(lru_cache())
     def cached_role_assignments(self) -> QuerySet["RoleAssignment"]:

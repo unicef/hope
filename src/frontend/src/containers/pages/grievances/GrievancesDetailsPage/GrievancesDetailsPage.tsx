@@ -1,15 +1,12 @@
 import { Grid2 as Grid } from '@mui/material';
-import { useLocation, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import {
   useGrievancesChoiceDataQuery,
   useGrievanceTicketQuery,
-  useMeQuery,
 } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { GrievanceDetailsToolbar } from '@components/grievances/GrievanceDetailsToolbar';
-import { GrievancesApproveSection } from '@components/grievances/GrievancesApproveSection/GrievancesApproveSection';
-import { GrievancesDetails } from '@components/grievances/GrievancesDetails/GrievancesDetails';
 import { GrievancesSidebar } from '@components/grievances/GrievancesSidebar/GrievancesSidebar';
 import { Notes } from '@components/grievances/Notes/Notes';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
@@ -18,15 +15,25 @@ import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
 import { grievancePermissions } from './grievancePermissions';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import GrievancesApproveSection from '@components/grievances/GrievancesApproveSection/GrievancesApproveSection';
+import GrievancesDetails from '@components/grievances/GrievancesDetails/GrievancesDetails';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 
-export const GrievancesDetailsPage = (): ReactElement => {
+const GrievancesDetailsPage = (): ReactElement => {
   const { id } = useParams();
-  const location = useLocation();
   const permissions = usePermissions();
-  const { data: currentUserData, loading: currentUserDataLoading } =
-    useMeQuery();
+  const { data: currentUserData, isLoading: currentUserDataLoading } = useQuery(
+    {
+      queryKey: ['profile'],
+      queryFn: () => {
+        return RestService.restProfileRetrieve();
+      },
+    },
+  );
+
   const { data, loading, error } = useGrievanceTicketQuery({
     variables: { id },
     fetchPolicy: 'network-only',
@@ -70,14 +77,7 @@ export const GrievancesDetailsPage = (): ReactElement => {
   } = grievancePermissions(isCreator, isOwner, ticket, permissions);
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'GrievancesDetailsPage.tsx');
-      }}
-      componentName="GrievancesDetailsPage"
-    >
+    <>
       <GrievanceDetailsToolbar
         ticket={ticket}
         canEdit={canEdit}
@@ -109,6 +109,10 @@ export const GrievancesDetailsPage = (): ReactElement => {
       {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
         <UniversalActivityLogTable objectId={ticket.id} />
       )}
-    </UniversalErrorBoundary>
+    </>
   );
 };
+export default withErrorBoundary(
+  GrievancesDetailsPage,
+  'GrievancesDetailsPage',
+);
