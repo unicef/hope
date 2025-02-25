@@ -1,7 +1,3 @@
-import '@testing-library/jest-dom/extend-expect';
-
-describe('ButtonTooltip', () => {
-  it('always passes', () => {
-    expect(true).toBe(true);
-  });
+test('basic test to check if true equals true', () => {
+  expect(true).toBe(true);
 });
