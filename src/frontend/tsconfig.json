@@ -40,7 +40,8 @@
     "jest",
     "tsconfig.json",
     ".eslintrc.cjs",
-    "jest.config"
+    "jest.config",
+    "babel.config.js"
   ],
   "exclude": [
     "node_modules",

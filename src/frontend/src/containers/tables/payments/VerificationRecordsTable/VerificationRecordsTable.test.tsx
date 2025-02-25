@@ -3,7 +3,7 @@ import { act } from 'react';
 
 import wait from 'waait';
 import { fakeApolloAllPaymentVerifications } from '../../../../../fixtures/payments/fakeApolloAllPaymentVerifications';
-import { ApolloLoadingLink, render } from '../../../../testUtils/testUtils';
+import { render } from '../../../../testUtils/testUtils';
 import { VerificationRecordsTable } from '.';
 
 describe('containers/tables/payments/VerificationRecordsTable', () => {
