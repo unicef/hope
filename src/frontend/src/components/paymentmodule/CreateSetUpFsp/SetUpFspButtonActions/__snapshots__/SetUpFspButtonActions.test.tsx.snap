@@ -11,7 +11,6 @@ exports[`components/paymentmodule/CreateSetUpFsp/SetUpFspButtonActions should re
       <a
         class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary css-4ifa8d-MuiButtonBase-root-MuiButton-root"
         href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/payment-module/payment-plans/asdjkfhsakdjfsd76asdf0sdf=="
-        id=":r0:"
         tabindex="0"
       >
         Cancel
@@ -20,7 +19,6 @@ exports[`components/paymentmodule/CreateSetUpFsp/SetUpFspButtonActions should re
     <button
       class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary css-cx92lf-MuiButtonBase-root-MuiButton-root"
       data-cy="button-next-save"
-      id=":r1:"
       tabindex="0"
       type="button"
     >

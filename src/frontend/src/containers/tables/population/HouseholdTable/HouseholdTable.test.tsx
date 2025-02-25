@@ -2,7 +2,7 @@ import { MockedProvider } from '@apollo/react-testing';
 
 import { act } from 'react';
 import wait from 'waait';
-import { render, ApolloLoadingLink } from '../../../../testUtils/testUtils';
+import { render } from '../../../../testUtils/testUtils';
 import { fakeHouseholdChoices } from '../../../../../fixtures/population/fakeHouseholdChoices';
 import { fakeApolloAllHouseholdsForPopulationTable } from '../../../../../fixtures/population/fakeApolloAllHouseholdsForPopulationTable';
 import { HouseholdTable } from '.';

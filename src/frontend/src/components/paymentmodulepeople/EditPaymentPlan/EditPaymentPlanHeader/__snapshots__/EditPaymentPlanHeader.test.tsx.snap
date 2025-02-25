@@ -98,7 +98,6 @@ exports[`components/paymentmodule/EditPaymentPlanHeader should render 1`] = `
               <a
                 class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary css-4ifa8d-MuiButtonBase-root-MuiButton-root"
                 href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/payment-module/payment-plans/UGF5bWVudFBsYW5Ob2RlOjU4MmE3ZTYzLTRkZGEtNDQ3Zi1hYWFhLTQzYWJmMzI0ZTViMw=="
-                id=":r0:"
                 tabindex="0"
               >
                 Cancel
@@ -106,7 +105,6 @@ exports[`components/paymentmodule/EditPaymentPlanHeader should render 1`] = `
             </div>
             <button
               class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary css-cx92lf-MuiButtonBase-root-MuiButton-root"
-              id=":r1:"
               tabindex="0"
               type="button"
             >

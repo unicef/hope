@@ -3,7 +3,7 @@ import { MockedProvider } from '@apollo/react-testing';
 import { act } from 'react';
 import wait from 'waait';
 import { RegistrationDataImportTable } from '.';
-import { render, ApolloLoadingLink } from '../../../../testUtils/testUtils';
+import { render } from '../../../../testUtils/testUtils';
 import { fakeApolloAllRegistrationDataImports } from '../../../../../fixtures/registration/fakeApolloAllRegistrationDataImports';
 
 const initialFilter = {

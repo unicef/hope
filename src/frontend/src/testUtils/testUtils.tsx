@@ -5,7 +5,6 @@ import { Formik } from 'formik';
 import noop from 'lodash/noop';
 import { TestProviders } from './testProviders';
 import { ProgramStatus } from '@generated/graphql';
-import { MockLink } from '@apollo/client/testing';
 
 const customRender = (
   ui: ReactElement,
@@ -47,16 +46,6 @@ export const random = () => {
   result /= 4294967296;
   return result;
 };
-
-export class ApolloLoadingLink extends MockLink {
-  constructor() {
-    super([]);
-  }
-
-  request() {
-    return null;
-  }
-}
 
 export const fakeContextProgram = {
   selectedProgram: {
