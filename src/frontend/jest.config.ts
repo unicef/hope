@@ -8,13 +8,12 @@ module.exports = {
   testPathIgnorePatterns: ['/node_modules/', '/.history/'],
   setupFilesAfterEnv: ['./jest/setupTests.ts'],
   transform: {
-    '^.+\\.cjs$': 'babel-jest',
-    '^.+\\.(js|jsx)$': 'esbuild-jest',
-    '^.+\\.(ts|tsx)$': 'ts-jest',
+    '^.+\\.[tj]sx?$': 'babel-jest',
     '^.+\\.css$': '<rootDir>/config/jest/cssTransform.cjs',
     '^(?!.*\\.(js|jsx|ts|tsx|css|json)$)':
       '<rootDir>/config/jest/fileTransform.cjs',
   },
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   transformIgnorePatterns: [
     '[/\\\\]node_modules[/\\\\].+\\.(js|jsx|ts|tsx)$',
     '^.+\\.module\\.(css|sass|scss)$',

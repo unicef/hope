@@ -2,7 +2,6 @@ import { TableWrapper } from '@components/core/TableWrapper';
 import { choicesToDict, dateToIsoString } from '@utils/utils';
 import {
   AllReportsQueryVariables,
-  MeQuery,
   ReportChoiceDataQuery,
   ReportNode,
   useAllReportsQuery,
@@ -16,7 +15,7 @@ interface ReportingTableProps {
   businessArea: string;
   filter;
   choicesData: ReportChoiceDataQuery;
-  meData: MeQuery;
+  meData;
 }
 export function ReportingTable({
   businessArea,
@@ -30,7 +29,7 @@ export function ReportingTable({
     createdTo: dateToIsoString(filter.createdTo, 'endOfDay'),
     reportType: filter.type,
     status: filter.status,
-    createdBy: filter.onlyMy ? meData.me.id : null,
+    createdBy: filter.onlyMy ? meData.id : null,
   };
   const typeChoices: {
     [id: number]: string;

@@ -1,7 +1,4 @@
-import {
-  bulkActionPaymentPlansManagerial,
-  fetchPaymentPlansManagerial,
-} from '@api/paymentModuleApi';
+import { bulkActionPaymentPlansManagerial } from '@api/paymentModuleApi';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
@@ -17,13 +14,12 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { FC, SetStateAction, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
-import { useLocation } from 'react-router-dom';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { RestService } from '@restgenerated/services/RestService';
 
 export const ManagerialConsolePage: FC = () => {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
-  const location = useLocation();
   const [selectedApproved, setSelectedApproved] = useState([]);
   const [selectedAuthorized, setSelectedAuthorized] = useState([]);
   const [selectedInReview, setSelectedInReview] = useState([]);
@@ -60,14 +56,23 @@ export const ManagerialConsolePage: FC = () => {
 
   const permissions = usePermissions();
 
+  const fetchPaymentPlans = (status: string) => {
+    return RestService.restPaymentsPaymentPlansManagerialList(
+      businessArea,
+      10000,
+      0,
+      null,
+      `status=${status}`,
+    );
+  };
+
   const {
     data: inApprovalData,
     isLoading: inApprovalLoading,
     refetch: refetchInApproval,
   } = useQuery({
     queryKey: ['paymentPlansInApproval', businessArea],
-    queryFn: () =>
-      fetchPaymentPlansManagerial(businessArea, { status: 'IN_APPROVAL' }),
+    queryFn: () => fetchPaymentPlans('IN_APPROVAL'),
   });
 
   const {
@@ -76,10 +81,7 @@ export const ManagerialConsolePage: FC = () => {
     refetch: refetchInAuthorization,
   } = useQuery({
     queryKey: ['paymentPlansInAuthorization', businessArea],
-    queryFn: () =>
-      fetchPaymentPlansManagerial(businessArea, {
-        status: 'IN_AUTHORIZATION',
-      }),
+    queryFn: () => fetchPaymentPlans('IN_AUTHORIZATION'),
   });
 
   const {
@@ -88,8 +90,7 @@ export const ManagerialConsolePage: FC = () => {
     refetch: refetchInReview,
   } = useQuery({
     queryKey: ['paymentPlansInReview', businessArea],
-    queryFn: () =>
-      fetchPaymentPlansManagerial(businessArea, { status: 'IN_REVIEW' }),
+    queryFn: () => fetchPaymentPlans('IN_REVIEW'),
   });
 
   const {
@@ -98,8 +99,7 @@ export const ManagerialConsolePage: FC = () => {
     refetch: refetchReleased,
   } = useQuery({
     queryKey: ['paymentPlansReleased', businessArea],
-    queryFn: () =>
-      fetchPaymentPlansManagerial(businessArea, { status: 'ACCEPTED' }),
+    queryFn: () => fetchPaymentPlans('ACCEPTED'),
   });
 
   const bulkAction = useMutation({
@@ -151,14 +151,7 @@ export const ManagerialConsolePage: FC = () => {
     return <PermissionDenied />;
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'ManagerialConsolePage.tsx');
-      }}
-      componentName="ManagerialConsolePage"
-    >
+    <>
       <PageHeader title={t('Managerial Console')} />
       {canApprove && (
         <Box mb={6}>
@@ -201,6 +194,11 @@ export const ManagerialConsolePage: FC = () => {
         </Box>
       )}
       {canSeeReleased && <ReleasedSection releasedData={releasedData} />}
-    </UniversalErrorBoundary>
+    </>
   );
 };
+
+export default withErrorBoundary(
+  ManagerialConsolePage,
+  'ManagerialConsolePage',
+);

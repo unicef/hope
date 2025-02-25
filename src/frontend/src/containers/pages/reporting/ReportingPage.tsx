@@ -1,18 +1,20 @@
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import { useMeQuery, useReportChoiceDataQuery } from '@generated/graphql';
+import { useReportChoiceDataQuery } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
-import { NewReportForm } from '@components/reporting/NewReportForm';
+import NewReportForm from '@components/reporting/NewReportForm';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { ReportingFilters } from '../../tables/ReportingTable/ReportingFilters';
 import { ReportingTable } from '../../tables/ReportingTable/ReportingTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 
 const initialFilter = {
   type: '',
@@ -22,7 +24,7 @@ const initialFilter = {
   onlyMy: false,
 };
 
-export function ReportingPage(): ReactElement {
+function ReportingPage(): ReactElement {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
   const permissions = usePermissions();
@@ -31,8 +33,11 @@ export function ReportingPage(): ReactElement {
   const { data: choicesData, loading: choicesLoading } =
     useReportChoiceDataQuery();
 
-  const { data: meData, loading: meLoading } = useMeQuery({
-    fetchPolicy: 'cache-first',
+  const { data: meData, isLoading: meLoading } = useQuery({
+    queryKey: ['profile'],
+    queryFn: () => {
+      return RestService.restProfileRetrieve();
+    },
   });
 
   const [filter, setFilter] = useState(
@@ -49,14 +54,7 @@ export function ReportingPage(): ReactElement {
     return <PermissionDenied />;
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'ReportingPage.tsx');
-      }}
-      componentName="ReportingPage"
-    >
+    <>
       <PageHeader title={t('Reporting')}>
         <NewReportForm />
       </PageHeader>
@@ -74,6 +72,7 @@ export function ReportingPage(): ReactElement {
         choicesData={choicesData}
         meData={meData}
       />
-    </UniversalErrorBoundary>
+    </>
   );
 }
+export default withErrorBoundary(ReportingPage, 'ReportingPage');
