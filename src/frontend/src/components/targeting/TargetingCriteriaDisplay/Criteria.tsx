@@ -28,6 +28,7 @@ import { ReactElement, useEffect, useState } from 'react';
 import { Fragment } from 'react/jsx-runtime';
 import { t } from 'i18next';
 import { useProgramContext } from 'src/programContext';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { LabelizedField } from '@components/core/LabelizedField';
 
 interface CriteriaElementProps {
@@ -558,3 +559,5 @@ export function Criteria({
     </CriteriaElement>
   );
 }
+
+export default withErrorBoundary(Criteria, 'Criteria');

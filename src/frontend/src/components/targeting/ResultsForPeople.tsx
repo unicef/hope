@@ -17,6 +17,7 @@ import { PaperContainer } from './PaperContainer';
 import { FieldBorder } from '@core/FieldBorder';
 import { ReactElement, useState } from 'react';
 import { PaymentPlanBuildStatus, PaymentPlanQuery } from '@generated/graphql';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { Pointer } from '@components/core/Pointer';
 
 const colors = {
@@ -54,9 +55,7 @@ interface ResultsProps {
   targetPopulation: PaymentPlanQuery['paymentPlan'];
 }
 
-export function ResultsForPeople({
-  targetPopulation,
-}: ResultsProps): ReactElement {
+function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
   const { t } = useTranslation();
   const [openDialog, setOpenDialog] = useState(false);
   const handleOpen = () => {
@@ -221,3 +220,5 @@ export function ResultsForPeople({
     </div>
   );
 }
+
+export default withErrorBoundary(ResultsForPeople, 'ResultsForPeople');

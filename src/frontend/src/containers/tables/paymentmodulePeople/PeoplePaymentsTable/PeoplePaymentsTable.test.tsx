@@ -5,7 +5,7 @@ import { fakeApolloAllPaymentsForTable } from '../../../../../fixtures/payments/
 import { fakeApolloAllPaymentPlansForTable } from '../../../../../fixtures/payments/fakeApolloAllPaymentPlansForTable';
 import { render } from '../../../../testUtils/testUtils';
 import { PaymentPlanQuery } from '@generated/graphql';
-import { PeoplePaymentsTable } from './PeoplePaymentsTable';
+import PeoplePaymentsTable from './PeoplePaymentsTable';
 import { PERMISSIONS } from '../../../../config/permissions';
 
 const paymentPlan = fakeApolloAllPaymentPlansForTable[0].result.data

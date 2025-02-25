@@ -17,6 +17,7 @@ import { FieldBorder } from '@core/FieldBorder';
 import { LabelizedField } from '@core/LabelizedField';
 import { PaperContainer } from './PaperContainer';
 import { useProgramContext } from 'src/programContext';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ReactElement, useState } from 'react';
 import { Pointer } from '@components/core/Pointer';
 
@@ -55,7 +56,7 @@ interface ResultsProps {
   targetPopulation: PaymentPlanQuery['paymentPlan'];
 }
 
-export function ResultsForHouseholds({
+function ResultsForHouseholds({
   targetPopulation,
 }: ResultsProps): ReactElement {
   const { t } = useTranslation();
@@ -237,3 +238,5 @@ export function ResultsForHouseholds({
     </div>
   );
 }
+
+export default withErrorBoundary(ResultsForHouseholds, 'ResultsForHouseholds');

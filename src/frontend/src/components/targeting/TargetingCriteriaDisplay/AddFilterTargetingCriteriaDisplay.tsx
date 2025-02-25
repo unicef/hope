@@ -13,13 +13,13 @@ import { useLocation } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { Criteria } from './Criteria';
-import { ExcludeCheckboxes } from './ExcludeCheckboxes';
-import {
+import ExcludeCheckboxes from './ExcludeCheckboxes';
+import TargetingCriteriaDisplayDisabled, {
   ContentWrapper,
-  TargetingCriteriaDisplayDisabled,
 } from './TargetingCriteriaDisplayDisabled';
 import { VulnerabilityScoreComponent } from './VulnerabilityScoreComponent';
 import { useCachedIndividualFieldsQuery } from '@hooks/useCachedIndividualFields';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const Title = styled.div`
   padding: ${({ theme }) => theme.spacing(3)} ${({ theme }) => theme.spacing(4)};
@@ -82,7 +82,7 @@ interface AddFilterTargetingCriteriaDisplayProps {
   isStandardDctType: boolean;
 }
 
-export const AddFilterTargetingCriteriaDisplay = ({
+const AddFilterTargetingCriteriaDisplay = ({
   rules,
   helpers,
   targetPopulation,
@@ -294,3 +294,8 @@ export const AddFilterTargetingCriteriaDisplay = ({
   }
   return <TargetingCriteriaDisplayDisabled showTooltip />;
 };
+
+export default withErrorBoundary(
+  AddFilterTargetingCriteriaDisplay,
+  'AddFilterTargetingCriteriaDisplay',
+);

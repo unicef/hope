@@ -13,12 +13,13 @@ import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
 import { EditHouseholdDataChangeFieldRow } from './EditHouseholdDataChangeFieldRow';
 import { useProgramContext } from 'src/programContext';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 export interface EditHouseholdDataChangeProps {
   values;
   setFieldValue;
 }
-export function EditHouseholdDataChange({
+function EditHouseholdDataChange({
   values,
   setFieldValue,
 }: EditHouseholdDataChangeProps): ReactElement {
@@ -110,3 +111,8 @@ export function EditHouseholdDataChange({
     )
   );
 }
+
+export default withErrorBoundary(
+  EditHouseholdDataChange,
+  'EditHouseholdDataChange',
+);
