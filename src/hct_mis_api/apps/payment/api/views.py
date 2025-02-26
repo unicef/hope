@@ -20,11 +20,8 @@ from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.api.permissions import (
-    PaymentPlanSupportingDocumentDeletePermission,
-    PaymentPlanSupportingDocumentDownloadPermission,
-    PaymentPlanSupportingDocumentUploadPermission,
-    PaymentViewListManagerialPermission,
-    PMViewListPermission,
+    HasAllOfPermissions,
+    HasOneOfPermissions,
 )
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.activity_log.models import log_create
@@ -66,9 +63,8 @@ class PaymentPlanMixin:
 
 
 class PaymentPlanViewSet(BusinessAreaProgramMixin, PaymentPlanMixin, mixins.ListModelMixin, GenericViewSet):
-    permission_classes = [
-        PMViewListPermission,
-    ]
+    permission_classes = [HasOneOfPermissions]
+    PERMISSIONS = [Permissions.PM_VIEW_LIST]
 
     def get_queryset(self) -> QuerySet:  # pragma: no cover
         business_area = self.get_business_area()
@@ -77,9 +73,10 @@ class PaymentPlanViewSet(BusinessAreaProgramMixin, PaymentPlanMixin, mixins.List
 
 
 class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.ListModelMixin, GenericViewSet):
-    permission_classes = [
-        PMViewListPermission,
-        PaymentViewListManagerialPermission,
+    permission_classes = [HasAllOfPermissions]
+    PERMISSIONS = [
+        Permissions.PM_VIEW_LIST,
+        Permissions.PAYMENT_VIEW_LIST_MANAGERIAL,
     ]
 
     def get_queryset(self) -> QuerySet:
@@ -190,10 +187,12 @@ class PaymentPlanSupportingDocumentViewSet(
         "create": PaymentPlanSupportingDocumentSerializer,
         "delete": PaymentPlanSupportingDocumentSerializer,
     }
-    permission_classes_by_action = {
-        "create": [PaymentPlanSupportingDocumentUploadPermission],
-        "delete": [PaymentPlanSupportingDocumentDeletePermission],
-        "download": [PaymentPlanSupportingDocumentDownloadPermission],
+    permission_classes = [HasOneOfPermissions]
+    permissions_by_action = {
+        "create": [Permissions.PM_UPLOAD_SUPPORTING_DOCUMENT],
+        "delete": [Permissions.PM_DELETE_SUPPORTING_DOCUMENT],
+        "destroy": [Permissions.PM_DELETE_SUPPORTING_DOCUMENT],
+        "download": [Permissions.PM_DOWNLOAD_SUPPORTING_DOCUMENT],
     }
 
     def get_queryset(self) -> QuerySet:
@@ -207,7 +206,6 @@ class PaymentPlanSupportingDocumentViewSet(
         )
 
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        self.permission_classes = [PaymentPlanSupportingDocumentDeletePermission]
         document = self.get_object()
         document.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

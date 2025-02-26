@@ -19,12 +19,8 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
-from hct_mis_api.apps.account.api.permissions import (
-    PDUTemplateCreatePermission,
-    PDUTemplateDownloadPermission,
-    PDUUploadPermission,
-    PDUViewListAndDetailsPermission,
-)
+from hct_mis_api.apps.account.api.permissions import HasOneOfPermissions
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.api.filters import UpdatedAtFilter
 from hct_mis_api.apps.core.api.mixins import (
     ActionMixin,
@@ -66,12 +62,13 @@ class PeriodicDataUpdateTemplateViewSet(
         "retrieve": PeriodicDataUpdateTemplateDetailSerializer,
         "create": PeriodicDataUpdateTemplateCreateSerializer,
     }
-    permission_classes_by_action = {
-        "list": [PDUViewListAndDetailsPermission],
-        "retrieve": [PDUViewListAndDetailsPermission],
-        "create": [PDUTemplateCreatePermission],
-        "export": [PDUTemplateCreatePermission],
-        "download": [PDUTemplateDownloadPermission],
+    permission_classes = [HasOneOfPermissions]
+    permissions_by_action = {
+        "list": [Permissions.PDU_VIEW_LIST_AND_DETAILS],
+        "retrieve": [Permissions.PDU_VIEW_LIST_AND_DETAILS],
+        "create": [Permissions.PDU_TEMPLATE_CREATE],
+        "export": [Permissions.PDU_TEMPLATE_CREATE],
+        "download": [Permissions.PDU_TEMPLATE_DOWNLOAD],
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = UpdatedAtFilter
@@ -137,10 +134,11 @@ class PeriodicDataUpdateUploadViewSet(
         "upload": PeriodicDataUpdateUploadSerializer,
         "retrieve": PeriodicDataUpdateUploadDetailSerializer,
     }
-    permission_classes_by_action = {
-        "list": [PDUViewListAndDetailsPermission],
-        "retrieve": [PDUViewListAndDetailsPermission],
-        "upload": [PDUUploadPermission],
+    permission_classes = [HasOneOfPermissions]
+    permissions_by_action = {
+        "list": [Permissions.PDU_VIEW_LIST_AND_DETAILS],
+        "retrieve": [Permissions.PDU_VIEW_LIST_AND_DETAILS],
+        "upload": [Permissions.PDU_UPLOAD],
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = UpdatedAtFilter

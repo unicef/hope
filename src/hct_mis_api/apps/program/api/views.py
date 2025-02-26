@@ -16,13 +16,8 @@ from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
-from hct_mis_api.apps.account.api.permissions import (
-    ProgramCycleCreatePermission,
-    ProgramCycleDeletePermission,
-    ProgramCycleUpdatePermission,
-    ProgramCycleViewDetailsPermission,
-    ProgramCycleViewListPermission,
-)
+from hct_mis_api.apps.account.api.permissions import HasOneOfPermissions
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.api.mixins import ActionMixin, BusinessAreaProgramMixin
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.api.caches import (
@@ -55,13 +50,14 @@ class ProgramCycleViewSet(
         "partial_update": ProgramCycleUpdateSerializer,
         "delete": ProgramCycleDeleteSerializer,
     }
-    permission_classes_by_action = {
-        "list": [ProgramCycleViewListPermission],
-        "retrieve": [ProgramCycleViewDetailsPermission],
-        "create": [ProgramCycleCreatePermission],
-        "update": [ProgramCycleUpdatePermission],
-        "partial_update": [ProgramCycleUpdatePermission],
-        "delete": [ProgramCycleDeletePermission],
+    permission_classes = [HasOneOfPermissions]
+    permissions_by_action = {
+        "list": [Permissions.PM_PROGRAMME_CYCLE_VIEW_DETAILS],
+        "retrieve": [Permissions.PM_PROGRAMME_CYCLE_VIEW_DETAILS],
+        "create": [Permissions.PM_PROGRAMME_CYCLE_CREATE],
+        "update": [Permissions.PM_PROGRAMME_CYCLE_UPDATE],
+        "partial_update": [Permissions.PM_PROGRAMME_CYCLE_UPDATE],
+        "delete": [Permissions.PM_PROGRAMME_CYCLE_DELETE],
     }
 
     filter_backends = (OrderingFilter, DjangoFilterBackend)
@@ -104,13 +100,13 @@ class ProgramCycleViewSet(
 
         program_cycle.delete()
 
-    @action(detail=True, methods=["post"], permission_classes=[ProgramCycleUpdatePermission])
+    @action(detail=True, methods=["post"], PERMISSIONS=[Permissions.PM_PROGRAMME_CYCLE_UPDATE])
     def finish(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program_cycle = self.get_object()
         program_cycle.set_finish()
         return Response(status=status.HTTP_200_OK, data={"message": "Programme Cycle Finished"})
 
-    @action(detail=True, methods=["post"], permission_classes=[ProgramCycleUpdatePermission])
+    @action(detail=True, methods=["post"], PERMISSIONS=[Permissions.PM_PROGRAMME_CYCLE_UPDATE])
     def reactivate(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program_cycle = self.get_object()
         program_cycle.set_active()
