@@ -138,7 +138,7 @@ class TestIndividualQuery(APITestCase):
                 "phone_no": "(953)682-4596",
                 "birth_date": "1943-07-30",
                 "id": "ffb2576b-126f-42de-b0f5-ef889b7bc1fe",
-                "registration_id": 1,
+                "detail_id": 1,
             },
             {
                 "full_name": "Robin Ford",
