@@ -41,7 +41,7 @@
     "tsconfig.json",
     ".eslintrc.cjs",
     "jest.config",
-    "babel.config.js"
+    "babel.config.cjs"
   ],
   "exclude": [
     "node_modules",
