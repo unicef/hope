@@ -1,8 +1,6 @@
 import logging
 from typing import Any
 
-from django.db.models import QuerySet
-
 from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins
@@ -27,14 +25,12 @@ class AreaViewSet(
     mixins.ListModelMixin,
     BaseViewSet,
 ):
+    queryset = Area.objects.all()
+    business_area_model_field = "area_type__country__business_areas"
     serializer_class = AreaListSerializer
     PERMISSIONS = [Permissions.GEO_VIEW_LIST]
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = AreaFilter
-
-    def get_queryset(self) -> QuerySet:
-        business_area = self.get_business_area()
-        return Area.objects.filter(area_type__country__business_areas=business_area)
 
     @etag_decorator(AreaKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=AreaKeyConstructor())
