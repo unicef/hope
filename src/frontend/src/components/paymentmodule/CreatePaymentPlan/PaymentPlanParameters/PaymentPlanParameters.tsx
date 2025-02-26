@@ -1,4 +1,3 @@
-import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { Grid2 as Grid, Typography } from '@mui/material';
 import { FormikCurrencyAutocomplete } from '@shared/Formik/FormikCurrencyAutocomplete';
@@ -25,47 +24,43 @@ export const PaymentPlanParameters = ({
       <Title>
         <Typography variant="h6">{t('Parameters')}</Typography>
       </Title>
-      <OverviewContainer>
-        <Grid spacing={3} container>
-          <Grid size={{ xs: 4 }}>
-            <Field
-              name="dispersionStartDate"
-              label={t('Dispersion Start Date')}
-              component={FormikDateField}
-              required
-              fullWidth
-              decoratorEnd={<CalendarTodayRounded color="disabled" />}
-              dataCy="input-dispersion-start-date"
-              tooltip={t(
-                'The first day from which payments could be delivered.',
-              )}
-            />
-          </Grid>
-          <Grid size={{ xs: 4 }}>
-            <Field
-              name="dispersionEndDate"
-              label={t('Dispersion End Date')}
-              component={FormikDateField}
-              required
-              minDate={tomorrow}
-              disabled={!values.dispersionStartDate}
-              initialFocusedDate={values.dispersionStartDate}
-              fullWidth
-              decoratorEnd={<CalendarTodayRounded color="disabled" />}
-              dataCy="input-dispersion-end-date"
-              tooltip={t('The last day on which payments could be delivered.')}
-            />
-          </Grid>
-          <Grid size={{ xs: 4 }}>
-            <Field
-              name="currency"
-              component={FormikCurrencyAutocomplete}
-              required
-              disabled={Boolean(paymentPlan?.isFollowUp)}
-            />
-          </Grid>
+      <Grid spacing={3} container>
+        <Grid size={{ xs: 3 }}>
+          <Field
+            name="dispersionStartDate"
+            label={t('Dispersion Start Date')}
+            component={FormikDateField}
+            required
+            fullWidth
+            decoratorEnd={<CalendarTodayRounded color="disabled" />}
+            dataCy="input-dispersion-start-date"
+            tooltip={t('The first day from which payments could be delivered.')}
+          />
         </Grid>
-      </OverviewContainer>
+        <Grid size={{ xs: 3 }}>
+          <Field
+            name="dispersionEndDate"
+            label={t('Dispersion End Date')}
+            component={FormikDateField}
+            required
+            minDate={tomorrow}
+            disabled={!values.dispersionStartDate}
+            initialFocusedDate={values.dispersionStartDate}
+            fullWidth
+            decoratorEnd={<CalendarTodayRounded color="disabled" />}
+            dataCy="input-dispersion-end-date"
+            tooltip={t('The last day on which payments could be delivered.')}
+          />
+        </Grid>
+        <Grid size={{ xs: 3 }}>
+          <Field
+            name="currency"
+            component={FormikCurrencyAutocomplete}
+            required
+            disabled={Boolean(paymentPlan?.isFollowUp)}
+          />
+        </Grid>
+      </Grid>
     </PaperContainer>
   );
 };
