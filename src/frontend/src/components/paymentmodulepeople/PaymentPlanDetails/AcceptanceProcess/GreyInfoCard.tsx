@@ -35,7 +35,7 @@ export function GreyInfoCard({
   topDate,
   approvals,
 }: GreyInfoCardProps): ReactElement {
-  const mappedApprovals = approvals.map((action) => {
+  const mappedApprovals = approvals?.map((action) => {
     const { info, createdAt, comment, createdBy } = action;
     return (
       info && (

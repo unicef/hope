@@ -88,8 +88,6 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
             "start_date",
             "end_date",
             "description",
-            "ca_id",
-            "ca_hash_id",
             "business_area",
             "budget",
             "frequency_of_payments",
@@ -166,18 +164,26 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         ],
         db_index=True,
     )
+    programme_code = models.CharField(max_length=4, null=True, blank=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICE, db_index=True)
-    start_date = models.DateField(db_index=True)
-    end_date = models.DateField(null=True, blank=True, db_index=True)
     description = models.CharField(
         blank=True,
         max_length=255,
         validators=[MinLengthValidator(3), MaxLengthValidator(255)],
     )
-    ca_id = CICharField(max_length=255, null=True, blank=True, db_index=True)
-    ca_hash_id = CICharField(max_length=255, null=True, blank=True, db_index=True)
-    admin_areas = models.ManyToManyField("geo.Area", related_name="programs", blank=True)
+    start_date = models.DateField(db_index=True)
+    end_date = models.DateField(null=True, blank=True, db_index=True)
+    data_collecting_type = models.ForeignKey(
+        "core.DataCollectingType", related_name="programs", on_delete=models.PROTECT
+    )
+    beneficiary_group = models.ForeignKey(
+        BeneficiaryGroup,
+        on_delete=models.PROTECT,
+        related_name="programs",
+    )
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
+    admin_areas = models.ManyToManyField("geo.Area", related_name="programs", blank=True)
+    sector = models.CharField(max_length=50, choices=SECTOR_CHOICE, db_index=True)
     budget = models.DecimalField(
         decimal_places=2,
         max_digits=11,
@@ -188,12 +194,17 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         max_length=50,
         choices=FREQUENCY_OF_PAYMENTS_CHOICE,
     )
-    sector = models.CharField(max_length=50, choices=SECTOR_CHOICE, db_index=True)
     scope = models.CharField(
         blank=True,
         null=True,
         max_length=50,
         choices=SCOPE_CHOICE,
+    )
+    partners = models.ManyToManyField(to="account.Partner", through=ProgramPartnerThrough, related_name="programs")
+    partner_access = models.CharField(
+        max_length=50,
+        choices=PARTNER_ACCESS_CHOICE,
+        default=SELECTED_PARTNERS_ACCESS,
     )
     cash_plus = models.BooleanField()
     population_goal = models.PositiveIntegerField()
@@ -202,29 +213,13 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         blank=True,
         validators=[MinLengthValidator(3), MaxLengthValidator(255)],
     )
-    data_collecting_type = models.ForeignKey(
-        "core.DataCollectingType", related_name="programs", on_delete=models.PROTECT
-    )
     is_visible = models.BooleanField(default=True)
     household_count = models.PositiveIntegerField(default=0)
     individual_count = models.PositiveIntegerField(default=0)
-    programme_code = models.CharField(max_length=4, null=True, blank=True)
 
-    partner_access = models.CharField(
-        max_length=50,
-        choices=PARTNER_ACCESS_CHOICE,
-        default=SELECTED_PARTNERS_ACCESS,
-    )
-    partners = models.ManyToManyField(to="account.Partner", through=ProgramPartnerThrough, related_name="programs")
-
+    deduplication_set_id = models.UUIDField(blank=True, null=True)
     biometric_deduplication_enabled = models.BooleanField(
         default=False, help_text="Enable Deduplication of Face Images"
-    )
-    deduplication_set_id = models.UUIDField(blank=True, null=True)
-    beneficiary_group = models.ForeignKey(
-        BeneficiaryGroup,
-        on_delete=models.PROTECT,
-        related_name="programs",
     )
 
     objects = SoftDeletableIsVisibleManager()
@@ -344,10 +339,10 @@ class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, C
         (FINISHED, _("Finished")),
     )
     title = models.CharField(_("Title"), max_length=255, null=True, blank=True, default="Default Programme Cycle")
+    program = models.ForeignKey("Program", on_delete=models.CASCADE, related_name="cycles")
     status = models.CharField(max_length=10, choices=STATUS_CHOICE, db_index=True, default=DRAFT)
     start_date = models.DateField()  # first from program
     end_date = models.DateField(null=True, blank=True)
-    program = models.ForeignKey("Program", on_delete=models.CASCADE, related_name="cycles")
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -386,12 +381,7 @@ class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, C
 
     @property
     def can_remove_cycle(self) -> bool:
-        return (
-            not self.target_populations.exists()
-            and not self.payment_plans.exists()
-            and self.program.cycles.count() > 1
-            and self.status == ProgramCycle.DRAFT
-        )
+        return not self.payment_plans.exists() and self.program.cycles.count() > 1 and self.status == ProgramCycle.DRAFT
 
     @property
     def total_entitled_quantity_usd(self) -> Decimal:

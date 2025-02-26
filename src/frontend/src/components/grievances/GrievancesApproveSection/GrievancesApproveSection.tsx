@@ -1,4 +1,4 @@
-import { Box, Grid } from '@mui/material';
+import { Box, Grid2 as Grid } from '@mui/material';
 import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import { GrievanceTicketQuery } from '@generated/graphql';
 import { AddIndividualGrievanceDetails } from '../AddIndividualGrievanceDetails';
@@ -122,7 +122,7 @@ export function GrievancesApproveSection({
   };
 
   return (
-    <Grid item xs={12}>
+    <Grid size={{ xs: 12 }}>
       <Box p={3}>{matchDetailsComponent()}</Box>
     </Grid>
   );

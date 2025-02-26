@@ -164,7 +164,7 @@ class PeriodicDataUpdateExportTemplateService:
             queryset = queryset.filter(registration_data_import_id=registration_data_import_id_filter_decoded)
         if self.target_population_id_filter:
             target_population_id_filter_decoded = decode_id_string_required(self.target_population_id_filter)
-            queryset = queryset.filter(household__target_populations=target_population_id_filter_decoded)
+            queryset = queryset.filter(household__payment__parent_id=target_population_id_filter_decoded)
         if self.gender_filter:
             queryset = queryset.filter(sex=self.gender_filter)
         if self.age_filter:

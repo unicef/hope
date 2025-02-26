@@ -1,4 +1,4 @@
-import { Box, Grid, Paper, Typography } from '@mui/material';
+import { Box, Grid2 as Grid, Paper, Typography } from '@mui/material';
 import WarningIcon from '@mui/icons-material/Warning';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -64,7 +64,7 @@ export function TicketsAlreadyExist({ values }): ReactElement {
     (!!values.selectedHousehold?.id || !!values.selectedIndividual?.id);
 
   return edges.length && shouldShowBox ? (
-    <Grid item xs={6}>
+    <Grid size={{ xs:6 }}>
       <StyledBox>
         <OrangeTitle>
           <Typography variant="h6">

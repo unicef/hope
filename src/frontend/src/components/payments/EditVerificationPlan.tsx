@@ -3,7 +3,7 @@ import {
   Button,
   DialogContent,
   DialogTitle,
-  Grid,
+  Grid2 as Grid,
   Typography,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/EditRounded';
@@ -432,10 +432,10 @@ export const EditVerificationPlan = ({
 
                         <Grid container>
                           {values.ageCheckbox && (
-                            <Grid item xs={12}>
+                            <Grid size={{ xs: 12 }}>
                               <Box mt={6}>
                                 <Grid container>
-                                  <Grid item xs={4}>
+                                  <Grid size={{ xs: 4 }}>
                                     <Field
                                       name="filterAgeMin"
                                       label={t('Minimum Age')}
@@ -444,7 +444,7 @@ export const EditVerificationPlan = ({
                                       component={FormikTextField}
                                     />
                                   </Grid>
-                                  <Grid item xs={4}>
+                                  <Grid size={{ xs: 4 }}>
                                     <Field
                                       name="filterAgeMax"
                                       label={t('Maximum Age')}
@@ -458,7 +458,7 @@ export const EditVerificationPlan = ({
                             </Grid>
                           )}
                           {values.sexCheckbox && (
-                            <Grid item xs={5}>
+                            <Grid size={{ xs:5 }}>
                               <Box mt={6}>
                                 <Field
                                   name="filterSex"

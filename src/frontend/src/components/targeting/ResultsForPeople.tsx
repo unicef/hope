@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@mui/material';
+import { Grid2 as Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { MiśTheme } from '../../theme';
@@ -65,9 +65,9 @@ export function ResultsForPeople({
         </Title>
         <ContentWrapper>
           <Grid container>
-            <Grid item xs={4}>
+            <Grid size={{ xs: 4 }}>
               <Grid container spacing={0} justifyContent="flex-start">
-                <Grid item xs={6}>
+                <Grid size={{ xs:6 }}>
                   <FieldBorder color={colors.femaleChildren}>
                     <LabelizedField
                       label={t('Female Children')}
@@ -75,7 +75,7 @@ export function ResultsForPeople({
                     />
                   </FieldBorder>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid size={{ xs:6 }}>
                   <FieldBorder color={colors.femaleAdult}>
                     <LabelizedField
                       label={t('Female Adults')}
@@ -83,7 +83,7 @@ export function ResultsForPeople({
                     />
                   </FieldBorder>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid size={{ xs:6 }}>
                   <FieldBorder color={colors.maleChildren}>
                     <LabelizedField
                       label={t('Male Children')}
@@ -91,7 +91,7 @@ export function ResultsForPeople({
                     />
                   </FieldBorder>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid size={{ xs:6 }}>
                   <FieldBorder color={colors.maleAdult}>
                     <LabelizedField
                       label={t('Male Adults')}
@@ -101,14 +101,14 @@ export function ResultsForPeople({
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item xs={4}>
+            <Grid size={{ xs: 4 }}>
               <Grid
                 container
                 spacing={0}
                 justifyContent="flex-start"
                 alignItems="center"
               >
-                <Grid item xs={4}>
+                <Grid size={{ xs: 4 }}>
                   <ChartContainer>
                     <Pie
                       width={100}
@@ -149,9 +149,9 @@ export function ResultsForPeople({
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item xs={4}>
+            <Grid size={{ xs: 4 }}>
               <Grid container spacing={0} justifyContent="flex-end">
-                <Grid item xs={6}>
+                <Grid size={{ xs:6 }}>
                   <SummaryBorder>
                     <LabelizedField label={t('Total Number of People')}>
                       <SummaryValue>

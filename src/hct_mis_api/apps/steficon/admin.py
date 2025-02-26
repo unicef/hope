@@ -35,6 +35,7 @@ from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.administration.widgets import JsonWidget
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.steficon.forms import (
     RuleCommitAdminForm,
     RuleDownloadCSVFileProcessForm,
@@ -186,9 +187,7 @@ class TestRuleMixin:
         else:
             context["form"] = RuleTestForm(initial={"raw_data": '{"a": 1, "b":2}', "opt": "optFile"})
         if "form" in context:
-            from hct_mis_api.apps.targeting.models import TargetPopulation
-
-            context["form"].fields["target_population"].widget = AutocompleteWidget(TargetPopulation, self.admin_site)
+            context["form"].fields["target_population"].widget = AutocompleteWidget(PaymentPlan, self.admin_site)
             context["form"].fields["content_type"].widget = AutocompleteWidget(ContentType, self.admin_site)
         return TemplateResponse(request, "admin/steficon/rule/test.html", context)
 

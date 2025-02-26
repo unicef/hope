@@ -34,8 +34,6 @@ export const PAYMENT_PLAN_QUERY = gql`
       program {
         id
         name
-        caId
-        caHashId
         status
         isSocialWorkerProgram
       }

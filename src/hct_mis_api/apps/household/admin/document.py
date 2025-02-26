@@ -31,11 +31,12 @@ class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase, RdiMergeStatusA
     list_display = ("document_number", "type", "country", "status", "individual", "program", "cleared_by")
     raw_id_fields = ("individual", "copied_from", "program", "country", "type")
     list_filter = (
+        ("program__business_area", AutoCompleteFilter),
+        ("program", AutoCompleteFilter),
         ("type", RelatedFieldComboFilter),
         ("country", AutoCompleteFilter),
         ("individual", AutoCompleteFilterTemp),
         ("cleared_by", AutoCompleteFilter),
-        ("program", AutoCompleteFilter),
         "status",
     )
     autocomplete_fields = ["type"]

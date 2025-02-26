@@ -110,8 +110,8 @@ class Command(BaseCommand):
         if not options["skip_drop"]:
             self.stdout.write("Dropping existing databases...")
             call_command("dropalldb")
-            self.stdout.write("Migrating databases...")
-            call_command("migratealldb")
+            self.stdout.write("Migrating database...")
+            call_command("migrate")
 
         # Flush databases
         self.stdout.write("Flushing databases...")

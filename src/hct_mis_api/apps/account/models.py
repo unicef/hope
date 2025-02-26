@@ -162,28 +162,14 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
 
 class User(AbstractUser, NaturalKeyModel, UUIDModel):
     status = models.CharField(choices=USER_STATUS_CHOICES, max_length=10, default=INVITED)
-    # TODO: in future will remove null=True after migrate prod data
-    partner = models.ForeignKey(Partner, on_delete=models.PROTECT, null=True)
+    partner = models.ForeignKey(Partner, on_delete=models.PROTECT)
     email = models.EmailField(_("email address"), unique=True)
-    # TODO: remove
-    available_for_export = models.BooleanField(
-        default=True, help_text="Indicating if a User can be exported to CashAssist"
-    )
     custom_fields = JSONField(default=dict, blank=True)
 
     job_title = models.CharField(max_length=255, blank=True)
     ad_uuid = models.CharField(max_length=64, unique=True, null=True, blank=True, editable=False)
 
-    # CashAssist DOAP fields
     last_modify_date = models.DateTimeField(auto_now=True, null=True, blank=True)
-    last_doap_sync = models.DateTimeField(
-        default=None, null=True, blank=True, help_text="Timestamp of last sync with CA"
-    )
-    doap_hash = models.TextField(
-        editable=False,
-        default="",
-        help_text="System field used to check if changes need to be sent to CA",
-    )
 
     def __str__(self) -> str:
         if self.first_name or self.last_name:
@@ -191,7 +177,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         return self.email or self.username
 
     def save(self, *args: Any, **kwargs: Any) -> None:
-        if not self.partner:
+        if not self.partner_id:
             self.partner, _ = Partner.objects.get_or_create(name=settings.DEFAULT_EMPTY_PARTNER)
         if not self.partner.pk:
             self.partner.save()
@@ -322,9 +308,9 @@ class HorizontalChoiceArrayField(ArrayField):
 
 
 class UserRole(NaturalKeyModel, TimeStampedUUIDModel):
-    business_area = models.ForeignKey("core.BusinessArea", related_name="user_roles", on_delete=models.CASCADE)
     user = models.ForeignKey("account.User", related_name="user_roles", on_delete=models.CASCADE)
     role = models.ForeignKey("account.Role", related_name="user_roles", on_delete=models.CASCADE)
+    business_area = models.ForeignKey("core.BusinessArea", related_name="user_roles", on_delete=models.CASCADE)
     expiry_date = models.DateField(
         blank=True, null=True, help_text="After expiry date this User Role will be inactive."
     )
@@ -337,9 +323,9 @@ class UserRole(NaturalKeyModel, TimeStampedUUIDModel):
 
 
 class UserGroup(NaturalKeyModel, models.Model):
-    business_area = models.ForeignKey("core.BusinessArea", related_name="user_groups", on_delete=models.CASCADE)
     user = models.ForeignKey("account.User", related_name="user_groups", on_delete=models.CASCADE)
     group = models.ForeignKey(Group, related_name="user_groups", on_delete=models.CASCADE)
+    business_area = models.ForeignKey("core.BusinessArea", related_name="user_groups", on_delete=models.CASCADE)
 
     class Meta:
         unique_together = ("business_area", "user", "group")

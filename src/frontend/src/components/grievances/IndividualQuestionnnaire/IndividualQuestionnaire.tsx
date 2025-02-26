@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material';
+import { Grid2 as Grid } from '@mui/material';
 import { Field } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
@@ -136,7 +136,7 @@ export const IndividualQuestionnaire = ({
   return (
     <Grid container spacing={6}>
       {questionFields.map((el) => (
-        <Grid key={el.name} item xs={3}>
+        <Grid key={el.name} size={{ xs: 3 }}>
           <Field
             data-cy={`input-${el.name}`}
             name={el.name}
