@@ -16,7 +16,8 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
-from hct_mis_api.apps.account.api.permissions import RDIViewListPermission
+from hct_mis_api.apps.account.api.permissions import HasOneOfPermissions
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.api.mixins import BusinessAreaProgramMixin
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.api.caches import RDIKeyConstructor
@@ -39,7 +40,8 @@ class RegistrationDataImportViewSet(
     GenericViewSet,
 ):
     serializer_class = RegistrationDataImportListSerializer
-    permission_classes = [RDIViewListPermission]
+    permission_classes = [HasOneOfPermissions]
+    PERMISSIONS = [Permissions.RDI_VIEW_LIST]
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = RegistrationDataImportFilter
 

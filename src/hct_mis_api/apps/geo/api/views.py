@@ -13,7 +13,8 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
-from hct_mis_api.apps.account.api.permissions import GeoViewListPermission
+from hct_mis_api.apps.account.api.permissions import HasOneOfPermissions
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.api.mixins import BusinessAreaMixin
 from hct_mis_api.apps.geo.api.caches import AreaKeyConstructor
 from hct_mis_api.apps.geo.api.filters import AreaFilter
@@ -29,7 +30,8 @@ class AreaViewSet(
     GenericViewSet,
 ):
     serializer_class = AreaListSerializer
-    permission_classes = [GeoViewListPermission]
+    permission_classes = [HasOneOfPermissions]
+    PERMISSIONS = [Permissions.GEO_VIEW_LIST]
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = AreaFilter
 
