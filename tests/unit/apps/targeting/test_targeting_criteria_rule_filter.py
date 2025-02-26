@@ -41,7 +41,6 @@ from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRuleFilter,
     TargetingIndividualBlockRuleFilter,
     TargetingIndividualRuleFilterBlock,
-    TargetPopulation,
 )
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
@@ -393,9 +392,9 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         self.assertEqual(queryset.count(), 4)
 
     def test_tc_rule_query_for_ind_hh_ids(self) -> None:
-        tp = TargetPopulation(program=self.households[0].program)
+        pp = PaymentPlanFactory(program_cycle=self.households[0].program.cycles.first())
         tc = TargetingCriteria()
-        tc.target_population = tp
+        tc.payment_plan = pp
         tc.save()
         tcr = TargetingCriteriaRule(household_ids="HH-1, HH-2", individual_ids="IND-11, IND-22")
         tcr.targeting_criteria = tc

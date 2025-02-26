@@ -56,9 +56,14 @@ class MessageAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase, IsOriginalAdmi
         "title",
         "body",
         "business_area",
+        "program",
+        "payment_plan",
         "registration_data_import",
         "sampling_type",
         "sample_size",
+        "created_by",
+        "copied_from",
+        "is_original",
     )
     list_display = (
         "unicef_id",
@@ -91,6 +96,13 @@ class SurveyAdmin(HOPEModelAdminBase):
         "created_by",
         "sample_file",
         "sample_size",
+    )
+    readonly_fields = (
+        "category",
+        "created_by",
+        "payment_plan",
+        "program",
+        "business_area",
     )
     list_filter = ("category", ("flow_id", AutoCompleteFilter))
     search_fields = ("unicef_id", "title")

@@ -170,20 +170,6 @@ YES_NO_CHOICE = (
     (NO, _("No")),
 )
 
-COLLECT_TYPE_UNKNOWN = ""
-COLLECT_TYPE_NONE = "0"
-COLLECT_TYPE_FULL = "1"
-COLLECT_TYPE_PARTIAL = "2"
-COLLECT_TYPE_SIZE_ONLY = "3"
-
-COLLECT_TYPES = (
-    (COLLECT_TYPE_UNKNOWN, _("Unknown")),
-    (COLLECT_TYPE_PARTIAL, _("Partial individuals collected")),
-    (COLLECT_TYPE_FULL, _("Full individual collected")),
-    (COLLECT_TYPE_SIZE_ONLY, _("Size only collected")),
-    (COLLECT_TYPE_NONE, _("No individual data")),
-)
-
 NOT_PROVIDED = "NOT_PROVIDED"
 WORK_STATUS_CHOICE = (
     (YES, _("Yes")),
@@ -410,7 +396,6 @@ class Household(
             "org_name_enumerator",
             "village",
             "registration_method",
-            "collect_individual_data",
             "currency",
             "unhcr_id",
             "detail_id",
@@ -509,9 +494,6 @@ class Household(
     org_name_enumerator = models.CharField(max_length=250, blank=True, default=BLANK)
     village = models.CharField(max_length=250, blank=True, default=BLANK)
     registration_method = models.CharField(max_length=250, choices=REGISTRATION_METHOD_CHOICES, default=BLANK)
-    collect_individual_data = models.CharField(
-        max_length=250, choices=COLLECT_TYPES, default=COLLECT_TYPE_UNKNOWN
-    )  # TODO remove
     currency = models.CharField(max_length=250, choices=CURRENCY_CHOICES, default=BLANK)
     unhcr_id = models.CharField(max_length=250, blank=True, default=BLANK, db_index=True)
     detail_id = models.CharField(
@@ -562,7 +544,6 @@ class Household(
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True)
     is_migration_handled = models.BooleanField(default=False)
     migrated_at = models.DateTimeField(null=True, blank=True)
-    is_recalculated_group_ages = models.BooleanField(default=False)  # TODO remove after migration
     collect_type = models.CharField(choices=CollectType.choices, default=CollectType.STANDARD.value, max_length=8)
 
     kobo_submission_uuid = models.UUIDField(null=True, default=None)
@@ -581,19 +562,6 @@ class Household(
                 name="unique_hh_unicef_id_in_program",
             )
         ]
-
-    def save(self, *args: Any, **kwargs: Any) -> None:
-        from hct_mis_api.apps.targeting.models import (
-            HouseholdSelection,
-            TargetPopulation,
-        )
-
-        if self.withdrawn:
-            HouseholdSelection.objects.filter(
-                household=self, target_population__status=TargetPopulation.STATUS_LOCKED
-            ).delete()
-        cache.delete_pattern(f"count_{self.business_area.slug}_HouseholdNodeConnection_*")
-        super().save(*args, **kwargs)
 
     def delete(self, *args: Any, **kwargs: Any) -> Tuple[int, Dict[str, int]]:
         household_deleted.send(self.__class__, instance=self)
@@ -727,18 +695,18 @@ class Document(AbstractSyncable, SoftDeletableRepresentationMergeStatusModel, Ti
         (STATUS_INVALID, _("Invalid")),
     )
 
-    document_number = models.CharField(max_length=255, blank=True, db_index=True)
-    photo = models.ImageField(blank=True)
     individual = models.ForeignKey("Individual", related_name="documents", on_delete=models.CASCADE)
+    program = models.ForeignKey("program.Program", null=True, related_name="+", on_delete=models.CASCADE)
+    document_number = models.CharField(max_length=255, blank=True, db_index=True)
     type = models.ForeignKey("DocumentType", related_name="documents", on_delete=models.CASCADE)
     country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    photo = models.ImageField(blank=True)
     cleared = models.BooleanField(default=False)
     cleared_date = models.DateTimeField(default=timezone.now)
     cleared_by = models.ForeignKey("account.User", null=True, on_delete=models.SET_NULL)
     issuance_date = models.DateTimeField(null=True, blank=True)
     expiry_date = models.DateTimeField(null=True, blank=True, db_index=True)
-    program = models.ForeignKey("program.Program", null=True, related_name="+", on_delete=models.CASCADE)
 
     is_migration_handled = models.BooleanField(default=False)
     copied_from = models.ForeignKey(
@@ -802,11 +770,7 @@ class Document(AbstractSyncable, SoftDeletableRepresentationMergeStatusModel, Ti
 
 
 class IndividualIdentity(SoftDeletableRepresentationMergeStatusModel, TimeStampedModel):
-    # notice that this model has `created` and `modified` fields
     individual = models.ForeignKey("Individual", related_name="identities", on_delete=models.CASCADE)
-    number = models.CharField(
-        max_length=255,
-    )
     partner = models.ForeignKey(
         "account.Partner",
         related_name="individual_identities",
@@ -814,6 +778,7 @@ class IndividualIdentity(SoftDeletableRepresentationMergeStatusModel, TimeStampe
         on_delete=models.PROTECT,
     )
     country = models.ForeignKey("geo.Country", null=True, on_delete=models.PROTECT)
+    number = models.CharField(max_length=255)
     is_migration_handled = models.BooleanField(default=False)
     copied_from = models.ForeignKey(
         "self",

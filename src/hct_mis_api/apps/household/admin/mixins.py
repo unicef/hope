@@ -6,23 +6,19 @@ from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
 from django.db.models import QuerySet
 from django.db.transaction import atomic
 from django.forms import Form
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponseRedirect
 from django.template.response import TemplateResponse
-from django.urls import reverse
 from django.utils import timezone
 
 from admin_extra_buttons.decorators import button
 
 from hct_mis_api.apps.household.forms import (
-    AddToTargetPopulationForm,
-    CreateTargetPopulationForm,
     MassRestoreForm,
     MassWithdrawForm,
     WithdrawForm,
 )
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
-from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refresh_stats
 
 
 class HouseholdWithDrawnMixin:
@@ -188,96 +184,3 @@ class HouseholdWithDrawnMixin:
 
         context["tickets"] = tickets
         return TemplateResponse(request, "admin/household/household/withdrawn.html", context)
-
-
-class CustomTargetPopulationMixin:
-    def add_to_target_population(self, request: HttpRequest, qs: QuerySet) -> Optional[HttpResponse]:
-        from hct_mis_api.apps.core.models import BusinessArea
-        from hct_mis_api.apps.targeting.models import TargetPopulation
-
-        context = self.get_common_context(request, title="Extend TargetPopulation")
-        tp: TargetPopulation
-        ba: BusinessArea
-        if "apply" in request.POST:
-            form = AddToTargetPopulationForm(request.POST, read_only=True)
-            if form.is_valid():
-                tp = form.cleaned_data["target_population"]
-                ba = tp.business_area
-                population = qs.filter(business_area=ba)
-                context["target_population"] = tp
-                context["population"] = population
-                context["queryset"] = qs
-                if population.count() != qs.count():
-                    context["mixed_household"] = True
-        elif "confirm" in request.POST:
-            form = AddToTargetPopulationForm(request.POST)
-            if form.is_valid():
-                tp = form.cleaned_data["target_population"]
-                ba = tp.business_area
-                population = qs.filter(business_area=ba)
-                with atomic():
-                    tp.households.add(*population)
-                    refresh_stats(tp)
-                    tp.save()
-                url = reverse("admin:targeting_targetpopulation_change", args=[tp.pk])
-                return HttpResponseRedirect(url)
-        else:
-            form = AddToTargetPopulationForm(
-                initial={
-                    "_selected_action": request.POST.getlist(ACTION_CHECKBOX_NAME),
-                    "action": "add_to_target_population",
-                }
-            )
-        context["form"] = form
-        return TemplateResponse(request, "admin/household/household/add_target_population.html", context)
-
-    add_to_target_population.allowed_permissions = ["create_target_population"]
-
-    def create_target_population(self, request: HttpRequest, qs: QuerySet) -> Optional[HttpResponse]:
-        context = self.get_common_context(request, title="Create TargetPopulation")
-        if "apply" in request.POST:
-            form = CreateTargetPopulationForm(request.POST, read_only=True)
-            if form.is_valid():
-                program = form.cleaned_data["program"]
-                ba = program.business_area
-                population = qs.filter(business_area=ba)
-                context["program"] = program
-                context["population"] = population
-                context["queryset"] = qs
-                if population.count() != qs.count():
-                    context["mixed_household"] = True
-        elif "confirm" in request.POST:
-            form = CreateTargetPopulationForm(request.POST)
-            if form.is_valid():
-                from hct_mis_api.apps.targeting.models import TargetPopulation
-
-                program = form.cleaned_data["program"]
-                ba = program.business_area
-                population = qs.filter(business_area=ba)
-                with atomic():
-                    tp = TargetPopulation.objects.create(
-                        targeting_criteria=None,
-                        created_by=request.user,
-                        name=form.cleaned_data["name"],
-                        business_area=ba,
-                        program=program,
-                    )
-                    tp.households.set(population)
-                    refresh_stats(tp)
-                    tp.save()
-                url = reverse("admin:targeting_targetpopulation_change", args=[tp.pk])
-                return HttpResponseRedirect(url)
-        else:
-            form = CreateTargetPopulationForm(
-                initial={
-                    "_selected_action": request.POST.getlist(ACTION_CHECKBOX_NAME),
-                    "action": "create_target_population",
-                }
-            )
-        context["form"] = form
-        return TemplateResponse(request, "admin/household/household/create_target_population.html", context)
-
-    create_target_population.allowed_permissions = ["create_target_population"]
-
-    def has_create_target_population_permission(self, request: HttpRequest) -> bool:
-        return request.user.has_perm("targeting.add_target_population")

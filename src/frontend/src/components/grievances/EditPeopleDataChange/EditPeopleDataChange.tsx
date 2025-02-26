@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Typography } from '@mui/material';
+import { Box, Button, Grid2 as Grid, Typography } from '@mui/material';
 import { AddCircleOutline } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
@@ -107,7 +107,7 @@ export function EditPeopleDataChange({
                       values={values}
                     />
                   ))}
-                  <Grid item xs={4}>
+                  <Grid size={{ xs: 4 }}>
                     <Button
                       color="primary"
                       onClick={() => {
@@ -129,7 +129,11 @@ export function EditPeopleDataChange({
       <BoxWithBorders>
         <Box mt={3}>
           <Title>
-            <Typography variant="h6">{t('Documents')}</Typography>
+            <Typography variant="h6">
+              {t(
+                'Documents: change/upload of document with other info (country, number etc.): add label beneficiary personal documents',
+              )}
+            </Typography>
           </Title>
           <ExistingDocumentFieldArray
             values={values}

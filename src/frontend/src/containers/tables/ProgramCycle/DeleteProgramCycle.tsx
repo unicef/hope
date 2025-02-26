@@ -62,7 +62,9 @@ export const DeleteProgramCycle = ({
       await mutateAsync();
       showMessage(t('Programme Cycle Deleted'));
     } catch (e) {
-      e.data?.forEach((message: string) => showMessage(message));
+      if (e.data && Array.isArray(e.data)) {
+        e.data.forEach((message: string) => showMessage(message));
+      }
     }
   };
 

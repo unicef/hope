@@ -1,6 +1,6 @@
 import { DividerLine } from '@components/core/DividerLine';
 import { IndividualNode } from '@generated/graphql';
-import { Grid, Paper, Typography } from '@mui/material';
+import { Grid2 as Grid, Paper, Typography } from '@mui/material';
 import { Title } from '@core/Title';
 import { t } from 'i18next';
 import React, { FC } from 'react';
@@ -47,11 +47,11 @@ export const IndividualDeliveryMechanisms: FC<
         {individual.deliveryMechanismsData.map((mechanism, index) => {
           const tabData = JSON.parse(mechanism.individualTabData);
           return (
-            <Grid item xs={12} key={index}>
+            <Grid size={{ xs:12 }} key={index}>
               <Typography variant="h6">{mechanism.name}</Typography>
               <Grid container spacing={3}>
                 {Object.entries(tabData).map(([key, value], idx) => (
-                  <Grid key={idx} item xs={3}>
+                  <Grid key={idx} size={{ xs: 3 }}>
                     <LabelizedField label={key.replace(/_/g, ' ')}>
                       {renderSomethingOrDash(value)}
                     </LabelizedField>

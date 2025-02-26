@@ -67,28 +67,14 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
     </BusinessArea>
     """
 
-    code_to_cash_assist_mapping = {"575RE00000": "SLVK"}
-    cash_assist_to_code_mapping = {v: k for k, v in code_to_cash_assist_mapping.items()}
     code = models.CharField(max_length=10, unique=True)
-    name = models.CharField(max_length=255)
-    long_name = models.CharField(max_length=255)
-    region_code = models.CharField(max_length=8)
-    region_name = models.CharField(max_length=8)
-    kobo_username = models.CharField(max_length=255, null=True, blank=True)
-    kobo_token = models.CharField(max_length=255, null=True, blank=True)
-    kobo_url = models.URLField(max_length=255, null=True, blank=True)
-    rapid_pro_host = models.URLField(null=True, blank=True)
-    rapid_pro_payment_verification_token = models.CharField(max_length=40, null=True, blank=True)
-    rapid_pro_messages_token = models.CharField(max_length=40, null=True, blank=True)
-    rapid_pro_survey_token = models.CharField(max_length=40, null=True, blank=True)
     slug = models.CharField(
         max_length=250,
         unique=True,
         db_index=True,
     )
-    custom_fields = JSONField(default=dict, blank=True)
-
-    has_data_sharing_agreement = models.BooleanField(default=False)
+    name = models.CharField(max_length=255)
+    long_name = models.CharField(max_length=255)
     parent = models.ForeignKey(
         "self",
         related_name="children",
@@ -96,10 +82,29 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
         null=True,
         blank=True,
     )
+    partners = models.ManyToManyField(
+        to="account.Partner", through=BusinessAreaPartnerThrough, related_name="business_areas"
+    )
+    countries = models.ManyToManyField("geo.Country", related_name="business_areas")
+
     is_split = models.BooleanField(default=False)
+    region_code = models.CharField(max_length=8)
+    region_name = models.CharField(max_length=8)
+    has_data_sharing_agreement = models.BooleanField(default=False)
+    is_accountability_applicable = models.BooleanField(default=False)
+    active = models.BooleanField(default=False)
+    enable_email_notification = models.BooleanField(default=True, verbose_name="Automatic Email notifications enabled")
+
+    kobo_username = models.CharField(max_length=255, null=True, blank=True)
+    kobo_token = models.CharField(max_length=255, null=True, blank=True)
+    kobo_url = models.URLField(max_length=255, null=True, blank=True)
+
+    rapid_pro_host = models.URLField(null=True, blank=True)
+    rapid_pro_payment_verification_token = models.CharField(max_length=40, null=True, blank=True)
+    rapid_pro_messages_token = models.CharField(max_length=40, null=True, blank=True)
+    rapid_pro_survey_token = models.CharField(max_length=40, null=True, blank=True)
 
     postpone_deduplication = models.BooleanField(default=False)
-    countries = models.ManyToManyField("geo.Country", related_name="business_areas")
     deduplication_duplicate_score = models.FloatField(
         default=6.0,
         validators=[MinValueValidator(0.0)],
@@ -134,13 +139,8 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
         help_text="Threshold for Face Image Deduplication",
         validators=[MinValueValidator(0.0), MaxValueValidator(100.0)],
     )
-    is_accountability_applicable = models.BooleanField(default=False)
-    active = models.BooleanField(default=False)
-    enable_email_notification = models.BooleanField(default=True, verbose_name="Automatic Email notifications enabled")
 
-    partners = models.ManyToManyField(
-        to="account.Partner", through=BusinessAreaPartnerThrough, related_name="business_areas"
-    )
+    custom_fields = JSONField(default=dict, blank=True)
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         unique_slugify(self, self.name, slug_field_name="slug")
@@ -155,9 +155,6 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
         ordering = ["name"]
         permissions = (
             ("can_split", "Can split BusinessArea"),
-            ("can_send_doap", "Can send DOAP matrix"),
-            ("can_reset_doap", "Can force sync DOAP matrix"),
-            ("can_export_doap", "Can export DOAP matrix"),
             ("ping_rapidpro", "Can test RapidPRO connection"),
             ("execute_sync_rapid_pro", "Can execute RapidPRO sync"),
         )
@@ -167,10 +164,6 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
 
     def natural_key(self) -> Tuple[str]:
         return (self.code,)
-
-    @property
-    def cash_assist_code(self) -> str:
-        return self.code_to_cash_assist_mapping.get(self.code, self.code)
 
     @property
     def can_import_ocha_response_plans(self) -> bool:
@@ -226,9 +219,12 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
         (ASSOCIATED_WITH_INDIVIDUAL, _("Individual")),
     )
 
-    type = models.CharField(max_length=16, choices=TYPE_CHOICE)
     name = models.CharField(max_length=255)
-    required = models.BooleanField(default=False)
+    group = models.ForeignKey(
+        "core.FlexibleAttributeGroup", on_delete=models.CASCADE, related_name="flex_attributes", null=True, blank=True
+    )
+    type = models.CharField(max_length=16, choices=TYPE_CHOICE)
+    associated_with = models.SmallIntegerField(choices=ASSOCIATED_WITH_CHOICES)
     program = models.ForeignKey(
         "program.Program",
         on_delete=models.CASCADE,
@@ -243,12 +239,9 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
         null=True,
         related_name="flex_field",
     )
+    required = models.BooleanField(default=False)
     label = JSONField(default=dict, validators=[label_contains_english_en_validator])
     hint = JSONField(default=dict)
-    group = models.ForeignKey(
-        "core.FlexibleAttributeGroup", on_delete=models.CASCADE, related_name="flex_attributes", null=True, blank=True
-    )
-    associated_with = models.SmallIntegerField(choices=ASSOCIATED_WITH_CHOICES)
 
     class Meta:
         constraints = [
@@ -347,8 +340,8 @@ class PeriodicFieldData(models.Model):
     )
 
     subtype = models.CharField(max_length=16, choices=TYPE_CHOICES)
-    number_of_rounds = models.IntegerField()
     rounds_names = ArrayField(models.CharField(max_length=255), default=list)
+    number_of_rounds = models.IntegerField()
 
     class Meta:
         verbose_name = "Periodic Field Data"
@@ -528,24 +521,15 @@ class FileTemp(TimeStampedModel):
         return f"{self.file.name} - {self.created}"
 
 
-class MigrationStatus(TimeStampedModel):
-    is_running = models.BooleanField()
-
-    class Meta:
-        verbose_name_plural = "Migration Status"
-
-
 class DataCollectingType(TimeStampedModel):
     class Type(models.TextChoices):
         STANDARD = "STANDARD", "Standard"
         SOCIAL = "SOCIAL", "Social Workers"
 
-    label = models.CharField(max_length=32, blank=True)
     code = models.CharField(max_length=32)
+    label = models.CharField(max_length=32, blank=True)
     type = models.CharField(choices=Type.choices, null=True, blank=True, max_length=32)
     description = models.TextField(blank=True)
-    compatible_types = models.ManyToManyField("self", blank=True, symmetrical=False)
-    limit_to = models.ManyToManyField(to="BusinessArea", related_name="data_collecting_types", blank=True)
     active = models.BooleanField(default=True)
     deprecated = models.BooleanField(
         default=False, help_text="Cannot be used in new programs, totally hidden in UI, only admin have access"
@@ -554,6 +538,8 @@ class DataCollectingType(TimeStampedModel):
     household_filters_available = models.BooleanField(default=True)
     recalculate_composition = models.BooleanField(default=False)
     weight = models.PositiveSmallIntegerField(default=0)
+    compatible_types = models.ManyToManyField("self", blank=True, symmetrical=False)
+    limit_to = models.ManyToManyField(to="BusinessArea", related_name="data_collecting_types", blank=True)
 
     def __str__(self) -> str:
         return self.label

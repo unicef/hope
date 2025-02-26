@@ -267,7 +267,7 @@ class TestSmokePaymentVerification:
         assert "Timeframe" in pagePaymentVerification.getStartdate().text
         assert "Last Modified Date" in pagePaymentVerification.getUpdatedat().text
         assert "PP-0000-00-1122334" in pagePaymentVerification.getCashPlanTableRow().text
-        assert "PENDING" in pagePaymentVerification.getStatusContainer().text
+        assert "FINISHED" in pagePaymentVerification.getStatusContainer().text
         assert "Rows per page: 5 1–1 of 1" in pagePaymentVerification.getTablePagination().text.replace("\n", " ")
 
     def test_smoke_payment_verification_details(

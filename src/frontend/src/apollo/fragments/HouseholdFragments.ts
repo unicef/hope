@@ -113,7 +113,6 @@ export const householdDetailed = gql`
     orgEnumerator
     updatedAt
     consent
-    collectIndividualData
     individuals {
       totalCount
       edges {

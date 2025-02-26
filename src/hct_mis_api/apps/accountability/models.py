@@ -53,10 +53,6 @@ class Message(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     # Recipients Lookup criteria
     households = models.ManyToManyField("household.Household", related_name="messages", blank=True)
-    # TODO: deprecated will remove after data migrations
-    target_population = models.ForeignKey(
-        "targeting.TargetPopulation", related_name="messages", blank=True, null=True, on_delete=models.SET_NULL
-    )
     payment_plan = models.ForeignKey(
         "payment.PaymentPlan", related_name="messages", blank=True, null=True, on_delete=models.SET_NULL
     )
@@ -118,7 +114,6 @@ class Feedback(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
         (NEGATIVE_FEEDBACK, _("Negative feedback")),
     )
 
-    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     issue_type = models.CharField(verbose_name=_("Issue type"), choices=ISSUE_TYPE_CHOICES, max_length=20)
     household_lookup = models.ForeignKey(
         "household.Household",
@@ -136,13 +131,13 @@ class Feedback(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
         on_delete=models.SET_NULL,
         verbose_name=_("Individual lookup"),
     )
-    description = models.TextField()
-    comments = models.TextField(blank=True, null=True)
-    admin2 = models.ForeignKey("geo.Area", null=True, blank=True, on_delete=models.SET_NULL)
-    area = models.CharField(max_length=250, blank=True)
-    language = models.TextField(blank=True)
-    consent = models.BooleanField(default=True)
+    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     program = models.ForeignKey("program.Program", null=True, blank=True, on_delete=models.CASCADE)
+    area = models.CharField(max_length=250, blank=True)
+    admin2 = models.ForeignKey("geo.Area", null=True, blank=True, on_delete=models.SET_NULL)
+    description = models.TextField()
+    language = models.TextField(blank=True)
+    comments = models.TextField(blank=True, null=True)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -159,6 +154,7 @@ class Feedback(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
         blank=True,
         verbose_name=_("Linked grievance"),
     )
+    consent = models.BooleanField(default=True)
     is_original = models.BooleanField(db_index=True, default=False)
     copied_from = models.ForeignKey(
         "self",
@@ -252,10 +248,6 @@ class Survey(UnicefIdentifiedModel, AdminUrlMixin, TimeStampedUUIDModel):
         verbose_name=_("Created by"),
     )
     recipients = models.ManyToManyField("household.Household", related_name="surveys", blank=True)
-    # TODO: deprecated will remove after data migrations
-    target_population = models.ForeignKey(
-        "targeting.TargetPopulation", related_name="surveys", blank=True, null=True, on_delete=models.SET_NULL
-    )
     payment_plan = models.ForeignKey(
         "payment.PaymentPlan", related_name="surveys", blank=True, null=True, on_delete=models.SET_NULL
     )
@@ -267,15 +259,15 @@ class Survey(UnicefIdentifiedModel, AdminUrlMixin, TimeStampedUUIDModel):
         on_delete=models.SET_NULL,
     )
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
+    flow_id = models.CharField(max_length=255, blank=True, null=True)
+
+    sampling_type = models.CharField(max_length=50, choices=SAMPLING_CHOICES, default=SAMPLING_FULL_LIST)
+    sample_size = models.PositiveIntegerField(default=0)
     sample_file = models.FileField(upload_to="", blank=True, null=True)
     sample_file_generated_at = models.DateTimeField(blank=True, null=True)
 
-    sampling_type = models.CharField(max_length=50, choices=SAMPLING_CHOICES, default=SAMPLING_FULL_LIST)
     full_list_arguments = models.JSONField(default=dict)
     random_sampling_arguments = models.JSONField(default=dict)
-    sample_size = models.PositiveIntegerField(default=0)
-
-    flow_id = models.CharField(max_length=255, blank=True, null=True)
     successful_rapid_pro_calls = ArrayField(models.JSONField(), default=list)
 
     class Meta:
