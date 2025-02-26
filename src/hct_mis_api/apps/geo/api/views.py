@@ -9,13 +9,11 @@ from rest_framework import mixins
 from rest_framework.filters import OrderingFilter
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet
 from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
-from hct_mis_api.apps.account.api.permissions import HasOneOfPermissions
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.api.mixins import BusinessAreaMixin
+from hct_mis_api.apps.core.api.mixins import BaseViewSet, BusinessAreaMixin
 from hct_mis_api.apps.geo.api.caches import AreaKeyConstructor
 from hct_mis_api.apps.geo.api.filters import AreaFilter
 from hct_mis_api.apps.geo.api.serializers import AreaListSerializer
@@ -27,10 +25,9 @@ logger = logging.getLogger(__name__)
 class AreaViewSet(
     BusinessAreaMixin,
     mixins.ListModelMixin,
-    GenericViewSet,
+    BaseViewSet,
 ):
     serializer_class = AreaListSerializer
-    permission_classes = [HasOneOfPermissions]
     PERMISSIONS = [Permissions.GEO_VIEW_LIST]
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = AreaFilter

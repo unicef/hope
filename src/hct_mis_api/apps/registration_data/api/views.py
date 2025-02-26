@@ -12,13 +12,11 @@ from rest_framework.filters import OrderingFilter
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.viewsets import GenericViewSet
 from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
-from hct_mis_api.apps.account.api.permissions import HasOneOfPermissions
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.api.mixins import BusinessAreaProgramMixin
+from hct_mis_api.apps.core.api.mixins import BaseViewSet, BusinessAreaProgramMixin
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.api.caches import RDIKeyConstructor
 from hct_mis_api.apps.registration_data.api.filters import RegistrationDataImportFilter
@@ -37,10 +35,9 @@ logger = logging.getLogger(__name__)
 class RegistrationDataImportViewSet(
     BusinessAreaProgramMixin,
     mixins.ListModelMixin,
-    GenericViewSet,
+    BaseViewSet,
 ):
     serializer_class = RegistrationDataImportListSerializer
-    permission_classes = [HasOneOfPermissions]
     PERMISSIONS = [Permissions.RDI_VIEW_LIST]
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = RegistrationDataImportFilter

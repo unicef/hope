@@ -15,15 +15,14 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
-from rest_framework.viewsets import GenericViewSet
 from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
-from hct_mis_api.apps.account.api.permissions import HasOneOfPermissions
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.api.filters import UpdatedAtFilter
 from hct_mis_api.apps.core.api.mixins import (
     ActionMixin,
+    BaseViewSet,
     BusinessAreaProgramMixin,
     ProgramMixin,
 )
@@ -55,14 +54,13 @@ class PeriodicDataUpdateTemplateViewSet(
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
-    GenericViewSet,
+    BaseViewSet,
 ):
     serializer_classes_by_action = {
         "list": PeriodicDataUpdateTemplateListSerializer,
         "retrieve": PeriodicDataUpdateTemplateDetailSerializer,
         "create": PeriodicDataUpdateTemplateCreateSerializer,
     }
-    permission_classes = [HasOneOfPermissions]
     permissions_by_action = {
         "list": [Permissions.PDU_VIEW_LIST_AND_DETAILS],
         "retrieve": [Permissions.PDU_VIEW_LIST_AND_DETAILS],
@@ -127,14 +125,13 @@ class PeriodicDataUpdateUploadViewSet(
     BusinessAreaProgramMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
-    GenericViewSet,
+    BaseViewSet,
 ):
     serializer_classes_by_action = {
         "list": PeriodicDataUpdateUploadListSerializer,
         "upload": PeriodicDataUpdateUploadSerializer,
         "retrieve": PeriodicDataUpdateUploadDetailSerializer,
     }
-    permission_classes = [HasOneOfPermissions]
     permissions_by_action = {
         "list": [Permissions.PDU_VIEW_LIST_AND_DETAILS],
         "retrieve": [Permissions.PDU_VIEW_LIST_AND_DETAILS],
@@ -188,7 +185,7 @@ class PeriodicDataUpdateUploadViewSet(
 class PeriodicFieldViewSet(
     ProgramMixin,
     mixins.ListModelMixin,
-    GenericViewSet,
+    BaseViewSet,
 ):
     serializer_class = PeriodicFieldSerializer
     permission_classes = [IsAuthenticated]

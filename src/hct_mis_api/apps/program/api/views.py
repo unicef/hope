@@ -9,6 +9,7 @@ from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import OrderingFilter
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
@@ -16,9 +17,12 @@ from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
-from hct_mis_api.apps.account.api.permissions import HasOneOfPermissions
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.api.mixins import ActionMixin, BusinessAreaProgramMixin
+from hct_mis_api.apps.core.api.mixins import (
+    ActionMixin,
+    BaseViewSet,
+    BusinessAreaProgramMixin,
+)
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.api.caches import (
     BeneficiaryGroupKeyConstructor,
@@ -41,6 +45,7 @@ class ProgramCycleViewSet(
     ActionMixin,
     BusinessAreaProgramMixin,
     ModelViewSet,
+    BaseViewSet,
 ):
     serializer_classes_by_action = {
         "list": ProgramCycleListSerializer,
@@ -50,7 +55,6 @@ class ProgramCycleViewSet(
         "partial_update": ProgramCycleUpdateSerializer,
         "delete": ProgramCycleDeleteSerializer,
     }
-    permission_classes = [HasOneOfPermissions]
     permissions_by_action = {
         "list": [Permissions.PM_PROGRAMME_CYCLE_VIEW_DETAILS],
         "retrieve": [Permissions.PM_PROGRAMME_CYCLE_VIEW_DETAILS],
@@ -117,6 +121,7 @@ class BeneficiaryGroupViewSet(
     mixins.ListModelMixin,
     GenericViewSet,
 ):
+    permission_classes = [IsAuthenticated]
     queryset = BeneficiaryGroup.objects.all()
     serializer_class = BeneficiaryGroupSerializer
 

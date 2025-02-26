@@ -4,8 +4,10 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 from requests import Response, session
 from requests.adapters import HTTPAdapter
 from rest_framework.generics import get_object_or_404
+from rest_framework.viewsets import GenericViewSet
 from urllib3 import Retry
 
+from hct_mis_api.apps.account.api.permissions import HasOneOfPermissions
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import decode_id_string
 
@@ -102,3 +104,19 @@ class ActionMixin:
             return self.serializer_classes_by_action[self.action]
         else:
             return super().get_serializer_class()  # pragma: no cover
+
+
+class CustomSerializerMixin:
+    serializer_classes = {}
+
+    def get_serializer_class(self) -> None:
+        if self.action in ["retrieve", "list"] and (
+            serializer_class := self.serializer_classes.get(self.request.GET.get("serializer"))
+        ):
+            return serializer_class
+        return super().get_serializer_class()
+
+
+class BaseViewSet(GenericViewSet):
+    permission_classes = [HasOneOfPermissions]
+    PERMISSIONS = []

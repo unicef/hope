@@ -15,19 +15,16 @@ from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.generics import get_object_or_404
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet
 from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
-from hct_mis_api.apps.account.api.permissions import (
-    HasAllOfPermissions,
-    HasOneOfPermissions,
-)
+from hct_mis_api.apps.account.api.permissions import HasAllOfPermissions
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.core.api.mixins import (
     ActionMixin,
+    BaseViewSet,
     BusinessAreaMixin,
     BusinessAreaProgramMixin,
 )
@@ -62,8 +59,7 @@ class PaymentPlanMixin:
     )
 
 
-class PaymentPlanViewSet(BusinessAreaProgramMixin, PaymentPlanMixin, mixins.ListModelMixin, GenericViewSet):
-    permission_classes = [HasOneOfPermissions]
+class PaymentPlanViewSet(BusinessAreaProgramMixin, PaymentPlanMixin, mixins.ListModelMixin, BaseViewSet):
     PERMISSIONS = [Permissions.PM_VIEW_LIST]
 
     def get_queryset(self) -> QuerySet:  # pragma: no cover
@@ -72,7 +68,7 @@ class PaymentPlanViewSet(BusinessAreaProgramMixin, PaymentPlanMixin, mixins.List
         return PaymentPlan.objects.filter(business_area=business_area, program_cycle__program=program)
 
 
-class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.ListModelMixin, GenericViewSet):
+class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.ListModelMixin, BaseViewSet):
     permission_classes = [HasAllOfPermissions]
     PERMISSIONS = [
         Permissions.PM_VIEW_LIST,
@@ -177,9 +173,7 @@ class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.L
         return action_to_permissions_map.get(action_name)
 
 
-class PaymentPlanSupportingDocumentViewSet(
-    ActionMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin, GenericViewSet
-):
+class PaymentPlanSupportingDocumentViewSet(ActionMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin, BaseViewSet):
     serializer_class = PaymentPlanSupportingDocumentSerializer
     lookup_field = "file_id"
 
@@ -187,7 +181,6 @@ class PaymentPlanSupportingDocumentViewSet(
         "create": PaymentPlanSupportingDocumentSerializer,
         "delete": PaymentPlanSupportingDocumentSerializer,
     }
-    permission_classes = [HasOneOfPermissions]
     permissions_by_action = {
         "create": [Permissions.PM_UPLOAD_SUPPORTING_DOCUMENT],
         "delete": [Permissions.PM_DELETE_SUPPORTING_DOCUMENT],
