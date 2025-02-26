@@ -1,8 +1,6 @@
 import logging
 from typing import Any
 
-from django.db.models import QuerySet
-
 from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, status
@@ -47,6 +45,8 @@ class ProgramCycleViewSet(
     ModelViewSet,
     BaseViewSet,
 ):
+    queryset = ProgramCycle.objects.all()
+    business_area_model_field = "program__business_area"
     serializer_classes_by_action = {
         "list": ProgramCycleListSerializer,
         "retrieve": ProgramCycleListSerializer,
@@ -66,11 +66,6 @@ class ProgramCycleViewSet(
 
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = ProgramCycleFilter
-
-    def get_queryset(self) -> QuerySet:
-        business_area = self.get_business_area()
-        program = self.get_program()
-        return ProgramCycle.objects.filter(program__business_area=business_area, program=program)
 
     @etag_decorator(ProgramCycleKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=ProgramCycleKeyConstructor())

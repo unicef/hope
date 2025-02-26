@@ -60,15 +60,13 @@ class PaymentPlanMixin:
 
 
 class PaymentPlanViewSet(BusinessAreaProgramMixin, PaymentPlanMixin, mixins.ListModelMixin, BaseViewSet):
+    program_model_field = "program_cycle__program"
+    queryset = PaymentPlan.objects.all()
     PERMISSIONS = [Permissions.PM_VIEW_LIST]
-
-    def get_queryset(self) -> QuerySet:  # pragma: no cover
-        business_area = self.get_business_area()
-        program = self.get_program()
-        return PaymentPlan.objects.filter(business_area=business_area, program_cycle__program=program)
 
 
 class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.ListModelMixin, BaseViewSet):
+    queryset = PaymentPlan.objects.all()
     permission_classes = [HasAllOfPermissions]
     PERMISSIONS = [
         Permissions.PM_VIEW_LIST,
@@ -76,22 +74,24 @@ class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.L
     ]
 
     def get_queryset(self) -> QuerySet:
-        business_area = self.get_business_area()
-        queryset = PaymentPlan.objects.filter(business_area=business_area)
         program_ids = self.request.user.get_program_ids_for_permission_in_business_area(
-            str(business_area.id),
+            str(self.business_area_id),
             [perm for perm_class in self.permission_classes for perm in perm_class.PERMISSIONS],
             one_of_permissions=False,
         )
 
-        return queryset.filter(
-            status__in=[
-                PaymentPlan.Status.IN_APPROVAL,
-                PaymentPlan.Status.IN_AUTHORIZATION,
-                PaymentPlan.Status.IN_REVIEW,
-                PaymentPlan.Status.ACCEPTED,
-            ],
-            program_cycle__program__in=program_ids,
+        return (
+            super()
+            .get_queryset()
+            .filter(
+                status__in=[
+                    PaymentPlan.Status.IN_APPROVAL,
+                    PaymentPlan.Status.IN_AUTHORIZATION,
+                    PaymentPlan.Status.IN_REVIEW,
+                    PaymentPlan.Status.ACCEPTED,
+                ],
+                program_cycle__program__in=program_ids,
+            )
         )
 
     # TODO: e2e failed probably because of cache here

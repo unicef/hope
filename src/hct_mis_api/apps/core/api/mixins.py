@@ -1,6 +1,8 @@
 import os
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
+from django.db.models import QuerySet
+
 from requests import Response, session
 from requests.adapters import HTTPAdapter
 from rest_framework.generics import get_object_or_404
@@ -74,15 +76,33 @@ class BaseAPI:
 
 
 class BusinessAreaMixin:
+    business_area_model_field = "business_area"
+
+    @property
+    def business_area_id(self) -> Optional[str]:
+        return self.kwargs.get("business_area")
+
     def get_business_area(self) -> BusinessArea:
-        return get_object_or_404(BusinessArea, slug=self.kwargs.get("business_area"))
+        return get_object_or_404(BusinessArea, slug=self.business_area_id)
+
+    def get_queryset(self) -> QuerySet:
+        return self.queryset.filter(**{self.business_area_model_field: self.business_area_id})
 
 
 class ProgramMixin:
+    program_model_field = "program"
+
+    @property
+    def program_id(self) -> Optional[str]:
+        return decode_id_string(self.kwargs.get("program_id"))
+
     def get_program(self) -> "Program":
         from hct_mis_api.apps.program.models import Program
 
-        return get_object_or_404(Program, id=decode_id_string(self.kwargs.get("program_id")))
+        return get_object_or_404(Program, id=self.program_id)
+
+    def get_queryset(self) -> QuerySet:
+        return self.queryset.filter(**{self.program_model_field: self.program_id})
 
 
 class BusinessAreaProgramMixin(BusinessAreaMixin, ProgramMixin):
@@ -118,5 +138,5 @@ class CustomSerializerMixin:
 
 
 class BaseViewSet(GenericViewSet):
-    permission_classes = [HasOneOfPermissions]
-    PERMISSIONS = []
+    permission_classes: list = [HasOneOfPermissions]
+    PERMISSIONS: list = []

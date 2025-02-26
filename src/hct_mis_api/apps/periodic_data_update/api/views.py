@@ -2,7 +2,6 @@ import logging
 from typing import Any
 
 from django.core.exceptions import ValidationError as DjangoValidationError
-from django.db.models import QuerySet
 from django.http import FileResponse
 
 from constance import config
@@ -56,6 +55,7 @@ class PeriodicDataUpdateTemplateViewSet(
     mixins.ListModelMixin,
     BaseViewSet,
 ):
+    queryset = PeriodicDataUpdateTemplate.objects.all()
     serializer_classes_by_action = {
         "list": PeriodicDataUpdateTemplateListSerializer,
         "retrieve": PeriodicDataUpdateTemplateDetailSerializer,
@@ -70,11 +70,6 @@ class PeriodicDataUpdateTemplateViewSet(
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = UpdatedAtFilter
-
-    def get_queryset(self) -> QuerySet:
-        business_area = self.get_business_area()
-        program = self.get_program()
-        return PeriodicDataUpdateTemplate.objects.filter(business_area=business_area, program=program)
 
     # caching disabled until we decide how to handle cache + dynamic status
     # to enable - just uncomment the decorators and related tests
@@ -127,6 +122,9 @@ class PeriodicDataUpdateUploadViewSet(
     mixins.ListModelMixin,
     BaseViewSet,
 ):
+    queryset = PeriodicDataUpdateUpload.objects.all()
+    program_model_field = "template__program"
+    business_area_model_field = "template__business_area"
     serializer_classes_by_action = {
         "list": PeriodicDataUpdateUploadListSerializer,
         "upload": PeriodicDataUpdateUploadSerializer,
@@ -139,11 +137,6 @@ class PeriodicDataUpdateUploadViewSet(
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = UpdatedAtFilter
-
-    def get_queryset(self) -> QuerySet:
-        business_area = self.get_business_area()
-        program = self.get_program()
-        return PeriodicDataUpdateUpload.objects.filter(template__business_area=business_area, template__program=program)
 
     # caching disabled until we decide how to handle cache + dynamic status
     # to enable - just uncomment the decorators and related tests
@@ -187,14 +180,11 @@ class PeriodicFieldViewSet(
     mixins.ListModelMixin,
     BaseViewSet,
 ):
+    queryset = FlexibleAttribute.objects.filter(type=FlexibleAttribute.PDU)
     serializer_class = PeriodicFieldSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = UpdatedAtFilter
-
-    def get_queryset(self) -> QuerySet:
-        program = self.get_program()
-        return FlexibleAttribute.objects.filter(program=program, type=FlexibleAttribute.PDU)
 
     @etag_decorator(PeriodicFieldKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=PeriodicFieldKeyConstructor())

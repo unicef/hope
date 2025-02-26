@@ -1,7 +1,6 @@
 import logging
 from typing import Any
 
-from django.db.models import QuerySet
 from django.http import HttpRequest
 
 from constance import config
@@ -37,15 +36,11 @@ class RegistrationDataImportViewSet(
     mixins.ListModelMixin,
     BaseViewSet,
 ):
+    queryset = RegistrationDataImport.objects.all()
     serializer_class = RegistrationDataImportListSerializer
     PERMISSIONS = [Permissions.RDI_VIEW_LIST]
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = RegistrationDataImportFilter
-
-    def get_queryset(self) -> QuerySet:
-        business_area = self.get_business_area()
-        program = self.get_program()
-        return RegistrationDataImport.objects.filter(business_area=business_area, program=program)
 
     @etag_decorator(RDIKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=RDIKeyConstructor())
