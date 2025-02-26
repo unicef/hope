@@ -152,14 +152,6 @@ class RdiMergeTask:
         "wallet_address",
     )
 
-    # TODO DATAHUB DELETE Fix for flex registration
-    #         if record := imported_household.flex_registrations_record:
-    #             household_data["registration_id"] = str(record.registration)
-
-    # TODO DATAHUB DELETE Fix for flex registration
-    #         if enumerator_rec_id := imported_household.enumerator_rec_id:
-    #             household_data["enumerator_rec_id"] = enumerator_rec_id
-
     def _create_grievance_ticket_for_delivery_mechanisms_errors(
         self, delivery_mechanism_data: DeliveryMechanismData, obj_hct: RegistrationDataImport, description: str
     ) -> Tuple[GrievanceTicket, TicketIndividualDataUpdateDetails]:
