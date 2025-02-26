@@ -751,14 +751,14 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
     @classmethod
     def resolve_can_export_xlsx(cls, parent: PaymentPlan, info: Any) -> bool:
         if parent.status in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
-            if parent.fsp_communication_channel == "API":
+            if parent.fsp_communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_API:
                 if not info.context.user.has_permission(
                     Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value, parent.business_area
                 ):
                     return False
                 return parent.can_create_xlsx_with_fsp_auth_code
 
-            if parent.fsp_communication_channel == "XLSX":
+            if parent.fsp_communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX:
                 if not info.context.user.has_permission(Permissions.PM_EXPORT_XLSX_FOR_FSP.value, parent.business_area):
                     return False
                 return cls._has_fsp_delivery_mechanism_xlsx_template(parent)
@@ -768,14 +768,14 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
     @staticmethod
     def resolve_can_download_xlsx(parent: PaymentPlan, info: Any) -> bool:
         if parent.status in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
-            if parent.fsp_communication_channel == "API":
+            if parent.fsp_communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_API:
                 if not info.context.user.has_permission(
                     Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value, parent.business_area
                 ):
                     return False
                 return parent.has_export_file
 
-            if parent.fsp_communication_channel == "XLSX":
+            if parent.fsp_communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX:
                 if not info.context.user.has_permission(
                     Permissions.PM_DOWNLOAD_XLSX_FOR_FSP.value, parent.business_area
                 ):
@@ -787,7 +787,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
     @staticmethod
     def resolve_can_send_xlsx_password(parent: PaymentPlan, info: Any) -> bool:
         if parent.status in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
-            if parent.fsp_communication_channel == "API":
+            if parent.fsp_communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_API:
                 if not info.context.user.has_permission(Permissions.PM_SEND_XLSX_PASSWORD.value, parent.business_area):
                     return False
                 return parent.has_export_file
