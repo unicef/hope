@@ -293,6 +293,7 @@ export function paymentPlanStatusToColor(
   status: string,
 ): string {
   const colorsMap = {
+    ['ASSIGNED']: theme.hctPalette.gray,
     [PaymentPlanStatus.Accepted]: theme.hctPalette.green,
     [PaymentPlanStatus.Draft]: theme.hctPalette.green,
     [PaymentPlanStatus.Finished]: theme.hctPalette.gray,
