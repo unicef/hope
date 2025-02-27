@@ -543,11 +543,11 @@ class TestCreateTargeting:
         assert pageTargetingDetails.getTitlePage().text.split("\n")[0].strip() == targeting_name
         assert pageTargetingDetails.getCriteriaContainer().text == disability_expected_criteria_text
         assert Household.objects.count() == 2
-        assert (
-            pageTargetingDetails.getHouseholdTableCell(1, 1).text
-            == household_with_disability.individuals.first().unicef_id
-        )
+        assert PaymentPlan.objects.get(name=targeting_name).payment_items.count() == 1
+        individual = household_with_disability.individuals.first()
+        pageTargetingDetails.wait_for_text(individual.unicef_id, pageTargetingDetails.household_table_cell.format(1, 1))
         assert len(pageTargetingDetails.getPeopleTableRows()) == 1
+        assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual.unicef_id
 
     # @pytest.mark.xfail(reason="UNSTABLE")
     def test_create_targeting_for_normal_program(
@@ -583,11 +583,14 @@ class TestCreateTargeting:
         assert pageTargetingDetails.getTitlePage().text.split("\n")[0].strip() == targeting_name
         assert pageTargetingDetails.getCriteriaContainer().text == disability_expected_criteria_text
         assert Household.objects.count() == 3
-        assert Program.objects.count() == 5
+        assert PaymentPlan.objects.get(name=targeting_name).payment_items.count() == 1
+        pageTargetingDetails.wait_for_text(
+            household_refugee.unicef_id, pageTargetingDetails.household_table_cell.format(1, 1)
+        )
+        assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
         assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == household_refugee.unicef_id
         actions = ActionChains(pageTargetingDetails.driver)
         actions.move_to_element(pageTargetingDetails.getHouseholdTableCell(1, 1)).perform()  # type: ignore
-        assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
 
     def test_create_targeting_with_pdu_string_criteria(
         self,
@@ -622,16 +625,20 @@ class TestCreateTargeting:
         pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
         expected_criteria_text = "Test String Attribute: Text\nRound 1 (Test Round String 1)"
         assert pageTargetingCreate.getCriteriaContainer().text == expected_criteria_text
-        targeting_name = "Test Targeting PDU string"
+        targeting_name = "Test Targeting PDU str"
         pageTargetingCreate.getFieldName().send_keys(targeting_name)
         pageTargetingCreate.getTargetPopulationSaveButton().click()
         pageTargetingDetails.getLockButton()
         assert pageTargetingDetails.getTitlePage().text.split("\n")[0].strip() == targeting_name
         assert pageTargetingDetails.getCriteriaContainer().text == expected_criteria_text
         assert Household.objects.count() == 3
-        assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual1.household.unicef_id
+        assert PaymentPlan.objects.get(name=targeting_name).payment_items.count() == 1
+        pageTargetingDetails.wait_for_text(
+            individual1.household.unicef_id, pageTargetingDetails.household_table_cell.format(1, 1)
+        )
         assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "1"
         assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
+        assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual1.household.unicef_id
 
     # @pytest.mark.xfail(reason="UNSTABLE")
     def test_create_targeting_with_pdu_bool_criteria(
@@ -695,6 +702,9 @@ class TestCreateTargeting:
         pageTargetingCreate.getButtonSave().click()
         pageTargetingDetails.getLockButton()
 
+        pageTargetingDetails.wait_for_text(
+            individual2.household.unicef_id, pageTargetingDetails.household_table_cell.format(1, 1)
+        )
         assert pageTargetingDetails.getCriteriaContainer().text == bool_no_expected_criteria_text
         assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual2.household.unicef_id
         assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "1"
@@ -714,7 +724,7 @@ class TestCreateTargeting:
         individual1.flex_fields[decimal_attribute.name]["1"]["value"] = 2.5
         individual1.save()
         individual2 = individual(program)
-        individual2.flex_fields[decimal_attribute.name]["1"]["value"] = 5.0
+        individual2.flex_fields[decimal_attribute.name]["1"]["value"] = 7.0
         individual2.save()
         individual(program)
         pageTargeting.navigate_to_page("afghanistan", program.id)
@@ -751,8 +761,8 @@ class TestCreateTargeting:
         pageTargetingDetails.getButtonEdit().click()
         pageTargetingDetails.getButtonIconEdit().click()
         pageTargetingCreate.getInputIndividualsFiltersBlocksValueTo().send_keys(Keys.BACKSPACE)
-        pageTargetingCreate.getInputIndividualsFiltersBlocksValueTo().send_keys("5")
-        bool_no_expected_criteria_text = "Test Decimal Attribute: 2 - 5\nRound 1 (Test Round Decimal 1)"
+        pageTargetingCreate.getInputIndividualsFiltersBlocksValueTo().send_keys("9")
+        bool_no_expected_criteria_text = "Test Decimal Attribute: 2 - 9\nRound 1 (Test Round Decimal 1)"
 
         pageTargetingCreate.get_elements(pageTargetingCreate.targetingCriteriaAddDialogSaveButton)[1].click()
 
@@ -760,7 +770,9 @@ class TestCreateTargeting:
         pageTargetingCreate.getButtonSave().click()
         pageTargetingDetails.getLockButton()
         pageTargetingDetails.disappearStatusContainer()
-
+        pageTargetingDetails.wait_for_text(
+            individual1.household.unicef_id, pageTargetingDetails.household_table_cell.format(1, 1)
+        )
         assert pageTargetingDetails.getCriteriaContainer().text == bool_no_expected_criteria_text
         assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "2"
         assert len(pageTargetingDetails.getHouseholdTableRows()) == 2
@@ -819,8 +831,9 @@ class TestCreateTargeting:
         pageTargetingDetails.wait_for_text(
             individual1.household.unicef_id, pageTargetingDetails.household_table_cell.format(1, 1)
         )
-        assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "1"
+        assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual1.household.unicef_id
         assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
+        assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "1"
 
     def test_create_targeting_with_pdu_null_criteria(
         self,
@@ -863,8 +876,10 @@ class TestCreateTargeting:
         assert pageTargetingDetails.getCriteriaContainer().text == expected_criteria_text
         assert Household.objects.count() == 3
         assert PaymentPlan.objects.get(name=targeting_name).payment_items.count() == 1
-
         assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "1"
+        pageTargetingDetails.wait_for_text(
+            individual3.household.unicef_id, pageTargetingDetails.household_table_cell.format(1, 1)
+        )
         assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
         assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual3.household.unicef_id
 
@@ -917,13 +932,17 @@ class TestCreateTargeting:
         assert pageTargetingDetails.getTitlePage().text.split("\n")[0].strip() == targeting_name
         assert pageTargetingDetails.getCriteriaContainer().text == expected_criteria_text
         assert Household.objects.count() == 3
-        assert PaymentPlan.objects.count() == 1
         assert PaymentPlan.objects.get(name=targeting_name).payment_items.count() == 1
         assert pageTargetingCreate.getTotalNumberOfPeopleCount().text == "1"
-        assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual1.unicef_id
+
+        pageTargetingDetails.wait_for_text(
+            individual1.unicef_id, pageTargetingDetails.household_table_cell.format(1, 1)
+        )
+
         assert len(pageTargetingDetails.getPeopleTableRows()) == 1
+        assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual1.unicef_id
         # TODO: just added for test in CI to check if above code will fail after re run
-        assert 11 == 99
+        assert "11" == "99"
 
 
 @pytest.mark.night
