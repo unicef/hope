@@ -208,11 +208,10 @@ class DeliveryMechanismDataNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION),)
 
     name = graphene.String(required=False)
-    is_valid = graphene.Boolean()
     individual_tab_data = graphene.JSONString()
 
     def resolve_name(self, info: Any) -> str:
-        return self.delivery_mechanism.name
+        return self.account_type.label
 
     def resolve_individual_tab_data(self, info: Any) -> dict:
         return {key: self.data.get(key, None) for key in self.all_dm_fields}

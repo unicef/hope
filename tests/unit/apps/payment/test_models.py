@@ -31,7 +31,6 @@ from hct_mis_api.apps.payment.fields import DynamicChoiceArrayField, DynamicChoi
 from hct_mis_api.apps.payment.fixtures import (
     ApprovalFactory,
     ApprovalProcessFactory,
-    DeliveryMechanismDataFactory,
     PaymentFactory,
     PaymentPlanFactory,
     RealProgramFactory,
@@ -39,7 +38,6 @@ from hct_mis_api.apps.payment.fixtures import (
 )
 from hct_mis_api.apps.payment.models import (
     Approval,
-    DeliveryMechanism,
     FinancialServiceProviderXlsxTemplate,
     Payment,
     PaymentPlan,
@@ -745,16 +743,6 @@ class TestFinancialServiceProviderModel(TestCase):
             document_number="id_doc_number_123",
         )
         generate_delivery_mechanisms()
-        dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
-        dmd = DeliveryMechanismDataFactory(
-            individual=primary,
-            delivery_mechanism=dm_atm_card,
-            data={
-                "card_number__atm_card": "333111222",
-                "card_expiry_date__atm_card": "2025-11-11",
-                "name_of_cardholder__atm_card": "Just Random Test Name",
-            },
-        )
 
         # get None if no snapshot
         none_resp = fsp_xlsx_template.get_column_from_core_field(payment, "given_name")
@@ -812,7 +800,7 @@ class TestFinancialServiceProviderModel(TestCase):
         self.assertEqual(primary_collector_id, str(primary.pk))
 
         # get delivery_mechanisms_data field
-        dmd_resp = fsp_xlsx_template.get_column_from_core_field(payment, "name_of_cardholder__atm_card", dmd)
+        dmd_resp = fsp_xlsx_template.get_column_from_core_field(payment, "name_of_cardholder__atm_card")
         self.assertEqual(dmd_resp, "Just Random Test Name")
 
         # country_origin

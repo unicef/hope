@@ -144,25 +144,6 @@ class EditBankTransferObjectType(graphene.InputObjectType):
     account_holder_name = graphene.String(required=True)
 
 
-class DeliveryMechanismDataPayloadFieldObjectType(graphene.InputObjectType):
-    name = graphene.String(required=True)
-    value = graphene.String(required=True)
-    previous_value = graphene.String(required=False)
-
-
-class DeliveryMechanismDataObjectType(graphene.InputObjectType):
-    label = graphene.String(required=True)
-    approve_status = graphene.Boolean(required=True)
-    data_fields = graphene.List(DeliveryMechanismDataPayloadFieldObjectType, required=True)
-
-
-class EditDeliveryMechanismDataObjectType(graphene.InputObjectType):
-    id = graphene.Field(graphene.ID, required=True)
-    label = graphene.String(required=True)
-    approve_status = graphene.Boolean(required=True)
-    data_fields = graphene.List(DeliveryMechanismDataPayloadFieldObjectType, required=True)
-
-
 class IndividualUpdateDataObjectType(graphene.InputObjectType):
     status = graphene.String()
     full_name = graphene.String()
@@ -207,9 +188,6 @@ class IndividualUpdateDataObjectType(graphene.InputObjectType):
     blockchain_name = graphene.String()
     wallet_address = graphene.String()
     wallet_name = graphene.String()
-    delivery_mechanism_data = graphene.List(DeliveryMechanismDataObjectType)
-    delivery_mechanism_data_to_edit = graphene.List(EditDeliveryMechanismDataObjectType)
-    delivery_mechanism_data_to_remove = graphene.List(graphene.ID)
     # people fields
     consent = graphene.Boolean(description="People update")
     residence_status = graphene.String(description="People update")

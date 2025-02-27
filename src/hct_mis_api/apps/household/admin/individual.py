@@ -54,13 +54,7 @@ logger = logging.getLogger(__name__)
 class IndividualDeliveryMechanismDataInline(admin.TabularInline):
     model = DeliveryMechanismData
     extra = 0
-    fields = ("delivery_mechanism", "data", "is_valid")
-    readonly_fields = ("delivery_mechanism", "data", "is_valid")
-    show_change_link = True
-    can_delete = False
-
-    def has_add_permission(self, request: HttpRequest, obj: Optional[Individual] = None) -> bool:
-        return False
+    fields = ("delivery_mechanism", "account_type", "data")
 
 
 @admin.register(Individual)

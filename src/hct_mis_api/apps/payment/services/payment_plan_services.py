@@ -382,14 +382,14 @@ class PaymentPlanService:
                 logging.exception(msg)
                 raise GraphQLError(msg)
 
-            if payment_plan.delivery_mechanism:
-                wallet, created = DeliveryMechanismData.objects.get_or_create(
-                    individual_id=collector_id, delivery_mechanism=payment_plan.delivery_mechanism
+            has_valid_wallet = False
+            if payment_plan.delivery_mechanism and payment_plan.financial_service_provider:
+                wallet, _ = DeliveryMechanismData.objects.get_or_create(
+                    individual_id=collector_id, account_type=payment_plan.delivery_mechanism.account_type
                 )
-                if created:
-                    wallet.validate()
-                    wallet.update_unique_field()
-                    wallet.save()
+                has_valid_wallet = wallet.validate(
+                    payment_plan.financial_service_provider, payment_plan.delivery_mechanism
+                )
 
             payments_to_create.append(
                 Payment(
@@ -404,9 +404,7 @@ class PaymentPlanService:
                     collector_id=collector_id,
                     financial_service_provider=payment_plan.financial_service_provider,
                     delivery_type=payment_plan.delivery_mechanism,
-                    has_valid_wallet=wallet.is_valid_for_fsp(payment_plan.financial_service_provider)
-                    if payment_plan.financial_service_provider
-                    else True,
+                    has_valid_wallet=has_valid_wallet,
                 )
             )
         try:

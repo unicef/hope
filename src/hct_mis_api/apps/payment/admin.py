@@ -387,21 +387,9 @@ class FspXlsxTemplatePerDeliveryMechanismForm(forms.ModelForm):
         cleaned_data = super().clean()
         delivery_mechanism = cleaned_data.get("delivery_mechanism")
         financial_service_provider = cleaned_data.get("financial_service_provider")
-        xlsx_template = cleaned_data.get("xlsx_template")
 
         if not delivery_mechanism or not financial_service_provider:
             return cleaned_data
-
-        missing_required_core_fields = [
-            required_field
-            for required_field in delivery_mechanism.required_fields
-            if required_field not in xlsx_template.core_fields
-        ]
-        if missing_required_core_fields:
-            raise ValidationError(
-                f"{missing_required_core_fields} fields are required by delivery mechanism "
-                f"{delivery_mechanism} and must be present in the template core fields"
-            )
 
         error_message = f"Delivery Mechanism {delivery_mechanism} is not supported by Financial Service Provider {financial_service_provider}"
         # to work both in inline and standalone
@@ -453,8 +441,6 @@ class FspXlsxTemplatePerDeliveryMechanismAdmin(HOPEModelAdminBase):
 
 
 class FinancialServiceProviderAdminForm(forms.ModelForm):
-    required_fields = CommaSeparatedArrayField()
-
     @staticmethod
     def locked_payment_plans_for_fsp(obj: FinancialServiceProvider) -> QuerySet[PaymentPlan]:
         return PaymentPlan.objects.filter(
@@ -464,7 +450,7 @@ class FinancialServiceProviderAdminForm(forms.ModelForm):
                     PaymentPlan.Status.FINISHED,
                 ],
             ),
-            delivery_mechanism__financial_service_provider=obj,
+            financial_service_provider=obj,
         ).distinct()
 
     def clean(self) -> Optional[Dict[str, Any]]:
@@ -521,7 +507,7 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
         ("communication_channel", "fsp_xlsx_templates"),
         ("data_transfer_configuration",),
         ("allowed_business_areas",),
-        ("payment_gateway_id", "required_fields"),
+        ("payment_gateway_id",),
     )
     readonly_fields = ("fsp_xlsx_templates", "data_transfer_configuration")
     inlines = (FspXlsxTemplatePerDeliveryMechanismAdminInline,)
@@ -554,17 +540,18 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
 
 @admin.register(DeliveryMechanismData)
 class DeliveryMechanismDataAdmin(HOPEModelAdminBase):
-    list_display = ("individual", "get_business_area", "get_program", "delivery_mechanism", "is_valid")
+    # TODO MB fix for Account model
+    list_display = ("individual", "get_business_area", "get_program", "account_type", "is_unique")
 
-    raw_id_fields = ("delivery_mechanism", "individual", "possible_duplicate_of")
-    readonly_fields = ("possible_duplicate_of", "unique_key", "signature_hash", "validation_errors")
+    raw_id_fields = ("account_type", "individual")
+    readonly_fields = ("unique_key", "signature_hash")
     search_fields = ("individual__unicef_id",)
     list_filter = (
         ("individual__program__business_area", AutoCompleteFilter),
         ("individual__program", AutoCompleteFilter),
         ("individual", AutoCompleteFilter),
-        ("delivery_mechanism", AutoCompleteFilter),
-        "is_valid",
+        ("account_type", AutoCompleteFilter),
+        "is_unique",
     )
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
@@ -577,22 +564,11 @@ class DeliveryMechanismDataAdmin(HOPEModelAdminBase):
         return obj.individual.program
 
 
-class DeliveryMechanismAdminForm(forms.ModelForm):
-    optional_fields = CommaSeparatedArrayField()
-    required_fields = CommaSeparatedArrayField()
-    unique_fields = CommaSeparatedArrayField()
-
-    class Meta:
-        model = DeliveryMechanism
-        fields = "__all__"
-
-
 @admin.register(DeliveryMechanism)
 class DeliveryMechanismAdmin(HOPEModelAdminBase):
     list_display = ("code", "name", "is_active", "transfer_type")
     search_fields = ("code", "name")
     list_filter = ("is_active", "transfer_type")
-    form = DeliveryMechanismAdminForm
 
 
 @admin.register(PaymentPlanSupportingDocument)

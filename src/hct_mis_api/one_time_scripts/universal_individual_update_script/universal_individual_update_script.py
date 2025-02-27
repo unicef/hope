@@ -18,7 +18,6 @@ from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
     DeduplicateTask,
     HardDocumentDeduplication,
 )
-from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
 from hct_mis_api.apps.utils.elasticsearch_utils import populate_index
 
 
@@ -216,7 +215,7 @@ class UniversalIndividualUpdateScript:
                 )
         return documents_to_update, documents_to_create
 
-    def handle_deliver_mechanism_data_update(
+    def handle_delivery_mechanism_data_update(
         self, row: Tuple[Any, ...], headers: List[str], individual: Individual
     ) -> None:
         if self.deliver_mechanism_data_fields is None:
@@ -240,18 +239,12 @@ class UniversalIndividualUpdateScript:
                 if single_data_object is None:
                     single_data_object = DeliveryMechanismData(
                         individual=individual,
-                        delivery_mechanism=delivery_mechanism,
+                        account_type=delivery_mechanism.account_type,
                         rdi_merge_status=DeliveryMechanismData.MERGED,
                     )
                 single_data_object.data[field_name] = value
             if single_data_object:
-                single_data_object.validate()
-                if single_data_object.is_valid:
-                    single_data_object.update_unique_field()
-                single_data_object.save()
-                RdiMergeTask()._create_grievance_tickets_for_delivery_mechanisms_errors(
-                    [single_data_object], single_data_object.individual.registration_data_import
-                )
+                single_data_object.update_unique_field()
 
     def handle_update(self, sheet: Worksheet, headers: List[str]) -> List[str]:
         row_index = 1
@@ -285,7 +278,7 @@ class UniversalIndividualUpdateScript:
             documents_to_update_part, documents_to_create_part = self.handle_documents_update(row, headers, individual)
             documents_to_update.extend(documents_to_update_part)
             documents_to_create.extend(documents_to_create_part)
-            self.handle_deliver_mechanism_data_update(row, headers, individual)
+            self.handle_delivery_mechanism_data_update(row, headers, individual)
             households_to_update.append(household)
             individuals_to_update.append(individual)
             if len(individuals_to_update) == self.batch_size:
