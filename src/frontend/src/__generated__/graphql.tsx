@@ -2224,7 +2224,6 @@ export type HouseholdNode = Node & {
   rdiMergeStatus: HouseholdRdiMergeStatus;
   referralTicketDetails: TicketReferralDetailsNodeConnection;
   registrationDataImport?: Maybe<RegistrationDataImportNode>;
-  registrationId?: Maybe<Scalars['String']['output']>;
   registrationMethod: HouseholdRegistrationMethod;
   removedDate?: Maybe<Scalars['DateTime']['output']>;
   representatives: IndividualNodeConnection;
@@ -2766,7 +2765,6 @@ export type IndividualNode = Node & {
   rdiMergeStatus: IndividualRdiMergeStatus;
   referralTicketDetails: TicketReferralDetailsNodeConnection;
   registrationDataImport: RegistrationDataImportNode;
-  registrationId?: Maybe<Scalars['String']['output']>;
   relationship?: Maybe<IndividualRelationship>;
   relationshipConfirmed: Scalars['Boolean']['output'];
   removedDate?: Maybe<Scalars['DateTime']['output']>;
@@ -23522,7 +23520,6 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   rdiMergeStatus?: Resolver<ResolversTypes['HouseholdRdiMergeStatus'], ParentType, ContextType>;
   referralTicketDetails?: Resolver<ResolversTypes['TicketReferralDetailsNodeConnection'], ParentType, ContextType, Partial<HouseholdNodeReferralTicketDetailsArgs>>;
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>;
-  registrationId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   registrationMethod?: Resolver<ResolversTypes['HouseholdRegistrationMethod'], ParentType, ContextType>;
   removedDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   representatives?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, Partial<HouseholdNodeRepresentativesArgs>>;
@@ -23736,7 +23733,6 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   rdiMergeStatus?: Resolver<ResolversTypes['IndividualRdiMergeStatus'], ParentType, ContextType>;
   referralTicketDetails?: Resolver<ResolversTypes['TicketReferralDetailsNodeConnection'], ParentType, ContextType, Partial<IndividualNodeReferralTicketDetailsArgs>>;
   registrationDataImport?: Resolver<ResolversTypes['RegistrationDataImportNode'], ParentType, ContextType>;
-  registrationId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   relationship?: Resolver<Maybe<ResolversTypes['IndividualRelationship']>, ParentType, ContextType>;
   relationshipConfirmed?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   removedDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;

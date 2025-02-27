@@ -1556,7 +1556,6 @@ type HouseholdNode implements Node {
   currency: String
   unhcrId: String!
   detailId: String
-  registrationId: String
   programRegistrationId: String
   totalCashReceivedUsd: Decimal
   totalCashReceived: Decimal
@@ -1910,7 +1909,6 @@ type IndividualNode implements Node {
   fchildHoh: Boolean!
   childHoh: Boolean!
   detailId: String
-  registrationId: String
   programRegistrationId: String
   preferredLanguage: String
   relationshipConfirmed: Boolean!

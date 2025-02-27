@@ -666,7 +666,7 @@ snapshots['TestIndividualQuery::test_query_individuals_by_search_phone_no_filter
     ]
 }
 
-snapshots['TestIndividualQuery::test_query_individuals_by_search_registration_id_filter_0_with_permission 1'] = {
+snapshots['TestIndividualQuery::test_query_individuals_by_search_detail_id_filter_0_with_permission 1'] = {
     'data': {
         'allIndividuals': {
             'edges': [
@@ -685,7 +685,7 @@ snapshots['TestIndividualQuery::test_query_individuals_by_search_registration_id
     }
 }
 
-snapshots['TestIndividualQuery::test_query_individuals_by_search_registration_id_filter_1_without_permission 1'] = {
+snapshots['TestIndividualQuery::test_query_individuals_by_search_detail_id_filter_1_without_permission 1'] = {
     'data': {
         'allIndividuals': None
     },
@@ -705,7 +705,7 @@ snapshots['TestIndividualQuery::test_query_individuals_by_search_registration_id
     ]
 }
 
-snapshots['TestIndividualQuery::test_query_individuals_by_search_registration_id_filter_with_search_type_0_with_permission 1'] = {
+snapshots['TestIndividualQuery::test_query_individuals_by_search_detail_id_filter_with_search_type_0_with_permission 1'] = {
     'data': {
         'allIndividuals': {
             'edges': [
@@ -724,7 +724,7 @@ snapshots['TestIndividualQuery::test_query_individuals_by_search_registration_id
     }
 }
 
-snapshots['TestIndividualQuery::test_query_individuals_by_search_registration_id_filter_with_search_type_1_without_permission 1'] = {
+snapshots['TestIndividualQuery::test_query_individuals_by_search_detail_id_filter_with_search_type_1_without_permission 1'] = {
     'data': {
         'allIndividuals': None
     },

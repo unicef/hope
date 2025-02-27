@@ -406,7 +406,6 @@ class Household(
             "currency",
             "unhcr_id",
             "detail_id",
-            "registration_id",
             "program_registration_id",
         ]
     )
@@ -501,14 +500,7 @@ class Household(
     currency = models.CharField(max_length=250, choices=CURRENCY_CHOICES, default=BLANK)
     unhcr_id = models.CharField(max_length=250, blank=True, default=BLANK, db_index=True)
     detail_id = models.CharField(
-        max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora source ID"
-    )
-    registration_id = CICharField(
-        max_length=100,
-        blank=True,
-        null=True,
-        db_index=True,
-        verbose_name=_("Aurora Registration Id"),
+        max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora registration ID"
     )
     program_registration_id = CICharField(
         max_length=100,
@@ -902,7 +894,6 @@ class Individual(
             "who_answers_phone",
             "who_answers_alt_phone",
             "detail_id",
-            "registration_id",
             "program_registration_id",
             "payment_delivery_phone_no",
         ]
@@ -1019,13 +1010,7 @@ class Individual(
     fchild_hoh = models.BooleanField(default=False)
     child_hoh = models.BooleanField(default=False)
     detail_id = models.CharField(
-        max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora source ID"
-    )
-    registration_id = CICharField(
-        max_length=100,
-        blank=True,
-        null=True,
-        verbose_name=_("Aurora Registration Id"),
+        max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora registration ID"
     )
     program_registration_id = CICharField(
         max_length=100, blank=True, null=True, verbose_name=_("Beneficiary Program Registration Id")

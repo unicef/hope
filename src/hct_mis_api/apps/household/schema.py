@@ -277,7 +277,7 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
 
     @staticmethod
     def resolve_import_id(parent: Individual, info: Any) -> str:
-        return f"{parent.unicef_id} (Detail ID {parent.detail_id})" if parent.unicef_id else parent.unicef_id
+        return f"{parent.unicef_id} (Detail ID {parent.detail_id})" if parent.detail_id else parent.unicef_id
 
     @staticmethod
     def resolve_preferred_language(parent: Individual, info: Any) -> Optional[str]:
