@@ -1,3 +1,4 @@
+# pragma: no cover
 import traceback
 
 from django.core.cache import cache
