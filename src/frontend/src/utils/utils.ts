@@ -195,8 +195,8 @@ export function targetPopulationStatusDisplayMap(status: string): string {
   switch (status) {
     case PaymentPlanStatus.TpOpen:
       return 'OPEN';
-    case 'DRAFT':
-      return 'Ready for PP Creation';
+    case PaymentPlanStatus.Draft:
+      return 'READY FOR PAYMENT MODULE';
     case PaymentPlanStatus.TpLocked:
       return 'LOCKED';
     case PaymentPlanStatus.Processing:
@@ -209,8 +209,7 @@ export function targetPopulationStatusDisplayMap(status: string): string {
       return 'STEFICON ERROR';
     case PaymentPlanStatus.SteficonCompleted:
       return 'STEFICON COMPLETED';
-    case PaymentPlanStatus.Draft:
-      return 'READY FOR PAYMENT MODULE';
+
     //   if other PP statuses ==> ASSIGNED
     default:
       return 'ASSIGNED';
