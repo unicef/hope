@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material';
+import { Grid2 as Grid } from '@mui/material';
 import ChildCareIcon from '@mui/icons-material/ChildCare';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@utils/utils';
@@ -23,10 +23,10 @@ export function TotalNumberOfChildrenReachedSection({
     <DashboardCard color="#4CD0E0">
       <CardTitle>{t('TOTAL NUMBER OF CHILDREN REACHED')}</CardTitle>
       <Grid container justifyContent="space-between" alignItems="center">
-        <Grid item data-cy="total-number-of-children-reached">
+        <Grid data-cy="total-number-of-children-reached">
           <CardAmountSmaller>{formatNumber(data?.total)}</CardAmountSmaller>
         </Grid>
-        <Grid item>
+        <Grid>
           <IconContainer bg="#E4F7FA" color="#4CD0E0">
             <ChildCareIcon fontSize="inherit" />
           </IconContainer>

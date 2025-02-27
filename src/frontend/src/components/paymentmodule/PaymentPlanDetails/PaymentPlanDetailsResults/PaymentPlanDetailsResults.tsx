@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@mui/material';
+import { Grid2 as Grid, Typography } from '@mui/material';
 import { Pie } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import { PaymentPlanQuery } from '@generated/graphql';
@@ -43,9 +43,9 @@ export const PaymentPlanDetailsResults = ({
       </Title>
       <ContentWrapper>
         <Grid container>
-          <Grid item xs={4}>
+          <Grid size={{ xs: 4 }}>
             <Grid container spacing={3} justifyContent="flex-start">
-              <Grid item xs={6}>
+              <Grid size={{ xs:6 }}>
                 <FieldBorder color={colors.femaleChildren}>
                   <LabelizedField
                     label={t('Female Children')}
@@ -53,7 +53,7 @@ export const PaymentPlanDetailsResults = ({
                   />
                 </FieldBorder>
               </Grid>
-              <Grid item xs={6}>
+              <Grid size={{ xs:6 }}>
                 <FieldBorder color={colors.femaleAdult}>
                   <LabelizedField
                     label={t('Female Adults')}
@@ -61,7 +61,7 @@ export const PaymentPlanDetailsResults = ({
                   />
                 </FieldBorder>
               </Grid>
-              <Grid item xs={6}>
+              <Grid size={{ xs:6 }}>
                 <FieldBorder color={colors.maleChildren}>
                   <LabelizedField
                     label={t('Male Children')}
@@ -69,7 +69,7 @@ export const PaymentPlanDetailsResults = ({
                   />
                 </FieldBorder>
               </Grid>
-              <Grid item xs={6}>
+              <Grid size={{ xs:6 }}>
                 <FieldBorder color={colors.maleAdult}>
                   <LabelizedField
                     label={t('Male Adults')}
@@ -79,14 +79,14 @@ export const PaymentPlanDetailsResults = ({
               </Grid>
             </Grid>
           </Grid>
-          <Grid item xs={4}>
+          <Grid size={{ xs: 4 }}>
             <Grid
               container
               spacing={0}
               justifyContent="flex-start"
               alignItems="center"
             >
-              <Grid item xs={4}>
+              <Grid size={{ xs: 4 }}>
                 <ChartContainer data-cy="chart-container">
                   <Pie
                     width={100}

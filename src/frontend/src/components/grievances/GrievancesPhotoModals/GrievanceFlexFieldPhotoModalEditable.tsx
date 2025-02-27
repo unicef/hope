@@ -6,7 +6,7 @@ import {
   AllAddIndividualFieldsQuery,
   useGrievanceTicketFlexFieldsQuery,
 } from '@generated/graphql';
-import { PhotoModal } from '@core/PhotoModal/PhotoModal';
+import PhotoModal from '@core/PhotoModal/PhotoModal';
 
 export interface GrievanceFlexFieldPhotoModalEditableProps {
   flexField: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];

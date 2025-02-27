@@ -1,4 +1,10 @@
-import { Box, FormHelperText, Grid, GridSize, Typography } from '@mui/material';
+import {
+  Box,
+  FormHelperText,
+  Grid2 as Grid,
+  GridSize,
+  Typography,
+} from '@mui/material';
 import { Field } from 'formik';
 import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -24,6 +30,7 @@ import { LookUpLinkedTickets } from '../../LookUps/LookUpLinkedTickets/LookUpLin
 import { LookUpPaymentRecord } from '../../LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
 import { useProgramContext } from 'src/programContext';
 import { replaceLabels } from '@components/grievances/utils/createGrievanceUtils';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -52,7 +59,7 @@ export interface DescriptionProps {
   permissions: string[];
 }
 
-export function Description({
+function Description({
   values,
   showIssueType,
   selectedIssueType,
@@ -174,7 +181,7 @@ export function Description({
                 isSocialDctType ? el.label !== 'Household ID' : el,
               )
               .map((el) => (
-                <Grid key={el.label} item xs={el.size as GridSize}>
+                <Grid key={el.label} size={{ xs: el.size as GridSize }}>
                   <LabelizedField label={el.label}>{el.value}</LabelizedField>
                 </Grid>
               ))}
@@ -184,7 +191,7 @@ export function Description({
         <BoxPadding />
         <Grid container spacing={3}>
           {values.issueType === GRIEVANCE_ISSUE_TYPES.PARTNER_COMPLAINT && (
-            <Grid item xs={3}>
+            <Grid size={{ xs: 3 }}>
               <Field
                 name="partner"
                 fullWidth
@@ -195,7 +202,7 @@ export function Description({
               />
             </Grid>
           )}
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <Field
               name="description"
               multiline
@@ -210,7 +217,7 @@ export function Description({
               component={FormikTextField}
             />
           </Grid>
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <Field
               name="comments"
               multiline
@@ -220,7 +227,7 @@ export function Description({
               component={FormikTextField}
             />
           </Grid>
-          <Grid item xs={6}>
+          <Grid size={{ xs: 6 }}>
             <Field
               name="admin"
               variant="outlined"
@@ -228,7 +235,7 @@ export function Description({
               disabled={Boolean(values.selectedHousehold?.admin2)}
             />
           </Grid>
-          <Grid item xs={6}>
+          <Grid size={{ xs: 6 }}>
             <Field
               name="area"
               fullWidth
@@ -237,7 +244,7 @@ export function Description({
               component={FormikTextField}
             />
           </Grid>
-          <Grid item xs={6}>
+          <Grid size={{ xs: 6 }}>
             <Field
               name="language"
               multiline
@@ -247,7 +254,7 @@ export function Description({
               component={FormikTextField}
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <Field
               name="priority"
               multiline
@@ -258,7 +265,7 @@ export function Description({
               component={FormikSelectField}
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <Field
               name="urgency"
               multiline
@@ -269,7 +276,7 @@ export function Description({
               component={FormikSelectField}
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <Field
               name="program"
               label={t('Programme Name')}
@@ -284,7 +291,7 @@ export function Description({
         <Box pt={5}>
           <BoxWithBorders>
             <Grid container spacing={4}>
-              <Grid item xs={6}>
+              <Grid size={{ xs: 6 }}>
                 <Box py={3}>
                   <LookUpLinkedTickets
                     values={values}
@@ -294,7 +301,7 @@ export function Description({
               </Grid>
               {(values.issueType === GRIEVANCE_ISSUE_TYPES.PAYMENT_COMPLAINT ||
                 values.issueType === GRIEVANCE_ISSUE_TYPES.FSP_COMPLAINT) && (
-                <Grid item xs={6}>
+                <Grid size={{ xs: 6 }}>
                   <Box py={3}>
                     <LookUpPaymentRecord
                       values={values}
@@ -331,3 +338,4 @@ export function Description({
     </>
   );
 }
+export default withErrorBoundary(Description, 'Description');

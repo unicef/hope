@@ -1,4 +1,4 @@
-import { Grid, MenuItem } from '@mui/material';
+import { Grid2 as Grid, MenuItem } from '@mui/material';
 import GroupIcon from '@mui/icons-material/Group';
 import moment from 'moment';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -10,6 +10,7 @@ import { SearchTextField } from '@components/core/SearchTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface ProgrammesFilterProps {
   filter;
@@ -19,7 +20,7 @@ interface ProgrammesFilterProps {
   appliedFilter;
   setAppliedFilter: (filter) => void;
 }
-export function ProgrammesFilters({
+function ProgrammesFilters({
   filter,
   choicesData,
   setFilter,
@@ -54,7 +55,7 @@ export function ProgrammesFilters({
       applyHandler={handleApplyFilter}
     >
       <Grid container alignItems="flex-end" spacing={3}>
-        <Grid item xs={2}>
+        <Grid size={{ xs:2 }}>
           <SearchTextField
             label="Search"
             value={filter.search}
@@ -62,7 +63,7 @@ export function ProgrammesFilters({
             data-cy="filters-search"
           />
         </Grid>
-        <Grid item xs={2}>
+        <Grid size={{ xs:2 }}>
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             label="Status"
@@ -76,7 +77,7 @@ export function ProgrammesFilters({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item xs={2}>
+        <Grid size={{ xs:2 }}>
           <DatePickerFilter
             label="Start Date"
             dataCy="filters-start-date"
@@ -89,7 +90,7 @@ export function ProgrammesFilters({
             value={filter.startDate}
           />
         </Grid>
-        <Grid item xs={2}>
+        <Grid size={{ xs:2 }}>
           <DatePickerFilter
             label="End Date"
             dataCy="filters-end-date"
@@ -102,7 +103,7 @@ export function ProgrammesFilters({
             value={filter.endDate}
           />
         </Grid>
-        <Grid item xs={4}>
+        <Grid size={{ xs: 4 }}>
           <SelectFilter
             onChange={(e) => handleFilterChange('sector', e.target.value)}
             label="Sector"
@@ -117,7 +118,7 @@ export function ProgrammesFilters({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item xs={2}>
+        <Grid size={{ xs:2 }}>
           <NumberTextField
             data-cy="filters-number-of-households-min"
             topLabel="Programme Size"
@@ -129,7 +130,7 @@ export function ProgrammesFilters({
             icon={<GroupIcon />}
           />
         </Grid>
-        <Grid item xs={2}>
+        <Grid size={{ xs:2 }}>
           <NumberTextField
             data-cy="filters-number-of-households-max"
             value={filter.numberOfHouseholdsMax}
@@ -140,7 +141,7 @@ export function ProgrammesFilters({
             icon={<GroupIcon />}
           />
         </Grid>
-        <Grid item xs={2}>
+        <Grid size={{ xs:2 }}>
           <NumberTextField
             data-cy="filters-budget-min"
             topLabel="Budget (USD)"
@@ -149,7 +150,7 @@ export function ProgrammesFilters({
             onChange={(e) => handleFilterChange('budgetMin', e.target.value)}
           />
         </Grid>
-        <Grid item xs={2}>
+        <Grid size={{ xs:2 }}>
           <NumberTextField
             data-cy="filters-budget-max"
             value={filter.budgetMax}
@@ -157,7 +158,7 @@ export function ProgrammesFilters({
             onChange={(e) => handleFilterChange('budgetMax', e.target.value)}
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SelectFilter
             onChange={(e) =>
               handleFilterChange('dataCollectingType', e.target.value)
@@ -177,3 +178,5 @@ export function ProgrammesFilters({
     </FiltersSection>
   );
 }
+
+export default withErrorBoundary(ProgrammesFilters, 'ProgrammesFilters');

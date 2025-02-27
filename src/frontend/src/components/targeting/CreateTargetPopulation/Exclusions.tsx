@@ -1,4 +1,4 @@
-import { Box, Button, Collapse, Grid, Typography } from '@mui/material';
+import { Box, Button, Collapse, Grid2 as Grid, Typography } from '@mui/material';
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUp from '@mui/icons-material/KeyboardArrowUp';
 import { Field } from 'formik';
@@ -7,8 +7,9 @@ import { useTranslation } from 'react-i18next';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { PaperContainer } from '../PaperContainer';
 import { useProgramContext } from '../../../programContext';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
-export function Exclusions({
+function Exclusions({
   initialOpen = false,
 }: {
   initialOpen?: boolean;
@@ -42,7 +43,7 @@ export function Exclusions({
       <Collapse in={isExclusionsOpen}>
         <Box mt={2}>
           <Grid container>
-            <Grid item xs={6}>
+            <Grid size={{ xs:6 }}>
               <Field
                 data-cy="input-excluded-ids"
                 name="excludedIds"
@@ -62,7 +63,7 @@ export function Exclusions({
         </Box>
         <Box mt={2}>
           <Grid container>
-            <Grid item xs={6}>
+            <Grid size={{ xs:6 }}>
               <Field
                 data-cy="input-exclusion-reason"
                 name="exclusionReason"
@@ -79,3 +80,5 @@ export function Exclusions({
     </PaperContainer>
   );
 }
+
+export default withErrorBoundary(Exclusions, 'Exclusions');

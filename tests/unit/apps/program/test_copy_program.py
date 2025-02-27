@@ -280,31 +280,28 @@ class TestCopyProgram(APITestCase):
         copied_program = Program.objects.exclude(id=self.program.id).order_by("created_at").last()
         self.assertEqual(copied_program.status, Program.DRAFT)
         self.assertEqual(copied_program.name, "copied name")
-        self.assertEqual(copied_program.household_set.count(), 2)
+        self.assertEqual(copied_program.households.count(), 2)
         self.assertEqual(copied_program.individuals.count(), 2)
-        self.assertNotIn(self.household3, copied_program.household_set.all())
+        self.assertNotIn(self.household3, copied_program.households.all())
         self.assertNotIn(self.individuals3[0], copied_program.individuals.all())
         self.assertNotIn(self.individuals3[1], copied_program.individuals.all())
         self.assertEqual(Household.objects.count(), 5)
         self.assertEqual(Individual.objects.count(), 6)
         self.assertEqual(EntitlementCard.objects.count(), 2)
         self.assertNotEqual(
-            copied_program.household_set.filter(copied_from=self.household1).first().entitlement_cards.first().id,
+            copied_program.households.filter(copied_from=self.household1).first().entitlement_cards.first().id,
             self.entitlement_card1.id,
         )
         self.assertEqual(
-            copied_program.household_set.filter(copied_from=self.household1)
-            .first()
-            .entitlement_cards.first()
-            .card_number,
+            copied_program.households.filter(copied_from=self.household1).first().entitlement_cards.first().card_number,
             self.entitlement_card1.card_number,
         )
         self.assertNotEqual(
-            copied_program.household_set.filter(copied_from=self.household1).first().first_registration_date,
+            copied_program.households.filter(copied_from=self.household1).first().first_registration_date,
             self.household1.first_registration_date,
         )
         self.assertNotEqual(
-            copied_program.household_set.filter(copied_from=self.household1).first().last_registration_date,
+            copied_program.households.filter(copied_from=self.household1).first().last_registration_date,
             self.household1.last_registration_date,
         )
         self.assertEqual(Document.objects.count(), 2)
@@ -345,18 +342,15 @@ class TestCopyProgram(APITestCase):
 
         self.assertEqual(IndividualRoleInHousehold.objects.count(), 2)
         self.assertNotEqual(
-            copied_program.household_set.filter(copied_from=self.household1).first().representatives.first().id,
+            copied_program.households.filter(copied_from=self.household1).first().representatives.first().id,
             self.individuals1[0].id,
         )
         self.assertEqual(
-            copied_program.household_set.filter(copied_from=self.household1).first().representatives.first().role,
+            copied_program.households.filter(copied_from=self.household1).first().representatives.first().role,
             self.individual_role_in_household1.role,
         )
         self.assertEqual(
-            copied_program.household_set.filter(copied_from=self.household1)
-            .first()
-            .representatives.first()
-            .copied_from,
+            copied_program.households.filter(copied_from=self.household1).first().representatives.first().copied_from,
             self.individual_role_in_household1.individual,
         )
         self.assertEqual(ProgramPartnerThrough.objects.filter(program=copied_program).count(), 1)
@@ -367,7 +361,7 @@ class TestCopyProgram(APITestCase):
         self.assertIsNotNone(self.household1.household_collection)
         self.assertIsNotNone(self.individuals1[0].individual_collection)
         self.assertEqual(
-            copied_program.household_set.filter(copied_from=self.household1).first().household_collection,
+            copied_program.households.filter(copied_from=self.household1).first().household_collection,
             self.household1.household_collection,
         )
         self.assertEqual(

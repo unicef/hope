@@ -1,4 +1,4 @@
-import { Box, Grid } from '@mui/material';
+import { Box, Grid2 as Grid } from '@mui/material';
 import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -114,7 +114,7 @@ export const DashboardYearPage = ({
   return (
     <PaddingContainer>
       <Grid container spacing={3}>
-        <Grid item xs={8}>
+        <Grid size={{ xs:8 }}>
           <Box mb={6}>
             <TotalAmountTransferredSection
               data={data.sectionTotalTransferred}
@@ -182,17 +182,17 @@ export const DashboardYearPage = ({
             </Box>
           )}
         </Grid>
-        <Grid item xs={4}>
+        <Grid size={{ xs: 4 }}>
           <PaddingLeftContainer>
             <Grid container spacing={6}>
               {(isAllPrograms || !isSocialDctType) && (
                 <>
-                  <Grid item xs={12}>
+                  <Grid size={{ xs: 12 }}>
                     <TotalNumberOfHouseholdsReachedSection
                       data={data.sectionHouseholdsReached}
                     />
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid size={{ xs: 12 }}>
                     <TotalNumberOfIndividualsReachedSection
                       data={data.sectionIndividualsReached}
                       chartDataIndividuals={
@@ -206,7 +206,7 @@ export const DashboardYearPage = ({
                 </>
               )}
               {(isAllPrograms || isSocialDctType) && (
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12 }}>
                   <TotalNumberOfPeopleReachedSection
                     data={data.sectionPeopleReached}
                     chartDataPeople={data.chartPeopleReachedByAgeAndGender}
@@ -217,13 +217,13 @@ export const DashboardYearPage = ({
                 </Grid>
               )}
               {data.sectionChildReached && (
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12 }}>
                   <TotalNumberOfChildrenReachedSection
                     data={data.sectionChildReached}
                   />
                 </Grid>
               )}
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <Box mb={6}>
                   <DashboardPaper
                     title={t('Volume by Delivery Mechanism in USD')}

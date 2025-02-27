@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Grid2 as Grid, Typography } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
@@ -30,10 +30,10 @@ import { HouseholdCompositionTable } from '../../tables/population/HouseholdComp
 import { AdminButton } from '@core/AdminButton';
 import { CollectorsTable } from '@containers/tables/population/CollectorsTable';
 import { HouseholdMembersTable } from '@containers/tables/population/HouseholdMembersTable';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
-import { PaymentsHouseholdTable } from '@containers/tables/payments/PaymentsHouseholdTable';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import PaymentsHouseholdTable from '@containers/tables/payments/PaymentsHouseholdTable/PaymentsHouseholdTable';
 
 const Container = styled.div`
   padding: 20px;
@@ -59,7 +59,7 @@ const SubTitle = styled(Typography)`
   }
 `;
 
-export const PopulationHouseholdDetailsPage = (): ReactElement => {
+const PopulationHouseholdDetailsPage = (): ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const { baseUrl, businessArea } = useBaseUrl();
@@ -120,14 +120,7 @@ export const PopulationHouseholdDetailsPage = (): ReactElement => {
   const { household } = data;
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'PopulationHouseholdDetailsPage.tsx');
-      }}
-      componentName="PopulationHouseholdDetailsPage"
-    >
+    <>
       <PageHeader
         title={`${beneficiaryGroup?.groupLabel}: ${renderSomethingOrDash(
           household?.unicefId,
@@ -211,17 +204,17 @@ export const PopulationHouseholdDetailsPage = (): ReactElement => {
             <Typography variant="h6">{t('Registration Details')}</Typography>
           </Title>
           <Grid container spacing={6}>
-            <Grid item xs={3}>
+            <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Source')}>
                 <div>{household?.registrationDataImport?.dataSource}</div>
               </LabelizedField>
             </Grid>
-            <Grid item xs={3}>
+            <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Import name')}>
                 <div>{household?.registrationDataImport?.name}</div>
               </LabelizedField>
             </Grid>
-            <Grid item xs={3}>
+            <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Registration Date')}>
                 <div>
                   <UniversalMoment>
@@ -230,13 +223,13 @@ export const PopulationHouseholdDetailsPage = (): ReactElement => {
                 </div>
               </LabelizedField>
             </Grid>
-            <Grid item xs={3}>
+            <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('User name')}>
                 {household?.registrationDataImport?.importedBy?.email}
               </LabelizedField>
             </Grid>
             {household?.programRegistrationId && (
-              <Grid item xs={3}>
+              <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Programme registration id')}>
                   {household.programRegistrationId}
                 </LabelizedField>
@@ -248,19 +241,19 @@ export const PopulationHouseholdDetailsPage = (): ReactElement => {
               <hr />
               <SubTitle variant="h6">{t('Data Collection')}</SubTitle>
               <Grid container spacing={6}>
-                <Grid item xs={3}>
+                <Grid size={{ xs: 3 }}>
                   <LabelizedField label={t('Start time')}>
                     <UniversalMoment>{household?.start}</UniversalMoment>
                   </LabelizedField>
                 </Grid>
-                <Grid item xs={3}>
+                <Grid size={{ xs: 3 }}>
                   <LabelizedField label={t('End time')}>
                     <UniversalMoment>
                       {household?.firstRegistrationDate}
                     </UniversalMoment>
                   </LabelizedField>
                 </Grid>
-                <Grid item xs={3}>
+                <Grid size={{ xs: 3 }}>
                   <LabelizedField label={t('Device ID')}>
                     {household?.deviceid}
                   </LabelizedField>
@@ -273,6 +266,11 @@ export const PopulationHouseholdDetailsPage = (): ReactElement => {
       {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
         <UniversalActivityLogTable objectId={data.household?.id} />
       )}
-    </UniversalErrorBoundary>
+    </>
   );
 };
+
+export default withErrorBoundary(
+  PopulationHouseholdDetailsPage,
+  'PopulationHouseholdDetailsPage',
+);

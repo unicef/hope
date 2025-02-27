@@ -89,6 +89,8 @@ class RdiMergeTask:
         "male_age_group_12_17_disabled_count",
         "male_age_group_18_59_disabled_count",
         "male_age_group_60_disabled_count",
+        "other_sex_group_count",
+        "unknown_sex_group_count",
         "first_registration_date",
         "last_registration_date",
         "flex_fields",
@@ -150,14 +152,6 @@ class RdiMergeTask:
         "blockchain_name",
         "wallet_address",
     )
-
-    # TODO DATAHUB DELETE Fix for flex registration
-    #         if record := imported_household.flex_registrations_record:
-    #             household_data["registration_id"] = str(record.registration)
-
-    # TODO DATAHUB DELETE Fix for flex registration
-    #         if enumerator_rec_id := imported_household.enumerator_rec_id:
-    #             household_data["enumerator_rec_id"] = enumerator_rec_id
 
     def _create_grievance_ticket_for_delivery_mechanisms_errors(
         self, delivery_mechanism_data: DeliveryMechanismData, obj_hct: RegistrationDataImport, description: str

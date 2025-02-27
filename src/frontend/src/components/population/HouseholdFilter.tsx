@@ -1,4 +1,4 @@
-import { Grid, MenuItem } from '@mui/material';
+import { Grid2 as Grid, MenuItem } from '@mui/material';
 import AssignmentIndRoundedIcon from '@mui/icons-material/AssignmentIndRounded';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
 import GroupIcon from '@mui/icons-material/Group';
@@ -72,7 +72,7 @@ export function HouseholdFilters({
       isOnPaper={isOnPaper}
     >
       <Grid container alignItems="flex-end" spacing={3}>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SearchTextField
             label={t('Search')}
             value={filter.search}
@@ -87,7 +87,7 @@ export function HouseholdFilters({
           choices={choicesData?.documentTypeChoices}
         />
         {isAllPrograms && (
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <SelectFilter
               onChange={(e) => handleFilterChange('program', e.target.value)}
               label={t('Programme')}
@@ -104,7 +104,7 @@ export function HouseholdFilters({
             </SelectFilter>
           </Grid>
         )}
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SelectFilter
             onChange={(e) =>
               handleFilterChange('residenceStatus', e.target.value)
@@ -122,7 +122,7 @@ export function HouseholdFilters({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <NumberTextField
             topLabel={`${beneficiaryGroup?.groupLabel} ${t('Size')}`}
             value={filter.householdSizeMin}
@@ -135,7 +135,7 @@ export function HouseholdFilters({
             data-cy="hh-filters-household-size-from"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <NumberTextField
             value={filter.householdSizeMax}
             placeholder={t('To')}
@@ -147,7 +147,7 @@ export function HouseholdFilters({
             data-cy="hh-filters-household-size-to"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SelectFilter
             onChange={(e) => handleFilterChange('orderBy', e.target.value)}
             label={t('Sort by')}
@@ -162,7 +162,7 @@ export function HouseholdFilters({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SelectFilter
             onChange={(e) => handleFilterChange('withdrawn', e.target.value)}
             label={t('Status')}
@@ -181,7 +181,7 @@ export function HouseholdFilters({
           </SelectFilter>
         </Grid>
         {isAllPrograms && (
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <SelectFilter
               onChange={(e) =>
                 handleFilterChange('programState', e.target.value)
@@ -197,7 +197,7 @@ export function HouseholdFilters({
             </SelectFilter>
           </Grid>
         )}
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <AdminAreaAutocomplete
             name="admin1"
             level={1}
@@ -211,7 +211,7 @@ export function HouseholdFilters({
             dataCy="hh-filters-admin1"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <AdminAreaAutocomplete
             name="admin2"
             level={2}

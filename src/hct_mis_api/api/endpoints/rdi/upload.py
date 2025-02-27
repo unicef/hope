@@ -121,6 +121,7 @@ class IndividualSerializer(serializers.ModelSerializer):
             "version",
             "vector_column",
             "unicef_id",
+            "program",
         ]
 
     def validate_role(self, value: str) -> Optional[str]:

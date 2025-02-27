@@ -68,7 +68,6 @@ class TestRoleReassignMutation(APITestCase):
         cls.household.registration_data_import.imported_by.save()
         cls.household.registration_data_import.program = program_one
         cls.household.registration_data_import.save()
-        cls.household.programs.add(program_one)
 
         cls.individual = IndividualFactory(
             **{
@@ -188,7 +187,6 @@ class TestRoleReassignMutationNewTicket(APITestCase):
         cls.household.registration_data_import.imported_by.save()
         cls.household.registration_data_import.program = program_one
         cls.household.registration_data_import.save()
-        cls.household.programs.add(program_one)
 
         cls.individual_1 = IndividualFactory(
             **{

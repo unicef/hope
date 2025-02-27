@@ -1,4 +1,4 @@
-import { Box, Button, DialogContent, DialogTitle, Grid } from '@mui/material';
+import { Box, Button, DialogContent, DialogTitle, Grid2 as Grid } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -93,7 +93,7 @@ export function VerifyPaymentGrievance({
             <DialogContent>
               <DialogContainer>
                 <Grid container>
-                  <Grid item xs={12}>
+                  <Grid size={{ xs: 12 }}>
                     <Field
                       name="newStatus"
                       label="Status"
@@ -105,7 +105,7 @@ export function VerifyPaymentGrievance({
                       component={FormikRadioGroup}
                     />
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid size={{ xs:6 }}>
                     {values.newStatus === 'RECEIVED' && (
                       <Field
                         name="newReceivedAmount"

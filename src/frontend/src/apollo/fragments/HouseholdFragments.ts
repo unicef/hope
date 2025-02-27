@@ -11,6 +11,8 @@ export const householdMinimal = gql`
     maleChildrenCount
     femaleChildrenCount
     childrenDisabledCount
+    otherSexGroupCount
+    unknownSexGroupCount
     size
     totalCashReceived
     totalCashReceivedUsd
@@ -61,13 +63,9 @@ export const householdMinimal = gql`
     individuals {
       totalCount
     }
-    programs {
-      edges {
-        node {
-          id
-          name
-        }
-      }
+    program {
+      id
+      name
     }
   }
 `;
@@ -121,13 +119,9 @@ export const householdDetailed = gql`
         }
       }
     }
-    programs {
-      edges {
-        node {
-          id
-          name
-        }
-      }
+    program {
+      id
+      name
     }
     registrationDataImport {
       name

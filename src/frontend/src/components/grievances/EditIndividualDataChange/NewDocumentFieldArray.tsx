@@ -1,4 +1,4 @@
-import { Button, Grid } from '@mui/material';
+import { Button, Grid2 as Grid } from '@mui/material';
 import { useLocation } from 'react-router-dom';
 import { AddCircleOutline } from '@mui/icons-material';
 import { FieldArray } from 'formik';
@@ -52,8 +52,8 @@ export function NewDocumentFieldArray({
               );
             })}
 
-            <Grid item xs={8} />
-            <Grid item xs={12}>
+            <Grid size={{ xs:8 }} />
+            <Grid size={{ xs: 12 }}>
               <Button
                 color="primary"
                 disabled={isEditTicket}

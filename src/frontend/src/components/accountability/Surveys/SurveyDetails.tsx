@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@mui/material';
+import { Grid2 as Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { choicesToDict, renderUserName } from '@utils/utils';
 import { SurveyQuery, SurveysChoiceDataQuery } from '@generated/graphql';
@@ -10,13 +10,14 @@ import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface SurveyDetailsProps {
   survey: SurveyQuery['survey'];
   choicesData: SurveysChoiceDataQuery;
 }
 
-export function SurveyDetails({
+function SurveyDetails({
   survey,
   choicesData,
 }: SurveyDetailsProps): ReactElement {
@@ -32,27 +33,27 @@ export function SurveyDetails({
       </Title>
       <OverviewContainer>
         <Grid container spacing={6}>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('Category')}
               value={categoryDict[category]}
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('Survey Title')} value={title} />
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('Created By')}
               value={renderUserName(createdBy)}
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('Date Created')}>
               <UniversalMoment>{createdAt}</UniversalMoment>
             </LabelizedField>
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('Target Population')}>
               {survey?.paymentPlan ? (
                 <BlackLink
@@ -65,7 +66,7 @@ export function SurveyDetails({
               )}
             </LabelizedField>
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('Programme')}>
               {program ? (
                 <BlackLink to={`/${baseUrl}/programmes/${program.id}`}>
@@ -77,7 +78,7 @@ export function SurveyDetails({
             </LabelizedField>
           </Grid>
           {body && (
-            <Grid item xs={8}>
+            <Grid size={{ xs: 8 }}>
               <LabelizedField label={t('Message')} value={body} />
             </Grid>
           )}
@@ -86,3 +87,5 @@ export function SurveyDetails({
     </ContainerColumnWithBorder>
   );
 }
+
+export default withErrorBoundary(SurveyDetails, 'SurveyDetails');
