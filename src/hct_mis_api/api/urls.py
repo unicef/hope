@@ -23,17 +23,13 @@ urlpatterns = [
     re_path("^swagger/$", SpectacularSwaggerView.as_view(url_name="api:schema"), name="swagger-ui"),
     re_path("^redoc/$", SpectacularRedocView.as_view(url_name="api:schema"), name="redoc"),
     path("", include("hct_mis_api.apps.core.api.urls", namespace="core")),
-    path("", include("hct_mis_api.apps.payment.api.urls.payments", namespace="payments")),
+    path("", include("hct_mis_api.apps.payment.api.urls", namespace="payments")),
     path("", include("hct_mis_api.apps.program.api.urls", namespace="programs")),
     path("", include("hct_mis_api.apps.targeting.api.urls", namespace="targeting")),
     path("", include("hct_mis_api.apps.registration_data.api.urls", namespace="registration-data")),
     path(
         "",
         include("hct_mis_api.apps.periodic_data_update.api.urls", namespace="periodic-data-update"),
-    ),
-    path(
-        "",
-        include("hct_mis_api.apps.payment.api.urls.payment_plans", namespace="payment-plan"),
     ),
     path(
         "",
