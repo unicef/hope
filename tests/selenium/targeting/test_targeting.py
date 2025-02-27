@@ -549,7 +549,7 @@ class TestCreateTargeting:
         )
         assert len(pageTargetingDetails.getPeopleTableRows()) == 1
 
-    @pytest.mark.xfail(reason="UNSTABLE")
+    # @pytest.mark.xfail(reason="UNSTABLE")
     def test_create_targeting_for_normal_program(
         self,
         non_sw_program: Program,
@@ -566,7 +566,7 @@ class TestCreateTargeting:
         pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
         pageTargetingCreate.select_listbox_element("First Cycle In Programme")
         pageTargetingCreate.getAddCriteriaButton().click()
-        assert pageTargetingCreate.getAddPeopleRuleButton().text.upper() == "ADD HOUSEHOLD RULE"
+        assert pageTargetingCreate.getAddPeopleRuleButton().text.upper() == "ADD ITEMS GROUP RULE"
         pageTargetingCreate.getAddHouseholdRuleButton().click()
         pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
         pageTargetingCreate.select_listbox_element("Residence status")
@@ -583,7 +583,7 @@ class TestCreateTargeting:
         assert pageTargetingDetails.getTitlePage().text.split("\n")[0].strip() == targeting_name
         assert pageTargetingDetails.getCriteriaContainer().text == disability_expected_criteria_text
         assert Household.objects.count() == 3
-        assert Program.objects.count() == 1
+        assert Program.objects.count() == 5
         assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == household_refugee.unicef_id
         actions = ActionChains(pageTargetingDetails.driver)
         actions.move_to_element(pageTargetingDetails.getHouseholdTableCell(1, 1)).perform()  # type: ignore
@@ -633,7 +633,7 @@ class TestCreateTargeting:
         assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "1"
         assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
 
-    @pytest.mark.xfail(reason="UNSTABLE")
+    # @pytest.mark.xfail(reason="UNSTABLE")
     def test_create_targeting_with_pdu_bool_criteria(
         self,
         program: Program,
@@ -742,9 +742,10 @@ class TestCreateTargeting:
         assert pageTargetingDetails.getTitlePage().text.split("\n")[0].strip() == targeting_name
         assert pageTargetingDetails.getCriteriaContainer().text == expected_criteria_text
         assert Household.objects.count() == 3
-        assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual1.household.unicef_id
+        assert PaymentPlan.objects.get(name=targeting_name).payment_items.count() == 1
         assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "1"
         assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
+        assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual1.household.unicef_id
 
         # edit range
         pageTargetingDetails.getButtonEdit().click()
@@ -761,6 +762,8 @@ class TestCreateTargeting:
         pageTargetingDetails.disappearStatusContainer()
 
         assert pageTargetingDetails.getCriteriaContainer().text == bool_no_expected_criteria_text
+        assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "2"
+        assert len(pageTargetingDetails.getHouseholdTableRows()) == 2
         assert pageTargetingDetails.getHouseholdTableCell(1, 1).text in [
             individual1.household.unicef_id,
             individual2.household.unicef_id,
@@ -769,8 +772,6 @@ class TestCreateTargeting:
             individual1.household.unicef_id,
             individual2.household.unicef_id,
         ]
-        assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "2"
-        assert len(pageTargetingDetails.getHouseholdTableRows()) == 2
 
     def test_create_targeting_with_pdu_date_criteria(
         self,
@@ -861,10 +862,11 @@ class TestCreateTargeting:
         assert pageTargetingDetails.getTitlePage().text.split("\n")[0].strip() == targeting_name
         assert pageTargetingDetails.getCriteriaContainer().text == expected_criteria_text
         assert Household.objects.count() == 3
+        assert PaymentPlan.objects.get(name=targeting_name).payment_items.count() == 1
 
-        assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual3.household.unicef_id
         assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "1"
         assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
+        assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual3.household.unicef_id
 
     def test_create_targeting_for_people_with_pdu(
         self,
@@ -917,9 +919,8 @@ class TestCreateTargeting:
         assert Household.objects.count() == 3
         assert PaymentPlan.objects.count() == 1
         assert PaymentPlan.objects.get(name=targeting_name).payment_items.count() == 1
-        assert pageTargetingDetails.getTotalNumberOfPeople().text == str(1)
-        assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual1.unicef_id
         assert pageTargetingCreate.getTotalNumberOfPeopleCount().text == "1"
+        assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual1.unicef_id
         assert len(pageTargetingDetails.getPeopleTableRows()) == 1
         # TODO: just added for test in CI to check if above code will fail after re run
         assert 11 == 99
