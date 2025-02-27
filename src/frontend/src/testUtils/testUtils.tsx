@@ -24,7 +24,7 @@ const customRender = (
   );
 
 export * from '@testing-library/react';
-export { customRender as render };
+export { customRender as renderWithProviders };
 
 let m_w = 123456789;
 let m_z = 987654321;
