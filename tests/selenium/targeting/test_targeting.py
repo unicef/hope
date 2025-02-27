@@ -549,7 +549,6 @@ class TestCreateTargeting:
         assert len(pageTargetingDetails.getPeopleTableRows()) == 1
         assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual.unicef_id
 
-    # @pytest.mark.xfail(reason="UNSTABLE")
     def test_create_targeting_for_normal_program(
         self,
         non_sw_program: Program,
@@ -640,7 +639,6 @@ class TestCreateTargeting:
         assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
         assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual1.household.unicef_id
 
-    # @pytest.mark.xfail(reason="UNSTABLE")
     def test_create_targeting_with_pdu_bool_criteria(
         self,
         program: Program,
@@ -941,8 +939,6 @@ class TestCreateTargeting:
 
         assert len(pageTargetingDetails.getPeopleTableRows()) == 1
         assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual1.unicef_id
-        # TODO: just added for test in CI to check if above code will fail after re run
-        assert "11" == "99"
 
 
 @pytest.mark.night
