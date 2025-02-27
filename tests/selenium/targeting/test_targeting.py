@@ -885,7 +885,7 @@ class TestCreateTargeting:
         individual1.flex_fields[string_attribute_for_sw.name]["1"]["value"] = "Text"
         individual1.save()
         individual2 = individual(sw_program)
-        individual2.flex_fields[string_attribute_for_sw.name]["1"]["value"] = "Test"
+        individual2.flex_fields[string_attribute_for_sw.name]["1"]["value"] = "Failed"
         individual2.save()
         individual(sw_program)
         pageTargeting.navigate_to_page("afghanistan", sw_program.id)
@@ -915,9 +915,14 @@ class TestCreateTargeting:
         assert pageTargetingDetails.getTitlePage().text.split("\n")[0].strip() == targeting_name
         assert pageTargetingDetails.getCriteriaContainer().text == expected_criteria_text
         assert Household.objects.count() == 3
+        assert PaymentPlan.objects.count() == 1
+        assert PaymentPlan.objects.get(name=targeting_name).payment_items.count() == 1
+        assert pageTargetingDetails.getTotalNumberOfPeople().text == str(1)
         assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual1.unicef_id
         assert pageTargetingCreate.getTotalNumberOfPeopleCount().text == "1"
         assert len(pageTargetingDetails.getPeopleTableRows()) == 1
+        # TODO: just added for test in CI to check if above code will fail after re run
+        assert 11 == 99
 
 
 @pytest.mark.night
