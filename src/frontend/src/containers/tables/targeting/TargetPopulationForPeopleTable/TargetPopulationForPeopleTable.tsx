@@ -64,7 +64,7 @@ export function TargetPopulationForPeopleTable({
         headCells={enableRadioButton ? headCells : headCells.slice(1)}
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllTargetPopulationsQuery}
-        queriedObjectName="allTargetPopulation"
+        queriedObjectName="allPaymentPlans"
         defaultOrderBy="createdAt"
         defaultOrderDirection="desc"
         initialVariables={initialVariables}
