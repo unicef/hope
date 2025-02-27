@@ -232,6 +232,7 @@ Deduplicating documents
 Update successful
 """
         assert universal_update.saved_logs == expected_update_log
+        assert universal_update.saved_logs == universal_update.logs
         assert individual.given_name == given_name_old
         assert individual.sex == sex_old
         assert individual.birth_date == birth_date_old
