@@ -62,6 +62,7 @@ class TargetingDetails(BaseComponents):
     householdSizeTo = 'input[data-cy="input-householdsFiltersBlocks[0].value.to"]'
     dialogBox = 'div[role="dialog"]'
     buttonTargetPopulationAddCriteria = 'div[data-cy="button-target-population-add-criteria"]'
+    totalNumberOfPeople = 'div[data-cy="label-Total Number of People"]'
 
     # Texts
     # Elements
@@ -235,3 +236,6 @@ class TargetingDetails(BaseComponents):
 
     def getButtonTargetPopulationAddCriteria(self) -> WebElement:
         return self.wait_for(self.buttonTargetPopulationAddCriteria)
+
+    def getTotalNumberOfPeople(self) -> WebElement:
+        return self.wait_for(self.totalNumberOfPeople)
