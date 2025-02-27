@@ -3,6 +3,8 @@ from typing import Any, Callable, Optional, Type
 
 from django.db.models import Model
 
+from phonenumber_field.phonenumber import PhoneNumber
+
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import timezone_datetime
 from hct_mis_api.apps.geo.models import Area
@@ -143,6 +145,7 @@ def simple_generator_handler(value: Any) -> Any:
 GENERATOR_TYPE_HANDLER = {
     bool: boolean_generator_handler,
     Area: lambda value: value.p_code,
+    PhoneNumber: lambda value: str(value),
 }
 
 

@@ -1,25 +1,18 @@
-from django.core.files.base import ContentFile
-
 import pytest
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.geo.models import Area, AreaType, Country
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
-from hct_mis_api.apps.household.models import (
-    FEMALE,
-    MALE,
-    Document,
-    DocumentType,
-    Individual,
-)
+from hct_mis_api.apps.household.models import MALE, Document, DocumentType, Individual
 from hct_mis_api.apps.payment.models import DeliveryMechanism, DeliveryMechanismData
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.universal_update_script.models import UniversalUpdate
-from hct_mis_api.apps.universal_update_script.universal_individual_update_service.universal_individual_update_service import (
-    UniversalIndividualUpdateService,
+from hct_mis_api.apps.universal_update_script.celery_tasks import (
+    generate_universal_individual_update_template,
+    run_universal_individual_update,
 )
+from hct_mis_api.apps.universal_update_script.models import UniversalUpdate
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -150,8 +143,8 @@ def document_national_id(individual: Individual, program: Program, poland: Count
     )
 
 
-class TestUniversalIndividualUpdateService:
-    def test_update_individual(
+class TestUniversalIndividualUpdateCeleryTasks:
+    def test_run_universal_individual_update(
         self,
         individual: Individual,
         program: Program,
@@ -161,90 +154,13 @@ class TestUniversalIndividualUpdateService:
         delivery_mechanism: DeliveryMechanism,
         wallet: DeliveryMechanismData,
     ) -> None:
-        """
-        This test generates file for individual update
-        Then Changes manually individual household document data
-        Then runs the update script based on the file generated and checks if data is updated to original
-
-        In this way I'm checking if file is generated correctly and also if service can use the same file to update back
-        :param individual:
-        :param program:
-        :return:
-        """
-        # save old values
-        given_name_old = individual.given_name
-        sex_old = individual.sex
-        birth_date_old = individual.birth_date
-        phone_no_old = individual.phone_no
-        address_old = individual.household.address
-        admin1_old = individual.household.admin1
-        size_old = individual.household.size
-        returnee_old = individual.household.returnee
-        muac_old = individual.flex_fields.get("muac")
-        eggs_old = individual.household.flex_fields.get("eggs")
-        wallet_number_old = wallet.data.get("phone_number")
-        document_number_old = document_national_id.document_number
         universal_update = UniversalUpdate(program=program)
         universal_update.unicef_ids = individual.unicef_id
-        universal_update.individual_fields = ["given_name", "sex", "birth_date", "phone_no"]
-        universal_update.individual_flex_fields_fields = ["muac"]
-        universal_update.household_flex_fields_fields = ["eggs"]
-        universal_update.household_fields = ["address", "admin1", "size", "returnee"]
+        universal_update.individual_fields = ["given_name"]
         universal_update.save()
-        universal_update.document_types.add(DocumentType.objects.first())
-        universal_update.delivery_mechanisms.add(DeliveryMechanism.objects.first())
-        service = UniversalIndividualUpdateService(universal_update)
-        template_file = service.generate_xlsx_template()
+        generate_universal_individual_update_template(str(universal_update.id))
+        assert universal_update.template_file is not None
         universal_update.refresh_from_db()
-        content = template_file.getvalue()
-        universal_update.update_file.save("template.xlsx", ContentFile(content))
+        universal_update.update_file = universal_update.template_file
         universal_update.save()
-        universal_update.refresh_from_db()
-        expected_generate_log = "Generating row 0 to 1\nGenerating Finished\n"
-        assert universal_update.saved_logs == expected_generate_log
-        # Change the data manually
-        individual.given_name = "Test Name"
-        individual.sex = FEMALE
-        individual.birth_date = "1996-06-21"
-        individual.phone_no = "+48555111111"
-        individual.flex_fields = {"muac": 25}
-        individual.save()
-        household = individual.household
-        household.address = "Wrocław"
-        household.admin1 = None
-        household.size = 100
-        household.returnee = False
-        household.flex_fields = {"eggs": "NEW"}
-        household.save()
-        document_national_id.document_number = "111"
-        document_national_id.save()
-        wallet.data["phone_number"] = "0"
-        wallet.save()
-        service = UniversalIndividualUpdateService(universal_update)
-        universal_update.clear_logs()
-        service.execute()
-        universal_update.refresh_from_db()
-        individual.refresh_from_db()
-        document_national_id.refresh_from_db()
-        wallet.refresh_from_db()
-        expected_update_log = """Validating row 0 to 1 Indivduals
-Validation successful
-Updating row 0 to 1 Individuals
-Deduplicating individuals Elasticsearch
-Deduplicating documents
-Update successful
-"""
-        assert universal_update.saved_logs == expected_update_log
-        assert universal_update.saved_logs == universal_update.logs
-        assert individual.given_name == given_name_old
-        assert individual.sex == sex_old
-        assert individual.birth_date == birth_date_old
-        assert individual.phone_no == phone_no_old
-        assert individual.household.address == address_old
-        assert individual.household.admin1 == admin1_old
-        assert document_national_id.document_number == document_number_old
-        assert individual.household.size == size_old
-        assert individual.household.returnee == returnee_old
-        assert individual.flex_fields.get("muac") == muac_old
-        assert individual.household.flex_fields.get("eggs") == eggs_old
-        assert wallet.data.get("phone_number") == wallet_number_old
+        run_universal_individual_update(str(universal_update.id))

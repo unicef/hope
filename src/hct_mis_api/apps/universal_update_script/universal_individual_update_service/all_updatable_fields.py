@@ -11,6 +11,7 @@ from hct_mis_api.apps.payment.models import DeliveryMechanism
 from hct_mis_api.apps.universal_update_script.universal_individual_update_service.validator_and_handlers import (
     handle_admin_field,
     handle_boolean_field,
+    handle_date_field,
     handle_integer_field,
     handle_simple_field,
     validate_admin,
@@ -30,7 +31,7 @@ individual_fields: Dict[str, Tuple[str, Any, Any]] = {
     "middle_name": ("middle_name", validate_string, handle_simple_field),
     "family_name": ("family_name", validate_string, handle_simple_field),
     "sex": ("sex", validate_choices, handle_simple_field),
-    "birth_date": ("birth_date", validate_date, handle_simple_field),
+    "birth_date": ("birth_date", validate_date, handle_date_field),
     "estimated_birth_date": ("estimated_birth_date", validate_boolean, handle_boolean_field),
     "marital_status": ("marital_status", validate_string, handle_simple_field),
     "phone_no": ("phone_no", validate_phone_number, handle_simple_field),
