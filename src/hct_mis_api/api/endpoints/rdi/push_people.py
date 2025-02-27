@@ -19,7 +19,6 @@ from hct_mis_api.api.models import Grant
 from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.household.models import (
     BLANK,
-    COLLECT_TYPES,
     HEAD,
     NON_BENEFICIARY,
     RESIDENCE_STATUS_CHOICE,
@@ -50,7 +49,6 @@ class PushPeopleSerializer(serializers.ModelSerializer):
 
     country_origin = serializers.ChoiceField(choices=Countries(), required=False)
     country = serializers.ChoiceField(choices=Countries())
-    collect_individual_data = serializers.ChoiceField(choices=COLLECT_TYPES)
     residence_status = serializers.ChoiceField(choices=RESIDENCE_STATUS_CHOICE)
     village = serializers.CharField(allow_blank=True, allow_null=True, required=False)
 
@@ -83,6 +81,7 @@ class PushPeopleSerializer(serializers.ModelSerializer):
             "unicef_id",
             "household",
             "detail_id",
+            "program",
         ]
 
 

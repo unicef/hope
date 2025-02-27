@@ -123,14 +123,13 @@
     "org_name_enumerator": "UNICEF",
     "village": "",
     "registration_method": "COMMUNITY",
-    "collect_individual_data": "1",
     "currency": "USD",
     "unhcr_id": "",
     "detail_id": "4",
     "total_cash_received_usd": null,
     "total_cash_received": null,
-    "programs": [],
-    "copied_from": null
+    "copied_from": null,
+    "program_id": "939ff91b-7f89-4e3c-9519-26ed62f51718"
   }
 },
 {
@@ -201,13 +200,11 @@
     "org_name_enumerator": "UNICEF",
     "village": "",
     "registration_method": "COMMUNITY",
-    "collect_individual_data": "1",
     "currency": "USD",
     "unhcr_id": "",
     "detail_id": "3",
     "total_cash_received_usd": null,
     "total_cash_received": null,
-    "programs": [],
     "program_id": "939ff91b-7f89-4e3c-9519-26ed62f51718",
     "copied_from": null
   }
@@ -581,7 +578,8 @@
     "detail_id": 7,
     "disability_certificate_picture": "",
     "vector_column": "'angela':1 'kowalska':2",
-    "copied_from": null
+    "copied_from": null,
+    "program_id": "939ff91b-7f89-4e3c-9519-26ed62f51718"
   }
 },
 {
@@ -658,7 +656,8 @@
     "detail_id": 8,
     "disability_certificate_picture": "",
     "vector_column": "'alicja':1 'kowalska':2",
-    "copied_from": null
+    "copied_from": null,
+    "program_id": "939ff91b-7f89-4e3c-9519-26ed62f51718"
   }
 },
 {
@@ -735,7 +734,8 @@
     "detail_id": 4,
     "disability_certificate_picture": "",
     "vector_column": "'alicja':1 'romaniak':2",
-    "copied_from": null
+    "copied_from": null,
+    "program_id": "939ff91b-7f89-4e3c-9519-26ed62f51718"
   }
 },
 {
@@ -812,7 +812,8 @@
     "detail_id": 6,
     "disability_certificate_picture": "",
     "vector_column": "'agata':1 'kowalska':2",
-    "copied_from": null
+    "copied_from": null,
+    "program_id": "939ff91b-7f89-4e3c-9519-26ed62f51718"
   }
 },
 {

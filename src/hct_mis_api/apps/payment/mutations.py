@@ -860,7 +860,7 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
         fsp_xlsx_template_id_str: Optional[str] = decode_id_string(fsp_xlsx_template_id)
         cls.has_permission(info, Permissions.PM_VIEW_LIST, payment_plan.business_area)
         if fsp_xlsx_template_id:
-            cls.has_permission(info, Permissions.PM_DOWNLOAD_MTCN, payment_plan.business_area)
+            cls.has_permission(info, Permissions.PM_DOWNLOAD_FSP_AUTH_CODE, payment_plan.business_area)
 
         old_payment_plan = copy_model_object(payment_plan)
         payment_plan = cls.export_action(payment_plan, info.context.user.pk, fsp_xlsx_template_id_str)

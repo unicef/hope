@@ -2,6 +2,7 @@ import styled from 'styled-components';
 import {
   AllIndividualsForPopulationTableQuery,
   AllIndividualsForPopulationTableQueryVariables,
+  IndividualRdiMergeStatus,
   useAllIndividualsForPopulationTableQuery,
 } from '@generated/graphql';
 import { UniversalTable } from '@containers/tables/UniversalTable';
@@ -92,6 +93,8 @@ export function LookUpIndividualTable({
     excludedId: excludedId || ticket?.individual?.id || null,
     program: isAllPrograms ? filter.program : programId,
     isActiveProgram: filter.programState === 'active' ? true : null,
+    withdrawn: false,
+    rdiMergeStatus: IndividualRdiMergeStatus.Merged,
   };
 
   const replacements = {

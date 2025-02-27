@@ -18,7 +18,7 @@ import { BlackLink } from '@core/BlackLink';
 import { StatusBox } from '@core/StatusBox';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import { UniversalMoment } from '@core/UniversalMoment';
-import { LinkedTicketsModal } from '../LinkedTicketsModal/LinkedTicketsModal';
+import LinkedTicketsModal from '../LinkedTicketsModal/LinkedTicketsModal';
 import { AssignedToDropdown } from './AssignedToDropdown';
 import { getGrievanceDetailsPath } from '../utils/createGrievanceUtils';
 import { useProgramContext } from 'src/programContext';

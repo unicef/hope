@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@mui/material';
+import { Grid2 as Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { MiśTheme } from '../../theme';
@@ -8,6 +8,7 @@ import { FieldBorder } from '@core/FieldBorder';
 import { Pie } from 'react-chartjs-2';
 import { ReactElement } from 'react';
 import { PaymentPlanBuildStatus, PaymentPlanQuery } from '@generated/graphql';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const colors = {
   femaleChildren: '#5F02CF',
@@ -50,9 +51,7 @@ interface ResultsProps {
   targetPopulation: PaymentPlanQuery['paymentPlan'];
 }
 
-export function ResultsForPeople({
-  targetPopulation,
-}: ResultsProps): ReactElement {
+function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
   const { t } = useTranslation();
   if (targetPopulation.buildStatus !== PaymentPlanBuildStatus.Ok) {
     return null;
@@ -65,9 +64,9 @@ export function ResultsForPeople({
         </Title>
         <ContentWrapper>
           <Grid container>
-            <Grid item xs={4}>
+            <Grid size={{ xs: 4 }}>
               <Grid container spacing={0} justifyContent="flex-start">
-                <Grid item xs={6}>
+                <Grid size={{ xs:6 }}>
                   <FieldBorder color={colors.femaleChildren}>
                     <LabelizedField
                       label={t('Female Children')}
@@ -75,7 +74,7 @@ export function ResultsForPeople({
                     />
                   </FieldBorder>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid size={{ xs:6 }}>
                   <FieldBorder color={colors.femaleAdult}>
                     <LabelizedField
                       label={t('Female Adults')}
@@ -83,7 +82,7 @@ export function ResultsForPeople({
                     />
                   </FieldBorder>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid size={{ xs:6 }}>
                   <FieldBorder color={colors.maleChildren}>
                     <LabelizedField
                       label={t('Male Children')}
@@ -91,7 +90,7 @@ export function ResultsForPeople({
                     />
                   </FieldBorder>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid size={{ xs:6 }}>
                   <FieldBorder color={colors.maleAdult}>
                     <LabelizedField
                       label={t('Male Adults')}
@@ -101,14 +100,14 @@ export function ResultsForPeople({
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item xs={4}>
+            <Grid size={{ xs: 4 }}>
               <Grid
                 container
                 spacing={0}
                 justifyContent="flex-start"
                 alignItems="center"
               >
-                <Grid item xs={4}>
+                <Grid size={{ xs: 4 }}>
                   <ChartContainer>
                     <Pie
                       width={100}
@@ -149,9 +148,9 @@ export function ResultsForPeople({
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item xs={4}>
+            <Grid size={{ xs: 4 }}>
               <Grid container spacing={0} justifyContent="flex-end">
-                <Grid item xs={6}>
+                <Grid size={{ xs:6 }}>
                   <SummaryBorder>
                     <LabelizedField label={t('Total Number of People')}>
                       <SummaryValue>
@@ -168,3 +167,5 @@ export function ResultsForPeople({
     </div>
   );
 }
+
+export default withErrorBoundary(ResultsForPeople, 'ResultsForPeople');

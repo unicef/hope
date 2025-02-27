@@ -50,11 +50,11 @@ class Registration(AuroraModel):
     slug = models.SlugField()
     extra = models.JSONField(blank=True, null=True)
     metadata = models.JSONField(blank=True, null=True)
+    rdi_parser = StrategyField(registry=registry, blank=True, null=True)
     rdi_policy = models.IntegerField(
         choices=RDI_POLICIES,
         default=1,
     )
-    rdi_parser = StrategyField(registry=registry, blank=True, null=True)
     steficon_rule = models.ForeignKey("steficon.RuleCommit", blank=True, null=True, on_delete=models.SET_NULL)
     mapping = models.JSONField(blank=True, null=True)
     private_key = models.TextField(blank=True, null=True, editable=False)
@@ -63,7 +63,7 @@ class Registration(AuroraModel):
         return self.name
 
 
-class RecordBase(models.Model):
+class Record(models.Model):
     STATUS_TO_IMPORT = "TO_IMPORT"
     STATUS_IMPORTED = "IMPORTED"
     STATUS_ERROR = "ERROR"
@@ -93,11 +93,6 @@ class RecordBase(models.Model):
     index2 = models.CharField(null=True, blank=True, max_length=255, db_index=True)
     index3 = models.CharField(null=True, blank=True, max_length=255, db_index=True)
 
-    class Meta:
-        abstract = True
-
-
-class Record(RecordBase):
     class Meta:
         swappable = swapper.swappable_setting("aurora", "Record")
         permissions = (

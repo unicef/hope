@@ -170,20 +170,6 @@ YES_NO_CHOICE = (
     (NO, _("No")),
 )
 
-COLLECT_TYPE_UNKNOWN = ""
-COLLECT_TYPE_NONE = "0"
-COLLECT_TYPE_FULL = "1"
-COLLECT_TYPE_PARTIAL = "2"
-COLLECT_TYPE_SIZE_ONLY = "3"
-
-COLLECT_TYPES = (
-    (COLLECT_TYPE_UNKNOWN, _("Unknown")),
-    (COLLECT_TYPE_PARTIAL, _("Partial individuals collected")),
-    (COLLECT_TYPE_FULL, _("Full individual collected")),
-    (COLLECT_TYPE_SIZE_ONLY, _("Size only collected")),
-    (COLLECT_TYPE_NONE, _("No individual data")),
-)
-
 NOT_PROVIDED = "NOT_PROVIDED"
 WORK_STATUS_CHOICE = (
     (YES, _("Yes")),
@@ -393,8 +379,10 @@ class Household(
             "male_age_group_12_17_disabled_count",
             "male_age_group_18_59_disabled_count",
             "male_age_group_60_disabled_count",
+            "other_sex_group_count",
+            "unknown_sex_group_count",
             "registration_data_import",
-            "programs",
+            "program",
             "returnee",
             "flex_fields",
             "first_registration_date",
@@ -410,11 +398,9 @@ class Household(
             "org_name_enumerator",
             "village",
             "registration_method",
-            "collect_individual_data",
             "currency",
             "unhcr_id",
             "detail_id",
-            "registration_id",
             "program_registration_id",
         ]
     )
@@ -452,33 +438,35 @@ class Household(
             Through model will contain the role (ROLE_CHOICE) they are connected with on.""",
         related_name="represented_households",
     )
-    female_age_group_0_5_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_6_11_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_12_17_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_18_59_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_60_count = models.PositiveIntegerField(default=None, null=True)
-    pregnant_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_0_5_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_6_11_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_12_17_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_18_59_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_60_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_0_5_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_6_11_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_12_17_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_18_59_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_60_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_0_5_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_6_11_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_12_17_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_18_59_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_60_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    children_count = models.PositiveIntegerField(default=None, null=True)
-    male_children_count = models.PositiveIntegerField(default=None, null=True)
-    female_children_count = models.PositiveIntegerField(default=None, null=True)
-    children_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    male_children_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    female_children_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    female_age_group_0_5_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    female_age_group_6_11_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    female_age_group_12_17_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    female_age_group_18_59_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    female_age_group_60_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    pregnant_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    male_age_group_0_5_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    male_age_group_6_11_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    male_age_group_12_17_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    male_age_group_18_59_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    male_age_group_60_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    female_age_group_0_5_disabled_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    female_age_group_6_11_disabled_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    female_age_group_12_17_disabled_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    female_age_group_18_59_disabled_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    female_age_group_60_disabled_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    male_age_group_0_5_disabled_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    male_age_group_6_11_disabled_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    male_age_group_12_17_disabled_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    male_age_group_18_59_disabled_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    male_age_group_60_disabled_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    children_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    male_children_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    female_children_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    children_disabled_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    male_children_disabled_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    female_children_disabled_count = models.PositiveIntegerField(default=None, null=True, blank=True)
+    other_sex_group_count = models.PositiveIntegerField(default=None, null=True, blank=True)  # OTHER
+    unknown_sex_group_count = models.PositiveIntegerField(default=None, null=True, blank=True)  # NOT_COLLECTED
 
     registration_data_import = models.ForeignKey(
         "registration_data.RegistrationDataImport",
@@ -487,11 +475,6 @@ class Household(
         null=True,
         on_delete=models.CASCADE,
     )
-    programs = models.ManyToManyField(
-        "program.Program",
-        related_name="households",
-        blank=True,
-    )  # TODO: remove after migration
     returnee = models.BooleanField(null=True)
     flex_fields = JSONField(default=dict, blank=True)
     first_registration_date = models.DateTimeField()
@@ -509,20 +492,10 @@ class Household(
     org_name_enumerator = models.CharField(max_length=250, blank=True, default=BLANK)
     village = models.CharField(max_length=250, blank=True, default=BLANK)
     registration_method = models.CharField(max_length=250, choices=REGISTRATION_METHOD_CHOICES, default=BLANK)
-    collect_individual_data = models.CharField(
-        max_length=250, choices=COLLECT_TYPES, default=COLLECT_TYPE_UNKNOWN
-    )  # TODO remove
     currency = models.CharField(max_length=250, choices=CURRENCY_CHOICES, default=BLANK)
     unhcr_id = models.CharField(max_length=250, blank=True, default=BLANK, db_index=True)
     detail_id = models.CharField(
-        max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora source ID"
-    )
-    registration_id = CICharField(
-        max_length=100,
-        blank=True,
-        null=True,
-        db_index=True,
-        verbose_name=_("Aurora Registration Id"),
+        max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora registration ID"
     )
     program_registration_id = CICharField(
         max_length=100,
@@ -547,9 +520,7 @@ class Household(
 
     family_id = models.CharField(max_length=100, blank=True, null=True)  # eDopomoga household id
     storage_obj = models.ForeignKey(StorageFile, on_delete=models.SET_NULL, blank=True, null=True)
-    program = models.ForeignKey(
-        "program.Program", null=True, blank=True, db_index=True, on_delete=models.SET_NULL
-    )  # TODO Add later related name, when no clash with programs, set null=False after migration
+    program = models.ForeignKey("program.Program", db_index=True, on_delete=models.PROTECT, related_name="households")
     copied_from = models.ForeignKey(
         "self",
         null=True,
@@ -562,7 +533,6 @@ class Household(
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True)
     is_migration_handled = models.BooleanField(default=False)
     migrated_at = models.DateTimeField(null=True, blank=True)
-    is_recalculated_group_ages = models.BooleanField(default=False)  # TODO remove after migration
     collect_type = models.CharField(choices=CollectType.choices, default=CollectType.STANDARD.value, max_length=8)
 
     kobo_submission_uuid = models.UUIDField(null=True, default=None)
@@ -581,19 +551,6 @@ class Household(
                 name="unique_hh_unicef_id_in_program",
             )
         ]
-
-    def save(self, *args: Any, **kwargs: Any) -> None:
-        from hct_mis_api.apps.targeting.models import (
-            HouseholdSelection,
-            TargetPopulation,
-        )
-
-        if self.withdrawn:
-            HouseholdSelection.objects.filter(
-                household=self, target_population__status=TargetPopulation.STATUS_LOCKED
-            ).delete()
-        cache.delete_pattern(f"count_{self.business_area.slug}_HouseholdNodeConnection_*")
-        super().save(*args, **kwargs)
 
     def delete(self, *args: Any, **kwargs: Any) -> Tuple[int, Dict[str, int]]:
         household_deleted.send(self.__class__, instance=self)
@@ -727,18 +684,18 @@ class Document(AbstractSyncable, SoftDeletableRepresentationMergeStatusModel, Ti
         (STATUS_INVALID, _("Invalid")),
     )
 
-    document_number = models.CharField(max_length=255, blank=True, db_index=True)
-    photo = models.ImageField(blank=True)
     individual = models.ForeignKey("Individual", related_name="documents", on_delete=models.CASCADE)
+    program = models.ForeignKey("program.Program", null=True, related_name="+", on_delete=models.CASCADE)
+    document_number = models.CharField(max_length=255, blank=True, db_index=True)
     type = models.ForeignKey("DocumentType", related_name="documents", on_delete=models.CASCADE)
     country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    photo = models.ImageField(blank=True)
     cleared = models.BooleanField(default=False)
     cleared_date = models.DateTimeField(default=timezone.now)
     cleared_by = models.ForeignKey("account.User", null=True, on_delete=models.SET_NULL)
     issuance_date = models.DateTimeField(null=True, blank=True)
     expiry_date = models.DateTimeField(null=True, blank=True, db_index=True)
-    program = models.ForeignKey("program.Program", null=True, related_name="+", on_delete=models.CASCADE)
 
     is_migration_handled = models.BooleanField(default=False)
     copied_from = models.ForeignKey(
@@ -802,11 +759,7 @@ class Document(AbstractSyncable, SoftDeletableRepresentationMergeStatusModel, Ti
 
 
 class IndividualIdentity(SoftDeletableRepresentationMergeStatusModel, TimeStampedModel):
-    # notice that this model has `created` and `modified` fields
     individual = models.ForeignKey("Individual", related_name="identities", on_delete=models.CASCADE)
-    number = models.CharField(
-        max_length=255,
-    )
     partner = models.ForeignKey(
         "account.Partner",
         related_name="individual_identities",
@@ -814,6 +767,7 @@ class IndividualIdentity(SoftDeletableRepresentationMergeStatusModel, TimeStampe
         on_delete=models.PROTECT,
     )
     country = models.ForeignKey("geo.Country", null=True, on_delete=models.PROTECT)
+    number = models.CharField(max_length=255)
     is_migration_handled = models.BooleanField(default=False)
     copied_from = models.ForeignKey(
         "self",
@@ -934,7 +888,6 @@ class Individual(
             "who_answers_phone",
             "who_answers_alt_phone",
             "detail_id",
-            "registration_id",
             "program_registration_id",
             "payment_delivery_phone_no",
         ]
@@ -1051,13 +1004,7 @@ class Individual(
     fchild_hoh = models.BooleanField(default=False)
     child_hoh = models.BooleanField(default=False)
     detail_id = models.CharField(
-        max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora source ID"
-    )
-    registration_id = CICharField(
-        max_length=100,
-        blank=True,
-        null=True,
-        verbose_name=_("Aurora Registration Id"),
+        max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora registration ID"
     )
     program_registration_id = CICharField(
         max_length=100, blank=True, null=True, verbose_name=_("Beneficiary Program Registration Id")
@@ -1069,9 +1016,7 @@ class Individual(
     blockchain_name = models.CharField(max_length=64, blank=True, default="")
     wallet_address = models.CharField(max_length=128, blank=True, default="")
 
-    program = models.ForeignKey(
-        "program.Program", null=True, blank=True, db_index=True, related_name="individuals", on_delete=models.SET_NULL
-    )  # TODO set null=False after migration
+    program = models.ForeignKey("program.Program", db_index=True, related_name="individuals", on_delete=models.PROTECT)
     copied_from = models.ForeignKey(
         "self",
         null=True,

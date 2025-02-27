@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Tuple
+from typing import List, Tuple
 
 from django.db import transaction
 from django.db.models import Count, Q
@@ -6,11 +6,12 @@ from django.db.models import Count, Q
 from dateutil.relativedelta import relativedelta
 
 from hct_mis_api.apps.household.models import (
-    COLLECT_TYPE_PARTIAL,
     DISABLED,
     FEMALE,
     MALE,
     NON_BENEFICIARY,
+    NOT_COLLECTED,
+    OTHER,
     Household,
     Individual,
 )
@@ -25,12 +26,6 @@ RECALCULATION_INDIVIDUAL_FIELDS = {
     "birth_date",
     "pregnant",
 }
-
-
-def aggregate_optionally(household: Household, **kwargs: Any) -> Dict:
-    if household.collect_individual_data == COLLECT_TYPE_PARTIAL:
-        return {key: None for key, _ in kwargs.items()}
-    return household.individuals.aggregate(**kwargs)
 
 
 @transaction.atomic
@@ -80,9 +75,10 @@ def recalculate_data(
     children_disabled_count = Q(birth_date__gt=date_18_years_ago) & disabled_disability
     female_children_disabled_count = Q(birth_date__gt=date_18_years_ago) & female_disability_beneficiary
     male_children_disabled_count = Q(birth_date__gt=date_18_years_ago) & male_disability_beneficiary
+    other_sex_group_count = Q(sex=OTHER)
+    unknown_sex_group_count = Q(sex=NOT_COLLECTED)
 
-    age_groups = aggregate_optionally(
-        household,
+    age_groups = household.individuals.aggregate(
         female_age_group_0_5_count=Count("id", distinct=True, filter=Q(female_beneficiary & to_6_years)),
         female_age_group_6_11_count=Count("id", distinct=True, filter=Q(female_beneficiary & from_6_to_12_years)),
         female_age_group_12_17_count=Count("id", distinct=True, filter=Q(female_beneficiary & from_12_to_18_years)),
@@ -177,6 +173,16 @@ def recalculate_data(
             distinct=True,
             filter=male_children_disabled_count,
         ),
+        other_sex_group_count=Count(
+            "id",
+            distinct=True,
+            filter=other_sex_group_count,
+        ),
+        unknown_sex_group_count=Count(
+            "id",
+            distinct=True,
+            filter=unknown_sex_group_count,
+        ),
     )
     updated_fields = ["child_hoh", "fchild_hoh", "updated_at"]
 
@@ -191,7 +197,6 @@ def recalculate_data(
             household.fchild_hoh = True
         household.child_hoh = True
 
-    household.is_recalculated_group_ages = True
     if save:
         household.save(update_fields=updated_fields)
 

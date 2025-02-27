@@ -18,6 +18,7 @@ import { WarningTooltipTable } from './WarningTooltipTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
 import { adjustHeadCells } from '@utils/utils';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const StyledBox = styled(Box)`
   background-color: #fff;
@@ -29,7 +30,7 @@ interface PaymentsTableProps {
   canViewDetails?: boolean;
 }
 
-export function PaymentsTable({
+function PaymentsTable({
   businessArea,
   paymentPlan,
   permissions,
@@ -113,3 +114,5 @@ export function PaymentsTable({
     </>
   );
 }
+
+export default withErrorBoundary(PaymentsTable, 'PaymentsTable');

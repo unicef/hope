@@ -1,16 +1,13 @@
-import { ClearApplyButtons } from '@core/ClearApplyButtons';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { createHandleApplyFilterChange } from '@utils/utils';
-import React from 'react';
-import Grid from '@mui/material/Grid';
-import { ContainerWithBorder } from '@core/ContainerWithBorder';
+import { Grid2 as Grid, MenuItem } from '@mui/material';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
-import { MenuItem } from '@mui/material';
 import { NumberTextField } from '@core/NumberTextField';
 import { DatePickerFilter } from '@core/DatePickerFilter';
 import moment from 'moment/moment';
+import { FiltersSection } from '@components/core/FiltersSection';
 
 interface ProgramCyclesFiltersProps {
   filter;
@@ -57,9 +54,12 @@ export const ProgramCyclesFilters = ({
   };
 
   return (
-    <ContainerWithBorder>
+    <FiltersSection
+      clearHandler={handleClearFilter}
+      applyHandler={handleApplyFilter}
+    >
       <Grid container spacing={3} alignItems="flex-end">
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SearchTextField
             label={t('Search')}
             value={filter.search}
@@ -67,7 +67,7 @@ export const ProgramCyclesFilters = ({
             onChange={(e) => handleFilterChange('search', e.target.value)}
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             variant="outlined"
@@ -84,7 +84,7 @@ export const ProgramCyclesFilters = ({
             })}
           </SelectFilter>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <NumberTextField
             id="totalEntitledQuantityUsdFromFilter"
             topLabel={t('Total Entitled Quantity')}
@@ -98,7 +98,7 @@ export const ProgramCyclesFilters = ({
             }
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <NumberTextField
             id="totalEntitledQuantityUsdToFilter"
             value={filter.total_entitled_quantity_usd_to}
@@ -117,7 +117,7 @@ export const ProgramCyclesFilters = ({
             }
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <DatePickerFilter
             topLabel="Date"
             onChange={(date) =>
@@ -129,7 +129,7 @@ export const ProgramCyclesFilters = ({
             value={filter.startDate}
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <DatePickerFilter
             onChange={(date) =>
               handleFilterChange(
@@ -141,10 +141,6 @@ export const ProgramCyclesFilters = ({
           />
         </Grid>
       </Grid>
-      <ClearApplyButtons
-        clearHandler={handleClearFilter}
-        applyHandler={handleApplyFilter}
-      />
-    </ContainerWithBorder>
+    </FiltersSection>
   );
 };

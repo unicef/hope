@@ -138,6 +138,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
             "last_name": collector_data.get("family_name", ""),
             "first_name": collector_data.get("given_name", ""),
             "full_name": collector_data.get("full_name", ""),
+            "middle_name": collector_data.get("middle_name", ""),
         }
         if obj.delivery_type.code == "mobile_money" and not delivery_mech_data:  # this workaround need to be dropped
             base_data["service_provider_code"] = collector_data.get("flex_fields", {}).get(
@@ -289,6 +290,7 @@ class PaymentGatewayAPI(BaseAPI):
         OPEN_PAYMENT_INSTRUCTION_STATUS = "payment_instructions/{remote_id}/open/"
         PROCESS_PAYMENT_INSTRUCTION_STATUS = "payment_instructions/{remote_id}/process/"
         READY_PAYMENT_INSTRUCTION_STATUS = "payment_instructions/{remote_id}/ready/"
+        FINALIZE_PAYMENT_INSTRUCTION_STATUS = "payment_instructions/{remote_id}/finalize/"
         PAYMENT_INSTRUCTION_ADD_RECORDS = "payment_instructions/{remote_id}/add_records/"
         GET_FSPS = "fsp/"
         GET_PAYMENT_RECORDS = "payment_records/"
@@ -316,6 +318,7 @@ class PaymentGatewayAPI(BaseAPI):
             PaymentInstructionStatus.OPEN: self.Endpoints.OPEN_PAYMENT_INSTRUCTION_STATUS,
             PaymentInstructionStatus.PROCESSED: self.Endpoints.PROCESS_PAYMENT_INSTRUCTION_STATUS,
             PaymentInstructionStatus.READY: self.Endpoints.READY_PAYMENT_INSTRUCTION_STATUS,
+            PaymentInstructionStatus.FINALIZED: self.Endpoints.FINALIZE_PAYMENT_INSTRUCTION_STATUS,
         }
         response_data, _ = self._post(action_endpoint_map[status].format(remote_id=remote_id))
 

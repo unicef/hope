@@ -9,7 +9,6 @@ from rest_framework.reverse import reverse
 from hct_mis_api.api.models import Grant
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import (
-    COLLECT_TYPE_FULL,
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     MALE,
@@ -50,13 +49,11 @@ class UploadRDITests(HOPEApiTestCase):
         data = {
             "name": "aaaa",
             "program": str(self.program.id),
-            "collect_individual_data": "FULL",
             "households": [
                 {
                     "residence_status": "IDP",
                     "village": "village1",
                     "country": "AF",
-                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": HEAD,
@@ -100,13 +97,11 @@ class UploadRDITests(HOPEApiTestCase):
         data = {
             "name": "aaaa",
             "program": str(self.program.id),
-            "collect_individual_data": COLLECT_TYPE_FULL,
             "households": [
                 {
                     "residence_status": "IDP",
                     "village": "village1",
                     "country": "AF",
-                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": HEAD,
@@ -149,13 +144,11 @@ class UploadRDITests(HOPEApiTestCase):
         data = {
             "name": "aaaa",
             "program": str(self.program.id),
-            "collect_individual_data": "FULL",
             "households": [
                 {
                     "residence_status": "IDP",
                     "village": "village1",
                     "country": "AF",
-                    "collect_individual_data": "FULL",
                     "members": [
                         {
                             "relationship": HEAD,
@@ -207,13 +200,11 @@ class UploadRDITests(HOPEApiTestCase):
         data = {
             "name": "aaaa",
             "program": str(self.program.id),
-            "collect_individual_data": "FULL",
             "households": [
                 {
                     "residence_status": "IDP",
                     "village": "village1",
                     "country": "AF",
-                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": HEAD,
@@ -266,13 +257,11 @@ class UploadRDITests(HOPEApiTestCase):
         data = {
             "name": "aaaa",
             "program": str(self.program.id),
-            "collect_individual_data": "FULL",
             "households": [
                 {
                     "residence_status": "IDP",
                     "village": "village1",
                     "country": "AF",
-                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": NON_BENEFICIARY,
@@ -316,7 +305,6 @@ class UploadRDITests(HOPEApiTestCase):
                     "residence_status": "",
                     "village": "village2",
                     "country": "AF",
-                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": HEAD,
@@ -347,7 +335,6 @@ class UploadRDITests(HOPEApiTestCase):
                     "residence_status": "",
                     "village": "village3",
                     "country": "AF",
-                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": HEAD,
@@ -388,7 +375,6 @@ class UploadRDITests(HOPEApiTestCase):
         self.assertIsNotNone(hh.primary_collector)
         self.assertIsNotNone(hh.alternate_collector)
 
-        self.assertEqual(hh.collect_individual_data, COLLECT_TYPE_FULL)
         self.assertEqual(hh.primary_collector.full_name, "Jhon Primary #1")
         self.assertEqual(hh.head_of_household.full_name, "James Head #1")
 
@@ -399,13 +385,11 @@ class UploadRDITests(HOPEApiTestCase):
         data = {
             "name": "aaaa",
             "program": str(self.program.id),
-            "collect_individual_data": "FULL",
             "households": [
                 {
                     "residence_status": "",
                     "village": "village1",
                     "country": "AF",
-                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": HEAD,
@@ -441,13 +425,11 @@ class UploadRDITests(HOPEApiTestCase):
         data = {
             "name": "aaaa",
             "program": str(self.program.id),
-            "collect_individual_data": "FULL",
             "households": [
                 {
                     "residence_status": "",
                     "village": "village1",
                     "country": "AF",
-                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": NON_BENEFICIARY,
@@ -491,7 +473,6 @@ class UploadRDITests(HOPEApiTestCase):
                     "residence_status": "",
                     "village": "village1",
                     "country": "AF",
-                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": HEAD,
@@ -527,13 +508,11 @@ class UploadRDITests(HOPEApiTestCase):
     def test_upload_multiple_errors(self) -> None:
         data = {
             "name": "aaaa",
-            "collect_individual_data": "FULL",
             "households": [
                 {
                     "residence_status": "",
                     "village": "village1",
                     "country": "AF",
-                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": NON_BENEFICIARY,
@@ -577,7 +556,6 @@ class UploadRDITests(HOPEApiTestCase):
                     "residence_status": "",
                     "village": "village1",
                     "country": "AF",
-                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": HEAD,

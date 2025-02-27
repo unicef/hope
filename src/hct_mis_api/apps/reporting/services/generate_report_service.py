@@ -163,9 +163,9 @@ class GenerateReportContentHelpers:
             cls._format_date(household.first_registration_date),
             cls._format_date(household.last_registration_date),
             household.org_name_enumerator,
+            household.program,
         ]
-        for program in household.programs.all():
-            row.append(program.name)
+
         return tuple(row)
 
     @staticmethod
@@ -253,10 +253,8 @@ class GenerateReportContentHelpers:
             payment.delivered_quantity_usd or payment.delivered_quantity,
             cls._format_date(payment.delivery_date),
             payment.delivery_type,
-            payment.parent.unicef_id,
             payment.entitlement_quantity,
-            payment.parent.target_population.id,
-            payment.parent.target_population.name,
+            payment.parent.name,
             cash_or_voucher,
             payment.household.id,
         )

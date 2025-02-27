@@ -3,18 +3,19 @@ import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ProgramQuery } from '@generated/graphql';
 import AddIcon from '@mui/icons-material/Add';
-import { CreateProgramCycle } from '@containers/tables/ProgramCycle/NewProgramCycle/CreateProgramCycle';
-import { UpdateProgramCycle } from '@containers/tables/ProgramCycle/NewProgramCycle/UpdateProgramCycle';
+import CreateProgramCycle from '@containers/tables/ProgramCycle/NewProgramCycle/CreateProgramCycle';
+import UpdateProgramCycle from '@containers/tables/ProgramCycle/NewProgramCycle/UpdateProgramCycle';
 import { ProgramCycle } from '@api/programCycleApi';
 import { useQueryClient } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface AddNewProgramCycleProps {
   program: ProgramQuery['program'];
   lastProgramCycle?: ProgramCycle;
 }
 
-export const AddNewProgramCycle = ({
+const AddNewProgramCycle = ({
   program,
   lastProgramCycle,
 }: AddNewProgramCycleProps): ReactElement => {
@@ -99,3 +100,5 @@ export const AddNewProgramCycle = ({
     </>
   );
 };
+
+export default withErrorBoundary(AddNewProgramCycle, 'AddNewProgramCycle');

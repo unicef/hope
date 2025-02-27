@@ -1,4 +1,4 @@
-import { Grid, MenuItem } from '@mui/material';
+import { Grid2 as Grid, MenuItem } from '@mui/material';
 import { Group, Person } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -14,6 +14,7 @@ import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface LookUpTargetPopulationFiltersSurveysProps {
   filter;
@@ -22,7 +23,7 @@ interface LookUpTargetPopulationFiltersSurveysProps {
   appliedFilter;
   setAppliedFilter: (filter) => void;
 }
-export function LookUpTargetPopulationFiltersSurveys({
+function LookUpTargetPopulationFiltersSurveys({
   filter,
   setFilter,
   initialFilter,
@@ -65,7 +66,7 @@ export function LookUpTargetPopulationFiltersSurveys({
       isOnPaper={false}
     >
       <Grid container alignItems="flex-end" spacing={3}>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SearchTextField
             label={t('Search')}
             value={filter.name}
@@ -74,7 +75,7 @@ export function LookUpTargetPopulationFiltersSurveys({
             fullWidth
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             value={filter.status}
@@ -90,7 +91,7 @@ export function LookUpTargetPopulationFiltersSurveys({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <NumberTextField
             topLabel={t(`Number of ${beneficiaryGroup?.groupLabelPlural}`)}
             value={filter.totalHouseholdsCountMin}
@@ -102,7 +103,7 @@ export function LookUpTargetPopulationFiltersSurveys({
             data-cy="filters-total-households-count-min"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <NumberTextField
             value={filter.totalHouseholdsCountMax}
             placeholder={t('To')}
@@ -113,7 +114,7 @@ export function LookUpTargetPopulationFiltersSurveys({
             data-cy="filters-total-households-count-max"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <DatePickerFilter
             topLabel={t('Date Created')}
             placeholder={t('From')}
@@ -122,7 +123,7 @@ export function LookUpTargetPopulationFiltersSurveys({
             dataCy="filters-creation-date-from"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) => handleFilterChange('createdAtRangeMax', date)}
@@ -134,3 +135,8 @@ export function LookUpTargetPopulationFiltersSurveys({
     </FiltersSection>
   );
 }
+
+export default withErrorBoundary(
+  LookUpTargetPopulationFiltersSurveys,
+  'LookUpTargetPopulationFiltersSurveys',
+);

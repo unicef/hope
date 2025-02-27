@@ -1,4 +1,4 @@
-import { Box, Grid } from '@mui/material';
+import { Box, Grid2 as Grid } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { useTranslation } from 'react-i18next';
@@ -25,8 +25,8 @@ export const LookUpPaymentRecordDisplay = ({
   const renderPaymentRecords = (): ReactElement => {
     if (values.selectedPaymentRecords.length) {
       return values.selectedPaymentRecords.map((record) => (
-        <BlueText key={record.caId} data-cy="payment-record">
-          {record.caId}
+        <BlueText key={record.id} data-cy="payment-record">
+          {record.unicefId}
         </BlueText>
       ));
     }
@@ -35,16 +35,16 @@ export const LookUpPaymentRecordDisplay = ({
   return (
     <StyledBox disabled={disabled}>
       <Grid container>
-        <Grid item>
+        <Grid>
           <Box display="flex" flexDirection="column">
             {t('Payment ID')}:{renderPaymentRecords()}
           </Box>
         </Grid>
         {disabled || (
-          <Grid item>
+          <Grid>
             <Box p={2}>
               <Grid container justifyContent="center" alignItems="center">
-                <Grid item>
+                <Grid>
                   <LightGrey>
                     <EditIcon
                       color="inherit"
@@ -53,7 +53,7 @@ export const LookUpPaymentRecordDisplay = ({
                     />
                   </LightGrey>
                 </Grid>
-                <Grid item>
+                <Grid>
                   <DarkGrey>
                     <DeleteIcon
                       color="inherit"

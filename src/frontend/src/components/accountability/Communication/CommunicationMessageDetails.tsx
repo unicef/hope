@@ -1,4 +1,4 @@
-import { Box, Grid, Paper, Typography } from '@mui/material';
+import { Box, Grid2 as Grid, Paper, Typography } from '@mui/material';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { renderUserName } from '@utils/utils';
@@ -7,6 +7,7 @@ import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -19,12 +20,12 @@ interface CommunicationMessageDetailsProps {
   message: AccountabilityCommunicationMessageQuery['accountabilityCommunicationMessage'];
 }
 
-export const CommunicationMessageDetails = ({
+const CommunicationMessageDetails = ({
   message,
 }: CommunicationMessageDetailsProps): ReactElement => {
   const { t } = useTranslation();
   return (
-    <Grid item xs={8} data-cy="communication-message-details">
+    <Grid size={{ xs: 8 }} data-cy="communication-message-details">
       <Box p={5}>
         <StyledBox>
           <Title>
@@ -34,7 +35,7 @@ export const CommunicationMessageDetails = ({
           </Title>
           <OverviewContainer>
             <Grid container spacing={6}>
-              <Grid item container justifyContent="space-between" xs={12}>
+              <Grid container justifyContent="space-between" size={{ xs: 12 }}>
                 <Box ml={2}>
                   <Typography variant="subtitle2" data-cy="message-created-by">
                     {renderUserName(message.createdBy)}
@@ -57,3 +58,8 @@ export const CommunicationMessageDetails = ({
     </Grid>
   );
 };
+
+export default withErrorBoundary(
+  CommunicationMessageDetails,
+  'CommunicationMessageDetails',
+);

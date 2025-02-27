@@ -6,72 +6,69 @@ exports[`components/paymentmodule/PaymentPlanDetails/Entitlement should render 1
     class="MuiBox-root css-zwiamn"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-blHHSb kPa-dfK css-1ps6pg7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-FEMpB iyPpzz css-1gtchvp-MuiPaper-root"
+      style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
     >
       <div
         class="MuiBox-root css-1yuhvjn"
       >
         <div
-          class="sc-dntaoT hJhDMc"
+          class="sc-dycHyt hdYwyt"
         >
           <h6
-            class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-h6 css-66ugg1-MuiTypography-root"
           >
             Entitlement
           </h6>
         </div>
         <p
-          class="sc-iuUfFv tBMPQ"
+          class="sc-gQJZgv RhQhK"
         >
           Select Entitlement Formula
         </p>
         <div
-          class="MuiGrid-root MuiGrid-container css-1vam7s3-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-1nmjuun-MuiGrid2-root"
         >
           <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-11 css-ykovpn-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-11 css-egdial-MuiGrid2-root"
           >
             <div
-              class="MuiFormControl-root MuiFormControl-fullWidth css-q8hpuo-MuiFormControl-root"
+              class="MuiFormControl-root MuiFormControl-fullWidth css-ytlejw-MuiFormControl-root"
             >
               <div
                 class="MuiBox-root css-1itv5e3"
               >
                 <label
-                  class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeSmall MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeSmall MuiInputLabel-outlined css-n5t7lh-MuiFormLabel-root-MuiInputLabel-root"
-                  data-shrink="false"
+                  class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeSmall MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiFormLabel-filled MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-sizeSmall MuiInputLabel-outlined css-xbjv7h-MuiFormLabel-root-MuiInputLabel-root"
+                  data-shrink="true"
                 >
                   Entitlement Formula
                 </label>
               </div>
               <div
-                class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-26qevy-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root"
+                class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary Mui-disabled MuiInputBase-formControl MuiInputBase-sizeSmall MuiSelect-root css-jcgkb9-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root"
                 data-cy="input-entitlement-formula"
               >
                 <div
-                  aria-controls=":r0:"
+                  aria-disabled="true"
                   aria-expanded="false"
                   aria-haspopup="listbox"
-                  class="MuiSelect-select MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-jedpe8-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input"
+                  class="MuiSelect-select MuiSelect-outlined Mui-disabled MuiInputBase-input MuiOutlinedInput-input Mui-disabled MuiInputBase-inputSizeSmall css-si86to-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input"
                   role="combobox"
-                  tabindex="0"
                 >
-                  <span
-                    class="notranslate"
-                  >
-                    ​
-                  </span>
+                  Test Formula for Payment Plan 033
                 </div>
                 <input
                   aria-hidden="true"
                   aria-invalid="false"
-                  class="MuiSelect-nativeInput css-yf8vq0-MuiSelect-nativeInput"
+                  class="MuiSelect-nativeInput css-j0riat-MuiSelect-nativeInput"
+                  disabled=""
                   tabindex="-1"
-                  value=""
+                  value="U3RlZmljb25SdWxlTm9kZTo1"
                 />
                 <svg
                   aria-hidden="true"
-                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiSelect-iconOutlined css-hfutr2-MuiSvgIcon-root-MuiSelect-icon"
+                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiSelect-iconOutlined Mui-disabled css-lohd6h-MuiSvgIcon-root-MuiSelect-icon"
                   data-testid="ArrowDropDownIcon"
                   focusable="false"
                   viewBox="0 0 24 24"
@@ -82,12 +79,13 @@ exports[`components/paymentmodule/PaymentPlanDetails/Entitlement should render 1
                 </svg>
                 <fieldset
                   aria-hidden="true"
-                  class="MuiOutlinedInput-notchedOutline css-1d3z3hw-MuiOutlinedInput-notchedOutline"
+                  class="MuiOutlinedInput-notchedOutline css-1ll44ll-MuiOutlinedInput-notchedOutline"
                 >
                   <legend
-                    class="css-ihdtdm"
+                    class="css-w4cd9x"
                   >
                     <span
+                      aria-hidden="true"
                       class="notranslate"
                     >
                       ​
@@ -98,15 +96,16 @@ exports[`components/paymentmodule/PaymentPlanDetails/Entitlement should render 1
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-item css-13i4rnv-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-direction-xs-row css-1fzlhpv-MuiGrid2-root"
           >
             <div
               class="MuiBox-root css-1isemmb"
             >
               <button
-                class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary Mui-disabled MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary css-dl1jos-MuiButtonBase-root-MuiButton-root"
+                class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary Mui-disabled MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary css-cx92lf-MuiButtonBase-root-MuiButton-root"
                 data-cy="button-apply-steficon"
                 disabled=""
+                id=":r1:"
                 tabindex="-1"
                 type="button"
               >
@@ -119,15 +118,15 @@ exports[`components/paymentmodule/PaymentPlanDetails/Entitlement should render 1
           class="MuiBox-root css-70qvj9"
         >
           <div
-            class="sc-eUlrpB jGrimq"
+            class="sc-iXqmyu dwxXXx"
           />
           <div
-            class="sc-hJRrWL bjdJAt"
+            class="sc-lertIE hmoMSh"
           >
             Or
           </div>
           <div
-            class="sc-eUlrpB jGrimq"
+            class="sc-iXqmyu dwxXXx"
           />
         </div>
       </div>
@@ -138,20 +137,22 @@ exports[`components/paymentmodule/PaymentPlanDetails/Entitlement should render 1
           class="MuiBox-root css-11ze7cv"
         >
           <div
-            class="sc-bMTdWJ gVUDoh MuiBox-root css-7jugx5"
+            class="sc-dOUtaJ gieBEI MuiBox-root css-7jugx5"
           >
             <button
-              class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary css-11ph28e-MuiButtonBase-root-MuiButton-root"
+              class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary Mui-disabled MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary css-4ifa8d-MuiButtonBase-root-MuiButton-root"
               data-cy="button-export-xlsx"
-              tabindex="0"
+              disabled=""
+              id=":r2:"
+              tabindex="-1"
               type="button"
             >
               <span
-                class="MuiButton-icon MuiButton-startIcon MuiButton-iconSizeMedium css-1d6wzja-MuiButton-startIcon"
+                class="MuiButton-icon MuiButton-startIcon MuiButton-iconSizeMedium css-1sh91j5-MuiButton-startIcon"
               >
                 <svg
                   aria-hidden="true"
-                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root"
+                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1umw9bq-MuiSvgIcon-root"
                   data-testid="GetAppIcon"
                   focusable="false"
                   viewBox="0 0 24 24"
@@ -162,12 +163,9 @@ exports[`components/paymentmodule/PaymentPlanDetails/Entitlement should render 1
                 </svg>
               </span>
               Export Xlsx
-              <span
-                class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
-              />
             </button>
             <p
-              class="sc-dprtRQ fhOqfo"
+              class="sc-bCjwNj gQdXnP"
             >
               Template contains payment list with all targeted households
             </p>
@@ -186,18 +184,19 @@ exports[`components/paymentmodule/PaymentPlanDetails/Entitlement should render 1
                 class="MuiBox-root css-0"
               >
                 <button
-                  class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary Mui-disabled MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary css-11ph28e-MuiButtonBase-root-MuiButton-root"
+                  class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary Mui-disabled MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary css-4ifa8d-MuiButtonBase-root-MuiButton-root"
                   data-cy="button-import"
                   disabled=""
+                  id=":r3:"
                   tabindex="-1"
                   type="button"
                 >
                   <span
-                    class="MuiButton-icon MuiButton-startIcon MuiButton-iconSizeMedium css-1d6wzja-MuiButton-startIcon"
+                    class="MuiButton-icon MuiButton-startIcon MuiButton-iconSizeMedium css-1sh91j5-MuiButton-startIcon"
                   >
                     <svg
                       aria-hidden="true"
-                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1umw9bq-MuiSvgIcon-root"
                       data-testid="PublishIcon"
                       focusable="false"
                       viewBox="0 0 24 24"
@@ -212,7 +211,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/Entitlement should render 1
               </div>
             </div>
             <p
-              class="sc-dprtRQ fhOqfo"
+              class="sc-bCjwNj gQdXnP"
             >
               Uploaded file should contain entitlement for each household
             </p>
@@ -220,11 +219,11 @@ exports[`components/paymentmodule/PaymentPlanDetails/Entitlement should render 1
         </div>
       </div>
       <div
-        class="sc-geXuza gvOJDy"
+        class="sc-dJkDXt ePWtJN"
       />
       <div>
         <span
-          class="sc-gtLWhw bkWrmx"
+          class="sc-gjcoXW bMjypC"
           color="textSecondary"
         >
           Total Entitled Quantity
@@ -233,14 +232,14 @@ exports[`components/paymentmodule/PaymentPlanDetails/Entitlement should render 1
           data-cy="label-Total Entitled Quantity"
         >
           <span
-            class="sc-egkSDF XYdBd"
+            class="sc-dVBluf fZAisw"
             color="textSecondary"
           >
             <div
-              class="sc-cHqXqK iAzTMC"
+              class="sc-fuExOL fQRxDJ"
               data-cy="total-entitled-quantity-usd"
             >
-              2691.69 PLN (376 USD)
+              424 USD (424 USD)
             </div>
           </span>
         </div>

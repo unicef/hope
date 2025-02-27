@@ -1,0 +1,17 @@
+{% load i18n %}
+<!-- Payments by Programme -->
+<div class="bg-white p-4 rounded shadow">
+    <h3 class="text-sm font-semibold">
+        <span class="icon icon-people-targeted icon-blue"></span>
+        {% translate "Payments by Programme" %}
+    </h3>
+    <div id="volume-by-program" class="dc-chart w-full h-full"></div>
+</div>
+<!-- Payments by FSP -->
+<div class="bg-white p-4 rounded shadow">
+    <h3 class="text-sm font-semibold">
+        <span class="icon icon-logistics icon-blue"></span>
+        {% translate "Payments by FSP" %}
+    </h3>
+    <div id="payments-by-fsp" class="dc-chart w-full h-full"></div>
+</div>

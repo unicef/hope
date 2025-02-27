@@ -1,5 +1,5 @@
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Box, Grid } from '@mui/material';
+import { Box, Grid2 as Grid } from '@mui/material';
 import * as React from 'react';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
@@ -49,10 +49,10 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
   return (
     <Grid container spacing={5}>
       {!isSocialDctType && (
-        <Grid item xs={4}>
+        <Grid size={{ xs: 4 }}>
           <StyledBox disabled={disableUnselectHousehold}>
             <Grid container alignItems="center" justifyContent="space-between">
-              <Grid item>
+              <Grid>
                 <Box display="flex">
                   {`${beneficiaryGroup?.groupLabel} ID`}:
                   <BlueText>
@@ -62,7 +62,7 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
                 </Box>
               </Grid>
               {!disableUnselectHousehold && selectedHousehold?.unicefId && (
-                <Grid item>
+                <Grid>
                   <DarkGrey>
                     <Flex>
                       <DeleteIcon
@@ -78,10 +78,10 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
           </StyledBox>
         </Grid>
       )}
-      <Grid item xs={4}>
+      <Grid size={{ xs: 4 }}>
         <StyledBox disabled={disableUnselectIndividual}>
           <Grid container alignItems="center" justifyContent="space-between">
-            <Grid item>
+            <Grid>
               <Box display="flex">
                 {`${beneficiaryGroup?.memberLabel} ID`}:
                 <BlueText>
@@ -91,7 +91,7 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
               </Box>
             </Grid>
             {!disableUnselectIndividual && selectedIndividual?.unicefId && (
-              <Grid item>
+              <Grid>
                 <DarkGrey>
                   <Flex>
                     <DeleteIcon

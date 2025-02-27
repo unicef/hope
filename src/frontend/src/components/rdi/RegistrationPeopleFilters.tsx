@@ -1,4 +1,4 @@
-import { Grid, MenuItem } from '@mui/material';
+import { Grid2 as Grid, MenuItem } from '@mui/material';
 import GroupIcon from '@mui/icons-material/Group';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -11,6 +11,7 @@ import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { FiltersSection } from '@core/FiltersSection';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface RegistrationFiltersProps {
   filter;
@@ -20,7 +21,7 @@ interface RegistrationFiltersProps {
   setAppliedFilter: (filter) => void;
 }
 
-export const RegistrationPeopleFilters = ({
+const RegistrationPeopleFilters = ({
   filter,
   setFilter,
   initialFilter,
@@ -60,7 +61,7 @@ export const RegistrationPeopleFilters = ({
       applyHandler={handleApplyFilter}
     >
       <Grid container alignItems="flex-end" spacing={3}>
-        <Grid item xs={4}>
+        <Grid size={{ xs: 4 }}>
           <SearchTextField
             label={t('Search')}
             value={filter.search}
@@ -68,7 +69,7 @@ export const RegistrationPeopleFilters = ({
             data-cy="filter-search"
           />
         </Grid>
-        <Grid item xs={4}>
+        <Grid size={{ xs: 4 }}>
           <AssigneeAutocomplete
             name="importedBy"
             label={t('Imported By')}
@@ -81,7 +82,7 @@ export const RegistrationPeopleFilters = ({
             setAppliedFilter={setAppliedFilter}
           />
         </Grid>
-        <Grid item xs={4}>
+        <Grid size={{ xs: 4 }}>
           <SelectFilter
             value={filter.status}
             label={t('Status')}
@@ -97,7 +98,7 @@ export const RegistrationPeopleFilters = ({
             )}
           </SelectFilter>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <NumberTextField
             id="minFilter"
             topLabel={t('Num. of People')}
@@ -108,7 +109,7 @@ export const RegistrationPeopleFilters = ({
             data-cy="filter-size-min"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <NumberTextField
             id="maxFilter"
             value={filter.sizeMax}
@@ -118,7 +119,7 @@ export const RegistrationPeopleFilters = ({
             data-cy="filter-size-max"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <DatePickerFilter
             topLabel={t('Import Date')}
             placeholder={t('From')}
@@ -127,7 +128,7 @@ export const RegistrationPeopleFilters = ({
             dataCy="filter-import-date-range-min"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) => handleFilterChange('importDateRangeMax', date)}
@@ -139,3 +140,8 @@ export const RegistrationPeopleFilters = ({
     </FiltersSection>
   );
 };
+
+export default withErrorBoundary(
+  RegistrationPeopleFilters,
+  'RegistrationPeopleFilters',
+);

@@ -12,6 +12,7 @@ from hct_mis_api.one_time_scripts.universal_individual_update_script.validator_a
     validate_admin,
     validate_date,
     validate_flex_field_string,
+    validate_phone_number,
     validate_sex,
     validate_string,
 )
@@ -29,6 +30,7 @@ individual_fields: Dict[str, Tuple[str, Any, Any]] = {
     "full_name_i_c": ("full_name", validate_string, handle_simple_field),
     "birth_date": ("birth_date", validate_date, handle_simple_field),
     "sex": ("sex", validate_sex, handle_simple_field),
+    "pp_phone_no_i_c": ("phone_no", validate_phone_number, handle_simple_field),
 }
 
 individual_flex_fields: Dict[str, Tuple[str, Any, Any]] = {
@@ -55,10 +57,10 @@ def south_sudan_update_script(file_path: str, program_id: str, batch_size: int) 
         business_area,
         program,
         file_path,
-        household_fields,
-        individual_fields,
-        individual_flex_fields,
-        document_fields,
+        household_fields=household_fields,
+        individual_fields=individual_fields,
+        individual_flex_fields=individual_flex_fields,
+        document_fields=document_fields,
         deduplicate_documents=True,
         deduplicate_es=True,
         batch_size=batch_size,

@@ -78,11 +78,10 @@ class TestPaymentVerificationMutations(APITestCase):
             {
                 "registration_data_import": registration_data_import,
                 "admin_area": Area.objects.order_by("?").first(),
+                "program": program,
             },
             {"registration_data_import": registration_data_import},
         )
-
-        household.programs.add(program)
 
         payment = PaymentFactory(
             parent=payment_plan,

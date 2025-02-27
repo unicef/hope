@@ -1,10 +1,9 @@
 import contextlib
 import logging
-from typing import Tuple
+from typing import Iterable, Tuple
 
 from django.core.cache import cache
 from django.db import transaction
-from django.db.models import QuerySet
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
@@ -89,6 +88,8 @@ class RdiMergeTask:
         "male_age_group_12_17_disabled_count",
         "male_age_group_18_59_disabled_count",
         "male_age_group_60_disabled_count",
+        "other_sex_group_count",
+        "unknown_sex_group_count",
         "first_registration_date",
         "last_registration_date",
         "flex_fields",
@@ -99,7 +100,6 @@ class RdiMergeTask:
         "org_name_enumerator",
         "village",
         "registration_method",
-        "collect_individual_data",
         "currency",
         "unhcr_id",
         "geopoint",
@@ -152,14 +152,6 @@ class RdiMergeTask:
         "wallet_address",
     )
 
-    # TODO DATAHUB DELETE Fix for flex registration
-    #         if record := imported_household.flex_registrations_record:
-    #             household_data["registration_id"] = str(record.registration)
-
-    # TODO DATAHUB DELETE Fix for flex registration
-    #         if enumerator_rec_id := imported_household.enumerator_rec_id:
-    #             household_data["enumerator_rec_id"] = enumerator_rec_id
-
     def _create_grievance_ticket_for_delivery_mechanisms_errors(
         self, delivery_mechanism_data: DeliveryMechanismData, obj_hct: RegistrationDataImport, description: str
     ) -> Tuple[GrievanceTicket, TicketIndividualDataUpdateDetails]:
@@ -183,7 +175,7 @@ class RdiMergeTask:
         return grievance_ticket, individual_data_update_ticket
 
     def _create_grievance_tickets_for_delivery_mechanisms_errors(
-        self, delivery_mechanisms_data: QuerySet[PendingDeliveryMechanismData], obj_hct: RegistrationDataImport
+        self, delivery_mechanisms_data: Iterable[PendingDeliveryMechanismData], obj_hct: RegistrationDataImport
     ) -> None:
         grievance_tickets_to_create = []
         individual_data_update_tickets_to_create = []

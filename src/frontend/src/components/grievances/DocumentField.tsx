@@ -1,4 +1,4 @@
-import { Grid, IconButton } from '@mui/material';
+import { Grid2 as Grid, IconButton } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { Field } from 'formik';
@@ -45,7 +45,7 @@ export function DocumentField({
 
   return (
     <Grid container alignItems="center" spacing={3}>
-      <Grid item xs={3}>
+      <Grid size={{ xs: 3 }}>
         <Field
           name={`${docFieldName}.key`}
           fullWidth
@@ -57,7 +57,7 @@ export function DocumentField({
           disabled={isEditTicket}
         />
       </Grid>
-      <Grid item xs={2}>
+      <Grid size={{ xs:2 }}>
         <Field
           name={`${docFieldName}.country`}
           fullWidth
@@ -69,7 +69,7 @@ export function DocumentField({
           disabled={isEditTicket}
         />
       </Grid>
-      <Grid item xs={3}>
+      <Grid size={{ xs: 3 }}>
         <Field
           name={`${docFieldName}.number`}
           fullWidth
@@ -80,7 +80,7 @@ export function DocumentField({
           disabled={isEditTicket}
         />
       </Grid>
-      <Grid item xs={3}>
+      <Grid size={{ xs: 3 }}>
         <GrievanceDocumentPhotoModalEditable
           photoSrc={photoSrc}
           setFieldValue={setFieldValue}
@@ -88,7 +88,7 @@ export function DocumentField({
         />
       </Grid>
       {!isEdited ? (
-        <Grid item xs={1}>
+        <Grid size={{ xs:1 }}>
           <IconButton disabled={isEditTicket} onClick={onDelete}>
             <Delete />
           </IconButton>

@@ -1,4 +1,4 @@
-import { Grid, GridSize, Typography } from '@mui/material';
+import { Grid2 as Grid, GridSize, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { renderUserName } from '@utils/utils';
 import { FeedbackIssueType, FeedbackQuery } from '@generated/graphql';
@@ -11,6 +11,7 @@ import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface FeedbackDetailsProps {
   feedback: FeedbackQuery['feedback'];
@@ -18,7 +19,7 @@ interface FeedbackDetailsProps {
   canViewIndividualDetails: boolean;
 }
 
-export function FeedbackDetails({
+function FeedbackDetails({
   feedback,
   canViewHouseholdDetails,
   canViewIndividualDetails,
@@ -29,7 +30,7 @@ export function FeedbackDetails({
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   return (
-    <Grid item xs={12}>
+    <Grid size={{ xs: 12 }}>
       <ContainerColumnWithBorder>
         <Title>
           <Typography variant="h6">{t('Details')}</Typography>
@@ -159,7 +160,7 @@ export function FeedbackDetails({
             ]
               .filter((el) => el)
               .map((el) => (
-                <Grid key={el.label} item xs={el.size as GridSize}>
+                <Grid key={el.label} size={{ xs: el.size as GridSize }}>
                   <LabelizedField label={el.label}>{el.value}</LabelizedField>
                 </Grid>
               ))}
@@ -169,3 +170,5 @@ export function FeedbackDetails({
     </Grid>
   );
 }
+
+export default withErrorBoundary(FeedbackDetails, 'FeedbackDetails');
