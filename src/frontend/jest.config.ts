@@ -10,7 +10,7 @@ const config: Config = {
   testPathIgnorePatterns: ['/node_modules/', '/.history/'],
   setupFilesAfterEnv: ['./jest/setupTests.ts'],
   transform: {
-    '^.+\\.[tj]sx?$': 'babel-jest',
+    '^.+\\.[tj]sx?$': 'ts-jest',
     '^.+\\.css$': '<rootDir>/config/jest/cssTransform.cjs',
     '^(?!.*\\.(js|jsx|ts|tsx|css|json)$)':
       '<rootDir>/config/jest/fileTransform.cjs',
