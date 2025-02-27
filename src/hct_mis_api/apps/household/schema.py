@@ -42,12 +42,14 @@ from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
     chart_permission_decorator,
     encode_ids,
+    get_lowest_admin_area,
     get_model_choices_fields,
     get_program_id_from_headers,
     resolve_flex_fields_choices_to_string,
     sum_lists_with_values,
     to_choice_object,
 )
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.geo.schema import AreaNode
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.filters import (
@@ -358,7 +360,8 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
                 raise PermissionDenied("Permission Denied")
             if not user.partner.has_program_access(object_instance.program_id):
                 raise PermissionDenied("Permission Denied")
-            if object_instance.household_id and object_instance.household.admin_area_id:
+            household_admin_area = get_lowest_admin_area(object_instance.household)
+            if object_instance.household_id and household_admin_area:
                 areas_from_partner = user.partner.get_program_areas(object_instance.program_id)
                 household = object_instance.household
                 areas_from_household = [
@@ -461,9 +464,14 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
         return parent.sanction_list_confirmed_match
 
     @staticmethod
+    def resolve_admin_area(parent: Household, info: Any) -> Optional[Area]:
+        return get_lowest_admin_area(parent)
+
+    @staticmethod
     def resolve_admin_area_title(parent: Household, info: Any) -> str:
-        if parent.admin_area:
-            return f"{parent.admin_area.name} - {parent.admin_area.p_code}"
+        admin_area = get_lowest_admin_area(parent)
+        if admin_area:
+            return f"{admin_area.name} - {admin_area.p_code}"
         return ""
 
     @staticmethod
@@ -529,7 +537,8 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
                 raise PermissionDenied("Permission Denied")
             if not user.partner.has_program_access(object_instance.program_id):
                 raise PermissionDenied("Permission Denied")
-            if object_instance.admin_area_id:
+            admin_area = get_lowest_admin_area(object_instance)
+            if admin_area:
                 areas_from_partner = user.partner.get_program_areas(object_instance.program_id)
                 areas_from_household = [object_instance.admin1_id, object_instance.admin2_id, object_instance.admin3_id]
                 if not areas_from_partner.filter(id__in=areas_from_household).exists():
@@ -739,7 +748,9 @@ class Query(graphene.ObjectType):
                     Q(household__admin1__in=areas_ids)
                     | Q(household__admin2__in=areas_ids)
                     | Q(household__admin3__in=areas_ids)
-                    | Q(household__admin_area__isnull=True)
+                    | Q(household__admin1__isnull=True)
+                    | Q(household__admin2__isnull=True)
+                    | Q(household__admin3__isnull=True)
                 )
                 filter_q |= Q(Q(program_id=program_id) & areas_query)
 
@@ -788,15 +799,29 @@ class Query(graphene.ObjectType):
                     Q(admin1__in=areas_ids)
                     | Q(admin2__in=areas_ids)
                     | Q(admin3__in=areas_ids)
-                    | Q(admin_area__isnull=True)
+                    | Q(household__admin1__isnull=True)
+                    | Q(household__admin2__isnull=True)
+                    | Q(household__admin3__isnull=True)
                 )
                 filter_q |= Q(Q(program_id=program_id) & areas_query)
 
             queryset = queryset.filter(filter_q)
 
-        if does_path_exist_in_query("edges.node.admin2", info):
-            queryset = queryset.select_related("admin_area")
-            queryset = queryset.select_related("admin_area__area_type")
+        if does_path_exist_in_query("edges.node.admin1", info) or does_path_exist_in_query(
+            "edges.node.admin_area", info
+        ):
+            queryset = queryset.select_related("admin1")
+            queryset = queryset.select_related("admin1__area_type")
+        if does_path_exist_in_query("edges.node.admin2", info) or does_path_exist_in_query(
+            "edges.node.admin_area", info
+        ):
+            queryset = queryset.select_related("admin2")
+            queryset = queryset.select_related("admin2__area_type")
+        if does_path_exist_in_query("edges.node.admin3", info) or does_path_exist_in_query(
+            "edges.node.admin_area", info
+        ):
+            queryset = queryset.select_related("admin3")
+            queryset = queryset.select_related("admin3__area_type")
 
         if does_path_exist_in_query("edges.node.headOfHousehold", info):
             queryset = queryset.select_related("head_of_household")
