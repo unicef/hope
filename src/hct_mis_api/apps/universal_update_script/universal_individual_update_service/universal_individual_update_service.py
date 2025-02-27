@@ -1,3 +1,4 @@
+import logging
 from io import BytesIO
 from typing import Any, List, Tuple
 
@@ -34,6 +35,8 @@ from hct_mis_api.apps.universal_update_script.universal_individual_update_servic
     get_generator_handler,
 )
 from hct_mis_api.apps.utils.elasticsearch_utils import populate_index
+
+logger = logging.getLogger(__name__)
 
 
 class UniversalIndividualUpdateService:
@@ -95,7 +98,7 @@ class UniversalIndividualUpdateService:
 
     def print_message(self, text: str) -> None:
         self.universal_update.save_logs(text)
-        print(text)
+        logger.info(text)
 
     def validate_household_fields(
         self, row: Tuple[Any, ...], headers: List[str], household: Any, row_index: int
@@ -413,6 +416,8 @@ class UniversalIndividualUpdateService:
             row.append(self.get_excel_value(individual.flex_fields.get(field_data[0])))
         for field_data in self.household_fields.values():
             row.append(self.get_excel_value(getattr(household, field_data[0])))
+        for field_data in self.household_flex_fields.values():
+            row.append(self.get_excel_value(household.flex_fields.get(field_data[0])))
         all_documents = individual.documents.all()
         for document_no_column, _ in self.document_fields:
             document = [x for x in all_documents if x.type_id == self.document_types[document_no_column].id]
@@ -430,7 +435,7 @@ class UniversalIndividualUpdateService:
             if len(wallet) > 1:
                 raise ValueError("Multiple wallets found")
             if len(wallet) == 1:
-                for field_name in data_fields:
+                for _, field_name in data_fields:
                     value = wallet[0].data.get(field_name)
                     row.append(self.get_excel_value(value))
             else:
@@ -450,13 +455,14 @@ class UniversalIndividualUpdateService:
         for column_name in self.household_fields.keys():
             columns.append(column_name)
 
+        for column_name in self.household_flex_fields.keys():
+            columns.append(column_name)
+
         for col_pair in self.document_fields:
             columns.extend(col_pair)
-
         for lists in self.deliver_mechanism_data_fields.values():
             for pair in lists:
                 columns.append(pair[0])
-
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.append(columns)

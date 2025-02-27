@@ -163,7 +163,7 @@ def get_household_flex_fields() -> dict[Any, Any]:
     for flexible_attribute in FlexibleAttribute.objects.filter(
         associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD
     ):
-        flex_fields_dict[f"flex_ind__{flexible_attribute.name}"] = (
+        flex_fields_dict[f"flex_hh__{flexible_attribute.name}"] = (
             flexible_attribute.name,
             validate_flex_field_string,
             handle_simple_field,
@@ -184,7 +184,7 @@ def get_wallet_fields() -> dict[Any, Any]:
         for field in delivery_mechanism.optional_fields:
             wallet_fields.append((f"wallet__{field}", field))
         if len(wallet_fields) > 0:
-            deliver_mechanism_data_fields[delivery_mechanism.name] = tuple(wallet_fields)
+            deliver_mechanism_data_fields[delivery_mechanism.code] = tuple(wallet_fields)
     return deliver_mechanism_data_fields
 
 

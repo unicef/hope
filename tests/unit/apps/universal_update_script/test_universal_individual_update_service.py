@@ -3,6 +3,7 @@ from django.core.files.base import ContentFile
 import pytest
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.geo.models import Area, AreaType, Country
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import (
@@ -12,6 +13,7 @@ from hct_mis_api.apps.household.models import (
     DocumentType,
     Individual,
 )
+from hct_mis_api.apps.payment.models import DeliveryMechanism, DeliveryMechanismData
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.universal_update_script.models import UniversalUpdate
@@ -62,14 +64,48 @@ def program(poland: Country, germany: Country) -> Program:
 
 
 @pytest.fixture
-def individual(program: Program, admin1: Area, admin2: Area) -> Individual:
-    _, individuals = create_household_and_individuals(
+def delivery_mechanism() -> DeliveryMechanism:
+    return DeliveryMechanism.objects.create(name="Mobile Money", code="mobile_money", required_fields=["phone_number"])
+
+
+@pytest.fixture
+def flexible_attribute_individual() -> FlexibleAttribute:
+    return FlexibleAttribute.objects.create(
+        name="muac",
+        type=FlexibleAttribute.INTEGER,
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+        label={"English(EN)": "Muac"},
+    )
+
+
+@pytest.fixture
+def flexible_attribute_household() -> FlexibleAttribute:
+    return FlexibleAttribute.objects.create(
+        name="eggs",
+        type=FlexibleAttribute.STRING,
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
+        label={"English(EN)": "Eggs"},
+    )
+
+
+@pytest.fixture
+def individual(
+    program: Program,
+    admin1: Area,
+    admin2: Area,
+    flexible_attribute_individual: FlexibleAttribute,
+    flexible_attribute_household: FlexibleAttribute,
+    delivery_mechanism: DeliveryMechanism,
+) -> Individual:
+    household, individuals = create_household_and_individuals(
         household_data={
             "unicef_id": "HH-20-0000.0002",
             "rdi_merge_status": "MERGED",
             "business_area": program.business_area,
             "program": program,
             "admin1": admin1,
+            "size": 954,
+            "returnee": True,
         },
         individuals_data=[
             {
@@ -80,8 +116,24 @@ def individual(program: Program, admin1: Area, admin2: Area) -> Individual:
             },
         ],
     )
+
     ind = individuals[0]
+
+    ind.flex_fields = {"muac": 0}
+    ind.save()
+    household.flex_fields = {"eggs": "OLD"}
+    household.save()
     return ind
+
+
+@pytest.fixture()
+def wallet(individual: Individual, delivery_mechanism: DeliveryMechanism) -> DeliveryMechanismData:
+    return DeliveryMechanismData.objects.create(
+        individual=individual,
+        data={"phone_number": "1234567890"},
+        delivery_mechanism=delivery_mechanism,
+        rdi_merge_status=DeliveryMechanismData.MERGED,
+    )
 
 
 @pytest.fixture
@@ -99,7 +151,14 @@ def document_national_id(individual: Individual, program: Program, poland: Count
 
 class TestUniversalIndividualUpdateService:
     def test_update_individual(
-        self, individual: Individual, program: Program, admin1: Area, admin2: Area, document_national_id: Document
+        self,
+        individual: Individual,
+        program: Program,
+        admin1: Area,
+        admin2: Area,
+        document_national_id: Document,
+        delivery_mechanism: DeliveryMechanism,
+        wallet: DeliveryMechanismData,
     ) -> None:
         """
         This test generates file for individual update
@@ -117,13 +176,21 @@ class TestUniversalIndividualUpdateService:
         birth_date_old = individual.birth_date
         address_old = individual.household.address
         admin1_old = individual.household.admin1
+        size_old = individual.household.size
+        returnee_old = individual.household.returnee
+        muac_old = individual.flex_fields.get("muac")
+        eggs_old = individual.household.flex_fields.get("eggs")
+        wallet_number_old = wallet.data.get("phone_number")
         document_number_old = document_national_id.document_number
         universal_update = UniversalUpdate(program=program)
         universal_update.unicef_ids = individual.unicef_id
         universal_update.individual_fields = ["given_name", "sex", "birth_date"]
-        universal_update.household_fields = ["address", "admin1"]
+        universal_update.individual_flex_fields_fields = ["muac"]
+        universal_update.household_flex_fields_fields = ["eggs"]
+        universal_update.household_fields = ["address", "admin1", "size", "returnee"]
         universal_update.save()
         universal_update.document_types.add(DocumentType.objects.first())
+        universal_update.delivery_mechanisms.add(DeliveryMechanism.objects.first())
         service = UniversalIndividualUpdateService(universal_update)
         template_file = service.generate_xlsx_template()
         universal_update.refresh_from_db()
@@ -137,19 +204,26 @@ class TestUniversalIndividualUpdateService:
         individual.given_name = "Test Name"
         individual.sex = FEMALE
         individual.birth_date = "1996-06-21"
+        individual.flex_fields = {"muac": 25}
         individual.save()
         household = individual.household
         household.address = "Wrocław"
         household.admin1 = None
+        household.size = 100
+        household.returnee = False
+        household.flex_fields = {"eggs": "NEW"}
         household.save()
         document_national_id.document_number = "111"
         document_national_id.save()
+        wallet.data["phone_number"] = "0"
+        wallet.save()
         service = UniversalIndividualUpdateService(universal_update)
         universal_update.clear_logs()
         service.execute()
         universal_update.refresh_from_db()
         individual.refresh_from_db()
         document_national_id.refresh_from_db()
+        wallet.refresh_from_db()
         expected_update_log = """Validating row 0 to 1 Indivduals
 Validation successful
 Updating row 0 to 1 Individuals
@@ -164,3 +238,8 @@ Update successful
         assert individual.household.address == address_old
         assert individual.household.admin1 == admin1_old
         assert document_national_id.document_number == document_number_old
+        assert individual.household.size == size_old
+        assert individual.household.returnee == returnee_old
+        assert individual.flex_fields.get("muac") == muac_old
+        assert individual.household.flex_fields.get("eggs") == eggs_old
+        assert wallet.data.get("phone_number") == wallet_number_old

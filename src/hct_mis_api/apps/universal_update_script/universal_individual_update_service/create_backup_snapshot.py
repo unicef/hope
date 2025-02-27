@@ -36,13 +36,13 @@ def create_and_save_snapshot_chunked(universal_update: UniversalUpdate) -> None:
     unicef_ids = _get_unicef_ids_from_workbook(workbook)
     log_message: Callable[[str], None] = lambda message_log: universal_update.save_logs(message_log)
     program_id = universal_update.program_id
-    content = create_snapshot_file(log_message, str(program_id), unicef_ids)
+    content = create_snapshot_content(log_message, str(program_id), unicef_ids)
 
     universal_update.backup_snapshot.save("snapshot.json", ContentFile(content))
     universal_update.save()
 
 
-def create_snapshot_file(log_message: Callable[[str], None], program_id: str, unicef_ids: [str]) -> str:
+def create_snapshot_content(log_message: Callable[[str], None], program_id: str, unicef_ids: [str]) -> str:
     db_count = Individual.objects.filter(unicef_id__in=unicef_ids, program_id=program_id).count()
     if db_count != len(unicef_ids):
         unicef_ids_from_db = list(
