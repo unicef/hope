@@ -1,7 +1,6 @@
 from django.urls import include, path
 
-from rest_framework.routers import SimpleRouter
-
+from hct_mis_api.apps.program.api.urls import get_program_nested_router
 from hct_mis_api.apps.registration_data.api.views import (
     RegistrationDataImportViewSet,
     WebhookDeduplicationView,
@@ -9,14 +8,14 @@ from hct_mis_api.apps.registration_data.api.views import (
 
 app_name = "registration_data"
 
-router = SimpleRouter()
-router.register(
+program_nested_router = get_program_nested_router()
+program_nested_router.register(
     "registration-data-imports",
     RegistrationDataImportViewSet,
     basename="registration-data-imports",
 )
 
 urlpatterns = [
-    path("", include(router.urls)),
+    path("", include(program_nested_router.urls)),
     path("webhookdeduplication/", WebhookDeduplicationView.as_view(), name="webhook_deduplication"),
 ]

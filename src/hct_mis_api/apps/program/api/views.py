@@ -7,6 +7,7 @@ from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import OrderingFilter
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -16,6 +17,7 @@ from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.api.filters import UpdatedAtFilter
 from hct_mis_api.apps.core.api.mixins import (
     ActionMixin,
     BaseViewSet,
@@ -33,10 +35,24 @@ from hct_mis_api.apps.program.api.serializers import (
     ProgramCycleDeleteSerializer,
     ProgramCycleListSerializer,
     ProgramCycleUpdateSerializer,
+    ProgramSerializer,
 )
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 
 logger = logging.getLogger(__name__)
+
+
+class ProgramViewSet(
+    RetrieveModelMixin,
+    ListModelMixin,
+    BaseViewSet,
+):
+    permission_classes = [IsAuthenticated]
+    queryset = Program.objects.all()
+    serializer_class = ProgramSerializer
+    filter_backends = (OrderingFilter, DjangoFilterBackend)
+    filterset_class = UpdatedAtFilter
+    lookup_url_kwarg = "programme_code"
 
 
 class ProgramCycleViewSet(
