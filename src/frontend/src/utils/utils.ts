@@ -195,6 +195,8 @@ export function targetPopulationStatusDisplayMap(status: string): string {
   switch (status) {
     case PaymentPlanStatus.TpOpen:
       return 'OPEN';
+    case 'DRAFT':
+      return 'Ready for PP Creation';
     case PaymentPlanStatus.TpLocked:
       return 'LOCKED';
     case PaymentPlanStatus.Processing:
