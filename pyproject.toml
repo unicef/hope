@@ -83,6 +83,7 @@ dev-dependencies = [
     "django-stubs~=1.12.0",
     "django-stubs-ext<1.0.0,>=0.7.0",
     "djangorestframework-stubs~=1.7.0",
+    "drf-nested-routers~=0.94.0",
     "argh<1.0,>=0.28",
     "django-webtest<2.0.0,>=1.9.10",
     "faker<18,>=17",
@@ -236,6 +237,7 @@ dependencies = [
     "django-fernet-fields>=0.6",
     "msoffcrypto-tool>=5.4.2",
     "pyzipper>=0.3.6",
+    "drf-nested-routers>=0.94.0",
 ]
 requires-python = "==3.12.*"
 readme = "README.md"

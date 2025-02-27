@@ -231,3 +231,21 @@ class BeneficiaryGroupSerializer(serializers.ModelSerializer):
             "member_label_plural",
             "master_detail",
         )
+
+
+class ProgramSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Program
+        fields = (
+            "id",
+            "name",
+            "start_date",
+            "end_date",
+            "budget",
+            "frequency_of_payments",
+            "sector",
+            "cash_plus",
+            "population_goal",
+            "data_collecting_type",
+            "beneficiary_group",
+        )
