@@ -1,1 +1,0 @@
-export { GrievancesDetails } from './GrievancesDetails';

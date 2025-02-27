@@ -3,53 +3,54 @@
 exports[`components/dashboard/TotalAmountTransferredSection should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-ivxoEo BQBNL css-1ps6pg7-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-jbAkgO ksOHpt css-1gtchvp-MuiPaper-root"
     color="#1E877D"
+    style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
   >
     <div
-      class="MuiGrid-root MuiGrid-container css-9cyib4-MuiGrid-root"
+      class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-15fcp3v-MuiGrid2-root"
     >
       <div
-        class="MuiGrid-root MuiGrid-item css-13i4rnv-MuiGrid-root"
+        class="MuiGrid2-root MuiGrid2-direction-xs-row css-1fzlhpv-MuiGrid2-root"
       >
         <div
-          class="sc-blHHSb bfnLSC"
+          class="sc-FEMpB dgnSFT"
         >
           TOTAL AMOUNT TRANSFERRED
         </div>
         <div
-          class="sc-gtLWhw BvXWK"
+          class="sc-gjcoXW egnRgJ"
         >
           IN USD
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item css-13i4rnv-MuiGrid-root"
+        class="MuiGrid2-root MuiGrid2-direction-xs-row css-1fzlhpv-MuiGrid2-root"
         data-cy="total-amount-transferred"
       >
         <div
-          class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 css-73i7jt-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-3 css-15imkbu-MuiGrid2-root"
         >
           <div
-            class="MuiGrid-root MuiGrid-item css-13i4rnv-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-direction-xs-row css-1fzlhpv-MuiGrid2-root"
           >
             <div
-              class="sc-fAUdSK cAWWcd"
+              class="sc-fLDLck ktOzqz"
             >
               USD 1,719.00
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-item css-13i4rnv-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-direction-xs-row css-1fzlhpv-MuiGrid2-root"
           >
             <div
               bg="#d9eceb"
-              class="sc-dntaoT fxmYCc"
+              class="sc-dycHyt laTIlp"
               color="#03867b"
             >
               <svg
                 aria-hidden="true"
-                class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit css-1vooibu-MuiSvgIcon-root"
+                class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit css-1ckov0h-MuiSvgIcon-root"
                 data-testid="AccountBalanceWalletIcon"
                 focusable="false"
                 viewBox="0 0 24 24"

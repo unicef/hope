@@ -1,4 +1,4 @@
-import { Box, Grid, Paper, Typography } from '@mui/material';
+import { Box, Grid2 as Grid, Paper, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -67,7 +67,7 @@ export const IndividualBioData = ({
 
   const mappedIndividualDocuments = individual?.documents?.edges?.map(
     (edge) => (
-      <Grid item xs={3} key={edge.node.id}>
+      <Grid size={{ xs:3 }} key={edge.node.id}>
         <Box flexDirection="column">
           <Box mb={1}>
             <LabelizedField label={edge.node.type.label}>
@@ -89,7 +89,7 @@ export const IndividualBioData = ({
   );
 
   const mappedIdentities = individual?.identities?.edges?.map((item) => (
-    <Grid item xs={3} key={item.node.id}>
+    <Grid size={{ xs:3 }} key={item.node.id}>
       <Box flexDirection="column">
         <Box mb={1}>
           <LabelizedField label={`${item.node.partner} ID`}>
@@ -102,7 +102,7 @@ export const IndividualBioData = ({
   ));
 
   const mappedRoles = (
-    <Grid item xs={3}>
+    <Grid size={{ xs: 3 }}>
       <LabelizedField label={`Linked ${beneficiaryGroup?.groupLabelPlural}`}>
         {individual?.householdsAndRoles?.length
           ? individual?.householdsAndRoles?.map((item) => (
@@ -121,25 +121,25 @@ export const IndividualBioData = ({
     }
     return (
       <>
-        <Grid item xs={12}>
+        <Grid size={{ xs: 12 }}>
           <BorderBox />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Bank name')}>
             {individual?.bankAccountInfo?.bankName}
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Bank account number')}>
             {individual?.bankAccountInfo?.bankAccountNumber}
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Account holder name')}>
             {individual?.bankAccountInfo?.accountHolderName}
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Bank branch name')}>
             {individual?.bankAccountInfo?.bankBranchName}
           </LabelizedField>
@@ -151,20 +151,20 @@ export const IndividualBioData = ({
   const renderDigitalWalletInfo = (): ReactNode => {
     return (
       <>
-        <Grid item xs={12}>
+        <Grid size={{ xs: 12 }}>
           <BorderBox />
         </Grid>
-        <Grid item xs={4}>
+        <Grid size={{ xs: 4 }}>
           <LabelizedField label={t('Wallet Name')}>
             {individual?.walletName}
           </LabelizedField>
         </Grid>
-        <Grid item xs={4}>
+        <Grid size={{ xs: 4 }}>
           <LabelizedField label={t('Blockchain Name')}>
             {individual?.blockchainName}
           </LabelizedField>
         </Grid>
-        <Grid item xs={4}>
+        <Grid size={{ xs: 4 }}>
           <LabelizedField label={t('Wallet Address')}>
             {individual?.walletAddress}
           </LabelizedField>
@@ -179,62 +179,62 @@ export const IndividualBioData = ({
         <Typography variant="h6">{t('Bio Data')}</Typography>
       </Title>
       <Grid container spacing={6}>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Full Name')}>
             {individual?.fullName}
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Given Name')}>
             {individual?.givenName}
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Middle Name')}>
             {individual?.middleName}
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Family Name')}>
             {individual?.familyName}
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Gender')}>
             {sexToCapitalize(individual?.sex)}
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Age')}>
             {formatAge(individual?.age)}
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Date of Birth')}>
             <UniversalMoment>{individual?.birthDate}</UniversalMoment>
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Estimated Date of Birth')}>
             {renderBoolean(individual?.estimatedBirthDate)}
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Marital Status')}>
             {maritalStatusChoicesDict[individual?.maritalStatus]}
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Work Status')}>
             {workStatusChoicesDict[individual?.workStatus]}
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Pregnant')}>
             {renderBoolean(individual?.pregnant)}
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={`${beneficiaryGroup?.groupLabel} ID`}>
             {individual?.household?.id ? (
               <ContentLink
@@ -247,67 +247,67 @@ export const IndividualBioData = ({
             )}
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Role')}>
             {roleChoicesDict[individual?.role]}
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField
             label={`Relationship to Head Of ${beneficiaryGroup?.groupLabel}`}
           >
             {relationshipChoicesDict[individual?.relationship]}
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Preferred language')}>
             {individual?.preferredLanguage}
           </LabelizedField>
         </Grid>
         {mappedRoles}
-        <Grid item xs={12}>
+        <Grid size={{ xs: 12 }}>
           <BorderBox />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Observed disabilities')}>
             {individual?.observedDisability
               .map((choice) => observedDisabilityChoicesDict[choice])
               .join(', ')}
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Seeing disability severity')}>
             {severityOfDisabilityChoicesDict[individual?.seeingDisability]}
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Hearing disability severity')}>
             {severityOfDisabilityChoicesDict[individual?.hearingDisability]}
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Physical disability severity')}>
             {severityOfDisabilityChoicesDict[individual?.physicalDisability]}
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField
             label={t('Remembering or concentrating disability severity')}
           >
             {severityOfDisabilityChoicesDict[individual?.memoryDisability]}
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Self-care disability severity')}>
             {severityOfDisabilityChoicesDict[individual?.selfcareDisability]}
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Communicating disability severity')}>
             {severityOfDisabilityChoicesDict[individual?.commsDisability]}
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Disability')}>
             {individual?.disability === IndividualDisability.Disabled
               ? 'Disabled'
@@ -316,26 +316,26 @@ export const IndividualBioData = ({
         </Grid>
         {!mappedIndividualDocuments?.length &&
         !mappedIdentities?.length ? null : (
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <BorderBox />
           </Grid>
         )}
         {mappedIndividualDocuments}
         {mappedIdentities}
-        <Grid item xs={12}>
+        <Grid size={{ xs: 12 }}>
           <BorderBox />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Email')}>
             {individual?.email}
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Phone Number')}>
             {getPhoneNoLabel(individual?.phoneNo, individual?.phoneNoValid)}
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Alternative Phone Number')}>
             {getPhoneNoLabel(
               individual?.phoneNoAlternative,
@@ -343,10 +343,10 @@ export const IndividualBioData = ({
             )}
           </LabelizedField>
         </Grid>
-        <Grid item xs={12}>
+        <Grid size={{ xs: 12 }}>
           <BorderBox />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField
             label={t('Date of last screening against sanctions list')}
           >
@@ -355,7 +355,7 @@ export const IndividualBioData = ({
             </UniversalMoment>
           </LabelizedField>
         </Grid>
-        <Grid item xs={6}>
+        <Grid size={{ xs:6 }}>
           {individual?.household?.unicefId && (
             <LinkedGrievancesModal
               household={individual?.household}

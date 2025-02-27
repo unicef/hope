@@ -129,13 +129,13 @@ class Command(BaseCommand):
                         "registration_data_import": registration_data_import,
                         "business_area": business_area,
                         "admin_area": Area.objects.filter(area_type__business_area=business_area).order_by("?").first(),
+                        "program": program,
                     },
                     {"registration_data_import": registration_data_import},
                 )
                 for individual in individuals:
                     DocumentFactory(individual=individual)
 
-                household.programs.add(program)
                 if household.admin_area:
                     program.admin_areas.add(household.admin_area)
 

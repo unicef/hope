@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Typography } from '@mui/material';
+import { Box, Button, Grid2 as Grid, Typography } from '@mui/material';
 import { AddCircleOutline } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
@@ -20,6 +20,7 @@ import { NewIdentityFieldArray } from './NewIdentityFieldArray';
 import { ExistingPaymentChannelFieldArray } from './ExistingPaymentChannelFieldArray';
 import { NewPaymentChannelFieldArray } from './NewPaymentChannelFieldArray';
 import { useProgramContext } from 'src/programContext';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -33,7 +34,7 @@ export interface EditIndividualDataChangeProps {
   field;
 }
 
-export function EditIndividualDataChange({
+function EditIndividualDataChange({
   values,
   setFieldValue,
 }: EditIndividualDataChangeProps): ReactElement {
@@ -117,7 +118,7 @@ export function EditIndividualDataChange({
                       values={values}
                     />
                   ))}
-                  <Grid item xs={4}>
+                  <Grid size={{ xs: 4 }}>
                     <Button
                       color="primary"
                       onClick={() => {
@@ -195,3 +196,8 @@ export function EditIndividualDataChange({
     </>
   );
 }
+
+export default withErrorBoundary(
+  EditIndividualDataChange,
+  'EditIndividualDataChange',
+);

@@ -17,7 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { ProgramQuery } from '@generated/graphql';
 import { Field, Form, Formik, FormikValues } from 'formik';
 import { GreyText } from '@core/GreyText';
-import Grid from '@mui/material/Grid';
+import Grid from '@mui/material/Grid2';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
@@ -30,6 +30,7 @@ import {
 import type { DefaultError } from '@tanstack/query-core';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface CreateProgramCycleProps {
   program: ProgramQuery['program'];
@@ -42,7 +43,7 @@ interface MutationError extends DefaultError {
   data: any;
 }
 
-export const CreateProgramCycle = ({
+const CreateProgramCycle = ({
   program,
   onClose,
   onSubmit,
@@ -146,7 +147,7 @@ export const CreateProgramCycle = ({
                 </GreyText>
               </DialogDescription>
               <Grid container spacing={3}>
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12 }}>
                   <Field
                     name="title"
                     fullWidth
@@ -159,7 +160,7 @@ export const CreateProgramCycle = ({
                     <FormHelperText error>{error.data.title}</FormHelperText>
                   )}
                 </Grid>
-                <Grid item xs={6} data-cy="start-date-cycle">
+                <Grid size={{ xs: 6 }} data-cy="start-date-cycle">
                   <Field
                     name="start_date"
                     label={t('Start Date')}
@@ -174,7 +175,7 @@ export const CreateProgramCycle = ({
                     </FormHelperText>
                   )}
                 </Grid>
-                <Grid item xs={6} data-cy="end-date-cycle">
+                <Grid size={{ xs: 6 }} data-cy="end-date-cycle">
                   <Field
                     name="end_date"
                     label={t('End Date')}
@@ -210,3 +211,5 @@ export const CreateProgramCycle = ({
     </Formik>
   );
 };
+
+export default withErrorBoundary(CreateProgramCycle, 'CreateProgramCycle');

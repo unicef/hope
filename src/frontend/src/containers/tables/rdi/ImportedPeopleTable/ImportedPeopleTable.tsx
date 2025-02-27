@@ -1,4 +1,4 @@
-import { Box, Checkbox, FormControlLabel, Grid } from '@mui/material';
+import { Box, Checkbox, FormControlLabel, Grid2 as Grid } from '@mui/material';
 import { ReactElement, useState } from 'react';
 import {
   AllIndividualsQueryVariables,
@@ -50,7 +50,7 @@ export function ImportedPeopleTable({
     <div data-cy="imported-individuals-table">
       {showCheckbox && (
         <Grid container justifyContent="flex-end" spacing={3}>
-          <Grid item>
+          <Grid>
             <Box p={3}>
               <FormControlLabel
                 control={

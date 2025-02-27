@@ -13,10 +13,10 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { GrievanceTicketQuery } from '@generated/graphql';
-import { PhotoModal } from '@core/PhotoModal/PhotoModal';
 import { TableTitle } from '@core/TableTitle';
 import { handleSelected } from '../utils/helpers';
 import { ReactElement } from 'react';
+import PhotoModal from '@components/core/PhotoModal/PhotoModal';
 
 const GreenIcon = styled.div`
   color: #28cb15;

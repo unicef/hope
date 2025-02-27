@@ -1,9 +1,9 @@
 import { fetchProgramCycles, ProgramCycle } from '@api/programCycleApi';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import { DeleteProgramCycle } from '@containers/tables/ProgramCycle/DeleteProgramCycle';
-import { EditProgramCycle } from '@containers/tables/ProgramCycle/EditProgramCycle';
+import DeleteProgramCycle from '@containers/tables/ProgramCycle/DeleteProgramCycle';
+import EditProgramCycle from '@containers/tables/ProgramCycle/EditProgramCycle';
 import headCells from '@containers/tables/ProgramCycle/HeadCells';
-import { AddNewProgramCycle } from '@containers/tables/ProgramCycle/NewProgramCycle/AddNewProgramCycle';
+import AddNewProgramCycle from '@containers/tables/ProgramCycle/NewProgramCycle/AddNewProgramCycle';
 import { BlackLink } from '@core/BlackLink';
 import { StatusBox } from '@core/StatusBox';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
@@ -16,12 +16,13 @@ import { useQuery } from '@tanstack/react-query';
 import { programCycleStatusToColor } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface ProgramCyclesTableProgramDetailsProps {
   program: ProgramQuery['program'];
 }
 
-export const ProgramCyclesTableProgramDetails = ({
+const ProgramCyclesTableProgramDetails = ({
   program,
 }: ProgramCyclesTableProgramDetailsProps) => {
   const [queryVariables, setQueryVariables] = useState({
@@ -142,3 +143,8 @@ export const ProgramCyclesTableProgramDetails = ({
     />
   );
 };
+
+export default withErrorBoundary(
+  ProgramCyclesTableProgramDetails,
+  'ProgramCyclesTableProgramDetails',
+);

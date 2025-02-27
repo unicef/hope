@@ -25,7 +25,7 @@ import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { MiśTheme } from '../../../theme';
-import { BiometricsResultsRdi } from './BiometricsResultsRdi';
+import BiometricsResultsRdi from './BiometricsResultsRdi';
 
 const Error = styled.span`
   color: ${({ theme }: { theme: MiśTheme }) => theme.hctPalette.red};
@@ -128,9 +128,7 @@ export function DedupeBiographicalBiometricResults({
     return path;
   };
 
-  const biographicalRows = rows.sort(
-    (a, b) => b.score - a.score,
-  );
+  const biographicalRows = rows.sort((a, b) => b.score - a.score);
   const biometricSortedRows = biometricRows.sort(
     (a, b) => b.similarityScore - a.similarityScore,
   );

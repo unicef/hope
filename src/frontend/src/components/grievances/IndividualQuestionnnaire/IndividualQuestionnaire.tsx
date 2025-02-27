@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material';
+import { Grid2 as Grid } from '@mui/material';
 import { Field } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
@@ -6,12 +6,13 @@ import { ContentLink } from '@core/ContentLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface IndividualQuestionnaireProps {
   values;
 }
 
-export const IndividualQuestionnaire = ({
+const IndividualQuestionnaire = ({
   values,
 }: IndividualQuestionnaireProps): ReactElement => {
   const { t } = useTranslation();
@@ -136,7 +137,7 @@ export const IndividualQuestionnaire = ({
   return (
     <Grid container spacing={6}>
       {questionFields.map((el) => (
-        <Grid key={el.name} item xs={3}>
+        <Grid key={el.name} size={{ xs: 3 }}>
           <Field
             data-cy={`input-${el.name}`}
             name={el.name}
@@ -150,3 +151,8 @@ export const IndividualQuestionnaire = ({
     </Grid>
   );
 };
+
+export default withErrorBoundary(
+  IndividualQuestionnaire,
+  'IndividualQuestionnaire',
+);

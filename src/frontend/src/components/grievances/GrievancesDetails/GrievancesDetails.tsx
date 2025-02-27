@@ -3,7 +3,7 @@ import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { ContentLink } from '@core/ContentLink';
 import { LabelizedField } from '@core/LabelizedField';
 import { OverviewContainer } from '@core/OverviewContainer';
-import { PhotoModal } from '@core/PhotoModal/PhotoModal';
+import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
@@ -12,7 +12,7 @@ import {
   GrievancesChoiceDataQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { Box, Grid, GridSize, Typography } from '@mui/material';
+import { Box, Grid2 as Grid, GridSize, Typography } from '@mui/material';
 import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import {
   choicesToDict,
@@ -24,6 +24,7 @@ import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import { replaceLabels } from '../utils/createGrievanceUtils';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface GrievancesDetailsProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
@@ -33,7 +34,7 @@ interface GrievancesDetailsProps {
   canViewIndividualDetails: boolean;
 }
 
-export function GrievancesDetails({
+function GrievancesDetails({
   ticket,
   choicesData,
   baseUrl,
@@ -156,7 +157,7 @@ export function GrievancesDetails({
   };
 
   return (
-    <Grid item xs={12}>
+    <Grid size={{ xs: 12 }}>
       <ContainerColumnWithBorder>
         <Title>
           <Typography variant="h6">{t('Details')}</Typography>
@@ -351,7 +352,7 @@ export function GrievancesDetails({
                   el.label &&
                   el.value &&
                   el.size && (
-                    <Grid key={el.label} item xs={el.size as GridSize}>
+                    <Grid key={el.label} size={{ xs: el.size as GridSize }}>
                       <LabelizedField label={el.label}>
                         {el.value}
                       </LabelizedField>
@@ -364,3 +365,5 @@ export function GrievancesDetails({
     </Grid>
   );
 }
+
+export default withErrorBoundary(GrievancesDetails, 'GrievancesDetails');

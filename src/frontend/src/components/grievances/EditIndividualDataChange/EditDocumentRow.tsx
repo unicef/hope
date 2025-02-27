@@ -1,4 +1,4 @@
-import { Box, Grid, IconButton } from '@mui/material';
+import { Box, Grid2 as Grid, IconButton } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import Close from '@mui/icons-material/Close';
 import { useLocation } from 'react-router-dom';
@@ -11,7 +11,7 @@ import {
   AllIndividualsQuery,
 } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
-import { PhotoModal } from '@core/PhotoModal/PhotoModal';
+import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { DocumentField } from '../DocumentField';
 import { removeItemById } from '../utils/helpers';
 
@@ -86,7 +86,7 @@ export function EditDocumentRow({
     </>
   ) : (
     <Fragment key={document.node.id}>
-      <Grid item xs={3}>
+      <Grid size={{ xs: 3 }}>
         <DisabledDiv disabled={removed}>
           <LabelizedField
             label={t('ID TYPE')}
@@ -94,12 +94,12 @@ export function EditDocumentRow({
           />
         </DisabledDiv>
       </Grid>
-      <Grid item xs={3}>
+      <Grid size={{ xs: 3 }}>
         <DisabledDiv disabled={removed}>
           <LabelizedField label={t('Country')} value={document.node.country} />
         </DisabledDiv>
       </Grid>
-      <Grid item xs={3}>
+      <Grid size={{ xs: 3 }}>
         <DisabledDiv disabled={removed}>
           <LabelizedField
             label={t('ID Number')}
@@ -107,10 +107,10 @@ export function EditDocumentRow({
           />
         </DisabledDiv>
       </Grid>
-      <Grid item xs={2}>
+      <Grid size={{ xs: 2 }}>
         <PhotoModal showRotate={false} src={document.node.photo} />
       </Grid>
-      <Grid item xs={1}>
+      <Grid size={{ xs: 1 }}>
         {!removed ? (
           !isEditTicket && (
             <Box display="flex" align-items="center">

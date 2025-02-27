@@ -1531,8 +1531,9 @@ type HouseholdNode implements Node {
   childrenDisabledCount: Int
   maleChildrenDisabledCount: Int
   femaleChildrenDisabledCount: Int
+  otherSexGroupCount: Int
+  unknownSexGroupCount: Int
   registrationDataImport: RegistrationDataImportNode
-  programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   returnee: Boolean
   flexFields: FlexFieldsScalar
   firstRegistrationDate: DateTime!
@@ -1550,12 +1551,11 @@ type HouseholdNode implements Node {
   currency: String
   unhcrId: String!
   detailId: String
-  registrationId: String
   programRegistrationId: String
   totalCashReceivedUsd: Decimal
   totalCashReceived: Decimal
   familyId: String
-  program: ProgramNode
+  program: ProgramNode!
   copiedFrom: HouseholdNode
   originUnicefId: String
   isMigrationHandled: Boolean!
@@ -1904,7 +1904,6 @@ type IndividualNode implements Node {
   fchildHoh: Boolean!
   childHoh: Boolean!
   detailId: String
-  registrationId: String
   programRegistrationId: String
   preferredLanguage: String
   relationshipConfirmed: Boolean!
@@ -1912,7 +1911,7 @@ type IndividualNode implements Node {
   walletName: String!
   blockchainName: String!
   walletAddress: String!
-  program: ProgramNode
+  program: ProgramNode!
   copiedFrom: IndividualNode
   originUnicefId: String
   isMigrationHandled: Boolean!
@@ -2915,7 +2914,6 @@ type ProgramNode implements Node {
   biometricDeduplicationEnabled: Boolean!
   pduFields: [PeriodicFieldNode]
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
-  householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   registrationImports(offset: Int, before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
@@ -4015,7 +4013,7 @@ type TicketHouseholdDataUpdateDetailsNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  household: HouseholdNode
+  household: HouseholdNode!
   householdData: Arg
 }
 
@@ -4035,7 +4033,7 @@ type TicketIndividualDataUpdateDetailsNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  individual: IndividualNode
+  individual: IndividualNode!
   individualData: Arg
   roleReassignData: JSONString!
 }
