@@ -1,6 +1,6 @@
 import json
 import tempfile
-from typing import Optional
+from typing import Callable, Optional
 
 from django.core.files.base import ContentFile
 
@@ -34,8 +34,15 @@ def create_and_save_snapshot_chunked(universal_update: UniversalUpdate) -> None:
     universal_update.update_file.open("rb")
     workbook = load_workbook(universal_update.update_file, data_only=True)
     unicef_ids = _get_unicef_ids_from_workbook(workbook)
-
+    log_message: Callable[[str], None] = lambda message_log: universal_update.save_logs(message_log)
     program_id = universal_update.program_id
+    content = create_snapshot_file(log_message, str(program_id), unicef_ids)
+
+    universal_update.backup_snapshot.save("snapshot.json", ContentFile(content))
+    universal_update.save()
+
+
+def create_snapshot_file(log_message: Callable[[str], None], program_id: str, unicef_ids: [str]) -> str:
     db_count = Individual.objects.filter(unicef_id__in=unicef_ids, program_id=program_id).count()
     if db_count != len(unicef_ids):
         unicef_ids_from_db = list(
@@ -45,13 +52,11 @@ def create_and_save_snapshot_chunked(universal_update: UniversalUpdate) -> None:
         )
         diff = set(unicef_ids) - set(unicef_ids_from_db)
         raise Exception("Some unicef ids are not in the program: " + str(diff))
-
     household_ids = list(
         Individual.objects.filter(unicef_id__in=unicef_ids, program_id=program_id)
         .distinct("household_id")
         .values_list("household_id", flat=True)
     )
-
     with tempfile.NamedTemporaryFile(mode="w+", delete=False, suffix=".json") as tmp_file:
         tmp_file.write("[\n")
         first_item = True
@@ -62,8 +67,7 @@ def create_and_save_snapshot_chunked(universal_update: UniversalUpdate) -> None:
             message = (
                 f"Creating backup snapshot for  records {index} to {min(index + chunk_size, length)} out of {length}"
             )
-            universal_update.save_logs(message)
-            print(message)
+            log_message(message)
             index += 1
             households = (
                 Household.objects.filter(id__in=id_chunk)
@@ -81,6 +85,4 @@ def create_and_save_snapshot_chunked(universal_update: UniversalUpdate) -> None:
         tmp_file.flush()
         tmp_file.seek(0)
         content = tmp_file.read()
-
-    universal_update.backup_snapshot.save("snapshot.json", ContentFile(content))
-    universal_update.save()
+    return content
