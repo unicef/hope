@@ -130,7 +130,6 @@ class ADUSerMixin:
                 role = form.cleaned_data["role"]
                 business_area = form.cleaned_data["business_area"]
                 partner = form.cleaned_data["partner"]
-
                 users_to_bulk_create = []
                 users_role_to_bulk_create = []
                 existing = set(account_models.User.objects.filter(email__in=emails).values_list("email", flat=True))
