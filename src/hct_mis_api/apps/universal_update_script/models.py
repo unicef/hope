@@ -15,6 +15,7 @@ class UniversalUpdate(
     individual_fields = ArrayField(base_field=models.CharField(max_length=255), default=list)
     individual_flex_fields_fields = ArrayField(base_field=models.CharField(max_length=255), default=list)
     household_fields = ArrayField(base_field=models.CharField(max_length=255), default=list)
+    household_flex_fields_fields = ArrayField(base_field=models.CharField(max_length=255), default=list)
     document_types = models.ManyToManyField(DocumentType, blank=True)
     delivery_mechanisms = models.ManyToManyField(DeliveryMechanism, blank=True)
     template_file = models.FileField(blank=True, null=True)

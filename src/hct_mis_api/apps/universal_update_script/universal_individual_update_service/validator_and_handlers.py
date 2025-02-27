@@ -28,6 +28,14 @@ def handle_boolean_field(value: Any, name: str, household: Any, business_area: B
     return value == "TRUE"
 
 
+def handle_integer_field(
+    value: Any, name: str, household: Any, business_area: BusinessArea, program: Program
+) -> Optional[int]:
+    if value is None or value == "":
+        return None
+    return int(value)
+
+
 def handle_admin_field(
     value: Any, name: str, household: Any, business_area: BusinessArea, program: Program
 ) -> Optional[Area]:
@@ -66,7 +74,7 @@ def validate_date(
 
 
 def validate_integer(
-    value: Any, name: str, model_class: Any, business_area: BusinessArea, program: Program
+    value: Any, name: str, modified_object: Any, business_area: BusinessArea, program: Program
 ) -> Optional[str]:
     if value is None or value == "":
         return None

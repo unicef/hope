@@ -24,6 +24,7 @@ from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
 from hct_mis_api.apps.universal_update_script.models import UniversalUpdate
 from hct_mis_api.apps.universal_update_script.universal_individual_update_service.all_updatable_fields import (
     get_document_fields,
+    get_household_flex_fields,
     get_individual_flex_fields,
     get_wallet_fields,
     household_fields,
@@ -64,6 +65,11 @@ class UniversalIndividualUpdateService:
             column_name: data
             for column_name, data in get_individual_flex_fields().items()
             if data[0] in universal_update.individual_flex_fields_fields
+        }
+        self.household_flex_fields = {
+            column_name: data
+            for column_name, data in get_household_flex_fields().items()
+            if data[0] in universal_update.household_flex_fields_fields
         }
         self.document_fields = []
         for document_no_column_name, _ in get_document_fields():
@@ -130,6 +136,19 @@ class UniversalIndividualUpdateService:
                 errors.append(f"Row: {row_index} - {error}")
         return errors
 
+    def validate_household_flex_fields(
+        self, row: Tuple[Any, ...], headers: List[str], individual: Individual, row_index: int
+    ) -> List[str]:
+        errors = []
+        if self.household_flex_fields is None:
+            return []
+        for field, (name, validator, _handler) in self.household_flex_fields.items():
+            value = row[headers.index(field)]
+            error = validator(value, name, row, self.business_area, self.program)
+            if error:  # pragma: no cover
+                errors.append(f"Row: {row_index} - {error}")
+        return errors
+
     def validate_documents(
         self, row: Tuple[Any, ...], headers: List[str], individual: Individual, row_index: int
     ) -> List[str]:
@@ -180,6 +199,7 @@ class UniversalIndividualUpdateService:
             errors.extend(self.validate_household_fields(row, headers, household, row_index))
             errors.extend(self.validate_individual_fields(row, headers, individual, row_index))
             errors.extend(self.validate_individual_flex_fields(row, headers, individual, row_index))
+            errors.extend(self.validate_household_flex_fields(row, headers, individual, row_index))
             errors.extend(self.validate_documents(row, headers, individual, row_index))
         return errors
 
@@ -212,6 +232,16 @@ class UniversalIndividualUpdateService:
             if self.ignore_empty_values and (handled_value is None or handled_value == ""):  # pragma: no cover
                 continue
             individual.flex_fields[name] = handled_value
+
+    def handle_household_flex_update(self, row: Tuple[Any, ...], headers: List[str], household: Household) -> None:
+        if self.household_flex_fields is None:
+            return
+        for field, (name, _validator, handler) in self.household_flex_fields.items():
+            value = row[headers.index(field)]
+            handled_value = handler(value, field, household, self.business_area, self.program)
+            if self.ignore_empty_values and (handled_value is None or handled_value == ""):  # pragma: no cover
+                continue
+            household.flex_fields[name] = handled_value
 
     def handle_documents_update(
         self, row: Tuple[Any, ...], headers: List[str], individual: Individual
@@ -317,6 +347,7 @@ class UniversalIndividualUpdateService:
             self.handle_household_update(row, headers, household)
             self.handle_individual_update(row, headers, individual)
             self.handle_individual_flex_update(row, headers, individual)
+            self.handle_household_flex_update(row, headers, household)
             documents_to_update_part, documents_to_create_part = self.handle_documents_update(row, headers, individual)
             documents_to_update.extend(documents_to_update_part)
             documents_to_create.extend(documents_to_create_part)

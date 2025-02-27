@@ -11,6 +11,7 @@ from hct_mis_api.apps.payment.models import DeliveryMechanism
 from hct_mis_api.apps.universal_update_script.universal_individual_update_service.validator_and_handlers import (
     handle_admin_field,
     handle_boolean_field,
+    handle_integer_field,
     handle_simple_field,
     validate_admin,
     validate_boolean,
@@ -72,58 +73,66 @@ household_fields: Dict[str, Tuple[str, Any, Any]] = {
     "admin2": ("admin2", validate_string, handle_admin_field),
     "admin3": ("admin3", validate_string, handle_admin_field),
     "admin4": ("admin4", validate_string, handle_admin_field),
-    "size": ("size", validate_integer, handle_simple_field),
-    "female_age_group_0_5_count": ("female_age_group_0_5_count", validate_integer, handle_simple_field),
-    "female_age_group_6_11_count": ("female_age_group_6_11_count", validate_integer, handle_simple_field),
-    "female_age_group_12_17_count": ("female_age_group_12_17_count", validate_integer, handle_simple_field),
-    "female_age_group_18_59_count": ("female_age_group_18_59_count", validate_integer, handle_simple_field),
-    "female_age_group_60_count": ("female_age_group_60_count", validate_integer, handle_simple_field),
-    "pregnant_count": ("pregnant_count", validate_integer, handle_simple_field),
-    "male_age_group_0_5_count": ("male_age_group_0_5_count", validate_integer, handle_simple_field),
-    "male_age_group_6_11_count": ("male_age_group_6_11_count", validate_integer, handle_simple_field),
-    "male_age_group_12_17_count": ("male_age_group_12_17_count", validate_integer, handle_simple_field),
-    "male_age_group_18_59_count": ("male_age_group_18_59_count", validate_integer, handle_simple_field),
-    "male_age_group_60_count": ("male_age_group_60_count", validate_integer, handle_simple_field),
+    "size": ("size", validate_integer, handle_integer_field),
+    "female_age_group_0_5_count": ("female_age_group_0_5_count", validate_integer, handle_integer_field),
+    "female_age_group_6_11_count": ("female_age_group_6_11_count", validate_integer, handle_integer_field),
+    "female_age_group_12_17_count": ("female_age_group_12_17_count", validate_integer, handle_integer_field),
+    "female_age_group_18_59_count": ("female_age_group_18_59_count", validate_integer, handle_integer_field),
+    "female_age_group_60_count": ("female_age_group_60_count", validate_integer, handle_integer_field),
+    "pregnant_count": ("pregnant_count", validate_integer, handle_integer_field),
+    "male_age_group_0_5_count": ("male_age_group_0_5_count", validate_integer, handle_integer_field),
+    "male_age_group_6_11_count": ("male_age_group_6_11_count", validate_integer, handle_integer_field),
+    "male_age_group_12_17_count": ("male_age_group_12_17_count", validate_integer, handle_integer_field),
+    "male_age_group_18_59_count": ("male_age_group_18_59_count", validate_integer, handle_integer_field),
+    "male_age_group_60_count": ("male_age_group_60_count", validate_integer, handle_integer_field),
     "female_age_group_0_5_disabled_count": (
         "female_age_group_0_5_disabled_count",
         validate_integer,
-        handle_simple_field,
+        handle_integer_field,
     ),
     "female_age_group_6_11_disabled_count": (
         "female_age_group_6_11_disabled_count",
         validate_integer,
-        handle_simple_field,
+        handle_integer_field,
     ),
     "female_age_group_12_17_disabled_count": (
         "female_age_group_12_17_disabled_count",
         validate_integer,
-        handle_simple_field,
+        handle_integer_field,
     ),
     "female_age_group_18_59_disabled_count": (
         "female_age_group_18_59_disabled_count",
         validate_integer,
-        handle_simple_field,
+        handle_integer_field,
     ),
-    "female_age_group_60_disabled_count": ("female_age_group_60_disabled_count", validate_integer, handle_simple_field),
-    "male_age_group_0_5_disabled_count": ("male_age_group_0_5_disabled_count", validate_integer, handle_simple_field),
-    "male_age_group_6_11_disabled_count": ("male_age_group_6_11_disabled_count", validate_integer, handle_simple_field),
+    "female_age_group_60_disabled_count": (
+        "female_age_group_60_disabled_count",
+        validate_integer,
+        handle_integer_field,
+    ),
+    "male_age_group_0_5_disabled_count": ("male_age_group_0_5_disabled_count", validate_integer, handle_integer_field),
+    "male_age_group_6_11_disabled_count": (
+        "male_age_group_6_11_disabled_count",
+        validate_integer,
+        handle_integer_field,
+    ),
     "male_age_group_12_17_disabled_count": (
         "male_age_group_12_17_disabled_count",
         validate_integer,
-        handle_simple_field,
+        handle_integer_field,
     ),
     "male_age_group_18_59_disabled_count": (
         "male_age_group_18_59_disabled_count",
         validate_integer,
-        handle_simple_field,
+        handle_integer_field,
     ),
-    "male_age_group_60_disabled_count": ("male_age_group_60_disabled_count", validate_integer, handle_simple_field),
-    "children_count": ("children_count", validate_integer, handle_simple_field),
-    "male_children_count": ("male_children_count", validate_integer, handle_simple_field),
-    "female_children_count": ("female_children_count", validate_integer, handle_simple_field),
-    "children_disabled_count": ("children_disabled_count", validate_integer, handle_simple_field),
-    "male_children_disabled_count": ("male_children_disabled_count", validate_integer, handle_simple_field),
-    "female_children_disabled_count": ("female_children_disabled_count", validate_integer, handle_simple_field),
+    "male_age_group_60_disabled_count": ("male_age_group_60_disabled_count", validate_integer, handle_integer_field),
+    "children_count": ("children_count", validate_integer, handle_integer_field),
+    "male_children_count": ("male_children_count", validate_integer, handle_integer_field),
+    "female_children_count": ("female_children_count", validate_integer, handle_integer_field),
+    "children_disabled_count": ("children_disabled_count", validate_integer, handle_integer_field),
+    "male_children_disabled_count": ("male_children_disabled_count", validate_integer, handle_integer_field),
+    "female_children_disabled_count": ("female_children_disabled_count", validate_integer, handle_integer_field),
     "returnee": ("returnee", validate_boolean, handle_boolean_field),
     "first_registration_date": ("first_registration_date", validate_date, handle_simple_field),
     "last_registration_date": ("last_registration_date", validate_date, handle_simple_field),
@@ -140,6 +149,19 @@ def get_individual_flex_fields() -> dict[Any, Any]:
     flex_fields_dict = dict()
     for flexible_attribute in FlexibleAttribute.objects.filter(
         associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
+    ):
+        flex_fields_dict[f"flex_ind__{flexible_attribute.name}"] = (
+            flexible_attribute.name,
+            validate_flex_field_string,
+            handle_simple_field,
+        )
+    return flex_fields_dict
+
+
+def get_household_flex_fields() -> dict[Any, Any]:
+    flex_fields_dict = dict()
+    for flexible_attribute in FlexibleAttribute.objects.filter(
+        associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD
     ):
         flex_fields_dict[f"flex_ind__{flexible_attribute.name}"] = (
             flexible_attribute.name,

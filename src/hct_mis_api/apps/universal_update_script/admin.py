@@ -53,6 +53,12 @@ class UniversalUpdateAdminForm(forms.ModelForm):
         widget=ArrayFieldFilteredSelectMultiple("Individual Flex Fields", is_stacked=False),
         required=False,
     )
+
+    household_flex_fields_fields = SimpleArrayField(
+        base_field=forms.CharField(max_length=255),  # type: ignore
+        widget=ArrayFieldFilteredSelectMultiple("Household Flex Fields", is_stacked=False),
+        required=False,
+    )
     household_fields = SimpleArrayField(
         base_field=forms.CharField(max_length=255),  # type: ignore
         widget=ArrayFieldFilteredSelectMultiple("Household Fields", is_stacked=False),
@@ -71,6 +77,9 @@ class UniversalUpdateAdminForm(forms.ModelForm):
         super().__init__(*args, **kwargs)  # type: ignore
         self.fields["individual_fields"].widget.choices = list(self.get_dynamic_individual_fields_choices())
         self.fields["individual_flex_fields_fields"].widget.choices = list(
+            self.get_dynamic_individual_flex_fields_choices()
+        )
+        self.fields["household_flex_fields_fields"].widget.choices = list(
             self.get_dynamic_individual_flex_fields_choices()
         )
         self.fields["household_fields"].widget.choices = list(self.get_dynamic_household_fields_choices())
@@ -133,6 +142,7 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
                 "fields": (
                     "individual_fields",
                     "individual_flex_fields_fields",
+                    "household_flex_fields_fields",
                     "household_fields",
                     "document_types",
                     "delivery_mechanisms",
