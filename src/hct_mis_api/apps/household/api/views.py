@@ -7,7 +7,6 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.filters import OrderingFilter
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 
-from hct_mis_api.apps.account.api.permissions import HasOneOfPermissions
 from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
     Permissions,
@@ -165,5 +164,7 @@ class HouseholdGlobalViewSet(
 
             filter_q |= Q(areas_null_and_program_q | Q(program_q & areas_query))
 
-        queryset = super().get_queryset().filter(filter_q)
+        queryset = (
+            super().get_queryset().filter(filter_q).select_related("head_of_household", "program", "admin1", "admin2")
+        )
         return queryset
