@@ -67,13 +67,12 @@ class HouseholdViewSet(
     filterset_class = HouseholdFilter
 
     def get_queryset(self) -> QuerySet:
-        program = self.get_program()
-        if program.status == Program.DRAFT:
+        if self.program.status == Program.DRAFT:
             return Household.objects.none()
 
         # apply admin area limits if partner has restrictions
         filter_q = Q()
-        area_limits = self.request.user.partner.get_area_limits_for_program(program.id)
+        area_limits = self.request.user.partner.get_area_limits_for_program(self.program.id)
         if area_limits.exists():
             areas_null = Q(admin_area__isnull=True)
             areas_query = Q(Q(admin1__in=area_limits) | Q(admin2__in=area_limits) | Q(admin3__in=area_limits))
@@ -111,7 +110,7 @@ class HouseholdViewSet(
 
             self.check_creator_or_owner_permission(
                 user,
-                self.get_program() or obj.business_area,
+                self.program or obj.business_area,
                 Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS.value,
                 any(user_ticket in user.created_tickets.all() for user_ticket in grievance_tickets),
                 Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_CREATOR.value,
@@ -136,8 +135,7 @@ class HouseholdGlobalViewSet(
     filterset_class = HouseholdFilter
 
     def get_queryset(self) -> QuerySet:
-        business_area = self.get_business_area()
-        business_area_id = business_area.id
+        business_area_id = self.business_area.id
         user = self.request.user
 
         programs_for_business_area = user.get_program_ids_for_permission_in_business_area(
