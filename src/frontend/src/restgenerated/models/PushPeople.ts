@@ -121,7 +121,6 @@ export type PushPeople = {
     who_answers_alt_phone?: string;
     fchild_hoh?: boolean;
     child_hoh?: boolean;
-    registration_id?: string | null;
     program_registration_id?: string | null;
     preferred_language?: (PreferredLanguageEnum | BlankEnum | NullEnum) | null;
     relationship_confirmed?: boolean;

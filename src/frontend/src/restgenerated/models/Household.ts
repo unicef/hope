@@ -78,7 +78,6 @@ export type Household = {
     registration_method?: (RegistrationMethodEnum | BlankEnum);
     currency?: (CurrencyEnum | BlankEnum);
     unhcr_id?: string;
-    registration_id?: string | null;
     program_registration_id?: string | null;
     total_cash_received_usd?: string | null;
     total_cash_received?: string | null;
