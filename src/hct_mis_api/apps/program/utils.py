@@ -188,7 +188,7 @@ class CopyProgramPopulation:
             role.pk = None
             role.household = new_household
             role.rdi_merge_status = self.rdi_merge_status
-            role.individual = Individual.objects.filter(
+            role.individual = getattr(Individual, self.manager).filter(
                 program=self.program,
                 unicef_id=role.individual.unicef_id,
             ).first()
