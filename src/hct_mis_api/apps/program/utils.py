@@ -143,7 +143,7 @@ class CopyProgramPopulation:
         household.copied_from_id = copy_from_household_id
         household.registration_data_import = self.rdi
         household.rdi_merge_status = self.rdi_merge_status
-        household.head_of_household = Individual.pending_objects.filter(
+        household.head_of_household = Individual.all_merge_status_objects.filter(
             program=self.program,
             unicef_id=household.head_of_household.unicef_id,
         ).first()
