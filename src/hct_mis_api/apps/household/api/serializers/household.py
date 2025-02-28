@@ -13,7 +13,7 @@ from hct_mis_api.apps.household.models import DUPLICATE, Household
 
 class HouseholdListSerializer(serializers.ModelSerializer):
     id = Base64ModelField(model_name="Household")
-    head_of_household = serializers.CharField(source="head_of_household__full_name")
+    head_of_household = serializers.CharField(source="head_of_household.full_name")
     admin1 = serializers.CharField(source="admin1.name", default="")
     admin2 = serializers.CharField(source="admin2.name", default="")
     program = serializers.CharField(source="program.name", default="")
@@ -40,7 +40,7 @@ class HouseholdListSerializer(serializers.ModelSerializer):
 
 class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
     id = Base64ModelField(model_name="Household")
-    head_of_household = serializers.CharField(source="head_of_household__full_name")
+    head_of_household = serializers.CharField(source="head_of_household.full_name")
     admin1 = serializers.CharField(source="admin1.name", default="")
     admin2 = serializers.CharField(source="admin2.name", default="")
     admin3 = serializers.CharField(source="admin3.name", default="")
