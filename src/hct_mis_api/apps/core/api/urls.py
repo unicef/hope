@@ -9,11 +9,11 @@ app_name = "core"
 router = routers.SimpleRouter()
 
 
-router.register(r"business_areas", BusinessAreaViewSet, basename="business_area")
+router.register(r"business-areas", BusinessAreaViewSet, basename="business-areas")
 
 
 urlpatterns = router.urls
 
 
 def get_business_area_nested_router() -> NestedSimpleRouter:
-    return NestedSimpleRouter(router, r"business_areas", lookup="business_area")
+    return NestedSimpleRouter(router, r"business-areas", lookup="business_area")
