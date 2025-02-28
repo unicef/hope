@@ -21,7 +21,7 @@ def _get_unicef_ids_from_sheet(ws: Worksheet) -> list[str]:
     try:
         col_index = header.index("unicef_id") + 1
     except ValueError:
-        raise ValueError("The column 'unicef_id' was not found in the header row.")
+        raise ValueError("The column 'unicef_id' was not found in the header row.")  # pragma: no cover
     return [row[col_index - 1] for row in ws.iter_rows(min_row=2, values_only=True)]
 
 
@@ -45,13 +45,13 @@ def create_and_save_snapshot_chunked(universal_update: UniversalUpdate) -> None:
 def create_snapshot_content(log_message: Callable[[str], None], program_id: str, unicef_ids: [str]) -> str:
     db_count = Individual.objects.filter(unicef_id__in=unicef_ids, program_id=program_id).count()
     if db_count != len(unicef_ids):
-        unicef_ids_from_db = list(
+        unicef_ids_from_db = list(  # pragma: no cover
             Individual.objects.filter(unicef_id__in=unicef_ids, program_id=program_id).values_list(
                 "unicef_id", flat=True
             )
         )
-        diff = set(unicef_ids) - set(unicef_ids_from_db)
-        raise Exception("Some unicef ids are not in the program: " + str(diff))
+        diff = set(unicef_ids) - set(unicef_ids_from_db)  # pragma: no cover
+        raise Exception("Some unicef ids are not in the program: " + str(diff))  # pragma: no cover
     household_ids = list(
         Individual.objects.filter(unicef_id__in=unicef_ids, program_id=program_id)
         .distinct("household_id")
