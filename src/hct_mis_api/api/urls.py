@@ -27,6 +27,7 @@ urlpatterns = [
     path("", include("hct_mis_api.apps.program.api.urls", namespace="programs")),
     path("", include("hct_mis_api.apps.targeting.api.urls", namespace="targeting")),
     path("", include("hct_mis_api.apps.registration_data.api.urls", namespace="registration-data")),
+    path("", include("hct_mis_api.apps.household.api.urls", namespace="households")),
     path(
         "",
         include("hct_mis_api.apps.periodic_data_update.api.urls", namespace="periodic-data-update"),

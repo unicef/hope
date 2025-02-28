@@ -81,3 +81,9 @@ class ProfileSerializer(serializers.ModelSerializer):
         program_id = get_program_id_from_headers(headers)
         business_area_slug = headers.get("Business-Area", "")
         return user.permissions_in_business_area(business_area_slug, program_id)
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields = ("first_name", "last_name", "email", "username")
