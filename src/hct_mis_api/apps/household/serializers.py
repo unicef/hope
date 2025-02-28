@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
 
 from django.db.models import DateTimeField
 
@@ -37,9 +37,9 @@ def get_individual_info(individual: "Individual", tax_id: Optional[str]) -> Dict
 
 def get_household_info(
     household: Optional[Household], individual: Optional["Individual"] = None, tax_id: Optional[str] = None
-) -> Dict:
+) -> Dict[str, Any]:
     status, date = get_household_status(household)
-    output = {"status": status, "date": date}
+    output: Dict = {"status": status, "date": date}
     if individual:
         output["individual"] = get_individual_info(individual, tax_id=tax_id)
     return {"info": output}

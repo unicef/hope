@@ -67,7 +67,7 @@ def get_household(detail_id: str, business_area_code: Optional[str]) -> Union[Pe
     if imported_households.count() > 1:
         raise Exception(f"Multiple imported households ({imported_households.count()}) with given detail_id found")
     if imported_households.count() == 1:
-        return imported_households.first()
+        return imported_households.first()  # type: ignore
     raise Exception("Household with given detail_id not found")
 
 
