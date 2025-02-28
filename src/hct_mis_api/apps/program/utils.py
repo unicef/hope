@@ -143,7 +143,7 @@ class CopyProgramPopulation:
         household.copied_from_id = copy_from_household_id
         household.registration_data_import = self.rdi
         household.rdi_merge_status = self.rdi_merge_status
-        household.head_of_household = Individual.objects.filter(
+        household.head_of_household = Individual.pending_objects.filter(
             program=self.program,
             unicef_id=household.head_of_household.unicef_id,
         ).first()
@@ -188,7 +188,7 @@ class CopyProgramPopulation:
             role.pk = None
             role.household = new_household
             role.rdi_merge_status = self.rdi_merge_status
-            role.individual = getattr(Individual, self.manager).filter(
+            role.individual = Individual.all_merge_status_objects.filter(
                 program=self.program,
                 unicef_id=role.individual.unicef_id,
             ).first()
@@ -242,7 +242,7 @@ class CopyProgramPopulation:
 
     def set_household_per_individual(self, new_individual: Individual) -> Individual:
         if new_individual.household:
-            new_individual.household = Household.objects.filter(
+            new_individual.household = Household.pending_objects.filter(
                 program=self.program,
                 unicef_id=new_individual.household.unicef_id,
             ).first()
