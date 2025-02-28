@@ -683,6 +683,9 @@ class TestCreateTargeting:
         assert pageTargetingDetails.getTitlePage().text.split("\n")[0].strip() == targeting_name
         assert pageTargetingDetails.getCriteriaContainer().text == bool_yes_expected_criteria_text
         assert Household.objects.count() == 3
+        pageTargetingDetails.wait_for_text(
+            individual1.household.unicef_id, pageTargetingDetails.household_table_cell.format(1, 1)
+        )
         assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual1.household.unicef_id
         assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "1"
         assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
@@ -751,6 +754,9 @@ class TestCreateTargeting:
         assert pageTargetingDetails.getCriteriaContainer().text == expected_criteria_text
         assert Household.objects.count() == 3
         assert PaymentPlan.objects.get(name=targeting_name).payment_items.count() == 1
+        pageTargetingDetails.wait_for_text(
+            individual1.household.unicef_id, pageTargetingDetails.household_table_cell.format(1, 1)
+        )
         assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "1"
         assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
         assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual1.household.unicef_id
