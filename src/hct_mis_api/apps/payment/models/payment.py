@@ -707,8 +707,8 @@ class PaymentPlan(
             financial_service_provider__payment_gateway_id__isnull=False,
         ).exists()
 
-        all_sent_to_fsp = not self.eligible_payments.exclude(status=Payment.STATUS_SENT_TO_FSP).exists()
-        return has_fsp_with_api and all_sent_to_fsp
+        has_sent_to_fsp_payment = self.eligible_payments.filter(status=Payment.STATUS_SENT_TO_FSP).exists()
+        return has_fsp_with_api and has_sent_to_fsp_payment
 
     @property
     def fsp_communication_channel(self) -> str:
