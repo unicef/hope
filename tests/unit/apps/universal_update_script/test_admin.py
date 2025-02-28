@@ -21,6 +21,7 @@ class UniversalUpdateAdminTest(TestCase):
     def test_universal_update_admin_edit_page_loads(self) -> None:
         universal_update = UniversalUpdate.objects.create(
             program=self.program,
+            individual_fields=["given_name", "family_name"],
         )
         url = reverse("admin:universal_update_script_universalupdate_change", args=(universal_update.pk,))
         response = self.client.get(url)

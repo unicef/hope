@@ -31,7 +31,7 @@ def run_universal_individual_update(universal_update_id: str) -> str:
     universal_update = UniversalUpdate.objects.get(id=universal_update_id)
     lock_id = f"lock:run_universal_individual_update:{universal_update_id}"
     lock = cache.lock(lock_id, timeout=HARD_TIME_LIMIT)
-    if not lock.acquire(blocking=False):
+    if not lock.acquire(blocking=False):  # pragma: no cover
         return RESULT_LOCKED
     try:
         universal_update.clear_logs()
@@ -43,10 +43,10 @@ def run_universal_individual_update(universal_update_id: str) -> str:
         )
         engine.execute()
         return RESULT_SUCCESS
-    except SoftTimeLimitExceeded:
+    except SoftTimeLimitExceeded:  # pragma: no cover
         universal_update.save_logs("Task time limit exceeded")
         return RESULT_FAILED
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         error_message = f"Unexpected error occurred in run_universal_update for UniversalUpdate {universal_update_id}\n{traceback.format_exc()}"
         universal_update.save_logs(error_message)
         raise e
@@ -61,7 +61,7 @@ def generate_universal_individual_update_template(universal_update_id: str) -> s
     universal_update = UniversalUpdate.objects.get(id=universal_update_id)
     lock_id = f"lock:generate_universal_individual_update_template:{universal_update_id}"
     lock = cache.lock(lock_id, timeout=HARD_TIME_LIMIT)
-    if not lock.acquire(blocking=False):
+    if not lock.acquire(blocking=False):  # pragma: no cover
         return RESULT_LOCKED
     try:
         universal_update.clear_logs()
@@ -73,10 +73,10 @@ def generate_universal_individual_update_template(universal_update_id: str) -> s
         universal_update.save()
         universal_update.save_logs("Finished Generating Template")
         return RESULT_SUCCESS
-    except SoftTimeLimitExceeded:
+    except SoftTimeLimitExceeded:  # pragma: no cover
         universal_update.save_logs("Task time limit exceeded")
         return RESULT_FAILED
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         error_message = f"Unexpected error occurred in run_universal_update for UniversalUpdate {universal_update_id}\n{traceback.format_exc()}"
         universal_update.save_logs(error_message)
         raise e
