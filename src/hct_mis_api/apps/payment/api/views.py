@@ -75,7 +75,7 @@ class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.L
 
     def get_queryset(self) -> QuerySet:
         program_ids = self.request.user.get_program_ids_for_permission_in_business_area(
-            str(self.business_area_id),
+            str(self.get_business_area().id),
             [perm for perm_class in self.permission_classes for perm in perm_class.PERMISSIONS],
             one_of_permissions=False,
         )
