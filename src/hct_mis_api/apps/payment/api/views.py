@@ -75,7 +75,7 @@ class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.L
 
     def get_queryset(self) -> QuerySet:
         program_ids = self.request.user.get_program_ids_for_permission_in_business_area(
-            str(self.get_business_area().id),
+            str(self.business_area.id),
             [perm for perm_class in self.permission_classes for perm in perm_class.PERMISSIONS],
             one_of_permissions=False,
         )
@@ -112,14 +112,13 @@ class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.L
         action_name = serializer.validated_data["action"]
         comment = serializer.validated_data.get("comment", "")
         input_data = {"action": action_name, "comment": comment}
-        business_area = self.get_business_area()
 
         with transaction.atomic():
             for payment_plan_id_str in serializer.validated_data["ids"]:
                 self._perform_payment_plan_status_action(
                     payment_plan_id_str,
                     input_data,
-                    business_area,
+                    self.business_area,
                     request,
                 )
 

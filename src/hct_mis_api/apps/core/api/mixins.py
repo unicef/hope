@@ -1,4 +1,5 @@
 import os
+from functools import cached_property
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 from django.db.models import QuerySet
@@ -83,7 +84,8 @@ class BusinessAreaMixin:
     def business_area_slug(self) -> Optional[str]:
         return self.kwargs.get("business_area_slug")
 
-    def get_business_area(self) -> BusinessArea:
+    @cached_property
+    def business_area(self) -> BusinessArea:
         return get_object_or_404(BusinessArea, slug=self.business_area_slug)
 
     def get_queryset(self) -> QuerySet:
@@ -97,7 +99,8 @@ class ProgramMixin:
     def program_id(self) -> Optional[str]:
         return decode_id_string(self.kwargs.get("program_pk"))
 
-    def get_program(self) -> "Program":
+    @cached_property
+    def program(self) -> "Program":
         from hct_mis_api.apps.program.models import Program
 
         return get_object_or_404(Program, id=self.program_id)
@@ -107,7 +110,9 @@ class ProgramMixin:
 
 
 class BusinessAreaProgramMixin(ProgramMixin, BusinessAreaMixin):
-    pass
+    @cached_property
+    def business_area(self) -> BusinessArea:
+        return self.program.business_area
 
 
 class ActionMixin:
