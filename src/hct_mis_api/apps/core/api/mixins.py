@@ -5,6 +5,7 @@ from django.db.models import QuerySet
 
 from requests import Response, session
 from requests.adapters import HTTPAdapter
+from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 from rest_framework.viewsets import GenericViewSet
 from urllib3 import Retry
@@ -79,14 +80,14 @@ class BusinessAreaMixin:
     business_area_model_field = "business_area"
 
     @property
-    def business_area_id(self) -> Optional[str]:
-        return self.kwargs.get("business_area")
+    def business_area_slug(self) -> Optional[str]:
+        return self.kwargs.get("business_area_slug")
 
     def get_business_area(self) -> BusinessArea:
-        return get_object_or_404(BusinessArea, slug=self.business_area_id)
+        return get_object_or_404(BusinessArea, slug=self.business_area_slug)
 
     def get_queryset(self) -> QuerySet:
-        return self.queryset.filter(**{self.business_area_model_field: self.business_area_id})
+        return self.queryset.filter(**{f"{self.business_area_model_field}__slug": self.business_area_slug})
 
 
 class ProgramMixin:
@@ -94,7 +95,7 @@ class ProgramMixin:
 
     @property
     def program_id(self) -> Optional[str]:
-        return decode_id_string(self.kwargs.get("program_id"))
+        return decode_id_string(self.kwargs.get("program_pk"))
 
     def get_program(self) -> "Program":
         from hct_mis_api.apps.program.models import Program
@@ -105,7 +106,7 @@ class ProgramMixin:
         return self.queryset.filter(**{self.program_model_field: self.program_id})
 
 
-class BusinessAreaProgramMixin(BusinessAreaMixin, ProgramMixin):
+class BusinessAreaProgramMixin(ProgramMixin, BusinessAreaMixin):
     pass
 
 
@@ -137,6 +138,22 @@ class CustomSerializerMixin:
         return super().get_serializer_class()
 
 
+class DecodeIdForDetailMixin:
+    def get_object(self) -> Any:
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+        self.kwargs[lookup_url_kwarg] = decode_id_string(self.kwargs[lookup_url_kwarg])
+        return super().get_object()
+
+
 class BaseViewSet(GenericViewSet):
     permission_classes: list = [HasOneOfPermissions]
     PERMISSIONS: list = []
+
+
+class AdminUrlSerializerMixin:
+    admin_url = serializers.SerializerMethodField()
+
+    def resolve_admin_url(self, obj: Any) -> Optional[str]:
+        if self.context.request.user.is_superuser:
+            return obj.admin_url
+        return None
