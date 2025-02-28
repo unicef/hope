@@ -13,10 +13,10 @@ from hct_mis_api.apps.household.models import DUPLICATE, Household
 
 class HouseholdListSerializer(serializers.ModelSerializer):
     id = Base64ModelField(model_name="Household")
-    head_of_household = serializers.CharField(source="head_of_household__full_name", read_only=True)
-    admin1 = serializers.CharField(source="admin1.name", read_only=True, default="")
-    admin2 = serializers.CharField(source="admin2.name", read_only=True, default="")
-    program = serializers.CharField(source="program.name", read_only=True, default="")
+    head_of_household = serializers.CharField(source="head_of_household__full_name")
+    admin1 = serializers.CharField(source="admin1.name", default="")
+    admin2 = serializers.CharField(source="admin2.name", default="")
+    program = serializers.CharField(source="program.name", default="")
     total_cash_received = serializers.DecimalField(max_digits=64, decimal_places=2)
     total_cash_received_usd = serializers.DecimalField(max_digits=64, decimal_places=2)
 
@@ -40,14 +40,14 @@ class HouseholdListSerializer(serializers.ModelSerializer):
 
 class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
     id = Base64ModelField(model_name="Household")
-    head_of_household = serializers.CharField(source="head_of_household__full_name", read_only=True)
-    admin1 = serializers.CharField(source="admin1.name", read_only=True, default="")
-    admin2 = serializers.CharField(source="admin2.name", read_only=True, default="")
-    admin3 = serializers.CharField(source="admin3.name", read_only=True, default="")
-    admin4 = serializers.CharField(source="admin4.name", read_only=True, default="")
-    program = serializers.CharField(source="program.name", read_only=True, default="")
-    country = serializers.CharField(source="country.name", read_only=True, default="")
-    country_origin = serializers.CharField(source="country_origin.name", read_only=True, default="")
+    head_of_household = serializers.CharField(source="head_of_household__full_name")
+    admin1 = serializers.CharField(source="admin1.name", default="")
+    admin2 = serializers.CharField(source="admin2.name", default="")
+    admin3 = serializers.CharField(source="admin3.name", default="")
+    admin4 = serializers.CharField(source="admin4.name", default="")
+    program = serializers.CharField(source="program.name", default="")
+    country = serializers.CharField(source="country.name", default="")
+    country_origin = serializers.CharField(source="country_origin.name", default="")
     total_cash_received = serializers.DecimalField(max_digits=64, decimal_places=2)
     total_cash_received_usd = serializers.DecimalField(max_digits=64, decimal_places=2)
     has_duplicates = serializers.SerializerMethodField()
