@@ -25,6 +25,8 @@ def handle_simple_field(value: Any, name: str, household: Any, business_area: Bu
 
 
 def handle_boolean_field(value: Any, name: str, household: Any, business_area: BusinessArea, program: Program) -> Any:
+    if value is None or value == "":
+        return None
     if isinstance(value, bool):
         return value
     return value == "TRUE"

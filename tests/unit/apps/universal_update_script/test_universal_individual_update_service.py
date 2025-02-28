@@ -1,5 +1,8 @@
+from io import BytesIO
+
 from django.core.files.base import ContentFile
 
+import openpyxl
 import pytest
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -233,6 +236,175 @@ Updating row 0 to 1 Individuals
 Deduplicating individuals Elasticsearch
 Deduplicating documents
 Update successful
+"""
+        assert universal_update.saved_logs == expected_update_log
+        assert universal_update.saved_logs == universal_update.logs
+        assert individual.given_name == given_name_old
+        assert individual.sex == sex_old
+        assert individual.birth_date == birth_date_old
+        assert individual.phone_no == phone_no_old
+        assert individual.household.address == address_old
+        assert individual.household.admin1 == admin1_old
+        assert document_national_id.document_number == document_number_old
+        assert individual.household.size == size_old
+        assert individual.household.returnee == returnee_old
+        assert individual.flex_fields.get("muac") == muac_old
+        assert individual.household.flex_fields.get("eggs") == eggs_old
+        assert wallet.data.get("phone_number") == wallet_number_old
+
+    def test_update_individual_empty_row(
+        self,
+        individual: Individual,
+        program: Program,
+        admin1: Area,
+        admin2: Area,
+        document_national_id: Document,
+        delivery_mechanism: DeliveryMechanism,
+        wallet: DeliveryMechanismData,
+    ) -> None:
+        # save old values
+        given_name_old = individual.given_name
+        sex_old = individual.sex
+        birth_date_old = individual.birth_date
+        phone_no_old = individual.phone_no
+        address_old = individual.household.address
+        admin1_old = individual.household.admin1
+        size_old = individual.household.size
+        returnee_old = individual.household.returnee
+        muac_old = individual.flex_fields.get("muac")
+        eggs_old = individual.household.flex_fields.get("eggs")
+        wallet_number_old = wallet.data.get("phone_number")
+        document_number_old = document_national_id.document_number
+        universal_update = UniversalUpdate(program=program)
+        universal_update.unicef_ids = individual.unicef_id
+        universal_update.individual_fields = ["given_name", "sex", "birth_date", "phone_no"]
+        universal_update.individual_flex_fields_fields = ["muac"]
+        universal_update.household_flex_fields_fields = ["eggs"]
+        universal_update.household_fields = ["address", "admin1", "size", "returnee"]
+        universal_update.save()
+        universal_update.document_types.add(DocumentType.objects.first())
+        universal_update.delivery_mechanisms.add(DeliveryMechanism.objects.first())
+        service = UniversalIndividualUpdateService(universal_update)
+        template_file = service.generate_xlsx_template()
+        universal_update.refresh_from_db()
+        content = template_file.getvalue()
+        universal_update.update_file.save("template.xlsx", ContentFile(content))
+        universal_update.save()
+        universal_update.refresh_from_db()
+        expected_generate_log = "Generating row 0 to 1\nGenerating Finished\n"
+        assert universal_update.saved_logs == expected_generate_log
+        # empty whole row xlsx template left only unicef id
+        wb = openpyxl.load_workbook(universal_update.update_file.path)
+        ws = wb.active
+        for row in ws.iter_rows(min_row=2, max_row=2):
+            for cell in row:
+                if cell.column == 1:
+                    continue
+                cell.value = None
+        output = BytesIO()
+        wb.save(output)
+        output.seek(0)
+        content = output.getvalue()
+        universal_update.update_file.save("testing.xlsx", ContentFile(content))
+        service = UniversalIndividualUpdateService(universal_update)
+        universal_update.clear_logs()
+        service.execute()
+        universal_update.refresh_from_db()
+        individual.refresh_from_db()
+        document_national_id.refresh_from_db()
+        wallet.refresh_from_db()
+        expected_update_log = """Validating row 0 to 1 Indivduals
+Validation successful
+Updating row 0 to 1 Individuals
+Deduplicating individuals Elasticsearch
+Deduplicating documents
+Update successful
+"""
+        assert universal_update.saved_logs == expected_update_log
+        assert universal_update.saved_logs == universal_update.logs
+        assert individual.given_name == given_name_old
+        assert individual.sex == sex_old
+        assert individual.birth_date == birth_date_old
+        assert individual.phone_no == phone_no_old
+        assert individual.household.address == address_old
+        assert individual.household.admin1 == admin1_old
+        assert document_national_id.document_number == document_number_old
+        assert individual.household.size == size_old
+        assert individual.household.returnee == returnee_old
+        assert individual.flex_fields.get("muac") == muac_old
+        assert individual.household.flex_fields.get("eggs") == eggs_old
+        assert wallet.data.get("phone_number") == wallet_number_old
+
+    def test_update_individual_invalid(
+        self,
+        individual: Individual,
+        program: Program,
+        admin1: Area,
+        admin2: Area,
+        document_national_id: Document,
+        delivery_mechanism: DeliveryMechanism,
+        wallet: DeliveryMechanismData,
+    ) -> None:
+        # save old values
+        given_name_old = individual.given_name
+        sex_old = individual.sex
+        birth_date_old = individual.birth_date
+        phone_no_old = individual.phone_no
+        address_old = individual.household.address
+        admin1_old = individual.household.admin1
+        size_old = individual.household.size
+        returnee_old = individual.household.returnee
+        muac_old = individual.flex_fields.get("muac")
+        eggs_old = individual.household.flex_fields.get("eggs")
+        wallet_number_old = wallet.data.get("phone_number")
+        document_number_old = document_national_id.document_number
+        universal_update = UniversalUpdate(program=program)
+        universal_update.unicef_ids = individual.unicef_id
+        universal_update.individual_fields = ["given_name", "sex", "birth_date", "phone_no"]
+        universal_update.individual_flex_fields_fields = ["muac"]
+        universal_update.household_flex_fields_fields = ["eggs"]
+        universal_update.household_fields = ["address", "admin1", "size", "returnee"]
+        universal_update.save()
+        universal_update.document_types.add(DocumentType.objects.first())
+        universal_update.delivery_mechanisms.add(DeliveryMechanism.objects.first())
+        service = UniversalIndividualUpdateService(universal_update)
+        template_file = service.generate_xlsx_template()
+        universal_update.refresh_from_db()
+        content = template_file.getvalue()
+        universal_update.update_file.save("template.xlsx", ContentFile(content))
+        universal_update.save()
+        universal_update.refresh_from_db()
+        expected_generate_log = "Generating row 0 to 1\nGenerating Finished\n"
+        assert universal_update.saved_logs == expected_generate_log
+        # put string in every collumn
+        wb = openpyxl.load_workbook(universal_update.update_file.path)
+        ws = wb.active
+        for row in ws.iter_rows(min_row=2, max_row=2):
+            for cell in row:
+                if cell.column == 1:
+                    continue
+                cell.value = "TEST String"
+        output = BytesIO()
+        wb.save(output)
+        output.seek(0)
+        content = output.getvalue()
+        universal_update.update_file.save("testing.xlsx", ContentFile(content))
+        service = UniversalIndividualUpdateService(universal_update)
+        universal_update.clear_logs()
+        service.execute()
+        universal_update.refresh_from_db()
+        individual.refresh_from_db()
+        document_national_id.refresh_from_db()
+        wallet.refresh_from_db()
+        expected_update_log = """Validating row 0 to 1 Indivduals
+Validation failed
+Row: 2 - Administrative area admin1 with p_code TEST String not found
+Row: 2 - TEST String for column size is not a valid integer
+Row: 2 - TEST String for column returnee is not a valid boolean allowed values are TRUE or FALSE
+Row: 2 - Invalid value TEST String for column sex allowed values are ['MALE', 'FEMALE', 'OTHER', 'NOT_COLLECTED', 'NOT_ANSWERED']
+Row: 2 - TEST String for column birth_date is not a valid date
+Row: 2 - TEST String for column phone_no is not a valid phone number
+Row: 2 - Country not found for field national_id_country_i_c and value TEST String
 """
         assert universal_update.saved_logs == expected_update_log
         assert universal_update.saved_logs == universal_update.logs

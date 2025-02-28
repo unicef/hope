@@ -6,7 +6,9 @@ from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.postgres.forms import SimpleArrayField
 from django.db.models import QuerySet
 from django.http import HttpRequest
+from django.shortcuts import get_object_or_404
 
+from admin_extra_buttons.buttons import Button
 from admin_extra_buttons.decorators import button
 
 from hct_mis_api.apps.universal_update_script.celery_tasks import (
@@ -19,6 +21,7 @@ from hct_mis_api.apps.universal_update_script.models import (
     UniversalUpdate,
 )
 from hct_mis_api.apps.universal_update_script.universal_individual_update_service.all_updatable_fields import (
+    get_household_flex_fields,
     get_individual_flex_fields,
     household_fields,
     individual_fields,
@@ -80,7 +83,7 @@ class UniversalUpdateAdminForm(forms.ModelForm):
             self.get_dynamic_individual_flex_fields_choices()
         )
         self.fields["household_flex_fields_fields"].widget.choices = list(
-            self.get_dynamic_individual_flex_fields_choices()
+            self.get_dynamic_household_flex_fields_choices()
         )
         self.fields["household_fields"].widget.choices = list(self.get_dynamic_household_fields_choices())
         self.fields["document_types"].queryset = self.get_dynamic_document_types_queryset()
@@ -96,6 +99,10 @@ class UniversalUpdateAdminForm(forms.ModelForm):
 
     def get_dynamic_household_fields_choices(self) -> Iterator[Tuple[str, str]]:
         for field_data in household_fields.values():
+            yield (field_data[0], field_data[0])
+
+    def get_dynamic_household_flex_fields_choices(self) -> Iterator[Tuple[str, str]]:
+        for field_data in get_household_flex_fields().values():
             yield (field_data[0], field_data[0])
 
     def get_dynamic_document_types_queryset(self) -> QuerySet[DocumentType]:
@@ -173,14 +180,24 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
 
     task_status.short_description = "Task Status"
 
-    @button(label="Generate Excel Template")
+    @staticmethod
+    def start_universal_update_task_visible(btn: Button) -> bool:
+        universal_update = get_object_or_404(UniversalUpdate, pk=btn.request.resolver_match.kwargs["object_id"])
+        return bool(universal_update.update_file)
+
+    @button(label="Generate Excel Template", permision="universal_update_script.can_generate_universal_update_template")
     def generate_xlsx_template(self, request: HttpRequest, pk: str) -> None:
         universal_update = self.get_object(request, pk)
         universal_update.queue(generate_universal_individual_update_template)
         self.message_user(request, "Gnerating Excel Template Task Scheduled")
         return None
 
-    @button(label="Start Universal Update Task")
+    @button(
+        label="Start Universal Update Task",
+        permision="universal_update_script.can_run_universal_update",
+        visible=start_universal_update_task_visible,
+        html_attrs={"style": "background-color:#44AA44;color:black"},
+    )
     def start_universal_update_task(self, request: HttpRequest, pk: str) -> None:
         universal_update = self.get_object(request, pk)
         universal_update.queue(run_universal_individual_update)
