@@ -37,7 +37,7 @@ class MessageCopiedToInline(admin.TabularInline):
     verbose_name_plural = "Message representations"
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
-        return Message.objects.all()
+        return Message.objects.all()  # pragma: no cover
 
 
 @admin.register(Message)

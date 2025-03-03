@@ -631,7 +631,7 @@ class TestProgramPopulationToPendingObjects(APITestCase):
                 individual=individual_already_in_program_from,
             ).first(),
         )
-        # role in new program
+        # role in new program - New Role is within PENDING rdi_merge_status
         self.assertIsNotNone(
             IndividualRoleInHousehold.pending_objects.filter(
                 household=new_hh_repr,

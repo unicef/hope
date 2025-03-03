@@ -357,7 +357,9 @@ class IndividualRepresentationInline(admin.TabularInline):
     verbose_name_plural = "Individual representations"
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
-        return Individual.all_objects.select_related("program").all().only("unicef_id", "copied_from", "program__name")
+        return (
+            Individual.all_objects.select_related("program").all().only("unicef_id", "copied_from", "program__name")
+        )  # pragma: no cover
 
     def has_add_permission(self, request: HttpRequest, obj: Optional[Individual] = None) -> bool:
         return False  # Disable adding new individual representations inline
