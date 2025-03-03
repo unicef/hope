@@ -11,7 +11,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.viewsets import GenericViewSet
 from urllib3 import Retry
 
-from hct_mis_api.apps.account.api.permissions import HasOneOfPermissions
+from hct_mis_api.apps.account.api.permissions import BaseRestPermission
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import decode_id_string
 
@@ -151,7 +151,7 @@ class DecodeIdForDetailMixin:
 
 
 class BaseViewSet(GenericViewSet):
-    permission_classes: list = [HasOneOfPermissions]
+    permission_classes: list = [BaseRestPermission]
     PERMISSIONS: list = []
 
 

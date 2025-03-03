@@ -316,9 +316,7 @@ class AllowAuthenticated(BasePermission):
         return info.context.user.is_authenticated
 
 
-def check_permissions(
-    user: Any, permissions: Iterable[Permissions], one_of_permissions: Optional[bool] = True, **kwargs: Any
-) -> bool:
+def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: Any) -> bool:
     from hct_mis_api.apps.program.models import Program
 
     if not user.is_authenticated:
@@ -338,9 +336,7 @@ def check_permissions(
     program = Program.objects.filter(id=get_program_id_from_headers(kwargs)).first()
     obj = program or business_area
 
-    if one_of_permissions:
-        return any(user.has_perm(permission.name, obj) for permission in permissions)
-    return all(user.has_perm(permission.name, obj) for permission in permissions)
+    return any(user.has_perm(permission.name, obj) for permission in permissions)
 
 
 def hopePermissionClass(permission: Permissions) -> Type[BasePermission]:

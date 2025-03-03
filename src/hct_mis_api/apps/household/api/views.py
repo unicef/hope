@@ -38,6 +38,7 @@ class HouseholdViewSet(
     ListModelMixin,
     BaseViewSet,
 ):
+    permission_classes = []
     queryset = Household.all_merge_status_objects.all()
     serializer_class = HouseholdListSerializer
     serializer_classes_by_action = {
@@ -99,10 +100,10 @@ class HouseholdViewSet(
         # if user doesn't have permission to view all households or RDI details, we check based on their grievance tickets
         if not user.has_perm(
             Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS.value,
-            obj.program or obj.business_area,
+            obj.program,
         ) and not user.has_perm(
             Permissions.RDI_VIEW_DETAILS.value,
-            obj.program or obj.business_area,
+            obj.program,
         ):
             grievance_tickets = GrievanceTicket.objects.filter(
                 complaint_ticket_details__in=obj.complaint_ticket_details.all()
@@ -110,7 +111,7 @@ class HouseholdViewSet(
 
             self.check_creator_or_owner_permission(
                 user,
-                self.program or obj.business_area,
+                obj.program,
                 Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS.value,
                 any(user_ticket in user.created_tickets.all() for user_ticket in grievance_tickets),
                 Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_CREATOR.value,
@@ -141,7 +142,6 @@ class HouseholdGlobalViewSet(
         programs_for_business_area = user.get_program_ids_for_permission_in_business_area(
             business_area_id,
             self.PERMISSIONS,
-            one_of_permissions=True,
         )
 
         filter_q = Q()

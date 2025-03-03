@@ -40,9 +40,7 @@ class TestCheckPermissions(TestCase):
 
     def test_business_area_is_invalid(self) -> None:
         arguments = {"business_area": "invalid"}
-        result = check_permissions(
-            self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], one_of_permissions=True, **arguments
-        )
+        result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
         self.assertFalse(result)
 
     def test_user_is_unicef(self) -> None:
@@ -55,9 +53,7 @@ class TestCheckPermissions(TestCase):
             "business_area": self.business_area.slug,
             "Program": encode_id_base64_required(self.program.id, "Program"),
         }
-        result = check_permissions(
-            self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], one_of_permissions=True, **arguments
-        )
+        result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
         self.assertTrue(result)
 
     def test_user_is_not_unicef_and_has_permission_in_different_program(self) -> None:
@@ -76,9 +72,7 @@ class TestCheckPermissions(TestCase):
             "business_area": self.business_area.slug,
             "Program": encode_id_base64_required(self.program.id, "Program"),
         }
-        result = check_permissions(
-            self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], one_of_permissions=True, **arguments
-        )
+        result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
         self.assertFalse(result)
 
     def test_user_is_not_unicef_and_partner_has_permission_in_program(self) -> None:
@@ -95,9 +89,7 @@ class TestCheckPermissions(TestCase):
             "business_area": self.business_area.slug,
             "Program": encode_id_base64_required(self.program.id, "Program"),
         }
-        result = check_permissions(
-            self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], one_of_permissions=True, **arguments
-        )
+        result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
         self.assertTrue(result)
 
     def test_user_is_not_unicef_and_user_has_permission_in_program(self) -> None:
@@ -113,9 +105,7 @@ class TestCheckPermissions(TestCase):
             "business_area": self.business_area.slug,
             "Program": encode_id_base64_required(self.program.id, "Program"),
         }
-        result = check_permissions(
-            self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], one_of_permissions=True, **arguments
-        )
+        result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
         self.assertTrue(result)
 
     def test_user_is_not_unicef_and_partner_has_permission_in_whole_ba(self) -> None:
@@ -130,9 +120,7 @@ class TestCheckPermissions(TestCase):
             "business_area": self.business_area.slug,
             "Program": encode_id_base64_required(self.program.id, "Program"),
         }
-        result = check_permissions(
-            self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], one_of_permissions=True, **arguments
-        )
+        result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
         self.assertTrue(result)
 
     def test_user_is_not_unicef_and_user_has_permission_in_whole_ba(self) -> None:
@@ -146,7 +134,5 @@ class TestCheckPermissions(TestCase):
             "business_area": self.business_area.slug,
             "Program": encode_id_base64_required(self.program.id, "Program"),
         }
-        result = check_permissions(
-            self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], one_of_permissions=True, **arguments
-        )
+        result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
         self.assertTrue(result)
