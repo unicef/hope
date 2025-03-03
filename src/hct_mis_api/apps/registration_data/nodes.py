@@ -52,6 +52,7 @@ class DeduplicationEngineSimilarityPairIndividualNode(graphene.ObjectType):
     photo = graphene.String()
     full_name = graphene.String()
     unicef_id = graphene.String()
+    status_code = graphene.String()
     # optional for RDI population view duplicates modal:
     similarity_score = graphene.Float()
     age = graphene.Int()
@@ -61,8 +62,11 @@ class DeduplicationEngineSimilarityPairIndividualNode(graphene.ObjectType):
     def resolve_photo(parent: Any, info: Any) -> Optional[graphene.String]:
         from hct_mis_api.apps.household.models import Individual
 
+        if not (ind_id := parent.get("id")):
+            return None
+
         # photo url serialization storage timeout
-        individual = Individual.all_objects.get(id=parent.get("id"))
+        individual = Individual.all_objects.get(id=ind_id)
         return individual.photo.url if individual.photo else None
 
     @staticmethod
