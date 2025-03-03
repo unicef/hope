@@ -1,8 +1,8 @@
 import { expect, it } from 'vitest';
-import MockExampleProfile from './MockExampleProfile'; // Adjust the import path as needed
-import { renderWithProviders } from '../../../testUtils/testUtils';
+import MockExampleProfile from './MockExampleProfile';
 import { waitFor, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { renderWithProviders } from 'src/testUtils/testUtils';
 
 it('MockExampleProfile renders correctly after data is fetched', async () => {
   const { asFragment } = renderWithProviders(<MockExampleProfile />);
