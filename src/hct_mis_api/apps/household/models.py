@@ -1249,7 +1249,6 @@ class EntitlementCard(TimeStampedUUIDModel):
         on_delete=models.SET_NULL,
         null=True,
     )
-    objects = models.Manager()
 
 
 class XlsxUpdateFile(TimeStampedUUIDModel):

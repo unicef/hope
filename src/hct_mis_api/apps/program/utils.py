@@ -242,7 +242,7 @@ class CopyProgramPopulation:
 
     def set_household_per_individual(self, new_individual: Individual) -> Individual:
         if new_individual.household:
-            new_individual.household = Household.pending_objects.filter(
+            new_individual.household = Household.all_merge_status_objects.filter(
                 program=self.program,
                 unicef_id=new_individual.household.unicef_id,
             ).first()

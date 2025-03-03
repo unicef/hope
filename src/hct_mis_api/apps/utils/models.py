@@ -1,4 +1,3 @@
-# Create your models here.
 import base64
 import hashlib
 import json
@@ -56,6 +55,16 @@ class MergedManager(models.Manager):
 
 
 class PendingManager(models.Manager):
+    def get_queryset(self) -> "QuerySet":
+        return super().get_queryset().filter(rdi_merge_status="PENDING")
+
+
+class SoftDeletableRepresentationMergedManager(SoftDeletableManager):
+    def get_queryset(self) -> "QuerySet":
+        return super().get_queryset().filter(rdi_merge_status="MERGED")
+
+
+class SoftDeletableRepresentationPendingManager(SoftDeletableManager):
     def get_queryset(self) -> "QuerySet":
         return super().get_queryset().filter(rdi_merge_status="PENDING")
 
@@ -122,11 +131,13 @@ class SoftDeletableMergeStatusModel(MergeStatusModel):
     class Meta:
         abstract = True
 
-    objects: models.Manager = MergedManager()
-    all_merge_status_objects: models.Manager = SoftDeletableManager()
-    available_objects: models.Manager = MergedManager()
-    all_objects: models.Manager = models.Manager()
     pending_objects: models.Manager = PendingManager()
+    objects: models.Manager = MergedManager()
+    available_objects: models.Manager = SoftDeletableRepresentationMergedManager()
+    all_objects: models.Manager = SoftDeletableRepresentationMergedManager()
+    all_merge_status_objects: models.Manager = SoftDeletableManager()
+    all_pending_objects: models.Manager = SoftDeletableRepresentationPendingManager()
+    all_merge_objects: models.Manager = SoftDeletableRepresentationMergedManager()
 
     def delete(
         self, using: Any = None, keep_parents: bool = False, soft: bool = True, *args: Any, **kwargs: Any
