@@ -365,15 +365,22 @@ class DeduplicationEngineSimilarityPair(models.Model):
         "program.Program", related_name="deduplication_engine_similarity_pairs", on_delete=models.CASCADE
     )
     individual1 = models.ForeignKey(
-        "household.Individual", related_name="biometric_duplicates_1", on_delete=models.CASCADE
+        "household.Individual",
+        related_name="biometric_duplicates_1",
+        on_delete=models.CASCADE,
+        null=True,
     )
     individual2 = models.ForeignKey(
-        "household.Individual", related_name="biometric_duplicates_2", on_delete=models.CASCADE
+        "household.Individual",
+        related_name="biometric_duplicates_2",
+        on_delete=models.CASCADE,
+        null=True,
     )
     similarity_score = models.DecimalField(
         max_digits=5,
         decimal_places=2,
-    )
+    )  # 0 represents invalid pair (ex. multiple faces detected)
+    status_code = models.CharField(max_length=20)
 
     class Meta:
         unique_together = ("individual1", "individual2")
@@ -399,8 +406,13 @@ class DeduplicationEngineSimilarityPair(models.Model):
         program = Program.objects.get(deduplication_set_id=deduplication_set_id)
         duplicates = []
         for pair in duplicates_data:
-            # Ensure consistent ordering of individual1 and individual2
-            individual1, individual2 = sorted([pair.first, pair.second])
+            if pair.first and pair.second:
+                # Ensure consistent ordering of individual1 and individual2
+                individual1, individual2 = sorted([pair.first, pair.second])
+            elif not (pair.first or pair.second):
+                continue
+            else:
+                individual1, individual2 = pair.first, pair.second
 
             if individual1 == individual2:
                 logger.warning(f"Skipping duplicate pair ({individual1}, {individual2})")
@@ -411,6 +423,7 @@ class DeduplicationEngineSimilarityPair(models.Model):
                     program=program,
                     individual1_id=individual1,
                     individual2_id=individual2,
+                    status_code=pair.status_code,
                     similarity_score=pair.score * 100,
                 )
             )
@@ -419,21 +432,16 @@ class DeduplicationEngineSimilarityPair(models.Model):
                 cls.objects.bulk_create(duplicates, ignore_conflicts=True)
 
     def serialize_for_ticket(self) -> Dict[str, Any]:
-        return {
-            "individual1": {
-                "id": str(self.individual1.id),
-                "unicef_id": str(self.individual1.unicef_id),
-                "full_name": self.individual1.full_name,
-                "photo_name": str(self.individual1.photo.name) if self.individual1.photo else None,
-            },
-            "individual2": {
-                "id": str(self.individual2.id),
-                "unicef_id": str(self.individual2.unicef_id),
-                "full_name": self.individual2.full_name,
-                "photo_name": str(self.individual2.photo.name) if self.individual2.photo else None,
-            },
-            "similarity_score": float(self.similarity_score),
-        }
+        results = {"similarity_score": float(self.similarity_score), "status_code": self.status_code}
+        for i, ind in enumerate([self.individual1, self.individual2]):
+            results[f"individual{i + 1}"] = {
+                "id": str(ind.id) if ind else "",
+                "unicef_id": str(ind.unicef_id) if ind else "",
+                "full_name": ind.full_name if ind else "",
+                "photo_name": str(ind.photo.name) if ind and ind.photo else None,
+            }
+
+        return results
 
     @classmethod
     def serialize_for_individual(
