@@ -5,6 +5,7 @@ import { restProgramsPeriodicDataUpdatePeriodicFieldsList } from './responses/re
 import { restProgramsPeriodicDataUpdatePeriodicDataUpdateTemplatesList } from './responses/restProgramsPeriodicDataUpdatePeriodicDataUpdateTemplatesList';
 import { restProgramsPeriodicDataUpdatePeriodicDataUpdateUploadsList } from './responses/restProgramsPeriodicDataUpdatePeriodicDataUpdateUploadsList';
 import { restProgramsPeriodicDataUpdatePeriodicDataUpdateTemplatesRetrieve } from './responses/restProgramsPeriodicDataUpdatePeriodicDataUpdateTemplatesRetrieve';
+import { restBeneficiaryGroupsList } from './responses/restBeneficiaryGroupsList';
 
 const endpoints = [
   {
@@ -30,6 +31,10 @@ const endpoints = [
   {
     url: 'http://localhost:3000/api/rest/:business_area/programs/:program_id/periodic-data-update/periodic-data-update-templates/:id/',
     response: restProgramsPeriodicDataUpdatePeriodicDataUpdateTemplatesRetrieve,
+},
+{
+  url: 'http://localhost:3000/api/rest/beneficiary-groups/',
+  response: restBeneficiaryGroupsList,
 },
 ];
 
