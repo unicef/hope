@@ -229,17 +229,14 @@ export const PeopleDetailsPage = (): ReactElement => {
             </Grid>
           </OverviewPaper>
           {hasPermissions(
-            PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS,
+            PERMISSIONS.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS,
             permissions,
           ) && (
             <PaymentsPeopleTable
               openInNewTab
               household={household as HouseholdNode}
               businessArea={businessArea}
-              canViewPaymentRecordDetails={hasPermissions(
-                PERMISSIONS.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS,
-                permissions,
-              )}
+              canViewPaymentRecordDetails={true}
             />
           )}
 
