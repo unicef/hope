@@ -18,7 +18,6 @@ from rest_framework.response import Response
 from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
-from hct_mis_api.apps.account.api.permissions import HasAllOfPermissions
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
@@ -67,9 +66,7 @@ class PaymentPlanViewSet(BusinessAreaProgramMixin, PaymentPlanMixin, mixins.List
 
 class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.ListModelMixin, BaseViewSet):
     queryset = PaymentPlan.objects.all()
-    permission_classes = [HasAllOfPermissions]
     PERMISSIONS = [
-        Permissions.PM_VIEW_LIST,
         Permissions.PAYMENT_VIEW_LIST_MANAGERIAL,
     ]
 
@@ -77,7 +74,6 @@ class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.L
         program_ids = self.request.user.get_program_ids_for_permission_in_business_area(
             str(self.business_area.id),
             [perm for perm_class in self.permission_classes for perm in perm_class.PERMISSIONS],
-            one_of_permissions=False,
         )
 
         return (

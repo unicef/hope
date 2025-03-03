@@ -18,8 +18,7 @@ class PaymentPlanProgramsPermissionsKeyBit(KeyBitBase):
         business_area = BusinessArea.objects.get(slug=kwargs.get("business_area"))
         program_ids = request.user.get_program_ids_for_permission_in_business_area(
             str(business_area.id),
-            [Permissions.PM_VIEW_LIST, Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
-            one_of_permissions=False,
+            [Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
         )
         program_ids.sort()
         return str(program_ids)

@@ -176,7 +176,7 @@ def filter_based_on_partner_areas_2(
             programs_for_business_area = [program_id]
         elif not program_id:
             programs_for_business_area = user.get_program_ids_for_permission_in_business_area(
-                business_area_id=business_area_id, permissions=permissions, one_of_permissions=True
+                business_area_id=business_area_id, permissions=permissions
             )
         # if user does not have access to any program/selected program -> return empty queryset for program-related obj
         if not programs_for_business_area:

@@ -733,7 +733,6 @@ class Query(graphene.ObjectType):
                     Permissions.POPULATION_VIEW_INDIVIDUALS_LIST,
                     *ALL_GRIEVANCES_CREATE_MODIFY,
                 ],
-                one_of_permissions=True,
             )
         if not programs_for_business_area:
             return Individual.objects.none()
@@ -794,7 +793,6 @@ class Query(graphene.ObjectType):
                     Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST,
                     *ALL_GRIEVANCES_CREATE_MODIFY,
                 ],
-                one_of_permissions=True,
             )
         if not programs_for_business_area:
             return Household.objects.none()

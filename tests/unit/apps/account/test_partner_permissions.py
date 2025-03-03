@@ -81,39 +81,27 @@ class UserPartnerTest(TestCase):
         resp_1 = self.other_user.partner.get_program_ids_for_permission_in_business_area(
             business_area_id=self.business_area.pk,
             permissions=[Permissions.PROGRAMME_CREATE],
-            one_of_permissions=True,
         )
         self.assertListEqual(resp_1, [])
 
         resp_2 = self.other_user.partner.get_program_ids_for_permission_in_business_area(
             business_area_id=self.business_area.pk,
             permissions=[Permissions.PROGRAMME_CREATE, Permissions.PROGRAMME_FINISH],
-            one_of_permissions=True,
         )
 
         self.assertListEqual(resp_2, [str(self.program.pk)])
 
-        resp_3 = self.other_user.partner.get_program_ids_for_permission_in_business_area(
-            business_area_id=self.business_area.pk,
-            permissions=[Permissions.PROGRAMME_CREATE, Permissions.PROGRAMME_FINISH],
-            one_of_permissions=False,
-        )
-
-        self.assertListEqual(resp_3, [])
-
-        resp_4 = self.unicef_user.partner.get_program_ids_for_permission_in_business_area(
+        resp_3 = self.unicef_user.partner.get_program_ids_for_permission_in_business_area(
             business_area_id=self.business_area.pk,
             permissions=[Permissions.PROGRAMME_CREATE],
-            one_of_permissions=False,
         )
-        self.assertListEqual(resp_4, [str(self.program.pk)])
+        self.assertListEqual(resp_3, [str(self.program.pk)])
 
     def test_get_user_program_ids_for_permission_in_business_area(self) -> None:
         program_other = ProgramFactory.create(status=Program.DRAFT, business_area=self.business_area)
         resp_1 = self.other_user.get_program_ids_for_permission_in_business_area(
             business_area_id=self.business_area.pk,
             permissions=[Permissions.PROGRAMME_CREATE],
-            one_of_permissions=True,
         )
         # user has role_1 for program=None
         self.assertIn(str(self.program.pk), resp_1)
@@ -122,26 +110,16 @@ class UserPartnerTest(TestCase):
         resp_2 = self.other_user.get_program_ids_for_permission_in_business_area(
             business_area_id=self.business_area.pk,
             permissions=[Permissions.PROGRAMME_CREATE, Permissions.PROGRAMME_FINISH],
-            one_of_permissions=True,
         )
         self.assertIn(str(self.program.pk), resp_2)
         self.assertIn(str(program_other.pk), resp_2)
 
-        resp_3 = self.other_user.get_program_ids_for_permission_in_business_area(
-            business_area_id=self.business_area.pk,
-            permissions=[Permissions.PROGRAMME_CREATE, Permissions.PROGRAMME_FINISH],
-            one_of_permissions=False,
-        )
-
-        self.assertListEqual(resp_3, [])
-
-        resp_4 = self.unicef_user.get_program_ids_for_permission_in_business_area(
+        resp_3 = self.unicef_user.get_program_ids_for_permission_in_business_area(
             business_area_id=self.business_area.pk,
             permissions=[Permissions.PROGRAMME_CREATE],
-            one_of_permissions=False,
         )
-        self.assertIn(str(self.program.pk), resp_4)
-        self.assertIn(str(program_other.pk), resp_4)
+        self.assertIn(str(self.program.pk), resp_3)
+        self.assertIn(str(program_other.pk), resp_3)
 
     def test_get_partner_area_limits_per_program(self) -> None:
         other_partner_areas = self.other_user.partner.get_area_limits_for_program(self.program.pk)
