@@ -560,16 +560,8 @@ class BiometricDeduplicationServiceTest(TestCase):
         service.get_deduplication_set = mock.Mock(return_value=DeduplicationSetData(state="Clean"))
 
         results_data = [
-            {
-                "first": {"reference_pk": "1"},
-                "second": {"reference_pk": "2"},
-                "score": 0.9,
-            },
-            {
-                "first": {"reference_pk": "3"},
-                "second": {"reference_pk": "4"},
-                "score": 0.8,
-            },
+            {"first": {"reference_pk": "1"}, "second": {"reference_pk": "2"}, "score": 0.9, "status_code": "200"},
+            {"first": {"reference_pk": "3"}, "second": {"reference_pk": "4"}, "score": 0.8, "status_code": "200"},
         ]
         service.get_deduplication_set_results = mock.Mock(return_value=results_data)
         service.store_similarity_pairs = mock.Mock()
@@ -585,6 +577,7 @@ class BiometricDeduplicationServiceTest(TestCase):
             [
                 SimilarityPair(
                     score=item["score"],
+                    status_code=item["status_code"],
                     first=item["first"]["reference_pk"],  # type: ignore
                     second=item["second"]["reference_pk"],  # type: ignore
                 )
