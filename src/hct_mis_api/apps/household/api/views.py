@@ -41,7 +41,6 @@ class HouseholdViewSet(
     ListModelMixin,
     BaseViewSet,
 ):
-    permission_classes = []
     queryset = Household.all_merge_status_objects.all()
     serializer_class = HouseholdListSerializer
     serializer_classes_by_action = {

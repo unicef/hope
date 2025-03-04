@@ -52,6 +52,7 @@ class ProgramViewSet(
     serializer_class = ProgramSerializer
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = UpdatedAtFilter
+    lookup_field = "programme_code"
 
 
 class ProgramCycleViewSet(
@@ -61,7 +62,6 @@ class ProgramCycleViewSet(
     BaseViewSet,
 ):
     queryset = ProgramCycle.objects.all()
-    business_area_model_field = "program__business_area"
     serializer_classes_by_action = {
         "list": ProgramCycleListSerializer,
         "retrieve": ProgramCycleListSerializer,
