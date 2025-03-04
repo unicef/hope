@@ -771,7 +771,6 @@ type DeduplicationEngineSimilarityPairIndividualNode {
   photo: String
   fullName: String
   unicefId: String
-  statusCode: String
   similarityScore: Float
   age: Int
   location: String
@@ -781,6 +780,7 @@ type DeduplicationEngineSimilarityPairNode {
   individual1: DeduplicationEngineSimilarityPairIndividualNode
   individual2: DeduplicationEngineSimilarityPairIndividualNode
   similarityScore: String
+  statusCode: String
 }
 
 type DeduplicationResultNode {

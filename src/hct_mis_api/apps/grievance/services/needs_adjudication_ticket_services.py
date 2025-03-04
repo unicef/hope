@@ -138,7 +138,7 @@ def create_grievance_ticket_with_details(
     if not possible_duplicates and issue_type != GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY:
         return None, None
 
-    ticket_all_individuals = {main_individual, *possible_duplicates}
+    ticket_all_individuals = {main_individual, *(possible_duplicates or [])}
 
     ticket_already_exists = (
         TicketNeedsAdjudicationDetails.objects.exclude(ticket__status=GrievanceTicket.STATUS_CLOSED)
@@ -170,11 +170,11 @@ def create_grievance_ticket_with_details(
     golden_records = main_individual.get_deduplication_golden_record()
     extra_data = {
         "golden_records": golden_records,
-        "possible_duplicate": possible_duplicate.get_deduplication_golden_record(),
+        "possible_duplicate": possible_duplicate.get_deduplication_golden_record() if possible_duplicate else None,
     }
 
     if dedup_engine_similarity_pair:
-        extra_data.update({"dedup_engine_similarity_pair": dedup_engine_similarity_pair.serialize_for_ticket()})
+        extra_data.update({"dedup_engine_similarity_pair": dedup_engine_similarity_pair.serialize_for_ticket()})  # type: ignore
         score_min, score_max = (
             dedup_engine_similarity_pair.similarity_score,
             dedup_engine_similarity_pair.similarity_score,
