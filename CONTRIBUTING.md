@@ -4,7 +4,7 @@ Setup development environment
 Prerequisites:
 - This project uses PDM as package manager (see https://github.com/pdm-project/pdm).
 - A Postgres DB v15+
-- A Redis server
+- A Valkey server
 - An Elastic Search server
 
 
@@ -17,7 +17,7 @@ Technology Stack
 - GraphQL
 - Postgres
 - Celery
-- Redis
+- Valkey
 - ElasticSearch
 - Kubernates
 
