@@ -361,6 +361,13 @@ class KoboImportedSubmission(models.Model):
 
 
 class DeduplicationEngineSimilarityPair(models.Model):
+    class StatusCode(models.TextChoices):
+        STATUS_200 = "200", "Deduplication success"
+        STATUS_404 = "404", "No file found"
+        STATUS_412 = "412", "No face detected"
+        STATUS_429 = "429", "Multiple faces detected"
+        STATUS_500 = "500", "Generic error"
+
     program = models.ForeignKey(
         "program.Program", related_name="deduplication_engine_similarity_pairs", on_delete=models.CASCADE
     )
@@ -380,7 +387,7 @@ class DeduplicationEngineSimilarityPair(models.Model):
         max_digits=5,
         decimal_places=2,
     )  # 0 represents invalid pair (ex. multiple faces detected)
-    status_code = models.CharField(max_length=20)
+    status_code = models.CharField(max_length=20, choices=StatusCode.choices)
 
     class Meta:
         unique_together = ("individual1", "individual2")

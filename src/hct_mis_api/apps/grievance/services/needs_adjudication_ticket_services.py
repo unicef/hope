@@ -179,8 +179,8 @@ def create_grievance_ticket_with_details(
             dedup_engine_similarity_pair.similarity_score,
             dedup_engine_similarity_pair.similarity_score,
         )
-        if dedup_engine_similarity_pair.status_code != "200":
-            ticket.description = f"Error Status Code: {dedup_engine_similarity_pair.status_code}"
+        if dedup_engine_similarity_pair.status_code != DeduplicationEngineSimilarityPair.StatusCode.STATUS_200.value:
+            ticket.description = f"Error Status Code: {dedup_engine_similarity_pair.status_code} {dedup_engine_similarity_pair.get_status_code_display()}"
             ticket.save(update_fields=["description"])
     else:
         score_min, score_max = _get_min_max_score(golden_records)

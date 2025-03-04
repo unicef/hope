@@ -348,6 +348,12 @@ class BiometricDeduplicationService:
                         second=item["second"]["reference_pk"] or None,
                     )
                     for item in data
+                    if item["status_code"]
+                    in [
+                        DeduplicationEngineSimilarityPair.StatusCode.STATUS_200.value,
+                        DeduplicationEngineSimilarityPair.StatusCode.STATUS_412.value,
+                        DeduplicationEngineSimilarityPair.StatusCode.STATUS_429.value,
+                    ]
                 ]
                 with transaction.atomic():
                     self.store_similarity_pairs(deduplication_set_id, similarity_pairs)
