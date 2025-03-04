@@ -59,12 +59,12 @@ class PendingManager(models.Manager):
         return super().get_queryset().filter(rdi_merge_status="PENDING")
 
 
-class SoftDeletableRepresentationMergedManager(SoftDeletableManager):
+class SoftDeletableMergedManager(SoftDeletableManager):
     def get_queryset(self) -> "QuerySet":
         return super().get_queryset().filter(rdi_merge_status="MERGED")
 
 
-class SoftDeletableRepresentationPendingManager(SoftDeletableManager):
+class SoftDeletablePendingManager(SoftDeletableManager):
     def get_queryset(self) -> "QuerySet":
         return super().get_queryset().filter(rdi_merge_status="PENDING")
 
@@ -131,13 +131,11 @@ class SoftDeletableMergeStatusModel(MergeStatusModel):
     class Meta:
         abstract = True
 
-    pending_objects: models.Manager = PendingManager()
-    objects: models.Manager = MergedManager()
-    available_objects: models.Manager = SoftDeletableRepresentationMergedManager()
-    all_objects: models.Manager = SoftDeletableRepresentationMergedManager()
-    all_merge_status_objects: models.Manager = SoftDeletableManager()
-    all_pending_objects: models.Manager = SoftDeletableRepresentationPendingManager()
-    all_merge_objects: models.Manager = SoftDeletableRepresentationMergedManager()
+    pending_objects: models.Manager = SoftDeletablePendingManager()  # PENDING - is_removed
+    objects: models.Manager = SoftDeletableMergedManager()  # MERGED - is_removed
+    available_objects: models.Manager = SoftDeletableMergedManager()  # MERGED - is_removed
+    all_objects: models.Manager = MergedManager()  # MERGED + is_removed
+    all_merge_status_objects: models.Manager = models.Manager()  # MERGED + PENDING + is_removed
 
     def delete(
         self, using: Any = None, keep_parents: bool = False, soft: bool = True, *args: Any, **kwargs: Any
