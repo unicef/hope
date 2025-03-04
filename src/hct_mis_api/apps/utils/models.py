@@ -134,8 +134,8 @@ class SoftDeletableMergeStatusModel(MergeStatusModel):
     objects: models.Manager = SoftDeletableMergedManager(_emit_deprecation_warnings=True)  # MERGED - is_removed
     pending_objects: models.Manager = SoftDeletablePendingManager()  # PENDING - is_removed
     available_objects: models.Manager = SoftDeletableMergedManager()  # MERGED - is_removed
-    all_objects: models.Manager = MergedManager()  # MERGED + is_removed
-    all_merge_status_objects: models.Manager = models.Manager()  # MERGED + PENDING + is_removed
+    all_merge_status_objects: models.Manager = SoftDeletableManager()  # MERGED + PENDING - is_removed
+    all_objects: models.Manager = models.Manager()  # MERGED + PENDING + is_removed
 
     def delete(
         self, using: Any = None, keep_parents: bool = False, soft: bool = True, *args: Any, **kwargs: Any
