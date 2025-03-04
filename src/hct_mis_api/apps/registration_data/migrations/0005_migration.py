@@ -21,11 +21,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='deduplicationenginesimilaritypair',
             name='individual1',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='biometric_duplicates_1', to='household.individual'),
+            field=models.ForeignKey(null=True, blank=True, on_delete=django.db.models.deletion.CASCADE, related_name='biometric_duplicates_1', to='household.individual'),
         ),
         migrations.AlterField(
             model_name='deduplicationenginesimilaritypair',
             name='individual2',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='biometric_duplicates_2', to='household.individual'),
+            field=models.ForeignKey(null=True, blank=True, on_delete=django.db.models.deletion.CASCADE, related_name='biometric_duplicates_2', to='household.individual'),
         ),
     ]

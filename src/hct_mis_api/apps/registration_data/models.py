@@ -372,16 +372,10 @@ class DeduplicationEngineSimilarityPair(models.Model):
         "program.Program", related_name="deduplication_engine_similarity_pairs", on_delete=models.CASCADE
     )
     individual1 = models.ForeignKey(
-        "household.Individual",
-        related_name="biometric_duplicates_1",
-        on_delete=models.CASCADE,
-        null=True,
+        "household.Individual", related_name="biometric_duplicates_1", on_delete=models.CASCADE, null=True, blank=True
     )
     individual2 = models.ForeignKey(
-        "household.Individual",
-        related_name="biometric_duplicates_2",
-        on_delete=models.CASCADE,
-        null=True,
+        "household.Individual", related_name="biometric_duplicates_2", on_delete=models.CASCADE, null=True, blank=True
     )
     similarity_score = models.DecimalField(
         max_digits=5,
@@ -439,7 +433,7 @@ class DeduplicationEngineSimilarityPair(models.Model):
                 cls.objects.bulk_create(duplicates, ignore_conflicts=True)
 
     def serialize_for_ticket(self) -> Dict[str, Any]:
-        results = {"similarity_score": float(self.similarity_score), "status_code": self.status_code}
+        results = {"similarity_score": float(self.similarity_score), "status_code": self.get_status_code_display()}
         for i, ind in enumerate([self.individual1, self.individual2]):
             results[f"individual{i + 1}"] = {
                 "id": str(ind.id) if ind else "",

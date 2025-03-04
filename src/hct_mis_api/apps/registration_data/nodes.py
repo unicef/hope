@@ -52,7 +52,6 @@ class DeduplicationEngineSimilarityPairIndividualNode(graphene.ObjectType):
     photo = graphene.String()
     full_name = graphene.String()
     unicef_id = graphene.String()
-    status_code = graphene.String()
     # optional for RDI population view duplicates modal:
     similarity_score = graphene.Float()
     age = graphene.Int()
@@ -80,3 +79,4 @@ class DeduplicationEngineSimilarityPairNode(BaseNodePermissionMixin, graphene.Ob
     individual1 = graphene.Field(DeduplicationEngineSimilarityPairIndividualNode)
     individual2 = graphene.Field(DeduplicationEngineSimilarityPairIndividualNode)
     similarity_score = graphene.String()
+    status_code = graphene.String()
