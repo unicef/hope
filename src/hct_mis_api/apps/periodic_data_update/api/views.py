@@ -20,10 +20,9 @@ from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.api.filters import UpdatedAtFilter
 from hct_mis_api.apps.core.api.mixins import (
-    ActionMixin,
     BaseViewSet,
-    BusinessAreaProgramMixin,
     ProgramMixin,
+    SerializerActionMixin,
 )
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.periodic_data_update.api.caches import PeriodicFieldKeyConstructor
@@ -48,8 +47,8 @@ logger = logging.getLogger(__name__)
 
 
 class PeriodicDataUpdateTemplateViewSet(
-    ActionMixin,
-    BusinessAreaProgramMixin,
+    SerializerActionMixin,
+    ProgramMixin,
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
@@ -116,8 +115,8 @@ class PeriodicDataUpdateTemplateViewSet(
 
 
 class PeriodicDataUpdateUploadViewSet(
-    ActionMixin,
-    BusinessAreaProgramMixin,
+    SerializerActionMixin,
+    ProgramMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
     BaseViewSet,
