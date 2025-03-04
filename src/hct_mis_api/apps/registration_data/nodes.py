@@ -61,12 +61,9 @@ class DeduplicationEngineSimilarityPairIndividualNode(graphene.ObjectType):
     def resolve_photo(parent: Any, info: Any) -> Optional[graphene.String]:
         from hct_mis_api.apps.household.models import Individual
 
-        if not (ind_id := parent.get("id")):
-            return None
-
         # photo url serialization storage timeout
-        individual = Individual.all_objects.get(id=ind_id)
-        return individual.photo.url if individual.photo else None
+        individual = Individual.all_objects.filter(id=parent.get("id")).first()
+        return individual.photo.url if individual and individual.photo else None
 
     @staticmethod
     def resolve_id(parent: Any, info: Any) -> Optional[str]:
