@@ -1137,6 +1137,7 @@ export type DeduplicationEngineSimilarityPairIndividualNode = {
   location?: Maybe<Scalars['String']['output']>;
   photo?: Maybe<Scalars['String']['output']>;
   similarityScore?: Maybe<Scalars['Float']['output']>;
+  statusCode?: Maybe<Scalars['String']['output']>;
   unicefId?: Maybe<Scalars['String']['output']>;
 };
 
@@ -22799,6 +22800,7 @@ export type DeduplicationEngineSimilarityPairIndividualNodeResolvers<ContextType
   location?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   photo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   similarityScore?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  statusCode?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
