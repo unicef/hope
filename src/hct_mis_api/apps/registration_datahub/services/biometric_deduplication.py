@@ -291,7 +291,9 @@ class BiometricDeduplicationService:
     ) -> QuerySet[DeduplicationEngineSimilarityPair]:
         rdi_individuals = PendingIndividual.objects.filter(registration_data_import=rdi).only("id")
         return DeduplicationEngineSimilarityPair.objects.filter(
-            Q(individual1__in=rdi_individuals) & Q(individual2__in=rdi_individuals), program=rdi.program, score__gt=0
+            Q(individual1__in=rdi_individuals) & Q(individual2__in=rdi_individuals),
+            program=rdi.program,
+            similarity_score__gt=0,
         ).distinct()
 
     def get_duplicates_for_rdi_against_population(
@@ -316,7 +318,7 @@ class BiometricDeduplicationService:
         ).exclude(Q(individual1__in=other_pending_rdis_individuals) | Q(individual2__in=other_pending_rdis_individuals))
 
         if exclude_not_valid:
-            qs.exclude(score=0)
+            qs.exclude(similarity_score=0)
 
         return qs.distinct()
 
