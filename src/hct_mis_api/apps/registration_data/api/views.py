@@ -15,7 +15,7 @@ from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.api.mixins import BaseViewSet, BusinessAreaProgramMixin
+from hct_mis_api.apps.core.api.mixins import BaseViewSet, ProgramMixin
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.api.caches import RDIKeyConstructor
 from hct_mis_api.apps.registration_data.api.filters import RegistrationDataImportFilter
@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 
 
 class RegistrationDataImportViewSet(
-    BusinessAreaProgramMixin,
+    ProgramMixin,
     mixins.ListModelMixin,
     BaseViewSet,
 ):

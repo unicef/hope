@@ -11,7 +11,7 @@ from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.api.mixins import BaseViewSet, BusinessAreaProgramMixin
+from hct_mis_api.apps.core.api.mixins import BaseViewSet, ProgramMixin
 from hct_mis_api.apps.payment.api.filters import PaymentPlanFilter
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.targeting.api.caches import TPKeyConstructor
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 class TargetPopulationViewSet(
-    BusinessAreaProgramMixin,
+    ProgramMixin,
     mixins.ListModelMixin,
     BaseViewSet,
 ):

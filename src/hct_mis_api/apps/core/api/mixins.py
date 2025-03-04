@@ -89,11 +89,15 @@ class BusinessAreaMixin:
         return get_object_or_404(BusinessArea, slug=self.business_area_slug)
 
     def get_queryset(self) -> QuerySet:
-        return self.queryset.filter(**{f"{self.business_area_model_field}__slug": self.business_area_slug})
+        return super().get_queryset().filter(**{f"{self.business_area_model_field}__slug": self.business_area_slug})
 
 
 class ProgramMixin:
     program_model_field = "program"
+
+    @cached_property
+    def business_area(self) -> BusinessArea:
+        return self.program.business_area
 
     @property
     def program_id(self) -> Optional[str]:
@@ -106,18 +110,11 @@ class ProgramMixin:
         return get_object_or_404(Program, id=self.program_id)
 
     def get_queryset(self) -> QuerySet:
-        return self.queryset.filter(**{self.program_model_field: self.program_id})
+        return super().get_queryset().filter(**{self.program_model_field: self.program_id})
 
 
-class BusinessAreaProgramMixin(ProgramMixin, BusinessAreaMixin):
-    @cached_property
-    def business_area(self) -> BusinessArea:
-        return self.program.business_area
-
-
-class ActionMixin:
+class PermissionActionMixin:
     permission_classes_by_action = {}
-    serializer_classes_by_action = {}
 
     def get_permissions(self) -> Any:
         if self.action in self.permission_classes_by_action:
@@ -125,11 +122,19 @@ class ActionMixin:
         else:
             return super().get_permissions()  # pragma: no cover
 
+
+class SerializerActionMixin:
+    serializer_classes_by_action = {}
+
     def get_serializer_class(self) -> Any:
         if self.action in self.serializer_classes_by_action:
             return self.serializer_classes_by_action[self.action]
         else:
             return super().get_serializer_class()  # pragma: no cover
+
+
+class ActionMixin(PermissionActionMixin, SerializerActionMixin):
+    pass
 
 
 class CustomSerializerMixin:

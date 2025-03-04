@@ -22,10 +22,10 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.core.api.mixins import (
-    ActionMixin,
     BaseViewSet,
     BusinessAreaMixin,
-    BusinessAreaProgramMixin,
+    ProgramMixin,
+    SerializerActionMixin,
 )
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import decode_id_string
@@ -58,7 +58,7 @@ class PaymentPlanMixin:
     )
 
 
-class PaymentPlanViewSet(BusinessAreaProgramMixin, PaymentPlanMixin, mixins.ListModelMixin, BaseViewSet):
+class PaymentPlanViewSet(ProgramMixin, PaymentPlanMixin, mixins.ListModelMixin, BaseViewSet):
     program_model_field = "program_cycle__program"
     queryset = PaymentPlan.objects.all()
     PERMISSIONS = [Permissions.PM_VIEW_LIST]
@@ -168,7 +168,9 @@ class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.L
         return action_to_permissions_map.get(action_name)
 
 
-class PaymentPlanSupportingDocumentViewSet(ActionMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin, BaseViewSet):
+class PaymentPlanSupportingDocumentViewSet(
+    SerializerActionMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin, BaseViewSet
+):
     serializer_class = PaymentPlanSupportingDocumentSerializer
     lookup_field = "file_id"
 

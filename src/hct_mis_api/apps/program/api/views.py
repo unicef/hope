@@ -19,9 +19,9 @@ from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.api.filters import UpdatedAtFilter
 from hct_mis_api.apps.core.api.mixins import (
-    ActionMixin,
     BaseViewSet,
-    BusinessAreaProgramMixin,
+    ProgramMixin,
+    SerializerActionMixin,
 )
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.api.caches import (
@@ -55,8 +55,8 @@ class ProgramViewSet(
 
 
 class ProgramCycleViewSet(
-    ActionMixin,
-    BusinessAreaProgramMixin,
+    SerializerActionMixin,
+    ProgramMixin,
     ModelViewSet,
     BaseViewSet,
 ):

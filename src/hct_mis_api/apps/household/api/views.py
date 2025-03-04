@@ -3,20 +3,23 @@ from typing import Any
 from django.db.models import Q, QuerySet
 
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.filters import OrderingFilter
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
+from rest_framework.response import Response
 
 from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
     Permissions,
 )
 from hct_mis_api.apps.core.api.mixins import (
-    ActionMixin,
     BaseViewSet,
     BusinessAreaMixin,
-    BusinessAreaProgramMixin,
     DecodeIdForDetailMixin,
+    ProgramMixin,
+    SerializerActionMixin,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.api.mixins import CreatorOrOwnerPermissionMixin
@@ -30,8 +33,8 @@ from hct_mis_api.apps.program.models import Program
 
 
 class HouseholdViewSet(
-    BusinessAreaProgramMixin,
-    ActionMixin,
+    ProgramMixin,
+    SerializerActionMixin,
     DecodeIdForDetailMixin,
     CreatorOrOwnerPermissionMixin,
     RetrieveModelMixin,
@@ -45,11 +48,6 @@ class HouseholdViewSet(
         "list": HouseholdListSerializer,
         "retrieve": HouseholdDetailSerializer,
     }
-    PERMISSIONS = [
-        Permissions.RDI_VIEW_DETAILS,
-        Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST,
-        *ALL_GRIEVANCES_CREATE_MODIFY,
-    ]
     permissions_by_action = {
         "list": [
             Permissions.RDI_VIEW_DETAILS,
@@ -118,6 +116,15 @@ class HouseholdViewSet(
                 any(user_ticket in user.assigned_tickets.all() for user_ticket in grievance_tickets),
                 Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER.value,
             )
+
+    @action(
+        detail=True,
+        methods=["post"],
+    )
+    def withdraw(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+        instance = self.get_object()
+        instance.withdraw()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class HouseholdGlobalViewSet(
