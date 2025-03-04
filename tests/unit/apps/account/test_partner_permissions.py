@@ -78,20 +78,20 @@ class UserPartnerTest(TestCase):
         self.assertListEqual(resp_2, [str(self.program.pk)])
 
     def test_get_partner_program_ids_for_permission_in_business_area(self) -> None:
-        resp_1 = self.other_user.partner.get_program_ids_for_permission_in_business_area(
+        resp_1 = self.other_user.partner.get_program_ids_for_permissions_in_business_area(
             business_area_id=self.business_area.pk,
             permissions=[Permissions.PROGRAMME_CREATE],
         )
         self.assertListEqual(resp_1, [])
 
-        resp_2 = self.other_user.partner.get_program_ids_for_permission_in_business_area(
+        resp_2 = self.other_user.partner.get_program_ids_for_permissions_in_business_area(
             business_area_id=self.business_area.pk,
             permissions=[Permissions.PROGRAMME_CREATE, Permissions.PROGRAMME_FINISH],
         )
 
         self.assertListEqual(resp_2, [str(self.program.pk)])
 
-        resp_3 = self.unicef_user.partner.get_program_ids_for_permission_in_business_area(
+        resp_3 = self.unicef_user.partner.get_program_ids_for_permissions_in_business_area(
             business_area_id=self.business_area.pk,
             permissions=[Permissions.PROGRAMME_CREATE],
         )
@@ -99,7 +99,7 @@ class UserPartnerTest(TestCase):
 
     def test_get_user_program_ids_for_permission_in_business_area(self) -> None:
         program_other = ProgramFactory.create(status=Program.DRAFT, business_area=self.business_area)
-        resp_1 = self.other_user.get_program_ids_for_permission_in_business_area(
+        resp_1 = self.other_user.get_program_ids_for_permissions_in_business_area(
             business_area_id=self.business_area.pk,
             permissions=[Permissions.PROGRAMME_CREATE],
         )
@@ -107,14 +107,14 @@ class UserPartnerTest(TestCase):
         self.assertIn(str(self.program.pk), resp_1)
         self.assertIn(str(program_other.pk), resp_1)
 
-        resp_2 = self.other_user.get_program_ids_for_permission_in_business_area(
+        resp_2 = self.other_user.get_program_ids_for_permissions_in_business_area(
             business_area_id=self.business_area.pk,
             permissions=[Permissions.PROGRAMME_CREATE, Permissions.PROGRAMME_FINISH],
         )
         self.assertIn(str(self.program.pk), resp_2)
         self.assertIn(str(program_other.pk), resp_2)
 
-        resp_3 = self.unicef_user.get_program_ids_for_permission_in_business_area(
+        resp_3 = self.unicef_user.get_program_ids_for_permissions_in_business_area(
             business_area_id=self.business_area.pk,
             permissions=[Permissions.PROGRAMME_CREATE],
         )

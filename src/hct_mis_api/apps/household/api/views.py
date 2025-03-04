@@ -1,11 +1,10 @@
 from typing import Any
 
-from django.db.models import Q, QuerySet
+from django.db.models import QuerySet
 
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.exceptions import PermissionDenied
 from rest_framework.filters import OrderingFilter
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
@@ -16,9 +15,9 @@ from hct_mis_api.apps.account.permissions import (
 )
 from hct_mis_api.apps.core.api.mixins import (
     BaseViewSet,
-    BusinessAreaMixin,
+    BusinessAreaVisibilityMixin,
     DecodeIdForDetailMixin,
-    ProgramMixin,
+    ProgramVisibilityMixin,
     SerializerActionMixin,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
@@ -33,7 +32,7 @@ from hct_mis_api.apps.program.models import Program
 
 
 class HouseholdViewSet(
-    ProgramMixin,
+    ProgramVisibilityMixin,
     SerializerActionMixin,
     DecodeIdForDetailMixin,
     CreatorOrOwnerPermissionMixin,
@@ -63,36 +62,17 @@ class HouseholdViewSet(
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = HouseholdFilter
+    admin_area_model_fields = ["admin1", "admin2", "admin3"]
 
     def get_queryset(self) -> QuerySet:
         if self.program.status == Program.DRAFT:
             return Household.objects.none()
 
-        # apply admin area limits if partner has restrictions
-        filter_q = Q()
-        area_limits = self.request.user.partner.get_area_limits_for_program(self.program.id)
-        if area_limits.exists():
-            areas_null = Q(admin_area__isnull=True)
-            areas_query = Q(Q(admin1__in=area_limits) | Q(admin2__in=area_limits) | Q(admin3__in=area_limits))
-            filter_q = Q(areas_null | Q(areas_query))
-        return (
-            super().get_queryset().filter(filter_q).select_related("head_of_household", "program", "admin1", "admin2")
-        )
+        return super().get_queryset().select_related("head_of_household", "program", "admin1", "admin2")
 
     def check_object_permissions(self, request: Any, obj: Household) -> None:
         super().check_object_permissions(request, obj)
         user = request.user
-        if obj.admin_area_id:
-            # check if user has access to the area
-            area_limits = user.partner.get_area_limits_for_program(obj.program_id)
-            if area_limits.exists():
-                areas_from_household = [
-                    obj.admin1_id,
-                    obj.admin2_id,
-                    obj.admin3_id,
-                ]
-                if not area_limits.filter(id__in=areas_from_household).exists():
-                    raise PermissionDenied()
 
         # if user doesn't have permission to view all households or RDI details, we check based on their grievance tickets
         if not user.has_perm(
@@ -127,7 +107,7 @@ class HouseholdViewSet(
 
 
 class HouseholdGlobalViewSet(
-    BusinessAreaMixin,
+    BusinessAreaVisibilityMixin,
     ListModelMixin,
     BaseViewSet,
 ):
@@ -140,35 +120,7 @@ class HouseholdGlobalViewSet(
     ]
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = HouseholdFilter
+    admin_area_model_fields = ["admin1", "admin2", "admin3"]
 
     def get_queryset(self) -> QuerySet:
-        business_area_id = self.business_area.id
-        user = self.request.user
-
-        programs_for_business_area = user.get_program_ids_for_permission_in_business_area(
-            business_area_id,
-            self.PERMISSIONS,
-        )
-
-        filter_q = Q()
-        for program_id in (
-            Program.objects.filter(id__in=programs_for_business_area)
-            .exclude(status=Program.DRAFT)
-            .values_list("id", flat=True)
-        ):
-            program_q = Q(program_id=program_id)
-            areas_null_and_program_q = program_q & Q(admin_area__isnull=True)
-            # apply admin area limits if partner has restrictions
-            area_limits = user.partner.get_area_limits_for_program(program_id)
-            areas_query = (
-                Q(Q(admin1__in=area_limits) | Q(admin2__in=area_limits) | Q(admin3__in=area_limits))
-                if area_limits.exists()
-                else Q()
-            )
-
-            filter_q |= Q(areas_null_and_program_q | Q(program_q & areas_query))
-
-        queryset = (
-            super().get_queryset().filter(filter_q).select_related("head_of_household", "program", "admin1", "admin2")
-        )
-        return queryset
+        return super().get_queryset().select_related("head_of_household", "program", "admin1", "admin2")

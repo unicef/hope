@@ -23,7 +23,7 @@ from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.core.api.mixins import (
     BaseViewSet,
-    BusinessAreaMixin,
+    BusinessAreaProgramsAccessMixin,
     ProgramMixin,
     SerializerActionMixin,
 )
@@ -64,18 +64,16 @@ class PaymentPlanViewSet(ProgramMixin, PaymentPlanMixin, mixins.ListModelMixin, 
     PERMISSIONS = [Permissions.PM_VIEW_LIST]
 
 
-class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.ListModelMixin, BaseViewSet):
+class PaymentPlanManagerialViewSet(
+    BusinessAreaProgramsAccessMixin, PaymentPlanMixin, mixins.ListModelMixin, BaseViewSet
+):
     queryset = PaymentPlan.objects.all()
     PERMISSIONS = [
         Permissions.PAYMENT_VIEW_LIST_MANAGERIAL,
     ]
+    program_model_field = "program_cycle__program"
 
     def get_queryset(self) -> QuerySet:
-        program_ids = self.request.user.get_program_ids_for_permission_in_business_area(
-            str(self.business_area.id),
-            [perm for perm_class in self.permission_classes for perm in perm_class.PERMISSIONS],
-        )
-
         return (
             super()
             .get_queryset()
@@ -86,7 +84,6 @@ class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.L
                     PaymentPlan.Status.IN_REVIEW,
                     PaymentPlan.Status.ACCEPTED,
                 ],
-                program_cycle__program__in=program_ids,
             )
         )
 

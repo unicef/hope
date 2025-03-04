@@ -27,6 +27,7 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.account.utils import test_conditional
 from hct_mis_api.apps.core.mixins import LimitBusinessAreaModelMixin
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.visibility_backends import VisibilityBackend
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.utils.mailjet import MailjetClient
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
@@ -120,7 +121,7 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
             )
         return [str(program_id) for program_id in programs_ids]
 
-    def get_program_ids_for_permission_in_business_area(
+    def get_program_ids_for_permissions_in_business_area(
         self, business_area_id: str, permissions: List[Permissions]
     ) -> List[str]:
         """
@@ -138,39 +139,17 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
             ).values_list("program_id", flat=True)
         return [str(program_id) for program_id in programs_ids]
 
-    def has_program_access(self, program_id: Union[str, UUID]) -> bool:
-        from hct_mis_api.apps.program.models import Program
-
-        return (
-            RoleAssignment.objects.filter(
-                Q(partner=self)
-                & Q(business_area=Program.objects.get(id=program_id).business_area)
-                & (Q(program=None) | Q(program_id=program_id))
-            )
-            .exclude(expiry_date__lt=timezone.now())
-            .exists()
-        )
-
     def has_area_access(self, area_id: Union[str, UUID], program_id: Union[str, UUID]) -> bool:
-        return (
-            not self.has_area_limits_in_program(program_id)
-            or self.get_area_limits_for_program(program_id).filter(id=area_id).exists()
-        )
+        return VisibilityBackend.has_area_access(self, area_id, program_id)
 
     def get_area_limits_for_program(self, program_id: Union[str, UUID]) -> QuerySet[Area]:
-        area_limits = AdminAreaLimitedTo.objects.filter(partner=self, program_id=program_id)
-        return Area.objects.filter(admin_area_limits__in=area_limits)
+        return VisibilityBackend.get_area_limits_for_program(self, program_id)
 
     def has_area_limits_in_program(self, program_id: Union[str, UUID]) -> bool:
-        return self.get_area_limits_for_program(program_id).exists()
+        return VisibilityBackend.has_area_limits_in_program(self, program_id)
 
     def get_areas_for_program(self, program_id: Union[str, UUID]) -> QuerySet[Area]:
-        area_limits = self.get_area_limits_for_program(program_id)
-        return (
-            area_limits
-            if area_limits.exists()
-            else Area.objects.filter(area_type__country__business_areas__program__id=program_id)
-        )
+        return VisibilityBackend.get_areas_for_program(self, program_id)
 
 
 class User(AbstractUser, NaturalKeyModel, UUIDModel):
@@ -198,20 +177,6 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             raise ValidationError(f"{self.partner} is a parent partner and cannot have users.")
         super().save(*args, **kwargs)
 
-    def has_program_access(self, program_id: Union[str, UUID]) -> bool:
-        from hct_mis_api.apps.program.models import Program
-
-        return (
-            RoleAssignment.objects.filter(
-                Q(user=self)
-                | Q(partner__user=self)
-                & Q(business_area=Program.objects.get(id=program_id).business_area)
-                & (Q(program=None) | Q(program_id=program_id))
-            )
-            .exclude(expiry_date__lt=timezone.now())
-            .exists()
-        )
-
     def get_program_ids_for_business_area(self, business_area_id: str) -> List[str]:
         """
         Return list of program ids that the user (or user's partner) has access to in the given business area.
@@ -229,7 +194,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             ).values_list("program_id", flat=True)
         return [str(program_id) for program_id in programs_ids]
 
-    def get_program_ids_for_permission_in_business_area(
+    def get_program_ids_for_permissions_in_business_area(
         self, business_area_id: str, permissions: List[Permissions]
     ) -> List[str]:
         """
@@ -260,8 +225,6 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         retrieved from RoleAssignments of the user and their partner
         """
         if program_id:
-            if not self.has_program_access(program_id):
-                return set()
             role_assignments = RoleAssignment.objects.filter(
                 Q(partner__user=self, business_area__slug=business_area_slug, program_id=program_id)
                 | Q(partner__user=self, business_area__slug=business_area_slug, program=None)
