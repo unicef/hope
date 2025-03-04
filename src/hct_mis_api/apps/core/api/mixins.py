@@ -2,7 +2,7 @@ import os
 from functools import cached_property
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
-from django.db.models import QuerySet
+from django.db.models import Q, QuerySet
 
 from requests import Response, session
 from requests.adapters import HTTPAdapter
@@ -124,6 +124,73 @@ class ProgramMixin:
                 }
             )
         )
+
+
+class BusinessAreaProgramsAccessMixin(BusinessAreaMixin):
+    """
+    Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
+    """
+
+    def get_queryset(self) -> QuerySet:
+        queryset = super().get_queryset()
+
+        program_ids = self.request.user.get_program_ids_for_permissions_in_business_area(
+            str(self.business_area.id),
+            [perm for perm_class in self.permission_classes for perm in perm_class.PERMISSIONS],
+        )
+
+        return queryset.filter(**{f"{self.program_model_field}__in": program_ids})
+
+
+class ProgramVisibilityMixin(ProgramMixin):
+    """
+    Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
+    """
+
+    def get_queryset(self) -> QuerySet:
+        queryset = super().get_queryset()
+
+        if area_limits := self.request.user.partner.get_area_limits_for_program(self.program.id):
+            areas_null = Q(**{f"{field}__isnull": True for field in self.admin_area_model_fields})
+            areas_query = Q()
+            for field in self.admin_area_model_fields:
+                areas_query |= Q(**{f"{field}__in": area_limits})
+            queryset = queryset.filter(Q(areas_null | Q(areas_query)))
+
+        return queryset
+
+
+class BusinessAreaVisibilityMixin(BusinessAreaMixin):
+    """
+    Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
+    """
+
+    def get_queryset(self) -> QuerySet:
+        from hct_mis_api.apps.program.models import Program
+
+        queryset = super().get_queryset()
+
+        user = self.request.user
+        program_ids = user.get_program_ids_for_permissions_in_business_area(
+            self.business_area.id,
+            self.PERMISSIONS,
+        )
+
+        filter_q = Q()
+        for program_id in (
+            Program.objects.filter(id__in=program_ids).exclude(status=Program.DRAFT).values_list("id", flat=True)
+        ):
+            program_q = Q(program_id=program_id)
+            areas_null = Q(**{f"{field}__isnull": True for field in self.admin_area_model_fields})
+            # apply admin area limits if partner has restrictions
+            area_limits = user.partner.get_area_limits_for_program(program_id)
+            areas_query = Q()
+            for field in self.admin_area_model_fields:
+                areas_query |= Q(**{f"{field}__in": area_limits})
+
+            filter_q |= Q(program_q & areas_null) | Q(program_q & areas_query)
+
+        return queryset.filter(filter_q) if filter_q else queryset.none()  # filter_q empty if no access to any program
 
 
 class PermissionActionMixin:

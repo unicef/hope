@@ -354,8 +354,6 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
 
         if program_id and str(object_instance.program_id) != program_id:
             raise PermissionDenied("Permission Denied")
-        if not user.has_program_access(object_instance.program_id):
-            raise PermissionDenied("Permission Denied")
         if object_instance.household_id and object_instance.household.admin_area_id:
             # check if user has access to the area
             area_limits = user.partner.get_area_limits_for_program(object_instance.program_id)
@@ -524,8 +522,7 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
 
         if program_id and str(object_instance.program_id) != program_id:
             raise PermissionDenied("Permission Denied")
-        if not user.has_program_access(object_instance.program_id):
-            raise PermissionDenied("Permission Denied")
+
         if object_instance.admin_area_id:
             # check if user has access to the area
             area_limits = user.partner.get_area_limits_for_program(object_instance.program_id)
@@ -723,10 +720,10 @@ class Query(graphene.ObjectType):
         business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
         programs_for_business_area = []
 
-        if program_id and user.has_program_access(program_id):
+        if program_id:
             programs_for_business_area = [program_id]
         elif not program_id:
-            programs_for_business_area = user.get_program_ids_for_permission_in_business_area(
+            programs_for_business_area = user.get_program_ids_for_permissions_in_business_area(
                 business_area_id,
                 [
                     Permissions.RDI_VIEW_DETAILS,
@@ -783,10 +780,10 @@ class Query(graphene.ObjectType):
         business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
         programs_for_business_area = []
 
-        if program_id and user.has_program_access(program_id):
+        if program_id:
             programs_for_business_area = [program_id]
         elif not program_id:
-            programs_for_business_area = user.get_program_ids_for_permission_in_business_area(
+            programs_for_business_area = user.get_program_ids_for_permissions_in_business_area(
                 business_area_id,
                 [
                     Permissions.RDI_VIEW_DETAILS,
