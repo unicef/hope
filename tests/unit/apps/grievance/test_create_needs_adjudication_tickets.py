@@ -249,13 +249,16 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
         cls.household3.save()
 
         cls.ind1, cls.ind2 = sorted(individuals, key=lambda x: x.id)
+        cls.ind1.registration_data_import = cls.rdi
+        cls.ind2.registration_data_import = cls.rdi
+        cls.ind1.save()
+        cls.ind2.save()
         cls.ind3, cls.ind4 = sorted([cls.ind1, other_individual], key=lambda x: x.id)
         cls.ind5 = other_individual2
 
         cls.dedup_engine_similarity_pair = DeduplicationEngineSimilarityPair.objects.create(
             program=program, individual1=cls.ind1, individual2=cls.ind2, similarity_score=55.55, status_code="200"
         )
-
         cls.dedup_engine_similarity_pair_2 = DeduplicationEngineSimilarityPair.objects.create(
             program=program, individual1=cls.ind3, individual2=cls.ind4, similarity_score=75.25, status_code="200"
         )
