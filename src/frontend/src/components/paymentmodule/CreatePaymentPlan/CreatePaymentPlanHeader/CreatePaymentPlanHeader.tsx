@@ -10,6 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
 import { RestService } from '@restgenerated/services/RestService';
+import { useProgramContext } from 'src/programContext';
 
 interface CreatePaymentPlanHeaderProps {
   handleSubmit: () => Promise<void>;
@@ -23,7 +24,8 @@ export function CreatePaymentPlanHeader({
   loadingCreate,
 }: CreatePaymentPlanHeaderProps): ReactElement {
   const { t } = useTranslation();
-  const { businessArea, programId } = useBaseUrl();
+  const { businessArea  } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
   const { programCycleId } = useParams();
 
   const decodedProgramCycleId = decodeIdString(programCycleId);
@@ -34,14 +36,14 @@ export function CreatePaymentPlanHeader({
         'programCyclesDetails',
         businessArea,
         decodedProgramCycleId,
-        programId,
+        selectedProgram?.programmeCode,
       ],
       queryFn: () => {
-        return RestService.restProgramsCyclesRetrieve(
-          businessArea,
-          decodedProgramCycleId,
-          programId,
-        );
+        return RestService.restBusinessAreasProgramsCyclesRetrieve({
+          businessAreaSlug: businessArea,
+          id: decodedProgramCycleId,
+          programProgrammeCode: selectedProgram?.programmeCode,
+      });
       },
     },
   );

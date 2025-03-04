@@ -47,7 +47,7 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { t } = useTranslation();
 
-  const { baseUrl, businessArea, programId } = useBaseUrl();
+  const { baseUrl, businessArea  } = useBaseUrl();
   const permissions = usePermissions();
 
   const { data, loading, error } = useIndividualQuery({
@@ -66,14 +66,15 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
   const { data: grievancesChoices, loading: grievancesChoicesLoading } =
     useGrievancesChoiceDataQuery();
 
-  const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
+    const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
     useQuery({
-      queryKey: ['periodicFields', businessArea, programId],
+      queryKey: ['periodicFields', businessArea, selectedProgram?.programmeCode],
       queryFn: () =>
-        RestService.restProgramsPeriodicDataUpdatePeriodicFieldsList(
-          businessArea,
-          programId,
-        ),
+        RestService.restBusinessAreasProgramsPeriodicFieldsList({
+          businessAreaSlug: businessArea,
+          programProgrammeCode: selectedProgram?.programmeCode,
+          limit: 1000,
+    }),
     });
 
   if (

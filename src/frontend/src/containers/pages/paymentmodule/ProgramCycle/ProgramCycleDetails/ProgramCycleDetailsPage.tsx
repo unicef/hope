@@ -12,6 +12,7 @@ import { PaymentPlansTable } from '@containers/pages/paymentmodule/ProgramCycle/
 import { PaymentPlansFilters } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansFilters';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RestService } from '@restgenerated/services/RestService';
+import { useProgramContext } from 'src/programContext';
 
 const initialFilter = {
   search: '',
@@ -24,7 +25,8 @@ const initialFilter = {
 };
 
 export const ProgramCycleDetailsPage = (): ReactElement => {
-  const { businessArea, programId } = useBaseUrl();
+  const { businessArea  } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
   const { programCycleId } = useParams();
   const location = useLocation();
   const permissions = usePermissions();
@@ -36,14 +38,14 @@ export const ProgramCycleDetailsPage = (): ReactElement => {
       'programCyclesDetails',
       businessArea,
       decodedProgramCycleId,
-      programId,
+      selectedProgram?.programmeCode,
     ],
     queryFn: () => {
-      return RestService.restProgramsCyclesRetrieve(
-        businessArea,
-        decodedProgramCycleId,
-        programId,
-      );
+      return RestService.restBusinessAreasProgramsCyclesRetrieve({
+        businessAreaSlug: businessArea,
+        id: decodedProgramCycleId,
+        programProgrammeCode: selectedProgram?.programmeCode,
+    });
     },
   });
   const [filter, setFilter] = useState(

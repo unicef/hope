@@ -206,7 +206,7 @@ export const GlobalProgramSelect = () => {
           },
           pduFields: program.pduFields,
           beneficiaryGroup: beneficiaryGroup,
-          programmeCode
+          programmeCode,
         });
       }
     }

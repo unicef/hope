@@ -64,7 +64,7 @@ const SubTitle = styled(Typography)`
 const PopulationHouseholdDetailsPage = (): ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
-  const { baseUrl, businessArea, programId } = useBaseUrl();
+  const { baseUrl, businessArea  } = useBaseUrl();
 
   //TODO: replace with REST queries
 
@@ -134,7 +134,7 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
   }
 
   const { household } = data;
-;
+
 
   return (
     <>
@@ -178,7 +178,6 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
         }
       />
       <HouseholdDetails
-        choicesData={choicesData}
         household={householdData}
         baseUrl={baseUrl}
         businessArea={businessArea}
