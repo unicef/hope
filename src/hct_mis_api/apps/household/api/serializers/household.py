@@ -8,7 +8,7 @@ from hct_mis_api.apps.core.utils import resolve_flex_fields_choices_to_string
 from hct_mis_api.apps.household.api.serializers.registration_data_import import (
     RegistrationDataImportSerializer,
 )
-from hct_mis_api.apps.household.models import DUPLICATE, Household
+from hct_mis_api.apps.household.models import DUPLICATE, Household, Individual
 
 
 class HouseholdListSerializer(serializers.ModelSerializer):
@@ -38,9 +38,20 @@ class HouseholdListSerializer(serializers.ModelSerializer):
         ]
 
 
+class HeadOfHouseholdSerializer(serializers.ModelSerializer):
+    id = Base64ModelField(model_name="Individual")
+
+    class Meta:
+        model = Individual
+        fields = (
+            "id",
+            "full_name",
+        )
+
+
 class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
     id = Base64ModelField(model_name="Household")
-    head_of_household = serializers.CharField(source="head_of_household.full_name")
+    head_of_household = HeadOfHouseholdSerializer()
     admin1 = serializers.CharField(source="admin1.name", default="")
     admin2 = serializers.CharField(source="admin2.name", default="")
     admin3 = serializers.CharField(source="admin3.name", default="")
