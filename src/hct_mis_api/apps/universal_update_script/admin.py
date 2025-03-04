@@ -1,4 +1,4 @@
-from typing import Any, Iterator, Tuple
+from typing import Any, Iterator, Tuple, Union
 
 from django import forms
 from django.contrib import admin
@@ -30,13 +30,13 @@ from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 
 class ArrayFieldFilteredSelectMultiple(FilteredSelectMultiple):
-    def format_value(self, value: str) -> list[str]:  # type: ignore
+    def format_value(self, value: Union[str, tuple, list]) -> list[str]:  # type: ignore
         """Return selected values as a list."""
         processed_value = []
         if value is None and self.allow_multiple_selected:
             return []
         elif self.allow_multiple_selected:
-            processed_value = [v for v in value.split(",")]
+            processed_value = value.split(",")
 
         if not isinstance(value, (tuple, list)):
             processed_value = [value]
