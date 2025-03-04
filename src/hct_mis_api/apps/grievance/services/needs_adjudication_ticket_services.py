@@ -265,7 +265,7 @@ def create_needs_adjudication_tickets_for_biometrics(
     new_tickets = []
 
     for pair in deduplication_pairs:
-        # if only one individual exists mark it as original (multiple faces detected)
+        # if only one individual exists mark it as original
         if not (pair.individual1 and pair.individual2):
             duplicate_individual = None
             if pair.individual1:
