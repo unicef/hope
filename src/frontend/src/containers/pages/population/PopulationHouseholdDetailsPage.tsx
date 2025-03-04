@@ -196,7 +196,10 @@ export const PopulationHouseholdDetailsPage = (): ReactElement => {
             openInNewTab
             household={household as HouseholdNode}
             businessArea={businessArea}
-            canViewPaymentRecordDetails={true}
+            canViewPaymentRecordDetails={hasPermissions(
+              PERMISSIONS.PM_VIEW_PAYMENT_LIST,
+              permissions,
+            )}
           />
         )}
         <HouseholdAdditionalRegistrationInformation
