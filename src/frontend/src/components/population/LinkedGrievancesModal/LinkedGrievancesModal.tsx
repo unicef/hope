@@ -32,6 +32,7 @@ import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import { getGrievanceDetailsPath } from '../../grievances/utils/createGrievanceUtils';
 import { Bold } from '@components/core/Bold';
 import { useProgramContext } from 'src/programContext';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -48,7 +49,7 @@ const StyledDialog = styled(Dialog)`
 `;
 
 interface LinkedGrievancesModalProps {
-  household: HouseholdNode;
+  household: HouseholdDetail;
   businessArea: string;
   baseUrl: string;
   grievancesChoices: GrievancesChoiceDataQuery;

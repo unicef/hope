@@ -34,6 +34,8 @@ import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import PaymentsHouseholdTable from '@containers/tables/payments/PaymentsHouseholdTable/PaymentsHouseholdTable';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 
 const Container = styled.div`
   padding: 20px;
@@ -62,7 +64,9 @@ const SubTitle = styled(Typography)`
 const PopulationHouseholdDetailsPage = (): ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
+
+  //TODO: replace with REST queries
 
   const location = useLocation();
   const permissions = usePermissions();
@@ -73,6 +77,16 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
+  const { data: householdData, isLoading: householdLoading } = useQuery({
+    queryKey: ['household', businessArea, id, selectedProgram?.programmeCode],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsHouseholdsRetrieve({
+        businessAreaSlug:businessArea,
+        id,
+        programProgrammeCode: selectedProgram?.programmeCode,
+  }),
+  });
+
   const { data: flexFieldsData, loading: flexFieldsDataLoading } =
     useAllHouseholdsFlexFieldsAttributesQuery();
   const { data: choicesData, loading: choicesLoading } =
@@ -85,6 +99,7 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
     choicesLoading ||
     flexFieldsDataLoading ||
     grievancesChoicesLoading
+    || householdLoading
   )
     return <LoadingComponent />;
 
@@ -96,6 +111,7 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
     !grievancesChoices ||
     !flexFieldsData ||
     permissions === null
+    || !householdData
   )
     return null;
 
@@ -118,6 +134,7 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
   }
 
   const { household } = data;
+;
 
   return (
     <>
@@ -162,7 +179,7 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
       />
       <HouseholdDetails
         choicesData={choicesData}
-        household={household as HouseholdNode}
+        household={householdData}
         baseUrl={baseUrl}
         businessArea={businessArea}
         grievancesChoices={grievancesChoices}

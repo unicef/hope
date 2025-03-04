@@ -1,0 +1,73 @@
+/* generated using openapi-typescript-codegen -- do not edit */
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+import type { BlankEnum } from './BlankEnum';
+import type { CurrencyEnum } from './CurrencyEnum';
+import type { HeadOfHousehold } from './HeadOfHousehold';
+import type { RegistrationDataImport } from './RegistrationDataImport';
+import type { ResidenceStatusEnum } from './ResidenceStatusEnum';
+export type HouseholdDetail = {
+    id: string;
+    unicef_id: string | null;
+    head_of_household: HeadOfHousehold;
+    admin1?: string;
+    admin2?: string;
+    admin3?: string;
+    admin4?: string;
+    program?: string;
+    country?: string;
+    country_origin?: string;
+    readonly status: string;
+    total_cash_received: string;
+    total_cash_received_usd: string;
+    readonly sanction_list_possible_match: boolean;
+    readonly sanction_list_confirmed_match: boolean;
+    readonly has_duplicates: boolean;
+    registration_data_import: RegistrationDataImport;
+    readonly flex_fields: Record<string, any>;
+    readonly admin_area_title: string;
+    readonly active_individuals_count: number;
+    readonly geopoint: Array<number> | null;
+    readonly import_id: string;
+    readonly admin_url: string;
+    male_children_count?: number | null;
+    female_children_count?: number | null;
+    children_disabled_count?: number | null;
+    currency?: (CurrencyEnum | BlankEnum);
+    first_registration_date: string;
+    last_registration_date: string;
+    unhcr_id?: string;
+    village?: string;
+    address?: string;
+    zip_code?: string | null;
+    female_age_group_0_5_count?: number | null;
+    female_age_group_6_11_count?: number | null;
+    female_age_group_12_17_count?: number | null;
+    female_age_group_18_59_count?: number | null;
+    female_age_group_60_count?: number | null;
+    pregnant_count?: number | null;
+    male_age_group_0_5_count?: number | null;
+    male_age_group_6_11_count?: number | null;
+    male_age_group_12_17_count?: number | null;
+    male_age_group_18_59_count?: number | null;
+    male_age_group_60_count?: number | null;
+    female_age_group_0_5_disabled_count?: number | null;
+    female_age_group_6_11_disabled_count?: number | null;
+    female_age_group_12_17_disabled_count?: number | null;
+    female_age_group_18_59_disabled_count?: number | null;
+    female_age_group_60_disabled_count?: number | null;
+    male_age_group_0_5_disabled_count?: number | null;
+    male_age_group_6_11_disabled_count?: number | null;
+    male_age_group_12_17_disabled_count?: number | null;
+    male_age_group_18_59_disabled_count?: number | null;
+    male_age_group_60_disabled_count?: number | null;
+    start?: string | null;
+    deviceid?: string;
+    fchild_hoh?: boolean | null;
+    child_hoh?: boolean | null;
+    returnee?: boolean | null;
+    size?: number | null;
+    residence_status?: (ResidenceStatusEnum | BlankEnum);
+};
+
