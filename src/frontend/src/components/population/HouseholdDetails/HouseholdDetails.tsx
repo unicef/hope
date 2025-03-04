@@ -1,9 +1,8 @@
-import { Box, Grid2 as Grid, Paper, Typography } from '@mui/material';
+import { Grid2 as Grid, Paper, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
   GrievancesChoiceDataQuery,
-  HouseholdChoiceDataQuery,
 } from '@generated/graphql';
 import { useProgramContext } from '../../../programContext';
 import {  formatCurrencyWithSymbol } from '@utils/utils';
@@ -44,14 +43,12 @@ const OverviewPaper = styled(Paper)`
 
 interface HouseholdDetailsProps {
   household: HouseholdDetail;
-  choicesData: HouseholdChoiceDataQuery;
   baseUrl: string;
   businessArea: string;
   grievancesChoices: GrievancesChoiceDataQuery;
 }
 export function HouseholdDetails({
   household,
-  choicesData,
   baseUrl,
   businessArea,
   grievancesChoices,

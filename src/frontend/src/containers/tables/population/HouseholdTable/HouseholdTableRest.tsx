@@ -9,7 +9,7 @@ import { UniversalMoment } from '@components/core/UniversalMoment';
 import { WarningTooltip } from '@components/core/WarningTooltip';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import {
-  HouseholdRdiMergeStatus
+  HouseholdRdiMergeStatus,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { TableCell } from '@mui/material';
@@ -34,7 +34,7 @@ export const HouseholdTableRest = ({
   canViewDetails,
 }: HouseholdTableRestProps): ReactElement => {
   const { selectedProgram } = useProgramContext();
-  const {businessArea} = useBaseUrl();
+  const { businessArea } = useBaseUrl();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { programId } = useBaseUrl();
   const matchWithdrawnValue = (): boolean | undefined => {
@@ -154,7 +154,8 @@ export const HouseholdTableRest = ({
       <TableCell align="right">
         <UniversalMoment>{household.last_registration_date}</UniversalMoment>
       </TableCell>
-    </ClickableTableRow>)}
+    </ClickableTableRow>);
+};
 
 if (isLoading) {
   return <LoadingComponent/>;
@@ -174,4 +175,4 @@ if (isLoading) {
       />
     </TableWrapper>
   );
-}
+};
