@@ -7,7 +7,7 @@ from hct_mis_api.apps.core.api.mixins import BaseAPI
 @dataclasses.dataclass
 class SimilarityPair:
     score: float
-    status_code = str
+    status_code: str
     first: Optional[str] = None
     second: Optional[str] = None
 
