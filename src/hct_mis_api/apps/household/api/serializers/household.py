@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Optional
 
 from rest_framework import serializers
 
@@ -138,8 +138,10 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
     def get_active_individuals_count(self, obj: Household) -> int:
         return obj.active_individuals.count()
 
-    def get_geopoint(self, obj: Household) -> tuple[float, float]:
-        return obj.geopoint.x, obj.geopoint.y
+    def get_geopoint(self, obj: Household) -> Optional[tuple[float, float]]:
+        if obj.geopoint:
+            return obj.geopoint.x, obj.geopoint.y
+        return None
 
     def get_import_id(self, obj: Household) -> str:
         if obj.detail_id:
