@@ -6,7 +6,7 @@ from rest_framework.utils.serializer_helpers import ReturnDict
 
 from hct_mis_api.apps.account.models import Role, User
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import get_program_id_from_headers
+from hct_mis_api.apps.program.models import Program
 
 
 class UserBusinessAreaSerializer(serializers.ModelSerializer):
@@ -77,9 +77,9 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     def get_permissions_in_scope(self, user: User) -> set:
         request = self.context.get("request", {})
-        headers = request.headers if request else {}
-        program_id = get_program_id_from_headers(headers)
-        business_area_slug = headers.get("Business-Area", "")
+        business_area_slug = request.parser_context.get("kwargs", {}).get("business_area_slug")
+        programme_code = request.parser_context.get("kwargs", {}).get("program_programme_code")
+        program_id = Program.objects.get(programme_code=programme_code, business_area__slug=business_area_slug).id
         return user.permissions_in_business_area(business_area_slug, program_id)
 
 
