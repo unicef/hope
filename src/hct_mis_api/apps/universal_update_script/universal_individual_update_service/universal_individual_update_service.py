@@ -116,8 +116,6 @@ class UniversalIndividualUpdateService:
     def validate_individual_fields(
         self, row: Tuple[Any, ...], headers: List[str], individual: Individual, row_index: int
     ) -> List[str]:
-        if self.individual_fields is None:
-            return []  # pragma: no cover
         errors = []
         for field, (name, validator, _handler) in self.individual_fields.items():
             value = row[headers.index(field)]
@@ -130,8 +128,6 @@ class UniversalIndividualUpdateService:
         self, row: Tuple[Any, ...], headers: List[str], individual: Individual, row_index: int
     ) -> List[str]:
         errors = []
-        if self.individual_flex_fields is None:
-            return []  # pragma: no cover
         for field, (name, validator, _handler) in self.individual_flex_fields.items():
             value = row[headers.index(field)]
             error = validator(value, name, row, self.business_area, self.program)
@@ -143,8 +139,6 @@ class UniversalIndividualUpdateService:
         self, row: Tuple[Any, ...], headers: List[str], individual: Individual, row_index: int
     ) -> List[str]:
         errors = []
-        if self.household_flex_fields is None:
-            return []  # pragma: no cover
         for field, (name, validator, _handler) in self.household_flex_fields.items():
             value = row[headers.index(field)]
             error = validator(value, name, row, self.business_area, self.program)
@@ -155,8 +149,6 @@ class UniversalIndividualUpdateService:
     def validate_documents(
         self, row: Tuple[Any, ...], headers: List[str], individual: Individual, row_index: int
     ) -> List[str]:
-        if self.document_fields is None:
-            return []  # pragma: no cover
         errors = []
         for number_column_name, country_column_name in self.document_fields:
             document_type = self.document_types.get(number_column_name)
@@ -209,42 +201,34 @@ class UniversalIndividualUpdateService:
         return errors
 
     def handle_household_update(self, row: Tuple[Any, ...], headers: List[str], household: Any) -> None:
-        if self.household_fields is None:
-            return  # pragma: no cover
         for field, (_name, _validator, handler) in self.household_fields.items():
             value = row[headers.index(field)]
             handled_value = handler(value, field, household, self.business_area, self.program)
-            if self.ignore_empty_values and (handled_value is None or handled_value == ""):  # pragma: no cover
+            if self.ignore_empty_values and (handled_value is None or handled_value == ""):
                 continue
             setattr(household, _name, handled_value)
 
     def handle_individual_update(self, row: Tuple[Any, ...], headers: List[str], individual: Individual) -> None:
-        if self.individual_fields is None:
-            return  # pragma: no cover
         for field, (_name, _validator, handler) in self.individual_fields.items():
             value = row[headers.index(field)]
             handled_value = handler(value, field, individual, self.business_area, self.program)
-            if self.ignore_empty_values and (handled_value is None or handled_value == ""):  # pragma: no cover
+            if self.ignore_empty_values and (handled_value is None or handled_value == ""):
                 continue
             setattr(individual, _name, handled_value)
 
     def handle_individual_flex_update(self, row: Tuple[Any, ...], headers: List[str], individual: Individual) -> None:
-        if self.individual_flex_fields is None:
-            return  # pragma: no cover
         for field, (name, _validator, handler) in self.individual_flex_fields.items():
             value = row[headers.index(field)]
             handled_value = handler(value, field, individual, self.business_area, self.program)
-            if self.ignore_empty_values and (handled_value is None or handled_value == ""):  # pragma: no cover
+            if self.ignore_empty_values and (handled_value is None or handled_value == ""):
                 continue
             individual.flex_fields[name] = handled_value
 
     def handle_household_flex_update(self, row: Tuple[Any, ...], headers: List[str], household: Household) -> None:
-        if self.household_flex_fields is None:
-            return  # pragma: no cover
         for field, (name, _validator, handler) in self.household_flex_fields.items():
             value = row[headers.index(field)]
             handled_value = handler(value, field, household, self.business_area, self.program)
-            if self.ignore_empty_values and (handled_value is None or handled_value == ""):  # pragma: no cover
+            if self.ignore_empty_values and (handled_value is None or handled_value == ""):
                 continue
             household.flex_fields[name] = handled_value
 
@@ -259,7 +243,7 @@ class UniversalIndividualUpdateService:
             document_type = self.document_types.get(number_column_name)
             document_number = row[headers.index(number_column_name)]
             document_country = row[headers.index(country_column_name)]
-            if self.ignore_empty_values and (document_number is None or document_number == ""):  # pragma: no cover
+            if self.ignore_empty_values and (document_number is None or document_number == ""):
                 continue
             country = self.countries[document_country]
             document = None
@@ -287,8 +271,6 @@ class UniversalIndividualUpdateService:
     def handle_deliver_mechanism_data_update(
         self, row: Tuple[Any, ...], headers: List[str], individual: Individual
     ) -> None:
-        if self.deliver_mechanism_data_fields is None:
-            return  # pragma: no cover
         individual_delivery_mechanisms_data = individual.delivery_mechanisms_data.all()
         for delivery_mechanism_code, delivery_mechanism_columns_mapping in self.deliver_mechanism_data_fields.items():
             delivery_mechanism = self.delivery_mechanisms.get(delivery_mechanism_code)
