@@ -330,6 +330,15 @@ class BiometricDeduplicationServiceTest(TestCase):
             RegistrationDataImport.DEDUP_ENGINE_FINISHED,
         )
 
+        rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
+        rdi.save()
+        service.mark_rdis_as_error(str(self.program.deduplication_set_id))
+        rdi.refresh_from_db()
+        self.assertEqual(
+            rdi.deduplication_engine_status,
+            RegistrationDataImport.DEDUP_ENGINE_ERROR,
+        )
+
     def test_get_duplicates_for_rdi_against_population(self) -> None:
         self.program.deduplication_set_id = uuid.uuid4()
         self.program.business_area.save()
@@ -584,6 +593,19 @@ class BiometricDeduplicationServiceTest(TestCase):
                 for item in results_data
             ],
         )
+
+    def test_fetch_biometric_deduplication_results_and_process_error(self) -> None:
+        deduplication_set_id = str(uuid.uuid4())
+        service = BiometricDeduplicationService()
+
+        service.get_deduplication_set = mock.Mock(return_value=DeduplicationSetData(state="Clean"))
+        service.get_deduplication_set_results = mock.Mock(side_effect=Exception("An error occurred"))
+        service.mark_rdis_as_error = mock.Mock()
+
+        service.fetch_biometric_deduplication_results_and_process(deduplication_set_id)
+
+        service.get_deduplication_set.assert_called_once_with(deduplication_set_id)
+        service.mark_rdis_as_error.assert_called_once_with(deduplication_set_id)
 
     def test_store_rdis_deduplication_statistics(self) -> None:
         self.program.deduplication_set_id = uuid.uuid4()

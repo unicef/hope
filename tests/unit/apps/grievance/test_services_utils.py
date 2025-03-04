@@ -608,10 +608,7 @@ class TestGrievanceUtils(TestCase):
             is_multiple_duplicates_version=True,
             issue_type=GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY,
             dedup_engine_similarity_pair=DeduplicationEngineSimilarityPair.objects.create(
-                program=program,
-                individual1=ind_1,
-                individual2=ind_2,
-                similarity_score=90.55,
+                program=program, individual1=ind_1, individual2=ind_2, similarity_score=90.55, status_code="200"
             ),
         )
         if not ticket:
@@ -636,3 +633,28 @@ class TestGrievanceUtils(TestCase):
             str(ind_2.photo.name),
             str(deduplication_set_id),
         )
+
+    def test_create_grievance_ticket_with_details__no_possible_duplicates(self) -> None:
+        ba = BusinessAreaFactory(slug="afghanistan")
+        deduplication_set_id = uuid.uuid4()
+        program = ProgramFactory(business_area=ba, deduplication_set_id=deduplication_set_id)
+        hh1, individuals_1 = create_household(
+            {"size": 2, "business_area": ba, "program": program},
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe",
+            },
+        )
+        ticket, ticket_details = create_grievance_ticket_with_details(
+            main_individual=individuals_1[1],
+            possible_duplicate=None,
+            business_area=ba,
+            registration_data_import=hh1.registration_data_import,
+            possible_duplicates=[],
+            is_multiple_duplicates_version=True,
+            issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
+        )
+        assert ticket is None
+        assert ticket_details is None

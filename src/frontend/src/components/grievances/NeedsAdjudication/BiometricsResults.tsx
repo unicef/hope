@@ -155,7 +155,7 @@ export const BiometricsResults = ({
                   {t('Algorithm similarity score:')} {similarityScore}
                 </strong>
               </div>
-              {similarityScore > 0 ? (<div>{t('Face images matching suggests: Duplicates')}</div>) : (statusCode)}
+              {Number(similarityScore) > 0 ? (<div>{t('Face images matching suggests: Duplicates')}</div>) : (statusCode)}
             </Box>
           </DialogContainer>
         </DialogContent>
