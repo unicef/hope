@@ -131,8 +131,8 @@ class SoftDeletableMergeStatusModel(MergeStatusModel):
     class Meta:
         abstract = True
 
+    objects: models.Manager = SoftDeletableMergedManager(_emit_deprecation_warnings=True)  # MERGED - is_removed
     pending_objects: models.Manager = SoftDeletablePendingManager()  # PENDING - is_removed
-    objects: models.Manager = SoftDeletableMergedManager()  # MERGED - is_removed
     available_objects: models.Manager = SoftDeletableMergedManager()  # MERGED - is_removed
     all_objects: models.Manager = MergedManager()  # MERGED + is_removed
     all_merge_status_objects: models.Manager = models.Manager()  # MERGED + PENDING + is_removed
