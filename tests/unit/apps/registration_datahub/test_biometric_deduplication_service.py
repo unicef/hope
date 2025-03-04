@@ -313,6 +313,35 @@ class BiometricDeduplicationServiceTest(TestCase):
             individual1=ind2, individual2=ind3, similarity_score=80.00
         ).exists()
 
+    def test_store_results_no_individuals(self) -> None:
+        self.program.deduplication_set_id = uuid.uuid4()
+        self.program.save()
+
+        service = BiometricDeduplicationService()
+        similarity_pairs = [
+            SimilarityPair(score=0.0, status_code="404"),
+        ]
+
+        service.store_similarity_pairs(str(self.program.deduplication_set_id), similarity_pairs)
+        assert self.program.deduplication_engine_similarity_pairs.count() == 0
+
+    def test_store_results_1_individual(self) -> None:
+        self.program.deduplication_set_id = uuid.uuid4()
+        self.program.save()
+
+        ind1 = IndividualFactory.create_batch(1)[0]
+        service = BiometricDeduplicationService()
+        similarity_pairs = [
+            SimilarityPair(score=0.0, first=ind1.id, status_code="429"),
+        ]
+
+        service.store_similarity_pairs(str(self.program.deduplication_set_id), similarity_pairs)
+
+        assert self.program.deduplication_engine_similarity_pairs.count() == 1
+        assert self.program.deduplication_engine_similarity_pairs.filter(
+            individual1=ind1, individual2=None, similarity_score=0.00
+        ).exists()
+
     def test_mark_rdis_as(self) -> None:
         service = BiometricDeduplicationService()
 
