@@ -32,7 +32,7 @@ const ProgramForm = ({
 
   const { data: beneficiaryGroupsData } = useQuery({
     queryKey: ['beneficiaryGroups'],
-    queryFn: () => RestService.restBeneficiaryGroupsList(),
+    queryFn: () => RestService.restBeneficiaryGroupsList({}),
   });
 
   const { setFieldValue } = useFormikContext();

@@ -11,6 +11,7 @@ export interface ProgramInterface {
   id: string;
   name: string;
   status: ProgramStatus;
+  programmeCode: string;
   dataCollectingType: {
     id: string;
     householdFiltersAvailable: boolean;

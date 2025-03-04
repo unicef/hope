@@ -172,6 +172,7 @@ export const GlobalProgramSelect = () => {
       status: ProgramStatus.Active,
       dataCollectingType: null,
       pduFields: null,
+      programmeCode: null,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -184,7 +185,7 @@ export const GlobalProgramSelect = () => {
         isMounted.current &&
         (!selectedProgram || selectedProgram?.id !== programId)
       ) {
-        const { id, name, status, dataCollectingType, beneficiaryGroup } =
+        const { id, name, status, dataCollectingType, beneficiaryGroup, programmeCode } =
           program;
 
         setSelectedProgram({
@@ -205,6 +206,7 @@ export const GlobalProgramSelect = () => {
           },
           pduFields: program.pduFields,
           beneficiaryGroup: beneficiaryGroup,
+          programmeCode
         });
       }
     }
@@ -276,6 +278,7 @@ export const GlobalProgramSelect = () => {
           status: ProgramStatus.Active,
           dataCollectingType: null,
           pduFields: null,
+          programmeCode: null,
         });
         navigate(`/${businessArea}/programs/all/list`);
       } else {
@@ -363,7 +366,9 @@ export const GlobalProgramSelect = () => {
               }
             }}
             onChange={onChange}
-            PopperComponent={PopperComponent}
+            slots={{
+              popper: PopperComponent,
+            }}
             noOptionsText="No results"
             renderOption={(props, option) => {
               const { key, ...restProps } = props;
