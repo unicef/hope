@@ -420,3 +420,54 @@ Row: 2 - Country not found for field national_id_country_i_c and value TEST Stri
         assert individual.flex_fields.get("muac") == muac_old
         assert individual.household.flex_fields.get("eggs") == eggs_old
         assert wallet.data.get("phone_number") == wallet_number_old
+
+    def test_update_individual_empty_fields(
+        self,
+        individual: Individual,
+        program: Program,
+        admin1: Area,
+        admin2: Area,
+        document_national_id: Document,
+        delivery_mechanism: DeliveryMechanism,
+        wallet: DeliveryMechanismData,
+    ) -> None:
+        universal_update = UniversalUpdate(program=program)
+        universal_update.unicef_ids = individual.unicef_id
+        universal_update.save()
+        service = UniversalIndividualUpdateService(universal_update)
+        template_file = service.generate_xlsx_template()
+        universal_update.refresh_from_db()
+        content = template_file.getvalue()
+        universal_update.update_file.save("template.xlsx", ContentFile(content))
+        universal_update.save()
+        universal_update.refresh_from_db()
+        expected_generate_log = "Generating row 0 to 1\nGenerating Finished\n"
+        assert universal_update.saved_logs == expected_generate_log
+        # empty whole row xlsx template left only unicef id
+        wb = openpyxl.load_workbook(universal_update.update_file.path)
+        ws = wb.active
+        for row in ws.iter_rows(min_row=2, max_row=2):
+            for cell in row:
+                if cell.column == 1:
+                    continue
+                cell.value = None
+        output = BytesIO()
+        wb.save(output)
+        output.seek(0)
+        content = output.getvalue()
+        universal_update.update_file.save("testing.xlsx", ContentFile(content))
+        service = UniversalIndividualUpdateService(universal_update)
+        universal_update.clear_logs()
+        service.execute()
+        universal_update.refresh_from_db()
+        individual.refresh_from_db()
+        document_national_id.refresh_from_db()
+        wallet.refresh_from_db()
+        expected_update_log = """Validating row 0 to 1 Indivduals
+Validation successful
+Updating row 0 to 1 Individuals
+Deduplicating individuals Elasticsearch
+Deduplicating documents
+Update successful
+"""
+        assert universal_update.saved_logs == expected_update_log
