@@ -123,7 +123,6 @@ class PeriodicDataUpdateUploadViewSet(
 ):
     queryset = PeriodicDataUpdateUpload.objects.all()
     program_model_field = "template__program"
-    business_area_model_field = "template__business_area"
     serializer_classes_by_action = {
         "list": PeriodicDataUpdateUploadListSerializer,
         "upload": PeriodicDataUpdateUploadSerializer,
