@@ -18,10 +18,8 @@ from hct_mis_api.apps.core.api.mixins import (
     BusinessAreaVisibilityMixin,
     DecodeIdForDetailMixin,
     ProgramVisibilityMixin,
-    SerializerActionMixin,
+    SerializerActionMixin, CountActionMixin,
 )
-from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.api.mixins import CreatorOrOwnerPermissionMixin
 from hct_mis_api.apps.household.api.serializers.household import (
     HouseholdDetailSerializer,
     HouseholdListSerializer,
@@ -32,10 +30,10 @@ from hct_mis_api.apps.program.models import Program
 
 
 class HouseholdViewSet(
+    CountActionMixin,
     ProgramVisibilityMixin,
     SerializerActionMixin,
     DecodeIdForDetailMixin,
-    CreatorOrOwnerPermissionMixin,
     RetrieveModelMixin,
     ListModelMixin,
     BaseViewSet,

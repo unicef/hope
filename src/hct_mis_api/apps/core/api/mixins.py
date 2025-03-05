@@ -7,9 +7,12 @@ from django.db.models import Q, QuerySet
 from requests import Response, session
 from requests.adapters import HTTPAdapter
 from rest_framework import serializers
+from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.viewsets import GenericViewSet
 from urllib3 import Retry
+from rest_framework.response import Response as DRFResponse
+
 
 from hct_mis_api.apps.account.api.permissions import BaseRestPermission
 from hct_mis_api.apps.core.models import BusinessArea
@@ -247,3 +250,18 @@ class AdminUrlSerializerMixin:
         if self.context.request.user.is_superuser:
             return obj.admin_url
         return None
+
+
+class CountActionMixin:
+    """
+    Adds a count action to the viewset that returns the count of the queryset.
+    NOTE: This mixin should be added as the first mixin in the inheritance chain.
+    """
+    @action(
+        detail=False,
+        methods=["get"],
+        permission_classes=[],  # TODO: get same permission as on the list
+    )
+    def count(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+        queryset_count = super().get_queryset().count()
+        return DRFResponse({"count": queryset_count})
