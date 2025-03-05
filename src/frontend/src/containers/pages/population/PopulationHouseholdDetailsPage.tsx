@@ -64,7 +64,7 @@ const SubTitle = styled(Typography)`
 const PopulationHouseholdDetailsPage = (): ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
-  const { baseUrl, businessArea  } = useBaseUrl();
+  const { baseUrl, businessArea } = useBaseUrl();
 
   //TODO: replace with REST queries
 
@@ -81,10 +81,11 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
     queryKey: ['household', businessArea, id, selectedProgram?.programmeCode],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsRetrieve({
-        businessAreaSlug:businessArea,
+        businessAreaSlug: businessArea,
         id,
         programProgrammeCode: selectedProgram?.programmeCode,
-  }),
+      }),
+    enabled: Boolean(selectedProgram?.programmeCode && businessArea),
   });
 
   const { data: flexFieldsData, loading: flexFieldsDataLoading } =
@@ -98,8 +99,8 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
     loading ||
     choicesLoading ||
     flexFieldsDataLoading ||
-    grievancesChoicesLoading
-    || householdLoading
+    grievancesChoicesLoading ||
+    householdLoading
   )
     return <LoadingComponent />;
 
@@ -110,8 +111,8 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
     !choicesData ||
     !grievancesChoices ||
     !flexFieldsData ||
-    permissions === null
-    || !householdData
+    permissions === null ||
+    !householdData
   )
     return null;
 
@@ -134,7 +135,6 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
   }
 
   const { household } = data;
-
 
   return (
     <>

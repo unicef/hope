@@ -57,11 +57,11 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
                   {`${beneficiaryGroup?.groupLabel} ID`}:
                   <BlueText>
                     &ensp;
-                    {selectedHousehold?.unicefId || '-'}
+                    {selectedHousehold?.unicef_id || '-'}
                   </BlueText>
                 </Box>
               </Grid>
-              {!disableUnselectHousehold && selectedHousehold?.unicefId && (
+              {!disableUnselectHousehold && selectedHousehold?.unicef_id && (
                 <Grid>
                   <DarkGrey>
                     <Flex>
