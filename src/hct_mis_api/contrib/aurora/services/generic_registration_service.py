@@ -6,7 +6,7 @@ from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.household.forms import (
     BankAccountInfoForm,
     DocumentForm,
-    IndividualForm,
+    IndividualForm, DeliveryMechanismDataForm,
 )
 from hct_mis_api.apps.household.models import (
     DISABLED,
@@ -21,6 +21,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
+from hct_mis_api.apps.payment.models import DeliveryMechanismData
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.contrib.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
@@ -37,6 +38,7 @@ SECONDARY_COLLECTOR = "secondary_collector"
 INDIVIDUAL_FIELD = "individual"
 DOCUMENT_FIELD = "document"
 BANK_FIELD = "bank"
+ACCOUNT_FIELD = "account"
 EXTRA_FIELD = "extra"
 
 
@@ -165,6 +167,11 @@ class GenericRegistrationService(BaseRegistrationService):
                         if bank_num not in my_dict["banks"]:
                             my_dict["banks"][bank_num] = dict()
                         my_dict["banks"][bank_num].update({bank_field: retrieved_value})
+                    if model == ACCOUNT_FIELD:
+                        account_num, account_field = field.split("-")
+                        if account_num not in my_dict["accounts"]:
+                            my_dict["accounts"][account_num] = dict()
+                        my_dict["accounts"][account_num].update({account_field: retrieved_value})
                     if model == EXTRA_FIELD:
                         my_dict["extra"][field] = retrieved_value
                     for kk, vv in item.items():
@@ -230,6 +237,10 @@ class GenericRegistrationService(BaseRegistrationService):
         for individual_data in individuals_data:
             documents_data = individual_data.pop("documents")
             banks_data = individual_data.pop("banks")
+            accounts_data = individual_data.pop("accounts")
+            # delivery_mechanism = models.ForeignKey("payment.DeliveryMechanism", on_delete=models.PROTECT)
+            # data = JSONField(default=dict, blank=True, encoder=DjangoJSONEncoder)
+
             extra_data = individual_data.pop("extra", dict())
 
             individual_dict = dict(
@@ -246,6 +257,10 @@ class GenericRegistrationService(BaseRegistrationService):
             for _, bank_data in banks_data.items():
                 bank_data[INDIVIDUAL_FIELD] = individual
                 self._create_object_and_validate(bank_data, PendingBankAccountInfo, BankAccountInfoForm)
+
+            for _, account_data in accounts_data.items():
+                account_data[INDIVIDUAL_FIELD] = individual
+                self._create_object_and_validate(account_data, DeliveryMechanismData, DeliveryMechanismDataForm)
 
             for _, document_data in documents_data.items():
                 key = document_data.pop("key", None)  # skip documents' without key
@@ -322,6 +337,11 @@ class GenericRegistrationService(BaseRegistrationService):
                 "bank_debit_card_h_f": "bank.bank1-debit_card_number",
                 "account_holder_name_i_c": "bank.bank1-account_holder_name",
                 "bank_branch_name_i_c": "bank.bank1-bank_branch_name",
+
+                "delivery_mechanism_h_f": "account.account1-delivery_mechanism",
+                "bank_name_h_f": "account.account1-bank_name",
+                "bank_branch_name_i_c": "account.account1-bank_branch_name",
+
                 "role_pr_i_c": "extra.primary_collector",
                 "role_sec_i_c": "extra.secondary_collector",
             },
