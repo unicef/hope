@@ -57,13 +57,13 @@ export const ManagerialConsolePage: FC = () => {
   const permissions = usePermissions();
 
   const fetchPaymentPlans = (status: string) => {
-    return RestService.restPaymentsPaymentPlansManagerialList(
+    return RestService.restBusinessAreasPaymentsPaymentPlansManagerialList({
       businessArea,
-      10000,
-      0,
-      null,
-      `status=${status}`,
-    );
+      limit: 10000,
+      offset: 0,
+      //@ts-ignore
+     status,
+  });
   };
 
   const {

@@ -41,6 +41,7 @@ import { IndividualDeliveryMechanisms } from '@components/population/IndividualD
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import PaymentsPeopleTable from '@containers/tables/payments/PaymentsPeopleTable/PaymentsPeopleTable';
 import { RestService } from '@restgenerated/services/RestService';
+import { useProgramContext } from 'src/programContext';
 
 const Container = styled.div`
   padding: 20px 20px 00px 20px;
@@ -67,7 +68,8 @@ const SubTitle = styled(Typography)`
 const PeopleDetailsPage = (): ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
-  const { baseUrl, businessArea, programId } = useBaseUrl();
+  const { baseUrl, businessArea  } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
   const permissions = usePermissions();
 
   const { data, loading, error } = useIndividualQuery({
@@ -88,13 +90,13 @@ const PeopleDetailsPage = (): ReactElement => {
 
   const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
     useQuery({
-      queryKey: ['periodicFields', businessArea, programId],
+      queryKey: ['periodicFields', businessArea, selectedProgram?.programmeCode],
       queryFn: () =>
-        RestService.restProgramsPeriodicDataUpdatePeriodicFieldsList(
-          businessArea,
-          programId,
-          1000,
-        ),
+        RestService.restBusinessAreasProgramsPeriodicFieldsList({
+          businessAreaSlug: businessArea,
+          programProgrammeCode: selectedProgram?.programmeCode,
+          limit: 1000,
+    }),
     });
 
   if (

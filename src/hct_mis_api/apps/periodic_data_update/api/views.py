@@ -2,7 +2,6 @@ import logging
 from typing import Any
 
 from django.core.exceptions import ValidationError as DjangoValidationError
-from django.db.models import QuerySet
 from django.http import FileResponse
 
 from constance import config
@@ -15,21 +14,15 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
-from rest_framework.viewsets import GenericViewSet
 from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
-from hct_mis_api.apps.account.api.permissions import (
-    PDUTemplateCreatePermission,
-    PDUTemplateDownloadPermission,
-    PDUUploadPermission,
-    PDUViewListAndDetailsPermission,
-)
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.api.filters import UpdatedAtFilter
 from hct_mis_api.apps.core.api.mixins import (
-    ActionMixin,
-    BusinessAreaProgramMixin,
+    BaseViewSet,
     ProgramMixin,
+    SerializerActionMixin,
 )
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.periodic_data_update.api.caches import PeriodicFieldKeyConstructor
@@ -54,32 +47,28 @@ logger = logging.getLogger(__name__)
 
 
 class PeriodicDataUpdateTemplateViewSet(
-    ActionMixin,
-    BusinessAreaProgramMixin,
+    SerializerActionMixin,
+    ProgramMixin,
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
-    GenericViewSet,
+    BaseViewSet,
 ):
+    queryset = PeriodicDataUpdateTemplate.objects.all()
     serializer_classes_by_action = {
         "list": PeriodicDataUpdateTemplateListSerializer,
         "retrieve": PeriodicDataUpdateTemplateDetailSerializer,
         "create": PeriodicDataUpdateTemplateCreateSerializer,
     }
-    permission_classes_by_action = {
-        "list": [PDUViewListAndDetailsPermission],
-        "retrieve": [PDUViewListAndDetailsPermission],
-        "create": [PDUTemplateCreatePermission],
-        "export": [PDUTemplateCreatePermission],
-        "download": [PDUTemplateDownloadPermission],
+    permissions_by_action = {
+        "list": [Permissions.PDU_VIEW_LIST_AND_DETAILS],
+        "retrieve": [Permissions.PDU_VIEW_LIST_AND_DETAILS],
+        "create": [Permissions.PDU_TEMPLATE_CREATE],
+        "export": [Permissions.PDU_TEMPLATE_CREATE],
+        "download": [Permissions.PDU_TEMPLATE_DOWNLOAD],
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = UpdatedAtFilter
-
-    def get_queryset(self) -> QuerySet:
-        business_area = self.get_business_area()
-        program = self.get_program()
-        return PeriodicDataUpdateTemplate.objects.filter(business_area=business_area, program=program)
 
     # caching disabled until we decide how to handle cache + dynamic status
     # to enable - just uncomment the decorators and related tests
@@ -126,29 +115,26 @@ class PeriodicDataUpdateTemplateViewSet(
 
 
 class PeriodicDataUpdateUploadViewSet(
-    ActionMixin,
-    BusinessAreaProgramMixin,
+    SerializerActionMixin,
+    ProgramMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
-    GenericViewSet,
+    BaseViewSet,
 ):
+    queryset = PeriodicDataUpdateUpload.objects.all()
+    program_model_field = "template__program"
     serializer_classes_by_action = {
         "list": PeriodicDataUpdateUploadListSerializer,
         "upload": PeriodicDataUpdateUploadSerializer,
         "retrieve": PeriodicDataUpdateUploadDetailSerializer,
     }
-    permission_classes_by_action = {
-        "list": [PDUViewListAndDetailsPermission],
-        "retrieve": [PDUViewListAndDetailsPermission],
-        "upload": [PDUUploadPermission],
+    permissions_by_action = {
+        "list": [Permissions.PDU_VIEW_LIST_AND_DETAILS],
+        "retrieve": [Permissions.PDU_VIEW_LIST_AND_DETAILS],
+        "upload": [Permissions.PDU_UPLOAD],
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = UpdatedAtFilter
-
-    def get_queryset(self) -> QuerySet:
-        business_area = self.get_business_area()
-        program = self.get_program()
-        return PeriodicDataUpdateUpload.objects.filter(template__business_area=business_area, template__program=program)
 
     # caching disabled until we decide how to handle cache + dynamic status
     # to enable - just uncomment the decorators and related tests
@@ -190,16 +176,13 @@ class PeriodicDataUpdateUploadViewSet(
 class PeriodicFieldViewSet(
     ProgramMixin,
     mixins.ListModelMixin,
-    GenericViewSet,
+    BaseViewSet,
 ):
+    queryset = FlexibleAttribute.objects.filter(type=FlexibleAttribute.PDU)
     serializer_class = PeriodicFieldSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = UpdatedAtFilter
-
-    def get_queryset(self) -> QuerySet:
-        program = self.get_program()
-        return FlexibleAttribute.objects.filter(program=program, type=FlexibleAttribute.PDU)
 
     @etag_decorator(PeriodicFieldKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=PeriodicFieldKeyConstructor())

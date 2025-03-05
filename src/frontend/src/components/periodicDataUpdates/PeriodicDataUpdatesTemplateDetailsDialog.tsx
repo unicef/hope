@@ -19,6 +19,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useProgramContext } from 'src/programContext';
 
 interface PeriodicDataUpdatesTemplateDetailsDialogProps {
   open: boolean;
@@ -30,29 +31,31 @@ export const PeriodicDataUpdatesTemplateDetailsDialog: FC<
   PeriodicDataUpdatesTemplateDetailsDialogProps
 > = ({ open, onClose, template }) => {
   const { t } = useTranslation();
-  const { businessArea, programId } = useBaseUrl();
+  const { businessArea  } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
   const { data: templateDetailsData, isLoading } = useQuery({
     queryKey: [
       'periodicDataUpdateTemplateDetails',
       businessArea,
-      programId,
+      selectedProgram?.programmeCode,
       template.id,
     ],
+
     queryFn: () =>
-      RestService.restProgramsPeriodicDataUpdatePeriodicDataUpdateTemplatesRetrieve(
-        businessArea,
-        template.id.toString(),
-        programId,
-      ),
+      RestService.restBusinessAreasProgramsPeriodicDataUpdateTemplatesRetrieve({
+        businessAreaSlug: businessArea,
+        id: template.id,
+        programProgrammeCode: selectedProgram?.programmeCode,
+  }),
   });
   const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
     useQuery({
-      queryKey: ['periodicFields', businessArea, programId],
+      queryKey: ['periodicFields', businessArea, selectedProgram?.programmeCode],
       queryFn: () =>
-        RestService.restProgramsPeriodicDataUpdatePeriodicFieldsList(
-          businessArea,
-          programId,
-        ),
+        RestService.restBusinessAreasProgramsPeriodicFieldsList({
+          businessAreaSlug: businessArea,
+          programProgrammeCode: selectedProgram?.programmeCode,
+        }),
     });
   const pduDataDict = useArrayToDict(periodicFieldsData?.results, 'name', '*');
   if (isLoading || periodicFieldsLoading || !pduDataDict)

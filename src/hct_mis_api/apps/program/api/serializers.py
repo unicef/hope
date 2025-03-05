@@ -7,6 +7,7 @@ from django.utils.dateparse import parse_date
 from rest_framework import serializers
 
 from hct_mis_api.api.utils import EncodedIdSerializerMixin
+from hct_mis_api.apps.account.api.fields import Base64ModelField
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 
@@ -230,4 +231,25 @@ class BeneficiaryGroupSerializer(serializers.ModelSerializer):
             "member_label",
             "member_label_plural",
             "master_detail",
+        )
+
+
+class ProgramSerializer(serializers.ModelSerializer):
+    id = Base64ModelField(model_name="Program")
+
+    class Meta:
+        model = Program
+        fields = (
+            "id",
+            "name",
+            "start_date",
+            "end_date",
+            "budget",
+            "frequency_of_payments",
+            "sector",
+            "cash_plus",
+            "population_goal",
+            "data_collecting_type",
+            "beneficiary_group",
+            "programme_code",
         )

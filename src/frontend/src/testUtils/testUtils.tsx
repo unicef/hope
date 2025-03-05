@@ -52,6 +52,7 @@ export const fakeContextProgram = {
     name: 'someName',
     status: 'ACTIVE',
     pduFields: null,
+    programCode: 'A123',
     dataCollectingType: {
       id: '1',
       householdFiltersAvailable: true,

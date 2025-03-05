@@ -15,7 +15,7 @@
     "download-local-schema": "wget --no-check-certificate -O data/schema.graphql http://localhost:3000/api/graphql/schema.graphql",
     "generate-types": "yarn download-dev-schema && graphql-codegen --config codegen.yml --debug",
     "generate-types-local": "yarn download-local-schema && graphql-codegen --config codegen.yml --debug",
-    "generate-rest-api-types": "npx openapi-typescript-codegen --input http://localhost:8080/api/rest/ --output src/restgenerated"
+    "generate-rest-api-types": "npx openapi-typescript-codegen --input http://localhost:8080/api/rest/ --output src/restgenerated --useOptions"
   },
   "engines": {
     "node": ">=20.0.0"

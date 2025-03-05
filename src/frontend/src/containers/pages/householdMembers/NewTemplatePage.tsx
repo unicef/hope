@@ -80,12 +80,12 @@ export const NewTemplatePage = (): ReactElement => {
 
   const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
     useQuery({
-      queryKey: ['periodicFields', businessArea, programId],
+      queryKey: ['periodicFields', businessArea, programId, selectedProgram?.programmeCode],
       queryFn: () =>
-        RestService.restProgramsPeriodicDataUpdatePeriodicFieldsList(
-          businessArea,
-          programId,
-        ),
+        RestService.restBusinessAreasProgramsPeriodicFieldsList({
+          businessAreaSlug: businessArea,
+          programProgrammeCode: selectedProgram?.programmeCode,
+    }),
     });
 
   if (periodicFieldsLoading) {

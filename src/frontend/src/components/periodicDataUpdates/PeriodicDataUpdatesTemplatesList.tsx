@@ -23,6 +23,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { PeriodicDataUpdateTemplateList } from '@restgenerated/models/PeriodicDataUpdateTemplateList';
 import { RestService } from '@restgenerated/services/RestService';
+import { useProgramContext } from 'src/programContext';
 
 const templatesHeadCells: HeadCell<PeriodicDataUpdateTemplateList>[] = [
   {
@@ -81,6 +82,7 @@ const templatesHeadCells: HeadCell<PeriodicDataUpdateTemplateList>[] = [
 export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
   const { t } = useTranslation();
   const { businessArea: businessAreaSlug, programId } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const permissions = usePermissions();
   const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(
@@ -142,18 +144,16 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
     queryKey: [
       'periodicDataUpdateTemplates',
       businessAreaSlug,
-      programId,
+      selectedProgram?.programmeCode,
       queryVariables,
     ],
     queryFn: () => {
       const { ordering } = queryVariables;
-      return RestService.restProgramsPeriodicDataUpdatePeriodicDataUpdateTemplatesList(
+      return RestService.restBusinessAreasProgramsPeriodicDataUpdateTemplatesList({
         businessAreaSlug,
-        programId,
-        null,
-        null,
+        programProgrammeCode: selectedProgram?.programmeCode,
         ordering,
-      );
+    });
     },
   });
 
