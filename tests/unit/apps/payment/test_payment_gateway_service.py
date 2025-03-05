@@ -36,7 +36,6 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.payment.services.payment_gateway import (
     AddRecordsResponseData,
     DeliveryMechanismData,
-    DeliveryMechanismDataRequirements,
     FspData,
     PaymentGatewayAPI,
     PaymentGatewayService,
@@ -573,33 +572,8 @@ class TestPaymentGatewayService(APITestCase):
         dm_cash.save()
 
         get_delivery_mechanisms_mock.return_value = [
-            DeliveryMechanismData(
-                id=33,
-                code="new_dm",
-                name="New DM",
-                requirements=DeliveryMechanismDataRequirements(
-                    required_fields=["required_field"],
-                    optional_fields=[
-                        "full_name",
-                    ],
-                    unique_fields=[],
-                ),
-                transfer_type="CASH",
-            ),
-            DeliveryMechanismData(
-                id=2,
-                code="cash",
-                name="Cash",
-                requirements=DeliveryMechanismDataRequirements(
-                    required_fields=["new_required_field"],
-                    optional_fields=[
-                        "full_name",
-                        "new_optional_field",
-                    ],
-                    unique_fields=["new_unique_field"],
-                ),
-                transfer_type="CASH",
-            ),
+            DeliveryMechanismData(id=33, code="new_dm", name="New DM", transfer_type="CASH", account_type="bank"),
+            DeliveryMechanismData(id=2, code="cash", name="Cash", transfer_type="CASH", account_type="bank"),
         ]
 
         pg_service = PaymentGatewayService()

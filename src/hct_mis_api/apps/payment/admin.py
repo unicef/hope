@@ -26,6 +26,7 @@ from hct_mis_api.apps.payment.models import (
     DeliveryMechanismData,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
+    FspNameMapping,
     FspXlsxTemplatePerDeliveryMechanism,
     Payment,
     PaymentHouseholdSnapshot,
@@ -472,6 +473,14 @@ class FinancialServiceProviderAdminForm(forms.ModelForm):
         return super().clean()
 
 
+class FspNameMappingInline(admin.TabularInline):  # or admin.StackedInline
+    model = FspNameMapping
+    extra = 1
+    min_num = 0
+    fields = ("external_name", "hope_name", "source")
+    autocomplete_fields = ("fsp",)
+
+
 class FspXlsxTemplatePerDeliveryMechanismAdminInline(admin.TabularInline):
     form = FspXlsxTemplatePerDeliveryMechanismForm
     model = FspXlsxTemplatePerDeliveryMechanism
@@ -510,7 +519,7 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
         ("payment_gateway_id",),
     )
     readonly_fields = ("fsp_xlsx_templates", "data_transfer_configuration")
-    inlines = (FspXlsxTemplatePerDeliveryMechanismAdminInline,)
+    inlines = (FspXlsxTemplatePerDeliveryMechanismAdminInline, FspNameMappingInline)
 
     def fsp_xlsx_templates(self, obj: FinancialServiceProvider) -> str:
         return format_html(
@@ -540,7 +549,6 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
 
 @admin.register(DeliveryMechanismData)
 class DeliveryMechanismDataAdmin(HOPEModelAdminBase):
-    # TODO MB fix for Account model
     list_display = ("individual", "get_business_area", "get_program", "account_type", "is_unique")
 
     raw_id_fields = ("account_type", "individual")
@@ -566,7 +574,7 @@ class DeliveryMechanismDataAdmin(HOPEModelAdminBase):
 
 @admin.register(DeliveryMechanism)
 class DeliveryMechanismAdmin(HOPEModelAdminBase):
-    list_display = ("code", "name", "is_active", "transfer_type")
+    list_display = ("code", "name", "is_active", "transfer_type", "account_type")
     search_fields = ("code", "name")
     list_filter = ("is_active", "transfer_type")
 

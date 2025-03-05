@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Optional, Union
 from django.utils.timezone import now
 
 from _decimal import Decimal
+from apps.payment.models.payment import AccountType
 from rest_framework import serializers
 
 from hct_mis_api.apps.core.api.mixins import BaseAPI
@@ -229,23 +230,12 @@ class FspData(FlexibleArgumentsDataclassMixin):
 
 
 @dataclasses.dataclass()
-class DeliveryMechanismDataRequirements(FlexibleArgumentsDataclassMixin):
-    required_fields: List[str]
-    optional_fields: List[str]
-    unique_fields: List[str]
-
-
-@dataclasses.dataclass()
 class DeliveryMechanismData(FlexibleArgumentsDataclassMixin):
     id: int
     code: str
     name: str
-    requirements: Union[DeliveryMechanismDataRequirements, Dict]
     transfer_type: str
-
-    def __post_init__(self) -> None:
-        if isinstance(self.requirements, dict):
-            self.requirements = DeliveryMechanismDataRequirements.create_from_dict(self.requirements)
+    account_type: str
 
 
 @dataclasses.dataclass()
@@ -500,15 +490,14 @@ class PaymentGatewayService:
     def sync_delivery_mechanisms(self) -> None:
         delivery_mechanisms: List[DeliveryMechanismData] = self.api.get_delivery_mechanisms()
         for dm in delivery_mechanisms:
-            DeliveryMechanism.objects.update_or_create(
+            instance = DeliveryMechanism.objects.update_or_create(
                 code=dm.code,
                 defaults={
                     "payment_gateway_id": dm.id,
                     "name": dm.name,
-                    "required_fields": dm.requirements.required_fields,
-                    "optional_fields": dm.requirements.optional_fields,
-                    "unique_fields": dm.requirements.unique_fields,
                     "transfer_type": dm.transfer_type,
                     "is_active": True,
+                    "account_type": AccountType.objects.get(key=dm.account_type),
                 },
             )
+            instance.account_types.add()

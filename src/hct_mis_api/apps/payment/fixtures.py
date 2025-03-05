@@ -29,6 +29,7 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.household.models import MALE, ROLE_PRIMARY, Household, Individual
 from hct_mis_api.apps.payment.models import (
+    AccountType,
     Approval,
     ApprovalProcess,
     DeliveryMechanism,
@@ -710,207 +711,89 @@ def update_fsps() -> None:
 
 
 def generate_delivery_mechanisms() -> None:
-    data = [
+    account_types_data = [
+        {
+            "key": "bank",
+            "label": "Bank",
+            "unique_fields": [
+                "number",
+            ],
+        },
+        {
+            "key": "phone",
+            "label": "Phone",
+            "unique_fields": [
+                "number",
+            ],
+        },
+    ]
+    for at in account_types_data:
+        AccountType.objects.update_or_create(
+            key=at["key"],
+            defaults={
+                "label": at["label"],
+                "unique_fields": at["unique_fields"],
+            },
+        )
+    account_types = {at.key: at for at in AccountType.objects.all()}
+    delivery_mechanisms_data = [
         {
             "code": "cardless_cash_withdrawal",
             "name": "Cardless cash withdrawal",
-            "requirements": {
-                "required_fields": [],
-                "optional_fields": [
-                    "full_name",
-                ],
-                "unique_fields": [],
-            },
             "transfer_type": "CASH",
+            "account_type": account_types["bank"],
         },
-        {
-            "code": "cash",
-            "name": "Cash",
-            "requirements": {
-                "required_fields": [],
-                "optional_fields": [
-                    "full_name",
-                ],
-                "unique_fields": [],
-            },
-            "transfer_type": "CASH",
-        },
-        {
-            "code": "cash_by_fsp",
-            "name": "Cash by FSP",
-            "requirements": {
-                "required_fields": [],
-                "optional_fields": [
-                    "full_name",
-                ],
-                "unique_fields": [],
-            },
-            "transfer_type": "CASH",
-        },
-        {
-            "code": "cheque",
-            "name": "Cheque",
-            "requirements": {
-                "required_fields": [],
-                "optional_fields": [
-                    "full_name",
-                ],
-                "unique_fields": [],
-            },
-            "transfer_type": "CASH",
-        },
+        {"code": "cash", "name": "Cash", "transfer_type": "CASH", "account_type": account_types["bank"]},
+        {"code": "cash_by_fsp", "name": "Cash by FSP", "transfer_type": "CASH", "account_type": account_types["bank"]},
+        {"code": "cheque", "name": "Cheque", "transfer_type": "CASH", "account_type": account_types["bank"]},
         {
             "code": "deposit_to_card",
             "name": "Deposit to Card",
-            "requirements": {
-                "required_fields": [
-                    "card_number__deposit_to_card",
-                ],
-                "optional_fields": [
-                    "full_name",
-                ],
-                "unique_fields": [
-                    "card_number__deposit_to_card",
-                ],
-            },
             "transfer_type": "CASH",
+            "account_type": account_types["bank"],
         },
         {
             "code": "mobile_money",
             "name": "Mobile Money",
-            "requirements": {
-                "required_fields": [
-                    "delivery_phone_number__mobile_money",
-                    "provider__mobile_money",
-                    "service_provider_code__mobile_money",
-                ],
-                "optional_fields": ["full_name"],
-                "unique_fields": ["delivery_phone_number__mobile_money", "provider__mobile_money"],
-            },
             "transfer_type": "CASH",
+            "account_type": account_types["phone"],
         },
         {
             "code": "pre-paid_card",
             "name": "Pre-paid card",
-            "requirements": {
-                "required_fields": [],
-                "optional_fields": [
-                    "full_name",
-                ],
-                "unique_fields": [],
-            },
             "transfer_type": "CASH",
+            "account_type": account_types["bank"],
         },
-        {
-            "code": "referral",
-            "name": "Referral",
-            "requirements": {
-                "required_fields": [],
-                "optional_fields": [
-                    "full_name",
-                ],
-                "unique_fields": [],
-            },
-            "transfer_type": "CASH",
-        },
-        {
-            "code": "transfer",
-            "name": "Transfer",
-            "requirements": {
-                "required_fields": [],
-                "optional_fields": [
-                    "full_name",
-                ],
-                "unique_fields": [],
-            },
-            "transfer_type": "CASH",
-        },
+        {"code": "referral", "name": "Referral", "transfer_type": "CASH", "account_type": account_types["bank"]},
+        {"code": "transfer", "name": "Transfer", "transfer_type": "CASH", "account_type": account_types["bank"]},
         {
             "code": "transfer_to_account",
             "name": "Transfer to Account",
-            "requirements": {
-                "required_fields": ["bank_name__transfer_to_account", "bank_account_number__transfer_to_account"],
-                "optional_fields": [
-                    "full_name",
-                ],
-                "unique_fields": [
-                    "bank_account_number__transfer_to_account",
-                ],
-            },
             "transfer_type": "CASH",
+            "account_type": account_types["bank"],
         },
-        {
-            "code": "voucher",
-            "name": "Voucher",
-            "requirements": {
-                "required_fields": [],
-                "optional_fields": [
-                    "full_name",
-                ],
-                "unique_fields": [],
-            },
-            "transfer_type": "VOUCHER",
-        },
+        {"code": "voucher", "name": "Voucher", "transfer_type": "VOUCHER", "account_type": account_types["bank"]},
         {
             "code": "cash_over_the_counter",
             "name": "Cash over the counter",
-            "requirements": {
-                "required_fields": [
-                    "mobile_phone_number__cash_over_the_counter",
-                ],
-                "optional_fields": [
-                    "full_name",
-                ],
-                "unique_fields": [],
-            },
             "transfer_type": "CASH",
+            "account_type": account_types["bank"],
         },
-        {
-            "code": "atm_card",
-            "name": "ATM Card",
-            "requirements": {
-                "required_fields": [
-                    "card_number__atm_card",
-                    "card_expiry_date__atm_card",
-                    "name_of_cardholder__atm_card",
-                ],
-                "optional_fields": [
-                    "full_name",
-                ],
-                "unique_fields": [
-                    "card_number__atm_card",
-                    "card_expiry_date__atm_card",
-                    "name_of_cardholder__atm_card",
-                ],
-            },
-            "transfer_type": "CASH",
-        },
+        {"code": "atm_card", "name": "ATM Card", "transfer_type": "CASH", "account_type": account_types["bank"]},
         {
             "code": "transfer_to_digital_wallet",
             "name": "Transfer to Digital Wallet",
-            "requirements": {
-                "required_fields": [
-                    "blockchain_name__transfer_to_digital_wallet",
-                    "wallet_address__transfer_to_digital_wallet",
-                ],
-                "optional_fields": ["full_name", "wallet_name__transfer_to_digital_wallet"],
-                "unique_fields": [
-                    "blockchain_name__transfer_to_digital_wallet",
-                    "wallet_address__transfer_to_digital_wallet",
-                ],
-            },
             "transfer_type": "DIGITAL",
+            "account_type": account_types["bank"],
         },
     ]
-    for dm in data:
+    for dm in delivery_mechanisms_data:
         DeliveryMechanism.objects.update_or_create(
             code=dm["code"],
             defaults={
                 "name": dm["name"],
-                "required_fields": dm["requirements"]["required_fields"],  # type: ignore
-                "optional_fields": dm["requirements"]["optional_fields"],  # type: ignore
-                "unique_fields": dm["requirements"]["unique_fields"],  # type: ignore
                 "transfer_type": dm["transfer_type"],
                 "is_active": True,
+                "account_type": dm["account_type"],
             },
         )

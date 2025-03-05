@@ -1830,7 +1830,13 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
         on_delete=models.CASCADE,
         related_name="delivery_mechanisms_data",  # TODO MB rename to collector_accounts
     )
-    account_type = models.ForeignKey("payment.AccountType", on_delete=models.PROTECT, related_name="accounts")
+    account_type = models.ForeignKey(
+        "payment.AccountType",
+        on_delete=models.PROTECT,
+        related_name="accounts",
+        null=True,  # TODO MB make not nullable after migrations
+        blank=True,
+    )
     data = JSONField(default=dict, blank=True, encoder=DjangoJSONEncoder)
     unique_key = models.CharField(max_length=256, blank=True, null=True, unique=True, editable=False)  # type: ignore
     is_unique = models.BooleanField(default=True)
@@ -1875,8 +1881,10 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
     def delivery_data(self, fsp: "FinancialServiceProvider", delivery_mechanism: "DeliveryMechanism") -> Dict:
         delivery_data = {}
 
-        fsp_names_mappings = fsp.names_mappings.all().in_bulk("external_name")
-        dm_config = DeliveryMechanismConfig.objects.get(fsp=fsp, delivery_mechanism=delivery_mechanism)
+        fsp_names_mappings = {x.external_name: x for x in fsp.names_mappings.all()}
+        dm_config = DeliveryMechanismConfig.objects.filter(fsp=fsp, delivery_mechanism=delivery_mechanism).first()
+        if not dm_config:
+            return {}
 
         for field in dm_config.required_fields:
             if fsp_name_mapping := fsp_names_mappings.get(field, None):
@@ -1895,8 +1903,10 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
         if not self.is_unique:  # TODO MB should ve validate this at this point?
             return False
 
-        fsp_names_mappings = fsp.names_mappings.all().in_bulk("external_name")
-        dm_config = DeliveryMechanismConfig.objects.get(fsp=fsp, delivery_mechanism=delivery_mechanism)
+        fsp_names_mappings = {x.external_name: x for x in fsp.names_mappings.all()}
+        dm_config = DeliveryMechanismConfig.objects.filter(fsp=fsp, delivery_mechanism=delivery_mechanism).first()
+        if not dm_config:
+            return False
 
         for field in dm_config.required_fields:
             if fsp_name_mapping := fsp_names_mappings.get(field, None):
@@ -1962,7 +1972,11 @@ class DeliveryMechanism(TimeStampedUUIDModel):
     is_active = models.BooleanField(default=True)
     transfer_type = models.CharField(max_length=255, choices=TransferType.choices, default=TransferType.CASH)
     account_type = models.ForeignKey(
-        "payment.AccountType", on_delete=models.PROTECT, related_name="delivery_mechanisms"
+        "payment.AccountType",
+        on_delete=models.PROTECT,
+        related_name="delivery_mechanisms",
+        null=True,  # TODO MB make not nullable after migrations
+        blank=True,
     )
 
     def __str__(self) -> str:
@@ -2011,8 +2025,6 @@ class AccountType(models.Model):
         ]
 
 
-# This can be easily modified in django admin via FinancialServiceProvider admin inlines
-# TODO MB add FSP admin inlines
 class FspNameMapping(models.Model):
     class SourceModel(models.TextChoices):
         INDIVIDUAL = "Individual"
