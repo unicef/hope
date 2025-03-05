@@ -15,6 +15,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     XlsxUpdateFile,
 )
+from hct_mis_api.apps.payment.models import DeliveryMechanismData, PendingDeliveryMechanismData
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.steficon.admin import AutocompleteWidget
@@ -273,6 +274,21 @@ class BankAccountInfoForm(forms.ModelForm):
         # override queryset for Individual
         if "individual" in self.Meta.fields:
             self.fields["individual"].queryset = PendingIndividual.objects.all()
+
+
+class DeliveryMechanismDataForm(forms.ModelForm):
+    class Meta:
+        model = DeliveryMechanismData
+        fields = []  # dynamically set in __init__
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        data = kwargs.get("data")
+        self.Meta.fields = list(data.keys()) if data else "__all__"  # type: ignore
+        super().__init__(*args, **kwargs)
+
+        # override queryset for Individual
+        if "individual" in self.Meta.fields:
+            self.fields["individual"].queryset = PendingDeliveryMechanismData.objects.all()
 
 
 # used in UkraineBaseRegistrationService
