@@ -136,6 +136,10 @@ class HouseholdWithdrawFromListMixin:
             form = WithdrawHouseholdsForm(request.POST)
             step = request.POST.get("step")
             if form.is_valid():
+                # get HH list
+                household_id_list = form.cleaned_data["household_list"].split(",")  # Convert text to list
+                household_id_list = [hh_id.strip() for hh_id in household_id_list]  # remove spaces if so
+
                 if step == "1":
                     context["step"] = "2"
                     self.get_and_set_context_data(request, context)
@@ -160,7 +164,6 @@ class HouseholdWithdrawFromListMixin:
                         context,
                     )
             if step == "3":
-                household_id_list = form.cleaned_data["household_list"].split(",")
                 tag = form.cleaned_data["tag"]
                 program = form.cleaned_data["program"]
 
