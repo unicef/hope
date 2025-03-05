@@ -11,7 +11,7 @@ import { useLocation } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { HouseholdTableRest } from '@containers/tables/population/HouseholdTable/HouseholdTableRest';
+import { HouseholdTable } from '@containers/tables/population/HouseholdTable/HouseholdTable';
 
 function PopulationHouseholdPage(): ReactElement {
   const location = useLocation();
@@ -67,7 +67,7 @@ function PopulationHouseholdPage(): ReactElement {
         flexDirection="column"
         data-cy="page-details-container"
       >
-        <HouseholdTableRest
+        <HouseholdTable
           filter={appliedFilter}
           canViewDetails={hasPermissions(
             PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS,

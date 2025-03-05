@@ -1,21 +1,18 @@
 import { Checkbox, Radio } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
-import {
-  AllHouseholdsForPopulationTableQuery,
-  HouseholdChoiceDataQuery,
-} from '@generated/graphql';
+import { HouseholdChoiceDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { BlackLink } from '@core/BlackLink';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { MouseEvent, ReactElement } from 'react';
+import { usePermissions } from '@hooks/usePermissions';
+import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 
 interface LookUpHouseholdTableRowProps {
-  household: AllHouseholdsForPopulationTableQuery['allHouseholds']['edges'][number]['node'];
-  radioChangeHandler: (
-    household: AllHouseholdsForPopulationTableQuery['allHouseholds']['edges'][number]['node'],
-  ) => void;
-  selectedHousehold: AllHouseholdsForPopulationTableQuery['allHouseholds']['edges'][number]['node'];
+  household;
+  radioChangeHandler: (household) => void;
+  selectedHousehold;
   choicesData: HouseholdChoiceDataQuery;
   checkboxClickHandler?: (
     event: MouseEvent<HTMLTableRowElement> | MouseEvent<HTMLButtonElement>,
@@ -40,6 +37,11 @@ export function LookUpHouseholdTableRow({
   const { baseUrl, isAllPrograms } = useBaseUrl();
   const isSelected = (id: string): boolean => selected.includes(id);
   const isItemSelected = isSelected(household.id);
+  const permissions = usePermissions();
+  const canViewDetails = hasPermissions(
+    PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
+    permissions,
+  );
 
   const handleClick = (event): void => {
     event.preventDefault();
@@ -89,19 +91,19 @@ export function LookUpHouseholdTableRow({
         )}
       </TableCell>
       <TableCell align="left">
-        {!isAllPrograms ? (
+        {!isAllPrograms && canViewDetails ? (
           <BlackLink to={`/${baseUrl}/population/household/${household.id}`}>
-            {household.unicefId}
+            {household.unicef_id}
           </BlackLink>
         ) : (
-          <span>{household.unicefId}</span>
+          <span>{household.unicef_id}</span>
         )}
       </TableCell>
-      <TableCell align="left">{household.headOfHousehold.fullName}</TableCell>
+      <TableCell align="left">{household.head_of_household}</TableCell>
       <TableCell align="left">{household.size}</TableCell>
-      <TableCell align="left">{household?.admin2?.name || '-'}</TableCell>
+      <TableCell align="left">{household?.admin2 || '-'}</TableCell>
       <TableCell align="left">
-        <UniversalMoment>{household.lastRegistrationDate}</UniversalMoment>
+        <UniversalMoment>{household.last_registration_date}</UniversalMoment>
       </TableCell>
       {isAllPrograms && (
         <TableCell align="left">
