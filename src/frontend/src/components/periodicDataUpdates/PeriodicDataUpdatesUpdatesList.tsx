@@ -7,11 +7,11 @@ import { useQuery } from '@tanstack/react-query';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import { fetchPeriodicDataUpdateUpdates } from '@api/periodicDataUpdateApi';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { PeriodicDataUpdatesUploadDetailsDialog } from '@components/periodicDataUpdates/PeriodicDataUpdatesUploadDetailsDialog';
 import { PeriodicDataUpdateUploadList } from '@restgenerated/models/PeriodicDataUpdateUploadList';
+import { RestService } from '@restgenerated/services/RestService';
 
 const updatesHeadCells: HeadCell<PeriodicDataUpdateUploadList>[] = [
   {
@@ -83,13 +83,18 @@ export const PeriodicDataUpdatesUpdatesList = (): ReactElement => {
       programId,
       queryVariables,
     ],
-    queryFn: () =>
-      fetchPeriodicDataUpdateUpdates(
+    queryFn: () => {
+      const { ordering } = queryVariables;
+      return RestService.restProgramsPeriodicDataUpdatePeriodicDataUpdateUploadsList(
         businessAreaSlug,
         programId,
-        queryVariables,
-      ),
+        null,
+        null,
+        ordering,
+      );
+    },
   });
+
   const handleDialogOpen = (uploadId) => {
     setSelectedUploadId(uploadId);
     setIsDialogOpen(true);

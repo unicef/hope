@@ -1,7 +1,6 @@
 import { BusinessAreaSelect } from '@containers/BusinessAreaSelect';
 import { GlobalProgramSelect } from '@containers/GlobalProgramSelect';
 import { UserProfileMenu } from '@containers/UserProfileMenu';
-import { useCachedMe } from '@hooks/useCachedMe';
 import MenuIcon from '@mui/icons-material/Menu';
 import TextsmsIcon from '@mui/icons-material/Textsms';
 import { Box, Button } from '@mui/material';
@@ -10,7 +9,9 @@ import IconButton from '@mui/material/IconButton';
 import Toolbar from '@mui/material/Toolbar';
 import { styled } from '@mui/system';
 import { ReactElement } from 'react';
-import {  theme as muiTheme } from 'src/theme';
+import { theme as muiTheme } from 'src/theme';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 
 const StyledToolbar = styled(Toolbar)(() => ({
   display: 'flex',
@@ -26,35 +27,32 @@ interface AppBarProps {
   open: boolean;
 }
 
-
-const StyledAppBar = styled(MuiAppBar)<AppBarProps>(
-  ({  open }) => ({
-    position: 'fixed',
-    top: 0,
-    zIndex: muiTheme.zIndex.drawer + 1,
-    backgroundColor: muiTheme.palette.secondary.main,
+const StyledAppBar = styled(MuiAppBar)<AppBarProps>(({ open }) => ({
+  position: 'fixed',
+  top: 0,
+  zIndex: muiTheme.zIndex.drawer + 1,
+  backgroundColor: muiTheme.palette.secondary.main,
+  transition: muiTheme.transitions.create(['width', 'margin'], {
+    easing: muiTheme.transitions.easing.sharp,
+    duration: muiTheme.transitions.duration.leavingScreen,
+  }),
+  ...(open && {
+    marginLeft: '270px',
+    width: 'calc(100% - 270px)',
+    transition: muiTheme.transitions.create(['width', 'margin'], {
+      easing: muiTheme.transitions.easing.sharp,
+      duration: muiTheme.transitions.duration.enteringScreen,
+    }),
+  }),
+  ...(!open && {
+    marginLeft: '0',
+    width: '100%',
     transition: muiTheme.transitions.create(['width', 'margin'], {
       easing: muiTheme.transitions.easing.sharp,
       duration: muiTheme.transitions.duration.leavingScreen,
     }),
-    ...(open && {
-      marginLeft: '270px',
-      width: 'calc(100% - 270px)',
-      transition: muiTheme.transitions.create(['width', 'margin'], {
-        easing: muiTheme.transitions.easing.sharp,
-        duration: muiTheme.transitions.duration.enteringScreen,
-      }),
-    }),
-    ...(!open && {
-      marginLeft: '0',
-      width: '100%',
-      transition: muiTheme.transitions.create(['width', 'margin'], {
-        easing: muiTheme.transitions.easing.sharp,
-        duration: muiTheme.transitions.duration.leavingScreen,
-      }),
-    }),
   }),
-);
+}));
 
 const StyledIconButton = styled(IconButton)<AppBarProps>(({ open }) => ({
   marginRight: 36,
@@ -64,7 +62,13 @@ const StyledIconButton = styled(IconButton)<AppBarProps>(({ open }) => ({
 }));
 
 export const AppBar = ({ open, handleDrawerOpen }): ReactElement => {
-  const { data: meData, loading: meLoading } = useCachedMe();
+  const { data: meData, isLoading: meLoading } = useQuery({
+    queryKey: ['profile'],
+    queryFn: () => {
+      return RestService.restProfileRetrieve();
+    },
+  });
+
   const servicenow = `https://unicef.service-now.com/cc?id=sc_cat_item&sys_id=762ae3128747d91021cb670a0cbb35a7&HOPE - ${
     window.location.pathname.split('/')[2]
   }&Workspace: ${window.location.pathname.split('/')[1]} \n Url: ${
@@ -75,7 +79,7 @@ export const AppBar = ({ open, handleDrawerOpen }): ReactElement => {
     return null;
   }
   return (
-    <StyledAppBar  open={open}>
+    <StyledAppBar open={open}>
       <StyledToolbar>
         <Box display="flex" alignItems="center" justifyContent="center">
           <Box ml={1}>

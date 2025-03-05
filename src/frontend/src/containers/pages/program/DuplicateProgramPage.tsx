@@ -16,7 +16,11 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Fade } from '@mui/material';
-import { decodeIdString } from '@utils/utils';
+import {
+  decodeIdString,
+  mapPartnerChoicesWithoutUnicef,
+  isPartnerVisible,
+} from '@utils/utils';
 import { Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -203,7 +207,7 @@ const DuplicateProgramPage = (): ReactElement => {
     cashPlus,
     frequencyOfPayments,
     partners: partners
-      .filter((partner) => partner.name !== 'UNICEF')
+      .filter((partner) => isPartnerVisible(partner.name))
       .map((partner) => ({
         id: partner.id,
         areas: partner.areas.map((area) => decodeIdString(area.id)),
@@ -272,31 +276,27 @@ const DuplicateProgramPage = (): ReactElement => {
     : undefined;
 
   return (
-    <Formik
-      initialValues={initialValues}
-      onSubmit={(values) => {
-        handleSubmit(values);
-      }}
-      validationSchema={editProgramDetailsValidationSchema(t, initialValues)}
-      validateOnChange={true}
-    >
-      {({
-        submitForm,
-        values,
-        validateForm,
-        setFieldTouched,
-        setFieldValue,
-        errors,
-        setErrors,
-      }) => {
-        const mappedPartnerChoices = userPartnerChoices
-          .filter((partner) => partner.name !== 'UNICEF')
-          .map((partner) => ({
-            value: partner.value,
-            label: partner.name,
-            disabled: values.partners.some((p) => p.id === partner.value),
-          }));
-
+      <Formik
+        initialValues={initialValues}
+        onSubmit={(values) => {
+          handleSubmit(values);
+        }}
+        validationSchema={editProgramDetailsValidationSchema(t, initialValues)}
+        validateOnChange={true}
+      >
+        {({
+          submitForm,
+          values,
+          validateForm,
+          setFieldTouched,
+          setFieldValue,
+          errors,
+          setErrors,
+        }) => {
+          const mappedPartnerChoices = mapPartnerChoicesWithoutUnicef(
+            userPartnerChoices,
+            values.partners,
+          );
         const handleNextStep = async () => {
           await handleNext({
             validateForm,

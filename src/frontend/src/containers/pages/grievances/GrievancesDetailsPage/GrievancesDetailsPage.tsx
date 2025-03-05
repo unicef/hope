@@ -3,7 +3,6 @@ import { useParams } from 'react-router-dom';
 import {
   useGrievancesChoiceDataQuery,
   useGrievanceTicketQuery,
-  useMeQuery,
 } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
@@ -20,12 +19,21 @@ import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import GrievancesApproveSection from '@components/grievances/GrievancesApproveSection/GrievancesApproveSection';
 import GrievancesDetails from '@components/grievances/GrievancesDetails/GrievancesDetails';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 
 const GrievancesDetailsPage = (): ReactElement => {
   const { id } = useParams();
   const permissions = usePermissions();
-  const { data: currentUserData, loading: currentUserDataLoading } =
-    useMeQuery();
+  const { data: currentUserData, isLoading: currentUserDataLoading } = useQuery(
+    {
+      queryKey: ['profile'],
+      queryFn: () => {
+        return RestService.restProfileRetrieve();
+      },
+    },
+  );
+
   const { data, loading, error } = useGrievanceTicketQuery({
     variables: { id },
     fetchPolicy: 'network-only',

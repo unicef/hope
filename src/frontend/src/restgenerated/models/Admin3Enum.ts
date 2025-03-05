@@ -183,7 +183,6 @@
  * * `UA0116027` - Perovska
  * * `UA0116029` - Pozharska
  * * `UA0116031` - Rodnykivska
- * * `UA0116033` - Simferopolska
  * * `UA0116035` - Skvortsivska
  * * `UA0116037` - Trudivska
  * * `UA0116039` - Ukromnivska
@@ -424,7 +423,6 @@ export enum Admin3Enum {
     UA0116027 = 'UA0116027',
     UA0116029 = 'UA0116029',
     UA0116031 = 'UA0116031',
-    UA0116033 = 'UA0116033',
     UA0116035 = 'UA0116035',
     UA0116037 = 'UA0116037',
     UA0116039 = 'UA0116039',

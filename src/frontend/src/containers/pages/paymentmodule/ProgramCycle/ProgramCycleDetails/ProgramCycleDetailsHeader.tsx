@@ -3,7 +3,6 @@ import { Box, Button } from '@mui/material';
 import { PageHeader } from '@core/PageHeader';
 import {
   finishProgramCycle,
-  ProgramCycle,
   reactivateProgramCycle,
 } from '@api/programCycleApi';
 import { useTranslation } from 'react-i18next';
@@ -17,9 +16,10 @@ import { decodeIdString } from '@utils/utils';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { AdminButton } from '@core/AdminButton';
+import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 
 interface ProgramCycleDetailsHeaderProps {
-  programCycle: ProgramCycle;
+  programCycle: ProgramCycleList;
 }
 
 export const ProgramCycleDetailsHeader = ({

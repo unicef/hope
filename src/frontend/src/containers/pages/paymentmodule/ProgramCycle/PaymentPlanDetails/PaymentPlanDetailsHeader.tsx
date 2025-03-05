@@ -19,9 +19,9 @@ import {
   paymentPlanStatusToColor,
 } from '@utils/utils';
 import { useQuery } from '@tanstack/react-query';
-import { fetchProgramCycle } from '@api/programCycleApi';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AdminButton } from '@core/AdminButton';
+import { RestService } from '@restgenerated/services/RestService';
 
 interface PaymentPlanDetailsHeaderProps {
   permissions: string[];
@@ -39,14 +39,14 @@ export const PaymentPlanDetailsHeader = ({
     queryKey: [
       'programCyclesDetails',
       businessArea,
-      programId,
       decodeIdString(programCycleId),
+      programId,
     ],
-    queryFn: async () => {
-      return fetchProgramCycle(
+    queryFn: () => {
+      return RestService.restProgramsCyclesRetrieve(
         businessArea,
-        programId,
         decodeIdString(programCycleId),
+        programId,
       );
     },
     enabled: !!programCycleId,

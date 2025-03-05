@@ -1,11 +1,13 @@
 from typing import Any
 
+import pytest
 from rest_framework import status
 from rest_framework.response import Response
 
 from hct_mis_api.api.caches import etag_decorator
 
 
+@pytest.mark.django_db(transaction=True)
 class TestEtagDecorator:
     class DummyEtagConstructorClass:
         def __init__(self, *args: Any, **kwargs: Any) -> None:

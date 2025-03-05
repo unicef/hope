@@ -14,28 +14,52 @@ snapshots['TestHouseholdQuery::test_household_query_all_0_all_with_permission 1'
                 {
                     'node': {
                         'address': 'Lorem Ipsum 2',
+                        'adminArea': {
+                            'pCode': 'area2'
+                        },
                         'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program TWO'
+                        },
                         'size': 2
                     }
                 },
                 {
                     'node': {
                         'address': 'Lorem Ipsum 3',
+                        'adminArea': {
+                            'pCode': 'area2'
+                        },
                         'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program TWO'
+                        },
                         'size': 3
                     }
                 },
                 {
                     'node': {
                         'address': 'Lorem Ipsum 5',
+                        'adminArea': {
+                            'pCode': 'area2'
+                        },
                         'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program TWO'
+                        },
                         'size': 5
                     }
                 },
                 {
                     'node': {
                         'address': 'Lorem Ipsum 14',
+                        'adminArea': {
+                            'pCode': 'area2'
+                        },
                         'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program TWO'
+                        },
                         'size': 14
                     }
                 }
@@ -167,56 +191,438 @@ snapshots['TestHouseholdQuery::test_household_query_all_5_all_max_with_permissio
     }
 }
 
-snapshots['TestHouseholdQuery::test_household_query_all_for_all_programs 1'] = {
+snapshots['TestHouseholdQuery::test_household_query_all_for_all_programs_area_restrictions_1 1'] = {
     'data': {
         'allHouseholds': {
             'edges': [
                 {
                     'node': {
                         'address': 'Lorem Ipsum 1',
+                        'adminArea': {
+                            'pCode': 'area2'
+                        },
                         'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program ONE'
+                        },
                         'size': 1
                     }
                 },
                 {
                     'node': {
                         'address': 'Lorem Ipsum 2',
+                        'adminArea': {
+                            'pCode': 'area2'
+                        },
                         'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program TWO'
+                        },
                         'size': 2
                     }
                 },
                 {
                     'node': {
                         'address': 'Lorem Ipsum 3',
+                        'adminArea': {
+                            'pCode': 'area2'
+                        },
                         'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program TWO'
+                        },
                         'size': 3
                     }
                 },
                 {
                     'node': {
-                        'address': 'Lorem Ipsum 4',
-                        'countryOrigin': 'Poland',
-                        'size': 4
-                    }
-                },
-                {
-                    'node': {
                         'address': 'Lorem Ipsum 5',
+                        'adminArea': {
+                            'pCode': 'area2'
+                        },
                         'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program TWO'
+                        },
                         'size': 5
                     }
                 },
                 {
                     'node': {
                         'address': 'Lorem Ipsum 11',
+                        'adminArea': {
+                            'pCode': 'area2'
+                        },
                         'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program ONE'
+                        },
                         'size': 11
                     }
                 },
                 {
                     'node': {
                         'address': 'Lorem Ipsum 14',
+                        'adminArea': {
+                            'pCode': 'area2'
+                        },
                         'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program TWO'
+                        },
+                        'size': 14
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestHouseholdQuery::test_household_query_all_for_all_programs_area_restrictions_2 1'] = {
+    'data': {
+        'allHouseholds': {
+            'edges': [
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum 4',
+                        'adminArea': {
+                            'pCode': 'areaother'
+                        },
+                        'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program ONE'
+                        },
+                        'size': 4
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestHouseholdQuery::test_household_query_all_for_all_programs_permission_in_specific_programs_1 1'] = {
+    'data': {
+        'allHouseholds': {
+            'edges': [
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum 1',
+                        'adminArea': {
+                            'pCode': 'area2'
+                        },
+                        'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program ONE'
+                        },
+                        'size': 1
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum 4',
+                        'adminArea': {
+                            'pCode': 'areaother'
+                        },
+                        'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program ONE'
+                        },
+                        'size': 4
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum 11',
+                        'adminArea': {
+                            'pCode': 'area2'
+                        },
+                        'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program ONE'
+                        },
+                        'size': 11
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestHouseholdQuery::test_household_query_all_for_all_programs_permission_in_specific_programs_2 1'] = {
+    'data': {
+        'allHouseholds': {
+            'edges': [
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum 1',
+                        'adminArea': {
+                            'pCode': 'area2'
+                        },
+                        'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program ONE'
+                        },
+                        'size': 1
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum 2',
+                        'adminArea': {
+                            'pCode': 'area2'
+                        },
+                        'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program TWO'
+                        },
+                        'size': 2
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum 3',
+                        'adminArea': {
+                            'pCode': 'area2'
+                        },
+                        'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program TWO'
+                        },
+                        'size': 3
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum 4',
+                        'adminArea': {
+                            'pCode': 'areaother'
+                        },
+                        'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program ONE'
+                        },
+                        'size': 4
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum 5',
+                        'adminArea': {
+                            'pCode': 'area2'
+                        },
+                        'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program TWO'
+                        },
+                        'size': 5
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum 11',
+                        'adminArea': {
+                            'pCode': 'area2'
+                        },
+                        'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program ONE'
+                        },
+                        'size': 11
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum 14',
+                        'adminArea': {
+                            'pCode': 'area2'
+                        },
+                        'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program TWO'
+                        },
+                        'size': 14
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestHouseholdQuery::test_household_query_all_for_all_programs_permission_in_whole_ba 1'] = {
+    'data': {
+        'allHouseholds': {
+            'edges': [
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum 1',
+                        'adminArea': {
+                            'pCode': 'area2'
+                        },
+                        'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program ONE'
+                        },
+                        'size': 1
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum 2',
+                        'adminArea': {
+                            'pCode': 'area2'
+                        },
+                        'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program TWO'
+                        },
+                        'size': 2
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum 3',
+                        'adminArea': {
+                            'pCode': 'area2'
+                        },
+                        'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program TWO'
+                        },
+                        'size': 3
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum 4',
+                        'adminArea': {
+                            'pCode': 'areaother'
+                        },
+                        'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program ONE'
+                        },
+                        'size': 4
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum 5',
+                        'adminArea': {
+                            'pCode': 'area2'
+                        },
+                        'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program TWO'
+                        },
+                        'size': 5
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsumm 5',
+                        'adminArea': None,
+                        'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program OTHER'
+                        },
+                        'size': 5
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum 11',
+                        'adminArea': {
+                            'pCode': 'area2'
+                        },
+                        'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program ONE'
+                        },
+                        'size': 11
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum 14',
+                        'adminArea': {
+                            'pCode': 'area2'
+                        },
+                        'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program TWO'
+                        },
+                        'size': 14
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestHouseholdQuery::test_household_query_all_for_all_programs_user_and_partner_permissions 1'] = {
+    'data': {
+        'allHouseholds': {
+            'edges': [
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum 2',
+                        'adminArea': {
+                            'pCode': 'area2'
+                        },
+                        'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program TWO'
+                        },
+                        'size': 2
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum 3',
+                        'adminArea': {
+                            'pCode': 'area2'
+                        },
+                        'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program TWO'
+                        },
+                        'size': 3
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum 5',
+                        'adminArea': {
+                            'pCode': 'area2'
+                        },
+                        'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program TWO'
+                        },
+                        'size': 5
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsumm 5',
+                        'adminArea': None,
+                        'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program OTHER'
+                        },
+                        'size': 5
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum 14',
+                        'adminArea': {
+                            'pCode': 'area2'
+                        },
+                        'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program TWO'
+                        },
                         'size': 14
                     }
                 }
@@ -334,7 +740,13 @@ snapshots['TestHouseholdQuery::test_query_households_by_national_id_no_filter_0_
                 {
                     'node': {
                         'address': 'Lorem Ipsum 2',
+                        'adminArea': {
+                            'pCode': 'area2'
+                        },
                         'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program TWO'
+                        },
                         'size': 2
                     }
                 }
@@ -363,51 +775,6 @@ snapshots['TestHouseholdQuery::test_query_households_by_national_id_no_filter_1_
     ]
 }
 
-snapshots['TestHouseholdQuery::test_query_households_by_detail_id_filter_0_with_permission 1'] = {
-    'data': {
-        'allHouseholds': {
-            'edges': [
-                {
-                    'node': {
-                        'address': 'Lorem Ipsum 2',
-                        'countryOrigin': 'Poland',
-                        'size': 2
-                    }
-                }
-            ]
-        }
-    }
-}
-
-snapshots['TestHouseholdQuery::test_query_households_by_detail_id_filter_1_with_permission_wrong_type_in_search 1'] = {
-    'data': {
-        'allHouseholds': {
-            'edges': [
-            ]
-        }
-    }
-}
-
-snapshots['TestHouseholdQuery::test_query_households_by_detail_id_filter_2_without_permission 1'] = {
-    'data': {
-        'allHouseholds': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 9,
-                    'line': 3
-                }
-            ],
-            'message': 'Permission Denied',
-            'path': [
-                'allHouseholds'
-            ]
-        }
-    ]
-}
-
 snapshots['TestHouseholdQuery::test_query_households_by_search_full_name_filter_0_with_permission 1'] = {
     'data': {
         'allHouseholds': {
@@ -415,7 +782,13 @@ snapshots['TestHouseholdQuery::test_query_households_by_search_full_name_filter_
                 {
                     'node': {
                         'address': 'Lorem Ipsum 2',
+                        'adminArea': {
+                            'pCode': 'area2'
+                        },
                         'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program TWO'
+                        },
                         'size': 2
                     }
                 }
@@ -451,7 +824,13 @@ snapshots['TestHouseholdQuery::test_query_households_by_search_household_id_filt
                 {
                     'node': {
                         'address': 'Lorem Ipsum 2',
+                        'adminArea': {
+                            'pCode': 'area2'
+                        },
                         'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program TWO'
+                        },
                         'size': 2
                     }
                 }
@@ -487,7 +866,13 @@ snapshots['TestHouseholdQuery::test_query_households_by_search_individual_id_fil
                 {
                     'node': {
                         'address': 'Lorem Ipsum 2',
+                        'adminArea': {
+                            'pCode': 'area2'
+                        },
                         'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program TWO'
+                        },
                         'size': 2
                     }
                 }
@@ -523,7 +908,13 @@ snapshots['TestHouseholdQuery::test_query_households_by_search_phone_no_filter_0
                 {
                     'node': {
                         'address': 'Lorem Ipsum 2',
+                        'adminArea': {
+                            'pCode': 'area2'
+                        },
                         'countryOrigin': 'Poland',
+                        'program': {
+                            'name': 'Test program TWO'
+                        },
                         'size': 2
                     }
                 }

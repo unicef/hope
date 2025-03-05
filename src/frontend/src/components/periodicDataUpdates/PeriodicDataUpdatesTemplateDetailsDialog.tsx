@@ -1,7 +1,3 @@
-import {
-  fetchPeriodicDataUpdateTemplateDetails,
-  fetchPeriodicFields,
-} from '@api/periodicDataUpdateApi';
 import { LabelizedField } from '@components/core/LabelizedField';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { useArrayToDict } from '@hooks/useArrayToDict';
@@ -19,6 +15,7 @@ import {
   TableRow,
 } from '@mui/material';
 import { PeriodicDataUpdateTemplateList } from '@restgenerated/models/PeriodicDataUpdateTemplateList';
+import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -42,16 +39,20 @@ export const PeriodicDataUpdatesTemplateDetailsDialog: FC<
       template.id,
     ],
     queryFn: () =>
-      fetchPeriodicDataUpdateTemplateDetails(
+      RestService.restProgramsPeriodicDataUpdatePeriodicDataUpdateTemplatesRetrieve(
         businessArea,
+        template.id.toString(),
         programId,
-        template.id,
       ),
   });
   const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
     useQuery({
       queryKey: ['periodicFields', businessArea, programId],
-      queryFn: () => fetchPeriodicFields(businessArea, programId),
+      queryFn: () =>
+        RestService.restProgramsPeriodicDataUpdatePeriodicFieldsList(
+          businessArea,
+          programId,
+        ),
     });
   const pduDataDict = useArrayToDict(periodicFieldsData?.results, 'name', '*');
   if (isLoading || periodicFieldsLoading || !pduDataDict)

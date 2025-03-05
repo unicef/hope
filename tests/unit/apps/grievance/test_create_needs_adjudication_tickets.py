@@ -308,17 +308,18 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
               }
             }
             """
+        program = Program.objects.get(name="Test HOPE")
 
         self.create_user_role_with_permissions(
             self.user,
             [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_BIOMETRIC_RESULTS],
             self.business_area,
+            program,
         )
         create_needs_adjudication_tickets_for_biometrics(
             DeduplicationEngineSimilarityPair.objects.filter(pk=self.dedup_engine_similarity_pair.pk),
             self.rdi,
         )
-        program = Program.objects.get(name="Test HOPE")
 
         self.snapshot_graphql_request(
             request_string=query_all,

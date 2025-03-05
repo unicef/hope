@@ -141,3 +141,34 @@ export const api = {
     return;
   },
 };
+
+export type Params = Record<string, any>;
+
+export const handleApiResponse = async (apiCall) => {
+  try {
+    const response = await apiCall;
+    return response;
+  } catch (error: any) {
+    console.error('API call failed:', error.message || error);
+    throw new Error(`API call failed: ${error.message || 'Unknown error'}`);
+  }
+};
+
+export const handleMutationError = (error: any, action: string): never => {
+  const errorMessage = error?.message || 'An unknown error occurred';
+  throw new Error(`Failed to ${action}: ${errorMessage}`);
+};
+
+export const postRequest = async (
+  url: string,
+  body: any,
+  errorMessage: string,
+) => {
+  try {
+    const response = await api.post(url, body);
+    return response.data;
+  } catch (error) {
+    handleMutationError(error, errorMessage);
+    throw error;
+  }
+};

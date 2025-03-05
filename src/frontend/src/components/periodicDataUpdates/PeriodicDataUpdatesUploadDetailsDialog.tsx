@@ -7,20 +7,16 @@ import {
   DialogActions,
   Button,
 } from '@mui/material';
-import { fetchPeriodicDataUpdateUploadDetails } from '@api/periodicDataUpdateApi';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useQuery } from '@tanstack/react-query';
 import { LoadingComponent } from '@components/core/LoadingComponent';
+import { RestService } from '@restgenerated/services/RestService';
 
 interface PeriodicDataUpdatesUploadDetailsDialogProps {
   open: boolean;
   onClose: () => void;
   uploadId: number;
 }
-
-// const StyledError = styled.p`
-//   color: red;
-// `;
 
 const FormErrorDisplay = ({ formErrors }) => {
   if (!formErrors || !formErrors.length) {
@@ -80,7 +76,11 @@ export const PeriodicDataUpdatesUploadDetailsDialog: FC<
       uploadId,
     ],
     queryFn: () =>
-      fetchPeriodicDataUpdateUploadDetails(businessArea, programId, uploadId),
+      RestService.restProgramsPeriodicDataUpdatePeriodicDataUpdateUploadsRetrieve(
+        businessArea,
+        uploadId.toString(),
+        programId,
+      ),
   });
 
   if (isLoading) return <LoadingComponent />;

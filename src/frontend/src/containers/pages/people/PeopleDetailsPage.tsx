@@ -1,4 +1,3 @@
-import { fetchPeriodicFields } from '@api/periodicDataUpdateApi';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
@@ -41,6 +40,7 @@ import { ReactElement } from 'react';
 import { IndividualDeliveryMechanisms } from '@components/population/IndividualDeliveryMechanisms';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import PaymentsPeopleTable from '@containers/tables/payments/PaymentsPeopleTable/PaymentsPeopleTable';
+import { RestService } from '@restgenerated/services/RestService';
 
 const Container = styled.div`
   padding: 20px 20px 00px 20px;
@@ -90,7 +90,11 @@ const PeopleDetailsPage = (): ReactElement => {
     useQuery({
       queryKey: ['periodicFields', businessArea, programId],
       queryFn: () =>
-        fetchPeriodicFields(businessArea, programId, { limit: 1000 }),
+        RestService.restProgramsPeriodicDataUpdatePeriodicFieldsList(
+          businessArea,
+          programId,
+          1000,
+        ),
     });
 
   if (

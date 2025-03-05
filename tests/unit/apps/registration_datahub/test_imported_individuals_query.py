@@ -11,7 +11,6 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import IndividualFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import ProgramPartnerThrough
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 ALL_IMPORTED_INDIVIDUALS_QUERY = """
@@ -91,11 +90,6 @@ class TestImportedIndividualQuery(APITestCase):
         cls.user = UserFactory.create(partner=cls.partner)
         cls.program = ProgramFactory(name="Program_1", status="ACTIVE")
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-        ProgramPartnerThrough.objects.create(
-            program=cls.program,
-            partner=cls.partner,
-            full_area_access=True,
-        )
         cls.individuals_to_create = [
             {
                 "full_name": "Benjamin Butler",
@@ -179,7 +173,12 @@ class TestImportedIndividualQuery(APITestCase):
         ]
     )
     def test_imported_individual_query(self, _: Any, permissions: List[Permissions], query: str) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user,
+            permissions,
+            self.business_area,
+            self.program,
+        )
 
         self.snapshot_graphql_request(
             request_string=query,
@@ -199,7 +198,12 @@ class TestImportedIndividualQuery(APITestCase):
         ]
     )
     def test_imported_individual_query_single(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user,
+            permissions,
+            self.business_area,
+            self.program,
+        )
 
         self.snapshot_graphql_request(
             request_string=IMPORTED_INDIVIDUAL_QUERY,

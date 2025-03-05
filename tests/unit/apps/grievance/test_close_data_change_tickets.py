@@ -110,8 +110,8 @@ class TestCloseDataChangeTickets(APITestCase):
             status=Program.ACTIVE,
             business_area=BusinessArea.objects.first(),
         )
-        cls.update_partner_access_to_program(partner, cls.program)
-        cls.update_partner_access_to_program(partner, program_one)
+        cls.create_partner_role_with_permissions(partner, [], cls.business_area, cls.program)
+        cls.create_partner_role_with_permissions(partner, [], cls.business_area, program_one)
 
         household_one = HouseholdFactory.build(admin_area=cls.admin_area_1, program=cls.program)
         household_one.household_collection.save()
@@ -332,7 +332,7 @@ class TestCloseDataChangeTickets(APITestCase):
         ]
     )
     def test_close_add_individual(self, _: Any, permissions: List[Permissions], should_close: bool) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         self.graphql_request(
             request_string=self.STATUS_CHANGE_MUTATION,
@@ -351,7 +351,7 @@ class TestCloseDataChangeTickets(APITestCase):
         )
         if should_close:
             self.assertTrue(created_individual.exists())
-            created_individual = created_individual.first()
+            created_individual = created_individual.first()  # type: ignore
 
             document = Document.objects.get(document_number="123-123-UX-321")
             country_pl = geo_models.Country.objects.get(iso_code2="PL")
@@ -376,7 +376,7 @@ class TestCloseDataChangeTickets(APITestCase):
         ]
     )
     def test_close_update_individual(self, _: Any, permissions: List[Permissions], should_close: bool) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         self.graphql_request(
             request_string=self.STATUS_CHANGE_MUTATION,
@@ -420,7 +420,7 @@ class TestCloseDataChangeTickets(APITestCase):
 
     def test_close_update_individual_document_photo(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area
+            self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area, self.program
         )
         country_pl = geo_models.Country.objects.get(iso_code2="PL")
         national_id_type = DocumentType.objects.get(
@@ -492,7 +492,7 @@ class TestCloseDataChangeTickets(APITestCase):
         ]
     )
     def test_close_update_household(self, _: Any, permissions: List[Permissions], should_close: bool) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
         self.graphql_request(
             request_string=self.STATUS_CHANGE_MUTATION,
             context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
@@ -509,7 +509,7 @@ class TestCloseDataChangeTickets(APITestCase):
 
     def test_close_individual_delete_with_correct_permissions(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area
+            self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area, self.program
         )
 
         self.graphql_request(
@@ -531,7 +531,7 @@ class TestCloseDataChangeTickets(APITestCase):
         self.assertTrue(changed_role_exists)
 
     def test_close_individual_delete_without_permissions(self) -> None:
-        self.create_user_role_with_permissions(self.user, [], self.business_area)
+        self.create_user_role_with_permissions(self.user, [], self.business_area, self.program)
 
         self.graphql_request(
             request_string=self.STATUS_CHANGE_MUTATION,
@@ -547,7 +547,10 @@ class TestCloseDataChangeTickets(APITestCase):
 
     def test_close_household_delete(cls) -> None:
         cls.create_user_role_with_permissions(
-            cls.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], cls.business_area
+            cls.user,
+            [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK],
+            cls.business_area,
+            whole_business_area_access=True,
         )
 
         grievance_ticket = GrievanceTicketFactory(
@@ -582,7 +585,10 @@ class TestCloseDataChangeTickets(APITestCase):
 
     def test_close_add_individual_create_bank_account(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area
+            self.user,
+            [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK],
+            self.business_area,
+            whole_business_area_access=True,
         )
 
         self.graphql_request(
@@ -610,7 +616,10 @@ class TestCloseDataChangeTickets(APITestCase):
 
     def test_close_update_individual_create_bank_account(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area
+            self.user,
+            [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK],
+            self.business_area,
+            whole_business_area_access=True,
         )
 
         ticket = GrievanceTicketFactory(
@@ -655,7 +664,7 @@ class TestCloseDataChangeTickets(APITestCase):
 
     def test_close_update_individual_update_bank_account(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area
+            self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area, self.program
         )
 
         ticket = GrievanceTicketFactory(
@@ -715,7 +724,7 @@ class TestCloseDataChangeTickets(APITestCase):
 
     def test_close_update_individual_delivery_mechanism_data(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area
+            self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area, self.program
         )
         dmd = DeliveryMechanismDataFactory(
             individual=self.individuals[0],

@@ -39,7 +39,9 @@ class TestEraseRdiMutation(APITestCase):
         cls.rdi_2 = RegistrationDataImportFactory(status=RegistrationDataImport.IN_REVIEW)
 
     def test_erase_registration_data_import_removes_data_links(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.RDI_REFUSE_IMPORT], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.RDI_REFUSE_IMPORT], self.business_area, whole_business_area_access=True
+        )
 
         imported_household = HouseholdFactory(registration_data_import=self.rdi_1)
         IndividualFactory(household=imported_household)
@@ -59,7 +61,9 @@ class TestEraseRdiMutation(APITestCase):
         self.assertEqual(Individual.objects.count(), 0)
 
     def test_erase_registration_data_import_raises_error_when_wrong_status(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.RDI_REFUSE_IMPORT], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.RDI_REFUSE_IMPORT], self.business_area, whole_business_area_access=True
+        )
 
         imported_household = HouseholdFactory(registration_data_import=self.rdi_2)
         IndividualFactory(household=imported_household)

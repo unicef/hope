@@ -44,6 +44,7 @@ def base_setup(cls: Any) -> None:
         cls.user,
         [Permissions.PM_CREATE, Permissions.PM_VIEW_DETAILS],
         BusinessArea.objects.get(slug="afghanistan"),
+        whole_business_area_access=True,
     )
 
     cls.registration_data_import = RegistrationDataImportFactory(business_area=cls.business_area)

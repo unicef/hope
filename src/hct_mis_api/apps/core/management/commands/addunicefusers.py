@@ -2,7 +2,7 @@ from typing import Any
 
 from django.core.management import BaseCommand
 
-from hct_mis_api.apps.account.models import Role, User, UserRole
+from hct_mis_api.apps.account.models import Role, RoleAssignment, User
 from hct_mis_api.apps.core.models import BusinessArea
 
 emails = [
@@ -30,4 +30,4 @@ class Command(BaseCommand):
             user = User.objects.create_user(
                 username=username, email=email, password="PaymentModule123", is_staff=True, is_superuser=True
             )
-            UserRole.objects.create(business_area=afg, user=user, role=role)
+            RoleAssignment.objects.create(business_area=afg, user=user, role=role)

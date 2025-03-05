@@ -7,9 +7,9 @@ import { PageHeader } from '@core/PageHeader';
 import { LoadingButton } from '@core/LoadingButton';
 import { decodeIdString } from '@utils/utils';
 import { useQuery } from '@tanstack/react-query';
-import { fetchProgramCycle } from '@api/programCycleApi';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
+import { RestService } from '@restgenerated/services/RestService';
 
 interface CreatePaymentPlanHeaderProps {
   handleSubmit: () => Promise<void>;
@@ -33,14 +33,14 @@ export function CreatePaymentPlanHeader({
       queryKey: [
         'programCyclesDetails',
         businessArea,
-        programId,
         decodedProgramCycleId,
+        programId,
       ],
-      queryFn: async () => {
-        return fetchProgramCycle(
+      queryFn: () => {
+        return RestService.restProgramsCyclesRetrieve(
           businessArea,
-          programId,
           decodedProgramCycleId,
+          programId,
         );
       },
     },

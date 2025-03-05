@@ -13,16 +13,11 @@ snapshots['TestAllProgramsQuery::test_all_programs_query_0_with_permission 1'] =
             'edges': [
                 {
                     'node': {
-                        'name': 'Program with all partners access'
-                    }
-                },
-                {
-                    'node': {
-                        'name': 'Program with partner access'
+                        'name': 'Program for User Role'
                     }
                 }
             ],
-            'totalCount': 2
+            'totalCount': 1
         }
     }
 }
@@ -83,6 +78,11 @@ snapshots['TestAllProgramsQuery::test_all_programs_query_filter_beneficiary_grou
                 },
                 {
                     'node': {
+                        'name': 'Program for Partner Role'
+                    }
+                },
+                {
+                    'node': {
                         'name': 'Program with all partners access'
                     }
                 },
@@ -98,11 +98,11 @@ snapshots['TestAllProgramsQuery::test_all_programs_query_filter_beneficiary_grou
                 },
                 {
                     'node': {
-                        'name': 'Program without partner access'
+                        'name': 'Program with selected partner access'
                     }
                 }
             ],
-            'totalCount': 7
+            'totalCount': 8
         }
     }
 }
@@ -128,7 +128,7 @@ snapshots['TestAllProgramsQuery::test_all_programs_query_filter_dct 1'] = {
                 },
                 {
                     'node': {
-                        'name': 'Program without partner access'
+                        'name': 'Program with selected partner access'
                     }
                 }
             ],
@@ -137,10 +137,65 @@ snapshots['TestAllProgramsQuery::test_all_programs_query_filter_dct 1'] = {
     }
 }
 
+snapshots['TestAllProgramsQuery::test_all_programs_query_first_partner 1'] = {
+    'data': {
+        'allPrograms': {
+            'edges': [
+                {
+                    'node': {
+                        'name': 'Program for Partner Role'
+                    }
+                },
+                {
+                    'node': {
+                        'name': 'Program with all partners access'
+                    }
+                },
+                {
+                    'node': {
+                        'name': 'Program with partner access'
+                    }
+                }
+            ],
+            'totalCount': 3
+        }
+    }
+}
+
+snapshots['TestAllProgramsQuery::test_all_programs_query_other_partner 1'] = {
+    'data': {
+        'allPrograms': {
+            'edges': [
+                {
+                    'node': {
+                        'name': 'Program for Partner Role'
+                    }
+                },
+                {
+                    'node': {
+                        'name': 'Program with all partners access'
+                    }
+                },
+                {
+                    'node': {
+                        'name': 'Program with selected partner access'
+                    }
+                }
+            ],
+            'totalCount': 3
+        }
+    }
+}
+
 snapshots['TestAllProgramsQuery::test_all_programs_query_unicef_partner 1'] = {
     'data': {
         'allPrograms': {
             'edges': [
+                {
+                    'node': {
+                        'name': 'Program for Partner Role'
+                    }
+                },
                 {
                     'node': {
                         'name': 'Program with all partners access'
@@ -158,11 +213,11 @@ snapshots['TestAllProgramsQuery::test_all_programs_query_unicef_partner 1'] = {
                 },
                 {
                     'node': {
-                        'name': 'Program without partner access'
+                        'name': 'Program with selected partner access'
                     }
                 }
             ],
-            'totalCount': 4
+            'totalCount': 5
         }
     }
 }

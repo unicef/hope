@@ -7,12 +7,8 @@ from django.utils import timezone
 
 from constance import config
 
-from hct_mis_api.apps.account.models import Partner, User, UserRole
-from hct_mis_api.apps.account.permissions import (
-    DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER,
-    Permissions,
-)
-from hct_mis_api.apps.core.models import BusinessAreaPartnerThrough
+from hct_mis_api.apps.account.models import RoleAssignment, User
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.utils.mailjet import MailjetClient
@@ -75,36 +71,23 @@ class PaymentNotification:
         business_area = self.payment_plan.business_area
         program = self.payment_plan.program
 
-        user_roles = (
-            UserRole.objects.filter(
-                role__permissions__contains=[permission],
-                business_area=business_area,
+        role_assignments = (
+            RoleAssignment.objects.filter(
+                Q(role__permissions__contains=[permission])
+                & Q(business_area=business_area)
+                & (Q(program=None) | Q(program=program))
             )
             .exclude(expiry_date__lt=timezone.now())
             .distinct()
         )
-
-        ba_partner_with_permission = BusinessAreaPartnerThrough.objects.filter(
-            business_area=business_area,
-            roles__permissions__contains=[permission],
-        ).distinct()
-        partners_with_permission = Partner.objects.filter(business_area_partner_through__in=ba_partner_with_permission)
-        partner_role_q = Q(partner__in=partners_with_permission)
-
-        program_access_q = Q(partner__in=program.partners.all())
-
-        unicef_q = (
-            Q(user_roles__business_area=business_area, partner__name="UNICEF")
-            if permission in DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER
-            else Q()
-        )
         users = (
             User.objects.filter(
-                (Q(user_roles__in=user_roles) & program_access_q) | Q(partner_role_q & program_access_q) | unicef_q
+                Q(role_assignments__in=role_assignments) | Q(partner__role_assignments__in=role_assignments)
             )
             .exclude(id=self.action_user.id)
             .distinct()
         )
+
         if settings.ENV == "prod":
             users = users.exclude(is_superuser=True)
         return users

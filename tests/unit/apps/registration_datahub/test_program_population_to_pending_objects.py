@@ -593,7 +593,7 @@ class TestProgramPopulationToPendingObjects(APITestCase):
         individual_already_in_program_from.save()
 
         self.assertFalse(
-            Individual.pending_objects.filter(unicef_id=individuals[0].unicef_id).exists(),
+            Individual.pending_objects.filter(unicef_id=individual_already_in_program_from.unicef_id).exists(),
         )
         import_program_population(
             import_from_program_id=str(self.program_from.id),
@@ -631,9 +631,9 @@ class TestProgramPopulationToPendingObjects(APITestCase):
                 individual=individual_already_in_program_from,
             ).first(),
         )
-        # role in new program
+        # role in new program - New Role is within PENDING rdi_merge_status
         self.assertIsNotNone(
-            IndividualRoleInHousehold.original_and_repr_objects.filter(
+            IndividualRoleInHousehold.pending_objects.filter(
                 household=new_hh_repr,
                 individual=individual_already_in_program_to,
             ).first(),

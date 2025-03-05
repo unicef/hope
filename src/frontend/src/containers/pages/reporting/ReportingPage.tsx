@@ -1,7 +1,7 @@
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import { useMeQuery, useReportChoiceDataQuery } from '@generated/graphql';
+import { useReportChoiceDataQuery } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
@@ -13,6 +13,8 @@ import { ReportingFilters } from '../../tables/ReportingTable/ReportingFilters';
 import { ReportingTable } from '../../tables/ReportingTable/ReportingTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 
 const initialFilter = {
   type: '',
@@ -31,8 +33,11 @@ function ReportingPage(): ReactElement {
   const { data: choicesData, loading: choicesLoading } =
     useReportChoiceDataQuery();
 
-  const { data: meData, loading: meLoading } = useMeQuery({
-    fetchPolicy: 'cache-first',
+  const { data: meData, isLoading: meLoading } = useQuery({
+    queryKey: ['profile'],
+    queryFn: () => {
+      return RestService.restProfileRetrieve();
+    },
   });
 
   const [filter, setFilter] = useState(

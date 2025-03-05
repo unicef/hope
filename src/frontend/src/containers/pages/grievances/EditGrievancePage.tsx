@@ -18,7 +18,6 @@ import {
   useGrievanceTicketQuery,
   useGrievanceTicketStatusChangeMutation,
   useGrievancesChoiceDataQuery,
-  useMeQuery,
   useUpdateGrievanceMutation,
 } from '@generated/graphql';
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
@@ -80,6 +79,8 @@ import { grievancePermissions } from './GrievancesDetailsPage/grievancePermissio
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -114,8 +115,14 @@ const EditGrievancePage = (): ReactElement => {
     fetchPolicy: 'cache-and-network',
   });
 
-  const { data: currentUserData, loading: currentUserDataLoading } =
-    useMeQuery();
+  const { data: currentUserData, isLoading: currentUserDataLoading } = useQuery(
+    {
+      queryKey: ['profile'],
+      queryFn: () => {
+        return RestService.restProfileRetrieve();
+      },
+    },
+  );
 
   const { data: choicesData, loading: choicesLoading } =
     useGrievancesChoiceDataQuery();
@@ -183,7 +190,7 @@ const EditGrievancePage = (): ReactElement => {
     [id: number]: string;
   } = choicesToDict(choicesData.grievanceTicketCategoryChoices);
 
-  const currentUserId = currentUserData.me.id;
+  const currentUserId = currentUserData.id;
   const ticket = ticketData.grievanceTicket;
 
   const isCreator = ticket.createdBy?.id === currentUserId;

@@ -1,4 +1,3 @@
-import { fetchPeriodicDataUpdateTemplates } from '@api/periodicDataUpdateApi';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { UniversalMoment } from '@components/core/UniversalMoment';
@@ -23,6 +22,7 @@ import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { PeriodicDataUpdateTemplateList } from '@restgenerated/models/PeriodicDataUpdateTemplateList';
+import { RestService } from '@restgenerated/services/RestService';
 
 const templatesHeadCells: HeadCell<PeriodicDataUpdateTemplateList>[] = [
   {
@@ -145,12 +145,16 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
       programId,
       queryVariables,
     ],
-    queryFn: () =>
-      fetchPeriodicDataUpdateTemplates(
+    queryFn: () => {
+      const { ordering } = queryVariables;
+      return RestService.restProgramsPeriodicDataUpdatePeriodicDataUpdateTemplatesList(
         businessAreaSlug,
         programId,
-        queryVariables,
-      ),
+        null,
+        null,
+        ordering,
+      );
+    },
   });
 
   const selectedTemplate = templatesData?.results?.find(
