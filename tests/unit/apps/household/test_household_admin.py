@@ -4,7 +4,6 @@ from django.http import HttpRequest
 from django.test import TestCase
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.utils import encode_id_base64_required
 from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
@@ -26,7 +25,7 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         business_area = create_afghanistan()
-        cls.program = ProgramFactory(business_area=business_area)
+        cls.program = ProgramFactory(business_area=business_area, status="ACTIVE")
         cls.program_other = ProgramFactory(business_area=business_area)
         cls.household_unicef_id = "HH-20-0192.6628"
         cls.household2_unicef_id = "HH-20-0192.6629"
@@ -98,10 +97,10 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
             "step": "3",
             "household_list": f"{self.household.unicef_id}, {self.household2.unicef_id}",
             "tag": tag,
-            "program_id": encode_id_base64_required(self.program.id, "Program"),
+            "program": str(self.program.id),
         }
 
-        with self.assertNumQueries(28):
+        with self.assertNumQueries(27):
             HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=request)
 
         self.household.refresh_from_db()
@@ -221,17 +220,6 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
             "",
         )
 
-    def test_get_program_from_encoded_id_wrong(self) -> None:
-        self.assertIsNone(HouseholdWithdrawFromListMixin.get_program_from_encoded_id("wrong_id"))
-
-    def test_get_program_from_encoded_id(self) -> None:
-        self.assertEqual(
-            HouseholdWithdrawFromListMixin.get_program_from_encoded_id(
-                encode_id_base64_required(self.program.id, "Program")
-            ),
-            self.program,
-        )
-
     def test_split_list_of_ids(self) -> None:
         self.assertEqual(
             HouseholdWithdrawFromListMixin.split_list_of_ids(
@@ -245,14 +233,74 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
         request.method = "POST"
         household_list = f"{self.household.unicef_id}"
         tag = "Some tag reason"
-        program_id = encode_id_base64_required(self.program.id, "Program")
         request.POST = {  # type: ignore
             "household_list": household_list,
             "tag": tag,
-            "program_id": program_id,
+            "program": str(self.program.id),
         }
         context = {}
         HouseholdWithdrawFromListMixin.get_and_set_context_data(request, context)
-        self.assertEqual(context["program_id"], program_id)
+        self.assertEqual(context["program"], str(self.program.id))
         self.assertEqual(context["household_list"], household_list)
         self.assertEqual(context["tag"], tag)
+
+    def test_get_request(self) -> None:
+        def mock_get_common_context(*args: Any, **kwargs: Any) -> dict:
+            return {}
+
+        HouseholdWithdrawFromListMixin.get_common_context = mock_get_common_context
+
+        request = HttpRequest()
+        request.method = "GET"
+        resp = HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=request)
+        self.assertEqual(resp.status_code, 200)
+
+    def test_post_households_withdraw_from_list_step_1(self) -> None:
+        def mock_get_common_context(*args: Any, **kwargs: Any) -> dict:
+            return {}
+
+        def mock_message_user(*args: Any, **kwargs: Any) -> None:
+            pass
+
+        HouseholdWithdrawFromListMixin.get_common_context = mock_get_common_context
+        HouseholdWithdrawFromListMixin.message_user = mock_message_user
+
+        request = HttpRequest()
+        request.method = "POST"
+        tag = "Some tag reason"
+        request.POST = {  # type: ignore
+            "step": "1",
+            "household_list": f"{self.household.unicef_id}, {self.household2.unicef_id}",
+            "tag": tag,
+            "program": str(self.program.id),
+        }
+
+        with self.assertNumQueries(1):
+            resp = HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=request)
+
+        self.assertEqual(resp.status_code, 200)
+
+    def test_post_households_withdraw_from_list_step_2(self) -> None:
+        def mock_get_common_context(*args: Any, **kwargs: Any) -> dict:
+            return {}
+
+        def mock_message_user(*args: Any, **kwargs: Any) -> None:
+            pass
+
+        HouseholdWithdrawFromListMixin.get_common_context = mock_get_common_context
+        HouseholdWithdrawFromListMixin.message_user = mock_message_user
+
+        request = HttpRequest()
+        request.method = "POST"
+        tag = "Some tag reason"
+        request.POST = {  # type: ignore
+            "step": "2",
+            "household_list": f"{self.household.unicef_id}, {self.household2.unicef_id}",
+            "tag": tag,
+            "program": str(self.program.id),
+        }
+
+        with self.assertNumQueries(2):
+            resp = HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=request)
+
+        self.assertEqual(resp.status_code, 200)
