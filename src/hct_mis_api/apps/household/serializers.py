@@ -1,5 +1,6 @@
-from datetime import datetime
-from typing import TYPE_CHECKING, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
+
+from django.db.models import DateTimeField
 
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import Payment, PaymentPlan
@@ -9,7 +10,7 @@ if TYPE_CHECKING:
     from hct_mis_api.apps.household.models import Individual
 
 
-def get_household_status(household: Household) -> Tuple[str, datetime]:
+def get_household_status(household: Optional[Household]) -> Tuple[str, Optional[DateTimeField]]:
     if household.rdi_merge_status == MergeStatusModel.PENDING:
         return "imported", household.updated_at
     if household.rdi_merge_status == MergeStatusModel.MERGED:
@@ -35,10 +36,10 @@ def get_individual_info(individual: "Individual", tax_id: Optional[str]) -> Dict
 
 
 def get_household_info(
-    household: Household, individual: Optional["Individual"] = None, tax_id: Optional[str] = None
-) -> Dict:
+    household: Optional[Household], individual: Optional["Individual"] = None, tax_id: Optional[str] = None
+) -> Dict[str, Any]:
     status, date = get_household_status(household)
-    output = {"status": status, "date": date}
+    output: Dict = {"status": status, "date": date}
     if individual:
         output["individual"] = get_individual_info(individual, tax_id=tax_id)
     return {"info": output}
@@ -48,5 +49,5 @@ def serialize_by_individual(individual: "Individual", tax_id: str) -> Dict:
     return get_household_info(individual.household, individual, tax_id)
 
 
-def serialize_by_household(household: Household) -> Dict:
+def serialize_by_household(household: Optional[Household]) -> Dict:
     return get_household_info(household)

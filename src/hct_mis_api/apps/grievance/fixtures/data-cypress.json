@@ -28,8 +28,6 @@
             "urgency": 2,
             "partner": null,
             "comments": null,
-            "is_original": false,
-            "is_migration_handled": false,
             "copied_from": null,
             "programs": [
                 "de3a43bf-a755-41ff-a5c0-acd02cf3d244"
@@ -65,8 +63,6 @@
             "urgency": 2,
             "partner": null,
             "comments": null,
-            "is_original": false,
-            "is_migration_handled": false,
             "copied_from": null,
             "programs": [
                 "de3a43bf-a755-41ff-a5c0-acd02cf3d244"
@@ -102,8 +98,6 @@
             "urgency": 3,
             "partner": null,
             "comments": null,
-            "is_original": false,
-            "is_migration_handled": false,
             "copied_from": null,
             "programs": [
                 "de3a43bf-a755-41ff-a5c0-acd02cf3d244"
@@ -139,8 +133,6 @@
             "urgency": 0,
             "partner": null,
             "comments": null,
-            "is_original": false,
-            "is_migration_handled": false,
             "copied_from": null,
             "programs": [
                 "de3a43bf-a755-41ff-a5c0-acd02cf3d244"
@@ -176,8 +168,6 @@
             "urgency": 2,
             "partner": null,
             "comments": null,
-            "is_original": false,
-            "is_migration_handled": false,
             "copied_from": null,
             "programs": [
                 "de3a43bf-a755-41ff-a5c0-acd02cf3d244"
@@ -213,8 +203,6 @@
             "urgency": 1,
             "partner": null,
             "comments": null,
-            "is_original": false,
-            "is_migration_handled": false,
             "copied_from": null,
             "programs": [
                 "de3a43bf-a755-41ff-a5c0-acd02cf3d244"
@@ -250,8 +238,6 @@
             "urgency": 2,
             "partner": null,
             "comments": null,
-            "is_original": false,
-            "is_migration_handled": false,
             "copied_from": null,
             "programs": [
                 "de3a43bf-a755-41ff-a5c0-acd02cf3d244"

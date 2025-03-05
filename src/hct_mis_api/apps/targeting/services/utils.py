@@ -25,14 +25,14 @@ def get_unicef_ids(ids_string: str, type_id: str, program: "Program") -> str:
     ids_list = [i.strip() for i in ids_list]
     if type_id == "household":
         hh_ids = [hh_id for hh_id in ids_list if hh_id.startswith("HH")]
-        list_ids = (
+        list_ids = list(
             Household.objects.filter(unicef_id__in=hh_ids, program=program)
             .order_by("unicef_id")
             .values_list("unicef_id", flat=True)
         )
     if type_id == "individual":
         ind_ids = [ind_id for ind_id in ids_list if ind_id.startswith("IND")]
-        list_ids = (
+        list_ids = list(
             Individual.objects.filter(unicef_id__in=ind_ids, program=program)
             .order_by("unicef_id")
             .values_list("unicef_id", flat=True)
