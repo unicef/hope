@@ -4,7 +4,6 @@ from django.http import HttpRequest
 from django.test import TestCase
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.utils import encode_id_base64_required
 from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
@@ -26,7 +25,7 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         business_area = create_afghanistan()
-        cls.program = ProgramFactory(business_area=business_area)
+        cls.program = ProgramFactory(business_area=business_area, status="ACTIVE")
         cls.program_other = ProgramFactory(business_area=business_area)
         cls.household_unicef_id = "HH-20-0192.6628"
         cls.household2_unicef_id = "HH-20-0192.6629"
@@ -98,10 +97,10 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
             "step": "3",
             "household_list": f"{self.household.unicef_id}, {self.household2.unicef_id}",
             "tag": tag,
-            "program_id": encode_id_base64_required(self.program.id, "Program"),
+            "program": str(self.program.id),
         }
 
-        with self.assertNumQueries(28):
+        with self.assertNumQueries(27):
             HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=request)
 
         self.household.refresh_from_db()
@@ -221,17 +220,6 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
             "",
         )
 
-    def test_get_program_from_encoded_id_wrong(self) -> None:
-        self.assertIsNone(HouseholdWithdrawFromListMixin.get_program_from_encoded_id("wrong_id"))
-
-    def test_get_program_from_encoded_id(self) -> None:
-        self.assertEqual(
-            HouseholdWithdrawFromListMixin.get_program_from_encoded_id(
-                encode_id_base64_required(self.program.id, "Program")
-            ),
-            self.program,
-        )
-
     def test_split_list_of_ids(self) -> None:
         self.assertEqual(
             HouseholdWithdrawFromListMixin.split_list_of_ids(
@@ -245,14 +233,13 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
         request.method = "POST"
         household_list = f"{self.household.unicef_id}"
         tag = "Some tag reason"
-        program_id = encode_id_base64_required(self.program.id, "Program")
         request.POST = {  # type: ignore
             "household_list": household_list,
             "tag": tag,
-            "program_id": program_id,
+            "program": str(self.program.id),
         }
         context = {}
         HouseholdWithdrawFromListMixin.get_and_set_context_data(request, context)
-        self.assertEqual(context["program_id"], program_id)
+        self.assertEqual(context["program"], str(self.program.id))
         self.assertEqual(context["household_list"], household_list)
         self.assertEqual(context["tag"], tag)
