@@ -65,7 +65,9 @@ class TestLogEntriesQueries(APITestCase):
         cls.user = UserFactory(first_name="First", last_name="Last", partner=cls.partner)
         cls.partner_2 = PartnerFactory(name="Test_2")
         cls.user_without_perms = UserFactory(partner=cls.partner_2)
-        cls.create_user_role_with_permissions(cls.user, [Permissions.ACTIVITY_LOG_VIEW], business_area)
+        cls.create_user_role_with_permissions(
+            cls.user, [Permissions.ACTIVITY_LOG_VIEW], business_area, whole_business_area_access=True
+        )
 
         cls.program_1 = ProgramFactory(business_area=business_area, pk="ad17c53d-11b0-4e9b-8407-2e034f03fd31")
         program_2 = ProgramFactory(business_area=business_area, pk="c74612a1-212c-4148-be5b-4b41d20e623c")

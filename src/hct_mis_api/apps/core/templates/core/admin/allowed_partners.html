@@ -1,0 +1,19 @@
+{% extends "admin_extra_buttons/action_page.html" %}
+{% load i18n admin_urls static admin_modify mptt_tags engine %}
+
+{% block action-content %}
+<form action="{% url 'admin:core_businessarea_change' business_area.id %}" method="get">
+    <input type="submit" value="Back to Business Area" class="button-like-input">
+</form><br><br>
+<h1>Allowed Partners for {{ business_area.name }}</h1>
+
+<form method="post" enctype="multipart/form-data" class="admin-form" >
+    {% csrf_token %}
+    {{ form.media }}
+    {{ form.partners }}
+    <div style="position:absolute;bottom:0;">
+        <input type="submit" value="Save">
+    </div>
+</form>
+
+{% endblock %}

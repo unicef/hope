@@ -21,13 +21,9 @@ from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 
 from hct_mis_api.apps.account.fixtures import RoleFactory, UserFactory
-from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
+from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment, User
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.models import (
-    BusinessArea,
-    BusinessAreaPartnerThrough,
-    DataCollectingType,
-)
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.fixtures import DocumentTypeFactory
 from hct_mis_api.apps.household.models import DocumentType
@@ -122,6 +118,17 @@ def get_redis_host() -> str:
     regex = "\\/\\/(.*):"
     redis_host = re.search(regex, env("CACHE_LOCATION")).group(1)
     return redis_host
+
+
+@pytest.fixture(autouse=True)
+def create_unicef_partner() -> None:
+    unicef, _ = Partner.objects.get_or_create(name="UNICEF")
+    Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER, parent=unicef)
+
+
+@pytest.fixture(autouse=True)
+def create_role_with_all_permissions() -> None:
+    Role.objects.get_or_create(name="Role with all permissions")
 
 
 @pytest.fixture(autouse=True)
@@ -314,6 +321,15 @@ def login(browser: Chrome) -> Chrome:
     browser.find_element(By.ID, password).send_keys("testtest2")
     browser.find_element(By.XPATH, loginButton).click()
     browser.get(f"{browser.live_server.url}/")
+
+    # Clear cache
+    WebDriverWait(browser, 10).until(
+        EC.visibility_of_element_located((By.CSS_SELECTOR, 'button[data-cy="menu-user-profile"]'))
+    ).click()
+    WebDriverWait(browser, 10).until(
+        EC.visibility_of_element_located((By.CSS_SELECTOR, 'li[data-cy="menu-item-clear-cache"]'))
+    ).click()
+
     from django.core.cache import cache
 
     cache.clear()
@@ -531,7 +547,7 @@ def pageCountryDashboard(request: FixtureRequest, browser: Chrome) -> CountryDas
 
 
 @pytest.fixture
-def business_area() -> BusinessArea:
+def business_area(create_unicef_partner: Any, create_role_with_all_permissions: Any) -> BusinessArea:
     business_area, _ = BusinessArea.objects.get_or_create(
         **{
             "pk": "c259b1a0-ae3a-494e-b343-f7c8eb060c68",
@@ -595,6 +611,7 @@ def create_super_user(business_area: BusinessArea) -> User:
 
     Partner.objects.get_or_create(name="TEST")
     partner, _ = Partner.objects.get_or_create(name="UNICEF")
+    unicef_hq, _ = Partner.objects.get_or_create(name="UNICEF HQ", parent=partner)
     Partner.objects.get_or_create(name="UNHCR")
 
     permission_list = [role.value for role in Permissions]
@@ -614,22 +631,22 @@ def create_super_user(business_area: BusinessArea) -> User:
             email="test@example.com",
             first_name="Test",
             last_name="Selenium",
-            partner=partner,
+            partner=unicef_hq,
         )
-    UserRole.objects.get_or_create(
+    RoleAssignment.objects.get_or_create(
         user=user,
         role=Role.objects.get(name="Role"),
         business_area=business_area,
     )
 
-    for partner in Partner.objects.exclude(name="UNICEF"):
+    for partner in Partner.objects.exclude(name__in=["UNICEF", settings.DEFAULT_EMPTY_PARTNER]):
         partner.allowed_business_areas.add(business_area)
         role = RoleFactory(name=f"Role for {partner.name}")
-        partner_through, _ = BusinessAreaPartnerThrough.objects.get_or_create(
+        partner_role_assignmnet, _ = RoleAssignment.objects.get_or_create(
             business_area=business_area,
             partner=partner,
+            role=role,
         )
-        partner_through.roles.set([role])
 
     assert User.objects.filter(email="test@example.com").first()
     assert user.is_superuser
@@ -682,10 +699,9 @@ def create_super_user(business_area: BusinessArea) -> User:
         )
         data_collecting_type.limit_to.add(business_area)
         data_collecting_type.save()
-    ba_partner_through, _ = BusinessAreaPartnerThrough.objects.get_or_create(
-        business_area=business_area, partner=partner
+    partner_role_assignment, _ = RoleAssignment.objects.get_or_create(
+        business_area=business_area, partner=partner, role=role
     )
-    ba_partner_through.roles.set([role])
 
     # add document types
     doc_type_keys = (

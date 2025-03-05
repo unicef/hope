@@ -8,7 +8,11 @@ import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { ProgrammeChoiceDataQuery, ProgramQuery } from '@generated/graphql';
 import { Box, Grid2 as Grid, Typography } from '@mui/material';
-import { choicesToDict, programStatusToColor } from '@utils/utils';
+import {
+  choicesToDict,
+  programStatusToColor,
+  isPartnerVisible,
+} from '@utils/utils';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { MiśTheme } from '../../../theme';
@@ -78,8 +82,8 @@ export const ProgramDetails = ({
     );
   };
 
-  const partners = program.partners.filter(
-    (partner) => partner.name !== 'UNICEF',
+  const partners = program.partners.filter((partner) =>
+    isPartnerVisible(partner.name),
   );
 
   const showPartners = partners.length > 0;

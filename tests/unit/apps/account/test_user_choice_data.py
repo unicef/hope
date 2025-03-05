@@ -1,10 +1,10 @@
-from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory, UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 
 
-class UserRolesTest(APITestCase):
+class RoleAssignmentsTest(APITestCase):
     USER_CHOICE_DATA_QUERY = """
     query userChoiceData {
       userPartnerChoices
@@ -24,21 +24,30 @@ class UserRolesTest(APITestCase):
 
         # UNICEF partner
         partner_unicef, _ = Partner.objects.get_or_create(name="UNICEF")
-        cls.user = UserFactory(partner=partner_unicef, username="unicef_user")
+
+        # UNICEF subpartner
+        unicef_afghanistan = PartnerFactory(name=f"UNICEF Partner for {cls.business_area.slug}", parent=partner_unicef)
+        cls.user = UserFactory(partner=unicef_afghanistan, username="unicef_user")
 
         # partner with role in BA
-        PartnerFactory(name="Partner with BA access")
+        partner_with_role = PartnerFactory(name="Partner with BA access")
 
-        for partner in Partner.objects.exclude(name="UNICEF"):  # unicef partner should be available everywhere
+        # partner allowed in BA but is a parent
+        parent_partner = PartnerFactory(name="Parent Partner with BA access")
+        partner_with_role.parent = parent_partner
+        partner_with_role.save()
+
+        parent_partner.allowed_business_areas.add(cls.business_area)
+
+        for partner in Partner.objects.exclude(id__in=[partner_unicef.id, parent_partner.id]):
             partner.allowed_business_areas.add(cls.business_area)
-            role = RoleFactory(name=f"Role for {partner.name}")
-            cls.add_partner_role_in_business_area(partner, cls.business_area, [role])
+            cls.create_partner_role_with_permissions(partner, [], cls.business_area)
 
-        # partner allowed in BA but without role -> is not listed
+        # partner allowed in BA but without role -> listed anyway
         partner_without_role = PartnerFactory(name="Partner Without Role")
         partner_without_role.allowed_business_areas.add(cls.business_area)
 
-        # partner not allowed in BA
+        # partner not allowed in BA -> not listed
         PartnerFactory(name="Partner Not Allowed in BA")
 
     def test_user_choice_data(self) -> None:

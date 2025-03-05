@@ -64,7 +64,9 @@ class TestPaymentPlanServices(APITestCase):
         generate_delivery_mechanisms()
         cls.business_area = create_afghanistan()
         cls.user = UserFactory.create()
-        cls.create_user_role_with_permissions(cls.user, [Permissions.PM_CREATE], cls.business_area)
+        cls.create_user_role_with_permissions(
+            cls.user, [Permissions.PM_CREATE], cls.business_area, whole_business_area_access=True
+        )
         cls.dm_transfer_to_account = DeliveryMechanism.objects.get(code="transfer_to_account")
         cls.program = ProgramFactory(status=Program.ACTIVE)
         cls.cycle = cls.program.cycles.first()

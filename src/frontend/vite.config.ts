@@ -10,12 +10,13 @@ export default defineConfig({
   resolve: {
     mainFields: [],
   },
-  esbuild: {
-    loader: 'tsx',
-    include: /\.[jt]sx?$/,
-    exclude: /node_modules/,
-    jsxFactory: 'createElement',
-    jsxFragment: 'Fragment',
+  optimizeDeps: {
+    esbuildOptions: {
+      loader: {
+        '.ts': 'ts', // Pure TypeScript for .ts
+        '.tsx': 'tsx', // TypeScript with JSX for .tsx
+      },
+    },
   },
   build: {
     outDir: 'build',

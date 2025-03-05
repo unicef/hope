@@ -312,6 +312,7 @@ class TestPaymentPlanQueries(APITestCase):
             cls.user,
             [Permissions.PM_VIEW_LIST, Permissions.PM_VIEW_DETAILS, Permissions.ACTIVITY_LOG_VIEW],
             cls.business_area,
+            whole_business_area_access=True,
         )
 
         with freeze_time("2020-10-10"):
@@ -460,9 +461,9 @@ class TestPaymentPlanQueries(APITestCase):
 
     @freeze_time("2020-10-10")
     def test_fetch_all_payments_for_open_payment_plan(self) -> None:
-        from hct_mis_api.apps.account.models import UserRole
+        from hct_mis_api.apps.account.models import RoleAssignment
 
-        role = UserRole.objects.get(user=self.user).role
+        role = RoleAssignment.objects.get(user=self.user).role
         role.permissions.append("PM_VIEW_FSP_AUTH_CODE")
         role.save()
 
@@ -987,7 +988,13 @@ class TestPaymentPlanQueries(APITestCase):
         self, _: Any, permissions: List[Permissions], communication_channel: str
     ) -> None:
         user = UserFactory.create(username="abc")
-        self.create_user_role_with_permissions(user, permissions, self.business_area)
+
+        # necessary permissions
+        self.create_user_role_with_permissions(
+            user, [Permissions.PM_VIEW_DETAILS], self.business_area, whole_business_area_access=True
+        )
+
+        self.create_user_role_with_permissions(user, permissions, self.business_area, whole_business_area_access=True)
 
         payment_plan = PaymentPlanFactory(
             name="Test Finished PP",

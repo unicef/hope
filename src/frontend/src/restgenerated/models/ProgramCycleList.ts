@@ -17,5 +17,6 @@ export type ProgramCycleList = {
     readonly frequency_of_payments: string;
     readonly created_by: string;
     readonly admin_url: string | null;
+    readonly can_remove_cycle: boolean;
 };
 

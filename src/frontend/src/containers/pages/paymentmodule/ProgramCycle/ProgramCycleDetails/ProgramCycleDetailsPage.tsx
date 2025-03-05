@@ -1,7 +1,6 @@
 import { ReactElement, useState } from 'react';
 import { decodeIdString, getFilterFromQueryParams } from '@utils/utils';
 import { useQuery } from '@tanstack/react-query';
-import { fetchProgramCycle } from '@api/programCycleApi';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useLocation, useParams } from 'react-router-dom';
 import { ProgramCycleDetailsHeader } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/ProgramCycleDetailsHeader';
@@ -12,6 +11,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { PaymentPlansTable } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansTable';
 import { PaymentPlansFilters } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansFilters';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { RestService } from '@restgenerated/services/RestService';
 
 const initialFilter = {
   search: '',
@@ -35,11 +35,15 @@ export const ProgramCycleDetailsPage = (): ReactElement => {
     queryKey: [
       'programCyclesDetails',
       businessArea,
-      programId,
       decodedProgramCycleId,
+      programId,
     ],
-    queryFn: async () => {
-      return fetchProgramCycle(businessArea, programId, decodedProgramCycleId);
+    queryFn: () => {
+      return RestService.restProgramsCyclesRetrieve(
+        businessArea,
+        decodedProgramCycleId,
+        programId,
+      );
     },
   });
   const [filter, setFilter] = useState(

@@ -85,7 +85,12 @@ class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.L
     def get_queryset(self) -> QuerySet:
         business_area = self.get_business_area()
         queryset = PaymentPlan.objects.filter(business_area=business_area)
-        program_ids = self.request.user.partner.get_program_ids_for_business_area(str(business_area.id))
+        program_ids = self.request.user.get_program_ids_for_permission_in_business_area(
+            str(business_area.id),
+            [perm for perm_class in self.permission_classes for perm in perm_class.PERMISSIONS],
+            one_of_permissions=False,
+        )
+
         return queryset.filter(
             status__in=[
                 PaymentPlan.Status.IN_APPROVAL,
@@ -137,10 +142,9 @@ class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.L
         payment_plan_id = decode_id_string(payment_plan_id_str)
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
 
-        if not self.request.user.has_permission(
-            self._get_action_permission(input_data["action"]),
-            business_area,
-            payment_plan.program_cycle.program_id,
+        if not self.request.user.has_perm(
+            self._get_action_permission(input_data["action"]),  # type: ignore
+            payment_plan.program_cycle.program or business_area,
         ):
             raise PermissionDenied(
                 f"You do not have permission to perform action {input_data['action']} "

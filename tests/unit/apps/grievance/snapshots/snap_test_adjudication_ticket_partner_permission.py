@@ -7,7 +7,7 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestAdjudicationTicketPartnerPermission::test_close_ticket_when_partner_does_not_have_permission 1'] = {
+snapshots['TestAdjudicationTicketPartnerPermission::test_close_ticket_when_partner_does_not_have_admin_area_access 1'] = {
     'data': {
         'grievanceStatusChange': None
     },
@@ -40,7 +40,27 @@ snapshots['TestAdjudicationTicketPartnerPermission::test_close_ticket_when_partn
     }
 }
 
-snapshots['TestAdjudicationTicketPartnerPermission::test_close_ticket_when_partner_with_permission 1'] = {
+snapshots['TestAdjudicationTicketPartnerPermission::test_close_ticket_when_partner_with_admin_area_access 1'] = {
+    'data': {
+        'grievanceStatusChange': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied: User does not have access to close ticket',
+            'path': [
+                'grievanceStatusChange'
+            ]
+        }
+    ]
+}
+
+snapshots['TestAdjudicationTicketPartnerPermission::test_close_ticket_when_partner_with_admin_area_access_and_no_selected_program 1'] = {
     'data': {
         'grievanceStatusChange': {
             '__typename': 'GrievanceStatusChangeMutation',
@@ -53,20 +73,27 @@ snapshots['TestAdjudicationTicketPartnerPermission::test_close_ticket_when_partn
     }
 }
 
-snapshots['TestAdjudicationTicketPartnerPermission::test_close_ticket_when_partner_with_permission_and_no_selected_program 1'] = {
+snapshots['TestAdjudicationTicketPartnerPermission::test_close_ticket_without_permissions 1'] = {
     'data': {
-        'grievanceStatusChange': {
-            '__typename': 'GrievanceStatusChangeMutation',
-            'grievanceTicket': {
-                '__typename': 'GrievanceTicketNode',
-                'description': 'GrievanceTicket',
-                'status': 6
-            }
+        'grievanceStatusChange': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied: User does not have correct permission.',
+            'path': [
+                'grievanceStatusChange'
+            ]
         }
-    }
+    ]
 }
 
-snapshots['TestAdjudicationTicketPartnerPermission::test_select_individual_when_partner_does_not_have_permission 1'] = {
+snapshots['TestAdjudicationTicketPartnerPermission::test_select_individual_when_partner_does_not_have_admin_area_access 1'] = {
     'data': {
         'approveNeedsAdjudication': None
     },
@@ -99,7 +126,7 @@ snapshots['TestAdjudicationTicketPartnerPermission::test_select_individual_when_
     }
 }
 
-snapshots['TestAdjudicationTicketPartnerPermission::test_select_individual_when_partner_with_permission 1'] = {
+snapshots['TestAdjudicationTicketPartnerPermission::test_select_individual_when_partner_with_admin_area_access 1'] = {
     'data': {
         'approveNeedsAdjudication': {
             '__typename': 'NeedsAdjudicationApproveMutation',
@@ -112,7 +139,7 @@ snapshots['TestAdjudicationTicketPartnerPermission::test_select_individual_when_
     }
 }
 
-snapshots['TestAdjudicationTicketPartnerPermission::test_select_individual_when_partner_with_permission_and_no_selected_program 1'] = {
+snapshots['TestAdjudicationTicketPartnerPermission::test_select_individual_when_partner_with_admin_area_access_and_no_selected_program 1'] = {
     'data': {
         'approveNeedsAdjudication': {
             '__typename': 'NeedsAdjudicationApproveMutation',
@@ -125,7 +152,7 @@ snapshots['TestAdjudicationTicketPartnerPermission::test_select_individual_when_
     }
 }
 
-snapshots['TestAdjudicationTicketPartnerPermission::test_select_individual_when_partner_with_permission_with_selectedIndividualId 1'] = {
+snapshots['TestAdjudicationTicketPartnerPermission::test_select_individual_when_partner_with_admin_area_access_with_selectedIndividualId 1'] = {
     'data': {
         'approveNeedsAdjudication': {
             '__typename': 'NeedsAdjudicationApproveMutation',
@@ -138,7 +165,7 @@ snapshots['TestAdjudicationTicketPartnerPermission::test_select_individual_when_
     }
 }
 
-snapshots['TestAdjudicationTicketPartnerPermission::test_select_individual_when_partner_with_permission_with_selectedIndividualId_incorrect 1'] = {
+snapshots['TestAdjudicationTicketPartnerPermission::test_select_individual_when_partner_with_admin_area_access_with_selectedIndividualId_incorrect 1'] = {
     'data': {
         'approveNeedsAdjudication': None
     },
@@ -158,7 +185,7 @@ snapshots['TestAdjudicationTicketPartnerPermission::test_select_individual_when_
     ]
 }
 
-snapshots['TestAdjudicationTicketPartnerPermission::test_select_individual_when_partner_with_permission_with_selected_individual_and_selected_individuals 1'] = {
+snapshots['TestAdjudicationTicketPartnerPermission::test_select_individual_when_partner_with_admin_area_access_with_selected_individual_and_selected_individuals 1'] = {
     'data': {
         'approveNeedsAdjudication': None
     },

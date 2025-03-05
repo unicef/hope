@@ -2,6 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { BiometricDeduplicationBatchStatusEnum } from './BiometricDeduplicationBatchStatusEnum';
+import type { BiometricDeduplicationGoldenRecordStatusEnum } from './BiometricDeduplicationGoldenRecordStatusEnum';
 import type { BlankEnum } from './BlankEnum';
 import type { CommsDisabilityEnum } from './CommsDisabilityEnum';
 import type { DeduplicationGoldenRecordStatusEnum } from './DeduplicationGoldenRecordStatusEnum';
@@ -33,7 +35,7 @@ export type Individual = {
     is_removed?: boolean;
     removed_date?: string | null;
     last_sync_at?: string | null;
-    unicef_id?: string | null;
+    internal_data?: any;
     duplicate?: boolean;
     duplicate_date?: string | null;
     withdrawn?: boolean;
@@ -78,10 +80,13 @@ export type Individual = {
     relationship?: (RelationshipEnum | BlankEnum);
     work_status?: (WorkStatusEnum | BlankEnum);
     flex_fields?: any;
-    user_fields?: any;
     enrolled_in_nutrition_programme?: boolean | null;
     administration_of_rutf?: boolean | null;
     deduplication_golden_record_status?: DeduplicationGoldenRecordStatusEnum;
+    biometric_deduplication_golden_record_status?: BiometricDeduplicationGoldenRecordStatusEnum;
+    biometric_deduplication_batch_status?: BiometricDeduplicationBatchStatusEnum;
+    biometric_deduplication_golden_record_results?: any;
+    biometric_deduplication_batch_results?: any;
     imported_individual_id?: string | null;
     sanction_list_possible_match?: boolean;
     sanction_list_confirmed_match?: boolean;
@@ -99,10 +104,9 @@ export type Individual = {
     fchild_hoh?: boolean;
     child_hoh?: boolean;
     /**
-     * Kobo asset ID, Xlsx row ID, Aurora source ID
+     * Kobo asset ID, Xlsx row ID, Aurora registration ID
      */
     detail_id?: string | null;
-    registration_id?: string | null;
     program_registration_id?: string | null;
     preferred_language?: (PreferredLanguageEnum | BlankEnum | NullEnum) | null;
     relationship_confirmed?: boolean;
@@ -112,7 +116,6 @@ export type Individual = {
     wallet_address?: string;
     origin_unicef_id?: string | null;
     individual_collection?: number | null;
-    program?: string | null;
     /**
      * If this individual was copied from another individual, this field will contain the individual it was copied from.
      */

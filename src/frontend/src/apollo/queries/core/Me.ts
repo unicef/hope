@@ -8,6 +8,7 @@ export const Me = gql`
       email
       firstName
       lastName
+      permissionsInScope
       isSuperuser
       businessAreas {
         edges {

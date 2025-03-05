@@ -37,7 +37,8 @@ class TestHouseholdRegistrationId(APITestCase):
         generate_data_collecting_types()
 
         cls.business_area = create_afghanistan()
-        cls.partner = PartnerFactory(name="UNICEF")
+        unicef_partner = PartnerFactory(name="UNICEF")
+        cls.partner = PartnerFactory(name="UNICEF HQ", parent=unicef_partner)
         cls.user = UserFactory.create(partner=cls.partner)
         cls.program = ProgramFactory(
             name="Test program",
@@ -62,7 +63,7 @@ class TestHouseholdRegistrationId(APITestCase):
     )
     def test_household_program_registration_id(self, program_registration_id: str) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS], self.business_area
+            self.user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS], self.business_area, self.program
         )
 
         self.household.program_registration_id = program_registration_id

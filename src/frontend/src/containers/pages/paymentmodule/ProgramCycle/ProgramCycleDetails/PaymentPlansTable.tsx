@@ -1,5 +1,4 @@
 import React, { ReactElement } from 'react';
-import { ProgramCycle } from '@api/programCycleApi';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import {
   AllPaymentPlansForTableQuery,
@@ -11,9 +10,10 @@ import { headCells } from '@containers/pages/paymentmodule/ProgramCycle/ProgramC
 import { PaymentPlanTableRow } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlanTableRow';
 import { adjustHeadCells } from '@utils/utils';
 import { useProgramContext } from 'src/programContext';
+import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 
 interface PaymentPlansTableProps {
-  programCycle: ProgramCycle;
+  programCycle: ProgramCycleList;
   filter;
   canViewDetails: boolean;
   title?: string;

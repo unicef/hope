@@ -1,5 +1,5 @@
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
-from hct_mis_api.apps.account.models import Partner, Role
+from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
@@ -28,7 +28,6 @@ class PartnerForGrievanceTest(APITestCase):
         cls.program_for_household = ProgramFactory(
             name="Test Program for Household", status=Program.DRAFT, business_area=cls.business_area
         )
-        cls.program_any = ProgramFactory(name="Test Program Any", status=Program.DRAFT, business_area=cls.business_area)
         cls.household, individuals = create_household_and_individuals(
             household_data={
                 "business_area": cls.business_area,
@@ -45,29 +44,35 @@ class PartnerForGrievanceTest(APITestCase):
 
         # UNICEF partner
         partner_unicef, _ = Partner.objects.get_or_create(name="UNICEF")
-        cls.user = UserFactory(partner=partner_unicef, username="unicef_user")
+        unicef_hq, _ = Partner.objects.get_or_create(name="UNICEF HQ", parent=partner_unicef)
+        cls.user = UserFactory(partner=unicef_hq, username="unicef_user")
 
         # partner with access to Test Program - should be returned if Program is passed or if neither program nor household/individual is passed
         # (because it has access to ANY program in this BA)
         partner_with_access_to_test_program = PartnerFactory(name="Partner with access to Test Program")
-        cls.update_partner_access_to_program(partner_with_access_to_test_program, cls.program)
+        cls.create_partner_role_with_permissions(
+            partner_with_access_to_test_program, [], cls.business_area, cls.program
+        )
 
         # partner with access to Test Program for Household - should be returned if Program is not passed and household/individual is passed or if neither program nor household/individual is passed
         # (because it has access to ANY program in this BA)
         partner_with_access_to_test_program_for_hh = PartnerFactory(
             name="Partner with access to Test Program for Household"
         )
-        cls.update_partner_access_to_program(partner_with_access_to_test_program_for_hh, cls.program_for_household)
+        cls.create_partner_role_with_permissions(
+            partner_with_access_to_test_program_for_hh, [], cls.business_area, cls.program_for_household
+        )
 
-        # partner with access to Test Program Any - should be returned if  neither program nor household/individual is passed
-        # (because it has access to ANY program in this BA)
-        partner_with_access_to_test_program_any = PartnerFactory(name="Partner with with access to Test Program Any")
-        cls.update_partner_access_to_program(partner_with_access_to_test_program_any, cls.program_any)
+        # partner with access to all programs - should be returned if neither program nor household/individual is passed
+        # or if any program is passed or if household/individual is passed
+        # (because it has access to all programs in this BA)
+        partner_with_access_to_all_programs = PartnerFactory(name="Partner with with access to All Programs")
+        cls.create_partner_role_with_permissions(
+            partner_with_access_to_all_programs, [], cls.business_area, whole_business_area_access=True
+        )
 
-        # partner without access to any program in this BA (but with role, which should not matter) - should not be returned in any case
-        role = Role.objects.create(name="Partner role")
-        partner_without_program_access = PartnerFactory(name="Partner Without Program Access")
-        cls.add_partner_role_in_business_area(partner_without_program_access, cls.business_area, [role])
+        # partner without access to any program in this BA - should not be returned in any case
+        PartnerFactory(name="Partner Without Program Access")
 
     def test_partner_choices_with_program(self) -> None:
         self.snapshot_graphql_request(

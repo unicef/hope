@@ -65,7 +65,7 @@ class TestGrievanceUpdateNegativeFeedbackTicketQuery(APITestCase):
         cls.ticket.ticket.status = GrievanceTicket.STATUS_NEW
         cls.ticket.ticket.save()
         cls.program = ProgramFactory(business_area=BusinessArea.objects.first(), status=Program.ACTIVE)
-        cls.update_partner_access_to_program(partner, cls.program)
+        cls.create_partner_role_with_permissions(partner, [], cls.business_area, cls.program)
 
     @parameterized.expand(
         [
@@ -77,7 +77,7 @@ class TestGrievanceUpdateNegativeFeedbackTicketQuery(APITestCase):
         ]
     )
     def test_update_negative_feedback_ticket_not_supported(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         self.snapshot_graphql_request(
             request_string=self.QUERY,
