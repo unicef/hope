@@ -15,7 +15,6 @@ import { IdentitiesToRemoveTable } from './IdentitiesToRemoveTable';
 import { PaymentChannelsTable } from './PaymentChannelsTable';
 import { PaymentChannelsToEditTable } from './PaymentChannelsToEditTable';
 import { PaymentChannelsToRemoveTable } from './PaymentChannelsToRemoveTable';
-import { DeliveryMechanismDataToEditTable } from './DeliveryMechanismDataToEditTable';
 
 interface RequestedIndividualDataChangeTableProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
@@ -48,11 +47,6 @@ export function RequestedIndividualDataChangeTable({
     payment_channels_to_edit: paymentChannelsToEdit,
     previous_payment_channels: previousPaymentChannels,
     flex_fields: flexFields,
-    // eslint-disable-next-line
-    delivery_mechanism_data: _deliveryMechanismData,
-    delivery_mechanism_data_to_edit: deliveryMechanismDataToEdit,
-    // eslint-disable-next-line
-    delivery_mechanism_data_to_remove: _deliveryMechanismDataToRemove,
     ...restIndividualData
   } = individualData;
   const entries = restIndividualData && Object.entries(restIndividualData);
@@ -205,21 +199,6 @@ export function RequestedIndividualDataChangeTable({
           previousPaymentChannels={previousPaymentChannels}
         />
       ) : null}
-      {deliveryMechanismDataToEdit?.length
-        ? deliveryMechanismDataToEdit.map(
-            (deliveryMechanismDataItem, index) => (
-              <DeliveryMechanismDataToEditTable
-                key={deliveryMechanismDataItem?.id}
-                values={values}
-                isEdit={isEdit}
-                ticket={ticket}
-                index={index}
-                setFieldValue={setFieldValue}
-                deliveryMechanismDataToEdit={deliveryMechanismDataItem}
-              />
-            ),
-          )
-        : null}
     </div>
   );
 }

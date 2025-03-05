@@ -71,8 +71,7 @@
       "TicketSensitiveDetailsNode",
       "TicketSystemFlaggingDetailsNode",
       "UserBusinessAreaNode",
-      "UserNode",
-      "VolumeByDeliveryMechanismNode"
+      "UserNode"
     ]
   }
 };

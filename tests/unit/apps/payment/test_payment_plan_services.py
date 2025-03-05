@@ -33,10 +33,10 @@ from hct_mis_api.apps.payment.celery_tasks import (
     prepare_payment_plan_task,
 )
 from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    PaymentPlanSplitFactory,
     generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import (
@@ -66,11 +66,19 @@ class TestPaymentPlanServices(APITestCase):
         cls.user = UserFactory.create()
         cls.create_user_role_with_permissions(cls.user, [Permissions.PM_CREATE], cls.business_area)
         cls.dm_transfer_to_account = DeliveryMechanism.objects.get(code="transfer_to_account")
+        cls.dm_transfer_to_digital_wallet = DeliveryMechanism.objects.get(code="transfer_to_digital_wallet")
         cls.program = ProgramFactory(status=Program.ACTIVE)
         cls.cycle = cls.program.cycles.first()
-
+        cls.fsp = FinancialServiceProviderFactory(
+            name="Test FSP 1",
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+        )
         cls.payment_plan = PaymentPlanFactory(
-            program_cycle=cls.cycle, created_by=cls.user, status=PaymentPlan.Status.TP_LOCKED
+            program_cycle=cls.cycle,
+            created_by=cls.user,
+            status=PaymentPlan.Status.TP_LOCKED,
+            delivery_mechanism=cls.dm_transfer_to_account,
+            financial_service_provider=cls.fsp,
         )
 
     def test_delete_tp_open(self) -> None:
@@ -274,7 +282,7 @@ class TestPaymentPlanServices(APITestCase):
         with mock.patch(
             "hct_mis_api.apps.payment.services.payment_plan_services.transaction"
         ) as mock_prepare_payment_plan_task:
-            with self.assertNumQueries(11):
+            with self.assertNumQueries(12):
                 pp = PaymentPlanService.create(
                     input_data=input_data, user=self.user, business_area_slug=self.business_area.slug
                 )
@@ -284,10 +292,11 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp.total_households_count, 0)
         self.assertEqual(pp.total_individuals_count, 0)
         self.assertEqual(pp.payment_items.count(), 0)
-        with self.assertNumQueries(77):
+        with self.assertNumQueries(78):
             prepare_payment_plan_task.delay(str(pp.id))
         pp.refresh_from_db()
         self.assertEqual(pp.status, PaymentPlan.Status.TP_OPEN)
+        self.assertEqual(pp.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_OK)
         self.assertEqual(pp.total_households_count, 2)
         self.assertEqual(pp.total_individuals_count, 4)
         self.assertEqual(pp.payment_items.count(), 2)
@@ -544,44 +553,52 @@ class TestPaymentPlanServices(APITestCase):
 
         self.assertEqual(pp_splits.count(), unique_collectors_count)
         self.assertEqual(pp_splits[0].split_type, PaymentPlanSplit.SplitType.BY_COLLECTOR)
-        self.assertEqual(pp_splits[0].payments.count(), 3)
-        self.assertEqual(pp_splits[1].payments.count(), 1)
-        self.assertEqual(pp_splits[2].payments.count(), 1)
-        self.assertEqual(pp_splits[3].payments.count(), 1)
-        self.assertEqual(pp_splits[4].payments.count(), 1)
-        self.assertEqual(pp_splits[5].payments.count(), 1)
-        self.assertEqual(pp_splits[6].payments.count(), 1)
-        self.assertEqual(pp_splits[7].payments.count(), 1)
-        self.assertEqual(pp_splits[8].payments.count(), 1)
-        self.assertEqual(pp_splits[9].payments.count(), 1)
+        self.assertEqual(pp_splits[0].split_payment_items.count(), 3)
+        self.assertEqual(pp_splits[1].split_payment_items.count(), 1)
+        self.assertEqual(pp_splits[2].split_payment_items.count(), 1)
+        self.assertEqual(pp_splits[3].split_payment_items.count(), 1)
+        self.assertEqual(pp_splits[4].split_payment_items.count(), 1)
+        self.assertEqual(pp_splits[5].split_payment_items.count(), 1)
+        self.assertEqual(pp_splits[6].split_payment_items.count(), 1)
+        self.assertEqual(pp_splits[7].split_payment_items.count(), 1)
+        self.assertEqual(pp_splits[8].split_payment_items.count(), 1)
+        self.assertEqual(pp_splits[9].split_payment_items.count(), 1)
 
         # split by records
-        with self.assertNumQueries(16):
+        with self.assertNumQueries(17):
             PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_RECORDS, chunks_no=5)
         pp_splits = pp.splits.all().order_by("order")
         self.assertEqual(pp_splits.count(), 3)
         self.assertEqual(pp_splits[0].split_type, PaymentPlanSplit.SplitType.BY_RECORDS)
-        self.assertEqual(pp_splits[0].payments.count(), 5)
-        self.assertEqual(pp_splits[1].payments.count(), 5)
-        self.assertEqual(pp_splits[2].payments.count(), 2)
+        self.assertEqual(pp_splits[0].split_payment_items.count(), 5)
+        self.assertEqual(pp_splits[1].split_payment_items.count(), 5)
+        self.assertEqual(pp_splits[2].split_payment_items.count(), 2)
 
         # split by admin2
-        with self.assertNumQueries(14):
+        with self.assertNumQueries(15):
             PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_ADMIN_AREA2)
         unique_admin2_count = pp.eligible_payments.values_list("household__admin2", flat=True).distinct().count()
         self.assertEqual(unique_admin2_count, 2)
         pp_splits = pp.splits.all().order_by("order")
         self.assertEqual(pp.splits.count(), unique_admin2_count)
         self.assertEqual(pp_splits[0].split_type, PaymentPlanSplit.SplitType.BY_ADMIN_AREA2)
-        self.assertEqual(pp_splits[0].payments.count(), 4)
-        self.assertEqual(pp_splits[1].payments.count(), 8)
+        self.assertEqual(pp_splits[0].split_payment_items.count(), 4)
+        self.assertEqual(pp_splits[1].split_payment_items.count(), 8)
 
     @freeze_time("2023-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_send_to_payment_gateway(self, get_exchange_rate_mock: Any) -> None:
+        pg_fsp = FinancialServiceProviderFactory(
+            name="Western Union",
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            payment_gateway_id="123",
+        )
+        pg_fsp.delivery_mechanisms.add(self.dm_transfer_to_account)
         pp = PaymentPlanFactory(
             status=PaymentPlan.Status.ACCEPTED,
             created_by=self.user,
+            financial_service_provider=pg_fsp,
+            delivery_mechanism=self.dm_transfer_to_account,
         )
         pp.background_action_status_send_to_payment_gateway()
         pp.save()
@@ -591,24 +608,13 @@ class TestPaymentPlanServices(APITestCase):
         pp.background_action_status_none()
         pp.save()
 
-        pg_fsp = FinancialServiceProviderFactory(
-            name="Western Union",
-            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-            payment_gateway_id="123",
-        )
-        pg_fsp.delivery_mechanisms.add(self.dm_transfer_to_account)
-        dm = DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=pp,
-            financial_service_provider=pg_fsp,
-            delivery_mechanism=self.dm_transfer_to_account,
-            sent_to_payment_gateway=True,
-        )
+        split = PaymentPlanSplitFactory(payment_plan=pp, sent_to_payment_gateway=True)
 
         with self.assertRaisesMessage(GraphQLError, "Already sent to Payment Gateway"):
             PaymentPlanService(pp).send_to_payment_gateway()
 
-        dm.sent_to_payment_gateway = False
-        dm.save()
+        split.sent_to_payment_gateway = False
+        split.save()
         with mock.patch(
             "hct_mis_api.apps.payment.services.payment_plan_services.send_to_payment_gateway.delay"
         ) as mock_send_to_payment_gateway_task:
@@ -711,7 +717,7 @@ class TestPaymentPlanServices(APITestCase):
         with mock.patch(
             "hct_mis_api.apps.payment.services.payment_plan_services.transaction"
         ) as mock_prepare_payment_plan_task:
-            with self.assertNumQueries(11):
+            with self.assertNumQueries(12):
                 pp = PaymentPlanService.create(
                     input_data=input_data, user=self.user, business_area_slug=self.business_area.slug
                 )
@@ -721,10 +727,11 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp.total_households_count, 0)
         self.assertEqual(pp.total_individuals_count, 0)
         self.assertEqual(pp.payment_items.count(), 0)
-        with self.assertNumQueries(77):
+        with self.assertNumQueries(78):
             prepare_payment_plan_task.delay(str(pp.id))
         pp.refresh_from_db()
         self.assertEqual(pp.status, PaymentPlan.Status.TP_OPEN)
+        self.assertEqual(pp.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_OK)
         self.assertEqual(pp.payment_items.count(), 2)
 
         old_payment_ids = list(pp.payment_items.values_list("id", flat=True))
@@ -981,10 +988,26 @@ class TestPaymentPlanServices(APITestCase):
             created_by=self.user,
             status=PaymentPlan.Status.OPEN,
             currency="AMD",
+            delivery_mechanism=self.dm_transfer_to_account,
+            financial_service_provider=self.fsp,
         )
         PaymentPlanService(payment_plan).update({"currency": "PLN"})
         payment_plan.refresh_from_db()
         self.assertEqual(payment_plan.currency, "PLN")
+
+    def test_update_pp_currency_validation(self) -> None:
+        payment_plan = PaymentPlanFactory(
+            program_cycle=self.cycle,
+            created_by=self.user,
+            status=PaymentPlan.Status.OPEN,
+            currency="USDC",
+            delivery_mechanism=self.dm_transfer_to_digital_wallet,
+            financial_service_provider=self.fsp,
+        )
+        with self.assertRaisesMessage(
+            GraphQLError, "For delivery mechanism Transfer to Digital Wallet only currency USDC can be assigned."
+        ):
+            PaymentPlanService(payment_plan).update({"currency": "PLN"})
 
     def test_update_dispersion_end_date(self) -> None:
         payment_plan = PaymentPlanFactory(
@@ -1023,6 +1046,8 @@ class TestPaymentPlanServices(APITestCase):
             business_area=self.business_area,
             program_cycle=self.cycle,
             targeting_criteria=targeting_criteria,
+            delivery_mechanism=self.dm_transfer_to_account,
+            financial_service_provider=self.fsp,
         )
         PaymentFactory(
             parent=payment_plan,

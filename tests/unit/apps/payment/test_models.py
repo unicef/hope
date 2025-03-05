@@ -31,23 +31,16 @@ from hct_mis_api.apps.payment.fields import DynamicChoiceArrayField, DynamicChoi
 from hct_mis_api.apps.payment.fixtures import (
     ApprovalFactory,
     ApprovalProcessFactory,
-    DeliveryMechanismDataFactory,
-    DeliveryMechanismPerPaymentPlanFactory,
-    FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    PaymentPlanSplitFactory,
     RealProgramFactory,
     generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import (
     Approval,
-    DeliveryMechanism,
-    FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     Payment,
     PaymentPlan,
-    PaymentPlanSplit,
 )
 from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
@@ -690,25 +683,6 @@ class TestPaymentPlanSplitModel(TestCase):
         cls.user = UserFactory()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
-    def test_properties(self) -> None:
-        pp = PaymentPlanFactory(created_by=self.user)
-        dm = DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=pp,
-            chosen_configuration="key1",
-        )
-        p1 = PaymentFactory(parent=pp, currency="PLN")
-        p2 = PaymentFactory(parent=pp, currency="PLN")
-        pp_split1 = PaymentPlanSplitFactory(
-            payment_plan=pp,
-            split_type=PaymentPlanSplit.SplitType.BY_RECORDS,
-            chunks_no=2,
-            order=0,
-        )
-        pp_split1.payments.set([p1, p2])
-        self.assertEqual(pp_split1.financial_service_provider, dm.financial_service_provider)
-        self.assertEqual(pp_split1.chosen_configuration, dm.chosen_configuration)
-        self.assertEqual(pp_split1.delivery_mechanism, dm.delivery_mechanism)
-
 
 class TestFinancialServiceProviderModel(TestCase):
     @classmethod
@@ -716,26 +690,6 @@ class TestFinancialServiceProviderModel(TestCase):
         super().setUpTestData()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-
-    def test_properties(self) -> None:
-        fsp1 = FinancialServiceProviderFactory(
-            data_transfer_configuration=[
-                {"key": "key1", "label": "label1", "id": 1, "random_key": "random"},
-                {"key": "key2", "label": "label2", "id": 2, "random_key": "random"},
-            ],
-            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-            payment_gateway_id=123,
-        )
-        fsp2 = FinancialServiceProviderFactory(
-            data_transfer_configuration=[
-                {"key": "key1", "label": "label1", "id": 1, "random_key": "random"},
-                {"key": "key2", "label": "label2", "id": 2, "random_key": "random"},
-            ],
-            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
-        )
-
-        self.assertEqual(fsp1.configurations, [])
-        self.assertEqual(fsp2.configurations, [])
 
     def test_fsp_template_get_column_from_core_field(self) -> None:
         household, individuals = create_household(
@@ -789,16 +743,6 @@ class TestFinancialServiceProviderModel(TestCase):
             document_number="id_doc_number_123",
         )
         generate_delivery_mechanisms()
-        dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
-        dmd = DeliveryMechanismDataFactory(
-            individual=primary,
-            delivery_mechanism=dm_atm_card,
-            data={
-                "card_number__atm_card": "333111222",
-                "card_expiry_date__atm_card": "2025-11-11",
-                "name_of_cardholder__atm_card": "Just Random Test Name",
-            },
-        )
 
         # get None if no snapshot
         none_resp = fsp_xlsx_template.get_column_from_core_field(payment, "given_name")
@@ -856,7 +800,7 @@ class TestFinancialServiceProviderModel(TestCase):
         self.assertEqual(primary_collector_id, str(primary.pk))
 
         # get delivery_mechanisms_data field
-        dmd_resp = fsp_xlsx_template.get_column_from_core_field(payment, "name_of_cardholder__atm_card", dmd)
+        dmd_resp = fsp_xlsx_template.get_column_from_core_field(payment, "name_of_cardholder__atm_card")
         self.assertEqual(dmd_resp, "Just Random Test Name")
 
         # country_origin

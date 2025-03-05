@@ -45,6 +45,8 @@ const CreateTargetPopulationPage = (): ReactElement => {
     flagExcludeIfOnSanctionList: false,
     householdIds: '',
     individualIds: '',
+    deliveryMechanism: '',
+    fsp: '',
   };
   const [mutate, { loading }] = useCreateTpMutation();
   const { showMessage } = useSnackbar();
@@ -62,7 +64,6 @@ const CreateTargetPopulationPage = (): ReactElement => {
     return <PermissionDenied />;
 
   const screenBeneficiary = businessAreaData?.businessArea?.screenBeneficiary;
-
   const validationSchema = Yup.object().shape({
     name: Yup.string()
       .required(t('Targeting Name is required'))
@@ -76,6 +77,8 @@ const CreateTargetPopulationPage = (): ReactElement => {
   });
 
   const handleSubmit = async (values): Promise<void> => {
+    const fsp = values.criterias[0]?.fsp || null;
+    const deliveryMechanism = values.criterias[0]?.deliveryMechanism || null;
     try {
       const res = await mutate({
         variables: {
@@ -84,6 +87,8 @@ const CreateTargetPopulationPage = (): ReactElement => {
             name: values.name,
             excludedIds: values.excludedIds,
             exclusionReason: values.exclusionReason,
+            fspId: fsp,
+            deliveryMechanismCode: deliveryMechanism,
             ...getTargetingCriteriaVariables(values),
           },
         },

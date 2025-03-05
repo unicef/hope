@@ -88,7 +88,7 @@ const PaymentPlanDetailsPage = (): ReactElement => {
             <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
           )}
           {shouldDisplayFsp && (
-            <FspSection baseUrl={baseUrl} paymentPlan={paymentPlan} />
+            <FspSection paymentPlan={paymentPlan} />
           )}
           <ExcludeSection paymentPlan={paymentPlan} />
           <SupportingDocumentsSection paymentPlan={paymentPlan} />

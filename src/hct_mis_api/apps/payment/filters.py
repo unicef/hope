@@ -328,14 +328,14 @@ class PaymentPlanFilter(FilterSet):
 
     @staticmethod
     def filter_service_provider(queryset: "QuerySet", model_field: str, service_provider_name: str) -> "QuerySet":
-        return queryset.filter(delivery_mechanisms__financial_service_provider__name=service_provider_name)
+        return queryset.filter(financial_service_provider__name=service_provider_name)
 
     @staticmethod
     def filter_delivery_types(
         queryset: "QuerySet", model_field: str, delivery_types: Any
     ) -> "QuerySet":  # pragma: no cover
         # the test added but looks like it does not count test_all_payment_plans_filter_by_delivery_types
-        return queryset.filter(delivery_mechanisms__delivery_mechanism__code__in=delivery_types)
+        return queryset.filter(delivery_mechanism__code__in=delivery_types)
 
 
 class PaymentFilter(FilterSet):

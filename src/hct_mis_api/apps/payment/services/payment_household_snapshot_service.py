@@ -158,8 +158,8 @@ def get_individual_snapshot(individual: Individual) -> dict:
     ).exists()
 
     if is_hh_collector:
-        individual_data["delivery_mechanisms_data"] = {
-            dmd.delivery_mechanism.code: dmd.delivery_data for dmd in individual.delivery_mechanisms_data.all()
+        individual_data["accounts_data"] = {
+            dmd.account_type.key: dmd.delivery_data() for dmd in individual.delivery_mechanisms_data.all()
         }
 
     return individual_data
