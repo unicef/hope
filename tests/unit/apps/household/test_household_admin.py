@@ -243,3 +243,64 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
         self.assertEqual(context["program"], str(self.program.id))
         self.assertEqual(context["household_list"], household_list)
         self.assertEqual(context["tag"], tag)
+
+    def test_get_request(self) -> None:
+        def mock_get_common_context(*args: Any, **kwargs: Any) -> dict:
+            return {}
+
+        HouseholdWithdrawFromListMixin.get_common_context = mock_get_common_context
+
+        request = HttpRequest()
+        request.method = "GET"
+        resp = HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=request)
+        self.assertEqual(resp.status_code, 200)
+
+    def test_post_households_withdraw_from_list_step_1(self) -> None:
+        def mock_get_common_context(*args: Any, **kwargs: Any) -> dict:
+            return {}
+
+        def mock_message_user(*args: Any, **kwargs: Any) -> None:
+            pass
+
+        HouseholdWithdrawFromListMixin.get_common_context = mock_get_common_context
+        HouseholdWithdrawFromListMixin.message_user = mock_message_user
+
+        request = HttpRequest()
+        request.method = "POST"
+        tag = "Some tag reason"
+        request.POST = {  # type: ignore
+            "step": "1",
+            "household_list": f"{self.household.unicef_id}, {self.household2.unicef_id}",
+            "tag": tag,
+            "program": str(self.program.id),
+        }
+
+        with self.assertNumQueries(1):
+            resp = HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=request)
+
+        self.assertEqual(resp.status_code, 200)
+
+    def test_post_households_withdraw_from_list_step_2(self) -> None:
+        def mock_get_common_context(*args: Any, **kwargs: Any) -> dict:
+            return {}
+
+        def mock_message_user(*args: Any, **kwargs: Any) -> None:
+            pass
+
+        HouseholdWithdrawFromListMixin.get_common_context = mock_get_common_context
+        HouseholdWithdrawFromListMixin.message_user = mock_message_user
+
+        request = HttpRequest()
+        request.method = "POST"
+        tag = "Some tag reason"
+        request.POST = {  # type: ignore
+            "step": "2",
+            "household_list": f"{self.household.unicef_id}, {self.household2.unicef_id}",
+            "tag": tag,
+            "program": str(self.program.id),
+        }
+
+        with self.assertNumQueries(2):
+            resp = HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=request)
+
+        self.assertEqual(resp.status_code, 200)
