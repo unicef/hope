@@ -120,11 +120,6 @@ class PaymentPlanSplit(TimeStampedUUIDModel):
     )
     split_type = models.CharField(choices=SplitType.choices, max_length=24, default=SplitType.NO_SPLIT)
     chunks_no = models.IntegerField(null=True, blank=True)
-    # payments = models.ManyToManyField(
-    #     "payment.Payment",
-    #     through="PaymentPlanSplitPayments",
-    #     related_name="+",
-    # )
     sent_to_payment_gateway = models.BooleanField(default=False)
     order = models.IntegerField(default=0)
 
