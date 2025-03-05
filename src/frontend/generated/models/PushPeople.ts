@@ -2,10 +2,16 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { Admin1Enum } from './Admin1Enum';
+import type { Admin2Enum } from './Admin2Enum';
+import type { Admin3Enum } from './Admin3Enum';
+import type { Admin4Enum } from './Admin4Enum';
 import type { BiometricDeduplicationBatchStatusEnum } from './BiometricDeduplicationBatchStatusEnum';
 import type { BiometricDeduplicationGoldenRecordStatusEnum } from './BiometricDeduplicationGoldenRecordStatusEnum';
 import type { BlankEnum } from './BlankEnum';
 import type { CommsDisabilityEnum } from './CommsDisabilityEnum';
+import type { CountryEnum } from './CountryEnum';
+import type { CountryOriginEnum } from './CountryOriginEnum';
 import type { DeduplicationGoldenRecordStatusEnum } from './DeduplicationGoldenRecordStatusEnum';
 import type { DisabilityEnum } from './DisabilityEnum';
 import type { Document } from './Document';
@@ -14,27 +20,41 @@ import type { MemoryDisabilityEnum } from './MemoryDisabilityEnum';
 import type { NullEnum } from './NullEnum';
 import type { PhysicalDisabilityEnum } from './PhysicalDisabilityEnum';
 import type { PreferredLanguageEnum } from './PreferredLanguageEnum';
+import type { PushPeopleTypeEnum } from './PushPeopleTypeEnum';
 import type { RdiMergeStatusEnum } from './RdiMergeStatusEnum';
 import type { RelationshipEnum } from './RelationshipEnum';
+import type { ResidenceStatusEnum } from './ResidenceStatusEnum';
 import type { SeeingDisabilityEnum } from './SeeingDisabilityEnum';
 import type { SelfcareDisabilityEnum } from './SelfcareDisabilityEnum';
 import type { SexEnum } from './SexEnum';
 import type { WorkStatusEnum } from './WorkStatusEnum';
-export type Individual = {
+export type PushPeople = {
     first_registration_date?: string;
     last_registration_date?: string;
-    readonly household: string;
-    role?: string;
     observed_disability?: string;
-    country_origin?: string;
     marital_status?: string;
     documents?: Array<Document>;
     birth_date: string;
+    type: (PushPeopleTypeEnum | BlankEnum);
+    country_origin?: CountryOriginEnum;
+    country: CountryEnum;
+    residence_status: (ResidenceStatusEnum | BlankEnum);
+    village?: string | null;
+    phone_no?: string | null;
+    phone_no_alternative?: string | null;
+    admin1?: (Admin1Enum | BlankEnum | NullEnum) | null;
+    admin2?: (Admin2Enum | BlankEnum | NullEnum) | null;
+    admin3?: (Admin3Enum | BlankEnum | NullEnum) | null;
+    admin4?: (Admin4Enum | BlankEnum | NullEnum) | null;
     rdi_merge_status?: RdiMergeStatusEnum;
     is_original?: boolean;
     is_removed?: boolean;
     removed_date?: string | null;
     last_sync_at?: string | null;
+    /**
+     * record revision number
+     */
+    version?: number;
     internal_data?: any;
     duplicate?: boolean;
     duplicate_date?: string | null;
@@ -48,9 +68,7 @@ export type Individual = {
     family_name?: string;
     sex: SexEnum;
     estimated_birth_date?: boolean;
-    phone_no?: string;
     phone_no_valid?: boolean | null;
-    phone_no_alternative?: string;
     phone_no_alternative_valid?: boolean | null;
     email?: string;
     payment_delivery_phone_no?: string | null;
@@ -103,10 +121,7 @@ export type Individual = {
     who_answers_alt_phone?: string;
     fchild_hoh?: boolean;
     child_hoh?: boolean;
-    /**
-     * Kobo asset ID, Xlsx row ID, Aurora registration ID
-     */
-    detail_id?: string | null;
+    registration_id?: string | null;
     program_registration_id?: string | null;
     preferred_language?: (PreferredLanguageEnum | BlankEnum | NullEnum) | null;
     relationship_confirmed?: boolean;
@@ -115,7 +130,9 @@ export type Individual = {
     blockchain_name?: string;
     wallet_address?: string;
     origin_unicef_id?: string | null;
+    vector_column?: string | null;
     individual_collection?: number | null;
+    program?: string | null;
     /**
      * If this individual was copied from another individual, this field will contain the individual it was copied from.
      */

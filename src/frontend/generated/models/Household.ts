@@ -63,8 +63,6 @@ export type Household = {
     children_disabled_count?: number | null;
     male_children_disabled_count?: number | null;
     female_children_disabled_count?: number | null;
-    other_sex_group_count?: number | null;
-    unknown_sex_group_count?: number | null;
     returnee?: boolean | null;
     flex_fields?: any;
     fchild_hoh?: boolean | null;
@@ -78,6 +76,7 @@ export type Household = {
     registration_method?: (RegistrationMethodEnum | BlankEnum);
     currency?: (CurrencyEnum | BlankEnum);
     unhcr_id?: string;
+    registration_id?: string | null;
     program_registration_id?: string | null;
     total_cash_received_usd?: string | null;
     total_cash_received?: string | null;
@@ -103,5 +102,6 @@ export type Household = {
      * Through model will contain the role (ROLE_CHOICE) they are connected with on.
      */
     readonly representatives: Array<string>;
+    programs?: Array<string>;
 };
 

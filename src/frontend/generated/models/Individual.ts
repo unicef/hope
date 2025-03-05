@@ -104,9 +104,10 @@ export type Individual = {
     fchild_hoh?: boolean;
     child_hoh?: boolean;
     /**
-     * Kobo asset ID, Xlsx row ID, Aurora registration ID
+     * Kobo asset ID, Xlsx row ID, Aurora source ID
      */
     detail_id?: string | null;
+    registration_id?: string | null;
     program_registration_id?: string | null;
     preferred_language?: (PreferredLanguageEnum | BlankEnum | NullEnum) | null;
     relationship_confirmed?: boolean;
@@ -116,6 +117,7 @@ export type Individual = {
     wallet_address?: string;
     origin_unicef_id?: string | null;
     individual_collection?: number | null;
+    program?: string | null;
     /**
      * If this individual was copied from another individual, this field will contain the individual it was copied from.
      */
