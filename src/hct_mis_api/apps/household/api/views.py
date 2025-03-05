@@ -70,32 +70,6 @@ class HouseholdViewSet(
 
         return super().get_queryset().select_related("head_of_household", "program", "admin1", "admin2")
 
-    def check_object_permissions(self, request: Any, obj: Household) -> None:
-        super().check_object_permissions(request, obj)
-        user = request.user
-
-        # if user doesn't have permission to view all households or RDI details, we check based on their grievance tickets
-        if not user.has_perm(
-            Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS.value,
-            obj.program,
-        ) and not user.has_perm(
-            Permissions.RDI_VIEW_DETAILS.value,
-            obj.program,
-        ):
-            grievance_tickets = GrievanceTicket.objects.filter(
-                complaint_ticket_details__in=obj.complaint_ticket_details.all()
-            )
-
-            self.check_creator_or_owner_permission(
-                user,
-                obj.program,
-                Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS.value,
-                any(user_ticket in user.created_tickets.all() for user_ticket in grievance_tickets),
-                Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_CREATOR.value,
-                any(user_ticket in user.assigned_tickets.all() for user_ticket in grievance_tickets),
-                Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER.value,
-            )
-
     @action(
         detail=True,
         methods=["post"],
