@@ -11,8 +11,11 @@ class BaseRestPermission(BasePermission):
     """
 
     def _get_permissions(self, view: Any) -> Any:
-        if hasattr(view, "permissions_by_action") and view.action in view.permissions_by_action:
-            return view.permissions_by_action[view.action]
+        if hasattr(view, "permissions_by_action"):
+            if view.action in view.permissions_by_action:
+                return view.permissions_by_action[view.action]
+            elif view.action == "count":
+                return view.permissions_by_action["list"]
         return view.PERMISSIONS
 
     def has_permission(self, request: Any, view: Any) -> bool:
