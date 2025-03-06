@@ -26,11 +26,8 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentPlanFactory,
     generate_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanism
 from hct_mis_api.apps.payment.models import (
-    DeliveryMechanismData as DeliveryMechanismDataModel,
-)
-from hct_mis_api.apps.payment.models import (
+    DeliveryMechanism,
     FinancialServiceProvider,
     Payment,
     PaymentHouseholdSnapshot,
@@ -97,15 +94,6 @@ class TestPaymentGatewayService(APITestCase):
             hh = HouseholdFactory(head_of_household=collector)
             collector.household = hh
             collector.save()
-            DeliveryMechanismDataModel.objects.create(
-                data={
-                    "provider__mobile_money": "OLD_PROVIDER",
-                    "delivery_phone_number__mobile_money": "+48602102373",
-                },
-                individual=collector,
-                delivery_mechanism=cls.dm_mobile_money,
-                rdi_merge_status=DeliveryMechanismDataModel.MERGED,
-            )
             IndividualRoleInHouseholdFactory(household=hh, individual=collector, role=ROLE_PRIMARY)
             IndividualFactory.create_batch(2, household=hh)
             cls.payments.append(
@@ -657,8 +645,6 @@ class TestPaymentGatewayService(APITestCase):
                         "full_name": self.payments[0].collector.full_name,
                         "destination_currency": self.payments[0].currency,
                         "service_provider_code": self.payments[0].collector.flex_fields["service_provider_code_i_f"],
-                        "provider": "OLD_PROVIDER",
-                        "delivery_phone_number": "+48602102373",
                     },
                     "extra_data": {},
                 }
@@ -713,9 +699,9 @@ class TestPaymentGatewayService(APITestCase):
                         "first_name": primary_collector.given_name,
                         "full_name": primary_collector.full_name,
                         "destination_currency": self.payments[0].currency,
-                        "service_provider_code__mobile_money": "ABC",
-                        "delivery_phone_number__mobile_money": "123456789",
-                        "provider__mobile_money": "Provider",
+                        "service_provider_code": "ABC",
+                        "delivery_phone_number": "123456789",
+                        "provider": "Provider",
                     },
                     "extra_data": {},
                 }
@@ -739,9 +725,22 @@ class TestPaymentGatewayService(APITestCase):
     @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
     def test_api_add_records_to_payment_instruction_no_snapshot(self, post_mock: Any) -> None:
         payment = self.payments[0]
-        payment.household_snapshot = None
-        payment.save()
-        PaymentGatewayAPI().add_records_to_payment_instruction([payment], "123")
+        payment.household_snapshot.delete()
+        payment.refresh_from_db()
+
+        post_mock.return_value = {
+            "remote_id": "123",
+            "records": {
+                "1": payment.id,
+            },
+            "errors": None,
+        }, 200
+
+        with self.assertRaisesMessage(
+            PaymentGatewayAPI.PaymentGatewayAPIException,
+            f"Not found snapshot for Payment {payment.unicef_id}",
+        ):
+            PaymentGatewayAPI().add_records_to_payment_instruction([payment], "123")
 
     @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_delivery_mechanisms")
     def test_sync_delivery_mechanisms(self, get_delivery_mechanisms_mock: Any) -> None:
