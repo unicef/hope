@@ -33,6 +33,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentPlanSplit,
+    PaymentVerificationSummary,
 )
 from hct_mis_api.apps.payment.services.payment_gateway import (
     AddRecordsResponseData,
@@ -163,6 +164,8 @@ class TestPaymentGatewayService(APITestCase):
 
         pg_service = PaymentGatewayService()
         pg_service.api.get_records_for_payment_instruction = get_records_for_payment_instruction_mock  # type: ignore
+        # check PaymentVerificationSummary before run sync
+        assert PaymentVerificationSummary.objects.filter(payment_plan=self.pp).count() == 0
 
         pg_service.sync_records()
         assert get_records_for_payment_instruction_mock.call_count == 2
@@ -203,6 +206,9 @@ class TestPaymentGatewayService(APITestCase):
         assert get_records_for_payment_instruction_mock.call_count == 0
 
         assert change_payment_instruction_status_mock.call_count == 2
+        assert PaymentVerificationSummary.objects.filter(payment_plan=self.pp).count() == 1
+        self.pp.refresh_from_db()
+        assert self.pp.status == PaymentPlan.Status.FINISHED
 
     @mock.patch(
         "hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
