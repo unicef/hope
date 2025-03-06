@@ -147,7 +147,7 @@ class CopyProgramPopulation:
         household.copied_from_id = copy_from_household_id
         household.registration_data_import = self.rdi
         household.rdi_merge_status = self.rdi_merge_status
-        household.head_of_household = Individual.original_and_repr_objects.filter(
+        household.head_of_household = Individual.all_merge_status_objects.filter(
             program=self.program,
             unicef_id=household.head_of_household.unicef_id,
         ).first()
@@ -192,7 +192,7 @@ class CopyProgramPopulation:
             role.pk = None
             role.household = new_household
             role.rdi_merge_status = self.rdi_merge_status
-            role.individual = Individual.original_and_repr_objects.filter(
+            role.individual = Individual.all_merge_status_objects.filter(
                 program=self.program,
                 unicef_id=role.individual.unicef_id,
             ).first()
@@ -246,7 +246,7 @@ class CopyProgramPopulation:
 
     def set_household_per_individual(self, new_individual: Individual) -> Individual:
         if new_individual.household:
-            new_individual.household = Household.original_and_repr_objects.filter(
+            new_individual.household = Household.all_merge_status_objects.filter(
                 program=self.program,
                 unicef_id=new_individual.household.unicef_id,
             ).first()
@@ -456,7 +456,6 @@ def enroll_households_to_program(households: QuerySet, program: Program, user_id
                 household.copied_from_id = original_household_id
                 household.pk = None
                 household.program = program
-                household.is_original = False
                 household.registration_data_import = rdi
                 household.total_cash_received = None
                 household.total_cash_received_usd = None

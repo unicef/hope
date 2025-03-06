@@ -217,7 +217,7 @@ class TestHouseholdQuery(APITestCase):
             cls.households.append(household)
 
         household = cls.households[0]
-        household.registration_id = 123
+        household.detail_id = 123
         household.save()
         household.refresh_from_db()
         household.head_of_household.phone_no = "+18663567905"
@@ -337,6 +337,8 @@ class TestHouseholdQuery(APITestCase):
           }
         }
         """
+        household.detail_id = None
+        household.enumerator_rec_id = None
 
         if field_name is not None:
             setattr(household, field_name, field_value)

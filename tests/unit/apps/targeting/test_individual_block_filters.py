@@ -118,6 +118,8 @@ class TestIndividualBlockFilter(TestCase):
         query = query.filter(tc.get_query())
         self.assertEqual(query.count(), 1)
         self.assertEqual(query.first().id, self.household_1_indiv.id)
+        self.assertEqual(tc.get_individual_queryset().count(), 3)
+        self.assertEqual(tc.get_household_queryset().count(), 2)
 
     def test_two_separate_blocks_on_mixins(self) -> None:
         query = Household.objects.all()
