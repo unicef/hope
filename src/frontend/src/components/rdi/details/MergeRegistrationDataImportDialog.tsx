@@ -47,9 +47,9 @@ function MergeRegistrationDataImportDialog({
   let dataCountInformation = (
     <div>
       <strong>
-        {registration.numberOfHouseholds} {beneficiaryGroup.groupLabelPlural}{' '}
+        {registration.numberOfHouseholds} {beneficiaryGroup?.groupLabelPlural}{' '}
         and {registration.numberOfIndividuals}{' '}
-        {beneficiaryGroup.memberLabelPlural} will be merged.{' '}
+        {beneficiaryGroup?.memberLabelPlural} will be merged.{' '}
       </strong>
       {t('Do you want to proceed?')}
     </div>
@@ -59,7 +59,7 @@ function MergeRegistrationDataImportDialog({
       <div>
         <strong>
           {registration.numberOfIndividuals}{' '}
-          {beneficiaryGroup.memberLabelPlural} will be merged.
+          {beneficiaryGroup?.memberLabelPlural} will be merged.
         </strong>
         {t('Do you want to proceed?')}
       </div>

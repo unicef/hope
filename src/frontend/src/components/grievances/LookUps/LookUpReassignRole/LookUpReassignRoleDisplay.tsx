@@ -3,6 +3,7 @@ import { Box, Grid2 as Grid } from '@mui/material';
 import { ReactElement } from 'react';
 import { useProgramContext } from 'src/programContext';
 import { BlueText, LightGrey, StyledBox } from '../LookUpStyles';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 export function LookUpReassignRoleDisplay({
   selectedHousehold,
@@ -10,7 +11,7 @@ export function LookUpReassignRoleDisplay({
   setLookUpDialogOpen,
   disabled,
 }: {
-  selectedHousehold;
+  selectedHousehold: HouseholdDetail;
   selectedIndividual;
   setLookUpDialogOpen;
   disabled?: boolean;
@@ -25,7 +26,7 @@ export function LookUpReassignRoleDisplay({
           <Box display="flex" flexDirection="column">
             <span>
               {`${beneficiaryGroup?.groupLabel} ID`}:
-              <BlueText> {selectedHousehold?.unicefId || '-'}</BlueText>
+              <BlueText> {selectedHousehold?.unicef_id || '-'}</BlueText>
             </span>
             <span>
               {`${beneficiaryGroup?.memberLabel} ID`}:

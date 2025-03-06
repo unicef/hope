@@ -15,6 +15,7 @@ import {
 import { LookUpIndividualTableRow } from './LookUpIndividualTableRow';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 interface LookUpIndividualTableProps {
   filter;
@@ -22,7 +23,7 @@ interface LookUpIndividualTableProps {
   setFieldValue;
   valuesInner;
   selectedIndividual;
-  selectedHousehold;
+  selectedHousehold: HouseholdDetail;
   setSelectedIndividual;
   setSelectedHousehold;
   ticket?;

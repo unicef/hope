@@ -5,7 +5,6 @@ import { useLocation } from 'react-router-dom';
 import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  AllHouseholdsQuery,
   useAllEditHouseholdFieldsQuery,
   useHouseholdLazyQuery,
 } from '@generated/graphql';
@@ -14,6 +13,7 @@ import { Title } from '@core/Title';
 import { EditHouseholdDataChangeFieldRow } from './EditHouseholdDataChangeFieldRow';
 import { useProgramContext } from 'src/programContext';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 export interface EditHouseholdDataChangeProps {
   values;
@@ -29,8 +29,7 @@ function EditHouseholdDataChange({
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const isEditTicket = location.pathname.includes('edit-ticket');
-  const household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'] =
-    values.selectedHousehold;
+  const household: HouseholdDetail = values.selectedHousehold;
   const [getHousehold, { data: fullHousehold, loading: fullHouseholdLoading }] =
     useHouseholdLazyQuery({ variables: { id: household?.id } });
   useEffect(() => {

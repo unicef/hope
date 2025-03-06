@@ -19,7 +19,7 @@ const IndividualQuestionnaire = ({
   const { baseUrl } = useBaseUrl();
   const { isSocialDctType, selectedProgram } = useProgramContext();
   const selectedIndividualData =
-    values.selectedIndividual || values.selectedHousehold.headOfHousehold;
+    values.selectedIndividual || values.selectedHousehold.head_of_household;
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const questionFields = isSocialDctType
     ? [

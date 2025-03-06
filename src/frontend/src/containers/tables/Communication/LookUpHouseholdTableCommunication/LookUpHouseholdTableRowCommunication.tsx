@@ -6,11 +6,12 @@ import { BlackLink } from '@components/core/BlackLink';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { MouseEvent, ReactElement } from 'react';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 interface LookUpHouseholdTableRowCommunicationProps {
-  household;
+  household: HouseholdDetail;
   radioChangeHandler: (household) => void;
-  selectedHousehold;
+  selectedHousehold: HouseholdDetail;
   choicesData: HouseholdChoiceDataQuery;
   checkboxClickHandler?: (
     event: MouseEvent<HTMLTableRowElement> | MouseEvent<HTMLButtonElement>,
