@@ -375,7 +375,6 @@ export type BankAccountInfoNode = Node & {
   createdAt: Scalars['DateTime']['output'];
   id: Scalars['ID']['output'];
   individual: IndividualNode;
-  isOriginal: Scalars['Boolean']['output'];
   isRemoved: Scalars['Boolean']['output'];
   lastSyncAt?: Maybe<Scalars['DateTime']['output']>;
   rdiMergeStatus: BankAccountInfoRdiMergeStatus;
@@ -757,7 +756,6 @@ export type CommunicationMessageNode = Node & {
   fullListArguments?: Maybe<Scalars['JSONString']['output']>;
   households: HouseholdNodeConnection;
   id: Scalars['ID']['output'];
-  isOriginal: Scalars['Boolean']['output'];
   numberOfRecipients: Scalars['Int']['output'];
   paymentPlan?: Maybe<PaymentPlanNode>;
   program?: Maybe<ProgramNode>;
@@ -1399,14 +1397,13 @@ export type DocumentNode = Node & {
   expiryDate?: Maybe<Scalars['DateTime']['output']>;
   id: Scalars['ID']['output'];
   individual: IndividualNode;
-  isMigrationHandled: Scalars['Boolean']['output'];
-  isOriginal: Scalars['Boolean']['output'];
   isRemoved: Scalars['Boolean']['output'];
   issuanceDate?: Maybe<Scalars['DateTime']['output']>;
   lastSyncAt?: Maybe<Scalars['DateTime']['output']>;
   photo?: Maybe<Scalars['String']['output']>;
   program?: Maybe<ProgramNode>;
   rdiMergeStatus: DocumentRdiMergeStatus;
+  removedDate?: Maybe<Scalars['DateTime']['output']>;
   status: DocumentStatus;
   type: ImportedDocumentTypeNode;
   updatedAt: Scalars['DateTime']['output'];
@@ -1581,7 +1578,6 @@ export type FeedbackNode = Node & {
   householdLookup?: Maybe<HouseholdNode>;
   id: Scalars['ID']['output'];
   individualLookup?: Maybe<IndividualNode>;
-  isOriginal: Scalars['Boolean']['output'];
   issueType: FeedbackIssueType;
   language: Scalars['String']['output'];
   linkedGrievance?: Maybe<GrievanceTicketNode>;
@@ -1957,13 +1953,10 @@ export type GrievanceTicketNode = Node & {
   ignored: Scalars['Boolean']['output'];
   individual?: Maybe<IndividualNode>;
   individualDataUpdateTicketDetails?: Maybe<TicketIndividualDataUpdateDetailsNode>;
-  isMigrationHandled: Scalars['Boolean']['output'];
-  isOriginal: Scalars['Boolean']['output'];
   issueType?: Maybe<Scalars['Int']['output']>;
   language: Scalars['String']['output'];
   lastNotificationSent?: Maybe<Scalars['DateTime']['output']>;
   linkedTickets?: Maybe<Array<Maybe<GrievanceTicketNode>>>;
-  migratedAt?: Maybe<Scalars['DateTime']['output']>;
   needsAdjudicationTicketDetails?: Maybe<TicketNeedsAdjudicationDetailsNode>;
   negativeFeedbackTicketDetails?: Maybe<TicketNegativeFeedbackDetailsNode>;
   partner?: Maybe<PartnerType>;
@@ -2123,8 +2116,6 @@ export type HouseholdNode = Node & {
   individuals?: Maybe<IndividualNodeConnection>;
   individualsAndRoles: Array<IndividualRoleInHouseholdNode>;
   internalData: Scalars['JSONString']['output'];
-  isMigrationHandled: Scalars['Boolean']['output'];
-  isOriginal: Scalars['Boolean']['output'];
   isRemoved: Scalars['Boolean']['output'];
   koboSubmissionTime?: Maybe<Scalars['DateTime']['output']>;
   koboSubmissionUuid?: Maybe<Scalars['UUID']['output']>;
@@ -2143,7 +2134,6 @@ export type HouseholdNode = Node & {
   maleChildrenCount?: Maybe<Scalars['Int']['output']>;
   maleChildrenDisabledCount?: Maybe<Scalars['Int']['output']>;
   messages: CommunicationMessageNodeConnection;
-  migratedAt?: Maybe<Scalars['DateTime']['output']>;
   misUnicefId?: Maybe<Scalars['String']['output']>;
   nameEnumerator: Scalars['String']['output'];
   negativeFeedbackTicketDetails: TicketNegativeFeedbackDetailsNodeConnection;
@@ -2159,7 +2149,6 @@ export type HouseholdNode = Node & {
   rdiMergeStatus: HouseholdRdiMergeStatus;
   referralTicketDetails: TicketReferralDetailsNodeConnection;
   registrationDataImport?: Maybe<RegistrationDataImportNode>;
-  registrationId?: Maybe<Scalars['String']['output']>;
   registrationMethod: HouseholdRegistrationMethod;
   removedDate?: Maybe<Scalars['DateTime']['output']>;
   representatives: IndividualNodeConnection;
@@ -2565,13 +2554,12 @@ export type IndividualIdentityNode = Node & {
   created: Scalars['DateTime']['output'];
   id: Scalars['ID']['output'];
   individual: IndividualNode;
-  isMigrationHandled: Scalars['Boolean']['output'];
-  isOriginal: Scalars['Boolean']['output'];
   isRemoved: Scalars['Boolean']['output'];
   modified: Scalars['DateTime']['output'];
   number: Scalars['String']['output'];
   partner?: Maybe<Scalars['String']['output']>;
   rdiMergeStatus: IndividualIdentityRdiMergeStatus;
+  removedDate?: Maybe<Scalars['DateTime']['output']>;
 };
 
 
@@ -2671,15 +2659,12 @@ export type IndividualNode = Node & {
   individualDataUpdateTicketDetails: TicketIndividualDataUpdateDetailsNodeConnection;
   individualId: Scalars['String']['output'];
   internalData: Scalars['JSONString']['output'];
-  isMigrationHandled: Scalars['Boolean']['output'];
-  isOriginal: Scalars['Boolean']['output'];
   isRemoved: Scalars['Boolean']['output'];
   lastRegistrationDate: Scalars['Date']['output'];
   lastSyncAt?: Maybe<Scalars['DateTime']['output']>;
   maritalStatus: IndividualMaritalStatus;
   memoryDisability: Scalars['String']['output'];
   middleName: Scalars['String']['output'];
-  migratedAt?: Maybe<Scalars['DateTime']['output']>;
   misUnicefId?: Maybe<Scalars['String']['output']>;
   negativeFeedbackTicketDetails: TicketNegativeFeedbackDetailsNodeConnection;
   observedDisability?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
@@ -2701,7 +2686,6 @@ export type IndividualNode = Node & {
   rdiMergeStatus: IndividualRdiMergeStatus;
   referralTicketDetails: TicketReferralDetailsNodeConnection;
   registrationDataImport: RegistrationDataImportNode;
-  registrationId?: Maybe<Scalars['String']['output']>;
   relationship?: Maybe<IndividualRelationship>;
   relationshipConfirmed: Scalars['Boolean']['output'];
   removedDate?: Maybe<Scalars['DateTime']['output']>;
@@ -2951,12 +2935,10 @@ export type IndividualRoleInHouseholdNode = {
   household: HouseholdNode;
   id: Scalars['UUID']['output'];
   individual: IndividualNode;
-  isMigrationHandled: Scalars['Boolean']['output'];
-  isOriginal: Scalars['Boolean']['output'];
   isRemoved: Scalars['Boolean']['output'];
   lastSyncAt?: Maybe<Scalars['DateTime']['output']>;
-  migratedAt?: Maybe<Scalars['DateTime']['output']>;
   rdiMergeStatus: IndividualRoleInHouseholdRdiMergeStatus;
+  removedDate?: Maybe<Scalars['DateTime']['output']>;
   role?: Maybe<IndividualRoleInHouseholdRole>;
   updatedAt: Scalars['DateTime']['output'];
 };
@@ -22373,7 +22355,6 @@ export type BankAccountInfoNodeResolvers<ContextType = any, ParentType extends R
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>;
-  isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   rdiMergeStatus?: Resolver<ResolversTypes['BankAccountInfoRdiMergeStatus'], ParentType, ContextType>;
@@ -22568,7 +22549,6 @@ export type CommunicationMessageNodeResolvers<ContextType = any, ParentType exte
   fullListArguments?: Resolver<Maybe<ResolversTypes['JSONString']>, ParentType, ContextType>;
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, Partial<CommunicationMessageNodeHouseholdsArgs>>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   numberOfRecipients?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>;
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>;
@@ -22963,14 +22943,13 @@ export type DocumentNodeResolvers<ContextType = any, ParentType extends Resolver
   expiryDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>;
-  isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   issuanceDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   photo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>;
   rdiMergeStatus?: Resolver<ResolversTypes['DocumentRdiMergeStatus'], ParentType, ContextType>;
+  removedDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   status?: Resolver<ResolversTypes['DocumentStatus'], ParentType, ContextType>;
   type?: Resolver<ResolversTypes['ImportedDocumentTypeNode'], ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
@@ -23070,7 +23049,6 @@ export type FeedbackNodeResolvers<ContextType = any, ParentType extends Resolver
   householdLookup?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   individualLookup?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>;
-  isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   issueType?: Resolver<ResolversTypes['FeedbackIssueType'], ParentType, ContextType>;
   language?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   linkedGrievance?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>;
@@ -23318,13 +23296,10 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   ignored?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>;
   individualDataUpdateTicketDetails?: Resolver<Maybe<ResolversTypes['TicketIndividualDataUpdateDetailsNode']>, ParentType, ContextType>;
-  isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   issueType?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   language?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   lastNotificationSent?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   linkedTickets?: Resolver<Maybe<Array<Maybe<ResolversTypes['GrievanceTicketNode']>>>, ParentType, ContextType>;
-  migratedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   needsAdjudicationTicketDetails?: Resolver<Maybe<ResolversTypes['TicketNeedsAdjudicationDetailsNode']>, ParentType, ContextType>;
   negativeFeedbackTicketDetails?: Resolver<Maybe<ResolversTypes['TicketNegativeFeedbackDetailsNode']>, ParentType, ContextType>;
   partner?: Resolver<Maybe<ResolversTypes['PartnerType']>, ParentType, ContextType>;
@@ -23438,8 +23413,6 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   individuals?: Resolver<Maybe<ResolversTypes['IndividualNodeConnection']>, ParentType, ContextType, Partial<HouseholdNodeIndividualsArgs>>;
   individualsAndRoles?: Resolver<Array<ResolversTypes['IndividualRoleInHouseholdNode']>, ParentType, ContextType>;
   internalData?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>;
-  isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   koboSubmissionTime?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   koboSubmissionUuid?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>;
@@ -23458,7 +23431,6 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   maleChildrenCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   maleChildrenDisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   messages?: Resolver<ResolversTypes['CommunicationMessageNodeConnection'], ParentType, ContextType, Partial<HouseholdNodeMessagesArgs>>;
-  migratedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   misUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   nameEnumerator?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   negativeFeedbackTicketDetails?: Resolver<ResolversTypes['TicketNegativeFeedbackDetailsNodeConnection'], ParentType, ContextType, Partial<HouseholdNodeNegativeFeedbackTicketDetailsArgs>>;
@@ -23474,7 +23446,6 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   rdiMergeStatus?: Resolver<ResolversTypes['HouseholdRdiMergeStatus'], ParentType, ContextType>;
   referralTicketDetails?: Resolver<ResolversTypes['TicketReferralDetailsNodeConnection'], ParentType, ContextType, Partial<HouseholdNodeReferralTicketDetailsArgs>>;
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>;
-  registrationId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   registrationMethod?: Resolver<ResolversTypes['HouseholdRegistrationMethod'], ParentType, ContextType>;
   removedDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   representatives?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, Partial<HouseholdNodeRepresentativesArgs>>;
@@ -23581,13 +23552,12 @@ export type IndividualIdentityNodeResolvers<ContextType = any, ParentType extend
   created?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>;
-  isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   modified?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   number?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   partner?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   rdiMergeStatus?: Resolver<ResolversTypes['IndividualIdentityRdiMergeStatus'], ParentType, ContextType>;
+  removedDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -23658,15 +23628,12 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   individualDataUpdateTicketDetails?: Resolver<ResolversTypes['TicketIndividualDataUpdateDetailsNodeConnection'], ParentType, ContextType, Partial<IndividualNodeIndividualDataUpdateTicketDetailsArgs>>;
   individualId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   internalData?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>;
-  isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   lastRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   maritalStatus?: Resolver<ResolversTypes['IndividualMaritalStatus'], ParentType, ContextType>;
   memoryDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   middleName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  migratedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   misUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   negativeFeedbackTicketDetails?: Resolver<ResolversTypes['TicketNegativeFeedbackDetailsNodeConnection'], ParentType, ContextType, Partial<IndividualNodeNegativeFeedbackTicketDetailsArgs>>;
   observedDisability?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
@@ -23688,7 +23655,6 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   rdiMergeStatus?: Resolver<ResolversTypes['IndividualRdiMergeStatus'], ParentType, ContextType>;
   referralTicketDetails?: Resolver<ResolversTypes['TicketReferralDetailsNodeConnection'], ParentType, ContextType, Partial<IndividualNodeReferralTicketDetailsArgs>>;
   registrationDataImport?: Resolver<ResolversTypes['RegistrationDataImportNode'], ParentType, ContextType>;
-  registrationId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   relationship?: Resolver<Maybe<ResolversTypes['IndividualRelationship']>, ParentType, ContextType>;
   relationshipConfirmed?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   removedDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
@@ -23741,12 +23707,10 @@ export type IndividualRoleInHouseholdNodeResolvers<ContextType = any, ParentType
   household?: Resolver<ResolversTypes['HouseholdNode'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>;
   individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>;
-  isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
-  migratedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   rdiMergeStatus?: Resolver<ResolversTypes['IndividualRoleInHouseholdRdiMergeStatus'], ParentType, ContextType>;
+  removedDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   role?: Resolver<Maybe<ResolversTypes['IndividualRoleInHouseholdRole']>, ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;

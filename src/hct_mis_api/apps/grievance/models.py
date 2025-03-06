@@ -82,22 +82,6 @@ class GrievanceTicketManager(models.Manager):
             (TicketComplaintDetails.objects.filter(Q(individual__in=individuals) | Q(household__in=households))),
         )
 
-    # remove 'is_original' after data migration
-    def get_queryset(self) -> "QuerySet":
-        return super().get_queryset().filter(is_original=False)
-
-
-class OriginalAndRepresentationsManager(models.Manager):
-    # TODO: remove after data migration
-    def get_queryset(self) -> "QuerySet":
-        return super().get_queryset()
-
-
-class OnlyOriginalManager(models.Manager):
-    # TODO: remove after data migration
-    def get_queryset(self) -> "QuerySet":
-        return super().get_queryset().filter(is_original=True)
-
 
 class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, UnicefIdentifiedModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
@@ -364,10 +348,6 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
     ignored = models.BooleanField(default=False, db_index=True)
     extras = JSONField(blank=True, default=dict)
     comments = models.TextField(blank=True, null=True)
-
-    is_original = models.BooleanField(db_index=True, default=False)
-    is_migration_handled = models.BooleanField(default=False)
-    migrated_at = models.DateTimeField(null=True, blank=True)
     copied_from = models.ForeignKey(
         "self",
         null=True,
@@ -409,9 +389,6 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
     )
 
     objects = GrievanceTicketManager()
-    # TODO: remove after data migration
-    # added for migration purposes because 0062 call .objects()
-    default_for_migrations_fix = OriginalAndRepresentationsManager()
 
     def flatten(self, t: List[List]) -> List:
         return [item for sublist in t for item in sublist]

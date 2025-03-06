@@ -252,11 +252,10 @@ input AvailableFspsForDeliveryMechanismsInput {
 type BankAccountInfoNode implements Node {
   id: ID!
   rdiMergeStatus: BankAccountInfoRdiMergeStatus!
-  isOriginal: Boolean!
-  createdAt: DateTime!
-  updatedAt: DateTime!
   isRemoved: Boolean!
   removedDate: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
   lastSyncAt: DateTime
   individual: IndividualNode!
   bankName: String!
@@ -466,7 +465,6 @@ type CommunicationMessageNode implements Node {
   randomSamplingArguments: JSONString
   sampleSize: Int!
   program: ProgramNode
-  isOriginal: Boolean!
   copiedFrom: CommunicationMessageNode
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   adminUrl: String
@@ -960,7 +958,7 @@ type DocumentNode implements Node {
   id: ID!
   rdiMergeStatus: DocumentRdiMergeStatus!
   isRemoved: Boolean!
-  isOriginal: Boolean!
+  removedDate: DateTime
   createdAt: DateTime!
   updatedAt: DateTime!
   lastSyncAt: DateTime
@@ -976,7 +974,6 @@ type DocumentNode implements Node {
   clearedBy: UserNode
   issuanceDate: DateTime
   expiryDate: DateTime
-  isMigrationHandled: Boolean!
   copiedFrom: DocumentNode
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
   countryIso3: String
@@ -1130,7 +1127,6 @@ type FeedbackNode implements Node {
   createdBy: UserNode
   linkedGrievance: GrievanceTicketNode
   consent: Boolean!
-  isOriginal: Boolean!
   copiedFrom: FeedbackNode
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
   feedbackMessages(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackMessageNodeConnection!
@@ -1397,9 +1393,6 @@ type GrievanceTicketNode implements Node {
   ignored: Boolean!
   extras: JSONString!
   comments: String
-  isOriginal: Boolean!
-  isMigrationHandled: Boolean!
-  migratedAt: DateTime
   copiedFrom: GrievanceTicketNode
   userModified: DateTime
   lastNotificationSent: DateTime
@@ -1477,11 +1470,10 @@ type HouseholdNode implements Node {
   size: Int
   headOfHousehold: IndividualNode
   rdiMergeStatus: HouseholdRdiMergeStatus!
-  isOriginal: Boolean!
-  createdAt: DateTime!
-  updatedAt: DateTime!
   isRemoved: Boolean!
   removedDate: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
   lastSyncAt: DateTime
   version: BigInt!
   unicefId: String
@@ -1550,7 +1542,6 @@ type HouseholdNode implements Node {
   currency: String
   unhcrId: String!
   detailId: String
-  registrationId: String
   programRegistrationId: String
   totalCashReceivedUsd: Decimal
   totalCashReceived: Decimal
@@ -1558,8 +1549,6 @@ type HouseholdNode implements Node {
   program: ProgramNode!
   copiedFrom: HouseholdNode
   originUnicefId: String
-  isMigrationHandled: Boolean!
-  migratedAt: DateTime
   collectType: HouseholdCollectType!
   koboSubmissionUuid: UUID
   koboSubmissionTime: DateTime
@@ -1793,12 +1782,11 @@ type IndividualIdentityNode implements Node {
   modified: DateTime!
   rdiMergeStatus: IndividualIdentityRdiMergeStatus!
   isRemoved: Boolean!
-  isOriginal: Boolean!
+  removedDate: DateTime
   individual: IndividualNode!
   partner: String
   country: String
   number: String!
-  isMigrationHandled: Boolean!
   copiedFrom: IndividualIdentityNode
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
   countryIso3: String
@@ -1839,11 +1827,10 @@ enum IndividualMaritalStatus {
 type IndividualNode implements Node {
   id: ID!
   rdiMergeStatus: IndividualRdiMergeStatus!
-  isOriginal: Boolean!
-  createdAt: DateTime!
-  updatedAt: DateTime!
   isRemoved: Boolean!
   removedDate: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
   lastSyncAt: DateTime
   version: BigInt!
   unicefId: String
@@ -1904,7 +1891,6 @@ type IndividualNode implements Node {
   fchildHoh: Boolean!
   childHoh: Boolean!
   detailId: String
-  registrationId: String
   programRegistrationId: String
   preferredLanguage: String
   relationshipConfirmed: Boolean!
@@ -1915,8 +1901,6 @@ type IndividualNode implements Node {
   program: ProgramNode!
   copiedFrom: IndividualNode
   originUnicefId: String
-  isMigrationHandled: Boolean!
-  migratedAt: DateTime
   misUnicefId: String
   representedHouseholds(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   headingHousehold: HouseholdNode
@@ -1992,15 +1976,13 @@ type IndividualRoleInHouseholdNode {
   id: UUID!
   rdiMergeStatus: IndividualRoleInHouseholdRdiMergeStatus!
   isRemoved: Boolean!
-  isOriginal: Boolean!
+  removedDate: DateTime
   createdAt: DateTime!
   updatedAt: DateTime!
   lastSyncAt: DateTime
   individual: IndividualNode!
   household: HouseholdNode!
   role: IndividualRoleInHouseholdRole
-  isMigrationHandled: Boolean!
-  migratedAt: DateTime
   copiedFrom: IndividualRoleInHouseholdNode
   copiedTo: [IndividualRoleInHouseholdNode!]!
 }

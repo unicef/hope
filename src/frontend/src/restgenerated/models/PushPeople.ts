@@ -121,7 +121,6 @@ export type PushPeople = {
     who_answers_alt_phone?: string;
     fchild_hoh?: boolean;
     child_hoh?: boolean;
-    registration_id?: string | null;
     program_registration_id?: string | null;
     preferred_language?: (PreferredLanguageEnum | BlankEnum | NullEnum) | null;
     relationship_confirmed?: boolean;
@@ -130,9 +129,6 @@ export type PushPeople = {
     blockchain_name?: string;
     wallet_address?: string;
     origin_unicef_id?: string | null;
-    is_migration_handled?: boolean;
-    migrated_at?: string | null;
-    mis_unicef_id?: string | null;
     vector_column?: string | null;
     individual_collection?: number | null;
     /**

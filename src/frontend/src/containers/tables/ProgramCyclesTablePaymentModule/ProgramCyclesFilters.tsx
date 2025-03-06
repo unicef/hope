@@ -1,16 +1,13 @@
-import { ClearApplyButtons } from '@core/ClearApplyButtons';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { createHandleApplyFilterChange } from '@utils/utils';
-import React from 'react';
-import Grid from '@mui/material/Grid2';
-import { ContainerWithBorder } from '@core/ContainerWithBorder';
+import { Grid2 as Grid, MenuItem } from '@mui/material';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
-import { MenuItem } from '@mui/material';
 import { NumberTextField } from '@core/NumberTextField';
 import { DatePickerFilter } from '@core/DatePickerFilter';
 import moment from 'moment/moment';
+import { FiltersSection } from '@components/core/FiltersSection';
 
 interface ProgramCyclesFiltersProps {
   filter;
@@ -57,7 +54,10 @@ export const ProgramCyclesFilters = ({
   };
 
   return (
-    <ContainerWithBorder>
+    <FiltersSection
+      clearHandler={handleClearFilter}
+      applyHandler={handleApplyFilter}
+    >
       <Grid container spacing={3} alignItems="flex-end">
         <Grid size={{ xs: 3 }}>
           <SearchTextField
@@ -141,10 +141,6 @@ export const ProgramCyclesFilters = ({
           />
         </Grid>
       </Grid>
-      <ClearApplyButtons
-        clearHandler={handleClearFilter}
-        applyHandler={handleApplyFilter}
-      />
-    </ContainerWithBorder>
+    </FiltersSection>
   );
 };
