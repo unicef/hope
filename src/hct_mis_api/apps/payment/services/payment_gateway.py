@@ -331,6 +331,7 @@ class PaymentGatewayAPI(BaseAPI):
         self, payment_records: List[Payment], remote_id: str, validate_response: bool = True
     ) -> AddRecordsResponseData:
         serializer = PaymentSerializer(payment_records, many=True)
+        print(serializer.data)
         response_data, _ = self._post(
             self.Endpoints.PAYMENT_INSTRUCTION_ADD_RECORDS.format(remote_id=remote_id),
             serializer.data,
