@@ -125,7 +125,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
     def get_payload(self, obj: Payment) -> Dict:
         snapshot = getattr(obj, "household_snapshot", None)
         if not snapshot:
-            logger.error(f"Not found snapshot for Payment {obj.unicef_id}")
+            raise PaymentGatewayAPI.PaymentGatewayAPIException(f"Not found snapshot for Payment {obj.unicef_id}")
 
         snapshot_data = snapshot.snapshot_data
         collector_data = snapshot_data.get("primary_collector") or snapshot_data.get("alternate_collector") or dict()
