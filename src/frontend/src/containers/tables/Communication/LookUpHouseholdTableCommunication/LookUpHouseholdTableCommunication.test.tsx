@@ -1,10 +1,10 @@
-import { MockedProvider } from '@apollo/client/testing';
-import '@testing-library/jest-dom';
-import { screen } from '@testing-library/react';
-import { MeDocument } from 'src/__generated__/graphql';
-import { renderWithProviders } from 'src/testUtils/testUtils';
 import { expect, it } from 'vitest';
-import { HouseholdTable } from './HouseholdTable';
+import { screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { MockedProvider } from '@apollo/client/testing';
+import { renderWithProviders } from 'src/testUtils/testUtils';
+import { MeDocument } from 'src/__generated__/graphql';
+import LookUpHouseholdTableCommunication from './LookUpHouseholdTableCommunication';
 
 const mocks = [
   {
@@ -24,10 +24,10 @@ const mocks = [
   // Add other mocks if needed
 ];
 
-it('HouseholdTable renders correctly after data is fetched', async () => {
+it('LookUpHouseholdTableCommunication renders correctly after data is fetched', async () => {
   const { asFragment } = renderWithProviders(
     <MockedProvider mocks={mocks} addTypename={false}>
-      <HouseholdTable
+      <LookUpHouseholdTableCommunication
         filter={{
           search: '',
           documentType: '',
@@ -40,7 +40,9 @@ it('HouseholdTable renders correctly after data is fetched', async () => {
           orderBy: 'unicef_id',
           withdrawn: '',
         }}
-        canViewDetails={true}
+        businessArea="afghanistan"
+        choicesData={{}}
+        setFieldValue={() => {}}
       />
     </MockedProvider>,
   );

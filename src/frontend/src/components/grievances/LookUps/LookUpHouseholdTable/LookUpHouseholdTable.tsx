@@ -13,6 +13,7 @@ import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { headCells } from './LookUpHouseholdTableHeadCells';
 import { LookUpHouseholdTableRow } from './LookUpHouseholdTableRow';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 interface LookUpHouseholdTableProps {
   businessArea: string;
@@ -206,7 +207,7 @@ export function LookUpHouseholdTable({
         row ? (
           <LookUpHouseholdTableRow
             key={(row as any).id}
-            household={row}
+            household={row as HouseholdDetail}
             radioChangeHandler={handleRadioChange}
             selectedHousehold={selectedHousehold}
             choicesData={choicesData}
