@@ -1,6 +1,5 @@
 import { BlackLink } from '@components/core/BlackLink';
 import { FlagTooltip } from '@components/core/FlagTooltip';
-import { LoadingComponent } from '@components/core/LoadingComponent';
 import { StatusBox } from '@components/core/StatusBox';
 import { AnonTableCell } from '@components/core/Table/AnonTableCell';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
@@ -170,10 +169,6 @@ export const HouseholdTable = ({
       </ClickableTableRow>
     );
   };
-
-  if (isLoading) {
-    return <LoadingComponent />;
-  }
 
   return (
     <TableWrapper>

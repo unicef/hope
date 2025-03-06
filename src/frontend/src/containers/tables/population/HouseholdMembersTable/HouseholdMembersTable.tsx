@@ -13,11 +13,7 @@ import {
   populationStatusToColor,
   sexToCapitalize,
 } from '@utils/utils';
-import {
-  HouseholdChoiceDataQuery,
-  HouseholdNode,
-  IndividualNode,
-} from '@generated/graphql';
+import { HouseholdChoiceDataQuery, IndividualNode } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Bold } from '@components/core/Bold';
 import { useProgramContext } from 'src/programContext';
@@ -83,9 +79,11 @@ export const HouseholdMembersTable = ({
   const relationshipChoicesDict = choicesToDict(
     choicesData?.relationshipChoices,
   );
-  const allIndividuals = household?.individuals?.edges?.map(
-    (edge) => edge.node,
-  );
+  const allIndividuals = [];
+  //TODO:
+  // household?.individuals?.edges?.map(
+  //   (edge) => edge.node,
+  // );
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 

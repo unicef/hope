@@ -10,11 +10,11 @@ import { restBusinessAreasHouseholdsList } from './responses/restBusinessAreasHo
 import { restBusinessAreasProgramsHouseholdsList } from './responses/restBusinessAreasProgramsHouseholdsList';
 import { restBusinessAreasProgramsHouseholdsRetrieve } from './responses/restBusinessAreasProgramsHouseholdsRetrieve';
 
-const baseUrl = 'http://localhost:3000/api/rest/';
+const baseUrl = 'http://localhost:3000/api/rest/business-areas/';
 
 const endpoints = [
   {
-    url: `${baseUrl}profile/`,
+    url: 'http://localhost:3000/api/rest/profile/',
     response: restProfileRetrieve,
   },
   {
@@ -38,7 +38,7 @@ const endpoints = [
     response: restProgramsPeriodicDataUpdatePeriodicDataUpdateTemplatesRetrieve,
   },
   {
-    url: `${baseUrl}beneficiary-groups/`,
+    url: `${baseUrl}:business_area/beneficiary-groups/`,
     response: restBeneficiaryGroupsList,
   },
   {
