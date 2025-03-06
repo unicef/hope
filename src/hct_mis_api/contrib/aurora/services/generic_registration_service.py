@@ -21,6 +21,10 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
+from hct_mis_api.apps.payment.models import (
+    DeliveryMechanism,
+    PendingDeliveryMechanismData,
+)
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.contrib.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
@@ -37,6 +41,7 @@ SECONDARY_COLLECTOR = "secondary_collector"
 INDIVIDUAL_FIELD = "individual"
 DOCUMENT_FIELD = "document"
 BANK_FIELD = "bank"
+ACCOUNT_FIELD = "account"
 EXTRA_FIELD = "extra"
 
 
@@ -165,6 +170,11 @@ class GenericRegistrationService(BaseRegistrationService):
                         if bank_num not in my_dict["banks"]:
                             my_dict["banks"][bank_num] = dict()
                         my_dict["banks"][bank_num].update({bank_field: retrieved_value})
+                    if model == ACCOUNT_FIELD:
+                        account_num, account_field = field.split("-")
+                        if account_num not in my_dict["accounts"]:
+                            my_dict["accounts"][account_num] = dict()
+                        my_dict["accounts"][account_num].update({account_field: retrieved_value})
                     if model == EXTRA_FIELD:
                         my_dict["extra"][field] = retrieved_value
                     for kk, vv in item.items():
@@ -342,6 +352,24 @@ class GenericRegistrationService(BaseRegistrationService):
             PendingIndividualRoleInHousehold.objects.create(
                 individual=pr_collector, household=household, role=ROLE_PRIMARY
             )
+            # check if "ind-bank-info" key exist in record
+            record_data_dict = record.get_data()
+            accounts_data = record_data_dict.get("ind-bank-info", [])
+            if accounts_data:
+                if primary_collector_account_details := accounts_data[0].get("account_details"):
+                    PendingDeliveryMechanismData.objects.create(
+                        individual=pr_collector,
+                        delivery_mechanism=DeliveryMechanism.objects.get(code="transfer_to_account"),
+                        data={
+                            "bank_account_number__transfer_to_account": primary_collector_account_details.get(
+                                "account_number", ""
+                            ),
+                            "bank_name__transfer_to_account": primary_collector_account_details.get(
+                                "institution_code", ""
+                            ),
+                        },
+                    )
+
         if sec_collector:
             PendingIndividualRoleInHousehold.objects.create(
                 individual=sec_collector, household=household, role=ROLE_ALTERNATE
