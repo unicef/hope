@@ -60,6 +60,7 @@ from django.utils import timezone
 
 import elasticsearch
 
+from hct_mis_api.apps.account.fixtures import create_superuser
 from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.payment.fixtures import (
@@ -121,20 +122,22 @@ class Command(BaseCommand):
         fixtures = [
             "apps/geo/fixtures/data.json",
             "apps/core/fixtures/data.json",
-            "apps/account/fixtures/data.json",
-            "apps/core/fixtures/businessareapartnerthrough.json",
-            "apps/program/fixtures/data.json",
-            "apps/registration_data/fixtures/data.json",
-            "apps/household/fixtures/documenttype.json",
-            "apps/household/fixtures/data.json",
-            "apps/accountability/fixtures/data.json",
-            "apps/steficon/fixtures/data.json",
-            "contrib/aurora/fixtures/data.json",
+            # "apps/account/fixtures/data.json",
+            # "apps/core/fixtures/businessareapartnerthrough.json",
+            # "apps/program/fixtures/data.json",
+            # "apps/registration_data/fixtures/data.json",
+            # "apps/household/fixtures/documenttype.json",
+            # "apps/household/fixtures/data.json",
+            # "apps/accountability/fixtures/data.json",
+            # "apps/steficon/fixtures/data.json",
+            # "contrib/aurora/fixtures/data.json",
         ]
         self.stdout.write("Loading fixtures...")
         for fixture in fixtures:
             self.stdout.write(f"Loading fixture: {fixture}")
             call_command("loaddata", f"{settings.PROJECT_ROOT}/{fixture}")
+
+        create_superuser()
 
         try:
             self.stdout.write("Rebuilding search index...")
@@ -155,9 +158,9 @@ class Command(BaseCommand):
 
         # Load more fixtures
         additional_fixtures = [
-            "apps/core/fixtures/pdu.json",
-            "apps/program/fixtures/programpartnerthrough.json",
-            "apps/grievance/fixtures/data.json",
+            # "apps/core/fixtures/pdu.json",
+            # "apps/program/fixtures/programpartnerthrough.json",
+            # "apps/grievance/fixtures/data.json",
         ]
         self.stdout.write("Loading additional fixtures...")
         for fixture in additional_fixtures:

@@ -72,3 +72,22 @@ class UserRoleFactory(DjangoModelFactory):
     class Meta:
         model = UserRole
         django_get_or_create = ("user", "role")
+
+
+def create_superuser(**kwargs: Any) -> User:
+    user_data = {
+        "username": kwargs.get("username") or "root",
+        "email": kwargs.get("email") or "root@root.com",
+        "first_name": kwargs.get("first_name") or "Root",
+        "last_name": kwargs.get("last_name") or "Rootkowski",
+        "partner": kwargs.get("partner") or PartnerFactory(name="UNICEF"),
+        "pk": kwargs.get("pk") or "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
+        "is_active": True,
+    }
+    user = User.objects.create_superuser(**user_data)
+    if "password" in kwargs:
+        user.set_password(kwargs["password"])
+    else:
+        user.password = "pbkdf2_sha256$260000$cRIP5zhsKkc3FSUGqN46sh$s4qBQteooXyZ4zmsfbl/Yyym4itqUYg5F6TMNqFMJ70="
+        user.save()
+    return user
