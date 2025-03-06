@@ -1,41 +1,38 @@
-import { Box, Grid2 as Grid, Typography } from '@mui/material';
-import Paper from '@mui/material/Paper';
-import { useTranslation } from 'react-i18next';
-import { useLocation, useParams } from 'react-router-dom';
-import styled from 'styled-components';
-import {
-  HouseholdNode,
-  useAllHouseholdsFlexFieldsAttributesQuery,
-  useGrievancesChoiceDataQuery,
-  useHouseholdChoiceDataQuery,
-  useHouseholdQuery,
-} from '@generated/graphql';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { FlagTooltip } from '@components/core/FlagTooltip';
 import { LabelizedField } from '@components/core/LabelizedField';
 import { LoadingComponent } from '@components/core/LoadingComponent';
+import { Missing } from '@components/core/Missing';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { Title } from '@components/core/Title';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { WarningTooltip } from '@components/core/WarningTooltip';
-import { HouseholdDetails } from '@components/population/HouseholdDetails';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { HouseholdAdditionalRegistrationInformation } from '@components/population/HouseholdAdditionalRegistrationInformation/HouseholdAdditionalRegistrationInformation';
-import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
+import { HouseholdDetails } from '@components/population/HouseholdDetails';
+import PaymentsHouseholdTable from '@containers/tables/payments/PaymentsHouseholdTable/PaymentsHouseholdTable';
+import { AdminButton } from '@core/AdminButton';
+import {
+  useAllHouseholdsFlexFieldsAttributesQuery,
+  useGrievancesChoiceDataQuery,
+  useHouseholdChoiceDataQuery,
+} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
+import { Box, Grid2 as Grid, Typography } from '@mui/material';
+import Paper from '@mui/material/Paper';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError, renderSomethingOrDash } from '@utils/utils';
+import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useLocation, useParams } from 'react-router-dom';
+import { useProgramContext } from 'src/programContext';
+import styled from 'styled-components';
+import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { HouseholdCompositionTable } from '../../tables/population/HouseholdCompositionTable/HouseholdCompositionTable';
-import { AdminButton } from '@core/AdminButton';
-import { CollectorsTable } from '@containers/tables/population/CollectorsTable';
-import { HouseholdMembersTable } from '@containers/tables/population/HouseholdMembersTable';
-import { useProgramContext } from 'src/programContext';
-import { ReactElement } from 'react';
-import withErrorBoundary from '@components/core/withErrorBoundary';
-import PaymentsHouseholdTable from '@containers/tables/payments/PaymentsHouseholdTable/PaymentsHouseholdTable';
-import { useQuery } from '@tanstack/react-query';
-import { RestService } from '@restgenerated/services/RestService';
 
 const Container = styled.div`
   padding: 20px;
@@ -73,11 +70,11 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const { data, loading, error } = useHouseholdQuery({
-    variables: { id },
-    fetchPolicy: 'cache-and-network',
-  });
-  const { data: householdData, isLoading: householdLoading } = useQuery({
+  const {
+    data: household,
+    isLoading: householdLoading,
+    error,
+  } = useQuery({
     queryKey: ['household', businessArea, id, selectedProgram?.programmeCode],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsRetrieve({
@@ -96,7 +93,6 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
     useGrievancesChoiceDataQuery();
 
   if (
-    loading ||
     choicesLoading ||
     flexFieldsDataLoading ||
     grievancesChoicesLoading ||
@@ -107,12 +103,11 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
   if (
-    !data ||
     !choicesData ||
     !grievancesChoices ||
     !flexFieldsData ||
     permissions === null ||
-    !householdData
+    !household
   )
     return null;
 
@@ -134,13 +129,11 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
     ];
   }
 
-  const { household } = data;
-
   return (
     <>
       <PageHeader
         title={`${beneficiaryGroup?.groupLabel}: ${renderSomethingOrDash(
-          household?.unicefId,
+          household?.unicef_id,
         )}`}
         breadCrumbs={
           hasPermissions(
@@ -153,7 +146,7 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
         flags={
           <>
             <Box mr={2}>
-              {household?.hasDuplicates && (
+              {household?.has_duplicates && (
                 <WarningTooltip
                   confirmed
                   message={`${beneficiaryGroup?.groupLabel} has Duplicates`}
@@ -161,49 +154,48 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
               )}
             </Box>
             <Box mr={2}>
-              {household?.sanctionListPossibleMatch && (
+              {household?.sanction_list_possible_match && (
                 <FlagTooltip message={t('Sanction List Possible Match')} />
               )}
             </Box>
             <Box mr={2}>
-              {household?.sanctionListConfirmedMatch && (
+              {household?.sanction_list_confirmed_match && (
                 <FlagTooltip
                   message={t('Sanction List Confirmed Match')}
                   confirmed
                 />
               )}
             </Box>
-            <AdminButton adminUrl={household?.adminUrl} />
+            <AdminButton adminUrl={household?.admin_url} />
           </>
         }
       />
       <HouseholdDetails
-        household={householdData}
+        household={household}
         baseUrl={baseUrl}
         businessArea={businessArea}
         grievancesChoices={grievancesChoices}
       />
-      <HouseholdCompositionTable household={household as HouseholdNode} />
+      <HouseholdCompositionTable household={household} />
       <Container>
-        {household?.individuals?.edges?.length ? (
+        <Missing />
+        {/* //TODO: */}
+        {/* {household?.individuals?.edges?.length ? (
           <>
             <HouseholdMembersTable
               choicesData={choicesData}
-              household={household as HouseholdNode}
+              household={household}
             />
-            <CollectorsTable
-              choicesData={choicesData}
-              household={household as HouseholdNode}
-            />
+            <CollectorsTable choicesData={choicesData} household={household} />
           </>
-        ) : null}
+        ) : null} */}
         {hasPermissions(
           PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS,
           permissions,
         ) && (
           <PaymentsHouseholdTable
             openInNewTab
-            household={household as HouseholdNode}
+            household={household}
             businessArea={businessArea}
             canViewPaymentRecordDetails={hasPermissions(
               PERMISSIONS.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS,
@@ -212,7 +204,7 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
           />
         )}
         <HouseholdAdditionalRegistrationInformation
-          household={household as HouseholdNode}
+          household={household}
           flexFieldsData={flexFieldsData}
         />
         <Overview>
@@ -222,37 +214,40 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
           <Grid container spacing={6}>
             <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Source')}>
-                <div>{household?.registrationDataImport?.dataSource}</div>
+                <div>{household?.registration_data_import?.data_source}</div>
               </LabelizedField>
             </Grid>
             <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Import name')}>
-                <div>{household?.registrationDataImport?.name}</div>
+                <div>{household?.registration_data_import?.name}</div>
               </LabelizedField>
             </Grid>
             <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Registration Date')}>
                 <div>
                   <UniversalMoment>
-                    {household?.lastRegistrationDate}
+                    {household?.last_registration_date}
                   </UniversalMoment>
                 </div>
               </LabelizedField>
             </Grid>
             <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('User name')}>
-                {household?.registrationDataImport?.importedBy?.email}
+                {<Missing />}
+                {/* TODO: */}
+                {/* {household?.registration_data_import?.importedBy?.email} */}
               </LabelizedField>
             </Grid>
-            {household?.programRegistrationId && (
+            {<Missing />}
+            {/* {household?.programRegistrationId && (
               <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Programme registration id')}>
                   {household.programRegistrationId}
                 </LabelizedField>
               </Grid>
-            )}
+            )} */}
           </Grid>
-          {household?.registrationDataImport?.dataSource === 'XLS' ? null : (
+          {household?.registration_data_import?.data_source === 'XLS' ? null : (
             <>
               <hr />
               <SubTitle variant="h6">{t('Data Collection')}</SubTitle>
@@ -265,7 +260,7 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
                 <Grid size={{ xs: 3 }}>
                   <LabelizedField label={t('End time')}>
                     <UniversalMoment>
-                      {household?.firstRegistrationDate}
+                      {household?.first_registration_date}
                     </UniversalMoment>
                   </LabelizedField>
                 </Grid>
@@ -280,7 +275,7 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
         </Overview>
       </Container>
       {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
-        <UniversalActivityLogTable objectId={data.household?.id} />
+        <UniversalActivityLogTable objectId={household?.id} />
       )}
     </>
   );

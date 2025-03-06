@@ -102,6 +102,7 @@ export const UniversalRestTable = <T, K>({
 
   return (
     <TableRestComponent<T>
+      data-cy="universal-rest-table"
       title={correctTitle}
       actions={actions}
       data={typedResults}
