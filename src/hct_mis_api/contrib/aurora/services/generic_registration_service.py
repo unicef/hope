@@ -41,7 +41,6 @@ SECONDARY_COLLECTOR = "secondary_collector"
 INDIVIDUAL_FIELD = "individual"
 DOCUMENT_FIELD = "document"
 BANK_FIELD = "bank"
-ACCOUNT_FIELD = "account"
 EXTRA_FIELD = "extra"
 
 
@@ -170,11 +169,6 @@ class GenericRegistrationService(BaseRegistrationService):
                         if bank_num not in my_dict["banks"]:
                             my_dict["banks"][bank_num] = dict()
                         my_dict["banks"][bank_num].update({bank_field: retrieved_value})
-                    if model == ACCOUNT_FIELD:
-                        account_num, account_field = field.split("-")
-                        if account_num not in my_dict["accounts"]:
-                            my_dict["accounts"][account_num] = dict()
-                        my_dict["accounts"][account_num].update({account_field: retrieved_value})
                     if model == EXTRA_FIELD:
                         my_dict["extra"][field] = retrieved_value
                     for kk, vv in item.items():
