@@ -1,10 +1,7 @@
 import { TableWrapper } from '@components/core/TableWrapper';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import {
-  AllHouseholdsQuery,
-  HouseholdChoiceDataQuery,
-} from '@generated/graphql';
+import { HouseholdChoiceDataQuery } from '@generated/graphql';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
@@ -135,9 +132,7 @@ function LookUpHouseholdTableCommunication({
     }
   };
 
-  const handleRadioChange = (
-    household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'],
-  ): void => {
+  const handleRadioChange = (household): void => {
     setSelectedHousehold(household);
     setFieldValue('selectedHousehold', household);
     setFieldValue('selectedIndividual', null);

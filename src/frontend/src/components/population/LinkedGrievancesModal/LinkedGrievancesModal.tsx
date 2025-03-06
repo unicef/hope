@@ -31,6 +31,7 @@ import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import { getGrievanceDetailsPath } from '../../grievances/utils/createGrievanceUtils';
 import { Bold } from '@components/core/Bold';
 import { useProgramContext } from 'src/programContext';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -47,8 +48,7 @@ const StyledDialog = styled(Dialog)`
 `;
 
 interface LinkedGrievancesModalProps {
-  //TODO: Define the type for household
-  household;
+  household: HouseholdDetail;
   businessArea: string;
   baseUrl: string;
   grievancesChoices: GrievancesChoiceDataQuery;
@@ -67,7 +67,7 @@ export function LinkedGrievancesModal({
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { data: grievances } = useAllGrievanceTicketQuery({
-    variables: { businessArea, household: household.unicefId },
+    variables: { businessArea, household: household.unicef_id },
     notifyOnNetworkStatusChange: true,
     fetchPolicy: 'network-only',
   });
@@ -176,7 +176,7 @@ export function LinkedGrievancesModal({
           <Box mt={2} mb={6}>
             <Typography>
               <Bold>
-                {beneficiaryGroup?.groupLabel} ID {household.unicefId}
+                {beneficiaryGroup?.groupLabel} ID {household.unicef_id}
               </Bold>
               is linked to following Grievances.
             </Typography>

@@ -13,7 +13,6 @@ import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { headCells } from './LookUpHouseholdTableHeadCells';
 import { LookUpHouseholdTableRow } from './LookUpHouseholdTableRow';
-import { LoadingComponent } from '@components/core/LoadingComponent';
 
 interface LookUpHouseholdTableProps {
   businessArea: string;
@@ -129,13 +128,6 @@ export function LookUpHouseholdTable({
     householdMultiSelect ? [...selectedHousehold] : [selectedHousehold],
   );
 
-  if (isLoadingHouseholdsAllPrograms || isLoadingHouseholdsProgram) {
-    return <LoadingComponent />;
-  }
-  if (!dataHouseholdsAllPrograms || !dataHouseholdsProgram) {
-    return null;
-  }
-
   const handleCheckboxClick = (
     _event: MouseEvent<HTMLTableRowElement> | MouseEvent<HTMLButtonElement>,
     name: string,
@@ -202,6 +194,7 @@ export function LookUpHouseholdTable({
       dataCy: 'programs',
     },
   ];
+  console.log('dataHouseholdsAllPrograms', dataHouseholdsAllPrograms);
 
   const preparedHeadcells = isAllPrograms
     ? headCellsWithProgramColumn

@@ -8,6 +8,7 @@ import { UniversalMoment } from '@components/core/UniversalMoment';
 import { WarningTooltip } from '@components/core/WarningTooltip';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -18,13 +19,11 @@ export const StyledLink = styled.div`
 `;
 
 interface ImportedHouseholdTableRowProps {
-  isMerged: boolean;
-  household;
+  household: HouseholdDetail;
   rdi;
 }
 
 export function ImportedHouseholdTableRow({
-  isMerged,
   household,
   rdi,
 }: ImportedHouseholdTableRowProps): ReactElement {
@@ -51,22 +50,20 @@ export function ImportedHouseholdTableRow({
       data-cy="imported-households-row"
     >
       <TableCell align="left">
-        {household.hasDuplicates && (
+        {household.has_duplicates && (
           <WarningTooltip confirmed message={t('Household has Duplicates')} />
         )}
       </TableCell>
       <TableCell align="left">
         <StyledLink onClick={() => handleClick()}>
-          {household.unicefId}
+          {household.unicef_id}
         </StyledLink>
       </TableCell>
-      <AnonTableCell>{household?.headOfHousehold?.fullName}</AnonTableCell>
+      <AnonTableCell>{household?.head_of_household}</AnonTableCell>
       <TableCell align="right">{household.size}</TableCell>
+      <TableCell align="left">{household?.admin2}</TableCell>
       <TableCell align="left">
-        {isMerged ? household.admin2?.name : household.admin2Title}
-      </TableCell>
-      <TableCell align="left">
-        <UniversalMoment>{household.firstRegistrationDate}</UniversalMoment>
+        <UniversalMoment>{household.first_registration_date}</UniversalMoment>
       </TableCell>
     </ClickableTableRow>
   );
