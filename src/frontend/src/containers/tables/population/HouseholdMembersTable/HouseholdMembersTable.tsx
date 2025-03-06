@@ -21,6 +21,7 @@ import {
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Bold } from '@components/core/Bold';
 import { useProgramContext } from 'src/programContext';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 const headCells: HeadCell<IndividualNode>[] = [
   {
@@ -62,7 +63,7 @@ const headCells: HeadCell<IndividualNode>[] = [
 ];
 
 interface HouseholdMembersTableProps {
-  household: HouseholdNode;
+  household: HouseholdDetail;
   choicesData: HouseholdChoiceDataQuery;
 }
 export const HouseholdMembersTable = ({

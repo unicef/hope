@@ -4,6 +4,7 @@ import { render, RenderOptions } from '@testing-library/react';
 import { Formik } from 'formik';
 import noop from 'lodash/noop';
 import { TestProviders } from './testProviders';
+import { ProgramStatus } from '@generated/graphql';
 
 const customRender = (
   ui: ReactElement,
@@ -50,7 +51,8 @@ export const fakeContextProgram = {
   selectedProgram: {
     id: '1',
     name: 'someName',
-    status: 'ACTIVE',
+    programmeCode: 'A123',
+    status: 'ACTIVE' as ProgramStatus,
     pduFields: null,
     programCode: 'A123',
     dataCollectingType: {
