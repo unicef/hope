@@ -134,6 +134,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
         base_data = {
             "amount": obj.entitlement_quantity,
             "destination_currency": obj.currency,
+            "origination_currency": obj.currency,
             "phone_no": collector_data.get("phone_no", ""),
             "last_name": collector_data.get("family_name", ""),
             "first_name": collector_data.get("given_name", ""),
@@ -152,7 +153,9 @@ class PaymentSerializer(ReadOnlyModelSerializer):
         payload_data = payload.data
 
         if delivery_mech_data:
-            payload_data.update(delivery_mech_data)
+            payload_data.update(
+                {field_name.split("__")[0]: field_value for field_name, field_value in delivery_mech_data.items()}
+            )
 
         return payload_data
 
