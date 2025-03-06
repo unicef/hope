@@ -2007,7 +2007,7 @@ class DeliveryMechanism(TimeStampedUUIDModel):
 class DeliveryMechanismConfig(models.Model):
     delivery_mechanism = models.ForeignKey(DeliveryMechanism, on_delete=models.PROTECT)
     fsp = models.ForeignKey(FinancialServiceProvider, on_delete=models.PROTECT)
-    country = models.ForeignKey(Country, on_delete=models.PROTECT)
+    country = models.ForeignKey(Country, on_delete=models.PROTECT, null=True, blank=True)
     required_fields = ArrayField(default=list, base_field=models.CharField(max_length=255))
 
 

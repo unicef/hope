@@ -6,14 +6,16 @@ from typing import Any, Dict, List, Optional, Union
 from django.utils.timezone import now
 
 from _decimal import Decimal
-from apps.payment.models.payment import AccountType
 from rest_framework import serializers
 
 from hct_mis_api.apps.core.api.mixins import BaseAPI
 from hct_mis_api.apps.core.utils import chunks
 from hct_mis_api.apps.payment.models import (
+    AccountType,
     DeliveryMechanism,
+    DeliveryMechanismConfig,
     FinancialServiceProvider,
+    FspNameMapping,
     Payment,
     PaymentPlan,
     PaymentPlanSplit,
@@ -213,6 +215,7 @@ class FspConfig(FlexibleArgumentsDataclassMixin):
     delivery_mechanism: int
     delivery_mechanism_name: str
     label: Optional[str] = None
+    required_fields: Optional[List[str]] = None
 
 
 @dataclasses.dataclass()
@@ -222,13 +225,13 @@ class FspData(FlexibleArgumentsDataclassMixin):
     name: str
     vendor_number: str
     configs: List[Union[FspConfig, Dict]]
-    required_fields: Optional[List[str]] = None
 
     def __post_init__(self) -> None:
         if self.configs and isinstance(self.configs[0], dict):
             self.configs = [FspConfig.create_from_dict(config) for config in self.configs]  # type: ignore
 
 
+# Based on this response fsp.names_mappings table is created and FspConfig table is populated with required fields
 @dataclasses.dataclass()
 class DeliveryMechanismData(FlexibleArgumentsDataclassMixin):
     id: int
@@ -395,7 +398,6 @@ class PaymentGatewayService:
                     "name": fsp_data.name,
                     "communication_channel": FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
                     "data_transfer_configuration": [dataclasses.asdict(config) for config in fsp_data.configs],
-                    "required_fields": fsp_data.required_fields or [],
                 },
             )
 
@@ -407,6 +409,21 @@ class PaymentGatewayService:
                     payment_gateway_id__in=delivery_mechanisms_pg_ids
                 )
                 fsp.delivery_mechanisms.set(delivery_mechanisms)
+
+            dm_required_fields = {config.delivery_mechanism_name: config.required_fields for config in fsp_data.configs}
+            for dm_code, required_fields in dm_required_fields.items():
+                DeliveryMechanismConfig.objects.update_or_create(
+                    delivery_mechanism=DeliveryMechanism.objects.get(code=dm_code),
+                    fsp=fsp,
+                    defaults=dict(required_fields=required_fields),
+                )
+
+                for required_field in required_fields:
+                    FspNameMapping.get_or_create(
+                        external_name=required_field,
+                        fsp=fsp,
+                        defaults=dict(hope_name=required_field, source=FspNameMapping.SourceModel.ACCOUNT),
+                    )
 
     @staticmethod
     def update_payment(

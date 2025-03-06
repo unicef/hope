@@ -6,6 +6,7 @@ from hct_mis_api.apps.payment.models.acceptance import (
 from hct_mis_api.apps.payment.models.payment import (
     AccountType,
     DeliveryMechanism,
+    DeliveryMechanismConfig,
     DeliveryMechanismData,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
@@ -48,4 +49,5 @@ __all__ = [
     "PaymentVerificationSummary",
     "FlexFieldArrayField",
     "build_summary",
+    "DeliveryMechanismConfig",
 ]
