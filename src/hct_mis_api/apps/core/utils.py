@@ -46,6 +46,8 @@ if TYPE_CHECKING:
     from openpyxl.worksheet.worksheet import Worksheet
 
     from hct_mis_api.apps.account.models import User
+    from hct_mis_api.apps.geo.models import Area
+    from hct_mis_api.apps.household.models import Household
 
 logger = logging.getLogger(__name__)
 
@@ -930,3 +932,12 @@ class JSONBSet(Func):
     def __init__(self, expression: Any, path: Any, new_value: Any, create_missing: bool = True, **extra: Any) -> None:
         create_missing = Value("true") if create_missing else Value("false")  # type: ignore
         super().__init__(expression, path, new_value, create_missing, **extra)
+
+
+def get_lowest_admin_area(household: "Household") -> Optional["Area"]:
+    fields = ["admin1", "admin2", "admin3"]
+    for field in fields:
+        admin_area = getattr(household, field)
+        if admin_area:
+            return admin_area
+    return None

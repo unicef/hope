@@ -92,7 +92,6 @@ def create_households_and_individuals() -> Household:
     hh.admin1 = Area.objects.first()
     hh.admin2 = Area.objects.get(name="Shakardara")
     hh.save()
-    hh.set_admin_areas()
     hh.refresh_from_db()
     yield hh
 
