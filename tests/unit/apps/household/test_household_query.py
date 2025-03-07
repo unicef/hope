@@ -9,7 +9,6 @@ from parameterized import parameterized
 from hct_mis_api.apps.account.fixtures import (
     BusinessAreaFactory,
     PartnerFactory,
-    RoleFactory,
     UserFactory,
 )
 from hct_mis_api.apps.account.permissions import Permissions
@@ -43,6 +42,12 @@ ALL_HOUSEHOLD_QUERY = """
               size
               countryOrigin
               address
+              program {
+                name
+              }
+              adminArea {
+                pCode
+              }
             }
           }
         }
@@ -207,7 +212,7 @@ class TestHouseholdQuery(APITestCase):
             )
             cls.area1 = AreaFactory(name="City Test1", area_type=area_type_level_1, p_code="area1")
             cls.area2 = AreaFactory(name="City Test2", area_type=area_type_level_2, p_code="area2", parent=cls.area1)
-            household.set_admin_areas(cls.area2)
+            household.set_admin_areas(cls.area2, save=True)
 
             cls.households.append(household)
 
@@ -218,6 +223,10 @@ class TestHouseholdQuery(APITestCase):
         household.head_of_household.phone_no = "+18663567905"
         household.head_of_household.save()
         household.head_of_household.refresh_from_db()
+
+        household2 = cls.households[1]
+        cls.area_other = AreaFactory(name="City Test Other", p_code="areaother")
+        household2.set_admin_areas(cls.area_other, save=True)
 
         # household in program that cls.user does not have access to
         create_household(
@@ -235,14 +244,12 @@ class TestHouseholdQuery(APITestCase):
             individual=household.head_of_household,
         )
 
-        role = RoleFactory(name="Test Role", permissions=[Permissions.PROGRAMME_CREATE])
-        cls.add_partner_role_in_business_area(
+        cls.create_partner_role_with_permissions(
             cls.partner,
+            [Permissions.PROGRAMME_CREATE],
             cls.business_area,
-            [role],
+            whole_business_area_access=True,
         )
-        for program in [cls.program_one, cls.program_two, cls.program_draft]:
-            cls.update_partner_access_to_program(cls.partner, program, [cls.households[0].admin_area])
 
         # just add one PENDING HH to be sure filters works correctly
         HouseholdFactory(
@@ -275,7 +282,7 @@ class TestHouseholdQuery(APITestCase):
         ]
     )
     def test_household_query_all(self, _: Any, permissions: List[Permissions], query_string: str) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program_two)
 
         self.snapshot_graphql_request(
             request_string=query_string,
@@ -296,7 +303,7 @@ class TestHouseholdQuery(APITestCase):
         ]
     )
     def test_household_query_single(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program_two)
 
         self.snapshot_graphql_request(
             request_string=HOUSEHOLD_QUERY,
@@ -319,7 +326,7 @@ class TestHouseholdQuery(APITestCase):
     )
     def test_household_query_single_import_id(self, field_name: str, field_value: str) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS], self.business_area
+            self.user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS], self.business_area, self.program_two
         )
         household = self.households[0]
 
@@ -353,7 +360,7 @@ class TestHouseholdQuery(APITestCase):
 
     def test_household_query_single_different_program_in_header(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS], self.business_area
+            self.user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS], self.business_area, self.program_one
         )
 
         self.snapshot_graphql_request(
@@ -370,7 +377,7 @@ class TestHouseholdQuery(APITestCase):
 
     def test_household_query_draft(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], self.business_area
+            self.user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], self.business_area, self.program_draft
         )
 
         self.snapshot_graphql_request(
@@ -391,7 +398,7 @@ class TestHouseholdQuery(APITestCase):
         ]
     )
     def test_query_households_by_search_household_id_filter(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program_two)
 
         household = self.households[0]
 
@@ -414,7 +421,7 @@ class TestHouseholdQuery(APITestCase):
         ]
     )
     def test_query_households_by_search_individual_id_filter(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program_two)
 
         household = self.households[0]
 
@@ -437,7 +444,7 @@ class TestHouseholdQuery(APITestCase):
         ]
     )
     def test_query_households_by_search_full_name_filter(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program_two)
 
         household = self.households[0]
 
@@ -460,7 +467,7 @@ class TestHouseholdQuery(APITestCase):
         ]
     )
     def test_query_households_by_search_phone_no_filter(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program_two)
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
@@ -481,7 +488,7 @@ class TestHouseholdQuery(APITestCase):
         ]
     )
     def test_query_households_by_national_id_no_filter(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program_two)
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
@@ -502,7 +509,7 @@ class TestHouseholdQuery(APITestCase):
         ]
     )
     def test_query_households_search_without_search_type(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program_two)
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
@@ -525,7 +532,7 @@ class TestHouseholdQuery(APITestCase):
         ]
     )
     def test_query_households_search_incorrect_kobo_asset_id(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program_two)
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
@@ -539,9 +546,27 @@ class TestHouseholdQuery(APITestCase):
             variables={"search": "qwerty12345"},
         )
 
-    def test_household_query_all_for_all_programs(self) -> None:
+    def test_household_query_all_for_all_programs_permission_in_whole_ba(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], self.business_area
+            self.user,
+            [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST],
+            self.business_area,
+            whole_business_area_access=True,
+        )  # permission in whole ba
+
+        self.snapshot_graphql_request(
+            request_string=ALL_HOUSEHOLD_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+        )
+
+    def test_household_query_all_for_all_programs_permission_in_specific_programs_1(self) -> None:
+        self.create_partner_role_with_permissions(
+            self.partner, [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], self.business_area, self.program_one
         )
 
         self.snapshot_graphql_request(
@@ -554,9 +579,79 @@ class TestHouseholdQuery(APITestCase):
             },
         )
 
+    def test_household_query_all_for_all_programs_permission_in_specific_programs_2(self) -> None:
+        for program in [self.program_one, self.program_two]:
+            self.create_partner_role_with_permissions(
+                self.partner, [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], program.business_area, program
+            )
+
+        self.snapshot_graphql_request(
+            request_string=ALL_HOUSEHOLD_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+        )
+
+    def test_household_query_all_for_all_programs_area_restrictions_1(self) -> None:
+        for program in [self.program_one, self.program_two]:
+            self.create_partner_role_with_permissions(
+                self.partner, [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], program.business_area, program
+            )
+            self.set_admin_area_limits_in_program(self.partner, program, [self.area1])
+        self.snapshot_graphql_request(
+            request_string=ALL_HOUSEHOLD_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+        )
+
+    def test_household_query_all_for_all_programs_area_restrictions_2(self) -> None:
+        for program in [self.program_one, self.program_two]:
+            self.create_partner_role_with_permissions(
+                self.partner, [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], program.business_area, program
+            )
+            self.set_admin_area_limits_in_program(self.partner, program, [self.area_other])
+        self.snapshot_graphql_request(
+            request_string=ALL_HOUSEHOLD_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+        )
+
+    def test_household_query_all_for_all_programs_user_and_partner_permissions(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], self.business_area, self.program_two
+        )  # permission in program_two
+        self.create_partner_role_with_permissions(
+            self.partner, [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], self.business_area, self.program_other
+        )  # permission in program_other
+
+        # result: no household from program_one in the response
+        self.snapshot_graphql_request(
+            request_string=ALL_HOUSEHOLD_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+        )
+
     def test_household_query_all_for_all_programs_user_with_no_program_access(self) -> None:
         self.create_user_role_with_permissions(
-            self.user_with_no_access, [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], self.business_area
+            self.user_with_no_access,
+            [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST],
+            self.business_area,
+            program=ProgramFactory(business_area=self.business_area),
         )
 
         self.snapshot_graphql_request(

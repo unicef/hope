@@ -49,13 +49,13 @@ class TestCreateSurvey(APITestCase):
         partner = PartnerFactory(name="Partner")
         cls.user = UserFactory(first_name="John", last_name="Doe", partner=partner)
         cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
+        cls.create_partner_role_with_permissions(partner, [], cls.business_area, cls.program)
         cls.pp = PaymentPlanFactory(
             business_area=cls.business_area, created_by=cls.user, program_cycle=cls.program.cycles.first()
         )
-        cls.update_partner_access_to_program(partner, cls.program)
 
     def test_create_survey_without_permission(self) -> None:
-        self.create_user_role_with_permissions(self.user, [], self.business_area)
+        self.create_user_role_with_permissions(self.user, [], self.business_area, self.program)
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_SURVEY_MUTATION,
@@ -79,7 +79,7 @@ class TestCreateSurvey(APITestCase):
 
     def test_create_survey_without_target_population_and_program(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE], self.business_area
+            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE], self.business_area, self.program
         )
 
         self.snapshot_graphql_request(
@@ -103,7 +103,7 @@ class TestCreateSurvey(APITestCase):
 
     def test_create_survey(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE], self.business_area
+            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE], self.business_area, self.program
         )
 
         create_household({"size": 3})
@@ -136,7 +136,7 @@ class TestCreateSurvey(APITestCase):
 
     def test_create_survey_and_send_via_rapidpro(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE], self.business_area
+            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE], self.business_area, self.program
         )
 
         create_household({"size": 3})
@@ -175,7 +175,7 @@ class TestCreateSurvey(APITestCase):
             self.assertEqual(task_mock.call_args[0][0], survey.id)
 
         households_ids = self.pp.payment_items.values_list("household_id", flat=True)
-        households = Household.objects.filter(id__in=households_ids)
+        households = Household.objects.filter(id__in=households_ids)  # type: ignore
         self.assertEqual(households[0].individuals.count(), 3)
         phone_number_1 = households[0].head_of_household.phone_no
         phone_number_2 = households[1].head_of_household.phone_no
@@ -240,7 +240,7 @@ class TestCreateSurvey(APITestCase):
 
     def test_create_survey_without_recipients(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE], self.business_area
+            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE], self.business_area, self.program
         )
 
         self.snapshot_graphql_request(

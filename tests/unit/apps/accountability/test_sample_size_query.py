@@ -74,7 +74,9 @@ class TestSampleSizeQuery(APITestCase):
     def test_get_communication_message_sample_size_for_target_population(
         self, _: str, permissions: Sequence[str], sampling_type: Message.SamplingChoices
     ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
 
         data = {
             "input": {
@@ -107,7 +109,9 @@ class TestSampleSizeQuery(APITestCase):
     def test_get_communication_message_sample_size_for_households(
         self, _: str, permissions: Sequence[str], sampling_type: Message.SamplingChoices
     ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
 
         data = {
             "input": {
@@ -141,7 +145,9 @@ class TestSampleSizeQuery(APITestCase):
     def test_get_communication_message_sample_size_for_rdi(
         self, _: str, permissions: Sequence[str], sampling_type: Message.SamplingChoices
     ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
 
         data = {
             "input": {

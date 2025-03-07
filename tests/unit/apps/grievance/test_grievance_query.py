@@ -6,7 +6,6 @@ from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 
-import pytest
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory, UserFactory
@@ -43,6 +42,9 @@ class TestGrievanceQuery(APITestCase):
             description
             consent
             createdAt
+            programs {
+              name
+            }
           }
         }
       }
@@ -216,7 +218,8 @@ class TestGrievanceQuery(APITestCase):
         create_afghanistan()
         call_command("loadcountries")
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-        cls.program = ProgramFactory(business_area=cls.business_area, status=Program.ACTIVE)
+        cls.program = ProgramFactory(business_area=cls.business_area, status=Program.ACTIVE, name="Program 1")
+        cls.program2 = ProgramFactory(business_area=cls.business_area, status=Program.ACTIVE, name="Program 2")
         country = CountryFactory(name="Afghanistan")
         country.business_areas.set([cls.business_area])
         area_type = AreaTypeFactory(
@@ -230,26 +233,15 @@ class TestGrievanceQuery(APITestCase):
         cls.partner = PartnerFactory(name="Partner1")
         cls.partner_2 = PartnerFactory(name="Partner2")
         # update partner perms
-        role = RoleFactory(name="Partner Role", permissions=[Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS])
-        cls.update_partner_access_to_program(
+        cls.set_admin_area_limits_in_program(
             cls.partner,
             cls.program,
             [cls.admin_area_1, cls.admin_area_2],
         )
-        cls.add_partner_role_in_business_area(
-            cls.partner,
-            cls.business_area,
-            [role],
-        )
-        cls.update_partner_access_to_program(
+        cls.set_admin_area_limits_in_program(
             cls.partner_2,
             cls.program,
             [cls.admin_area_1, cls.admin_area_2],
-        )
-        cls.add_partner_role_in_business_area(
-            cls.partner_2,
-            cls.business_area,
-            [role],
         )
         cls.user = UserFactory.create(partner=cls.partner)
         cls.user2 = UserFactory.create(partner=cls.partner_2)
@@ -397,28 +389,35 @@ class TestGrievanceQuery(APITestCase):
         cls.grievance_tickets[2].programs.add(cls.program)
         cls.grievance_tickets[3].programs.add(cls.program)
 
+        grievance_ticket_other_program = GrievanceTicketFactory(
+            business_area=cls.business_area,
+            admin2=cls.admin_area_1,
+            language="Polish",
+            consent=True,
+            description="Ticket with other program, in admin area 1, new",
+            category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+            status=GrievanceTicket.STATUS_NEW,
+            created_by=cls.user,
+            assigned_to=cls.user,
+        )
+        grievance_ticket_other_program.created_at = timezone.make_aware(datetime(year=2020, month=2, day=12))
+        grievance_ticket_other_program.save()
+        grievance_ticket_other_program.programs.add(cls.program2)
+
         # user with unicef partner
         partner_unicef = PartnerFactory(name="UNICEF")
-        cls.user_with_unicef_partner = UserFactory(partner=partner_unicef, username="unicef_user")
-
-        # user without access to program
-        partner_without_program = PartnerFactory(name="Partner Without Program")
-        cls.user_without_program = UserFactory(partner=partner_without_program, username="user_without_program")
+        unicef_hq = PartnerFactory(name="UNICEF HQ", parent=partner_unicef)
+        cls.user_with_unicef_partner = UserFactory(partner=unicef_hq, username="unicef_user")
 
         # user with full area access
         partner_with_full_area_access = PartnerFactory(name="Partner With Full Area Access")
-        cls.update_partner_access_to_program(
-            partner_with_full_area_access,
-            cls.program,
-            full_area_access=True,
-        )
         cls.user_with_full_area_access = UserFactory(
             partner=partner_with_full_area_access, username="user_with_full_area_access"
         )
 
-        # user with access to admin area 1
+        # user with access to only admin area 1 within cls.program
         partner_with_admin_area1_access = PartnerFactory(name="Partner With Admin Area 1 Access")
-        cls.update_partner_access_to_program(
+        cls.set_admin_area_limits_in_program(
             partner_with_admin_area1_access,
             cls.program,
             [cls.admin_area_1],
@@ -427,9 +426,9 @@ class TestGrievanceQuery(APITestCase):
             partner=partner_with_admin_area1_access, username="user_with_admin_area_1_access"
         )
 
-        # user with access to admin area 2
+        # user with access to only admin area 2 within cls.program
         partner_with_admin_area2_access = PartnerFactory(name="Partner With Admin Area 2 Access")
-        cls.update_partner_access_to_program(
+        cls.set_admin_area_limits_in_program(
             partner_with_admin_area2_access,
             cls.program,
             [cls.admin_area_2],
@@ -437,6 +436,11 @@ class TestGrievanceQuery(APITestCase):
         cls.user_with_admin_area_2_access = UserFactory(
             partner=partner_with_admin_area2_access, username="user_with_admin_area_2_access"
         )
+
+        # adjust Role with all permissions (held by UNICEF partner)
+        role_with_all_perms = RoleFactory(name="Role with all permissions")
+        role_with_all_perms.permissions = ["GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE"]
+        role_with_all_perms.save()
 
     @parameterized.expand(
         [
@@ -456,6 +460,56 @@ class TestGrievanceQuery(APITestCase):
                 "user": self.user,
                 "headers": {
                     "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+        )
+
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_grievance_query_all_for_all_programs(self, _: Any, permissions: List[Permissions]) -> None:
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
+        cache.clear()
+        self.snapshot_graphql_request(
+            request_string=self.ALL_GRIEVANCE_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": "all",
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+        )
+
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_grievance_query_all_for_all_programs_permission_in_single_program(
+        self, _: Any, permissions: List[Permissions]
+    ) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
+        cache.clear()
+        self.snapshot_graphql_request(
+            request_string=self.ALL_GRIEVANCE_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": "all",
                     "Business-Area": self.business_area.slug,
                 },
             },
@@ -483,65 +537,52 @@ class TestGrievanceQuery(APITestCase):
             variables={"id": self.id_to_base64(gt_id, "GrievanceTicketNode")},
         )
 
-    def test_grievance_ticket_query_partner_access_detail_partner_unicef_for_program(self) -> None:
+    def test_grievance_ticket_query_detail_partner_unicef_for_program(self) -> None:
         # access to ticket detail of every program-related ticket in this BA (through specific Program)
-        self._test_grievance_ticket_query_partner_access_detail_for_user_for_program(self.user_with_unicef_partner)
+        self._test_grievance_ticket_query_detail_for_program(self.user_with_unicef_partner)
 
-    def test_grievance_ticket_query_partner_access_detail_partner_unicef_for_all_programs(self) -> None:
+    def test_grievance_ticket_query_detail_partner_unicef_for_all_programs(self) -> None:
         # access to ticket detail of every ticket in this BA (through All Programs)
-        self._test_grievance_ticket_query_partner_access_detail_for_user_for_all_programs(self.user_with_unicef_partner)
+        self._test_grievance_ticket_query_detail_for_all_programs(self.user_with_unicef_partner)
 
-    def test_grievance_ticket_query_partner_access_detail_partner_without_program_for_program(self) -> None:
-        # no access to any ticket detail (through specific Program)
-        self._test_grievance_ticket_query_partner_access_detail_for_user_for_program(self.user_without_program)
+    def test_grievance_ticket_query_detail_partner_with_full_area_access_for_program(self) -> None:
+        # access to ticket detail of program-related tickets in this BA (through specific Program)
+        self._test_grievance_ticket_query_detail_for_program(self.user_with_full_area_access)
 
-    def test_grievance_ticket_query_partner_access_detail_partner_without_program_for_all_programs(self) -> None:
-        # access to ticket detail of non-program tickets (through All Programs)
-        self._test_grievance_ticket_query_partner_access_detail_for_user_for_all_programs(self.user_without_program)
-
-    def test_grievance_ticket_query_partner_access_detail_partner_with_full_area_access_for_program(self) -> None:
-        # access to program-related ticket detail of tickets in this BA (through specific Program)
-        self._test_grievance_ticket_query_partner_access_detail_for_user_for_program(self.user_with_full_area_access)
-
-    def test_grievance_ticket_query_partner_access_detail_partner_with_full_area_access_for_all_programs(self) -> None:
+    def test_grievance_ticket_query_detail_partner_with_full_area_access_for_all_programs(self) -> None:
         # access to ticket detail of every ticket in this BA (through All Programs)
-        self._test_grievance_ticket_query_partner_access_detail_for_user_for_all_programs(
-            self.user_with_full_area_access
-        )
+        self._test_grievance_ticket_query_detail_for_all_programs(self.user_with_full_area_access)
 
-    def test_grievance_ticket_query_partner_access_detail_partner_with_admin_area_1_access_for_program(self) -> None:
-        # access to program-related ticket detail of tickets without admin area or with admin_area_1
+    def test_grievance_ticket_query_detail_partner_with_admin_area_1_access_for_program(self) -> None:
+        # access to ticket detail of program-related tickets without admin area or with admin_area_1
         # (through specific Program)
-        self._test_grievance_ticket_query_partner_access_detail_for_user_for_program(self.user_with_admin_area_1_access)
+        self._test_grievance_ticket_query_detail_for_program(self.user_with_admin_area_1_access)
 
-    def test_grievance_ticket_query_partner_access_detail_partner_with_admin_area_1_access_for_all_programs(
+    def test_grievance_ticket_query_detail_partner_with_admin_area_1_access_for_all_programs(
         self,
     ) -> None:
         # access to ticket detail of non-program tickets or tickets without admin area or with admin_area_1
         # (through All Programs)
-        self._test_grievance_ticket_query_partner_access_detail_for_user_for_all_programs(
-            self.user_with_admin_area_1_access
-        )
+        self._test_grievance_ticket_query_detail_for_all_programs(self.user_with_admin_area_1_access)
 
-    def test_grievance_ticket_query_partner_access_detail_partner_with_admin_area_2_access_for_program(self) -> None:
-        # access to program-related ticket detail of tickets without admin area or with admin_area_1
+    def test_grievance_ticket_query_detail_partner_with_admin_area_2_access_for_program(self) -> None:
+        # access to ticket detail of program-related tickets without admin area or with admin_area_1
         # (through specific Program)
-        self._test_grievance_ticket_query_partner_access_detail_for_user_for_program(self.user_with_admin_area_2_access)
+        self._test_grievance_ticket_query_detail_for_program(self.user_with_admin_area_2_access)
 
-    def test_grievance_ticket_query_partner_access_detail_partner_with_admin_area_2_access_for_all_programs(
+    def test_grievance_ticket_query_detail_partner_with_admin_area_2_access_for_all_programs(
         self,
     ) -> None:
         # access to ticket detail of non-program tickets or tickets without admin area or with admin_area_1
         # (through All Programs)
-        self._test_grievance_ticket_query_partner_access_detail_for_user_for_all_programs(
-            self.user_with_admin_area_2_access
-        )
+        self._test_grievance_ticket_query_detail_for_all_programs(self.user_with_admin_area_2_access)
 
-    def _test_grievance_ticket_query_partner_access_detail_for_user_for_program(self, user: User) -> None:
+    def _test_grievance_ticket_query_detail_for_program(self, user: User) -> None:
         self.create_user_role_with_permissions(
             user,
             [Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE],
             self.business_area,
+            self.program,
         )
         for ticket in self.grievance_tickets:
             self.snapshot_graphql_request(
@@ -556,11 +597,12 @@ class TestGrievanceQuery(APITestCase):
                 variables={"id": self.id_to_base64(ticket.id, "GrievanceTicketNode")},
             )
 
-    def _test_grievance_ticket_query_partner_access_detail_for_user_for_all_programs(self, user: User) -> None:
+    def _test_grievance_ticket_query_detail_for_all_programs(self, user: User) -> None:
         self.create_user_role_with_permissions(
             user,
             [Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE],
             self.business_area,
+            whole_business_area_access=True,
         )
         for ticket in self.grievance_tickets:
             self.snapshot_graphql_request(
@@ -575,59 +617,46 @@ class TestGrievanceQuery(APITestCase):
                 variables={"id": self.id_to_base64(ticket.id, "GrievanceTicketNode")},
             )
 
-    @pytest.mark.skip(reason="This test has never worked with pytest")
-    def test_grievance_ticket_query_partner_access_list_partner_unicef_for_program(self) -> None:
+    def test_grievance_ticket_query_list_partner_unicef_for_program(self) -> None:
         # list of all program-related tickets in this BA (through specific Program)
-        self._test_grievance_ticket_query_partner_access_list_for_user_for_program(self.user_with_unicef_partner)
+        self._test_grievance_ticket_query_list_for_program(self.user_with_unicef_partner)
 
-    def test_grievance_ticket_query_partner_access_list_partner_unicef_for_all_programs(self) -> None:
+    def test_grievance_ticket_query_list_partner_unicef_for_all_programs(self) -> None:
         # list of all tickets in this BA (through All Programs)
-        self._test_grievance_ticket_query_partner_access_list_for_user_for_all_programs(self.user_with_unicef_partner)
+        self._test_grievance_ticket_query_list_for_all_programs(self.user_with_unicef_partner)
 
-    def test_grievance_ticket_query_partner_access_list_partner_without_program_for_program(self) -> None:
-        # permission denied (through specific Program)
-        self._test_grievance_ticket_query_partner_access_list_for_user_for_program(self.user_without_program)
-
-    def test_grievance_ticket_query_partner_access_list_partner_without_program_for_all_programs(self) -> None:
-        # list of non-program tickets (through All Programs)
-        self._test_grievance_ticket_query_partner_access_list_for_user_for_all_programs(self.user_without_program)
-
-    @pytest.mark.skip(reason="This test has never worked with pytest")
-    def test_grievance_ticket_query_partner_access_list_partner_with_full_area_access_for_program(self) -> None:
+    def test_grievance_ticket_query_list_partner_with_full_area_access_for_program(self) -> None:
         # list of all program-related tickets in this BA (through specific Program)
-        self._test_grievance_ticket_query_partner_access_list_for_user_for_program(self.user_with_full_area_access)
+        self._test_grievance_ticket_query_list_for_program(self.user_with_full_area_access)
 
-    def test_grievance_ticket_query_partner_access_list_partner_with_full_area_access_for_all_programs(self) -> None:
+    def test_grievance_ticket_query_list_partner_with_full_area_access_for_all_programs(self) -> None:
         # list of all tickets in this BA (through All Programs)
-        self._test_grievance_ticket_query_partner_access_list_for_user_for_all_programs(self.user_with_full_area_access)
+        self._test_grievance_ticket_query_list_for_all_programs(self.user_with_full_area_access)
 
-    def test_grievance_ticket_query_partner_access_list_partner_with_admin_area_1_access_for_program(self) -> None:
+    def test_grievance_ticket_query_list_partner_with_admin_area_1_access_for_program(self) -> None:
         # list of program-related tickets without admin area or with admin_area_1 (through specific Program)
-        self._test_grievance_ticket_query_partner_access_list_for_user_for_program(self.user_with_admin_area_1_access)
+        self._test_grievance_ticket_query_list_for_program(self.user_with_admin_area_1_access)
 
-    def test_grievance_ticket_query_partner_access_list_partner_with_admin_area_1_access_for_all_programs(self) -> None:
+    def test_grievance_ticket_query_list_partner_with_admin_area_1_access_for_all_programs(self) -> None:
         # list of tickets without program and tickets without admin area or with admin_area_1 (through All Programs)
-        self._test_grievance_ticket_query_partner_access_list_for_user_for_all_programs(
-            self.user_with_admin_area_1_access
-        )
+        self._test_grievance_ticket_query_list_for_all_programs(self.user_with_admin_area_1_access)
 
-    @pytest.mark.skip(reason="This test has never worked with pytest")
-    def test_grievance_ticket_query_partner_access_list_partner_with_admin_area_2_access_for_program(self) -> None:
+    def test_grievance_ticket_query_list_partner_with_admin_area_2_access_for_program(self) -> None:
         # list of program-related tickets without admin area or with admin_area_2 (through specific Program)
-        self._test_grievance_ticket_query_partner_access_list_for_user_for_program(self.user_with_admin_area_2_access)
+        self._test_grievance_ticket_query_list_for_program(self.user_with_admin_area_2_access)
 
-    def test_grievance_ticket_query_partner_access_list_partner_with_admin_area_2_access_for_all_programs(self) -> None:
+    def test_grievance_ticket_query_list_partner_with_admin_area_2_access_for_all_programs(self) -> None:
         # list of tickets without program and tickets without admin area or with admin_area_2 (through All Programs)
-        self._test_grievance_ticket_query_partner_access_list_for_user_for_all_programs(
-            self.user_with_admin_area_2_access
-        )
+        self._test_grievance_ticket_query_list_for_all_programs(self.user_with_admin_area_2_access)
 
-    def _test_grievance_ticket_query_partner_access_list_for_user_for_program(self, user: User) -> None:
+    def _test_grievance_ticket_query_list_for_program(self, user: User) -> None:
         self.create_user_role_with_permissions(
             user,
             [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
             self.business_area,
+            self.program,
         )
+        cache.clear()
         self.snapshot_graphql_request(
             request_string=self.ALL_GRIEVANCE_QUERY_FOR_PROGRAM,
             context={
@@ -640,17 +669,71 @@ class TestGrievanceQuery(APITestCase):
             variables={"program": self.id_to_base64(self.program.id, "ProgramNode")},
         )
 
-    def _test_grievance_ticket_query_partner_access_list_for_user_for_all_programs(self, user: User) -> None:
+    def _test_grievance_ticket_query_list_for_all_programs(self, user: User) -> None:
         self.create_user_role_with_permissions(
             user,
             [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
             self.business_area,
+            whole_business_area_access=True,
         )
         cache.clear()
         self.snapshot_graphql_request(
             request_string=self.ALL_GRIEVANCE_QUERY,
             context={
                 "user": user,
+                "headers": {
+                    "Program": "all",
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+        )
+
+    def test_grievance_ticket_query_list_for_all_programs_permission_in_specific_programs_1(self) -> None:
+        self.create_partner_role_with_permissions(
+            self.partner, [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE], self.business_area, self.program
+        )
+        cache.clear()
+        self.snapshot_graphql_request(
+            request_string=self.ALL_GRIEVANCE_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": "all",
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+        )
+
+    def test_grievance_ticket_query_list_for_all_programs_permission_in_specific_programs_2(self) -> None:
+        self.create_partner_role_with_permissions(
+            self.partner,
+            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            self.business_area,
+            self.program2,
+        )
+        cache.clear()
+        self.snapshot_graphql_request(
+            request_string=self.ALL_GRIEVANCE_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": "all",
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+        )
+
+    def test_grievance_ticket_query_list_for_all_programs_permission_in_specific_programs_3(self) -> None:
+        for program in [self.program, self.program2]:
+            self.create_partner_role_with_permissions(
+                self.partner, [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE], program.business_area, program
+            )
+
+        cache.clear()
+        self.snapshot_graphql_request(
+            request_string=self.ALL_GRIEVANCE_QUERY,
+            context={
+                "user": self.user,
                 "headers": {
                     "Program": "all",
                     "Business-Area": self.business_area.slug,

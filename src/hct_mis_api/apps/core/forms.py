@@ -19,7 +19,7 @@ class StorageFileForm(forms.Form):
         self.fields["file"] = forms.FileField(label="Select a file")
 
     def get_business_area_queryset(self) -> QuerySet[BusinessArea]:
-        return BusinessArea.objects.filter(id__in=self.user.user_roles.all().values_list("business_area_id", flat=True))
+        return BusinessArea.objects.filter(role_assignments__user=self.user)
 
     def clean(self, *args: Any, **kwargs: Any) -> Optional[Dict[str, Any]]:
         cleaned_data = super().clean()

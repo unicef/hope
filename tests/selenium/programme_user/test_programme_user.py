@@ -31,5 +31,5 @@ class TestSmokeAccountabilitySurveys:
         assert "INVITED" in pageProgrammeUsers.getStatusContainer().text
         assert "Rows per page: 10 1–1 of 1" in pageProgrammeUsers.getTablePagination().text.replace("\n", " ")
         pageProgrammeUsers.getArrowDown().click()
-        assert "Country / Role" in pageProgrammeUsers.getCountryRole().text
-        assert "Afghanistan / Role" in pageProgrammeUsers.getMappedCountryRole().text
+        assert "Country / Program / Role" in pageProgrammeUsers.getCountryRole().text
+        assert "Afghanistan / All / Role" in pageProgrammeUsers.getMappedCountryRole().text

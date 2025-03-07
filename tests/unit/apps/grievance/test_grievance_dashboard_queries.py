@@ -151,7 +151,9 @@ class TestGrievanceDashboardQuery(APITestCase):
         ]
     )
     def test_grievance_query_by_type(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
 
         self.snapshot_graphql_request(
             request_string=self.TICKETS_BY_TYPE_QUERY,
@@ -169,7 +171,9 @@ class TestGrievanceDashboardQuery(APITestCase):
         ]
     )
     def test_grievance_query_by_category(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
 
         self.snapshot_graphql_request(
             request_string=self.TICKETS_BY_CATEGORY,
@@ -187,7 +191,9 @@ class TestGrievanceDashboardQuery(APITestCase):
         ]
     )
     def test_grievance_query_by_status(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
 
         self.snapshot_graphql_request(
             request_string=self.TICKETS_BY_STATUS,
@@ -205,7 +211,9 @@ class TestGrievanceDashboardQuery(APITestCase):
         ]
     )
     def test_grievance_query_by_location(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
 
         self.snapshot_graphql_request(
             request_string=self.TICKETS_BY_LOCATION,

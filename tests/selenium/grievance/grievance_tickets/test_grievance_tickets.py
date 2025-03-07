@@ -911,10 +911,10 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getReceivedConsent().click()
         pageGrievanceNewTicket.getButtonNext().click()
         pageGrievanceNewTicket.getPartner().click()
-        pageGrievanceNewTicket.select_option_by_name("UNICEF")
+        pageGrievanceNewTicket.select_option_by_name("UNICEF HQ")
         pageGrievanceNewTicket.getDescription().send_keys("Test !@#$ OK")
         pageGrievanceNewTicket.getButtonNext().click()
-        assert "UNICEF" in pageGrievanceDetailsPage.getLabelPartner().text
+        assert "UNICEF HQ" in pageGrievanceDetailsPage.getLabelPartner().text
 
     def test_grievance_tickets_create_new_tickets_Grievance_Complaint_Payment_Related_Complaint(
         self,

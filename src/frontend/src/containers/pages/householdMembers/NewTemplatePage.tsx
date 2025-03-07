@@ -1,7 +1,4 @@
-import {
-  createPeriodicDataUpdateTemplate,
-  fetchPeriodicFields,
-} from '@api/periodicDataUpdateApi';
+import { createPeriodicDataUpdateTemplate } from '@api/periodicDataUpdateApi';
 import { BaseSection } from '@components/core/BaseSection';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -13,6 +10,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Button, Step, StepLabel, Stepper } from '@mui/material';
+import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Formik } from 'formik';
 import moment from 'moment';
@@ -83,7 +81,11 @@ export const NewTemplatePage = (): ReactElement => {
   const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
     useQuery({
       queryKey: ['periodicFields', businessArea, programId],
-      queryFn: () => fetchPeriodicFields(businessArea, programId),
+      queryFn: () =>
+        RestService.restProgramsPeriodicDataUpdatePeriodicFieldsList(
+          businessArea,
+          programId,
+        ),
     });
 
   if (periodicFieldsLoading) {

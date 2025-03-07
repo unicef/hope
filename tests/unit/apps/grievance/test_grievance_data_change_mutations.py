@@ -101,7 +101,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             status=Program.ACTIVE,
             business_area=BusinessArea.objects.first(),
         )
-        cls.update_partner_access_to_program(partner, cls.program)
+        cls.create_partner_role_with_permissions(partner, [], cls.business_area, cls.program)
 
         household_one = HouseholdFactory.build(size=3, country=country, program=cls.program, unicef_id="HH-0001")
         household_one.household_collection.save()
@@ -231,7 +231,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
     )
     @mock.patch("django.core.files.storage.default_storage.save", lambda filename, file: "test_file_name.jpg")
     def test_grievance_create_individual_data_change(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         variables = {
             "input": {
@@ -303,7 +303,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
     )
     @mock.patch("django.core.files.storage.default_storage.save", lambda filename, file: "test_file_name.jpg")
     def test_grievance_update_individual_data_change(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         variables = {
             "input": {
@@ -383,7 +383,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         ]
     )
     def test_create_payment_channel_for_individual(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         variables = {
             "input": {
@@ -430,7 +430,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         ]
     )
     def test_edit_payment_channel_for_individual(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         bank_account = BankAccountInfoFactory(
             id="413b2a07-4bc1-43a7-80e6-91abb486aa9d",
@@ -487,7 +487,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         ]
     )
     def test_grievance_delete_individual_data_change(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         variables = {
             "input": {
@@ -523,7 +523,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         ]
     )
     def test_grievance_update_household_data_change(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
         self.household_one.female_age_group_6_11_count = 2
         self.household_one.save()
 
@@ -566,7 +566,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         ]
     )
     def test_grievance_delete_household_data_change(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         variables = {
             "input": {
@@ -593,7 +593,9 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         )
 
     def test_grievance_create_household_data_change_with_admin_area(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_CREATE], self.business_area, self.program
+        )
 
         variables = {
             "input": {

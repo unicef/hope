@@ -2,6 +2,7 @@
 
 import django.contrib.gis.db.models.fields
 import django.contrib.postgres.fields.citext
+from django.contrib.postgres.operations import CITextExtension
 from django.db import migrations, models
 import django.db.models.deletion
 import model_utils.fields
@@ -17,6 +18,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        CITextExtension(),
         migrations.CreateModel(
             name='Country',
             fields=[

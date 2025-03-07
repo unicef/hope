@@ -66,7 +66,9 @@ class TestRefuseRdiMutation(APITestCase):
         ]
     )
     def test_refuse_registration_data_import(self, _: Any, permissions: List[Permissions], status: bool) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
         self.rdi.status = status
         self.rdi.save()
 
@@ -77,7 +79,9 @@ class TestRefuseRdiMutation(APITestCase):
         )
 
     def test_refuse_registration_data_import_removes_data_links(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.RDI_REFUSE_IMPORT], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.RDI_REFUSE_IMPORT], self.business_area, whole_business_area_access=True
+        )
 
         rdi = RegistrationDataImportFactory(status=RegistrationDataImport.IN_REVIEW)
 
@@ -99,7 +103,9 @@ class TestRefuseRdiMutation(APITestCase):
         self.assertEqual(Individual.objects.all().count(), 0)
 
     def test_refuse_registration_data_import_with_reason(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.RDI_REFUSE_IMPORT], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.RDI_REFUSE_IMPORT], self.business_area, whole_business_area_access=True
+        )
 
         rdi = RegistrationDataImportFactory(status=RegistrationDataImport.IN_REVIEW)
         imported_household = HouseholdFactory(registration_data_import=rdi)

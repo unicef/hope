@@ -131,6 +131,7 @@ class TestGrievanceQuerySearchFilter(APITestCase):
             self.user,
             [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
@@ -152,6 +153,7 @@ class TestGrievanceQuerySearchFilter(APITestCase):
             self.user,
             [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
@@ -173,6 +175,7 @@ class TestGrievanceQuerySearchFilter(APITestCase):
             self.user,
             [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
@@ -194,6 +197,7 @@ class TestGrievanceQuerySearchFilter(APITestCase):
             self.user,
             [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(

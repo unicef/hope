@@ -107,15 +107,13 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
         self.user.partner = partner
         self.user.save()
 
-        self.create_user_role_with_permissions(
-            self.user,
-            [
-                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
-                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
-                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
-            ],
-            self.business_area,
-        )
+        role_with_all_permissions = partner.role_assignments.filter(business_area=self.business_area).first().role
+        role_with_all_permissions.permissions = [
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE.value,
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR.value,
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER.value,
+        ]
+        role_with_all_permissions.save()
 
         self.snapshot_graphql_request(
             request_string=APPROVE_NEEDS_ADJUDICATION_MUTATION,
@@ -143,14 +141,40 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
         self.ticket_details.selected_individuals.add(self.individuals_2[0])  # burka guy, but can be anyone
         self.ticket_details.selected_distinct.add(self.individuals_1[0])
 
-        self.create_user_role_with_permissions(
-            self.user,
-            [
-                Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
-                Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR,
-                Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER,
-            ],
+        role_with_all_permissions = partner.role_assignments.filter(business_area=self.business_area).first().role
+        role_with_all_permissions.permissions = [
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK.value,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR.value,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER.value,
+        ]
+        role_with_all_permissions.save()
+
+        self.snapshot_graphql_request(
+            request_string=GRIEVANCE_TICKET_STATUS_CHANGE,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={"grievanceTicketId": encode_id_base64(self.grievance.id, "GrievanceTicketNode"), "status": 6},
+        )
+
+    def test_close_ticket_without_permissions(self) -> None:
+        partner = PartnerFactory()
+
+        self.user.partner = partner
+        self.user.save()
+
+        self.ticket_details.selected_individuals.add(self.individuals_2[0])
+        self.ticket_details.selected_distinct.add(self.individuals_1[0])
+
+        self.create_partner_role_with_permissions(
+            partner,
+            [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
@@ -165,9 +189,9 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
             variables={"grievanceTicketId": encode_id_base64(self.grievance.id, "GrievanceTicketNode"), "status": 6},
         )
 
-    def test_select_individual_when_partner_with_permission(self) -> None:
+    def test_select_individual_when_partner_with_admin_area_access(self) -> None:
         partner = PartnerFactory(name="NOT_UNICEF")
-        self.update_partner_access_to_program(partner, self.program, [self.doshi])
+        self.set_admin_area_limits_in_program(partner, self.program, [self.doshi])
 
         self.user.partner = partner
         self.user.save()
@@ -177,14 +201,15 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
 
         self.ticket_details.selected_individuals.add(self.individuals_1[0])  # doshi guy
 
-        self.create_user_role_with_permissions(
-            self.user,
+        self.create_partner_role_with_permissions(
+            partner,
             [
                 Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
                 Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
                 Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
             ],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
@@ -204,9 +229,9 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
             },
         )
 
-    def test_select_individual_when_partner_with_permission_with_selectedIndividualId(self) -> None:
+    def test_select_individual_when_partner_with_admin_area_access_with_selectedIndividualId(self) -> None:
         partner = PartnerFactory(name="NOT_UNICEF")
-        self.update_partner_access_to_program(partner, self.program, [self.doshi])
+        self.set_admin_area_limits_in_program(partner, self.program, [self.doshi])
 
         self.user.partner = partner
         self.user.save()
@@ -216,14 +241,15 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
 
         self.ticket_details.selected_individuals.add(self.individuals_1[0])  # doshi guy
 
-        self.create_user_role_with_permissions(
-            self.user,
+        self.create_partner_role_with_permissions(
+            partner,
             [
                 Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
                 Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
                 Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
             ],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
@@ -243,9 +269,9 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
             },
         )
 
-    def test_select_individual_when_partner_with_permission_with_selectedIndividualId_incorrect(self) -> None:
+    def test_select_individual_when_partner_with_admin_area_access_with_selectedIndividualId_incorrect(self) -> None:
         partner = PartnerFactory(name="NOT_UNICEF")
-        self.update_partner_access_to_program(partner, self.program, [self.doshi])
+        self.set_admin_area_limits_in_program(partner, self.program, [self.doshi])
 
         self.user.partner = partner
         self.user.save()
@@ -253,14 +279,15 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
         self.individuals_1[0].program = self.program
         self.individuals_1[0].save()
 
-        self.create_user_role_with_permissions(
-            self.user,
+        self.create_partner_role_with_permissions(
+            partner,
             [
                 Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
                 Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
                 Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
             ],
             self.business_area,
+            self.program,
         )
 
         _, individuals = create_household(
@@ -289,11 +316,11 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
             },
         )
 
-    def test_select_individual_when_partner_with_permission_with_selected_individual_and_selected_individuals(
+    def test_select_individual_when_partner_with_admin_area_access_with_selected_individual_and_selected_individuals(
         self,
     ) -> None:
         partner = PartnerFactory(name="NOT_UNICEF")
-        self.update_partner_access_to_program(partner, self.program, [self.doshi])
+        self.set_admin_area_limits_in_program(partner, self.program, [self.doshi])
 
         self.user.partner = partner
         self.user.save()
@@ -303,14 +330,15 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
 
         self.ticket_details.selected_individuals.add(self.individuals_1[0])  # doshi guy
 
-        self.create_user_role_with_permissions(
-            self.user,
+        self.create_partner_role_with_permissions(
+            partner,
             [
                 Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
                 Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
                 Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
             ],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
@@ -331,9 +359,9 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
             },
         )
 
-    def test_select_individual_when_partner_with_permission_and_no_selected_program(self) -> None:
+    def test_select_individual_when_partner_with_admin_area_access_and_no_selected_program(self) -> None:
         partner = PartnerFactory(name="NOT_UNICEF")
-        self.update_partner_access_to_program(partner, self.program, [self.doshi])
+        self.set_admin_area_limits_in_program(partner, self.program, [self.doshi])
 
         self.user.partner = partner
         self.user.save()
@@ -343,14 +371,15 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
 
         self.ticket_details.selected_individuals.add(self.individuals_1[0])  # doshi guy
 
-        self.create_user_role_with_permissions(
-            self.user,
+        self.create_partner_role_with_permissions(
+            partner,
             [
                 Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
                 Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
                 Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
             ],
             self.business_area,
+            whole_business_area_access=True,
         )
 
         self.snapshot_graphql_request(
@@ -370,23 +399,25 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
             },
         )
 
-    def test_close_ticket_when_partner_with_permission(self) -> None:
-        partner = PartnerFactory()
-        self.update_partner_access_to_program(partner, self.program, [self.doshi])
+    def test_close_ticket_when_partner_with_admin_area_access(self) -> None:
+        partner = PartnerFactory(name="NOT_UNICEF")
+        self.set_admin_area_limits_in_program(partner, self.program, [self.doshi])
+
         self.ticket_details.selected_distinct.add(self.individuals_1[0])
         self.ticket_details.selected_individuals.add(self.individuals_2[0])
 
         self.user.partner = partner
         self.user.save()
 
-        self.create_user_role_with_permissions(
-            self.user,
+        self.create_partner_role_with_permissions(
+            partner,
             [
                 Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
                 Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR,
                 Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER,
             ],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
@@ -401,23 +432,25 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
             variables={"grievanceTicketId": encode_id_base64(self.grievance.id, "GrievanceTicketNode"), "status": 6},
         )
 
-    def test_close_ticket_when_partner_with_permission_and_no_selected_program(self) -> None:
-        partner = PartnerFactory()
-        self.update_partner_access_to_program(partner, self.program, [self.doshi])
+    def test_close_ticket_when_partner_with_admin_area_access_and_no_selected_program(self) -> None:
+        partner = PartnerFactory(name="NOT_UNICEF")
+        self.set_admin_area_limits_in_program(partner, self.program, [self.doshi])
+
         self.ticket_details.selected_distinct.add(self.individuals_2[0])
         self.ticket_details.selected_individuals.add(self.individuals_1[0])
 
         self.user.partner = partner
         self.user.save()
 
-        self.create_user_role_with_permissions(
-            self.user,
+        self.create_partner_role_with_permissions(
+            partner,
             [
                 Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
                 Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR,
                 Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER,
             ],
             self.business_area,
+            whole_business_area_access=True,
         )
 
         self.snapshot_graphql_request(
@@ -432,21 +465,22 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
             variables={"grievanceTicketId": encode_id_base64(self.grievance.id, "GrievanceTicketNode"), "status": 6},
         )
 
-    def test_select_individual_when_partner_does_not_have_permission(self) -> None:
+    def test_select_individual_when_partner_does_not_have_admin_area_access(self) -> None:
         partner = PartnerFactory(name="NOT_UNICEF")
-        self.update_partner_access_to_program(partner, self.program, [self.doshi])
+        self.set_admin_area_limits_in_program(partner, self.program, [self.doshi])
 
         self.user.partner = partner
         self.user.save()
 
-        self.create_user_role_with_permissions(
-            self.user,
+        self.create_partner_role_with_permissions(
+            partner,
             [
                 Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
                 Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
                 Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
             ],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
@@ -466,9 +500,10 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
             },
         )
 
-    def test_close_ticket_when_partner_does_not_have_permission(self) -> None:
+    def test_close_ticket_when_partner_does_not_have_admin_area_access(self) -> None:
         partner = PartnerFactory(name="NOT_UNICEF")
-        self.update_partner_access_to_program(partner, self.program, [self.burka])
+        self.set_admin_area_limits_in_program(partner, self.program, [self.burka])
+
         self.user.partner = partner
         self.user.save()
 
@@ -482,14 +517,15 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
         self.ticket_details.golden_records_individual = individuals_3[0]
         self.ticket_details.save()
 
-        self.create_user_role_with_permissions(
-            self.user,
+        self.create_partner_role_with_permissions(
+            partner,
             [
                 Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
                 Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR,
                 Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER,
             ],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(

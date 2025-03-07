@@ -43,7 +43,7 @@ class TestDeleteProgram(APITestCase):
     def test_delete_program_authenticated(self, _: Any, permissions: List[Permissions], status: str) -> None:
         user = UserFactory.create()
 
-        self.create_user_role_with_permissions(user, permissions, self.business_area)
+        self.create_user_role_with_permissions(user, permissions, self.business_area, whole_business_area_access=True)
         self.program.status = status
         self.program.save()
 

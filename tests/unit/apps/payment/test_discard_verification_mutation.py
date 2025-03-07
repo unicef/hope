@@ -102,7 +102,9 @@ class TestDiscardVerificationMutation(APITestCase):
         ]
     )
     def test_discard_active(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
 
         self.snapshot_graphql_request(
             request_string=self.DISCARD_MUTATION,

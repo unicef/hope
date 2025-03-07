@@ -1,7 +1,7 @@
 from django.core.cache import cache
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory, UserFactory
-from hct_mis_api.apps.account.models import UserRole
+from hct_mis_api.apps.account.models import RoleAssignment
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -13,7 +13,7 @@ from hct_mis_api.apps.grievance.fixtures import (
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
+from hct_mis_api.apps.program.models import Program
 
 FILTER_GRIEVANCE_BY_CROSS_AREA = """
 query AllGrievanceTickets($isCrossArea: Boolean) {
@@ -39,10 +39,11 @@ class TestCrossAreaFilter(APITestCase):
         super().setUpTestData()
         cls.business_area = create_afghanistan()
         partner_unicef = PartnerFactory(name="UNICEF")
-        cls.user = UserFactory(partner=partner_unicef)
+        unicef_hq = PartnerFactory(name="UNICEF HQ", parent=partner_unicef)
+        cls.user = UserFactory(partner=unicef_hq)
 
         role = RoleFactory(name="GRIEVANCES CROSS AREA FILTER", permissions=["GRIEVANCES_CROSS_AREA_FILTER"])
-        UserRole.objects.create(business_area=cls.business_area, user=cls.user, role=role)
+        RoleAssignment.objects.create(business_area=cls.business_area, user=cls.user, role=role)
 
         cls.admin_area1 = AreaFactory(name="Admin Area 1", level=2, p_code="AREA1")
         cls.admin_area2 = AreaFactory(name="Admin Area 2", level=2, p_code="AREA2")
@@ -109,13 +110,9 @@ class TestCrossAreaFilter(APITestCase):
 
         # testing different access requirements
         cls.partner_without_area_restrictions = PartnerFactory(name="Partner without area restrictions")
-        program_partner_through_without_area_restrictions = ProgramPartnerThrough.objects.create(
-            program=cls.program, partner=cls.partner_without_area_restrictions
-        )
-        program_partner_through_without_area_restrictions.full_area_access = True
-        program_partner_through_without_area_restrictions.save()
+
         cls.partner_with_area_restrictions = PartnerFactory(name="Partner with area restrictions")
-        cls.update_partner_access_to_program(
+        cls.set_admin_area_limits_in_program(
             cls.partner_with_area_restrictions, cls.program, [cls.admin_area1, cls.admin_area2]
         )
 
@@ -126,6 +123,7 @@ class TestCrossAreaFilter(APITestCase):
             user_without_permission,
             [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
@@ -150,6 +148,7 @@ class TestCrossAreaFilter(APITestCase):
                 Permissions.GRIEVANCES_CROSS_AREA_FILTER,
             ],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
@@ -169,6 +168,7 @@ class TestCrossAreaFilter(APITestCase):
             self.user,
             [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
             self.business_area,
+            self.program,
         )
 
         self.needs_adjudication_ticket_cross_area.refresh_from_db()
@@ -193,6 +193,7 @@ class TestCrossAreaFilter(APITestCase):
             self.user,
             [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
@@ -218,6 +219,7 @@ class TestCrossAreaFilter(APITestCase):
                 Permissions.GRIEVANCES_CROSS_AREA_FILTER,
             ],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(

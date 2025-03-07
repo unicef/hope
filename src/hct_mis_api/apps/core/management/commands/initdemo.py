@@ -60,8 +60,8 @@ from django.utils import timezone
 
 import elasticsearch
 
-from hct_mis_api.apps.account.fixtures import create_superuser
-from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
+from hct_mis_api.apps.account.fixtures import create_superuser, generate_unicef_partners
+from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment, User
 from hct_mis_api.apps.core.fixtures import (
     generate_business_areas,
     generate_country_codes,
@@ -126,6 +126,7 @@ class Command(BaseCommand):
 
         # Load fixtures
         self.stdout.write("Loading fixtures...")
+        generate_unicef_partners()
         call_command("loadcountries")
         generate_country_codes()
         generate_business_areas()
@@ -135,9 +136,11 @@ class Command(BaseCommand):
         call_command("generatedocumenttypes")
         call_command("generateroles")
         # Create UserRoles for superuser
-        role = Role.objects.get(name="Role with all permissions")
+        role_with_all_perms = Role.objects.get(name="Role with all permissions")
         for ba_name in ["Global", "Afghanistan"]:
-            UserRole.objects.get_or_create(user=user, role=role, business_area=BusinessArea.objects.get(name=ba_name))
+            RoleAssignment.objects.get_or_create(
+                user=user, role=role_with_all_perms, business_area=BusinessArea.objects.get(name=ba_name)
+            )
 
         # Geo app
         generate_area_types()
@@ -146,9 +149,10 @@ class Command(BaseCommand):
 
         # TODO: will remove all files
         # fixtures = [
+        #     "apps/account/fixtures/initial.json" done +++
+        #     "apps/geo/fixtures/data.json"
         #     "apps/core/fixtures/data.json",
         #     # "apps/account/fixtures/data.json",
-        #     # "apps/core/fixtures/businessareapartnerthrough.json",
         #     # "apps/program/fixtures/data.json",
         #     # "apps/registration_data/fixtures/data.json",
         #     # "apps/household/fixtures/documenttype.json",
@@ -178,7 +182,6 @@ class Command(BaseCommand):
         # Load more fixtures
         additional_fixtures = [
             # "apps/core/fixtures/pdu.json",
-            # "apps/program/fixtures/programpartnerthrough.json",
             # "apps/grievance/fixtures/data.json",
         ]
         self.stdout.write("Loading additional fixtures...")
@@ -207,9 +210,9 @@ class Command(BaseCommand):
         )
 
         if email_list or tester_list:
-            role_with_all_perms = Role.objects.get(name="Role with all permissions")
             afghanistan = BusinessArea.objects.get(slug="afghanistan")
             partner = Partner.objects.get(name="UNICEF")
+            unicef_hq = Partner.objects.get(name=settings.UNICEF_HQ_PARTNER, parent=partner)
 
             combined_email_list: List[str] = [email.strip() for email in email_list + tester_list if email.strip()]
 
@@ -217,8 +220,8 @@ class Command(BaseCommand):
                 self.stdout.write("Creating users...")
                 for email in combined_email_list:
                     try:
-                        user = User.objects.create_user(email, email, "password", partner=partner)
-                        UserRole.objects.create(
+                        user = User.objects.create_user(email, email, "password", partner=unicef_hq)
+                        RoleAssignment.objects.create(
                             user=user,
                             role=role_with_all_perms,
                             business_area=afghanistan,

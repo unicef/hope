@@ -147,7 +147,9 @@ class TestCloseGrievanceTicketAndDisableDeduplication(APITestCase):
         permissions = [
             Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
         ]
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
 
         response = self.graphql_request(
             request_string=self.UPDATE_GRIEVANCE_TICKET_STATUS_CHANGE_MUTATION,

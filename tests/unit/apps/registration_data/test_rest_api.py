@@ -7,7 +7,7 @@ from rest_framework import status
 from rest_framework.test import APIClient, APIRequestFactory
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
-from hct_mis_api.apps.account.models import Role, UserRole
+from hct_mis_api.apps.account.models import Role, RoleAssignment
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
@@ -22,11 +22,12 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         user_permissions = [
             Permissions.RDI_VIEW_LIST,
         ]
-        partner = PartnerFactory(name="UNICEF")
-        cls.user = UserFactory(username="Hope_Test_DRF", password="HopePass", partner=partner, is_superuser=True)
+        unicef_partner = PartnerFactory(name="UNICEF")
+        unicef = PartnerFactory(name="UNICEF HQ", parent=unicef_partner)
+        cls.user = UserFactory(username="Hope_Test_DRF", password="HopePass", partner=unicef, is_superuser=True)
         permission_list = [perm.value for perm in user_permissions]
         role, created = Role.objects.update_or_create(name="TestName", defaults={"permissions": permission_list})
-        user_role, _ = UserRole.objects.get_or_create(user=cls.user, role=role, business_area=cls.business_area)
+        user_role, _ = RoleAssignment.objects.get_or_create(user=cls.user, role=role, business_area=cls.business_area)
         cls.program = ProgramFactory(
             name="Test Program",
             status=Program.ACTIVE,

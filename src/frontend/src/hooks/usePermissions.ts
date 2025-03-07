@@ -1,15 +1,19 @@
-import { useBaseUrl } from './useBaseUrl';
+// import { RestService } from '@restgenerated/services/RestService';
+// import { useQuery } from '@tanstack/react-query';
 import { useCachedMe } from './useCachedMe';
 
 export function usePermissions(): string[] {
+  //TODO: uncomment this
+  // const { data: meData, isLoading: meDataLoading } = useQuery({
+  //   queryKey: ['profile'],
+  //   queryFn: () => {
+  //     return RestService.restProfileRetrieve();
+  //   },
+  // });
+
   const { data, loading } = useCachedMe();
-  const { businessArea } = useBaseUrl();
   if (loading || !data) {
     return [];
   }
-  // eslint-disable-next-line no-restricted-syntax
-  for (const businessAreaEdge of data.me.businessAreas.edges) {
-    if (businessArea === businessAreaEdge.node.slug) return businessAreaEdge.node.permissions;
-  }
-  return [];
+  return data.me.permissionsInScope || [];
 }
