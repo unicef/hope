@@ -62,7 +62,13 @@ import elasticsearch
 
 from hct_mis_api.apps.account.fixtures import create_superuser
 from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
+from hct_mis_api.apps.core.fixtures import (
+    generate_business_areas,
+    generate_country_codes,
+    generate_data_collecting_types,
+)
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.geo.fixtures import generate_area_types, generate_areas
 from hct_mis_api.apps.payment.fixtures import (
     generate_delivery_mechanisms,
     generate_payment_plan,
@@ -119,25 +125,38 @@ class Command(BaseCommand):
         call_command("flush", "--noinput")
 
         # Load fixtures
-        fixtures = [
-            "apps/geo/fixtures/data.json",
-            "apps/core/fixtures/data.json",
-            # "apps/account/fixtures/data.json",
-            # "apps/core/fixtures/businessareapartnerthrough.json",
-            # "apps/program/fixtures/data.json",
-            # "apps/registration_data/fixtures/data.json",
-            # "apps/household/fixtures/documenttype.json",
-            # "apps/household/fixtures/data.json",
-            # "apps/accountability/fixtures/data.json",
-            # "apps/steficon/fixtures/data.json",
-            # "contrib/aurora/fixtures/data.json",
-        ]
         self.stdout.write("Loading fixtures...")
-        for fixture in fixtures:
-            self.stdout.write(f"Loading fixture: {fixture}")
-            call_command("loaddata", f"{settings.PROJECT_ROOT}/{fixture}")
+        call_command("loadcountries")
+        generate_country_codes()
+        generate_business_areas()
+        self.stdout.write("Creating superuser...")
+        user = create_superuser()
 
-        create_superuser()
+        call_command("generatedocumenttypes")
+        call_command("generateroles")
+        # Create UserRoles for superuser
+        role = Role.objects.get(name="Role with all permissions")
+        for ba_name in ["Global", "Afghanistan"]:
+            UserRole.objects.get_or_create(user=user, role=role, business_area=BusinessArea.objects.get(name=ba_name))
+
+        # Geo app
+        generate_area_types()
+        generate_areas()
+        generate_data_collecting_types()
+
+        # TODO: will remove all files
+        # fixtures = [
+        #     "apps/core/fixtures/data.json",
+        #     # "apps/account/fixtures/data.json",
+        #     # "apps/core/fixtures/businessareapartnerthrough.json",
+        #     # "apps/program/fixtures/data.json",
+        #     # "apps/registration_data/fixtures/data.json",
+        #     # "apps/household/fixtures/documenttype.json",
+        #     # "apps/household/fixtures/data.json",
+        #     # "apps/accountability/fixtures/data.json",
+        #     # "apps/steficon/fixtures/data.json",
+        #     # "contrib/aurora/fixtures/data.json",
+        # ]
 
         try:
             self.stdout.write("Rebuilding search index...")

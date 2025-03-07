@@ -5,7 +5,6 @@ from datetime import datetime
 from typing import Any
 
 from django.conf import settings
-from django.core.management import call_command
 
 import pytest
 import redis
@@ -28,6 +27,7 @@ from hct_mis_api.apps.core.models import (
     BusinessAreaPartnerThrough,
     DataCollectingType,
 )
+from hct_mis_api.apps.geo.fixtures import generate_small_areas_for_afghanistan_only
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.fixtures import DocumentTypeFactory
 from hct_mis_api.apps.household.models import DocumentType
@@ -600,7 +600,7 @@ def create_super_user(business_area: BusinessArea) -> User:
     permission_list = [role.value for role in Permissions]
 
     role, _ = Role.objects.update_or_create(name="Role", defaults={"permissions": permission_list})
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data_small.json", verbosity=0)
+    generate_small_areas_for_afghanistan_only()
     country = Country.objects.get(name="Afghanistan")
     business_area.countries.add(country)
 

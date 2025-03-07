@@ -8,11 +8,13 @@ from faker import Faker
 
 from hct_mis_api.apps.core.models import (
     BusinessArea,
+    CountryCodeMap,
     DataCollectingType,
     FlexibleAttribute,
     PeriodicFieldData,
     StorageFile,
 )
+from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.periodic_data_update.utils import field_label_to_field_name
 from hct_mis_api.apps.program.models import Program
 
@@ -70,22 +72,6 @@ class StorageFileFactory(DjangoModelFactory):
         model = StorageFile
 
     business_area = factory.LazyAttribute(lambda _: BusinessArea.objects.first())
-
-
-def generate_data_collecting_types() -> None:
-    data_collecting_types = [
-        {"label": "Partial", "code": "partial_individuals", "description": "Partial individuals collected"},
-        {"label": "Full", "code": "full_collection", "description": "Full individual collected"},
-        {"label": "Size only", "code": "size_only", "description": "Size only collected"},
-        {
-            "label": "size/age/gender disaggregated",
-            "code": "size_age_gender_disaggregated",
-            "description": "No individual data",
-        },
-    ]
-
-    for data_dict in data_collecting_types:
-        DataCollectingType.objects.update_or_create(**data_dict)
 
 
 class DataCollectingTypeFactory(DjangoModelFactory):
@@ -161,3 +147,76 @@ def create_pdu_flexible_attribute(
     )
     flexible_attribute.save()
     return flexible_attribute
+
+
+def generate_country_codes() -> None:
+    for country in Country.objects.all():
+        CountryCodeMap.objects.get_or_create(country=country, defaults={"ca_code": country.iso_code3})
+
+
+def generate_business_areas() -> None:
+    for country in Country.objects.all():
+        business_area, _ = BusinessArea.objects.get_or_create(
+            code=country.iso_num,
+            defaults=dict(
+                name=country.short_name,
+                long_name=country.name,
+                region_code=country.iso_num,
+                region_name=country.iso_code3,
+                has_data_sharing_agreement=True,
+                active=True,
+                kobo_token="abc_test",
+                is_accountability_applicable=True,
+            ),
+        )
+        business_area.countries.add(country)
+    # create Global
+    BusinessArea.objects.get_or_create(
+        code="GLOBAL",
+        defaults=dict(
+            name="Global",
+            long_name="Global Business Area",
+            region_code="GLOBAL",
+            region_name="GLOBAL",
+            has_data_sharing_agreement=True,
+        ),
+    )
+
+
+def generate_data_collecting_types() -> None:
+    all_ba_list = list(BusinessArea.objects.all())
+    data_collecting_types = [
+        {
+            "label": "Partial",
+            "code": "partial_individuals",
+            "description": "Partial individuals collected",
+            "type": DataCollectingType.Type.STANDARD.value,
+        },
+        {
+            "label": "Full",
+            "code": "full_collection",
+            "description": "Full individual collected",
+            "type": DataCollectingType.Type.STANDARD.value,
+        },
+        {
+            "label": "Size only",
+            "code": "size_only",
+            "description": "Size only collected",
+            "type": DataCollectingType.Type.STANDARD.value,
+        },
+        {
+            "label": "size/age/gender disaggregated",
+            "code": "size_age_gender_disaggregated",
+            "description": "No individual data",
+            "type": DataCollectingType.Type.SOCIAL.value,
+        },
+    ]
+
+    for data_dict in data_collecting_types:
+        DataCollectingTypeFactory(
+            label=data_dict["label"],
+            code=data_dict["code"],
+            business_areas=all_ba_list,
+            type=data_dict["type"],
+            household_filters_available=True if data_dict["type"] == DataCollectingType.Type.STANDARD.value else False,
+        )
