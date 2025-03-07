@@ -9,8 +9,6 @@ from rest_framework_extensions.key_constructor import bits
 from rest_framework_extensions.key_constructor.bits import KeyBitBase
 from rest_framework_extensions.key_constructor.constructors import KeyConstructor
 
-from hct_mis_api.apps.core.utils import decode_id_string
-
 
 def etag_decorator(key_constructor_class: "KeyConstructor", compare_etags: bool = True) -> Callable:
     """
@@ -96,20 +94,11 @@ class BusinessAreaAndProgramKeyBit(KeyBitBase):
     def get_data(
         self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
     ) -> str:
-        business_area_slug = kwargs.get("business_area")
+        business_area_slug = kwargs.get("business_area_slug")
         business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
 
-        program_id = decode_id_string(kwargs.get("program_id"))
+        program_slug = kwargs.get("program_slug")
 
-        version_key = f"{business_area_slug}:{business_area_version}:{program_id}:{self.specific_view_cache_key}"
+        version_key = f"{business_area_slug}:{business_area_version}:{program_slug}:{self.specific_view_cache_key}"
         version = get_or_create_cache_key(version_key, 1)
-        return str(version)
-
-
-class ProgramKeyBit(KeyBitBase):
-    def get_data(
-        self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
-    ) -> str:
-        program_id = decode_id_string(kwargs.get("program_id"))
-        version = get_or_create_cache_key(f"{program_id}:version", 1)
         return str(version)

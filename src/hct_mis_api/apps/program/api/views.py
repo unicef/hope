@@ -52,7 +52,7 @@ class ProgramViewSet(
     serializer_class = ProgramSerializer
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = UpdatedAtFilter
-    lookup_field = "programme_code"
+    lookup_field = "slug"
 
 
 class ProgramCycleViewSet(

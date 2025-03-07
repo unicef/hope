@@ -106,22 +106,29 @@ class ProgramMixin:
         return self.kwargs.get("business_area_slug")
 
     @property
-    def program_code(self) -> Optional[str]:
-        return self.kwargs.get("program_programme_code")
+    def program_slug(self) -> Optional[str]:
+        return self.kwargs.get("program_slug")
 
     @cached_property
     def program(self) -> "Program":
         from hct_mis_api.apps.program.models import Program
 
-        return get_object_or_404(Program, programme_code=self.program_code, business_area__slug=self.business_area_slug)
+        return get_object_or_404(Program, slug=self.program_slug, business_area__slug=self.business_area_slug)
 
     def get_queryset(self) -> QuerySet:
+        print(super().get_queryset())
+        print(super().get_queryset().filter(**{f"{self.program_model_field}__slug": self.program_slug}))
+        print(
+            super()
+            .get_queryset()
+            .filter(**{f"{self.program_model_field}__business_area__slug": self.business_area_slug})
+        )
         return (
             super()
             .get_queryset()
             .filter(
                 **{
-                    f"{self.program_model_field}__programme_code": self.program_code,
+                    f"{self.program_model_field}__slug": self.program_slug,
                     f"{self.program_model_field}__business_area__slug": self.business_area_slug,
                 }
             )
