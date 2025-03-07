@@ -241,6 +241,8 @@ class ProgramSerializer(serializers.ModelSerializer):
         model = Program
         fields = (
             "id",
+            "programme_code",
+            "slug",
             "name",
             "start_date",
             "end_date",
