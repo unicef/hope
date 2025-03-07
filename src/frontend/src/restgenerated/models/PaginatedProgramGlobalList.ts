@@ -4,7 +4,6 @@
 /* eslint-disable */
 import type { ProgramGlobal } from './ProgramGlobal';
 export type PaginatedProgramGlobalList = {
-    count: number;
     next?: string | null;
     previous?: string | null;
     results: Array<ProgramGlobal>;

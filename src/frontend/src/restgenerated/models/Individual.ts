@@ -31,7 +31,6 @@ export type Individual = {
     documents?: Array<Document>;
     birth_date: string;
     rdi_merge_status?: RdiMergeStatusEnum;
-    is_original?: boolean;
     is_removed?: boolean;
     removed_date?: string | null;
     last_sync_at?: string | null;
@@ -115,6 +114,7 @@ export type Individual = {
     blockchain_name?: string;
     wallet_address?: string;
     origin_unicef_id?: string | null;
+    mis_unicef_id?: string | null;
     individual_collection?: number | null;
     /**
      * If this individual was copied from another individual, this field will contain the individual it was copied from.

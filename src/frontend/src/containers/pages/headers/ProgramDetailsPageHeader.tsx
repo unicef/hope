@@ -8,9 +8,10 @@ import { DraftProgramDetailsPageHeaderButtons } from './DraftProgramDetailsPageH
 import { FinishedProgramDetailsPageHeaderButtons } from './FinishedProgramDetailsPageHeaderButtons';
 import { AdminButton } from '@core/AdminButton';
 import { ReactElement } from 'react';
+import { Program } from '@restgenerated/models/Program';
 
 export interface ProgramDetailsPageHeaderPropTypes {
-  program: ProgramQuery['program'];
+  program: Program;
   canActivate: boolean;
   canEdit: boolean;
   canRemove: boolean;

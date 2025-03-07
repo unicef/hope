@@ -4,7 +4,6 @@
 /* eslint-disable */
 import type { HouseholdList } from './HouseholdList';
 export type PaginatedHouseholdListList = {
-    count: number;
     next?: string | null;
     previous?: string | null;
     results: Array<HouseholdList>;

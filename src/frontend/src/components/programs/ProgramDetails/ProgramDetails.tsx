@@ -1,44 +1,36 @@
-import { PartnerAccess } from '@components/programs/constants';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { DividerLine } from '@core/DividerLine';
 import { LabelizedField } from '@core/LabelizedField';
 import { OverviewContainer } from '@core/OverviewContainer';
-import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
-import { UniversalMoment } from '@core/UniversalMoment';
 import { ProgrammeChoiceDataQuery, ProgramQuery } from '@generated/graphql';
 import { Box, Grid2 as Grid, Typography } from '@mui/material';
-import {
-  choicesToDict,
-  programStatusToColor,
-  isPartnerVisible,
-} from '@utils/utils';
+import { Program } from '@restgenerated/models/Program';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { MiśTheme } from '../../../theme';
-import { ReactElement } from 'react';
 
-const NumberOfHouseHolds = styled.div`
-  padding: ${({ theme }) => theme.spacing(8)};
-  border-color: #b1b1b5;
-  border-left-width: 1px;
-  border-left-style: solid;
-`;
-const NumberOfHouseHoldsValue = styled.div`
-  font-family: ${({ theme }: { theme: MiśTheme }) =>
-    theme.hctTypography.fontFamily};
-  color: #253b46;
-  font-size: 36px;
-  line-height: 32px;
-  margin-top: ${({ theme }) => theme.spacing(2)};
-`;
+// const NumberOfHouseHolds = styled.div`
+//   padding: ${({ theme }) => theme.spacing(8)};
+//   border-color: #b1b1b5;
+//   border-left-width: 1px;
+//   border-left-style: solid;
+// `;
+// const NumberOfHouseHoldsValue = styled.div`
+//   font-family: ${({ theme }: { theme: MiśTheme }) =>
+//     theme.hctTypography.fontFamily};
+//   color: #253b46;
+//   font-size: 36px;
+//   line-height: 32px;
+//   margin-top: ${({ theme }) => theme.spacing(2)};
+// `;
 
 const StyledBox = styled(Box)`
   border: 1px solid #e3e3e3;
 `;
 
 interface ProgramDetailsProps {
-  program: ProgramQuery['program'];
+  program: Program;
   choices: ProgrammeChoiceDataQuery;
 }
 
@@ -47,11 +39,13 @@ export const ProgramDetails = ({
   choices,
 }: ProgramDetailsProps): ReactElement => {
   const { t } = useTranslation();
-  const { programFrequencyOfPaymentsChoices, programSectorChoices } = choices;
-  const programFrequencyOfPaymentsChoicesDict = choicesToDict(
-    programFrequencyOfPaymentsChoices,
-  );
-  const programSectorChoicesDict = choicesToDict(programSectorChoices);
+  //TODO: remove console.log
+  console.log(program, choices);
+  // const { programFrequencyOfPaymentsChoices, programSectorChoices } = choices;
+  // const programFrequencyOfPaymentsChoicesDict = choicesToDict(
+  //   programFrequencyOfPaymentsChoices,
+  // );
+  // const programSectorChoicesDict = choicesToDict(programSectorChoices);
   const renderAdminAreasCount = (
     partner: ProgramQuery['program']['partners'][0],
   ): ReactElement => {
@@ -82,9 +76,10 @@ export const ProgramDetails = ({
     );
   };
 
-  const partners = program.partners.filter((partner) =>
-    isPartnerVisible(partner.name),
-  );
+  const partners = [];
+  // program.partners.filter((partner) =>
+  //   isPartnerVisible(partner.name),
+  // );
 
   const showPartners = partners.length > 0;
   return (
@@ -93,7 +88,9 @@ export const ProgramDetails = ({
         <Typography variant="h6">{t('Programme Details')}</Typography>
       </Title>
       <OverviewContainer>
-        <Grid container spacing={6}>
+        {/* //TODO: remove span */}
+        <span></span>
+        {/* <Grid container spacing={6}>
           <Grid size={{ xs: 4 }}>
             <LabelizedField label={t('status')}>
               <StatusBox
@@ -180,7 +177,7 @@ export const ProgramDetails = ({
               {program.totalNumberOfHouseholds}
             </NumberOfHouseHoldsValue>
           </LabelizedField>
-        </NumberOfHouseHolds>
+        </NumberOfHouseHolds> */}
       </OverviewContainer>
       {showPartners && (
         <>

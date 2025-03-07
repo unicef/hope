@@ -47,7 +47,6 @@ export type PushPeople = {
     admin3?: (Admin3Enum | BlankEnum | NullEnum) | null;
     admin4?: (Admin4Enum | BlankEnum | NullEnum) | null;
     rdi_merge_status?: RdiMergeStatusEnum;
-    is_original?: boolean;
     is_removed?: boolean;
     removed_date?: string | null;
     last_sync_at?: string | null;
@@ -129,6 +128,7 @@ export type PushPeople = {
     blockchain_name?: string;
     wallet_address?: string;
     origin_unicef_id?: string | null;
+    mis_unicef_id?: string | null;
     vector_column?: string | null;
     individual_collection?: number | null;
     /**

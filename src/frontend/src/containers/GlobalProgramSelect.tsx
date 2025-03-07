@@ -1,30 +1,27 @@
-import { styled } from '@mui/material/styles';
-import Popper from '@mui/material/Popper';
-import ClickAwayListener from '@mui/material/ClickAwayListener';
+import { StatusBox } from '@core/StatusBox';
+import { ProgramStatus } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import ArrowDropDown from '@mui/icons-material/ArrowDropDown';
-import Autocomplete, {
-  autocompleteClasses,
-  AutocompleteCloseReason,
-} from '@mui/material/Autocomplete';
-import ButtonBase from '@mui/material/ButtonBase';
-import Box from '@mui/material/Box';
+import ClearIcon from '@mui/icons-material/Clear';
+import SearchIcon from '@mui/icons-material/Search';
 import {
   CircularProgress,
   IconButton,
   InputAdornment,
   TextField,
 } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
+import Autocomplete, {
+  autocompleteClasses,
+  AutocompleteCloseReason,
+} from '@mui/material/Autocomplete';
+import Box from '@mui/material/Box';
+import ButtonBase from '@mui/material/ButtonBase';
+import ClickAwayListener from '@mui/material/ClickAwayListener';
+import Popper from '@mui/material/Popper';
+import { styled } from '@mui/material/styles';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import { programStatusToColor } from '@utils/utils';
-import { StatusBox } from '@core/StatusBox';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useProgramContext } from '../programContext';
-import { useNavigate } from 'react-router-dom';
-import {
-  ProgramStatus,
-  useAllProgramsForChoicesLazyQuery,
-  useProgramQuery,
-} from '@generated/graphql';
 import {
   ChangeEvent,
   KeyboardEvent,
@@ -33,7 +30,8 @@ import {
   useRef,
   useState,
 } from 'react';
-import ClearIcon from '@mui/icons-material/Clear';
+import { useNavigate } from 'react-router-dom';
+import { useProgramContext } from '../programContext';
 
 interface PopperComponentProps {
   anchorEl?: any;
@@ -117,6 +115,7 @@ interface ProgramRecord {
   id: string;
   name: string;
   status: string;
+  slug: string;
 }
 
 export const GlobalProgramSelect = () => {
@@ -124,29 +123,43 @@ export const GlobalProgramSelect = () => {
   const { businessArea, programId } = useBaseUrl();
   const { selectedProgram, setSelectedProgram } = useProgramContext();
   const navigate = useNavigate();
-  const [
-    loadProgramsList,
-    { data: programsList, loading: loadingProgramsList },
-  ] = useAllProgramsForChoicesLazyQuery({
-    variables: {
-      businessArea,
-      first: 10,
-      orderBy: 'name',
-      status: [ProgramStatus.Active, ProgramStatus.Draft],
-    },
-    fetchPolicy: 'network-only',
+  const [shouldFetch, setShouldFetch] = useState(true);
+  const [queryParams, setQueryParams] = useState({});
+
+  const {
+    data: programsData,
+    isLoading: loadingPrograms,
+    // isSuccess,
+  } = useQuery({
+    queryKey: ['businessAreaProgram', businessArea, queryParams],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsList({
+        businessAreaSlug: businessArea,
+        ...queryParams,
+      }),
+    enabled: shouldFetch,
   });
+
+  // if (isSuccess) {
+  //   setShouldFetch(false);
+  // }
+
   const isMounted = useRef(false);
   const [inputValue, setInputValue] = useState<string>('');
-  const { data: programData, loading: loadingProgram } = useProgramQuery({
-    variables: { id: programId },
-    skip: programId === 'all' || !programId,
+  // const { data: program, loading: loadingProgram } = useProgramQuery({
+  //   variables: { id: programId },
+  //   skip: programId === 'all' || !programId,
+  // });
+  const { data: program, isLoading: loadingProgram } = useQuery({
+    queryKey: ['businessAreaProgram', businessArea, programId],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsRetrieve({
+        businessAreaSlug: businessArea,
+        slug: programId,
+      }),
+    enabled: programId !== 'all' && !!programId,
   });
   const [programs, setPrograms] = useState<ProgramRecord[]>([]);
-
-  useEffect(() => {
-    void loadProgramsList();
-  }, [loadProgramsList]);
 
   useEffect(() => {
     isMounted.current = true;
@@ -173,20 +186,27 @@ export const GlobalProgramSelect = () => {
       dataCollectingType: null,
       pduFields: null,
       programmeCode: null,
+      slug: null,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (programId !== 'all') {
-      const program = programData?.program;
       if (
         program &&
         isMounted.current &&
-        (!selectedProgram || selectedProgram?.id !== programId)
+        (!selectedProgram || selectedProgram?.slug !== programId)
       ) {
-        const { id, name, status, dataCollectingType, beneficiaryGroup, programmeCode } =
-          program;
+        const {
+          id,
+          name,
+          status,
+          dataCollectingType,
+          beneficiaryGroup,
+          programmeCode,
+          slug,
+        } = program;
 
         setSelectedProgram({
           id,
@@ -207,10 +227,11 @@ export const GlobalProgramSelect = () => {
           pduFields: program.pduFields,
           beneficiaryGroup: beneficiaryGroup,
           programmeCode,
+          slug,
         });
       }
     }
-  }, [programId, selectedProgram, setSelectedProgram, programData]);
+  }, [programId, selectedProgram, setSelectedProgram, program]);
 
   useEffect(() => {
     // If the programId is not in a valid format or not one of the available programs, redirect to the access denied page
@@ -218,42 +239,42 @@ export const GlobalProgramSelect = () => {
       programId &&
       programId !== 'all' &&
       !loadingProgram &&
-      programData?.program === null
+      program === null
     ) {
       setSelectedProgram(null);
-      navigate(`/access-denied/${businessArea}`);
+      // navigate(`/access-denied/${businessArea}`);
     }
   }, [
     programId,
     navigate,
     businessArea,
     loadingProgram,
-    programData,
+    program,
     setSelectedProgram,
   ]);
 
   useEffect(() => {
-    if (programsList?.allPrograms) {
-      const newProgramsList: ProgramRecord[] = [];
+    if (programsData) {
+      //TODO: add : Program[] line below
+      const newProgramsList = [];
       if (inputValue === '') {
         newProgramsList.push({
           id: 'all',
           name: 'All Programmes',
-          status: null,
+          // status: null,
+          slug: 'all',
         });
       }
-      const { edges } = programsList.allPrograms;
       newProgramsList.push(
-        ...edges.map(({ node: { id, name, status } }) => ({
+        ...programsData.results.map(({ id, name }) => ({
           id,
           name,
-          status,
         })),
       );
       setPrograms(newProgramsList);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [programsList?.allPrograms, inputValue]);
+  }, [programsData, inputValue]);
 
   const handleClose = () => {
     setAnchorEl(null);
@@ -279,11 +300,12 @@ export const GlobalProgramSelect = () => {
           dataCollectingType: null,
           pduFields: null,
           programmeCode: null,
+          slug: null,
         });
         navigate(`/${businessArea}/programs/all/list`);
       } else {
         navigate(
-          `/${businessArea}/programs/${selectedValue.id}/details/${selectedValue.id}`,
+          `/${businessArea}/programs/${selectedValue.slug}/details/${selectedValue.slug}`,
         );
       }
     }
@@ -291,23 +313,20 @@ export const GlobalProgramSelect = () => {
 
   const searchPrograms = () => {
     if (!inputValue) {
-      void loadProgramsList();
+      setQueryParams({});
     } else {
-      void loadProgramsList({
-        variables: {
-          businessArea,
-          first: 10,
-          orderBy: 'name',
-          status: [
-            ProgramStatus.Active,
-            ProgramStatus.Draft,
-            ProgramStatus.Finished,
-          ],
-          name: inputValue,
-        },
-        fetchPolicy: 'network-only',
+      setQueryParams({
+        first: 10,
+        orderBy: 'name',
+        status: [
+          ProgramStatus.Active,
+          ProgramStatus.Draft,
+          ProgramStatus.Finished,
+        ],
+        name: inputValue,
       });
     }
+    setShouldFetch(true);
   };
 
   const handleClick = (event: MouseEvent<HTMLElement>) => {
@@ -326,7 +345,7 @@ export const GlobalProgramSelect = () => {
 
   const clearInput = () => {
     setInputValue('');
-    void loadProgramsList();
+    setShouldFetch(true);
   };
 
   const open = Boolean(anchorEl);
@@ -390,7 +409,7 @@ export const GlobalProgramSelect = () => {
             options={programs}
             getOptionLabel={(option) => option.name}
             forcePopupIcon={false}
-            loading={loadingProgramsList}
+            loading={loadingPrograms}
             inputValue={inputValue}
             renderInput={(params) => (
               <StyledTextField
@@ -399,35 +418,44 @@ export const GlobalProgramSelect = () => {
                 variant="outlined"
                 size="small"
                 ref={params.InputProps.ref}
-                inputProps={{
-                  ...params.inputProps,
-                  'data-cy': 'search-input-gpf',
-                }}
                 autoFocus
                 onChange={handleOnChangeInput}
                 onKeyDown={handleEnter}
-                onFocus={() => loadProgramsList()}
-                InputProps={{
-                  ...params.InputProps,
-                  endAdornment: (
-                    <>
-                      {params.InputProps.endAdornment}
-                      <InputAdornment position="end">
-                        {loadingProgramsList && <CircularProgress />}
-                        {inputValue && (
-                          <IconButton data-cy="clear-icon" onClick={clearInput}>
-                            <ClearIcon />
+                onFocus={() => {
+                  if (!shouldFetch) {
+                    setShouldFetch(true);
+                  }
+                }}
+                slotProps={{
+                  htmlInput: {
+                    ...params.inputProps,
+                    'data-cy': 'search-input-gpf',
+                  },
+                  input: {
+                    ...params.InputProps,
+                    endAdornment: (
+                      <>
+                        {params.InputProps.endAdornment}
+                        <InputAdornment position="end">
+                          {loadingPrograms && <CircularProgress />}
+                          {inputValue && (
+                            <IconButton
+                              data-cy="clear-icon"
+                              onClick={clearInput}
+                            >
+                              <ClearIcon />
+                            </IconButton>
+                          )}
+                          <IconButton
+                            data-cy="search-icon"
+                            onClick={searchPrograms}
+                          >
+                            <SearchIcon />
                           </IconButton>
-                        )}
-                        <IconButton
-                          data-cy="search-icon"
-                          onClick={searchPrograms}
-                        >
-                          <SearchIcon />
-                        </IconButton>
-                      </InputAdornment>
-                    </>
-                  ),
+                        </InputAdornment>
+                      </>
+                    ),
+                  },
                 }}
               />
             )}
