@@ -89,10 +89,10 @@ class ProgrammeCodeValidator(BaseValidator):
     ) -> None:
         if programme_code:
             programme_code = programme_code.upper()
-            if not re.match(r"^[A-Z0-9\-/.]{4}$", programme_code):
+            if not re.match(r"^[A-Z0-9\-]{4}$", programme_code):
                 raise ValidationError(
                     "Programme code should be exactly 4 characters long and may only contain letters, digits "
-                    "and characters: - . /"
+                    "and character: -"
                 )
 
             qs = Program.objects.filter(business_area=business_area, programme_code=programme_code)

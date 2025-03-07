@@ -78,7 +78,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     def get_permissions_in_scope(self, user: User) -> set:
         request = self.context.get("request", {})
         business_area_slug = request.parser_context.get("kwargs", {}).get("business_area_slug")
-        programme_code = request.parser_context.get("kwargs", {}).get("program_programme_code")
+        programme_code = request.parser_context.get("kwargs", {}).get("program_slug")
         program_id = Program.objects.get(programme_code=programme_code, business_area__slug=business_area_slug).id
         return user.permissions_in_business_area(business_area_slug, program_id)
 
