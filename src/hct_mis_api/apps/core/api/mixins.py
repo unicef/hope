@@ -116,13 +116,6 @@ class ProgramMixin:
         return get_object_or_404(Program, slug=self.program_slug, business_area__slug=self.business_area_slug)
 
     def get_queryset(self) -> QuerySet:
-        print(super().get_queryset())
-        print(super().get_queryset().filter(**{f"{self.program_model_field}__slug": self.program_slug}))
-        print(
-            super()
-            .get_queryset()
-            .filter(**{f"{self.program_model_field}__business_area__slug": self.business_area_slug})
-        )
         return (
             super()
             .get_queryset()
