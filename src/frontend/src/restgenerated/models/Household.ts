@@ -21,11 +21,10 @@ export type Household = {
     country_origin?: CountryOriginEnum;
     size?: number | null;
     rdi_merge_status?: RdiMergeStatusEnum;
-    is_original?: boolean;
-    readonly created_at: string;
-    readonly updated_at: string;
     is_removed?: boolean;
     removed_date?: string | null;
+    readonly created_at: string;
+    readonly updated_at: string;
     last_sync_at?: string | null;
     internal_data?: any;
     withdrawn?: boolean;
@@ -85,6 +84,7 @@ export type Household = {
     origin_unicef_id?: string | null;
     collect_type?: CollectTypeEnum;
     enumerator_rec_id?: number | null;
+    mis_unicef_id?: string | null;
     flex_registrations_record_id?: number | null;
     household_collection?: number | null;
     admin_area?: string | null;

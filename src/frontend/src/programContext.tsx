@@ -6,12 +6,14 @@ import {
   useState,
 } from 'react';
 import { DataCollectingTypeType, ProgramStatus } from './__generated__/graphql';
+import { Program } from '@restgenerated/models/Program';
 
 export interface ProgramInterface {
   id: string;
   name: string;
   status: ProgramStatus;
   programmeCode: string;
+  slug: string;
   dataCollectingType: {
     id: string;
     householdFiltersAvailable: boolean;
@@ -32,11 +34,11 @@ export interface ProgramInterface {
   };
 }
 
-export type ProgramContextType = ProgramInterface | null;
+export type ProgramContextType = Program | null;
 
 type ProgramContent = {
-  selectedProgram: ProgramContextType;
-  setSelectedProgram: (program: ProgramContextType) => void;
+  selectedProgram: Program;
+  setSelectedProgram: (program: Program) => void;
   isActiveProgram: boolean;
   isSocialDctType: boolean;
   isStandardDctType: boolean;

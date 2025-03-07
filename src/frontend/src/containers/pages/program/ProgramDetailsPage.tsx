@@ -7,7 +7,6 @@ import {
   ProgramStatus,
   useBusinessAreaDataQuery,
   useProgrammeChoiceDataQuery,
-  useProgramQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -19,6 +18,8 @@ import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { ProgramDetailsPageHeader } from '../headers/ProgramDetailsPageHeader';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 
 const Container = styled.div`
   && {
@@ -48,11 +49,21 @@ const NoCashPlansTitle = styled.div`
 function ProgramDetailsPage(): ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
-  const { data, loading, error } = useProgramQuery({
-    variables: { id },
-    fetchPolicy: 'network-only',
-  });
   const { businessArea } = useBaseUrl();
+
+  const {
+    data: program,
+    isLoading: loading,
+    error,
+  } = useQuery({
+    queryKey: ['businessAreaProgram', businessArea, id],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsRetrieve({
+        businessAreaSlug: businessArea,
+        slug: id,
+      }),
+  });
+
   const { data: businessAreaData, loading: businessAreaDataLoading } =
     useBusinessAreaDataQuery({
       variables: { businessAreaSlug: businessArea },
@@ -66,10 +77,8 @@ function ProgramDetailsPage(): ReactElement {
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!choices || !businessAreaData || permissions === null || !data)
-    return null;
+  if (!choices || !businessAreaData || permissions === null) return null;
 
-  const { program } = data;
   const canFinish = hasPermissions(PERMISSIONS.PROGRAMME_FINISH, permissions);
   return (
     <>
@@ -89,7 +98,9 @@ function ProgramDetailsPage(): ReactElement {
       />
       <Container>
         <ProgramDetails program={program} choices={choices} />
-        {program.status === ProgramStatus.Draft ? (
+        {/* //TODO: remove ts ignore and ?  */}
+        {/* @ts-ignore */}
+        {program?.status === ProgramStatus.Draft ? (
           <NoCashPlansContainer>
             <NoCashPlansTitle>
               {t('Activate the Programme to create a Cycle')}
