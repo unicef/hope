@@ -6,7 +6,6 @@ import {
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, CircularProgress } from '@mui/material';
-import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { Field, FormikProvider, useFormik } from 'formik';
 import { ReactElement, useEffect } from 'react';

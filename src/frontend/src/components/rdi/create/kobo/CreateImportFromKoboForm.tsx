@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { Box, CircularProgress } from '@mui/material';
+import { CircularProgress } from '@mui/material';
 import { Field, FormikProvider, useFormik } from 'formik';
 import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';

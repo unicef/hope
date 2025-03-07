@@ -212,7 +212,7 @@ export function RequestedIndividualDataChange({
       identitiesToEdit.length +
       paymentChannels.length +
       paymentChannelsToRemove.length +
-      paymentChannelsToEdit.length
+      paymentChannelsToEdit.length;
 
     return allSelected === countAll;
   };

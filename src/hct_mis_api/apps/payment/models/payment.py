@@ -1818,17 +1818,13 @@ class PaymentHouseholdSnapshot(TimeStampedUUIDModel):
     payment = models.OneToOneField(Payment, on_delete=models.CASCADE, related_name="household_snapshot")
 
 
-# TODO MB rename to Account
 class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
-    # TODO MB migrate existing data format (ex. phone_number__mobile_money) to new format
-    # set account type and store only field_name (phone) / value in .data json
-    # TODO MB migrate bank account info model
     ACCOUNT_FIELD_PREFIX = "account__"
 
     individual = models.ForeignKey(
         "household.Individual",
         on_delete=models.CASCADE,
-        related_name="delivery_mechanisms_data",  # TODO MB rename to collector_accounts
+        related_name="delivery_mechanisms_data",
     )
     account_type = models.ForeignKey(
         "payment.AccountType",
@@ -1851,14 +1847,6 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
 
     def __str__(self) -> str:
         return f"{self.individual} - {self.account_type}"
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["individual", "account_type"],
-                name="unique_individual_account_type",
-            ),
-        ]
 
     def get_associated_object(self, associated_with: str) -> Any:
         associated_objects = {
