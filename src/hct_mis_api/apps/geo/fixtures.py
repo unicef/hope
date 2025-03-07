@@ -71,9 +71,9 @@ def generate_p_code(prefix: str, count: int) -> List[str]:
 
 
 def generate_areas(country_names: Optional[List[str]] = None) -> None:
-    """create areas in every level for country in country_names or by default only for Afghanistan, Croatia and Ukraine"""
+    """create areas in every level for country in country_names or by default only for Afghanistan"""
     if country_names is None:
-        country_names = ["Afghanistan", "Croatia", "Ukraine"]
+        country_names = ["Afghanistan"]
     print(f"Generating Areas for {country_names}")
     for country in Country.objects.filter(short_name__in=country_names):
         p_code_prefix = country.iso_code2

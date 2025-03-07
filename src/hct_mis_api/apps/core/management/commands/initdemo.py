@@ -144,13 +144,13 @@ class Command(BaseCommand):
 
         # Geo app
         generate_area_types()
-        generate_areas()
+        generate_areas(country_names=["Afghanistan", "Croatia", "Ukraine"])
         generate_data_collecting_types()
 
         # TODO: will remove all files
         # fixtures = [
         #     "apps/account/fixtures/initial.json" done +++
-        #     "apps/geo/fixtures/data.json"
+        #     "apps/geo/fixtures/data.json"  -> call_command("init-geo-fixtures")
         #     "apps/core/fixtures/data.json",
         #     "apps/account/fixtures/data.json",
         #     "apps/program/fixtures/data.json",

@@ -28,7 +28,7 @@ class Command(BaseCommand):
         reset_business_area_sequences()
         call_command("flush", "--noinput")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/account/fixtures/initial.json")
-        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json")
+        call_command("init-geo-fixtures")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/account/fixtures/data.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/program/fixtures/data-cypress.json")

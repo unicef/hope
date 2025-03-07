@@ -1,6 +1,6 @@
 from typing import Any, List
 
-from django.conf import settings
+from django.core.management import call_command
 
 from parameterized import parameterized
 
@@ -20,8 +20,6 @@ from hct_mis_api.apps.program.models import Program
 
 
 class TestFeedbackMessages(APITestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     CREATE_FEEDBACK_MESSAGE_MUTATION = """
     mutation CreateFeedbackMessage($input: CreateFeedbackMessageInput!) {
       createFeedbackMessage(input: $input) {
@@ -56,6 +54,7 @@ class TestFeedbackMessages(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         cls.business_area = create_afghanistan()
         cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
 
