@@ -36,6 +36,7 @@
       "admin_areas": [],
       "data_collecting_type": 1,
       "programme_code": "ABC2",
+      "slug": "abc2",
       "beneficiary_group": "09343484-199b-4374-b6e8-9b0c6eae6bda"
     },
     "model": "program.program",
@@ -66,6 +67,7 @@
       "admin_areas": [],
       "data_collecting_type": 1,
       "programme_code": "ABC1",
+      "slug": "abc1",
       "beneficiary_group": "09343484-199b-4374-b6e8-9b0c6eae6bda"
     }
   },
