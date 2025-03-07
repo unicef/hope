@@ -59,6 +59,7 @@ from django.db import OperationalError, connections
 from django.utils import timezone
 
 import elasticsearch
+from flags.models import FlagState
 
 from hct_mis_api.apps.account.fixtures import create_superuser, generate_unicef_partners
 from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment, User
@@ -66,6 +67,7 @@ from hct_mis_api.apps.core.fixtures import (
     generate_business_areas,
     generate_country_codes,
     generate_data_collecting_types,
+    generate_pdu_data,
 )
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.fixtures import generate_area_types, generate_areas
@@ -128,8 +130,8 @@ class Command(BaseCommand):
         self.stdout.write("Loading fixtures...")
         generate_unicef_partners()
         call_command("loadcountries")
-        generate_country_codes()
-        generate_business_areas()
+        generate_country_codes()  # core
+        generate_business_areas()  # core
         self.stdout.write("Creating superuser...")
         user = create_superuser()
 
@@ -145,17 +147,19 @@ class Command(BaseCommand):
         # Geo app
         generate_area_types()
         generate_areas(country_names=["Afghanistan", "Croatia", "Ukraine"])
+        # Core app
         generate_data_collecting_types()
+        FlagState.objects.get_or_create(
+            **{"name": "ALLOW_ACCOUNTABILITY_MODULE", "condition": "boolean", "value": "True", "required": False}
+        )
 
         # TODO: will remove all files
         # fixtures = [
-        #     "apps/core/fixtures/data.json",
-        #     "apps/account/fixtures/data.json",
         #     "apps/program/fixtures/data.json",
         #     "apps/registration_data/fixtures/data.json",
         #     "apps/household/fixtures/documenttype.json",
         #     "apps/household/fixtures/data.json",
-        #     "apps/accountability/fixtures/data.json",
+        #     "apps/accountability/fixtures/data.json", #333
         #     "apps/steficon/fixtures/data.json",
         #     "contrib/aurora/fixtures/data.json",
         # ]
@@ -178,14 +182,11 @@ class Command(BaseCommand):
         update_fsps()
 
         # Load more fixtures
-        additional_fixtures = [
-            # "apps/core/fixtures/pdu.json",
-            # "apps/grievance/fixtures/data.json",
-        ]
+        # additional_fixtures = [
+        # "apps/grievance/fixtures/data.json",
+        # ]
         self.stdout.write("Loading additional fixtures...")
-        for fixture in additional_fixtures:
-            self.stdout.write(f"Loading fixture: {fixture}")
-            call_command("loaddata", f"{settings.PROJECT_ROOT}/{fixture}")
+        generate_pdu_data()
 
         # Retrieve email lists from environment variables or command-line arguments
         email_list_env = os.getenv("INITDEMO_EMAIL_LIST")

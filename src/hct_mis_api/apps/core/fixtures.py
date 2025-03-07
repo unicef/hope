@@ -11,6 +11,7 @@ from hct_mis_api.apps.core.models import (
     CountryCodeMap,
     DataCollectingType,
     FlexibleAttribute,
+    FlexibleAttributeGroup,
     PeriodicFieldData,
     StorageFile,
 )
@@ -190,7 +191,7 @@ def generate_data_collecting_types() -> None:
             "label": "Partial",
             "code": "partial_individuals",
             "description": "Partial individuals collected",
-            "type": DataCollectingType.Type.STANDARD.value,
+            "type": DataCollectingType.Type.SOCIAL.value,
         },
         {
             "label": "Full",
@@ -220,3 +221,23 @@ def generate_data_collecting_types() -> None:
             type=data_dict["type"],
             household_filters_available=True if data_dict["type"] == DataCollectingType.Type.STANDARD.value else False,
         )
+        # limit_to
+    # compatible_types
+    # TODO: fix it?!?
+
+
+def generate_pdu_data() -> None:
+    print("Generating PDU Data...")
+    test_program = Program.objects.get(business_area__slug="afghanistan", name="Test Program")
+    group = FlexibleAttributeGroup.objects.create(name="Group 1", label={"english": "english"})
+    pdu_data = PeriodicFieldData.objects.create(
+        subtype="STRING", number_of_rounds=12, rounds_names=["test1", "test2", "test3..."]
+    )
+    FlexibleAttributeForPDUFactory(
+        name="test_1_i_f",
+        program=test_program,
+        pdu_data=pdu_data,
+        label={"English(EN)": "Test pdu 1"},
+        hint={"English(EN)": "Test pdu 1"},
+        group=group,
+    )

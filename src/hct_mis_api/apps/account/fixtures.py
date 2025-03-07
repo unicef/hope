@@ -137,3 +137,5 @@ def create_superuser(**kwargs: Any) -> User:
 def generate_unicef_partners() -> None:
     unicef_main_partner = PartnerFactory(name="UNICEF")
     PartnerFactory(name="UNICEF HQ", parent=unicef_main_partner)
+    PartnerFactory(name="UNHCR")
+    PartnerFactory(name="WFP")
