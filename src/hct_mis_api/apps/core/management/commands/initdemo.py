@@ -152,14 +152,14 @@ class Command(BaseCommand):
         #     "apps/account/fixtures/initial.json" done +++
         #     "apps/geo/fixtures/data.json"
         #     "apps/core/fixtures/data.json",
-        #     # "apps/account/fixtures/data.json",
-        #     # "apps/program/fixtures/data.json",
-        #     # "apps/registration_data/fixtures/data.json",
-        #     # "apps/household/fixtures/documenttype.json",
-        #     # "apps/household/fixtures/data.json",
-        #     # "apps/accountability/fixtures/data.json",
-        #     # "apps/steficon/fixtures/data.json",
-        #     # "contrib/aurora/fixtures/data.json",
+        #     "apps/account/fixtures/data.json",
+        #     "apps/program/fixtures/data.json",
+        #     "apps/registration_data/fixtures/data.json",
+        #     "apps/household/fixtures/documenttype.json",
+        #     "apps/household/fixtures/data.json",
+        #     "apps/accountability/fixtures/data.json",
+        #     "apps/steficon/fixtures/data.json",
+        #     "contrib/aurora/fixtures/data.json",
         # ]
 
         try:
