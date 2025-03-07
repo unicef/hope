@@ -1,4 +1,4 @@
-from django.conf import settings
+from django.core.management import call_command
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -8,7 +8,6 @@ from hct_mis_api.apps.geo.models import Area, AreaType, Country
 
 class TestSchema(APITestCase):
     maxDiff = None
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     QUERY = """
     query AllAreasTree {
@@ -43,6 +42,7 @@ class TestSchema(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         cls.business_area = create_ukraine()
         country = Country.objects.get(name="Ukraine")
         cls.business_area.countries.add(country)

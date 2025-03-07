@@ -555,11 +555,10 @@ def run_automate_rdi_creation_task(*args: Any, **kwargs: Any) -> Any:
     "hct_mis_api.contrib.aurora.services.base_flex_registration_service.BaseRegistrationService.validate_data_collection_type"
 )
 class TestAutomatingRDICreationTask(TestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         organization = OrganizationFactory.create(slug="ukraine")
         cls.project = ProjectFactory.create(organization=organization)
         cls.registration = RegistrationFactory.create(project=cls.project)

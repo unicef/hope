@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.core.management import call_command
 
 from parameterized import parameterized
@@ -12,8 +11,6 @@ from hct_mis_api.apps.core.models import BusinessArea
 
 
 class TestMetaDataFilterType(APITestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     QUERY = """
     query AllFieldsAttributes {
      allFieldsAttributes{
@@ -43,6 +40,7 @@ class TestMetaDataFilterType(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         call_command("loadflexfieldsattributes")
         # graph query to be called.
         cls.user = UserFactory.create()

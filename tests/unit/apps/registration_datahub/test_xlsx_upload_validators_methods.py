@@ -27,13 +27,13 @@ from hct_mis_api.apps.registration_datahub.validators import UploadXLSXInstanceV
 
 class TestXLSXValidatorsMethods(APITestCase):
     databases = {"default"}
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     FILES_DIR_PATH = f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file"
 
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         call_command("loadflexfieldsattributes")
         generate_delivery_mechanisms()
 

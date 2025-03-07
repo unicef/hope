@@ -8,6 +8,7 @@ from unittest import mock
 from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.core.files import File
+from django.core.management import call_command
 from django.forms import model_to_dict
 from django.test import TestCase
 from django.utils.dateparse import parse_datetime
@@ -80,11 +81,10 @@ class CellMock:
 
 
 class TestRdiXlsxCreateTask(TestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         generate_delivery_mechanisms()
         FlexibleAttribute.objects.create(
             type=FlexibleAttribute.INTEGER,

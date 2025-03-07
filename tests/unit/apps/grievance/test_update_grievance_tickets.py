@@ -2,8 +2,8 @@ from datetime import date
 from typing import Any, Dict, List, Optional
 from unittest import mock
 
-from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.management import call_command
 
 from factory import Factory
 from parameterized import parameterized
@@ -61,8 +61,6 @@ from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
 class TestUpdateGrievanceTickets(APITestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     UPDATE_GRIEVANCE_TICKET_MUTATION = """
     mutation UpdateGrievanceTicket(
       $input: UpdateGrievanceTicketInput!
@@ -96,6 +94,7 @@ class TestUpdateGrievanceTickets(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         create_afghanistan()
         generate_delivery_mechanisms()
         cls.generate_document_types_for_all_countries()

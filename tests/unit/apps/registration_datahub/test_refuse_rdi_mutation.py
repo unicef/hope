@@ -1,6 +1,6 @@
 from typing import Any, List
 
-from django.conf import settings
+from django.core.management import call_command
 
 import pytest
 from parameterized import parameterized
@@ -21,7 +21,6 @@ pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 class TestRefuseRdiMutation(APITestCase):
     databases = "__all__"
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     REFUSE_IMPORT_QUERY = """
       mutation RefuseRDI($id: ID!, $refuseReason: String) {
@@ -37,6 +36,7 @@ class TestRefuseRdiMutation(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         cls.user = UserFactory()
         create_afghanistan()
         cls.business_area_slug = "afghanistan"

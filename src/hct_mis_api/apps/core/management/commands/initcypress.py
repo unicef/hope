@@ -4,6 +4,7 @@ from typing import Any
 from django.conf import settings
 from django.core.management import BaseCommand, call_command
 
+from hct_mis_api.apps.account.fixtures import generate_unicef_partners
 from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment, User
 from hct_mis_api.apps.core.management.commands.reset_business_area_sequences import (
     reset_business_area_sequences,
@@ -27,7 +28,8 @@ class Command(BaseCommand):
 
         reset_business_area_sequences()
         call_command("flush", "--noinput")
-        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/account/fixtures/initial.json")
+        generate_unicef_partners()
+        call_command("generateroles")
         call_command("init-geo-fixtures")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/account/fixtures/data.json")

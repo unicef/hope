@@ -1,6 +1,6 @@
 import datetime
 
-from django.conf import settings
+from django.core.management import call_command
 from django.test import TestCase
 
 from freezegun import freeze_time
@@ -24,11 +24,10 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 
 class TestRegistrationDataModels(TestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         create_afghanistan()
         cls.program = ProgramFactory(status=Program.ACTIVE)
         partner = PartnerFactory()

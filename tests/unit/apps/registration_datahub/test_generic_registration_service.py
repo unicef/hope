@@ -2,7 +2,7 @@ import datetime
 import json
 from typing import Union
 
-from django.conf import settings
+from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 
@@ -35,10 +35,10 @@ from hct_mis_api.contrib.aurora.services.generic_registration_service import (
 
 class TestGenericRegistrationService(TestCase):
     databases = {"default"}
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUp(cls) -> None:
+        call_command("init-geo-fixtures")
         DocumentType.objects.create(key="tax_id", label="Tax ID")
         DocumentType.objects.create(key="disability_certificate", label="Disability Certificate")
         cls.business_area = BusinessAreaFactory(slug="generic-slug")

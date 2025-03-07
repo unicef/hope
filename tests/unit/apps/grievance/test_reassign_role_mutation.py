@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.core.management import call_command
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -138,8 +137,6 @@ class TestRoleReassignMutation(APITestCase):
 
 
 class TestRoleReassignMutationNewTicket(APITestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     REASSIGN_ROLE_MUTATION = """
     mutation ReassignRole(
       $grievanceTicketId: ID!,
@@ -168,6 +165,7 @@ class TestRoleReassignMutationNewTicket(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
