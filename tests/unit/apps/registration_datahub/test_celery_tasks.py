@@ -20,6 +20,7 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.household.fixtures import (
     DocumentFactory,
     DocumentTypeFactory,
@@ -564,6 +565,9 @@ class TestAutomatingRDICreationTask(TestCase):
         cls.registration = RegistrationFactory.create(project=cls.project)
         cls.registration.rdi_parser = UkraineBaseRegistrationService
         cls.registration.save()
+        admin1 = AreaFactory(p_code="UA07", name="Name1")
+        admin2 = AreaFactory(p_code="UA0702", name="Name2", parent=admin1)
+        AreaFactory(p_code="UA0702001", name="Name3", parent=admin2)
 
     def test_successful_run_without_records_to_import(self, mock_validate_data_collection_type: Any) -> None:
         result = run_automate_rdi_creation_task(registration_id=self.registration.id, page_size=1)

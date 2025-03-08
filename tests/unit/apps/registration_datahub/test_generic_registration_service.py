@@ -11,6 +11,7 @@ from parameterized import parameterized
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_TAX_ID,
     ROLE_ALTERNATE,
@@ -49,6 +50,9 @@ class TestGenericRegistrationService(TestCase):
         cls.program = ProgramFactory(status="ACTIVE", data_collecting_type=cls.data_collecting_type)
         cls.organization = OrganizationFactory(business_area=cls.business_area, slug=cls.business_area.slug)
         cls.project = ProjectFactory(name="fake_project", organization=cls.organization, programme=cls.program)
+        admin1 = AreaFactory(p_code="UA07", name="Name1")
+        admin2 = AreaFactory(p_code="UA0702", name="Name2", parent=admin1)
+        AreaFactory(p_code="UA0114007", name="Name3", parent=admin2)
 
         mapping = {
             "defaults": {"business_area": "ukraine", "country": "UA"},

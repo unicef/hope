@@ -31,6 +31,7 @@ from hct_mis_api.apps.core.utils import (
     IDENTIFICATION_TYPE_TO_KEY_MAPPING,
     SheetImageLoader,
 )
+from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.geo.models import Country as GeoCountry
 from hct_mis_api.apps.household.fixtures import (
     IndividualFactory,
@@ -103,6 +104,8 @@ class TestRdiXlsxCreateTask(TestCase):
         ).read_bytes()
         file = File(BytesIO(content), name="new_reg_data_import.xlsx")
         business_area = create_afghanistan()
+        parent = AreaFactory(p_code="AF11", name="Name")
+        AreaFactory(p_code="AF1115", name="Name2", parent=parent)
 
         from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
             RdiXlsxCreateTask,

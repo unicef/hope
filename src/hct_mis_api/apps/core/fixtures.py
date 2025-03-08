@@ -185,7 +185,7 @@ def generate_business_areas() -> None:
 
 
 def generate_data_collecting_types() -> None:
-    all_ba_list = list(BusinessArea.objects.all())
+    all_ba_id_list = list(BusinessArea.objects.all().values_list("id", flat=True))
     data_collecting_types = [
         {
             "label": "Partial",
@@ -217,13 +217,10 @@ def generate_data_collecting_types() -> None:
         DataCollectingTypeFactory(
             label=data_dict["label"],
             code=data_dict["code"],
-            business_areas=all_ba_list,
+            business_areas=all_ba_id_list,
             type=data_dict["type"],
             household_filters_available=True if data_dict["type"] == DataCollectingType.Type.STANDARD.value else False,
         )
-        # limit_to
-    # compatible_types
-    # TODO: fix it?!?
 
 
 def generate_pdu_data() -> None:
