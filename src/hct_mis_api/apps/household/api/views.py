@@ -39,7 +39,7 @@ class HouseholdViewSet(
     ListModelMixin,
     BaseViewSet,
 ):
-    queryset = Household.all_merge_status_objects.all()
+    queryset = Household.all_merge_status_objects.order_by("created_at")
     serializer_class = HouseholdListSerializer
     serializer_classes_by_action = {
         "list": HouseholdListSerializer,
