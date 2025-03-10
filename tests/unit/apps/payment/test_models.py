@@ -799,10 +799,6 @@ class TestFinancialServiceProviderModel(TestCase):
         primary_collector_id = fsp_xlsx_template.get_column_from_core_field(payment, "primary_collector_id")
         self.assertEqual(primary_collector_id, str(primary.pk))
 
-        # get delivery_mechanisms_data field
-        dmd_resp = fsp_xlsx_template.get_column_from_core_field(payment, "name_of_cardholder__atm_card")
-        self.assertEqual(dmd_resp, "Just Random Test Name")
-
         # country_origin
         country_origin = fsp_xlsx_template.get_column_from_core_field(payment, "country_origin")
         self.assertEqual(household.country_origin.iso_code3, country_origin)

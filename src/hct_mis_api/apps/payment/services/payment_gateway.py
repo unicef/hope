@@ -410,10 +410,12 @@ class PaymentGatewayService:
                 )
                 fsp.delivery_mechanisms.set(delivery_mechanisms)
 
-            dm_required_fields = {config.delivery_mechanism: config.required_fields for config in fsp_data.configs}
+            dm_required_fields = {
+                config.delivery_mechanism: config.required_fields or [] for config in fsp_data.configs
+            }
             for dm_id, required_fields in dm_required_fields.items():
                 DeliveryMechanismConfig.objects.update_or_create(
-                    delivery_mechanism=DeliveryMechanism.objects.get(id=dm_id),
+                    delivery_mechanism=DeliveryMechanism.objects.get(payment_gateway_id=dm_id),
                     fsp=fsp,
                     defaults=dict(required_fields=required_fields),
                 )

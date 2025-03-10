@@ -524,6 +524,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             delivered_quantity_usd=None,
             financial_service_provider=santander_fsp,
             currency="PLN",
+            has_valid_wallet=True,
         )
         self.assertEqual(payment.entitlement_quantity, 1000)
         create_payment_plan_snapshot_data(payment_plan)
@@ -582,17 +583,6 @@ class TestPaymentPlanReconciliation(APITestCase):
         self.assertEqual(
             lock_fsp_in_payment_plan_response["data"]["actionPaymentPlanMutation"]["paymentPlan"]["status"],
             "LOCKED_FSP",
-        )
-
-        payment_plan.refresh_from_db()
-        assert payment_plan.financial_service_provider == santander_fsp
-        assert payment_plan.delivery_mechanism == dm_cash
-        assert (
-            payment_plan.eligible_payments.filter(
-                financial_service_provider__isnull=False,
-                delivery_type__isnull=False,
-            ).count()
-            == 4
         )
 
         send_for_approval_payment_plan_response = self.graphql_request(

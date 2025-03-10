@@ -26,6 +26,7 @@ from hct_mis_api.apps.payment.fixtures import (
     generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import (
+    AccountType,
     DeliveryMechanism,
     FinancialServiceProvider,
     Payment,
@@ -512,6 +513,7 @@ class TestPaymentGatewayService(APITestCase):
                 "delivery_phone_number__mobile_money": "123456789",
                 "provider__mobile_money": "Provider",
             },
+            account_type=AccountType.objects.get(key="mobile"),
         )
         self.payments[0].delivery_type = self.dm_mobile_money
         self.payments[0].save()
@@ -539,9 +541,9 @@ class TestPaymentGatewayService(APITestCase):
                         "first_name": primary_collector.given_name,
                         "full_name": primary_collector.full_name,
                         "destination_currency": self.payments[0].currency,
-                        "service_provider_code__mobile_money": "ABC",
-                        "delivery_phone_number__mobile_money": "123456789",
-                        "provider__mobile_money": "Provider",
+                        "service_provider_code": "ABC",
+                        "delivery_phone_number": "123456789",
+                        "provider": "Provider",
                     },
                     "extra_data": {},
                 }
@@ -581,9 +583,7 @@ class TestPaymentGatewayService(APITestCase):
         pg_service.sync_delivery_mechanisms()
         dm_cash = DeliveryMechanism.objects.get(code="cash")
         assert dm_cash.is_active
-        assert dm_cash.required_fields == ["new_required_field"]
-        assert dm_cash.optional_fields == ["full_name", "new_optional_field"]
-        assert dm_cash.unique_fields == ["new_unique_field"]
+        assert dm_cash.account_type.key == "bank"
 
         dm_new = DeliveryMechanism.objects.get(code="new_dm")
         assert dm_new.is_active
