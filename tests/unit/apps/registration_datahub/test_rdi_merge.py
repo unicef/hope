@@ -85,7 +85,7 @@ class TestRdiMergeTask(TestCase):
         call_command("init-core-fixtures")
         cls.business_area = create_afghanistan()
         program = ProgramFactory()
-        cls.rdi = RegistrationDataImportFactory(program=program)
+        cls.rdi = RegistrationDataImportFactory(program=program, business_area=cls.business_area)
         cls.rdi.business_area.postpone_deduplication = True
         cls.rdi.business_area.save()
 
