@@ -9,7 +9,6 @@ from drf_spectacular.views import (
 from hct_mis_api.api import endpoints
 from hct_mis_api.api.endpoints.base import ConstanceSettingsAPIView
 from hct_mis_api.api.endpoints.program.views import ProgramGlobalListView
-from hct_mis_api.apps.account.api.views import UserProfileView
 from hct_mis_api.contrib.aurora.views import (
     OrganizationListView,
     ProjectListView,
@@ -36,6 +35,7 @@ urlpatterns = [
         "",
         include("hct_mis_api.apps.geo.api.urls", namespace="geo"),
     ),
+    path("", include("hct_mis_api.apps.account.api.urls", namespace="accounts")),
     # old urls
     path("areas/", endpoints.lookups.AreaList().as_view(), name="area-list"),
     path("areatypes/", endpoints.lookups.AreaTypeList().as_view(), name="areatype-list"),
@@ -51,7 +51,6 @@ urlpatterns = [
     path("lookups/role/", endpoints.lookups.Roles().as_view(), name="role-list"),
     path("lookups/sex/", endpoints.lookups.Sex().as_view(), name="sex-list"),
     path("lookups/program-statuses/", endpoints.lookups.ProgramStatuses().as_view(), name="program-statuses-list"),
-    path("profile/", UserProfileView.as_view(), name="profile-data"),
     path("programs/", ProgramGlobalListView.as_view(), name="program-global-list"),
     path("dashboard/", include("hct_mis_api.apps.dashboard.urls")),
     path(

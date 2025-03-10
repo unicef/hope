@@ -13,15 +13,6 @@ class UserBusinessAreaSerializer(serializers.ModelSerializer):
     permissions = serializers.SerializerMethodField()
     is_accountability_applicable = serializers.SerializerMethodField()
 
-    def get_permissions(self, obj: BusinessArea) -> list:
-        user = self.context["request"].user
-        if user:
-            return user.permissions_in_business_area(obj.slug)
-        return []
-
-    def get_is_accountability_applicable(self, obj: BusinessArea) -> bool:
-        return all([bool(flag_state("ALLOW_ACCOUNTABILITY_MODULE")), obj.is_accountability_applicable])
-
     class Meta:
         model = BusinessArea
         fields = (
@@ -32,6 +23,15 @@ class UserBusinessAreaSerializer(serializers.ModelSerializer):
             "is_accountability_applicable",
         )
 
+    def get_permissions(self, obj: BusinessArea) -> list:
+        user = self.context["request"].user
+        if user:
+            return user.permissions_in_business_area(obj.slug)
+        return []
+
+    def get_is_accountability_applicable(self, obj: BusinessArea) -> bool:
+        return all([bool(flag_state("ALLOW_ACCOUNTABILITY_MODULE")), obj.is_accountability_applicable])
+
 
 class RoleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -41,7 +41,7 @@ class RoleSerializer(serializers.ModelSerializer):
 
 class ProfileSerializer(serializers.ModelSerializer):
     permissions_in_scope = serializers.SerializerMethodField()
-    business_areas = serializers.SerializerMethodField()
+    business_areas = UserBusinessAreaSerializer(many=True)
     partner_roles = serializers.SerializerMethodField()
     user_roles = serializers.SerializerMethodField()
 
@@ -60,27 +60,26 @@ class ProfileSerializer(serializers.ModelSerializer):
             "partner_roles",
         )
 
-    def get_business_areas(self, user: User) -> ReturnDict:
-        return UserBusinessAreaSerializer(
-            user.business_areas, many=True, context={"request": self.context.get("request", {})}
-        ).data
-
     @staticmethod
     def get_partner_roles(user: User) -> ReturnDict:
-        role_ids = list(user.partner.role_assignments.order_by("business_area__slug").values_list("role_id", flat=True))
+        role_ids = user.partner.role_assignments.order_by("business_area__slug").values_list("role_id", flat=True)
         return RoleSerializer(Role.objects.filter(id__in=role_ids), many=True).data
 
     @staticmethod
     def get_user_roles(user: User) -> ReturnDict:
-        role_ids = list(user.role_assignments.order_by("business_area__slug").values_list("role_id", flat=True))
+        role_ids = user.role_assignments.order_by("business_area__slug").values_list("role_id", flat=True)
         return RoleSerializer(Role.objects.filter(id__in=role_ids), many=True).data
 
     def get_permissions_in_scope(self, user: User) -> set:
         request = self.context.get("request", {})
-        business_area_slug = request.parser_context.get("kwargs", {}).get("business_area_slug")
-        programme_code = request.parser_context.get("kwargs", {}).get("program_slug")
-        program_id = Program.objects.get(programme_code=programme_code, business_area__slug=business_area_slug).id
-        return user.permissions_in_business_area(business_area_slug, program_id)
+        business_area_slug = request.query_params.get("business_area_slug")
+
+        if program_slug := request.query_params.get("program_slug"):  # scope program
+            if program := Program.objects.filter(slug=program_slug, business_area__slug=business_area_slug).first():
+                return user.permissions_in_business_area(business_area_slug, program.id)
+            return set()
+
+        return user.permissions_in_business_area(business_area_slug)
 
 
 class UserSerializer(serializers.ModelSerializer):
