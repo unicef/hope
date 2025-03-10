@@ -49,14 +49,10 @@ class HouseholdViewSet(
         "list": [
             Permissions.RDI_VIEW_DETAILS,
             Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST,
-            *ALL_GRIEVANCES_CREATE_MODIFY,
         ],
         "retrieve": [
             Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
             Permissions.RDI_VIEW_DETAILS,
-            Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS,
-            Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_CREATOR,
-            Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER,
         ],
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
