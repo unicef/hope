@@ -71,12 +71,18 @@ from hct_mis_api.apps.core.fixtures import (
 )
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.fixtures import generate_area_types, generate_areas
+from hct_mis_api.apps.household.fixtures import generate_additional_doc_types
 from hct_mis_api.apps.payment.fixtures import (
     generate_delivery_mechanisms,
     generate_payment_plan,
     generate_reconciled_payment_plan,
     update_fsps,
 )
+from hct_mis_api.apps.program.fixtures import (
+    generate_beneficiary_groups,
+    generate_people_program,
+)
+from hct_mis_api.apps.registration_data.fixtures import generate_rdi
 
 logger = logging.getLogger(__name__)
 
@@ -155,14 +161,17 @@ class Command(BaseCommand):
 
         # TODO: will remove all files
         # fixtures = [
-        #     "apps/program/fixtures/data.json",
-        #     "apps/registration_data/fixtures/data.json",
-        #     "apps/household/fixtures/documenttype.json",
-        #     "apps/household/fixtures/data.json",
-        #     "apps/accountability/fixtures/data.json", #333
+        #     "apps/accountability/fixtures/data.json",
         #     "apps/steficon/fixtures/data.json",
         #     "contrib/aurora/fixtures/data.json",
         # ]
+        generate_beneficiary_groups()
+        self.stdout.write("Generating programs...")
+        generate_people_program()
+        self.stdout.write("Generating RDIs...")
+        generate_rdi()
+        self.stdout.write("Generating additional document types...")
+        generate_additional_doc_types()
 
         try:
             self.stdout.write("Rebuilding search index...")
