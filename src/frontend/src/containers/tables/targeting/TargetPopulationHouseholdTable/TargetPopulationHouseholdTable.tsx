@@ -28,7 +28,7 @@ export function TargetPopulationHouseholdTable({
     ...variables,
   };
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const replacements = {
     unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} ID`,
@@ -46,7 +46,7 @@ export function TargetPopulationHouseholdTable({
   return (
     <TableWrapper>
       <UniversalTable
-        title={t(`${beneficiaryGroup?.groupLabelPlural}`)}
+        title={t(`${beneficiaryGroup?.group_label_plural}`)}
         headCells={adjustedHeadCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={query}

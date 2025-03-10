@@ -31,11 +31,11 @@ export function HouseholdCompositionTable({
 }: HouseholdCompositionTableProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
   return (
     <OverviewPaper>
       <Title>
-        <Typography variant="h6">{`${beneficiaryGroup?.groupLabel} Composition`}</Typography>
+        <Typography variant="h6">{`${beneficiaryGroup?.group_label} Composition`}</Typography>
       </Title>
       <Table>
         <TableHead>

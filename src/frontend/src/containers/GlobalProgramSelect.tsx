@@ -19,6 +19,7 @@ import ButtonBase from '@mui/material/ButtonBase';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
 import Popper from '@mui/material/Popper';
 import { styled } from '@mui/material/styles';
+import { Program } from '@restgenerated/models/Program';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { programStatusToColor } from '@utils/utils';
@@ -32,6 +33,7 @@ import {
 } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from '../programContext';
+import { Status791Enum } from '@restgenerated/models/Status791Enum';
 
 interface PopperComponentProps {
   anchorEl?: any;
@@ -111,24 +113,17 @@ const ButtonLabel = styled('span')`
   margin-right: 10px;
 `;
 
-interface ProgramRecord {
-  id: string;
-  name: string;
-  status: string;
-  slug: string;
-}
-
 export const GlobalProgramSelect = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const { businessArea, programId } = useBaseUrl();
   const { selectedProgram, setSelectedProgram } = useProgramContext();
   const navigate = useNavigate();
-  const [shouldFetch, setShouldFetch] = useState(true);
   const [queryParams, setQueryParams] = useState({});
 
   const {
     data: programsData,
     isLoading: loadingPrograms,
+    refetch: refetchPrograms,
     // isSuccess,
   } = useQuery({
     queryKey: ['businessAreaProgram', businessArea, queryParams],
@@ -137,19 +132,11 @@ export const GlobalProgramSelect = () => {
         businessAreaSlug: businessArea,
         ...queryParams,
       }),
-    enabled: shouldFetch,
   });
-
-  // if (isSuccess) {
-  //   setShouldFetch(false);
-  // }
 
   const isMounted = useRef(false);
   const [inputValue, setInputValue] = useState<string>('');
-  // const { data: program, loading: loadingProgram } = useProgramQuery({
-  //   variables: { id: programId },
-  //   skip: programId === 'all' || !programId,
-  // });
+
   const { data: program, isLoading: loadingProgram } = useQuery({
     queryKey: ['businessAreaProgram', businessArea, programId],
     queryFn: () =>
@@ -159,7 +146,7 @@ export const GlobalProgramSelect = () => {
       }),
     enabled: programId !== 'all' && !!programId,
   });
-  const [programs, setPrograms] = useState<ProgramRecord[]>([]);
+  const [programs, setPrograms] = useState([]);
 
   useEffect(() => {
     isMounted.current = true;
@@ -171,21 +158,21 @@ export const GlobalProgramSelect = () => {
   useEffect(() => {
     // Initial setup for selectedProgram
     setSelectedProgram({
-      beneficiaryGroup: {
+      beneficiary_group: {
         id: 'default-id',
         name: 'Beneficiaries',
-        groupLabel: 'Group',
-        groupLabelPlural: 'Groups',
-        memberLabel: 'Member',
-        memberLabelPlural: 'Members',
-        masterDetail: false,
+        group_label: 'Group',
+        group_label_plural: 'Groups',
+        member_label: 'Member',
+        member_label_plural: 'Members',
+        master_detail: false,
       },
       id: 'all',
       name: 'All Programmes',
-      status: ProgramStatus.Active,
-      dataCollectingType: null,
-      pduFields: null,
-      programmeCode: null,
+      status: Status791Enum.ACTIVE,
+      data_collecting_type: null,
+      pdu_fields: null,
+      programme_code: null,
       slug: null,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -202,9 +189,10 @@ export const GlobalProgramSelect = () => {
           id,
           name,
           status,
-          dataCollectingType,
-          beneficiaryGroup,
-          programmeCode,
+          data_collecting_type,
+          pdu_fields,
+          beneficiary_group,
+          programme_code,
           slug,
         } = program;
 
@@ -212,21 +200,10 @@ export const GlobalProgramSelect = () => {
           id,
           name,
           status,
-          dataCollectingType: {
-            id: dataCollectingType?.id,
-            code: dataCollectingType?.code,
-            type: dataCollectingType?.type,
-            label: dataCollectingType?.label,
-            householdFiltersAvailable:
-              dataCollectingType?.householdFiltersAvailable,
-            individualFiltersAvailable:
-              dataCollectingType?.individualFiltersAvailable,
-            // collectorFieldsAvailable:
-            //   dataCollectingType?.collectorFieldsAvailable,
-          },
-          pduFields: program.pduFields,
-          beneficiaryGroup: beneficiaryGroup,
-          programmeCode,
+          data_collecting_type,
+          pdu_fields,
+          beneficiary_group,
+          programme_code,
           slug,
         });
       }
@@ -242,7 +219,7 @@ export const GlobalProgramSelect = () => {
       program === null
     ) {
       setSelectedProgram(null);
-      // navigate(`/access-denied/${businessArea}`);
+      navigate(`/access-denied/${businessArea}`);
     }
   }, [
     programId,
@@ -255,20 +232,21 @@ export const GlobalProgramSelect = () => {
 
   useEffect(() => {
     if (programsData) {
-      //TODO: add : Program[] line below
-      const newProgramsList = [];
+      const newProgramsList: Partial<Program>[] = [];
       if (inputValue === '') {
         newProgramsList.push({
           id: 'all',
           name: 'All Programmes',
-          // status: null,
+          status: null,
           slug: 'all',
         });
       }
       newProgramsList.push(
-        ...programsData.results.map(({ id, name }) => ({
+        ...programsData.results.map(({ id, name, slug, status }) => ({
           id,
           name,
+          status,
+          slug,
         })),
       );
       setPrograms(newProgramsList);
@@ -280,26 +258,26 @@ export const GlobalProgramSelect = () => {
     setAnchorEl(null);
   };
 
-  const onChange = (_event: any, selectedValue: ProgramRecord): void => {
+  const onChange = (_event: any, selectedValue: Program): void => {
     if (selectedValue) {
       handleClose();
       if (selectedValue.id === 'all') {
         setSelectedProgram({
-          beneficiaryGroup: {
+          beneficiary_group: {
             id: 'default-id',
             name: 'Beneficiaries',
-            groupLabel: 'Group',
-            groupLabelPlural: 'Groups',
-            memberLabel: 'Member',
-            memberLabelPlural: 'Members',
-            masterDetail: false,
+            group_label: 'Group',
+            group_label_plural: 'Groups',
+            member_label: 'Member',
+            member_label_plural: 'Members',
+            master_detail: false,
           },
           id: 'all',
           name: 'All Programmes',
-          status: ProgramStatus.Active,
-          dataCollectingType: null,
-          pduFields: null,
-          programmeCode: null,
+          status: Status791Enum.ACTIVE,
+          data_collecting_type: null,
+          pdu_fields: null,
+          programme_code: null,
           slug: null,
         });
         navigate(`/${businessArea}/programs/all/list`);
@@ -326,7 +304,7 @@ export const GlobalProgramSelect = () => {
         name: inputValue,
       });
     }
-    setShouldFetch(true);
+    refetchPrograms();
   };
 
   const handleClick = (event: MouseEvent<HTMLElement>) => {
@@ -345,7 +323,6 @@ export const GlobalProgramSelect = () => {
 
   const clearInput = () => {
     setInputValue('');
-    setShouldFetch(true);
   };
 
   const open = Boolean(anchorEl);
@@ -422,9 +399,7 @@ export const GlobalProgramSelect = () => {
                 onChange={handleOnChangeInput}
                 onKeyDown={handleEnter}
                 onFocus={() => {
-                  if (!shouldFetch) {
-                    setShouldFetch(true);
-                  }
+                  refetchPrograms();
                 }}
                 slotProps={{
                   htmlInput: {

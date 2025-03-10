@@ -14,6 +14,8 @@ import { useDebounce } from '@hooks/useDebounce';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
 import Paper from '@mui/material/Paper';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_TICKET_STATES,
@@ -22,22 +24,20 @@ import { adjustHeadCells, choicesToDict, dateToIsoString } from '@utils/utils';
 import get from 'lodash/get';
 import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useProgramContext } from 'src/programContext';
 import {
   PERMISSIONS,
   hasCreatorOrOwnerPermissions,
 } from '../../../config/permissions';
 import {
-  headCellsStandardProgram,
   headCellsSocialProgram,
+  headCellsStandardProgram,
 } from './GrievancesTableHeadCells';
 import { GrievancesTableRow } from './GrievancesTableRow';
 import { BulkAddNoteModal } from './bulk/BulkAddNoteModal';
 import { BulkAssignModal } from './bulk/BulkAssignModal';
 import { BulkSetPriorityModal } from './bulk/BulkSetPriorityModal';
 import { BulkSetUrgencyModal } from './bulk/BulkSetUrgencyModal';
-import { useProgramContext } from 'src/programContext';
-import { useQuery } from '@tanstack/react-query';
-import { RestService } from '@restgenerated/services/RestService';
 
 interface GrievancesTableProps {
   filter;
@@ -49,7 +49,7 @@ export const GrievancesTable = ({
 }: GrievancesTableProps): ReactElement => {
   const { businessArea, programId, isAllPrograms } = useBaseUrl();
   const { isSocialDctType, selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
   const { t } = useTranslation();
 
   const replacements = {
@@ -139,9 +139,12 @@ export const GrievancesTable = ({
 
   const { data: currentUserData, isLoading: currentUserDataLoading } = useQuery(
     {
-      queryKey: ['profile'],
+      queryKey: ['profile', businessArea, programId],
       queryFn: () => {
-        return RestService.restProfileRetrieve();
+        return RestService.restUsersProfileRetrieve({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+        });
       },
     },
   );

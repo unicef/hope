@@ -27,7 +27,7 @@ export const PaymentPlansTable = ({
 }: PaymentPlansTableProps): ReactElement => {
   const { programId, businessArea } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const initialVariables: AllPaymentPlansForTableQueryVariables = {
     businessArea,

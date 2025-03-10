@@ -54,7 +54,7 @@ export function LookUpIndividualTable({
   const { isSocialDctType } = useProgramContext();
   const { programId, isAllPrograms } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const handleRadioChange = (individual): void => {
     setSelectedIndividual(individual);
@@ -99,7 +99,7 @@ export function LookUpIndividualTable({
   };
 
   const replacements = {
-    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
+    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.member_label} ID`,
     household__id: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} ID`,
   };
 

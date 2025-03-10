@@ -85,7 +85,7 @@ export const HouseholdMembersTable = ({
   //   (edge) => edge.node,
   // );
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   if (orderBy) {
     if (orderDirection === 'asc') {
@@ -98,8 +98,8 @@ export const HouseholdMembersTable = ({
   const totalCount = allIndividuals.length;
 
   const replacements = {
-    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
-    fullName: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel}`,
+    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.member_label} ID`,
+    fullName: (_beneficiaryGroup) => `${_beneficiaryGroup?.member_label}`,
     relationship: (_beneficiaryGroup) =>
       `Relationship to Head of ${_beneficiaryGroup?.groupLabel}`,
   };
@@ -112,7 +112,7 @@ export const HouseholdMembersTable = ({
 
   return (
     <TableComponent<IndividualNode>
-      title={`${beneficiaryGroup?.groupLabel} Members`}
+      title={`${beneficiaryGroup?.group_label} Members`}
       data={allIndividuals.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage,

@@ -10,25 +10,25 @@ import { ReactElement } from 'react';
 export const IndividualDetails = ({ individual }): ReactElement => {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   return (
     <Overview>
       <Title>
         <Typography variant="h6">
-          {t(`${beneficiaryGroup?.memberLabel}`)}
+          {t(`${beneficiaryGroup?.member_label}`)}
         </Typography>{' '}
       </Title>
       <Grid container spacing={3}>
         <Grid size={{ xs: 3 }}>
           <LabelizedField
-            label={t(`${beneficiaryGroup?.memberLabel.toUpperCase()} ID`)}
+            label={t(`${beneficiaryGroup?.member_label.toUpperCase()} ID`)}
             value={individual.unicefId}
           />
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField
-            label={t(`${beneficiaryGroup?.memberLabel.toUpperCase()} ID`)}
+            label={t(`${beneficiaryGroup?.member_label.toUpperCase()} ID`)}
             value={individual.fullName}
           />
         </Grid>

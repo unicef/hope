@@ -23,7 +23,7 @@ export function RecipientsTable({
 }: RecipientsTableProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
   const initialVariables: RecipientsQueryVariables = {
     survey: id,
   };

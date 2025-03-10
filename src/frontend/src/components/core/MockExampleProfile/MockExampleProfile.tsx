@@ -1,12 +1,18 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const MockExampleProfile = () => {
+  const { businessArea, programId } = useBaseUrl();
+
   const { data: meData, isLoading: meLoading } = useQuery({
-    queryKey: ['profile'],
+    queryKey: ['profile', businessArea, programId],
     queryFn: () => {
-      return RestService.restProfileRetrieve();
+      return RestService.restUsersProfileRetrieve({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+      });
     },
   });
 

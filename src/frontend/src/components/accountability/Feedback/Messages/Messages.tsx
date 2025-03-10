@@ -1,24 +1,25 @@
-import { Avatar, Box, Grid2 as Grid, Paper, Typography } from '@mui/material';
-import { Field, Form, Formik } from 'formik';
-import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
-import styled from 'styled-components';
-import * as Yup from 'yup';
-import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { renderUserName } from '@utils/utils';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { LoadingButton } from '@core/LoadingButton';
+import { OverviewContainerColumn } from '@core/OverviewContainerColumn';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
 import {
   FeedbackDocument,
   FeedbackQuery,
   useCreateFeedbackMsgMutation,
 } from '@generated/graphql';
-import { LoadingButton } from '@core/LoadingButton';
-import { OverviewContainerColumn } from '@core/OverviewContainerColumn';
-import { Title } from '@core/Title';
-import { UniversalMoment } from '@core/UniversalMoment';
-import { ReactElement } from 'react';
-import withErrorBoundary from '@components/core/withErrorBoundary';
-import { useQuery } from '@tanstack/react-query';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { Avatar, Box, Grid2 as Grid, Paper, Typography } from '@mui/material';
 import { RestService } from '@restgenerated/services/RestService';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { useQuery } from '@tanstack/react-query';
+import { renderUserName } from '@utils/utils';
+import { Field, Form, Formik } from 'formik';
+import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
+import styled from 'styled-components';
+import * as Yup from 'yup';
 
 const Name = styled.span`
   font-size: 16px;
@@ -44,11 +45,15 @@ interface MessagesProps {
 
 function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
   const { t } = useTranslation();
+  const { businessArea, programId } = useBaseUrl();
 
   const { data: meData, isLoading: meLoading } = useQuery({
-    queryKey: ['profile'],
+    queryKey: ['profile', businessArea, programId],
     queryFn: () => {
-      return RestService.restProfileRetrieve();
+      return RestService.restUsersProfileRetrieve({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+      });
     },
   });
 
@@ -104,7 +109,7 @@ function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
     newNote: Yup.string().required(t('Note cannot be empty')),
   });
 
-  const myName = `${meData.firstName || meData.email}`;
+  const myName = `${meData.first_name || meData.email}`;
 
   return (
     <Grid size={{ xs: 8 }}>

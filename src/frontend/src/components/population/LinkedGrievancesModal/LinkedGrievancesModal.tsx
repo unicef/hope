@@ -64,7 +64,7 @@ export function LinkedGrievancesModal({
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const { data: grievances } = useAllGrievanceTicketQuery({
     variables: { businessArea, household: household.unicef_id },
@@ -176,7 +176,7 @@ export function LinkedGrievancesModal({
           <Box mt={2} mb={6}>
             <Typography>
               <Bold>
-                {beneficiaryGroup?.groupLabel} ID {household.unicef_id}
+                {beneficiaryGroup?.group_label} ID {household.unicef_id}
               </Bold>
               is linked to following Grievances.
             </Typography>

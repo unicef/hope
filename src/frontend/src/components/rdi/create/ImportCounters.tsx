@@ -16,7 +16,7 @@ export function ImportCounters({
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const { data: programData } = useProgramQuery({
     variables: { id: programId },
@@ -38,7 +38,7 @@ export function ImportCounters({
       <div data-cy="number-of-households">
         {numberOfHouseholds}{' '}
         {t(
-          `${beneficiaryGroup?.groupLabel}`
+          `${beneficiaryGroup?.group_label}`
             .concat(numberOfHouseholds > 1 ? 's' : '')
             .concat(' available to import'),
         )}
@@ -46,7 +46,7 @@ export function ImportCounters({
       <div data-cy="number-of-individuals">
         {numberOfIndividuals}{' '}
         {t(
-          `${beneficiaryGroup?.memberLabel}`
+          `${beneficiaryGroup?.member_label}`
             .concat(numberOfIndividuals > 1 ? 's' : '')
             .concat(' available to import'),
         )}
