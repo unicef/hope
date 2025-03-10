@@ -8,7 +8,8 @@ from rest_framework import serializers
 
 from hct_mis_api.api.utils import EncodedIdSerializerMixin
 from hct_mis_api.apps.account.api.fields import Base64ModelField
-from hct_mis_api.apps.core.utils import decode_id_string
+from hct_mis_api.apps.core.api.serializers import DataCollectingTypeSerializer
+from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64_required
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 
 
@@ -236,6 +237,10 @@ class BeneficiaryGroupSerializer(serializers.ModelSerializer):
 
 class ProgramSerializer(serializers.ModelSerializer):
     id = Base64ModelField(model_name="Program")
+    status = serializers.CharField(source="get_status_display")
+    data_collecting_type = DataCollectingTypeSerializer()
+    pdu_fields = serializers.SerializerMethodField()
+    beneficiary_group = BeneficiaryGroupSerializer()
 
     class Meta:
         model = Program
@@ -254,4 +259,12 @@ class ProgramSerializer(serializers.ModelSerializer):
             "data_collecting_type",
             "beneficiary_group",
             "programme_code",
+            "status",
+            "pdu_fields",
         )
+
+    def get_pdu_fields(self, obj: Program) -> list[str]:
+        pdu_field_encoded_ids = []
+        for pdu_field in obj.pdu_fields.all():
+            pdu_field_encoded_ids.append(encode_id_base64_required(pdu_field, "FlexibleAttribute"))
+        return pdu_field_encoded_ids
