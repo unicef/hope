@@ -86,9 +86,9 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
 
         for cell, header_cell in zip(row, first_row):
             try:
-                if header_cell in self._pdu_column_names:
+                if header_cell.value in self._pdu_column_names:
                     continue
-                elif header_cell.startswith(DeliveryMechanismData.ACCOUNT_FIELD_PREFIX):
+                elif header_cell.value.startswith(DeliveryMechanismData.ACCOUNT_FIELD_PREFIX):
                     self._handle_delivery_mechanism_fields(cell.value, header_cell, cell.row, obj_to_create)
                     continue
 

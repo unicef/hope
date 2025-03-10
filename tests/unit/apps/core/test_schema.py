@@ -174,7 +174,6 @@ class TestAllCollectorsFields(APITestCase):
         cls.user = UserFactory()
         DeliveryMechanismFactory(
             name="Test Name",
-            required_fields=["delivery_data_field__random_name"],
         )
 
     def test_collectors_fields_choices_data(self) -> None:

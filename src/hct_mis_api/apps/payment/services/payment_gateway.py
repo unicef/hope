@@ -507,7 +507,7 @@ class PaymentGatewayService:
     def sync_delivery_mechanisms(self) -> None:
         delivery_mechanisms: List[DeliveryMechanismData] = self.api.get_delivery_mechanisms()
         for dm in delivery_mechanisms:
-            instance, _ = DeliveryMechanism.objects.update_or_create(
+            DeliveryMechanism.objects.update_or_create(
                 code=dm.code,
                 defaults={
                     "payment_gateway_id": dm.id,
@@ -517,4 +517,3 @@ class PaymentGatewayService:
                     "account_type": AccountType.objects.get(key=dm.account_type),
                 },
             )
-            instance.account_types.add()

@@ -89,7 +89,7 @@ def create_payment_snapshot_data(payment: Payment) -> PaymentHouseholdSnapshot:
     household_data["needs_adjudication_tickets_count"] = 0
     individuals_dict = {}
     for individual in household.individuals.all():
-        individual_data = get_individual_snapshot(individual)
+        individual_data = get_individual_snapshot(individual, payment)
         individuals_dict[str(individual.id)] = individual_data
         household_data["individuals"].append(individual_data)
         household_data["needs_adjudication_tickets_count"] += individual_data["needs_adjudication_tickets_count"]
@@ -98,7 +98,7 @@ def create_payment_snapshot_data(payment: Payment) -> PaymentHouseholdSnapshot:
         if str(household.primary_collector.id) in individuals_dict:
             household_data["primary_collector"] = individuals_dict[str(household.primary_collector.id)]
         else:
-            household_data["primary_collector"] = get_individual_snapshot(household.primary_collector)
+            household_data["primary_collector"] = get_individual_snapshot(household.primary_collector, payment)
             household_data["needs_adjudication_tickets_count"] += household_data["primary_collector"][
                 "needs_adjudication_tickets_count"
             ]
@@ -106,18 +106,18 @@ def create_payment_snapshot_data(payment: Payment) -> PaymentHouseholdSnapshot:
         if str(household.alternate_collector.id) in individuals_dict:
             household_data["alternate_collector"] = individuals_dict[str(household.alternate_collector.id)]
         else:
-            household_data["alternate_collector"] = get_individual_snapshot(
-                household.alternate_collector,
-            )
+            household_data["alternate_collector"] = get_individual_snapshot(household.alternate_collector, payment)
             household_data["needs_adjudication_tickets_count"] += household_data["alternate_collector"][
                 "needs_adjudication_tickets_count"
             ]
     for role in household.individuals_and_roles.all():
-        household_data["roles"].append({"role": role.role, "individual": get_individual_snapshot(role.individual)})
+        household_data["roles"].append(
+            {"role": role.role, "individual": get_individual_snapshot(role.individual, payment)}
+        )
     return PaymentHouseholdSnapshot(payment=payment, snapshot_data=household_data, household_id=household.id)
 
 
-def get_individual_snapshot(individual: Individual) -> dict:
+def get_individual_snapshot(individual: Individual, payment: Payment) -> dict:
     all_individual_data_dict = individual.__dict__
     keys = [key for key in all_individual_data_dict.keys() if key not in excluded_individual_fields]
     individual_data = {}
@@ -159,7 +159,8 @@ def get_individual_snapshot(individual: Individual) -> dict:
 
     if is_hh_collector:
         individual_data["accounts_data"] = {
-            dmd.account_type.key: dmd.delivery_data() for dmd in individual.delivery_mechanisms_data.all()
+            dmd.account_type.key: dmd.delivery_data(payment.financial_service_provider, payment.delivery_type)
+            for dmd in individual.delivery_mechanisms_data.all()
         }
 
     return individual_data

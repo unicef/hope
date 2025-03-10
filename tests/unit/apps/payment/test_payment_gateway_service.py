@@ -634,7 +634,7 @@ class TestPaymentGatewayService(APITestCase):
                         "id": 23,
                         "key": "key23",
                         "delivery_mechanism": self.dm_transfer.payment_gateway_id,
-                        "delivery_mechanism_name": self.dm_transfer.configs,
+                        "delivery_mechanism_name": self.dm_transfer.code,
                         "label": "label23",
                     },
                 ],
