@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from rest_framework.serializers import BaseSerializer
 
 
-class ProgramSerializer(serializers.ModelSerializer):
+class ProgramAPISerializer(serializers.ModelSerializer):
     class Meta:
         model = Program
         fields = (
@@ -40,7 +40,7 @@ class ProgramSerializer(serializers.ModelSerializer):
 
 
 class ProgramViewSet(CreateModelMixin, ListModelMixin, HOPEAPIBusinessAreaViewSet, GenericAPIView):
-    serializer_class = ProgramSerializer
+    serializer_class = ProgramAPISerializer
     permission = Grant.API_READ_ONLY
     queryset = Program.objects.all()
     pagination_class = None
@@ -53,7 +53,7 @@ class ProgramViewSet(CreateModelMixin, ListModelMixin, HOPEAPIBusinessAreaViewSe
     def perform_create(self, serializer_class: "BaseSerializer") -> None:
         serializer_class.save(business_area=self.selected_business_area)
 
-    @extend_schema(request=ProgramSerializer)
+    @extend_schema(request=ProgramAPISerializer)
     def create(self, request: "Request", *args: Any, **kwargs: Any) -> Response:
         self.selected_business_area
         serializer = self.serializer_class(data=request.data)
