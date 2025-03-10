@@ -1,10 +1,8 @@
-from django.conf import settings
-from django.core.management import call_command
-
 import pytest
 from selenium.webdriver import Keys
 
 from hct_mis_api.apps.account.models import User
+from hct_mis_api.apps.accountability.fixtures import generate_feedback
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Area, Country
@@ -35,7 +33,7 @@ pytestmark = pytest.mark.django_db()
 
 @pytest.fixture
 def add_feedbacks() -> None:
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/accountability/fixtures/data-cypress.json")
+    generate_feedback()
     yield
 
 

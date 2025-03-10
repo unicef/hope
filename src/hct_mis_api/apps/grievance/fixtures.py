@@ -308,3 +308,7 @@ class GrievanceDocumentFactory(DjangoModelFactory):
     file_size = 2 * 1024 * 1024
     content_type = "image/jpeg"
     grievance_ticket = factory.SubFactory(GrievanceTicketFactory, category=GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK)
+
+
+def generate_grievances() -> None:
+    pass

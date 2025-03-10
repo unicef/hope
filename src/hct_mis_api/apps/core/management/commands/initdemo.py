@@ -63,6 +63,10 @@ from flags.models import FlagState
 
 from hct_mis_api.apps.account.fixtures import create_superuser, generate_unicef_partners
 from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment, User
+from hct_mis_api.apps.accountability.fixtures import (
+    generate_feedback,
+    generate_messages,
+)
 from hct_mis_api.apps.core.fixtures import (
     generate_business_areas,
     generate_country_codes,
@@ -71,6 +75,7 @@ from hct_mis_api.apps.core.fixtures import (
 )
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.fixtures import generate_area_types, generate_areas
+from hct_mis_api.apps.grievance.fixtures import generate_grievances
 from hct_mis_api.apps.household.fixtures import generate_additional_doc_types
 from hct_mis_api.apps.payment.fixtures import (
     generate_delivery_mechanisms,
@@ -83,6 +88,8 @@ from hct_mis_api.apps.program.fixtures import (
     generate_people_program,
 )
 from hct_mis_api.apps.registration_data.fixtures import generate_rdi
+from hct_mis_api.apps.steficon.fixtures import generate_rule_formulas
+from hct_mis_api.contrib.aurora.fixtures import generate_aurora_test_data
 
 logger = logging.getLogger(__name__)
 
@@ -155,23 +162,23 @@ class Command(BaseCommand):
         generate_areas(country_names=["Afghanistan", "Croatia", "Ukraine"])
         # Core app
         generate_data_collecting_types()
+        # set accountability flag
         FlagState.objects.get_or_create(
             **{"name": "ALLOW_ACCOUNTABILITY_MODULE", "condition": "boolean", "value": "True", "required": False}
         )
-
-        # TODO: will remove all files
-        # fixtures = [
-        #     "apps/accountability/fixtures/data.json",
-        #     "apps/steficon/fixtures/data.json",
-        #     "contrib/aurora/fixtures/data.json",
-        # ]
         generate_beneficiary_groups()
+
         self.stdout.write("Generating programs...")
         generate_people_program()
+
         self.stdout.write("Generating RDIs...")
         generate_rdi()
+
         self.stdout.write("Generating additional document types...")
         generate_additional_doc_types()
+
+        self.stdout.write("Generating Engine core ...")
+        generate_rule_formulas()
 
         try:
             self.stdout.write("Rebuilding search index...")
@@ -190,12 +197,15 @@ class Command(BaseCommand):
         self.stdout.write("Updating FSPs...")
         update_fsps()
 
-        # Load more fixtures
-        # additional_fixtures = [
-        # "apps/grievance/fixtures/data.json",
-        # ]
         self.stdout.write("Loading additional fixtures...")
         generate_pdu_data()
+        self.stdout.write("Generating messages...")
+        generate_messages()
+        generate_feedback()
+        self.stdout.write("Generating aurora test data...")
+        generate_aurora_test_data()
+        self.stdout.write("Generating grievances...")
+        generate_grievances()
 
         # Retrieve email lists from environment variables or command-line arguments
         email_list_env = os.getenv("INITDEMO_EMAIL_LIST")

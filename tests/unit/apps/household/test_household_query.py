@@ -1,6 +1,5 @@
 from typing import Any, List
 
-from django.conf import settings
 from django.core.management import call_command
 
 import pytest
@@ -143,11 +142,11 @@ HOUSEHOLD_QUERY = """
 @override_config(USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH=True)
 class TestHouseholdQuery(APITestCase):
     databases = "__all__"
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/household/fixtures/documenttype.json",)
 
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("generatedocumenttypes")
         call_command("init-geo-fixtures")
         cls.partner = PartnerFactory(name="NOT_UNICEF")
         cls.user = UserFactory.create(partner=cls.partner)
