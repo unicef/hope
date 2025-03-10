@@ -40,7 +40,6 @@ class TestMetaDataFilterType(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        call_command("init-geo-fixtures")
         call_command("loadflexfieldsattributes")
         # graph query to be called.
         cls.user = UserFactory.create()
