@@ -350,9 +350,17 @@ class ApprovalFactory(DjangoModelFactory):
         model = Approval
 
 
+class AccountTypeFactory(DjangoModelFactory):
+    key = factory.Faker("uuid4")
+    label = factory.Faker("name")
+
+    class Meta:
+        model = AccountType
+
+
 class DeliveryMechanismDataFactory(DjangoModelFactory):
     individual = factory.SubFactory(IndividualFactory)
-    delivery_mechanism = factory.SubFactory(DeliveryMechanismFactory)
+    account_type = factory.SubFactory(AccountTypeFactory)
     rdi_merge_status = MergeStatusModel.MERGED
 
     class Meta:

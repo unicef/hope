@@ -378,9 +378,7 @@ class TestIndividualBlockFilter(TestCase):
             individual=hh.individuals.first(), household=hh, role=ROLE_PRIMARY, rdi_merge_status=MergeStatusModel.MERGED
         )
         collector = IndividualRoleInHousehold.objects.get(household_id=hh.pk, role=ROLE_PRIMARY).individual
-        DeliveryMechanismDataFactory(
-            individual=collector, is_valid=True, data={"delivery_data_field__random_name": "test123"}
-        )
+        DeliveryMechanismDataFactory(individual=collector, data={"delivery_data_field__random_name": "test123"})
         # Target population
         tc = TargetingCriteriaFactory()
         PaymentPlanFactory(targeting_criteria=tc, program_cycle=self.program_cycle, created_by=self.user)

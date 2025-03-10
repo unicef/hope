@@ -109,15 +109,11 @@ class TestDeliveryMechanismDataModel(TestCase):
             "name_of_cardholder__atm_card",
         ]
 
-        dmd_1 = DeliveryMechanismDataFactory(
-            data={"name_of_cardholder__atm_card": "test"}, individual=self.ind, is_valid=True
-        )
+        dmd_1 = DeliveryMechanismDataFactory(data={"name_of_cardholder__atm_card": "test"}, individual=self.ind)
         dmd_1.individual.seeing_disability = LOT_DIFFICULTY
         dmd_1.individual.save()
 
-        dmd_2 = DeliveryMechanismDataFactory(
-            data={"name_of_cardholder__atm_card": "test2"}, individual=self.ind2, is_valid=True
-        )
+        dmd_2 = DeliveryMechanismDataFactory(data={"name_of_cardholder__atm_card": "test2"}, individual=self.ind2)
         dmd_2.individual.seeing_disability = LOT_DIFFICULTY
         dmd_2.individual.save()
 
@@ -133,8 +129,8 @@ class TestDeliveryMechanismDataModel(TestCase):
             "name_of_cardholder__atm_card",
         ]
 
-        dmd_1 = DeliveryMechanismDataFactory(individual=self.ind, is_valid=True)
-        dmd_2 = DeliveryMechanismDataFactory(individual=self.ind2, is_valid=True)
+        dmd_1 = DeliveryMechanismDataFactory(individual=self.ind)
+        dmd_2 = DeliveryMechanismDataFactory(individual=self.ind2)
 
         delivery_data = {
             "seeing_disability": LOT_DIFFICULTY,
@@ -166,14 +162,14 @@ class TestDeliveryMechanismDataModel(TestCase):
                         self.assertEqual(dmd_2.possible_duplicate_of, dmd_1)
 
     def test_delivery_mechanism_fields(self) -> None:
-        dmd = DeliveryMechanismDataFactory(individual=self.ind, delivery_mechanism=self.dm_atm_card)
+        dmd = DeliveryMechanismDataFactory(individual=self.ind)
         self.assertEqual(
             dmd.all_fields,
             ["card_number__atm_card", "card_expiry_date__atm_card", "name_of_cardholder__atm_card", "full_name"],
         )
 
     def test_required_fields(self) -> None:
-        dmd = DeliveryMechanismDataFactory(individual=self.ind, delivery_mechanism=self.dm_atm_card)
+        dmd = DeliveryMechanismDataFactory(individual=self.ind)
         self.assertEqual(
             dmd.required_fields,
             [
@@ -184,7 +180,7 @@ class TestDeliveryMechanismDataModel(TestCase):
         )
 
     def test_unique_fields(self) -> None:
-        dmd = DeliveryMechanismDataFactory(individual=self.ind, delivery_mechanism=self.dm_atm_card)
+        dmd = DeliveryMechanismDataFactory(individual=self.ind)
         self.assertEqual(
             dmd.unique_fields,
             [
@@ -218,7 +214,6 @@ class TestDeliveryMechanismDataModel(TestCase):
     def test_get_delivery_mechanism_fields(self) -> None:
         dmd = DeliveryMechanismDataFactory(
             individual=self.ind,
-            delivery_mechanism=self.dm_atm_card,
         )
         self.assertEqual(
             dmd.all_fields,
@@ -233,12 +228,6 @@ class TestDeliveryMechanismDataModel(TestCase):
     def test_get_grievance_ticket_payload_for_errors(self) -> None:
         dmd = DeliveryMechanismDataFactory(
             individual=self.ind,
-            delivery_mechanism=self.dm_atm_card,
-            validation_errors={
-                "full_name": "Missing required payment data",
-                "number_of_children": "Missing required payment data",
-                "name_of_cardholder__atm_card": "Missing required payment data",
-            },
         )
         self.assertEqual(
             dmd.get_grievance_ticket_payload_for_errors(),
@@ -284,12 +273,6 @@ class TestDeliveryMechanismDataModel(TestCase):
         )
         dmd = DeliveryMechanismDataFactory(
             individual=self.ind,
-            is_valid=False,
-            validation_errors={
-                "full_name": "Missing required payment data",
-                "name_of_cardholder__atm_card": "Missing required payment data",
-            },
-            delivery_mechanism=self.dm_atm_card,
         )
 
         with mock.patch.object(dmd, "validate"):

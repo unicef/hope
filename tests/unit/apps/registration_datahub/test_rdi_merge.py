@@ -42,7 +42,7 @@ from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismDataFactory,
     generate_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanism, DeliveryMechanismData
+from hct_mis_api.apps.payment.models import DeliveryMechanismData
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import (
@@ -582,12 +582,9 @@ class TestRdiMergeTaskDeliveryMechanismData(TestCase):
         ind3.full_name = ind.full_name
         ind3.save()
 
-        dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
-
         # valid data
         dmd = DeliveryMechanismDataFactory(
             individual=ind,
-            delivery_mechanism=dm_atm_card,
             data={
                 "card_number__atm_card": "123",
                 "card_expiry_date__atm_card": "2022-01-01",
@@ -597,7 +594,6 @@ class TestRdiMergeTaskDeliveryMechanismData(TestCase):
         # invalid data, ticket should be created
         dmd2 = DeliveryMechanismDataFactory(
             individual=ind2,
-            delivery_mechanism=dm_atm_card,
             data={
                 "card_number__atm_card": "123",
                 "card_expiry_date__atm_card": None,
@@ -607,7 +603,6 @@ class TestRdiMergeTaskDeliveryMechanismData(TestCase):
         # not unique data, ticket should be created
         dmd3 = DeliveryMechanismDataFactory(
             individual=ind3,
-            delivery_mechanism=dm_atm_card,
             data={
                 "card_number__atm_card": "123",
                 "card_expiry_date__atm_card": "2022-01-01",

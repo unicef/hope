@@ -386,7 +386,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         dm_transfer = DeliveryMechanism.objects.get(code="transfer_to_account")
 
         for ind in [individual_1, individual_2, individual_3]:
-            DeliveryMechanismDataFactory(individual=ind, is_valid=True, delivery_mechanism=dm_cash)
+            DeliveryMechanismDataFactory(individual=ind)
 
         santander_fsp = FinancialServiceProviderFactory(
             name="Santander",

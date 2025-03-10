@@ -294,7 +294,6 @@ class TestUpdateGrievanceTickets(APITestCase):
         cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
         cls.dmd = DeliveryMechanismDataFactory(
             individual=cls.individuals[0],
-            delivery_mechanism=cls.dm_atm_card,
         )
 
     @parameterized.expand(

@@ -54,7 +54,6 @@ class TestBuildSnapshot(TestCase):
             cls.hoh1.save()
             DeliveryMechanismDataFactory(
                 individual=cls.hoh1,
-                delivery_mechanism=cls.dm_atm_card,
                 data={
                     "card_number__atm_card": "123",
                     "card_expiry_date__atm_card": "2022-01-01",

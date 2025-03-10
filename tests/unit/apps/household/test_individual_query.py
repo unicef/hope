@@ -852,23 +852,19 @@ class TestIndividualWithDeliveryMechanismsDataQuery(APITestCase):
         cls.individual = individuals[0]
         DeliveryMechanismDataFactory(
             individual=cls.individual,
-            delivery_mechanism=cls.dm_atm_card,
             data={
                 "card_number__atm_card": "123",
                 "card_expiry_date__atm_card": "2022-01-01",
                 "name_of_cardholder__atm_card": "Marek",
             },
-            is_valid=True,
         )
         DeliveryMechanismDataFactory(
             individual=cls.individual,
-            delivery_mechanism=cls.dm_mobile_money,
             data={
                 "service_provider_code__mobile_money": "ABC",
                 "delivery_phone_number__mobile_money": "123456789",
                 "provider__mobile_money": "Provider",
             },
-            is_valid=False,
         )
 
     @parameterized.expand(

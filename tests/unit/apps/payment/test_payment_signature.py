@@ -135,7 +135,7 @@ class TestPaymentSignature(APITestCase):
         dm_cash = DeliveryMechanism.objects.get(code="cash")
 
         for ind in [hoh1, hoh2]:
-            DeliveryMechanismDataFactory(individual=ind, is_valid=True, delivery_mechanism=dm_cash)
+            DeliveryMechanismDataFactory(individual=ind)
 
         program_cycle = program.cycles.first()
         program_cycle_id = self.id_to_base64(program_cycle.id, "ProgramCycleNode")

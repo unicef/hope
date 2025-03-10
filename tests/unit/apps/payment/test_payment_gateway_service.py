@@ -507,7 +507,6 @@ class TestPaymentGatewayService(APITestCase):
 
         DeliveryMechanismDataFactory(
             individual=primary_collector,
-            delivery_mechanism=self.dm_mobile_money,
             data={
                 "service_provider_code__mobile_money": "ABC",
                 "delivery_phone_number__mobile_money": "123456789",
@@ -613,14 +612,14 @@ class TestPaymentGatewayService(APITestCase):
                         "id": 21,
                         "key": "key21",
                         "delivery_mechanism": self.dm_cash_over_the_counter.payment_gateway_id,
-                        "delivery_mechanism_name": self.dm_cash_over_the_counter.name,
+                        "delivery_mechanism_name": self.dm_cash_over_the_counter.code,
                         "label": "label21",
                     },
                     {
                         "id": 22,
                         "key": "key22",
                         "delivery_mechanism": self.dm_transfer.payment_gateway_id,
-                        "delivery_mechanism_name": self.dm_transfer.name,
+                        "delivery_mechanism_name": self.dm_transfer.code,
                         "label": "label22",
                     },
                 ],
@@ -635,7 +634,7 @@ class TestPaymentGatewayService(APITestCase):
                         "id": 23,
                         "key": "key23",
                         "delivery_mechanism": self.dm_transfer.payment_gateway_id,
-                        "delivery_mechanism_name": self.dm_transfer.name,
+                        "delivery_mechanism_name": self.dm_transfer.configs,
                         "label": "label23",
                     },
                 ],

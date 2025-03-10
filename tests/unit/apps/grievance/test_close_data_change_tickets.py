@@ -719,7 +719,6 @@ class TestCloseDataChangeTickets(APITestCase):
         )
         dmd = DeliveryMechanismDataFactory(
             individual=self.individuals[0],
-            delivery_mechanism=self.dm_atm_card,
         )
         self.assertEqual(dmd.data, {})
         ticket = GrievanceTicketFactory(

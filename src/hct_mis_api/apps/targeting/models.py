@@ -271,12 +271,12 @@ class TargetingCollectorBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaF
         if argument.lower() == "yes":
             individuals_with_field_query = collectors_ind_query.filter(
                 delivery_mechanisms_data__data__has_key=field_name,
-                delivery_machanisms_data__account_type__key=account_type,
+                delivery_mechanisms_data__account_type__key=account_type,
             )
         # If argument is No
         else:
             individuals_with_field_query = collectors_ind_query.exclude(
                 delivery_mechanisms_data__data__has_key=field_name,
-                delivery_machanisms_data__account_type__key=account_type,
+                delivery_mechanisms_data__account_type__key=account_type,
             )
         return Q(pk__in=list(individuals_with_field_query.values_list("household_id", flat=True)))
