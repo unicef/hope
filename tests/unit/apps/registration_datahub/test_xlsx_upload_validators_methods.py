@@ -561,7 +561,7 @@ class TestXLSXValidatorsMethods(APITestCase):
 
         with open(file_path, "rb") as file:
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
-            result, _ = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
+            result = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
         self.assertEqual(result, expected_result)
 
     def test_validate_incorrect_admin_area(self) -> None:
@@ -602,7 +602,7 @@ class TestXLSXValidatorsMethods(APITestCase):
 
         with open(file_path, "rb") as file:
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
-            result, _ = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
+            result = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
         self.assertEqual(result, expected_result)
 
     def test_validate_people_sheet_invalid(self) -> None:
@@ -642,7 +642,7 @@ class TestXLSXValidatorsMethods(APITestCase):
         ]
         with open(file_path, "rb") as file:
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.social_worker_program)
-            result, _ = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
+            result = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
         self.assertEqual(result, expected_result)
 
     def test_validate_people_sheet_valid(self) -> None:
@@ -650,7 +650,7 @@ class TestXLSXValidatorsMethods(APITestCase):
 
         with open(file_path, "rb") as file:
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.social_worker_program)
-            result, _ = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
+            result = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
         self.assertEqual(result, [])
 
     @parameterized.expand(
