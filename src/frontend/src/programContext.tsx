@@ -7,6 +7,7 @@ import {
 } from 'react';
 import { DataCollectingTypeType, ProgramStatus } from './__generated__/graphql';
 import { Program } from '@restgenerated/models/Program';
+import { Status791Enum } from '@restgenerated/models/Status791Enum';
 
 export interface ProgramInterface {
   id: string;
@@ -38,7 +39,7 @@ export type ProgramContextType = Program | null;
 
 type ProgramContent = {
   selectedProgram: Program;
-  setSelectedProgram: (program: Program) => void;
+  setSelectedProgram: (program: Partial<Program>) => void;
   isActiveProgram: boolean;
   isSocialDctType: boolean;
   isStandardDctType: boolean;
@@ -54,15 +55,15 @@ export function ProgramProvider({
 }): ReactElement {
   const [selectedProgram, setSelectedProgram] =
     useState<ProgramContextType>(null);
-  let isActiveProgram = selectedProgram?.status === ProgramStatus.Active;
+  let isActiveProgram = selectedProgram?.status === Status791Enum.ACTIVE;
   const isSocialDctType =
-    selectedProgram?.dataCollectingType?.type?.toUpperCase() ===
+    selectedProgram?.data_collecting_type?.type?.toUpperCase() ===
     DataCollectingTypeType.Social;
   const isStandardDctType =
-    selectedProgram?.dataCollectingType?.type?.toUpperCase() ===
+    selectedProgram?.data_collecting_type?.type?.toUpperCase() ===
     DataCollectingTypeType.Standard;
 
-  const programHasPdu = selectedProgram?.pduFields?.length > 0;
+  const programHasPdu = selectedProgram?.pdu_fields?.length > 0;
 
   // Set isActiveProgram to true if All Programs is selected
   if (selectedProgram === null) {

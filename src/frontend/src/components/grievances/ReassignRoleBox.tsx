@@ -46,7 +46,7 @@ export const ReassignRoleBox = ({
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   let { individual } = ticket;
   let { household } = ticket;
@@ -94,7 +94,8 @@ export const ReassignRoleBox = ({
   if (reassignData && typeof reassignData === 'object') {
     for (const key of Object.keys(reassignData)) {
       if (reassignData[key] && reassignData[key].individual) {
-        reassignDataDictByIndividualId[reassignData[key].individual] = reassignData[key];
+        reassignDataDictByIndividualId[reassignData[key].individual] =
+          reassignData[key];
       }
     }
   }
@@ -107,7 +108,7 @@ export const ReassignRoleBox = ({
           <LabelizedField label={t('ROLE')}>
             <>{capitalize(el.role)} Collector</>
           </LabelizedField>
-          <LabelizedField label={t(`${beneficiaryGroup?.groupLabel} ID`)}>
+          <LabelizedField label={t(`${beneficiaryGroup?.group_label} ID`)}>
             <ContentLink
               href={`/${baseUrl}/population/household/${el.household.id}`}
             >
@@ -158,7 +159,7 @@ export const ReassignRoleBox = ({
       return (
         <Typography variant="body2">
           {t(
-            `Upon removing you will need to select new ${beneficiaryGroup?.memberLabelPlural} for this role.`,
+            `Upon removing you will need to select new ${beneficiaryGroup?.member_label_plural} for this role.`,
           )}
         </Typography>
       );
@@ -172,7 +173,7 @@ export const ReassignRoleBox = ({
         <Typography variant="h6">
           <WarnIcon />
           {t(
-            `${beneficiaryGroup?.memberLabel} is the Head of Household or the collector for the ${beneficiaryGroup?.groupLabel}`,
+            `${beneficiaryGroup?.member_label} is the Head of Household or the collector for the ${beneficiaryGroup?.group_label}`,
           )}{' '}
         </Typography>
       </OrangeTitle>
@@ -182,9 +183,9 @@ export const ReassignRoleBox = ({
           <Box mb={2} mt={2}>
             <Box mb={2}>
               <LabelizedField label={t('ROLE')}>
-                <>{t(`Head of ${beneficiaryGroup?.groupLabel}`)}</>
+                <>{t(`Head of ${beneficiaryGroup?.group_label}`)}</>
               </LabelizedField>
-              <LabelizedField label={t(`${beneficiaryGroup?.groupLabel} ID`)}>
+              <LabelizedField label={t(`${beneficiaryGroup?.group_label} ID`)}>
                 <ContentLink
                   href={`/${baseUrl}/population/household/${ticket?.household.id}`}
                 >

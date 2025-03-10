@@ -21,7 +21,7 @@ function HouseholdQuestionnaire({
   const { baseUrl } = useBaseUrl();
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
   const household: HouseholdDetail = values.selectedHousehold;
   const [getHousehold, { data: fullHousehold, loading: fullHouseholdLoading }] =
     useHouseholdLazyQuery({ variables: { id: household?.id } });
@@ -43,7 +43,7 @@ function HouseholdQuestionnaire({
       {[
         {
           name: 'questionnaire_size',
-          label: t(`${beneficiaryGroup?.groupLabel} Size`),
+          label: t(`${beneficiaryGroup?.group_label} Size`),
           value: selectedHouseholdData.size,
           size: 3,
         },
@@ -67,7 +67,7 @@ function HouseholdQuestionnaire({
         },
         {
           name: 'questionnaire_headOfHousehold',
-          label: t(`Head of ${beneficiaryGroup?.groupLabel}`),
+          label: t(`Head of ${beneficiaryGroup?.group_label}`),
           value: (
             <ContentLink
               href={`/${baseUrl}/population/individuals/${selectedHouseholdData.headOfHousehold.id}`}

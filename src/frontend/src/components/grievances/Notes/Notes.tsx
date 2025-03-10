@@ -19,6 +19,7 @@ import { useProgramContext } from '../../../programContext';
 import { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const Name = styled.span`
   font-size: 16px;
@@ -45,10 +46,15 @@ export function Notes({
   canAddNote: boolean;
 }): ReactElement {
   const { t } = useTranslation();
+  const { businessArea, programId } = useBaseUrl();
+
   const { data: meData, isLoading: meLoading } = useQuery({
-    queryKey: ['profile'],
+    queryKey: ['profile', businessArea, programId],
     queryFn: () => {
-      return RestService.restProfileRetrieve();
+      return RestService.restUsersProfileRetrieve({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+      });
     },
   });
 
@@ -109,7 +115,7 @@ export function Notes({
     newNote: Yup.string().required(t('Note cannot be empty')),
   });
 
-  const myName = `${meData.firstName || meData.email}`;
+  const myName = `${meData.first_name || meData.email}`;
 
   return (
     <Grid size={{ xs: 8 }}>

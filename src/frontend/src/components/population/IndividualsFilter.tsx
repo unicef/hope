@@ -47,7 +47,7 @@ export function IndividualsFilter({
   const location = useLocation();
   const { isAllPrograms } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
@@ -144,7 +144,7 @@ export function IndividualsFilter({
             <MenuItem value="NOT_ANSWERED">{t('Not Answered')}</MenuItem>
           </SelectFilter>
         </Grid>
-        <Grid size={{ xs:2 }}>
+        <Grid size={{ xs: 2 }}>
           <NumberTextField
             fullWidth
             topLabel={t('Age')}
@@ -158,7 +158,7 @@ export function IndividualsFilter({
             icon={<CakeIcon />}
           />
         </Grid>
-        <Grid size={{ xs:2 }}>
+        <Grid size={{ xs: 2 }}>
           <NumberTextField
             fullWidth
             placeholder={t('To')}
@@ -207,7 +207,7 @@ export function IndividualsFilter({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid size={{ xs:2 }}>
+        <Grid size={{ xs: 2 }}>
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             label={t('Status')}
@@ -225,7 +225,7 @@ export function IndividualsFilter({
             </MenuItem>
           </SelectFilter>
         </Grid>
-        <Grid size={{ xs:2 }}>
+        <Grid size={{ xs: 2 }}>
           <DatePickerFilter
             topLabel={t('Registration Date')}
             placeholder={t('From')}
@@ -236,7 +236,7 @@ export function IndividualsFilter({
             dataCy="ind-filters-reg-date-from"
           />
         </Grid>
-        <Grid size={{ xs:2 }}>
+        <Grid size={{ xs: 2 }}>
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) =>
@@ -247,7 +247,7 @@ export function IndividualsFilter({
           />
         </Grid>
         {isAllPrograms && (
-          <Grid size={{ xs:2 }}>
+          <Grid size={{ xs: 2 }}>
             <SelectFilter
               onChange={(e) =>
                 handleFilterChange('programState', e.target.value)

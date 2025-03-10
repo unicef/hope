@@ -68,7 +68,7 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
   const location = useLocation();
   const permissions = usePermissions();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const {
     data: household,
@@ -113,7 +113,7 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
 
   let breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: beneficiaryGroup?.groupLabelPlural,
+      title: beneficiaryGroup?.group_label_plural,
       to: `/${baseUrl}/population/household`,
     },
   ];
@@ -132,7 +132,7 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
   return (
     <>
       <PageHeader
-        title={`${beneficiaryGroup?.groupLabel}: ${renderSomethingOrDash(
+        title={`${beneficiaryGroup?.group_label}: ${renderSomethingOrDash(
           household?.unicef_id,
         )}`}
         breadCrumbs={
@@ -149,7 +149,7 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
               {household?.has_duplicates && (
                 <WarningTooltip
                   confirmed
-                  message={`${beneficiaryGroup?.groupLabel} has Duplicates`}
+                  message={`${beneficiaryGroup?.group_label} has Duplicates`}
                 />
               )}
             </Box>

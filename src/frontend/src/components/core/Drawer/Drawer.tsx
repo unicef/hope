@@ -110,8 +110,10 @@ const Text = styled(ListItemText)`
 `;
 const ProgramNotActiveBar = styled.div`
   background-color: #ff80ff;
+  color: #721c24;
+  border-radius: 5px;
   text-align: center;
-  color: #444;
+  font-weight: 600;
 `;
 
 const Icon = styled(ListItemIcon)`
@@ -153,13 +155,14 @@ export const Drawer = ({
   }, [backendVersion, frontendVersion, showMismatchedDialog]);
 
   let notActiveBar = null;
-  const programStatus = selectedProgram?.status;
+  //TODO: toUpper case not needed after changes?
+  const programStatus = selectedProgram?.status.toUpperCase();
   const isActive = programStatus === ProgramStatus.Active;
   const isDefined = programStatus !== undefined && programStatus !== null;
   if (!isAllPrograms && !isActive && isDefined) {
     notActiveBar = (
       <ProgramNotActiveBar data-cy="program-inactive-subheader">
-        programme inactive
+        Programme Inactive
       </ProgramNotActiveBar>
     );
   }

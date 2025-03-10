@@ -52,7 +52,7 @@ const EditFeedbackPage = (): ReactElement => {
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const { data: feedbackData, loading: feedbackDataLoading } = useFeedbackQuery(
     {
@@ -215,7 +215,7 @@ const EditFeedbackPage = (): ReactElement => {
                       <Grid container size={{ xs: 6 }} spacing={6}>
                         <Grid size={{ xs: 6 }}>
                           <LabelizedField
-                            label={t(`${beneficiaryGroup?.groupLabel} ID`)}
+                            label={t(`${beneficiaryGroup?.group_label} ID`)}
                           >
                             {' '}
                             {feedback.householdLookup?.id &&
@@ -237,7 +237,7 @@ const EditFeedbackPage = (): ReactElement => {
                         </Grid>
                         <Grid size={{ xs: 6 }}>
                           <LabelizedField
-                            label={t(`${beneficiaryGroup?.memberLabel} ID`)}
+                            label={t(`${beneficiaryGroup?.member_label} ID`)}
                           >
                             {' '}
                             {feedback.individualLookup?.id &&

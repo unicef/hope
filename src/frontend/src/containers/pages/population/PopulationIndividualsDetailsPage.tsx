@@ -44,10 +44,10 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
   const { id } = useParams();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
   const { t } = useTranslation();
 
-  const { baseUrl, businessArea  } = useBaseUrl();
+  const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
 
   const { data, loading, error } = useIndividualQuery({
@@ -66,15 +66,19 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
   const { data: grievancesChoices, loading: grievancesChoicesLoading } =
     useGrievancesChoiceDataQuery();
 
-    const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
+  const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
     useQuery({
-      queryKey: ['periodicFields', businessArea, selectedProgram?.programmeCode],
+      queryKey: [
+        'periodicFields',
+        businessArea,
+        selectedProgram?.programmeCode,
+      ],
       queryFn: () =>
         RestService.restBusinessAreasProgramsPeriodicFieldsList({
           businessAreaSlug: businessArea,
           programProgrammeCode: selectedProgram?.programmeCode,
           limit: 1000,
-    }),
+        }),
     });
 
   if (
@@ -100,7 +104,7 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
 
   let breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: `${beneficiaryGroup?.groupLabelPlural}`,
+      title: `${beneficiaryGroup?.group_label_plural}`,
       to: `/${baseUrl}/population/individuals`,
     },
   ];
@@ -122,7 +126,7 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
   return (
     <>
       <PageHeader
-        title={`${t(`${beneficiaryGroup?.memberLabel} ID`)}: ${individual?.unicefId}`}
+        title={`${t(`${beneficiaryGroup?.member_label} ID`)}: ${individual?.unicefId}`}
         breadCrumbs={
           hasPermissions(
             PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST,

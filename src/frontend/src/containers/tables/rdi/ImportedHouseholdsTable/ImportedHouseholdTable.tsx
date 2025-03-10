@@ -39,10 +39,10 @@ function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
     enabled: !!businessArea && !!selectedProgram?.programmeCode,
   });
 
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const mergedReplacements = {
-    id: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
+    id: (_beneficiaryGroup) => `${_beneficiaryGroup?.member_label} ID`,
     head_of_household__full_name: (_beneficiaryGroup) =>
       `Head of ${_beneficiaryGroup?.groupLabel}`,
     size: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} Size`,

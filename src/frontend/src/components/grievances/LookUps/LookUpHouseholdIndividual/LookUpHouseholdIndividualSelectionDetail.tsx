@@ -98,7 +98,7 @@ export function LookUpHouseholdIndividualSelectionDetail({
   );
 
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const { data: programsData, loading: programsLoading } =
     useAllProgramsForChoicesQuery({
@@ -137,7 +137,7 @@ export function LookUpHouseholdIndividualSelectionDetail({
             {!isSocialDctType && (
               <Tab
                 data-cy="look-up-household"
-                label={`LOOK UP ${beneficiaryGroup?.groupLabel}`}
+                label={`LOOK UP ${beneficiaryGroup?.group_label}`}
               />
             )}
             <Tab
@@ -149,7 +149,7 @@ export function LookUpHouseholdIndividualSelectionDetail({
                 initialValues.issueType === GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD
               }
               data-cy="look-up-individual"
-              label={`LOOK UP ${beneficiaryGroup?.memberLabel}`}
+              label={`LOOK UP ${beneficiaryGroup?.member_label}`}
             />
           </StyledTabs>
         </Box>

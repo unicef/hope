@@ -20,7 +20,7 @@ export function OtherRelatedTicketsCreate({ values }): ReactElement {
   const { t } = useTranslation();
   const { baseUrl, businessArea } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
   const [show, setShow] = useState(false);
 
   const { data, loading } = useExistingGrievanceTicketsQuery({
@@ -73,7 +73,7 @@ export function OtherRelatedTicketsCreate({ values }): ReactElement {
       </Title>
       <Box display="flex" flexDirection="column">
         <LabelizedField
-          label={`For ${beneficiaryGroup?.groupLabel} ${values?.selectedHousehold?.unicefId || '-'}`}
+          label={`For ${beneficiaryGroup?.group_label} ${values?.selectedHousehold?.unicefId || '-'}`}
         >
           <>{renderIds(openExistingTickets)}</>
         </LabelizedField>
@@ -88,7 +88,7 @@ export function OtherRelatedTicketsCreate({ values }): ReactElement {
           <Box mb={3} mt={3}>
             <Typography>{t('Closed Tickets')}</Typography>
             <LabelizedField
-              label={`For ${beneficiaryGroup?.groupLabel} ${values?.selectedHousehold?.unicefId || '-'}`}
+              label={`For ${beneficiaryGroup?.group_label} ${values?.selectedHousehold?.unicefId || '-'}`}
             >
               <>{renderIds(closedExistingTickets)}</>
             </LabelizedField>

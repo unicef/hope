@@ -31,7 +31,7 @@ export const IndividualDeliveryMechanisms: FC<
     permissions,
   );
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   if (!individual.deliveryMechanismsData.length || !canViewDeliveryMechanisms) {
     return null;
@@ -40,14 +40,14 @@ export const IndividualDeliveryMechanisms: FC<
     <Overview>
       <Title>
         <Typography variant="h6">
-          {t(`${beneficiaryGroup?.memberLabel} Delivery Mechanisms`)}
+          {t(`${beneficiaryGroup?.member_label} Delivery Mechanisms`)}
         </Typography>
       </Title>
       <Grid container spacing={6}>
         {individual.deliveryMechanismsData.map((mechanism, index) => {
           const tabData = JSON.parse(mechanism.individualTabData);
           return (
-            <Grid size={{ xs:12 }} key={index}>
+            <Grid size={{ xs: 12 }} key={index}>
               <Typography variant="h6">{mechanism.name}</Typography>
               <Grid container spacing={3}>
                 {Object.entries(tabData).map(([key, value], idx) => (

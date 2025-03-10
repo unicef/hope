@@ -31,7 +31,7 @@ function MergeRegistrationDataImportDialog({
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const { isSocialDctType, selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const [mutate, { loading }] = useMergeRdiMutation({
     variables: { id: registration.id },
@@ -47,9 +47,9 @@ function MergeRegistrationDataImportDialog({
   let dataCountInformation = (
     <div>
       <strong>
-        {registration.numberOfHouseholds} {beneficiaryGroup?.groupLabelPlural}{' '}
+        {registration.numberOfHouseholds} {beneficiaryGroup?.group_label_plural}{' '}
         and {registration.numberOfIndividuals}{' '}
-        {beneficiaryGroup?.memberLabelPlural} will be merged.{' '}
+        {beneficiaryGroup?.member_label_plural} will be merged.{' '}
       </strong>
       {t('Do you want to proceed?')}
     </div>
@@ -59,7 +59,7 @@ function MergeRegistrationDataImportDialog({
       <div>
         <strong>
           {registration.numberOfIndividuals}{' '}
-          {beneficiaryGroup?.memberLabelPlural} will be merged.
+          {beneficiaryGroup?.member_label_plural} will be merged.
         </strong>
         {t('Do you want to proceed?')}
       </div>

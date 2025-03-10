@@ -36,7 +36,7 @@ export const HouseholdTable = ({
 }: HouseholdTableRestProps): ReactElement => {
   const { selectedProgram } = useProgramContext();
   const { businessArea } = useBaseUrl();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const initialQueryVariables = useMemo(() => {
     const matchWithdrawnValue = (): boolean | undefined => {
@@ -51,7 +51,7 @@ export const HouseholdTable = ({
 
     return {
       businessAreaSlug: businessArea,
-      programProgrammeCode: selectedProgram?.programmeCode,
+      programProgrammeCode: selectedProgram?.programme_code,
       familySize: JSON.stringify({
         min: filter.householdSizeMin,
         max: filter.householdSizeMax,
@@ -78,12 +78,16 @@ export const HouseholdTable = ({
     queryKey: [
       'businessAreasProgramsHouseholdsList',
       queryVariables,
-      selectedProgram?.programmeCode,
+      selectedProgram?.slug,
       businessArea,
     ],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsHouseholdsList(queryVariables),
-    enabled: !!businessArea && !!selectedProgram?.programmeCode,
+      RestService.restBusinessAreasProgramsHouseholdsList({
+        businessAreaSlug: businessArea,
+        programSlug: selectedProgram?.slug,
+        ...queryVariables,
+      }),
+    enabled: !!businessArea && !!selectedProgram?.slug,
   });
 
   const replacements = {
@@ -173,7 +177,7 @@ export const HouseholdTable = ({
   return (
     <TableWrapper>
       <UniversalRestTable
-        title={`${beneficiaryGroup?.groupLabelPlural}`}
+        title={`${beneficiaryGroup?.group_label_plural}`}
         renderRow={renderRow}
         headCells={adjustedHeadCells}
         data={data}

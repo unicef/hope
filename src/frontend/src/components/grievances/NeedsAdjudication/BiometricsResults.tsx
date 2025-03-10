@@ -60,7 +60,7 @@ export const BiometricsResults = ({
     permissions,
   );
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const [loadData] = useGrievanceTicketLazyQuery({
     variables: {
@@ -116,7 +116,7 @@ export const BiometricsResults = ({
                   <Placeholder />
                 )}
                 <Typography variant="subtitle2">
-                  {beneficiaryGroup?.memberLabel} {individual1?.unicefId}:{' '}
+                  {beneficiaryGroup?.member_label} {individual1?.unicefId}:{' '}
                   {individual1?.fullName}
                 </Typography>
               </Box>
@@ -136,7 +136,7 @@ export const BiometricsResults = ({
                   <Placeholder />
                 )}
                 <Typography variant="subtitle2">
-                  {beneficiaryGroup?.memberLabel} {individual2?.unicefId}:{' '}
+                  {beneficiaryGroup?.member_label} {individual2?.unicefId}:{' '}
                   {individual2?.fullName}
                 </Typography>
               </Box>
