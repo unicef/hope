@@ -75,7 +75,7 @@ from hct_mis_api.apps.core.fixtures import (
 )
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.fixtures import generate_area_types, generate_areas
-from hct_mis_api.apps.grievance.fixtures import generate_grievances
+from hct_mis_api.apps.grievance.fixtures import generate_fake_grievances
 from hct_mis_api.apps.household.fixtures import generate_additional_doc_types
 from hct_mis_api.apps.payment.fixtures import (
     generate_delivery_mechanisms,
@@ -205,7 +205,7 @@ class Command(BaseCommand):
         self.stdout.write("Generating aurora test data...")
         generate_aurora_test_data()
         self.stdout.write("Generating grievances...")
-        generate_grievances()
+        generate_fake_grievances()
 
         # Retrieve email lists from environment variables or command-line arguments
         email_list_env = os.getenv("INITDEMO_EMAIL_LIST")
