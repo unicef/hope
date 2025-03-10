@@ -237,7 +237,6 @@ class BeneficiaryGroupSerializer(serializers.ModelSerializer):
 
 class ProgramSerializer(serializers.ModelSerializer):
     id = Base64ModelField(model_name="Program")
-    status = serializers.CharField(source="get_status_display")
     data_collecting_type = DataCollectingTypeSerializer()
     pdu_fields = serializers.SerializerMethodField()
     beneficiary_group = BeneficiaryGroupSerializer()

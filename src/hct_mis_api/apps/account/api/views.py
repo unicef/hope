@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING, Any
 
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -17,6 +18,7 @@ class UserViewSet(BaseViewSet):
     serializer_class = ProfileSerializer
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(parameters=[OpenApiParameter(name="business_area_slug"), OpenApiParameter(name="program_slug")])
     @action(detail=False, methods=["get"], url_path="profile", url_name="profile")
     def profile(self, request: "Request", *args: Any, **kwargs: Any) -> Response:
         user = request.user
