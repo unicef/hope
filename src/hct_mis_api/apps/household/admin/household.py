@@ -130,46 +130,45 @@ class HouseholdWithdrawFromListMixin:
         context["program"] = program
 
     def withdraw_households_from_list(self, request: HttpRequest) -> Optional[HttpResponse]:
-        form = WithdrawHouseholdsForm()
-        context = self.get_common_context(request, title="Withdraw households from list", form=form)
-        if request.method == "POST":
-            form = WithdrawHouseholdsForm(request.POST)
-            step = request.POST.get("step")
-            if form.is_valid():
-                # get HH list
-                household_id_list = [
-                    hh_id.strip() for hh_id in form.cleaned_data["household_list"].split(",")
-                ]  # Convert text to list and remove spaces if so
-                program = form.cleaned_data["program"]
-                tag = form.cleaned_data["tag"]
+        step = request.POST.get("step", "0")
+        if step == "0":
+            context = self.get_common_context(
+                request, title="Withdraw households from list", form=WithdrawHouseholdsForm()
+            )
+            context["step"] = "0"
+            return TemplateResponse(request, "admin/household/household/withdraw_households_from_list.html", context)
 
-                if step == "1":
-                    context["step"] = "2"
-                    self.get_and_set_context_data(request, context)
-                    return TemplateResponse(
-                        request,
-                        "admin/household/household/withdraw_households_from_list.html",
-                        context,
-                    )
-                elif step == "2":
-                    context["step"] = "2"
-                    self.get_and_set_context_data(request, context)
-                    context["household_count"] = self.get_household_queryset_from_list(
-                        household_id_list, program
-                    ).count()
-                    return TemplateResponse(
-                        request,
-                        "admin/household/household/withdraw_households_from_list.html",
-                        context,
-                    )
-                elif step == "3":
-                    mass_withdraw_households_from_list_task.delay(household_id_list, tag, str(program.id))
-                    self.message_user(request, f"{len(household_id_list)} Households are being withdrawn.")
-
-                    return HttpResponseRedirect(reverse("admin:household_household_changelist"))
-        else:
+        elif step == "1":
+            business_area = request.POST.get("business_area")
+            form = WithdrawHouseholdsForm(request.POST, business_area=business_area)
+            context = self.get_common_context(request, title="Withdraw households from list", form=form)
+            request.session["business_area"] = business_area
             context["step"] = "1"
-            context["form"] = form
+            return TemplateResponse(request, "admin/household/household/withdraw_households_from_list.html", context)
+
+        business_area = request.session.get("business_area")
+        form = WithdrawHouseholdsForm(request.POST, business_area=business_area)
+        context = self.get_common_context(request, title="Withdraw households from list", form=form)
+        if form.is_valid():
+            # get HH list
+            household_id_list = [
+                hh_id.strip() for hh_id in form.cleaned_data["household_list"].split(",")
+            ]  # Convert text to list and remove spaces if so
+            program = form.cleaned_data["program"]
+            tag = form.cleaned_data["tag"]
+            if step == "2":
+                context["step"] = "2"
+                self.get_and_set_context_data(request, context)
+                context["household_count"] = self.get_household_queryset_from_list(household_id_list, program).count()
+                return TemplateResponse(
+                    request,
+                    "admin/household/household/withdraw_households_from_list.html",
+                    context,
+                )
+            elif step == "3":
+                mass_withdraw_households_from_list_task.delay(household_id_list, tag, str(program.id))
+                self.message_user(request, f"{len(household_id_list)} Households are being withdrawn.")
+                return HttpResponseRedirect(reverse("admin:household_household_changelist"))
         return TemplateResponse(request, "admin/household/household/withdraw_households_from_list.html", context)
 
 
