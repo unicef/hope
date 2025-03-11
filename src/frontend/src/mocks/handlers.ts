@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw';
-import { restProfileRetrieve } from './responses/restProfileRetrieve';
+import { restUsersProfileRetrieve } from './responses/restUsersProfileRetrieve';
 import { restProgramsCyclesRetrieve } from './responses/restProgramsCyclesRetrieve';
 import { restProgramsPeriodicDataUpdatePeriodicFieldsList } from './responses/restProgramsPeriodicDataUpdatePeriodicFieldsList';
 import { restProgramsPeriodicDataUpdatePeriodicDataUpdateTemplatesList } from './responses/restProgramsPeriodicDataUpdatePeriodicDataUpdateTemplatesList';
@@ -15,7 +15,7 @@ const baseUrl = 'http://localhost:3000/api/rest/business-areas/';
 const endpoints = [
   {
     url: 'http://localhost:3000/api/rest/profile/',
-    response: restProfileRetrieve,
+    response: restUsersProfileRetrieve,
   },
   {
     url: `${baseUrl}:business_area/programs/:program_id/cycles/:id/`,

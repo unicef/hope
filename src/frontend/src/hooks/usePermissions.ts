@@ -1,19 +1,24 @@
-// import { RestService } from '@restgenerated/services/RestService';
-// import { useQuery } from '@tanstack/react-query';
-import { useCachedMe } from './useCachedMe';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { useBaseUrl } from './useBaseUrl';
 
 export function usePermissions(): string[] {
-  //TODO: uncomment this
-  // const { data: meData, isLoading: meDataLoading } = useQuery({
-  //   queryKey: ['profile'],
-  //   queryFn: () => {
-  //     return RestService.restProfileRetrieve();
-  //   },
-  // });
+  const { businessArea, programId } = useBaseUrl();
+  const { data: meData, isLoading: meDataLoading } = useQuery({
+    queryKey: ['profile', businessArea, programId],
+    queryFn: () => {
+      return RestService.restUsersProfileRetrieve({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+      });
+    },
+  });
 
-  const { data, loading } = useCachedMe();
-  if (loading || !data) {
+  if (!meData || !meDataLoading) {
     return [];
   }
-  return data.me.permissionsInScope || [];
+  console.log(meData);
+  return (
+    (meData as { permissions_in_scope?: string[] })?.permissions_in_scope ?? []
+  );
 }
