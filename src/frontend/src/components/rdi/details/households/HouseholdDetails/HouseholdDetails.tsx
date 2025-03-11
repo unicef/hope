@@ -94,7 +94,7 @@ export function HouseholdDetails({
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('Data Collecting Type')}>
-              {selectedProgram?.dataCollectingType?.label}
+              {selectedProgram?.data_collecting_type?.label}
             </LabelizedField>
           </Grid>
         </Grid>

@@ -66,7 +66,7 @@ export function LookUpHouseholdTable({
 
     return {
       businessAreaSlug: businessArea,
-      programProgrammeCode: selectedProgram?.programmeCode,
+      programSlug: selectedProgram?.slug,
       familySize: JSON.stringify({
         min: filter.householdSizeMin,
         max: filter.householdSizeMax,
@@ -96,12 +96,12 @@ export function LookUpHouseholdTable({
     queryKey: [
       'businessAreasProgramsHouseholdsList',
       queryVariables,
-      selectedProgram?.programmeCode,
+      selectedProgram?.slug,
       businessArea,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsList(queryVariables),
-    enabled: !!businessArea && !!selectedProgram?.programmeCode,
+    enabled: !!businessArea && !!selectedProgram?.slug,
   });
 
   const {
@@ -112,12 +112,12 @@ export function LookUpHouseholdTable({
     queryKey: [
       'businessAreasHouseholdsList',
       queryVariables,
-      selectedProgram?.programmeCode,
+      selectedProgram?.slug,
       businessArea,
     ],
     queryFn: () => {
       // eslint-disable-next-line no-unused-vars
-      const { programProgrammeCode, ...restQueryVariables } = queryVariables;
+      const { programSlug, ...restQueryVariables } = queryVariables;
       return RestService.restBusinessAreasHouseholdsList({
         businessAreaSlug: businessArea,
         ...restQueryVariables,

@@ -80,16 +80,11 @@ export const NewTemplatePage = (): ReactElement => {
 
   const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
     useQuery({
-      queryKey: [
-        'periodicFields',
-        businessArea,
-        programId,
-        selectedProgram?.programmeCode,
-      ],
+      queryKey: ['periodicFields', businessArea, programId, programId],
       queryFn: () =>
         RestService.restBusinessAreasProgramsPeriodicFieldsList({
           businessAreaSlug: businessArea,
-          programProgrammeCode: selectedProgram?.programmeCode,
+          programSlug: programId,
         }),
     });
 

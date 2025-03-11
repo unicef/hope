@@ -3,6 +3,7 @@ import {
   ProgramStatus,
   PaymentPlanBackgroundActionStatus,
 } from '@generated/graphql';
+import { BeneficiaryGroup } from '@restgenerated/models/BeneficiaryGroup';
 
 export const TARGETING_STATES = {
   NONE: 'None',
@@ -281,16 +282,6 @@ export const SurveyTabsValues = {
   A_1: 'Full',
   A_2: 'Partial',
 };
-
-interface BeneficiaryGroup {
-  id: string;
-  name: string;
-  group_label: string;
-  group_label_plural: string;
-  member_label: string;
-  member_label_plural: string;
-  master_detail: boolean;
-}
 
 export const generateTableOrderOptionsGroup = (
   beneficiaryGroup: BeneficiaryGroup | null,

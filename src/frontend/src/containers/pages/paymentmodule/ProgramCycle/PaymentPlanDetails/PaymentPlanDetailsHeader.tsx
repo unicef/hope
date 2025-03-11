@@ -22,7 +22,6 @@ import { useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AdminButton } from '@core/AdminButton';
 import { RestService } from '@restgenerated/services/RestService';
-import { useProgramContext } from 'src/programContext';
 
 interface PaymentPlanDetailsHeaderProps {
   permissions: string[];
@@ -34,22 +33,21 @@ export const PaymentPlanDetailsHeader = ({
   paymentPlan,
 }: PaymentPlanDetailsHeaderProps): ReactElement => {
   const { t } = useTranslation();
-  const { businessArea  } = useBaseUrl();
-  const { selectedProgram } = useProgramContext();
+  const { businessArea, programId } = useBaseUrl();
   const programCycleId = paymentPlan.programCycle?.id;
   const { data: programCycleData } = useQuery({
     queryKey: [
       'programCyclesDetails',
       businessArea,
       decodeIdString(programCycleId),
-      selectedProgram?.programmeCode,
+      programId,
     ],
     queryFn: () => {
       return RestService.restBusinessAreasProgramsCyclesRetrieve({
         businessAreaSlug: businessArea,
         id: decodeIdString(programCycleId),
-        programProgrammeCode: selectedProgram?.programmeCode,
-    });
+        programSlug: programId,
+      });
     },
     enabled: !!programCycleId,
   });

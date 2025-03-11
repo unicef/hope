@@ -19,7 +19,6 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useProgramContext } from 'src/programContext';
 
 interface PeriodicDataUpdatesTemplateDetailsDialogProps {
   open: boolean;
@@ -31,13 +30,12 @@ export const PeriodicDataUpdatesTemplateDetailsDialog: FC<
   PeriodicDataUpdatesTemplateDetailsDialogProps
 > = ({ open, onClose, template }) => {
   const { t } = useTranslation();
-  const { businessArea  } = useBaseUrl();
-  const { selectedProgram } = useProgramContext();
+  const { businessArea, programId } = useBaseUrl();
   const { data: templateDetailsData, isLoading } = useQuery({
     queryKey: [
       'periodicDataUpdateTemplateDetails',
       businessArea,
-      selectedProgram?.programmeCode,
+      programId,
       template.id,
     ],
 
@@ -45,16 +43,16 @@ export const PeriodicDataUpdatesTemplateDetailsDialog: FC<
       RestService.restBusinessAreasProgramsPeriodicDataUpdateTemplatesRetrieve({
         businessAreaSlug: businessArea,
         id: template.id,
-        programProgrammeCode: selectedProgram?.programmeCode,
-  }),
+        programSlug: programId,
+      }),
   });
   const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
     useQuery({
-      queryKey: ['periodicFields', businessArea, selectedProgram?.programmeCode],
+      queryKey: ['periodicFields', businessArea, programId],
       queryFn: () =>
         RestService.restBusinessAreasProgramsPeriodicFieldsList({
           businessAreaSlug: businessArea,
-          programProgrammeCode: selectedProgram?.programmeCode,
+          programSlug: programId,
         }),
     });
   const pduDataDict = useArrayToDict(periodicFieldsData?.results, 'name', '*');

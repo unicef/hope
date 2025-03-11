@@ -7,11 +7,7 @@ import {
 } from '@mui/material';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  ProgramQuery,
-  ProgramStatus,
-  useUpdateProgramMutation,
-} from '@generated/graphql';
+import { ProgramStatus, useUpdateProgramMutation } from '@generated/graphql';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -20,9 +16,11 @@ import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
 import { useProgramContext } from '../../../programContext';
 import { useNavigate } from 'react-router-dom';
+import { Status791Enum } from '@restgenerated/models/Status791Enum';
+import { Program } from '@restgenerated/models/Program';
 
 interface ReactivateProgramProps {
-  program: ProgramQuery['program'];
+  program: Program;
 }
 
 export function ReactivateProgram({
@@ -43,13 +41,15 @@ export function ReactivateProgram({
           id: program.id,
           status: ProgramStatus.Active,
         },
-        version: program.version,
+        //TODO: add
+        version: null,
+        // version: program.version,
       },
     });
     if (!response.errors && response.data.updateProgram) {
       setSelectedProgram({
         ...selectedProgram,
-        status: ProgramStatus.Active,
+        status: Status791Enum.ACTIVE,
       });
 
       showMessage(t('Programme reactivated.'));

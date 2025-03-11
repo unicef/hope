@@ -9,20 +9,23 @@ import { useProgramContext } from 'src/programContext';
 import { headCells as importedHeadCells } from './ImportedHouseholdTableHeadCells';
 import { ImportedHouseholdTableRow } from './ImportedHouseholdTableRow';
 import { headCells as mergedHeadCells } from './MergedHouseholdTableHeadCells';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
   const { selectedProgram } = useProgramContext();
+  const { programId } = useBaseUrl();
 
   const initialQueryVariables = useMemo(
     () => ({
       rdiId: rdi.id,
       businessAreaSlug: businessArea,
-      programProgrammeCode: selectedProgram?.programmeCode,
+      programSlug: programId,
       rdiMergeStatus: isMerged
         ? HouseholdRdiMergeStatus.Merged
         : HouseholdRdiMergeStatus.Pending,
     }),
-    [rdi, businessArea, isMerged, selectedProgram?.programmeCode],
+    [rdi, businessArea, isMerged, programId],
   );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
@@ -31,12 +34,11 @@ function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
     queryKey: [
       'businessAreasProgramsHouseholdsList',
       queryVariables,
-      selectedProgram?.programmeCode,
-      businessArea,
+      programId,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsList(queryVariables),
-    enabled: !!businessArea && !!selectedProgram?.programmeCode,
+    enabled: !!businessArea && !!programId,
   });
 
   const beneficiaryGroup = selectedProgram?.beneficiary_group;
@@ -72,7 +74,6 @@ function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
         renderRow={(row) => (
           <ImportedHouseholdTableRow
             rdi={rdi}
-            isMerged={isMerged}
             key={(row as any).id}
             household={row}
           />
@@ -91,8 +92,7 @@ function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
       renderRow={(row) => (
         <ImportedHouseholdTableRow
           rdi={rdi}
-          isMerged={isMerged}
-          key={(row as any).id}
+          key={(row as HouseholdDetail).id}
           household={row}
         />
       )}

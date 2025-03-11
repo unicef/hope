@@ -1,3 +1,5 @@
+import { StatusBox } from '@components/core/StatusBox';
+import { UniversalMoment } from '@components/core/UniversalMoment';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { DividerLine } from '@core/DividerLine';
 import { LabelizedField } from '@core/LabelizedField';
@@ -6,6 +8,7 @@ import { Title } from '@core/Title';
 import { ProgrammeChoiceDataQuery, ProgramQuery } from '@generated/graphql';
 import { Box, Grid2 as Grid, Typography } from '@mui/material';
 import { Program } from '@restgenerated/models/Program';
+import { programStatusToColor } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -40,6 +43,7 @@ export const ProgramDetails = ({
 }: ProgramDetailsProps): ReactElement => {
   const { t } = useTranslation();
   //TODO: remove console.log
+  //TODO: uncomment all fields
   console.log(program, choices);
   // const { programFrequencyOfPaymentsChoices, programSectorChoices } = choices;
   // const programFrequencyOfPaymentsChoicesDict = choicesToDict(
@@ -88,9 +92,7 @@ export const ProgramDetails = ({
         <Typography variant="h6">{t('Programme Details')}</Typography>
       </Title>
       <OverviewContainer>
-        {/* //TODO: remove span */}
-        <span></span>
-        {/* <Grid container spacing={6}>
+        <Grid container spacing={6}>
           <Grid size={{ xs: 4 }}>
             <LabelizedField label={t('status')}>
               <StatusBox
@@ -102,82 +104,82 @@ export const ProgramDetails = ({
           <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('START DATE')}
-              value={<UniversalMoment>{program.startDate}</UniversalMoment>}
+              value={<UniversalMoment>{program.start_date}</UniversalMoment>}
             />
           </Grid>
           <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('END DATE')}
-              value={<UniversalMoment>{program.endDate}</UniversalMoment>}
+              value={<UniversalMoment>{program.end_date}</UniversalMoment>}
             />
           </Grid>
           <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('Programme Code')}
-              value={program.programmeCode}
+              value={program.programme_code}
             />
           </Grid>
-          <Grid size={{ xs: 4 }}>
+          {/* //TODO: */}
+          {/* <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('Sector')}
               value={programSectorChoicesDict[program.sector]}
             />
-          </Grid>
+          </Grid> */}
           <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('Data Collecting Type')}
-              value={program?.dataCollectingType?.label}
+              value={program?.data_collecting_type?.label}
             />
           </Grid>
           <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('Beneficiary Group')}
-              value={program?.beneficiaryGroup?.name}
+              value={program?.beneficiary_group?.name}
             />
           </Grid>
-          <Grid size={{ xs: 4 }}>
+          {/* <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('Frequency of Payment')}
               value={
                 programFrequencyOfPaymentsChoicesDict[
-                  program.frequencyOfPayments
+                  program.frequency_of_payments
                 ]
               }
             />
           </Grid>
-
           <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('Administrative Areas of implementation')}
               value={program.administrativeAreasOfImplementation}
             />
-          </Grid>
-          <Grid size={{ xs: 4 }}>
+          </Grid> */}
+          {/* <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('Description')}
               value={program.description}
             />
-          </Grid>
+          </Grid> */}
           <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('CASH+')}
-              value={program.cashPlus ? t('Yes') : t('No')}
+              value={program.cash_plus ? t('Yes') : t('No')}
             />
           </Grid>
-          <Grid size={{ xs: 4 }}>
+          {/* <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('Partner Access')}
               value={PartnerAccess[program.partnerAccess]}
             />
-          </Grid>
+          </Grid> */}
         </Grid>
-        <NumberOfHouseHolds>
+        {/* <NumberOfHouseHolds>
           <LabelizedField label={t('Programme size')}>
             <NumberOfHouseHoldsValue>
               {program.totalNumberOfHouseholds}
             </NumberOfHouseHoldsValue>
           </LabelizedField>
-        </NumberOfHouseHolds> */}
+        </NumberOfHouseHolds>  */}
       </OverviewContainer>
       {showPartners && (
         <>

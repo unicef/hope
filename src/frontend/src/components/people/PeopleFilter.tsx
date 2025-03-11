@@ -68,7 +68,7 @@ export function PeopleFilter({
 
   // Show admin area filter only for social programs
   const showAdminAreaFilter =
-    selectedProgram?.dataCollectingType?.type?.toUpperCase() ===
+    selectedProgram?.data_collecting_type?.type?.toUpperCase() ===
     DataCollectingTypeType.Social;
 
   const individualTableOrderOptions =

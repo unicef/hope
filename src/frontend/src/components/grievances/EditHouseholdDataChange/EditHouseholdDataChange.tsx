@@ -4,16 +4,16 @@ import { FieldArray } from 'formik';
 import { useLocation } from 'react-router-dom';
 import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  useAllEditHouseholdFieldsQuery,
-  useHouseholdLazyQuery,
-} from '@generated/graphql';
+import { useAllEditHouseholdFieldsQuery } from '@generated/graphql';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
 import { EditHouseholdDataChangeFieldRow } from './EditHouseholdDataChangeFieldRow';
 import { useProgramContext } from 'src/programContext';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export interface EditHouseholdDataChangeProps {
   values;
@@ -25,16 +25,30 @@ function EditHouseholdDataChange({
 }: EditHouseholdDataChangeProps): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
+  const { businessArea, programId } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiary_group;
-
   const isEditTicket = location.pathname.includes('edit-ticket');
   const household: HouseholdDetail = values.selectedHousehold;
-  const [getHousehold, { data: fullHousehold, loading: fullHouseholdLoading }] =
-    useHouseholdLazyQuery({ variables: { id: household?.id } });
+
+  const {
+    data: fullHousehold,
+    isLoading: fullHouseholdLoading,
+    refetch: refetchHousehold,
+  } = useQuery({
+    queryKey: ['household', businessArea, household.id, programId],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsHouseholdsRetrieve({
+        businessAreaSlug: businessArea,
+        id: household.id,
+        programSlug: programId,
+      }),
+    enabled: Boolean(programId && businessArea),
+  });
+
   useEffect(() => {
     if (values.selectedHousehold) {
-      getHousehold();
+      refetchHousehold();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [values.selectedHousehold]);
@@ -83,7 +97,7 @@ function EditHouseholdDataChange({
                     key={`${index}-${item.fieldName}`}
                     itemValue={item}
                     index={index}
-                    household={fullHousehold.household}
+                    household={fullHousehold}
                     fields={householdFieldsDict}
                     notAvailableFields={notAvailableItems}
                     onDelete={() => arrayHelpers.remove(index)}

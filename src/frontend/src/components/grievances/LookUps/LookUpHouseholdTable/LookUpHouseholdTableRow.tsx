@@ -110,13 +110,14 @@ export function LookUpHouseholdTableRow({
       </TableCell>
       {isAllPrograms && (
         <TableCell align="left">
-          {household.program ? (
+          {/* //TODO: fix */}
+          {/* {household.program ? (
             <BlackLink to={`/${baseUrl}/details/${household.program.id}`}>
               {household.program.name}
             </BlackLink>
           ) : (
             '-'
-          )}
+          )} */}
         </TableCell>
       )}
     </ClickableTableRow>

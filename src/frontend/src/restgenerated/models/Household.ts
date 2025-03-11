@@ -2,7 +2,6 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { BlankEnum } from './BlankEnum';
 import type { CollectTypeEnum } from './CollectTypeEnum';
 import type { ConsentSharingEnum } from './ConsentSharingEnum';
 import type { CountryEnum } from './CountryEnum';
@@ -31,8 +30,8 @@ export type Household = {
     withdrawn_date?: string | null;
     consent_sign?: string;
     consent?: boolean | null;
-    consent_sharing?: (ConsentSharingEnum | BlankEnum);
-    residence_status?: (ResidenceStatusEnum | BlankEnum);
+    consent_sharing?: ConsentSharingEnum;
+    residence_status?: ResidenceStatusEnum;
     address?: string;
     zip_code?: string | null;
     female_age_group_0_5_count?: number | null;
@@ -71,11 +70,11 @@ export type Household = {
     start?: string | null;
     deviceid?: string;
     name_enumerator?: string;
-    org_enumerator?: (OrgEnumeratorEnum | BlankEnum);
+    org_enumerator?: OrgEnumeratorEnum;
     org_name_enumerator?: string;
     village?: string;
-    registration_method?: (RegistrationMethodEnum | BlankEnum);
-    currency?: (CurrencyEnum | BlankEnum);
+    registration_method?: RegistrationMethodEnum;
+    currency?: CurrencyEnum;
     unhcr_id?: string;
     program_registration_id?: string | null;
     total_cash_received_usd?: string | null;

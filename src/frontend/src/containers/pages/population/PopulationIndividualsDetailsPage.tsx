@@ -47,7 +47,7 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
   const beneficiaryGroup = selectedProgram?.beneficiary_group;
   const { t } = useTranslation();
 
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
 
   const { data, loading, error } = useIndividualQuery({
@@ -68,15 +68,11 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
 
   const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
     useQuery({
-      queryKey: [
-        'periodicFields',
-        businessArea,
-        selectedProgram?.programmeCode,
-      ],
+      queryKey: ['periodicFields', businessArea, programId],
       queryFn: () =>
         RestService.restBusinessAreasProgramsPeriodicFieldsList({
           businessAreaSlug: businessArea,
-          programProgrammeCode: selectedProgram?.programmeCode,
+          programSlug: programId,
           limit: 1000,
         }),
     });
