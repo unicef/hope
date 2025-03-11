@@ -67,6 +67,7 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
 
   const location = useLocation();
   const permissions = usePermissions();
+  const { programId } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
@@ -75,14 +76,14 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
     isLoading: householdLoading,
     error,
   } = useQuery({
-    queryKey: ['household', businessArea, id, selectedProgram?.programmeCode],
+    queryKey: ['household', businessArea, id, programId],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsRetrieve({
         businessAreaSlug: businessArea,
         id,
-        programProgrammeCode: selectedProgram?.programmeCode,
+        programSlug: programId,
       }),
-    enabled: Boolean(selectedProgram?.programmeCode && businessArea),
+    enabled: Boolean(programId && businessArea),
   });
 
   const { data: flexFieldsData, loading: flexFieldsDataLoading } =

@@ -16,7 +16,7 @@ export interface ProgramInterface {
   programmeCode: string;
   slug: string;
   dataCollectingType: {
-    id: string;
+    id: number;
     householdFiltersAvailable: boolean;
     individualFiltersAvailable: boolean;
     label: string;
@@ -35,10 +35,10 @@ export interface ProgramInterface {
   };
 }
 
-export type ProgramContextType = Program | null;
+export type ProgramContextType = Partial<Program> | null;
 
 type ProgramContent = {
-  selectedProgram: Program;
+  selectedProgram: Partial<Program>;
   setSelectedProgram: (program: Partial<Program>) => void;
   isActiveProgram: boolean;
   isSocialDctType: boolean;

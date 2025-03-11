@@ -8,7 +8,6 @@ import { UniversalMoment } from '@components/core/UniversalMoment';
 import { WarningTooltip } from '@components/core/WarningTooltip';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
-import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -19,7 +18,9 @@ export const StyledLink = styled.div`
 `;
 
 interface ImportedHouseholdTableRowProps {
-  household: HouseholdDetail;
+  household;
+  //TODO: add types
+  // household: HouseholdDetail;
   rdi;
 }
 

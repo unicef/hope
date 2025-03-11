@@ -25,7 +25,6 @@ import { LoadingComponent } from '@core/LoadingComponent';
 import { IndividualsFilter } from '../../../population/IndividualsFilter';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 export function LookUpReassignRoleModal({
   onValueChange,
@@ -47,7 +46,9 @@ export function LookUpReassignRoleModal({
   setLookUpDialogOpen;
   ticket;
   selectedIndividual;
-  selectedHousehold: HouseholdDetail;
+  selectedHousehold;
+  //TODO: add types
+  // selectedHousehold: HouseholdDetail;
   setSelectedIndividual;
   setSelectedHousehold;
   shouldUseMultiple;

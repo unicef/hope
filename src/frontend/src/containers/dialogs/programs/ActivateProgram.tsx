@@ -1,23 +1,21 @@
-import { Button, Dialog, DialogContent, DialogTitle } from '@mui/material';
-import { ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import {
-  ProgramQuery,
-  ProgramStatus,
-  useUpdateProgramMutation,
-} from '@generated/graphql';
 import { LoadingButton } from '@components/core/LoadingButton';
+import { ProgramStatus, useUpdateProgramMutation } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { Button, Dialog, DialogContent, DialogTitle } from '@mui/material';
+import { Program } from '@restgenerated/models/Program';
+import { Status791Enum } from '@restgenerated/models/Status791Enum';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import { useProgramContext } from '../../../programContext';
 import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
-import { useProgramContext } from '../../../programContext';
-import { useNavigate } from 'react-router-dom';
 
 interface ActivateProgramProps {
-  program: ProgramQuery['program'];
+  program: Program;
 }
 
 export const ActivateProgram = ({
@@ -39,14 +37,16 @@ export const ActivateProgram = ({
           id: program.id,
           status: ProgramStatus.Active,
         },
-        version: program.version,
+        //TODO: add
+        version: null,
+        // version: program.version,
       },
     });
 
     if (!response.errors && response.data.updateProgram) {
       setSelectedProgram({
         ...selectedProgram,
-        status: ProgramStatus.Active,
+        status: Status791Enum.ACTIVE,
       });
 
       showMessage(t('Programme activated.'));

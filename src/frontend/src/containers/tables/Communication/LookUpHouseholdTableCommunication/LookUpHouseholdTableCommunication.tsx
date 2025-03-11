@@ -10,6 +10,7 @@ import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { headCells } from './LookUpHouseholdComunicationTableHeadCells';
 import { LookUpHouseholdTableRowCommunication } from './LookUpHouseholdTableRowCommunication';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface LookUpHouseholdTableCommunicationProps {
   businessArea: string;
@@ -45,6 +46,7 @@ function LookUpHouseholdTableCommunication({
   redirectedFromRelatedTicket,
   isFeedbackWithHouseholdOnly,
 }: LookUpHouseholdTableCommunicationProps): ReactElement {
+  const { programId } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
@@ -61,7 +63,7 @@ function LookUpHouseholdTableCommunication({
 
     return {
       businessAreaSlug: businessArea,
-      programProgrammeCode: selectedProgram?.programmeCode,
+      programSlug: programId,
       familySize: JSON.stringify({
         min: filter.householdSizeMin,
         max: filter.householdSizeMax,
@@ -75,7 +77,7 @@ function LookUpHouseholdTableCommunication({
       orderBy: filter.orderBy,
       headOfHouseholdPhoneNoValid: true,
     };
-  }, [businessArea, selectedProgram, filter]);
+  }, [businessArea, programId, filter]);
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
@@ -87,12 +89,12 @@ function LookUpHouseholdTableCommunication({
     queryKey: [
       'businessAreasProgramsHouseholdsList',
       queryVariables,
-      selectedProgram?.programmeCode,
+      programId,
       businessArea,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsList(queryVariables),
-    enabled: !!businessArea && !!selectedProgram?.programmeCode,
+    enabled: !!businessArea && !!programId,
   });
 
   const [selected, setSelected] = useState<string[]>(

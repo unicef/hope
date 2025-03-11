@@ -9,7 +9,8 @@ import { MouseEvent, ReactElement } from 'react';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 interface LookUpHouseholdTableRowCommunicationProps {
-  household: HouseholdDetail;
+  household;
+  // household: HouseholdDetail;
   radioChangeHandler: (household) => void;
   selectedHousehold: HouseholdDetail;
   choicesData: HouseholdChoiceDataQuery;

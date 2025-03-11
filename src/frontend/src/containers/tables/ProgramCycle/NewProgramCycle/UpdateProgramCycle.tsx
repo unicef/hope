@@ -1,5 +1,20 @@
-import { ProgramQuery } from '@generated/graphql';
+import {
+  ProgramCycle,
+  ProgramCycleUpdate,
+  ProgramCycleUpdateResponse,
+  updateProgramCycle,
+} from '@api/programCycleApi';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { DialogActions } from '@containers/dialogs/DialogActions';
+import { DialogDescription } from '@containers/dialogs/DialogDescription';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { GreyText } from '@core/GreyText';
+import { LabelizedField } from '@core/LabelizedField';
+import { LoadingButton } from '@core/LoadingButton';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
+import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import {
   Box,
   Button,
@@ -7,34 +22,19 @@ import {
   DialogTitle,
   FormHelperText,
 } from '@mui/material';
-import { DialogDescription } from '@containers/dialogs/DialogDescription';
-import { DialogFooter } from '@containers/dialogs/DialogFooter';
-import { DialogActions } from '@containers/dialogs/DialogActions';
-import { LoadingButton } from '@core/LoadingButton';
-import { useTranslation } from 'react-i18next';
-import { Field, Form, Formik, FormikValues } from 'formik';
-import { decodeIdString, today } from '@utils/utils';
-import moment from 'moment';
-import * as Yup from 'yup';
-import { GreyText } from '@core/GreyText';
 import Grid from '@mui/material/Grid2';
-import { LabelizedField } from '@core/LabelizedField';
+import { Program } from '@restgenerated/models/Program';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
-import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
-import {
-  ProgramCycle,
-  ProgramCycleUpdate,
-  ProgramCycleUpdateResponse,
-  updateProgramCycle,
-} from '@api/programCycleApi';
-import { useMutation } from '@tanstack/react-query';
 import type { DefaultError } from '@tanstack/query-core';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useSnackbar } from '@hooks/useSnackBar';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useMutation } from '@tanstack/react-query';
+import { decodeIdString, today } from '@utils/utils';
+import { Field, Form, Formik, FormikValues } from 'formik';
+import moment from 'moment';
+import { useTranslation } from 'react-i18next';
+import * as Yup from 'yup';
 
 interface UpdateProgramCycleProps {
-  program: ProgramQuery['program'];
+  program: Program;
   programCycle?: ProgramCycle;
   onClose: () => void;
   onSubmit: () => void;
@@ -70,9 +70,9 @@ const UpdateProgramCycle = ({
         : schema,
     );
 
-  if (program.endDate) {
+  if (program.end_date) {
     endDate = endDate.max(
-      new Date(program.endDate),
+      new Date(program.end_date),
       t('End Date cannot be after Programme End Date'),
     );
   }

@@ -54,8 +54,6 @@ export function HouseholdDetails({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
-  //TODO: Add the rest of the fields
-
   return (
     <>
       <Container>
@@ -195,7 +193,7 @@ export function HouseholdDetails({
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('Data Collecting Type')}>
-              {selectedProgram?.dataCollectingType?.label}
+              {selectedProgram?.data_collecting_type?.label}
             </LabelizedField>
           </Grid>
         </Grid>
@@ -208,6 +206,7 @@ export function HouseholdDetails({
           <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('Cash received')}>
               {/* //TODO: fix this */}
+              {/* //TODO: Add the rest of the fields */}
 
               {/* {household?.deliveredQuantities?.length ? (
                 <Box mb={2}>

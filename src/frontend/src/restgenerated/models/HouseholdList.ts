@@ -2,7 +2,6 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { BlankEnum } from './BlankEnum';
 import type { ResidenceStatusEnum } from './ResidenceStatusEnum';
 export type HouseholdList = {
     id: string;
@@ -13,7 +12,7 @@ export type HouseholdList = {
     program?: string;
     readonly status: string;
     size?: number | null;
-    residence_status?: (ResidenceStatusEnum | BlankEnum);
+    residence_status?: ResidenceStatusEnum;
     total_cash_received: string;
     total_cash_received_usd: string;
     last_registration_date: string;

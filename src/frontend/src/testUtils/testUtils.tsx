@@ -4,7 +4,7 @@ import { render, RenderOptions } from '@testing-library/react';
 import { Formik } from 'formik';
 import noop from 'lodash/noop';
 import { TestProviders } from './testProviders';
-import { ProgramStatus } from '@generated/graphql';
+import { Status791Enum } from '@restgenerated/models/Status791Enum';
 
 const customRender = (
   ui: ReactElement,
@@ -52,11 +52,11 @@ export const fakeContextProgram = {
     id: '1',
     name: 'someName',
     programme_code: 'A123',
-    status: 'ACTIVE' as ProgramStatus,
+    status: 'ACTIVE' as Status791Enum,
     pdu_fields: null,
     program_code: 'A123',
     data_collecting_type: {
-      id: '1',
+      id: 1,
       household_filters_available: true,
       individual_filters_available: true,
       label: 'data collecting type',

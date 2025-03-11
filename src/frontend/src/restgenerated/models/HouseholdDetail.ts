@@ -2,7 +2,6 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { BlankEnum } from './BlankEnum';
 import type { CurrencyEnum } from './CurrencyEnum';
 import type { HeadOfHousehold } from './HeadOfHousehold';
 import type { RegistrationDataImport } from './RegistrationDataImport';
@@ -34,7 +33,7 @@ export type HouseholdDetail = {
     male_children_count?: number | null;
     female_children_count?: number | null;
     children_disabled_count?: number | null;
-    currency?: (CurrencyEnum | BlankEnum);
+    currency?: CurrencyEnum;
     first_registration_date: string;
     last_registration_date: string;
     unhcr_id?: string;
@@ -68,6 +67,6 @@ export type HouseholdDetail = {
     child_hoh?: boolean | null;
     returnee?: boolean | null;
     size?: number | null;
-    residence_status?: (ResidenceStatusEnum | BlankEnum);
+    residence_status?: ResidenceStatusEnum;
 };
 

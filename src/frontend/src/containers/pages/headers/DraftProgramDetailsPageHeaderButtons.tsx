@@ -1,13 +1,13 @@
 import { EditProgramMenu } from '@components/programs/EditProgram/EditProgramMenu';
-import { ProgramQuery } from '@generated/graphql';
 import { Box } from '@mui/material';
+import { ReactElement } from 'react';
 import { ActivateProgram } from '../../dialogs/programs/ActivateProgram';
 import { DeleteProgram } from '../../dialogs/programs/DeleteProgram';
 import { DuplicateProgramButtonLink } from '../../dialogs/programs/DuplicateProgramButtonLink';
-import { ReactElement } from 'react';
+import { Program } from '@restgenerated/models/Program';
 
 export interface DraftProgramDetailsPageHeaderPropTypes {
-  program: ProgramQuery['program'];
+  program: Program;
   canRemove: boolean;
   canEdit: boolean;
   canActivate: boolean;

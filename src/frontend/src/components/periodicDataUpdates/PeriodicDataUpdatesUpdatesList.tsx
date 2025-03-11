@@ -12,7 +12,6 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import { PeriodicDataUpdatesUploadDetailsDialog } from '@components/periodicDataUpdates/PeriodicDataUpdatesUploadDetailsDialog';
 import { PeriodicDataUpdateUploadList } from '@restgenerated/models/PeriodicDataUpdateUploadList';
 import { RestService } from '@restgenerated/services/RestService';
-import { useProgramContext } from 'src/programContext';
 
 const updatesHeadCells: HeadCell<PeriodicDataUpdateUploadList>[] = [
   {
@@ -61,8 +60,7 @@ const updatesHeadCells: HeadCell<PeriodicDataUpdateUploadList>[] = [
 ];
 
 export const PeriodicDataUpdatesUpdatesList = (): ReactElement => {
-  const { businessArea: businessAreaSlug  } = useBaseUrl();
-  const { selectedProgram } = useProgramContext();
+  const { businessArea: businessAreaSlug, programId } = useBaseUrl();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedUploadId, setSelectedUploadId] = useState<number | null>(null);
@@ -82,16 +80,18 @@ export const PeriodicDataUpdatesUpdatesList = (): ReactElement => {
     queryKey: [
       'periodicDataUpdateUploads',
       businessAreaSlug,
-      selectedProgram?.programmeCode,
+      programId,
       queryVariables,
     ],
     queryFn: () => {
       const { ordering } = queryVariables;
-      return RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsList({
-        businessAreaSlug,
-        programProgrammeCode: selectedProgram?.programmeCode,
-        ordering,
-    });
+      return RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsList(
+        {
+          businessAreaSlug,
+          programSlug: programId,
+          ordering,
+        },
+      );
     },
   });
 

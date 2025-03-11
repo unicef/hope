@@ -1,6 +1,12 @@
-import React, { ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import { deleteProgramCycle, ProgramCycle } from '@api/programCycleApi';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { DialogDescription } from '@containers/dialogs/DialogDescription';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { GreyText } from '@core/GreyText';
+import { LoadingButton } from '@core/LoadingButton';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
 import DeleteIcon from '@mui/icons-material/Delete';
 import {
   Button,
@@ -10,25 +16,19 @@ import {
   DialogTitle,
   IconButton,
 } from '@mui/material';
-import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { DialogDescription } from '@containers/dialogs/DialogDescription';
-import { GreyText } from '@core/GreyText';
-import { DialogFooter } from '@containers/dialogs/DialogFooter';
-import { LoadingButton } from '@core/LoadingButton';
-import { ProgramQuery } from '@generated/graphql';
-import { deleteProgramCycle, ProgramCycle } from '@api/programCycleApi';
-import { useSnackbar } from '@hooks/useSnackBar';
+import { Program } from '@restgenerated/models/Program';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { decodeIdString } from '@utils/utils';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 
 const WhiteDeleteIcon = styled(DeleteIcon)`
   color: #fff;
 `;
 
 interface DeleteProgramCycleProps {
-  program: ProgramQuery['program'];
+  program: Program;
   programCycle: ProgramCycle;
 }
 

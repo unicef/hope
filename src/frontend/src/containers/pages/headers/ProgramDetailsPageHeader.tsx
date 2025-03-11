@@ -1,14 +1,14 @@
-import { useTranslation } from 'react-i18next';
-import { ProgramQuery, ProgramStatus } from '@generated/graphql';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { PageHeader } from '@components/core/PageHeader';
+import { AdminButton } from '@core/AdminButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { Program } from '@restgenerated/models/Program';
+import { Status791Enum } from '@restgenerated/models/Status791Enum';
+import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActiveProgramDetailsPageHeaderButtons } from './ActiveProgramDetailsPageHeaderButtons';
 import { DraftProgramDetailsPageHeaderButtons } from './DraftProgramDetailsPageHeaderButtons';
 import { FinishedProgramDetailsPageHeaderButtons } from './FinishedProgramDetailsPageHeaderButtons';
-import { AdminButton } from '@core/AdminButton';
-import { ReactElement } from 'react';
-import { Program } from '@restgenerated/models/Program';
 
 export interface ProgramDetailsPageHeaderPropTypes {
   program: Program;
@@ -31,7 +31,7 @@ export function ProgramDetailsPageHeader({
   const { t } = useTranslation();
   const { baseUrl, isAllPrograms } = useBaseUrl();
   switch (program.status) {
-    case ProgramStatus.Active:
+    case Status791Enum.ACTIVE:
       buttons = (
         <ActiveProgramDetailsPageHeaderButtons
           program={program}
@@ -41,7 +41,7 @@ export function ProgramDetailsPageHeader({
         />
       );
       break;
-    case ProgramStatus.Draft:
+    case Status791Enum.DRAFT:
       buttons = (
         <DraftProgramDetailsPageHeaderButtons
           program={program}
@@ -73,7 +73,13 @@ export function ProgramDetailsPageHeader({
     <PageHeader
       title={program.name}
       breadCrumbs={breadCrumbsItems}
-      flags={<AdminButton adminUrl={program.adminUrl} />}
+      flags={
+        <AdminButton
+          adminUrl={'example'}
+          //TODO: add
+          // adminUrl={program.adminUrl}
+        />
+      }
     >
       {buttons}
     </PageHeader>

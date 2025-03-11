@@ -4,12 +4,14 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ProgramDetails } from '@components/programs/ProgramDetails/ProgramDetails';
 import ProgramCyclesTableProgramDetails from '@containers/tables/ProgramCycle/ProgramCyclesTableProgramDetails';
 import {
-  ProgramStatus,
   useBusinessAreaDataQuery,
   useProgrammeChoiceDataQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
+import { Status791Enum } from '@restgenerated/models/Status791Enum';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -18,8 +20,6 @@ import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { ProgramDetailsPageHeader } from '../headers/ProgramDetailsPageHeader';
-import { useQuery } from '@tanstack/react-query';
-import { RestService } from '@restgenerated/services/RestService';
 
 const Container = styled.div`
   && {
@@ -98,9 +98,7 @@ function ProgramDetailsPage(): ReactElement {
       />
       <Container>
         <ProgramDetails program={program} choices={choices} />
-        {/* //TODO: remove ts ignore and ?  */}
-        {/* @ts-ignore */}
-        {program?.status === ProgramStatus.Draft ? (
+        {program?.status === Status791Enum.DRAFT ? (
           <NoCashPlansContainer>
             <NoCashPlansTitle>
               {t('Activate the Programme to create a Cycle')}
