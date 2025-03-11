@@ -165,7 +165,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         db_index=True,
     )
     programme_code = models.CharField(max_length=4, null=True, blank=True)
-    slug = models.CharField(max_length=4, unique=True, db_index=True)
+    slug = models.CharField(max_length=4, db_index=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICE, db_index=True)
     description = models.CharField(
         blank=True,
@@ -302,6 +302,11 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
                 fields=["business_area", "programme_code"],
                 condition=Q(is_removed=False),
                 name="unique_for_business_area_and_programme_code_if_not_removed",
+            ),
+            UniqueConstraint(
+                fields=["business_area", "slug"],
+                condition=Q(is_removed=False),
+                name="unique_for_business_area_and_slug_if_not_removed",
             ),
         ]
         permissions = [("enroll_beneficiaries", "Can enroll beneficiaries")]

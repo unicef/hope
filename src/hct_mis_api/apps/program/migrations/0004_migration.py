@@ -27,6 +27,13 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="program",
             name="slug",
-            field=models.CharField(db_index=True, max_length=4, unique=True),
+            field=models.CharField(db_index=True, max_length=4),
+        ),
+        migrations.AddConstraint(
+            model_name='program',
+            constraint=models.UniqueConstraint(
+                condition=models.Q(('is_removed', False)),
+                fields=('business_area', 'slug'),
+                name='unique_for_business_area_and_slug_if_not_removed'),
         ),
     ]
