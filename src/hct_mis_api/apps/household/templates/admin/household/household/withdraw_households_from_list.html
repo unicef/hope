@@ -17,9 +17,19 @@
 {% block content %}
 <form method="post">
     {% csrf_token %}
-    {% if step == "1" %}
+    {% if step == "0" %}
+        <h3>Please Select Business Area</h3>
+        <input type="hidden" name="step" value="1">
+        {{ form.business_area }}
+        <div><input type="submit" value="Next"></div>
+    {% elif step == "1" %}
         <input type="hidden" name="step" value="2">
-        {{ form.as_p }}
+        {{ form.program.label_tag }}<br>
+        {{ form.program }}<br>
+        {{ form.household_list.label_tag }}<br>
+        {{ form.household_list }}<br>
+        {{ form.tag.label_tag }}<br>
+        {{ form.tag }}
         <div><input type="submit" value="Submit"></div>
     {% elif step == "2" %}
         <input type="hidden" name="step" value="3">
