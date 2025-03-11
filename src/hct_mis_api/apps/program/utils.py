@@ -329,8 +329,6 @@ class CopyProgramPopulation:
         """
         delivery_mechanisms_data_list = []
         for delivery_mechanism_data in delivery_mechanisms_data:
-            original_delivery_mechanism_data_id = delivery_mechanism_data.id
-            delivery_mechanism_data.copied_from_id = original_delivery_mechanism_data_id
             delivery_mechanism_data.pk = None
             delivery_mechanism_data.individual = individual_representation
             delivery_mechanism_data.rdi_merge_status = rdi_merge_status
