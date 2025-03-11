@@ -21,10 +21,6 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import (
-    DeliveryMechanism,
-    PendingDeliveryMechanismData,
-)
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.contrib.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
@@ -346,24 +342,6 @@ class GenericRegistrationService(BaseRegistrationService):
             PendingIndividualRoleInHousehold.objects.create(
                 individual=pr_collector, household=household, role=ROLE_PRIMARY
             )
-            # check if "ind-bank-info" key exist in record
-            record_data_dict = record.get_data()
-            accounts_data = record_data_dict.get("ind-bank-info", [])
-            if accounts_data:
-                if primary_collector_account_details := accounts_data[0].get("account_details"):
-                    PendingDeliveryMechanismData.objects.create(
-                        individual=pr_collector,
-                        delivery_mechanism=DeliveryMechanism.objects.get(code="transfer_to_account"),
-                        data={
-                            "bank_account_number__transfer_to_account": primary_collector_account_details.get(
-                                "account_number", ""
-                            ),
-                            "bank_name__transfer_to_account": primary_collector_account_details.get(
-                                "institution_code", ""
-                            ),
-                        },
-                    )
-
         if sec_collector:
             PendingIndividualRoleInHousehold.objects.create(
                 individual=sec_collector, household=household, role=ROLE_ALTERNATE
