@@ -198,7 +198,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         self, business_area_id: str, permissions: List[Permissions]
     ) -> List[str]:
         """
-        Return list of program ids that the user (or user's partner) has permissions for in the given business area -
+        Return list of program ids that the user (or user's partner) has permissions for in the given business area.
         """
         from hct_mis_api.apps.program.models import Program
 

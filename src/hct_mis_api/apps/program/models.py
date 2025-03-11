@@ -242,7 +242,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         if not self.programme_code:
             self.programme_code = self._generate_programme_code()
         if not self.slug:
-            self.slug = self.slugify_programme_code()
+            self.slug = self.generate_slug()
         if self.data_collecting_type_id is None and self.data_collecting_type:
             # save the related object before saving Program
             self.data_collecting_type.save()
@@ -254,7 +254,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
             return self._generate_programme_code()
         return programme_code
 
-    def slugify_programme_code(self) -> str:
+    def generate_slug(self) -> str:
         return self.programme_code.lower()
 
     @staticmethod
