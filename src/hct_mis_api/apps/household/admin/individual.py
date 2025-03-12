@@ -54,7 +54,7 @@ logger = logging.getLogger(__name__)
 class IndividualDeliveryMechanismDataInline(admin.TabularInline):
     model = DeliveryMechanismData
     extra = 0
-    fields = ("delivery_mechanism", "account_type", "data")
+    fields = ("account_type", "data")
 
 
 @admin.register(Individual)

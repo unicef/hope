@@ -6,7 +6,6 @@ from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
     get_core_fields_attributes,
 )
 from hct_mis_api.apps.core.field_attributes.fields_types import TYPE_STRING, Scope
-from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
 
 
 class TestCoreFields(APITestCase):
@@ -92,14 +91,3 @@ class TestCoreFields(APITestCase):
         choices = FieldFactory.get_all_core_fields_choices()
         self.assertEqual(len(choices), 136)
         self.assertEqual(choices[0], ("age", "Age (calculated)"))
-
-        generate_delivery_mechanisms()
-        choices = FieldFactory.get_all_core_fields_choices()
-        self.assertEqual(len(choices), 149)
-        self.assertEqual(
-            choices[-1],
-            (
-                "wallet_name__transfer_to_digital_wallet",
-                "Wallet Name Transfer To Digital Wallet (Transfer to Digital Wallet Delivery Mechanism)",
-            ),
-        )

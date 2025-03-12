@@ -813,7 +813,6 @@ class TestIndividualWithDeliveryMechanismsDataQuery(APITestCase):
         birthDate
         deliveryMechanismsData {
             name
-            isValid
             individualTabData
         }
       }

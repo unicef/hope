@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 from typing import Any
+from unittest import mock
 from unittest.mock import MagicMock, patch
 
 from django import forms
@@ -26,11 +27,16 @@ from hct_mis_api.apps.household.fixtures import (
     IndividualFactory,
     create_household,
 )
-from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
+from hct_mis_api.apps.household.models import (
+    LOT_DIFFICULTY,
+    ROLE_PRIMARY,
+    IndividualRoleInHousehold,
+)
 from hct_mis_api.apps.payment.fields import DynamicChoiceArrayField, DynamicChoiceField
 from hct_mis_api.apps.payment.fixtures import (
     ApprovalFactory,
     ApprovalProcessFactory,
+    DeliveryMechanismDataFactory,
     PaymentFactory,
     PaymentPlanFactory,
     RealProgramFactory,
@@ -38,7 +44,9 @@ from hct_mis_api.apps.payment.fixtures import (
 )
 from hct_mis_api.apps.payment.models import (
     Approval,
+    DeliveryMechanism,
     FinancialServiceProviderXlsxTemplate,
+    FspNameMapping,
     Payment,
     PaymentPlan,
 )
@@ -844,3 +852,93 @@ class TestFinancialServiceProviderXlsxTemplate(TestCase):
             form.errors,
             {"core_fields": ["Select a valid choice. field1 is not one of the available choices."]},
         )
+
+
+class TestDeliveryMechanismDataModel(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        create_afghanistan()
+        cls.program1 = ProgramFactory()
+        cls.user = UserFactory.create()
+        cls.ind = IndividualFactory(household=None, program=cls.program1)
+        cls.ind2 = IndividualFactory(household=None, program=cls.program1)
+        cls.hh = HouseholdFactory(head_of_household=cls.ind)
+        cls.ind.household = cls.hh
+        cls.ind.save()
+        cls.ind2.household = cls.hh
+        cls.ind2.save()
+
+        generate_delivery_mechanisms()
+        cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
+
+    def test_str(self) -> None:
+        dmd = DeliveryMechanismDataFactory(individual=self.ind)
+        self.assertEqual(str(dmd), f"{dmd.individual} - {dmd.account_type}")
+
+    def test_get_associated_object(self) -> None:
+        dmd = DeliveryMechanismDataFactory(data={"test": "test"}, individual=self.ind)
+        self.assertEqual(dmd.get_associated_object(FspNameMapping.SourceModel.ACCOUNT.value), dmd.data)
+        self.assertEqual(
+            dmd.get_associated_object(FspNameMapping.SourceModel.HOUSEHOLD.value), dmd.individual.household
+        )
+        self.assertEqual(dmd.get_associated_object(FspNameMapping.SourceModel.INDIVIDUAL.value), dmd.individual)
+
+    def test_delivery_data(self) -> None:
+        dmd = DeliveryMechanismDataFactory(data={"name_of_cardholder__atm_card": "test"}, individual=self.ind)
+        self.hh.number_of_children = 1
+        self.hh.save()
+
+        with mock.patch.object(dmd.delivery_mechanism, "optional_fields", []):
+            with mock.patch.object(dmd.delivery_mechanism, "required_fields", []):
+                self.assertEqual(
+                    dmd.delivery_data,
+                    {
+                        "full_name": dmd.individual.full_name,
+                        "number_of_children": 1,
+                        "name_of_cardholder__atm_card": "test",
+                    },
+                )
+
+    def test_validate(self) -> None:
+        dmd = DeliveryMechanismDataFactory(data={"test": "test"}, individual=self.ind)
+        dmd.individual.household.number_of_children = None
+        dmd.individual.household.save()
+        dmd.individual.seeing_disability = ""
+        dmd.individual.save()
+        required_fields = [
+            "seeing_disability",
+            "number_of_children",
+            "name_of_cardholder__atm_card",
+        ]
+        with mock.patch.object(dmd.delivery_mechanism, "required_fields", required_fields):
+            dmd.validate()
+            self.assertEqual(
+                dmd.validation_errors,
+                {
+                    "seeing_disability": "Missing required payment data",
+                    "number_of_children": "Missing required payment data",
+                    "name_of_cardholder__atm_card": "Missing required payment data",
+                },
+            )
+            self.assertEqual(dmd.is_valid, False)
+
+    def test_update_unique_fields(self) -> None:
+        unique_fields = [
+            "seeing_disability",
+            "name_of_cardholder__atm_card",
+        ]
+
+        dmd_1 = DeliveryMechanismDataFactory(data={"name_of_cardholder__atm_card": "test"}, individual=self.ind)
+        dmd_1.individual.seeing_disability = LOT_DIFFICULTY
+        dmd_1.individual.save()
+
+        dmd_2 = DeliveryMechanismDataFactory(data={"name_of_cardholder__atm_card": "test2"}, individual=self.ind2)
+        dmd_2.individual.seeing_disability = LOT_DIFFICULTY
+        dmd_2.individual.save()
+
+        with mock.patch.object(dmd_1.delivery_mechanism, "unique_fields", unique_fields):
+            dmd_1.update_unique_field()
+            self.assertEqual(dmd_1.is_valid, True)
+            self.assertIsNotNone(dmd_1.unique_key)
+            self.assertEqual(dmd_1.validation_errors, {})

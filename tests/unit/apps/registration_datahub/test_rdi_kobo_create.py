@@ -595,7 +595,6 @@ class TestRdiKoboCreateTask(TestCase):
             households_to_create,
             individuals_ids_hash_dict,
             submission_meta_data,
-            [],
             1,
         )
         hh = households_to_create[0]

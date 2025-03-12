@@ -37,7 +37,6 @@ from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES, USDC
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
-    CORE_FIELDS_ATTRIBUTES,
     FieldFactory,
     get_core_fields_attributes,
 )
@@ -1974,15 +1973,6 @@ class DeliveryMechanism(TimeStampedUUIDModel):
         ordering = ["code"]
         verbose_name = "Delivery Mechanism"
         verbose_name_plural = "Delivery Mechanisms"
-
-    @property
-    def all_fields(self) -> List[str]:
-        return self.required_fields + self.optional_fields
-
-    @property
-    def all_dm_fields(self) -> List[str]:
-        core_fields = [cf["name"] for cf in CORE_FIELDS_ATTRIBUTES]
-        return [field for field in self.all_fields if field not in core_fields]
 
     @classmethod
     def get_choices(cls, only_active: bool = True) -> List[Tuple[str, str]]:

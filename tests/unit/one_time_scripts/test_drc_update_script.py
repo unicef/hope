@@ -7,7 +7,7 @@ from django.test import TestCase
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
-from hct_mis_api.apps.payment.models import DeliveryMechanism, DeliveryMechanismData
+from hct_mis_api.apps.payment.models import DeliveryMechanismData
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
@@ -36,10 +36,6 @@ class TestSouthSudanUpdateScript(TestCase):
 
         business_area = create_afghanistan()
         cls.business_area = business_area
-        deliver_mechanism = DeliveryMechanism.objects.create(
-            code="mobile_money",
-            name="Mobile Money",
-        )
 
         household, individuals = create_household_and_individuals(
             household_data={
@@ -86,7 +82,6 @@ class TestSouthSudanUpdateScript(TestCase):
                 "delivery_phone_number__mobile_money": "+48602102373",
             },
             individual=individual2,
-            delivery_mechanism=deliver_mechanism,
             rdi_merge_status=DeliveryMechanismData.MERGED,
         )
 
@@ -117,7 +112,6 @@ class TestSouthSudanUpdateScript(TestCase):
                 "delivery_phone_number__mobile_money": "+48602102373",
             },
             individual=individual3,
-            delivery_mechanism=deliver_mechanism,
             rdi_merge_status=DeliveryMechanismData.MERGED,
         )
 
