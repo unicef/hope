@@ -104,8 +104,8 @@ class AutocompleteWidget(forms.Widget):
 
     def get_url(self) -> str:
         url = reverse("admin:autocomplete")
-        if self.business_area:  # Append BA ID if provided
-            url += f"?business_area={self.business_area}"
+        if self.business_area:
+            url += f"?business_area={self.business_area}"  #
         return url
 
     def get_context(self, name: str, value: Any, attrs: Optional[Dict[str, Any]]) -> Dict:
