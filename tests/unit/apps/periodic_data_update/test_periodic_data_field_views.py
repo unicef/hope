@@ -52,8 +52,8 @@ class TestPeriodicFieldViews:
         self.url_list = reverse(
             "api:periodic-data-update:periodic-fields-list",
             kwargs={
-                "business_area": self.afghanistan.slug,
-                "program_id": id_to_base64(self.program1.id, "Program"),
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program1.slug,
             },
         )
 
