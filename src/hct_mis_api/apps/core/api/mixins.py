@@ -137,8 +137,8 @@ class BusinessAreaProgramsAccessMixin(BusinessAreaMixin):
         queryset = super().get_queryset()
 
         program_ids = self.request.user.get_program_ids_for_permissions_in_business_area(
-            str(self.business_area.id),
-            [perm for perm_class in self.permission_classes for perm in perm_class.PERMISSIONS],
+            self.business_area.id,
+            self.PERMISSIONS,
         )
 
         return queryset.filter(**{f"{self.program_model_field}__in": program_ids})
@@ -171,7 +171,6 @@ class BusinessAreaVisibilityMixin(BusinessAreaMixin):
         from hct_mis_api.apps.program.models import Program
 
         queryset = super().get_queryset()
-
         user = self.request.user
         program_ids = user.get_program_ids_for_permissions_in_business_area(
             self.business_area.id,
@@ -185,13 +184,12 @@ class BusinessAreaVisibilityMixin(BusinessAreaMixin):
             program_q = Q(program_id=program_id)
             areas_null = Q(**{f"{field}__isnull": True for field in self.admin_area_model_fields})
             # apply admin area limits if partner has restrictions
-            area_limits = user.partner.get_area_limits_for_program(program_id)
             areas_query = Q()
-            for field in self.admin_area_model_fields:
-                areas_query |= Q(**{f"{field}__in": area_limits})
+            if area_limits := user.partner.get_area_limits_for_program(program_id):
+                for field in self.admin_area_model_fields:
+                    areas_query |= Q(**{f"{field}__in": area_limits})
 
             filter_q |= Q(program_q & areas_null) | Q(program_q & areas_query)
-
         return queryset.filter(filter_q) if filter_q else queryset.none()  # filter_q empty if no access to any program
 
 
