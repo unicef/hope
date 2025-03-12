@@ -15,6 +15,7 @@ import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RestService } from '@restgenerated/services/RestService';
+import { useLocation } from 'react-router-dom';
 
 interface ProgramFormPropTypes {
   values;
@@ -26,6 +27,9 @@ const ProgramForm = ({
   programHasRdi,
 }: ProgramFormPropTypes): ReactElement => {
   const { t } = useTranslation();
+  const location = useLocation();
+  const isEditProgram = location.pathname.includes('edit');
+
   const { data } = useProgrammeChoiceDataQuery();
   const { data: dataCollectionTypeChoicesData } =
     useDataCollectionTypeChoiceDataQuery();
@@ -111,6 +115,7 @@ const ProgramForm = ({
             component={FormikTextField}
             maxLength={4}
             data-cy="input-programme-code"
+            disabled={isEditProgram}
           />
         </Grid>
         <Grid size={{ xs: 6 }}>
