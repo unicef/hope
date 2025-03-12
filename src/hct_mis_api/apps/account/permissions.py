@@ -333,8 +333,8 @@ def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: A
     if business_area is None:
         return False
     program = None
-    if programme_code := kwargs.get("program"):
-        program = Program.objects.filter(programme_code=programme_code, business_area=business_area).first()
+    if program_slug := kwargs.get("program"):
+        program = Program.objects.filter(slug=program_slug, business_area=business_area).first()
     elif kwargs.get("Program"):  # TODO: GraphQL - remove after GraphQL complete removal
         program = Program.objects.filter(id=get_program_id_from_headers(kwargs)).first()
     obj = program or business_area
