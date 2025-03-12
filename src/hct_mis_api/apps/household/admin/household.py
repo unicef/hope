@@ -139,11 +139,13 @@ class HouseholdWithdrawFromListMixin:
         if step == "1":
             business_area = request.POST.get("business_area")
             request.session["business_area"] = business_area
-            context.update({
-                "form": WithdrawHouseholdsForm(request.POST, business_area=business_area),
-                "business_area": business_area,
-                "step": "1"
-            })
+            context.update(
+                {
+                    "form": WithdrawHouseholdsForm(request.POST, business_area=business_area),
+                    "business_area": business_area,
+                    "step": "1",
+                }
+            )
             return TemplateResponse(request, "admin/household/household/withdraw_households_from_list.html", context)
 
         business_area = request.session.get("business_area")
@@ -156,13 +158,16 @@ class HouseholdWithdrawFromListMixin:
             tag = form.cleaned_data["tag"]
 
             if step == "2":
-                context.update({
-                    "step": "2",
-                    "household_count": self.get_household_queryset_from_list(household_id_list, program).count()
-                })
+                context.update(
+                    {
+                        "step": "2",
+                        "household_count": self.get_household_queryset_from_list(household_id_list, program).count(),
+                    }
+                )
                 self.get_and_set_context_data(request, context)
-                return TemplateResponse(request, "admin/household/household/withdraw_households_from_list.html",
-                                        context)
+                return TemplateResponse(
+                    request, "admin/household/household/withdraw_households_from_list.html", context
+                )
 
             if step == "3":
                 mass_withdraw_households_from_list_task.delay(household_id_list, tag, str(program.id))

@@ -84,7 +84,7 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
     def _request_with_post_method_and_session_ba(self) -> HttpRequest:
         request = HttpRequest()
         request.method = "POST"
-        middleware = SessionMiddleware(lambda req: None)
+        middleware = SessionMiddleware(lambda req: None)  # type: ignore
         middleware.process_request(request)
         request.session.save()
         request.session["business_area"] = str(self.program.business_area.pk)
