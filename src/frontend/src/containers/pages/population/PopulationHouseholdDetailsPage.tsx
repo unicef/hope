@@ -235,11 +235,9 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
             <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('User name')}>
                 {<Missing />}
-                {/* TODO: */}
-                {/* {household?.registration_data_import?.importedBy?.email} */}
+                {household?.registration_data_import.imported_by.email}
               </LabelizedField>
             </Grid>
-            {<Missing />}
             {/* {household?.programRegistrationId && (
               <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Programme registration id')}>
