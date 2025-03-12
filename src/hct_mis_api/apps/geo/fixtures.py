@@ -115,7 +115,7 @@ def generate_small_areas_for_afghanistan_only() -> None:
         ),
     )
     parent = None
-    for area_type_name, level in [("Province", 1), ("District", 2), ("Village", 3), ("Small Village", 4)]:
+    for area_type_name, level in [("Province", 1), ("District", 2), ("Village", 3)]:
         parent = AreaTypeFactory(parent=parent, name=area_type_name, country=country, area_level=level)
 
     areas = [
@@ -136,9 +136,9 @@ def generate_small_areas_for_afghanistan_only() -> None:
         {"level": 2, "p_code": "AF0102", "name": "Dehsabz", "parent_name": "Kabul"},
         {"level": 2, "p_code": "AF0103", "name": "Shakardara", "parent_name": "Kabul"},
     ]
-    area_type_level_1 = AreaType.objects.get(country=country, area_level=1)
-    area_type_level_2 = AreaType.objects.get(country=country, area_level=2)
+    area_type_level_1 = AreaType.objects.filter(country=country, area_level=1).first()
+    area_type_level_2 = AreaType.objects.filter(country=country, area_level=2).first()
     for area in areas:
         parent = None if not area.get("parent_name") else Area.objects.filter(name=area["parent_name"]).first()
         area_type = area_type_level_1 if area["level"] == 1 else area_type_level_2
-        AreaFactory(p_code=area["p_code"], name=area["name"], country=country, area_type=area_type, parent=parent)
+        AreaFactory(p_code=area["p_code"], name=area["name"], area_type=area_type, parent=parent)
