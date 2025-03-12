@@ -79,7 +79,7 @@ class TestPeriodicDataUpdateTemplateViews:
             "api:periodic-data-update:periodic-data-update-templates-list",
             kwargs={
                 "business_area_slug": self.afghanistan.slug,
-                "program_slug": self.program1.slug,
+                "program_slug": self.program2.slug,
             },
         )
         self.url_export_pdu_template_program1 = reverse(
