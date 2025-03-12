@@ -33,6 +33,7 @@ from hct_mis_api.apps.payment.models import (
     Approval,
     ApprovalProcess,
     DeliveryMechanism,
+    DeliveryMechanismConfig,
     DeliveryMechanismData,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
@@ -728,8 +729,8 @@ def generate_delivery_mechanisms() -> None:
             ],
         },
         {
-            "key": "phone",
-            "label": "Phone",
+            "key": "mobile",
+            "label": "Mobile",
             "unique_fields": [
                 "number",
             ],
@@ -764,7 +765,12 @@ def generate_delivery_mechanisms() -> None:
             "code": "mobile_money",
             "name": "Mobile Money",
             "transfer_type": "CASH",
-            "account_type": account_types["phone"],
+            "account_type": account_types["mobile"],
+            "required_fields": [
+                "number",
+                "provider",
+                "service_provider_code",
+            ],
         },
         {
             "code": "pre-paid_card",
@@ -779,6 +785,7 @@ def generate_delivery_mechanisms() -> None:
             "name": "Transfer to Account",
             "transfer_type": "CASH",
             "account_type": account_types["bank"],
+            "required_fields": ["name", "number"],
         },
         {"code": "voucher", "name": "Voucher", "transfer_type": "VOUCHER", "account_type": account_types["bank"]},
         {
@@ -787,7 +794,17 @@ def generate_delivery_mechanisms() -> None:
             "transfer_type": "CASH",
             "account_type": account_types["bank"],
         },
-        {"code": "atm_card", "name": "ATM Card", "transfer_type": "CASH", "account_type": account_types["bank"]},
+        {
+            "code": "atm_card",
+            "name": "ATM Card",
+            "transfer_type": "CASH",
+            "account_type": account_types["bank"],
+            "required_fields": [
+                "number",
+                "expiry_date",
+                "name_of_cardholder",
+            ],
+        },
         {
             "code": "transfer_to_digital_wallet",
             "name": "Transfer to Digital Wallet",
@@ -796,7 +813,7 @@ def generate_delivery_mechanisms() -> None:
         },
     ]
     for dm in delivery_mechanisms_data:
-        DeliveryMechanism.objects.update_or_create(
+        delivery_mechanism, _ = DeliveryMechanism.objects.update_or_create(
             code=dm["code"],
             defaults={
                 "name": dm["name"],
@@ -805,3 +822,7 @@ def generate_delivery_mechanisms() -> None:
                 "account_type": dm["account_type"],
             },
         )
+        for fsp in FinancialServiceProvider.objects.all():
+            DeliveryMechanismConfig.objects.get_or_create(
+                fsp=fsp, delivery_mechanism=delivery_mechanism, required_fields=dm.get("required_fields", [])
+            )

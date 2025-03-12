@@ -116,7 +116,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
 
         snapshot_data = snapshot.snapshot_data
         collector_data = snapshot_data.get("primary_collector") or snapshot_data.get("alternate_collector") or dict()
-        delivery_mech_data = collector_data.get("delivery_mechanisms_data", {}).get(obj.delivery_type.code, {})
+        delivery_mech_data = collector_data.get("accounts_data", {}).get(obj.delivery_type.account_type.key, {})
 
         base_data = {
             "amount": obj.entitlement_quantity,

@@ -167,13 +167,8 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         if self.payment_generate_token_and_order_numbers:
             payment = generate_token_and_order_numbers(payment)
 
-        delivery_mechanism_data = payment.collector.delivery_mechanisms_data.filter(
-            account_type__delivery_mechanisms=payment.delivery_type
-        ).first()
         payment_row = [
-            FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(
-                payment, column_name, delivery_mechanism_data
-            )
+            FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(payment, column_name)
             for column_name in fsp_template_columns
         ]
         core_fields_row = [

@@ -890,7 +890,9 @@ class ExportXLSXPaymentPlanPaymentListPerFSPMutation(ExportXLSXPaymentPlanPaymen
             raise GraphQLError(msg)
 
         if fsp_xlsx_template_id and not payment_plan.can_create_xlsx_with_fsp_auth_code:
-            msg = "Export failed: All Payments must have the status 'Sent to FSP' and FSP communication channel set to API."
+            msg = (
+                "Export failed: There could be not Pending Payments and FSP communication channel should be set to API."
+            )
             raise GraphQLError(msg)
 
         return PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(user_id, fsp_xlsx_template_id)

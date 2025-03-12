@@ -73,7 +73,7 @@ class RdiBaseCreateTask:
             self.delivery_mechanisms_data[f"individual_{row_num}"][account_type].update({field_name: value})
 
     def _create_delivery_mechanisms_data(self) -> None:
-        account_types_dict = AccountType.objects.in_bulk(field_name="key")
+        account_types_dict = {obj.key: obj for obj in AccountType.objects.all()}
 
         imported_delivery_mechanism_data = []
         for _, data in self.delivery_mechanisms_data.items():

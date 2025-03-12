@@ -34,7 +34,6 @@ from hct_mis_api.apps.payment.models import (
     ApprovalProcess,
     DeliveryMechanism,
     FinancialServiceProvider,
-    Payment,
     PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentPlanSupportingDocument,
@@ -316,7 +315,7 @@ class TestPaymentPlanQueries(APITestCase):
         )
 
         with freeze_time("2020-10-10"):
-            cash_dm = DeliveryMechanism.objects.get(code="cash")
+            cls.cash_dm = DeliveryMechanism.objects.get(code="cash")
             program = RealProgramFactory(
                 name="Test All PP QS",
                 cycle__start_date=timezone.datetime(2020, 9, 10, tzinfo=utc).date(),
@@ -335,7 +334,7 @@ class TestPaymentPlanQueries(APITestCase):
                 is_follow_up=False,
                 created_by=cls.user,
                 currency="PLN",
-                delivery_mechanism=cash_dm,
+                delivery_mechanism=cls.cash_dm,
                 financial_service_provider=cls.financial_service_provider,
             )
             cls.pp.unicef_id = "PP-01"
@@ -1002,18 +1001,7 @@ class TestPaymentPlanQueries(APITestCase):
             created_by=user,
             currency="PLN",
             financial_service_provider=fsp,
-        )
-        PaymentFactory(
-            parent=payment_plan,
-            status=Payment.STATUS_SENT_TO_FSP,
-            conflicted=True,
-            entitlement_quantity=00.00,
-            entitlement_quantity_usd=00.00,
-            delivered_quantity=00.00,
-            delivered_quantity_usd=00.00,
-            financial_service_provider=fsp,
-            currency="PLN",
-            fsp_auth_code="987",
+            delivery_mechanism=self.cash_dm,
         )
 
         encoded_payment_plan_id = encode_id_base64(payment_plan.id, "PaymentPlan")

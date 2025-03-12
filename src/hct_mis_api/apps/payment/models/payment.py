@@ -693,7 +693,7 @@ class PaymentPlan(
         export MTCN file
         xlsx file with password
         """
-        all_sent_to_fsp = not self.eligible_payments.exclude(status=Payment.STATUS_SENT_TO_FSP).exists()
+        all_sent_to_fsp = not self.eligible_payments.filter(status=Payment.STATUS_PENDING).exists()
         return self.is_payment_gateway and all_sent_to_fsp
 
     @property
@@ -1344,9 +1344,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         return snapshot_data
 
     @classmethod
-    def get_column_value_from_payment(
-        cls, payment: "Payment", column_name: str, delivery_mechanism_data: Optional["DeliveryMechanismData"] = None
-    ) -> Union[str, float, list, None]:
+    def get_column_value_from_payment(cls, payment: "Payment", column_name: str) -> Union[str, float, list, None]:
         # we can get if needed payment.parent.program.is_social_worker_program
         snapshot = getattr(payment, "household_snapshot", None)
         if not snapshot:
@@ -1356,6 +1354,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         primary_collector = snapshot_data.get("primary_collector", {})
         alternate_collector = snapshot_data.get("alternate_collector", {})
         collector_data = primary_collector or alternate_collector or dict()
+        delivery_mechanism_data = collector_data.get("accounts_data", {})
 
         map_obj_name_column = {
             "payment_id": (payment, "unicef_id"),
@@ -1391,18 +1390,18 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
                 "transaction_status_blockchain_link",
             ),
             "fsp_auth_code": (payment, "fsp_auth_code"),
+            "account_data": (delivery_mechanism_data, payment.delivery_type.account_type.key),
         }
         additional_columns = {
             "admin_level_2": (cls.get_admin_level_2, [snapshot_data]),
             "alternate_collector_document_numbers": (cls.get_alternate_collector_doc_numbers, [snapshot_data]),
-            "account_data": (cls.get_account_data, [collector_data, delivery_mechanism_data]),
         }
         if column_name in DocumentType.get_all_doc_types():
             return cls.get_document_number_by_doc_type_key(snapshot_data, column_name)
 
         if column_name in additional_columns:
             method, args = additional_columns[column_name]
-            return method(*args)  # type: ignore
+            return method(*args)
 
         if column_name not in map_obj_name_column:
             return "wrong_column_name"
@@ -1894,7 +1893,8 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
         fsp_names_mappings = {x.external_name: x for x in fsp.names_mappings.all()}
         dm_config = DeliveryMechanismConfig.objects.filter(fsp=fsp, delivery_mechanism=delivery_mechanism).first()
         if not dm_config:
-            return False
+            logger.error(f"DeliveryMechanismConfig not found for {fsp}, {delivery_mechanism}")
+            return True
 
         for field in dm_config.required_fields:
             if fsp_name_mapping := fsp_names_mappings.get(field, None):
@@ -2000,7 +2000,7 @@ class DeliveryMechanismConfig(models.Model):
 
 
 class AccountType(models.Model):
-    key = models.CharField(max_length=255)
+    key = models.CharField(max_length=255, unique=True)
     label = models.CharField(max_length=255)
     unique_fields = ArrayField(default=list, base_field=models.CharField(max_length=255))
 

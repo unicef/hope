@@ -384,9 +384,13 @@ class PaymentPlanService:
 
             has_valid_wallet = False
             if payment_plan.delivery_mechanism and payment_plan.financial_service_provider:
-                wallet, _ = DeliveryMechanismData.objects.get_or_create(
+                wallet = DeliveryMechanismData.objects.filter(
                     individual_id=collector_id, account_type=payment_plan.delivery_mechanism.account_type
-                )
+                ).first()
+                if not wallet:
+                    wallet = DeliveryMechanismData.objects.create(
+                        individual_id=collector_id, account_type=payment_plan.delivery_mechanism.account_type
+                    )
                 has_valid_wallet = wallet.validate(
                     payment_plan.financial_service_provider, payment_plan.delivery_mechanism
                 )

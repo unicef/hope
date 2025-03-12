@@ -19,6 +19,7 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import FileTemp
+from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.household.fixtures import (
     HouseholdFactory,
@@ -33,6 +34,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     prepare_payment_plan_task,
 )
 from hct_mis_api.apps.payment.fixtures import (
+    DeliveryMechanismDataFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
@@ -40,6 +42,7 @@ from hct_mis_api.apps.payment.fixtures import (
     generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import (
+    AccountType,
     DeliveryMechanism,
     FinancialServiceProvider,
     Payment,
@@ -254,6 +257,14 @@ class TestPaymentPlanServices(APITestCase):
 
         hoh1 = IndividualFactory(household=None)
         hoh2 = IndividualFactory(household=None)
+        DeliveryMechanismDataFactory(
+            individual=hoh1,
+            account_type=AccountType.objects.get(key="bank"),
+        )
+        DeliveryMechanismDataFactory(
+            individual=hoh1,
+            account_type=AccountType.objects.get(key="bank"),
+        )
         hh1 = HouseholdFactory(head_of_household=hoh1, program=program, business_area=self.business_area)
         hh2 = HouseholdFactory(head_of_household=hoh2, program=program, business_area=self.business_area)
         IndividualRoleInHouseholdFactory(household=hh1, individual=hoh1, role=ROLE_PRIMARY)
@@ -277,12 +288,14 @@ class TestPaymentPlanServices(APITestCase):
                     }
                 ],
             },
+            fsp_id=encode_id_base64(self.fsp.id, "FinancialServiceProvider"),
+            delivery_mechanism_code=self.dm_transfer_to_account.code,
         )
 
         with mock.patch(
             "hct_mis_api.apps.payment.services.payment_plan_services.transaction"
         ) as mock_prepare_payment_plan_task:
-            with self.assertNumQueries(12):
+            with self.assertNumQueries(16):
                 pp = PaymentPlanService.create(
                     input_data=input_data, user=self.user, business_area_slug=self.business_area.slug
                 )
@@ -292,7 +305,7 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp.total_households_count, 0)
         self.assertEqual(pp.total_individuals_count, 0)
         self.assertEqual(pp.payment_items.count(), 0)
-        with self.assertNumQueries(29):
+        with self.assertNumQueries(90):
             prepare_payment_plan_task.delay(str(pp.id))
         pp.refresh_from_db()
         self.assertEqual(pp.status, PaymentPlan.Status.TP_OPEN)

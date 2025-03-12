@@ -61,17 +61,17 @@ class TestPaymentGatewayService(APITestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         create_afghanistan()
+        cls.pg_fsp = FinancialServiceProviderFactory(
+            name="Western Union",
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            payment_gateway_id="123",
+        )
         generate_delivery_mechanisms()
         cls.dm_cash_over_the_counter = DeliveryMechanism.objects.get(code="cash_over_the_counter")
         cls.dm_transfer = DeliveryMechanism.objects.get(code="transfer")
         cls.dm_mobile_money = DeliveryMechanism.objects.get(code="mobile_money")
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory.create()
-        cls.pg_fsp = FinancialServiceProviderFactory(
-            name="Western Union",
-            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-            payment_gateway_id="123",
-        )
         cls.pg_fsp.delivery_mechanisms.add(cls.dm_cash_over_the_counter)
 
         cls.pp = PaymentPlanFactory(
@@ -128,6 +128,7 @@ class TestPaymentGatewayService(APITestCase):
                 delivered_quantity=None,
                 delivered_quantity_usd=None,
                 financial_service_provider=cls.pg_fsp,
+                delivery_type=cls.dm_transfer,
             ),
             PaymentFactory(
                 parent=cls.pp,
@@ -139,6 +140,7 @@ class TestPaymentGatewayService(APITestCase):
                 delivered_quantity=None,
                 delivered_quantity_usd=None,
                 financial_service_provider=cls.pg_fsp,
+                delivery_type=cls.dm_transfer,
             ),
         ]
         create_payment_plan_snapshot_data(cls.pp)
@@ -505,13 +507,12 @@ class TestPaymentGatewayService(APITestCase):
         }, 200
 
         primary_collector = self.payments[0].collector
-
         DeliveryMechanismDataFactory(
             individual=primary_collector,
             data={
-                "service_provider_code__mobile_money": "ABC",
-                "delivery_phone_number__mobile_money": "123456789",
-                "provider__mobile_money": "Provider",
+                "service_provider_code": "ABC",
+                "number": "123456789",
+                "provider": "Provider",
             },
             account_type=AccountType.objects.get(key="mobile"),
         )
@@ -542,7 +543,7 @@ class TestPaymentGatewayService(APITestCase):
                         "full_name": primary_collector.full_name,
                         "destination_currency": self.payments[0].currency,
                         "service_provider_code": "ABC",
-                        "delivery_phone_number": "123456789",
+                        "number": "123456789",
                         "provider": "Provider",
                     },
                     "extra_data": {},
@@ -566,7 +567,7 @@ class TestPaymentGatewayService(APITestCase):
 
     @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_delivery_mechanisms")
     def test_sync_delivery_mechanisms(self, get_delivery_mechanisms_mock: Any) -> None:
-        assert DeliveryMechanism.objects.all().count() == 16
+        assert DeliveryMechanism.objects.all().count() == 14
 
         dm_cash = DeliveryMechanism.objects.get(code="cash")
         dm_cash.is_active = False

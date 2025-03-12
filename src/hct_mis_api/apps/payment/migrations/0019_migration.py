@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
             name='AccountType',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('key', models.CharField(max_length=255)),
+                ('key', models.CharField(max_length=255, unique=True)),
                 ('label', models.CharField(max_length=255)),
                 ('unique_fields', django.contrib.postgres.fields.ArrayField(base_field=models.CharField(max_length=255), default=list, size=None)),
             ],

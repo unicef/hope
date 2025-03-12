@@ -56,6 +56,7 @@ from hct_mis_api.apps.payment.fixtures import (
     generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import (
+    AccountType,
     DeliveryMechanism,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
@@ -382,11 +383,12 @@ class TestPaymentPlanReconciliation(APITestCase):
         household_3, individual_3 = self.create_household_and_individual(program)
         household_3.refresh_from_db()
 
+        account_type_bank = AccountType.objects.get(key="bank")
         dm_cash = DeliveryMechanism.objects.get(code="cash")
         dm_transfer = DeliveryMechanism.objects.get(code="transfer_to_account")
 
         for ind in [individual_1, individual_2, individual_3]:
-            DeliveryMechanismDataFactory(individual=ind)
+            DeliveryMechanismDataFactory(individual=ind, account_type=account_type_bank)
 
         santander_fsp = FinancialServiceProviderFactory(
             name="Santander",
@@ -451,7 +453,6 @@ class TestPaymentPlanReconciliation(APITestCase):
                     },
                 },
             )
-            print(create_payment_plan_response)
             assert mock_prepare_payment_plan_task.on_commit.call_count == 1
             mock_prepare_payment_plan_task.on_commit.call_args[0][0]()  # call real func
 

@@ -127,6 +127,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
                 parent_split=cls.split,
                 household=household,
                 financial_service_provider=cls.fsp_1,
+                delivery_type=cls.dm_cash,
                 currency="PLN",
             )
 
@@ -348,7 +349,13 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             bank_account_number="362277220020615398848112903",
             debit_card_number="123",
         )
-        payment = PaymentFactory(parent=self.payment_plan, household=household, collector=primary)
+        payment = PaymentFactory(
+            parent=self.payment_plan,
+            household=household,
+            collector=primary,
+            financial_service_provider=self.fsp_1,
+            delivery_type=self.dm_cash,
+        )
         # remove old and create new snapshot with bank account info
         PaymentHouseholdSnapshot.objects.all().delete()
         create_payment_plan_snapshot_data(self.payment_plan)
@@ -405,7 +412,13 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             date_flexible_attribute.name: "2021-01-01",
         }
         household.save()
-        payment = PaymentFactory(parent=self.payment_plan, household=household, collector=individual)
+        payment = PaymentFactory(
+            parent=self.payment_plan,
+            household=household,
+            collector=individual,
+            financial_service_provider=self.fsp_1,
+            delivery_type=self.dm_cash,
+        )
         decimal_flexible_attribute_index = headers.index(decimal_flexible_attribute.name)
         date_flexible_attribute_index = headers.index(date_flexible_attribute.name)
 
