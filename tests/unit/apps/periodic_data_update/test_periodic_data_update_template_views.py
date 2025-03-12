@@ -48,69 +48,69 @@ class TestPeriodicDataUpdateTemplateViews:
         self.url_list = reverse(
             "api:periodic-data-update:periodic-data-update-templates-list",
             kwargs={
-                "business_area": self.afghanistan.slug,
-                "program_id": id_to_base64(self.program1.id, "Program"),
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program1.slug,
             },
         )
         self.url_detail_pdu_template_program2 = reverse(
             "api:periodic-data-update:periodic-data-update-templates-detail",
             kwargs={
-                "business_area": self.afghanistan.slug,
-                "program_id": id_to_base64(self.program2.id, "Program"),
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program2.slug,
                 "pk": self.pdu_template_program2.id,
             },
         )
         self.url_detail_pdu_template1 = reverse(
             "api:periodic-data-update:periodic-data-update-templates-detail",
             kwargs={
-                "business_area": self.afghanistan.slug,
-                "program_id": id_to_base64(self.program1.id, "Program"),
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program1.slug,
                 "pk": self.pdu_template1.id,
             },
         )
         self.url_create_pdu_template_program1 = reverse(
             "api:periodic-data-update:periodic-data-update-templates-list",
             kwargs={
-                "business_area": self.afghanistan.slug,
-                "program_id": id_to_base64(self.program1.id, "Program"),
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program1.slug,
             },
         )
         self.url_create_pdu_template_program2 = reverse(
             "api:periodic-data-update:periodic-data-update-templates-list",
             kwargs={
-                "business_area": self.afghanistan.slug,
-                "program_id": id_to_base64(self.program2.id, "Program"),
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program1.slug,
             },
         )
         self.url_export_pdu_template_program1 = reverse(
             "api:periodic-data-update:periodic-data-update-templates-export",
             kwargs={
-                "business_area": self.afghanistan.slug,
-                "program_id": id_to_base64(self.program1.id, "Program"),
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program1.slug,
                 "pk": self.pdu_template1.id,
             },
         )
         self.url_export_pdu_template_program2 = reverse(
             "api:periodic-data-update:periodic-data-update-templates-export",
             kwargs={
-                "business_area": self.afghanistan.slug,
-                "program_id": id_to_base64(self.program2.id, "Program"),
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program2.slug,
                 "pk": self.pdu_template_program2.id,
             },
         )
         self.url_download_pdu_template_program1 = reverse(
             "api:periodic-data-update:periodic-data-update-templates-download",
             kwargs={
-                "business_area": self.afghanistan.slug,
-                "program_id": id_to_base64(self.program1.id, "Program"),
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program1.slug,
                 "pk": self.pdu_template1.id,
             },
         )
         self.url_download_pdu_template_program2 = reverse(
             "api:periodic-data-update:periodic-data-update-templates-download",
             kwargs={
-                "business_area": self.afghanistan.slug,
-                "program_id": id_to_base64(self.program2.id, "Program"),
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program2.slug,
                 "pk": self.pdu_template_program2.id,
             },
         )
