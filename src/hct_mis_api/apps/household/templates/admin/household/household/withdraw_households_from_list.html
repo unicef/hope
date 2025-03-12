@@ -24,6 +24,7 @@
         <div><input type="submit" value="Next"></div>
     {% elif step == "1" %}
         <input type="hidden" name="step" value="2">
+        <input type="hidden" name="business_area" value="{{ business_area }}">
         {{ form.program.label_tag }}<br>
         {{ form.program }}<br>
         {{ form.household_list.label_tag }}<br>
@@ -36,6 +37,7 @@
         <input type="hidden" name="household_list" value="{{ household_list }}">
         <input type="hidden" name="tag" value="{{ tag }}">
         <input type="hidden" name="program" value="{{ program }}">
+        <input type="hidden" name="business_area" value="{{ business_area }}">
         <p>This action will result in withdrawing {{ household_count }} households</p>
         <div><input type="submit" value="Confirm"></div>
     {% endif %}

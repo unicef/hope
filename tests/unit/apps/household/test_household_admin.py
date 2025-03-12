@@ -1,5 +1,6 @@
 from typing import Any
 
+from django.contrib.sessions.middleware import SessionMiddleware
 from django.http import HttpRequest
 from django.test import TestCase
 
@@ -80,6 +81,15 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
         cls.program.individual_count = 3
         cls.program.save()
 
+    def _request_with_post_method_and_session_ba(self) -> HttpRequest:
+        request = HttpRequest()
+        request.method = "POST"
+        middleware = SessionMiddleware(lambda req: None)
+        middleware.process_request(request)
+        request.session.save()
+        request.session["business_area"] = str(self.program.business_area.pk)
+        return request
+
     def test_households_withdraw_from_list(self) -> None:
         def mock_get_common_context(*args: Any, **kwargs: Any) -> dict:
             return {}
@@ -90,17 +100,17 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
         HouseholdWithdrawFromListMixin.get_common_context = mock_get_common_context
         HouseholdWithdrawFromListMixin.message_user = mock_message_user
 
-        request = HttpRequest()
-        request.method = "POST"
+        request = self._request_with_post_method_and_session_ba()
         tag = "Some tag reason"
         request.POST = {  # type: ignore
             "step": "3",
             "household_list": f"{self.household.unicef_id}, {self.household2.unicef_id}",
             "tag": tag,
             "program": str(self.program.id),
+            "business_area": self.program.business_area,
         }
 
-        with self.assertNumQueries(27):
+        with self.assertNumQueries(28):
             HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=request)
 
         self.household.refresh_from_db()
@@ -229,20 +239,21 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
         )
 
     def test_get_and_set_context_data(self) -> None:
-        request = HttpRequest()
-        request.method = "POST"
+        request = self._request_with_post_method_and_session_ba()
         household_list = f"{self.household.unicef_id}"
         tag = "Some tag reason"
         request.POST = {  # type: ignore
             "household_list": household_list,
             "tag": tag,
             "program": str(self.program.id),
+            "business_area": str(self.program.business_area.pk),
         }
         context = {}
         HouseholdWithdrawFromListMixin.get_and_set_context_data(request, context)
         self.assertEqual(context["program"], str(self.program.id))
         self.assertEqual(context["household_list"], household_list)
         self.assertEqual(context["tag"], tag)
+        self.assertEqual(context["business_area"], str(self.program.business_area.pk))
 
     def test_get_request(self) -> None:
         def mock_get_common_context(*args: Any, **kwargs: Any) -> dict:
@@ -255,6 +266,27 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
         resp = HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=request)
         self.assertEqual(resp.status_code, 200)
 
+    def test_post_households_withdraw_from_list_step_0(self) -> None:
+        def mock_get_common_context(*args: Any, **kwargs: Any) -> dict:
+            return {}
+
+        def mock_message_user(*args: Any, **kwargs: Any) -> None:
+            pass
+
+        HouseholdWithdrawFromListMixin.get_common_context = mock_get_common_context
+        HouseholdWithdrawFromListMixin.message_user = mock_message_user
+
+        request = self._request_with_post_method_and_session_ba()
+        request.POST = {  # type: ignore
+            "step": "0",
+            "business_area": self.program.business_area,
+        }
+
+        with self.assertNumQueries(0):
+            resp = HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=request)
+
+        self.assertEqual(resp.status_code, 200)
+
     def test_post_households_withdraw_from_list_step_1(self) -> None:
         def mock_get_common_context(*args: Any, **kwargs: Any) -> dict:
             return {}
@@ -265,17 +297,17 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
         HouseholdWithdrawFromListMixin.get_common_context = mock_get_common_context
         HouseholdWithdrawFromListMixin.message_user = mock_message_user
 
-        request = HttpRequest()
-        request.method = "POST"
+        request = self._request_with_post_method_and_session_ba()
         tag = "Some tag reason"
         request.POST = {  # type: ignore
             "step": "1",
             "household_list": f"{self.household.unicef_id}, {self.household2.unicef_id}",
             "tag": tag,
             "program": str(self.program.id),
+            "business_area": self.program.business_area,
         }
 
-        with self.assertNumQueries(1):
+        with self.assertNumQueries(0):
             resp = HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=request)
 
         self.assertEqual(resp.status_code, 200)
@@ -290,17 +322,17 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
         HouseholdWithdrawFromListMixin.get_common_context = mock_get_common_context
         HouseholdWithdrawFromListMixin.message_user = mock_message_user
 
-        request = HttpRequest()
-        request.method = "POST"
+        request = self._request_with_post_method_and_session_ba()
         tag = "Some tag reason"
         request.POST = {  # type: ignore
             "step": "2",
             "household_list": f"{self.household.unicef_id}, {self.household2.unicef_id}",
             "tag": tag,
             "program": str(self.program.id),
+            "business_area": self.program.business_area,
         }
 
-        with self.assertNumQueries(2):
+        with self.assertNumQueries(3):
             resp = HouseholdWithdrawFromListMixin().withdraw_households_from_list(request=request)
 
         self.assertEqual(resp.status_code, 200)

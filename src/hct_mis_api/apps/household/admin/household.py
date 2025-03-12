@@ -122,50 +122,49 @@ class HouseholdWithdrawFromListMixin:
 
     @staticmethod
     def get_and_set_context_data(request: HttpRequest, context: dict) -> None:
-        household_list = request.POST.get("household_list")
-        tag = request.POST.get("tag")
-        program = request.POST.get("program")
-        context["household_list"] = household_list
-        context["tag"] = tag
-        context["program"] = program
+        context["household_list"] = request.POST.get("household_list")
+        context["tag"] = request.POST.get("tag")
+        context["program"] = request.POST.get("program")
+        context["business_area"] = request.POST.get("business_area")
 
     def withdraw_households_from_list(self, request: HttpRequest) -> Optional[HttpResponse]:
         step = request.POST.get("step", "0")
+        context = self.get_common_context(request, title="Withdraw households from list")
+
         if step == "0":
-            context = self.get_common_context(
-                request, title="Withdraw households from list", form=WithdrawHouseholdsForm()
-            )
+            context["form"] = WithdrawHouseholdsForm()
             context["step"] = "0"
             return TemplateResponse(request, "admin/household/household/withdraw_households_from_list.html", context)
 
-        elif step == "1":
+        if step == "1":
             business_area = request.POST.get("business_area")
-            form = WithdrawHouseholdsForm(request.POST, business_area=business_area)
-            context = self.get_common_context(request, title="Withdraw households from list", form=form)
             request.session["business_area"] = business_area
-            context["step"] = "1"
+            context.update({
+                "form": WithdrawHouseholdsForm(request.POST, business_area=business_area),
+                "business_area": business_area,
+                "step": "1"
+            })
             return TemplateResponse(request, "admin/household/household/withdraw_households_from_list.html", context)
 
         business_area = request.session.get("business_area")
         form = WithdrawHouseholdsForm(request.POST, business_area=business_area)
-        context = self.get_common_context(request, title="Withdraw households from list", form=form)
+        context["form"] = form
+
         if form.is_valid():
-            # get HH list
-            household_id_list = [
-                hh_id.strip() for hh_id in form.cleaned_data["household_list"].split(",")
-            ]  # Convert text to list and remove spaces if so
+            household_id_list = [hh_id.strip() for hh_id in form.cleaned_data["household_list"].split(",")]
             program = form.cleaned_data["program"]
             tag = form.cleaned_data["tag"]
+
             if step == "2":
-                context["step"] = "2"
+                context.update({
+                    "step": "2",
+                    "household_count": self.get_household_queryset_from_list(household_id_list, program).count()
+                })
                 self.get_and_set_context_data(request, context)
-                context["household_count"] = self.get_household_queryset_from_list(household_id_list, program).count()
-                return TemplateResponse(
-                    request,
-                    "admin/household/household/withdraw_households_from_list.html",
-                    context,
-                )
-            elif step == "3":
+                return TemplateResponse(request, "admin/household/household/withdraw_households_from_list.html",
+                                        context)
+
+            if step == "3":
                 mass_withdraw_households_from_list_task.delay(household_id_list, tag, str(program.id))
                 self.message_user(request, f"{len(household_id_list)} Households are being withdrawn.")
                 return HttpResponseRedirect(reverse("admin:household_household_changelist"))
