@@ -1,6 +1,10 @@
+import json
 from typing import Any
 
 from django.contrib.gis.geos import Point
+from django.core.cache import cache
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 
 import pytest
 from rest_framework import status
@@ -89,7 +93,7 @@ class TestHouseholdListViewSet:
 
         response = self.client.get(self.list_url)
         assert response.status_code == status.HTTP_200_OK
-        response_results = response.data["results"]
+        response_results = response.json()["results"]
         assert len(response_results) == 2
 
         response_ids = [result["id"] for result in response_results]
@@ -189,6 +193,75 @@ class TestHouseholdListViewSet:
         assert get_encoded_household_id(household_without_areas) in response_ids
 
         assert get_encoded_household_id(household_different_areas) not in response_ids
+
+    def test_household_list_caching(
+        self, create_user_role_with_permissions: Any, set_admin_area_limits_in_program: Any
+    ) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.RDI_VIEW_DETAILS],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.client.get(self.list_url)
+            assert response.status_code == status.HTTP_200_OK
+            assert response.has_header("etag")
+            etag = response.headers["etag"]
+            assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
+            assert len(response.json()["results"]) == 2
+            assert len(ctx.captured_queries) == 13
+
+        # no change - use cache
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.client.get(self.list_url)
+            assert response.status_code == status.HTTP_200_OK
+            assert response.has_header("etag")
+            etag_second_call = response.headers["etag"]
+            assert etag == etag_second_call
+            assert len(ctx.captured_queries) == 7
+
+        self.household1.children_count = 100
+        self.household1.save()
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.client.get(self.list_url)
+            assert response.status_code == status.HTTP_200_OK
+            assert response.has_header("etag")
+            etag_third_call = response.headers["etag"]
+            assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
+            assert etag_third_call not in [etag, etag_second_call]
+            # 4 queries are saved because of cached permissions calculations
+            assert len(ctx.captured_queries) == 9
+
+        set_admin_area_limits_in_program(self.partner, self.program, [self.area1])
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.client.get(self.list_url)
+            assert response.status_code == status.HTTP_200_OK
+            assert response.has_header("etag")
+            etag_changed_areas = response.headers["etag"]
+            assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
+            assert etag_changed_areas not in [etag, etag_second_call, etag_third_call]
+            assert len(ctx.captured_queries) == 9
+
+        self.household2.delete()
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.client.get(self.list_url)
+            assert response.status_code == status.HTTP_200_OK
+            assert response.has_header("etag")
+            etag_fourth_call = response.headers["etag"]
+            assert len(response.json()["results"]) == 1
+            assert etag_fourth_call not in [etag, etag_second_call, etag_third_call, etag_changed_areas]
+            assert len(ctx.captured_queries) == 9
+
+        # no change - use cache
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.client.get(self.list_url)
+            assert response.status_code == status.HTTP_200_OK
+            assert response.has_header("etag")
+            etag_fifth_call = response.headers["etag"]
+            assert etag_fifth_call == etag_fourth_call
+            assert len(ctx.captured_queries) == 7
 
 
 class TestHouseholdDetailViewSet:

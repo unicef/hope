@@ -1,7 +1,8 @@
 import functools
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 
 from django.core.cache import cache
+from django.db.models import Count, Max, QuerySet
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -102,3 +103,36 @@ class BusinessAreaAndProgramKeyBit(KeyBitBase):
         version_key = f"{business_area_slug}:{business_area_version}:{program_slug}:{self.specific_view_cache_key}"
         version = get_or_create_cache_key(version_key, 1)
         return str(version)
+
+
+class BusinessAreaAndProgramLastUpdatedKeyBit(KeyBitBase):
+    """
+    KeyBit that validates the cache based on the latest `updated_at` and the number of objects in the queryset.
+    It eliminates the need to create and maintain cache versions at the cost of an additional query to fetch
+    the latest `updated_at` value and object count.
+    """
+
+    specific_view_cache_key = ""
+
+    def _get_queryset(self, business_area_slug: Optional[Any], program_slug: Optional[Any]) -> QuerySet:
+        raise NotImplementedError
+
+    def get_data(
+        self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
+    ) -> str:
+        business_area_slug = kwargs.get("business_area_slug")
+        business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
+        program_slug = kwargs.get("program_slug")
+
+        queryset = self._get_queryset(business_area_slug, program_slug).aggregate(
+            latest_updated_at=Max("updated_at"), obj_count=Count("id")
+        )
+        latest_updated_at = queryset["latest_updated_at"]
+        obj_count = queryset["obj_count"]
+
+        key = (
+            f"{business_area_slug}:{business_area_version}:{program_slug}:{self.specific_view_cache_key}"
+            f":{latest_updated_at}:{obj_count}"
+        )
+
+        return key
