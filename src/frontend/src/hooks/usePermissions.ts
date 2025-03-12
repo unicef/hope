@@ -1,24 +1,35 @@
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from './useBaseUrl';
+import { Profile } from '@restgenerated/models/Profile';
 
 export function usePermissions(): string[] {
   const { businessArea, programId } = useBaseUrl();
-  const { data: meData, isLoading: meDataLoading } = useQuery({
+  const {
+    data: meData,
+    isLoading: meDataLoading,
+    error,
+  } = useQuery<Profile>({
     queryKey: ['profile', businessArea, programId],
     queryFn: () => {
-      return RestService.restUsersProfileRetrieve({
+      const params: { businessAreaSlug: string; programSlug?: string } = {
         businessAreaSlug: businessArea,
-        programSlug: programId,
-      });
+      };
+      if (programId !== 'all') {
+        params.programSlug = programId;
+      }
+      return RestService.restUsersProfileRetrieve(params);
     },
   });
 
-  if (!meData || !meDataLoading) {
+  if (meDataLoading) {
     return [];
   }
-  console.log(meData);
-  return (
-    (meData as { permissions_in_scope?: string[] })?.permissions_in_scope ?? []
-  );
+
+  if (error) {
+    console.error('Error fetching permissions:', error);
+    return [];
+  }
+  //@ts-ignore
+  return meData?.permissions_in_scope ?? [];
 }
