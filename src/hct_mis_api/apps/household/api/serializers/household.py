@@ -16,7 +16,7 @@ class HouseholdListSerializer(serializers.ModelSerializer):
     head_of_household = serializers.CharField(source="head_of_household.full_name")
     admin1 = serializers.CharField(source="admin1.name", default="")
     admin2 = serializers.CharField(source="admin2.name", default="")
-    program = serializers.CharField(source="program.name", default="")
+    program = serializers.CharField(source="program.name")
     total_cash_received = serializers.DecimalField(max_digits=64, decimal_places=2)
     total_cash_received_usd = serializers.DecimalField(max_digits=64, decimal_places=2)
 
@@ -56,7 +56,7 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
     admin2 = serializers.CharField(source="admin2.name", default="")
     admin3 = serializers.CharField(source="admin3.name", default="")
     admin4 = serializers.CharField(source="admin4.name", default="")
-    program = serializers.CharField(source="program.name", default="")
+    program = serializers.CharField(source="program.name")
     country = serializers.CharField(source="country.name", default="")
     country_origin = serializers.CharField(source="country_origin.name", default="")
     total_cash_received = serializers.DecimalField(max_digits=64, decimal_places=2)
@@ -133,6 +133,7 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
             "returnee",
             "size",
             "residence_status",
+            "program_registration_id",
         )
 
     def get_has_duplicates(self, obj: Household) -> bool:

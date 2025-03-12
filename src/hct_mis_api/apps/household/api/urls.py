@@ -16,7 +16,7 @@ program_nested_router.register(
     basename="households",
 )
 business_area_nested_router = get_business_area_nested_router()
-business_area_nested_router.register("households", HouseholdGlobalViewSet, basename="households")
+business_area_nested_router.register("households", HouseholdGlobalViewSet, basename="households-global")
 
 urlpatterns = [
     path("", include(program_nested_router.urls)),

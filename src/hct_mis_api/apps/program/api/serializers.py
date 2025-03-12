@@ -261,6 +261,7 @@ class ProgramSerializer(serializers.ModelSerializer):
             "status",
             "pdu_fields",
         )
+        extra_kwargs = {"status": {"help_text": "Status"}}  # for swagger purpose
 
     def get_pdu_fields(self, obj: Program) -> list[str]:
         pdu_field_encoded_ids = []

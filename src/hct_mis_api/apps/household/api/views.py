@@ -9,10 +9,7 @@ from rest_framework.filters import OrderingFilter
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
 
-from hct_mis_api.apps.account.permissions import (
-    ALL_GRIEVANCES_CREATE_MODIFY,
-    Permissions,
-)
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.api.mixins import (
     BaseViewSet,
     BusinessAreaVisibilityMixin,
@@ -85,7 +82,6 @@ class HouseholdGlobalViewSet(
     PERMISSIONS = [
         Permissions.RDI_VIEW_DETAILS,
         Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST,
-        *ALL_GRIEVANCES_CREATE_MODIFY,
     ]
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = HouseholdFilter
