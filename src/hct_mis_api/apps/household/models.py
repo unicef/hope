@@ -892,17 +892,7 @@ class Individual(
             "payment_delivery_phone_no",
         ]
     )
-    individual_collection = models.ForeignKey(
-        IndividualCollection,
-        related_name="individuals",
-        on_delete=models.CASCADE,
-        null=True,
-        help_text="Collection of individual representations [sys]",
-    )
-    duplicate = models.BooleanField(default=False, db_index=True, help_text="Duplicate status [sys]")
-    duplicate_date = models.DateTimeField(null=True, blank=True, help_text="Duplicate date [sys]")
-    withdrawn = models.BooleanField(default=False, db_index=True, help_text="Withdrawn status [sys]")
-    withdrawn_date = models.DateTimeField(null=True, blank=True, help_text="Withdrawn date [sys]")
+
     individual_id = models.CharField(max_length=255, blank=True, help_text="Individual ID")
     photo = models.ImageField(blank=True, help_text="Photo")
     full_name = CICharField(
@@ -923,11 +913,7 @@ class Individual(
     )
 
     phone_no = PhoneNumberField(blank=True, db_index=True, help_text="Beneficiary phone number")
-    phone_no_valid = models.BooleanField(null=True, db_index=True, help_text="Beneficiary phone number valid [sys]")
     phone_no_alternative = PhoneNumberField(blank=True, db_index=True, help_text="Beneficiary phone number alternative")
-    phone_no_alternative_valid = models.BooleanField(
-        null=True, db_index=True, help_text="Beneficiary phone number alternative valid [sys]"
-    )
     email = models.CharField(max_length=255, blank=True, help_text="Beneficiary email address")
     payment_delivery_phone_no = PhoneNumberField(
         blank=True, null=True, help_text="Beneficiary payment delivery phone number"
@@ -951,12 +937,6 @@ class Individual(
             simply means they are a representative of one or more households
             and not a member of one.""",
     )
-    registration_data_import = models.ForeignKey(
-        "registration_data.RegistrationDataImport",
-        related_name="individuals",
-        on_delete=models.CASCADE,
-        help_text="RDI where Beneficiary was imported [sys]",
-    )
     work_status = models.CharField(
         max_length=20,
         choices=WORK_STATUS_CHOICE,
@@ -964,11 +944,76 @@ class Individual(
         default=NOT_PROVIDED,
         help_text="Work status",
     )
-    first_registration_date = models.DateField(help_text="First registration date [sys]")
-    last_registration_date = models.DateField(help_text="Last registration date [sys]")
     flex_fields = JSONField(
         default=dict, blank=True, encoder=FlexFieldsEncoder, help_text="FlexFields JSON representation"
     )
+    pregnant = models.BooleanField(null=True, help_text="Pregnant status")
+
+    disability = models.CharField(
+        max_length=20, choices=DISABILITY_CHOICES, default=NOT_DISABLED, help_text="Disability status"
+    )
+    observed_disability = MultiSelectField(
+        choices=OBSERVED_DISABILITY_CHOICE, default=NONE, help_text="Observed disability status"
+    )
+    disability_certificate_picture = models.ImageField(
+        blank=True, null=True, help_text="Disability certificate picture"
+    )
+
+    seeing_disability = models.CharField(
+        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True, help_text="Seeing disability"
+    )
+    hearing_disability = models.CharField(
+        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True, help_text="Hearing disability"
+    )
+    physical_disability = models.CharField(
+        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True, help_text="Physical disability"
+    )
+    memory_disability = models.CharField(
+        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True, help_text="Memory disability"
+    )
+    selfcare_disability = models.CharField(
+        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True, help_text="Selfcare disability"
+    )
+    comms_disability = models.CharField(
+        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True, help_text="Comms disability"
+    )
+
+    who_answers_phone = models.CharField(max_length=150, blank=True, help_text="Who answers phone number")
+    who_answers_alt_phone = models.CharField(max_length=150, blank=True, help_text="Who answers alt phone number")
+
+    preferred_language = models.CharField(
+        max_length=6, choices=Languages.get_tuple(), null=True, blank=True, help_text="Preferred language"
+    )
+    relationship_confirmed = models.BooleanField(default=False, help_text="Relationship confirmed status")
+    wallet_name = models.CharField(max_length=64, blank=True, default="", help_text="Wallet name")
+    blockchain_name = models.CharField(max_length=64, blank=True, default="", help_text="Blockchain name")
+    wallet_address = models.CharField(max_length=128, blank=True, default="", help_text="Wallet address")
+
+    # System fields
+    individual_collection = models.ForeignKey(
+        IndividualCollection,
+        related_name="individuals",
+        on_delete=models.CASCADE,
+        null=True,
+        help_text="Collection of individual representations [sys]",
+    )
+    duplicate = models.BooleanField(default=False, db_index=True, help_text="Duplicate status [sys]")
+    duplicate_date = models.DateTimeField(null=True, blank=True, help_text="Duplicate date [sys]")
+    withdrawn = models.BooleanField(default=False, db_index=True, help_text="Withdrawn status [sys]")
+    withdrawn_date = models.DateTimeField(null=True, blank=True, help_text="Withdrawn date [sys]")
+
+    phone_no_valid = models.BooleanField(null=True, db_index=True, help_text="Beneficiary phone number valid [sys]")
+    phone_no_alternative_valid = models.BooleanField(
+        null=True, db_index=True, help_text="Beneficiary phone number alternative valid [sys]"
+    )
+    registration_data_import = models.ForeignKey(
+        "registration_data.RegistrationDataImport",
+        related_name="individuals",
+        on_delete=models.CASCADE,
+        help_text="RDI where Beneficiary was imported [sys]",
+    )
+    first_registration_date = models.DateField(help_text="First registration date [sys]")
+    last_registration_date = models.DateField(help_text="Last registration date [sys]")
     enrolled_in_nutrition_programme = models.BooleanField(null=True, help_text="Enrolled in nutrition programe [sys]")
     administration_of_rutf = models.BooleanField(null=True, help_text="Administration on rutf [sys]")
     deduplication_golden_record_status = models.CharField(
@@ -1016,39 +1061,6 @@ class Individual(
     sanction_list_confirmed_match = models.BooleanField(
         default=False, db_index=True, help_text="Sanction list confirmed match [sys]"
     )
-    pregnant = models.BooleanField(null=True, help_text="Pregnant status")
-
-    disability = models.CharField(
-        max_length=20, choices=DISABILITY_CHOICES, default=NOT_DISABLED, help_text="Disability status"
-    )
-    observed_disability = MultiSelectField(
-        choices=OBSERVED_DISABILITY_CHOICE, default=NONE, help_text="Observed disability status"
-    )
-    disability_certificate_picture = models.ImageField(
-        blank=True, null=True, help_text="Disability certificate picture"
-    )
-
-    seeing_disability = models.CharField(
-        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True, help_text="Seeing disability"
-    )
-    hearing_disability = models.CharField(
-        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True, help_text="Hearing disability"
-    )
-    physical_disability = models.CharField(
-        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True, help_text="Physical disability"
-    )
-    memory_disability = models.CharField(
-        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True, help_text="Memory disability"
-    )
-    selfcare_disability = models.CharField(
-        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True, help_text="Selfcare disability"
-    )
-    comms_disability = models.CharField(
-        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True, help_text="Communication disability"
-    )
-
-    who_answers_phone = models.CharField(max_length=150, blank=True, help_text="Who answers phone number")
-    who_answers_alt_phone = models.CharField(max_length=150, blank=True, help_text="Who answers alt phone number")
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE, help_text="Business area [sys]")
     fchild_hoh = models.BooleanField(default=False, help_text="Fchild hoh status [sys]")
     child_hoh = models.BooleanField(default=False, help_text="Child hoh status [sys]")
@@ -1062,14 +1074,7 @@ class Individual(
         verbose_name=_("Beneficiary Program Registration Id"),
         help_text="Beneficiary Program Registration ID [sys]",
     )
-    preferred_language = models.CharField(
-        max_length=6, choices=Languages.get_tuple(), null=True, blank=True, help_text="Preferred language"
-    )
-    relationship_confirmed = models.BooleanField(default=False, help_text="Relationship confirmed status")
     age_at_registration = models.PositiveSmallIntegerField(null=True, blank=True, help_text="Age at registration [sys]")
-    wallet_name = models.CharField(max_length=64, blank=True, default="", help_text="Wallet name")
-    blockchain_name = models.CharField(max_length=64, blank=True, default="", help_text="Blockchain name")
-    wallet_address = models.CharField(max_length=128, blank=True, default="", help_text="Wallet address")
 
     program = models.ForeignKey(
         "program.Program",
