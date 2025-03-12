@@ -1,34 +1,27 @@
-from typing import Any
+from typing import Any, Optional
+
+from django.db.models import QuerySet
 
 from rest_framework_extensions.key_constructor import bits
 from rest_framework_extensions.key_constructor.bits import KeyBitBase
 from rest_framework_extensions.key_constructor.constructors import KeyConstructor
 
-from hct_mis_api.api.caches import KeyConstructorMixin, get_or_create_cache_key
+from hct_mis_api.api.caches import (
+    BusinessAreaAndProgramLastUpdatedKeyBit,
+    KeyConstructorMixin,
+    get_or_create_cache_key,
+)
 from hct_mis_api.apps.program.models import ProgramCycle
 
 
-class ProgramCycleListVersionsKeyBit(KeyBitBase):
-    def get_data(
-        self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
-    ) -> str:
-        program_slug = kwargs.get("program_slug")
-        business_area_slug = kwargs.get("business_area_slug")
-        program_cycle_qs = ProgramCycle.objects.filter(
+class ProgramCycleListVersionsKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
+    specific_view_cache_key = "program_cycle_list"
+
+    def _get_queryset(self, business_area_slug: Optional[Any], program_slug: Optional[Any]) -> QuerySet:
+        return ProgramCycle.objects.filter(
             program__slug=program_slug,
             program__business_area__slug=business_area_slug,
         )
-        program_cycle_updated_at = program_cycle_qs.latest("updated_at").updated_at
-        program_cycle_count = program_cycle_qs.count()
-
-        business_area_slug = kwargs.get("business_area_slug")
-        business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
-
-        version_key = (
-            f"{business_area_slug}:{business_area_version}:{program_slug}:program_cycle_list:"
-            f"{program_cycle_updated_at}:{program_cycle_count}"
-        )
-        return str(version_key)
 
 
 class ProgramCycleKeyConstructor(KeyConstructorMixin):

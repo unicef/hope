@@ -2,13 +2,16 @@ from typing import Any
 
 from django.db.models import QuerySet
 
+from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
+from rest_framework_extensions.cache.decorators import cache_response
 
+from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.api.mixins import (
     BaseViewSet,
@@ -18,6 +21,7 @@ from hct_mis_api.apps.core.api.mixins import (
     ProgramVisibilityMixin,
     SerializerActionMixin,
 )
+from hct_mis_api.apps.household.api.caches import HouseholdListKeyConstructor
 from hct_mis_api.apps.household.api.serializers.household import (
     HouseholdDetailSerializer,
     HouseholdListSerializer,
@@ -61,6 +65,11 @@ class HouseholdViewSet(
             return Household.objects.none()
 
         return super().get_queryset().select_related("head_of_household", "program", "admin1", "admin2")
+
+    @etag_decorator(HouseholdListKeyConstructor)
+    @cache_response(timeout=config.REST_API_TTL, key_func=HouseholdListKeyConstructor())
+    def list(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+        return super().list(request, *args, **kwargs)
 
     @action(
         detail=True,
