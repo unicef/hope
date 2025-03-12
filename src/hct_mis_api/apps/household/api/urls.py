@@ -5,11 +5,11 @@ from hct_mis_api.apps.household.api.views import (
     HouseholdGlobalViewSet,
     HouseholdViewSet,
 )
-from hct_mis_api.apps.program.api.urls import get_program_nested_router
+from hct_mis_api.apps.program.api.urls import program_base_router
 
 app_name = "payment"
 
-program_nested_router = get_program_nested_router()
+program_nested_router = program_base_router.program_nested_router
 program_nested_router.register(
     "households",
     HouseholdViewSet,

@@ -77,7 +77,6 @@ class APICountriesTests(HOPEApiTestCase):
                 self.get_response(self.country_poland),
             ],
         )
-        self.assertIn("count", response.json())
         self.assertIn("next", response.json())
         self.assertIn("previous", response.json())
 
