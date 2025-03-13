@@ -44,7 +44,6 @@ logger = logging.getLogger(__name__)
 
 class PaymentPlanMixin:
     serializer_class = PaymentPlanSerializer
-    permission_classes = []
     filter_backends = (
         filters.DjangoFilterBackend,
         SearchFilter,
