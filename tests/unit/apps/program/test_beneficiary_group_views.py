@@ -15,7 +15,7 @@ class BeneficiaryGroupAPITestCase(HOPEApiTestCase):
         cls.client = APIClient()
 
         cls.list_url = reverse(
-            "api:beneficiary-group:beneficiary-group-list",
+            "api:programs:beneficiary-groups-list",
         )
         cls.beneficiary_group1 = BeneficiaryGroupFactory(name="Household")
         cls.beneficiary_group2 = BeneficiaryGroupFactory(name="Social Workers")
