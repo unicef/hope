@@ -112,6 +112,10 @@ class CreateProgram(
             data_collecting_type=data_collecting_type,
             beneficiary_group=beneficiary_group,
         )
+        if not program.programme_code:
+            program.programme_code = program.generate_programme_code()
+        program.slug = program.generate_slug()
+
         program.full_clean()
         program.save()
         ProgramCycle.objects.create(

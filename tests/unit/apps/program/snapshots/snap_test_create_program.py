@@ -722,7 +722,7 @@ snapshots['TestCreateProgram::test_create_program_with_programme_code_greater_th
                     'line': 3
                 }
             ],
-            'message': 'Programme code should be exactly 4 characters long and may only contain letters, digits and characters: - . /',
+            'message': 'Programme code should be exactly 4 characters long and may only contain letters, digits and character: -',
             'path': [
                 'createProgram'
             ]
@@ -742,7 +742,7 @@ snapshots['TestCreateProgram::test_create_program_with_programme_code_less_than_
                     'line': 3
                 }
             ],
-            'message': 'Programme code should be exactly 4 characters long and may only contain letters, digits and characters: - . /',
+            'message': 'Programme code should be exactly 4 characters long and may only contain letters, digits and character: -',
             'path': [
                 'createProgram'
             ]
@@ -762,7 +762,7 @@ snapshots['TestCreateProgram::test_create_program_with_programme_code_not_within
                     'line': 3
                 }
             ],
-            'message': 'Programme code should be exactly 4 characters long and may only contain letters, digits and characters: - . /',
+            'message': 'Programme code should be exactly 4 characters long and may only contain letters, digits and character: -',
             'path': [
                 'createProgram'
             ]
