@@ -5,13 +5,13 @@ import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import { PaymentPlanBuildStatus } from '@generated/graphql';
 import { PaperContainer } from './PaperContainer';
-import { ResultsForHouseholds } from './ResultsForHouseholds';
-import { TargetingHouseholds } from './TargetingHouseholds';
+import ResultsForHouseholds from './ResultsForHouseholds';
+import TargetingHouseholds from './TargetingHouseholds';
 import { TargetPopulationPeopleTable } from '@containers/tables/targeting/TargetPopulationPeopleTable';
-import { ResultsForPeople } from '@components/targeting/ResultsForPeople';
+import ResultsForPeople from '@components/targeting/ResultsForPeople';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
-import { AddFilterTargetingCriteriaDisplay } from './TargetingCriteriaDisplay/AddFilterTargetingCriteriaDisplay';
+import AddFilterTargetingCriteriaDisplay from './TargetingCriteriaDisplay/AddFilterTargetingCriteriaDisplay';
 
 const Label = styled.p`
   color: #b1b1b5;

@@ -347,7 +347,6 @@ class GenericRegistrationService(BaseRegistrationService):
                 individual=sec_collector, household=household, role=ROLE_ALTERNATE
             )
 
-        household.registration_id = record.source_id  # TODO to be removed
         household.detail_id = record.source_id
         household.save()
         record.mark_as_imported()

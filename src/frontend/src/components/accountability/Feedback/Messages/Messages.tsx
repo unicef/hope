@@ -17,6 +17,7 @@ import { OverviewContainerColumn } from '@core/OverviewContainerColumn';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const Name = styled.span`
   font-size: 16px;
@@ -40,10 +41,7 @@ interface MessagesProps {
   canAddMessage: boolean;
 }
 
-export function Messages({
-  messages,
-  canAddMessage,
-}: MessagesProps): ReactElement {
+function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
   const { t } = useTranslation();
   const { data: meData, loading: meLoading } = useMeQuery({
     fetchPolicy: 'cache-and-network',
@@ -63,10 +61,10 @@ export function Messages({
     noteId: string,
   ): ReactElement => (
     <Grid container key={noteId}>
-      <Grid size={{ xs:2 }}>
+      <Grid size={{ xs: 2 }}>
         <Avatar alt={`${name} picture`} src="/static/images/avatar/1.jpg" />
       </Grid>
-      <Grid size={{ xs:10 }}>
+      <Grid size={{ xs: 10 }}>
         <Grid size={{ xs: 12 }}>
           <Box display="flex" justifyContent="space-between">
             <Name>{name}</Name>
@@ -104,7 +102,7 @@ export function Messages({
   const myName = `${meData.me.firstName || meData.me.email}`;
 
   return (
-    <Grid size={{ xs:8 }}>
+    <Grid size={{ xs: 8 }}>
       <Box p={3}>
         <Formik
           initialValues={initialValues}
@@ -130,10 +128,10 @@ export function Messages({
                 {mappedMessages}
                 {canAddMessage && (
                   <Grid container>
-                    <Grid size={{ xs:2 }}>
+                    <Grid size={{ xs: 2 }}>
                       <Avatar src={myName} alt={myName} />
                     </Grid>
-                    <Grid size={{ xs:10 }}>
+                    <Grid size={{ xs: 10 }}>
                       <Grid size={{ xs: 12 }}>
                         <Box display="flex" justifyContent="space-between">
                           <Name>{renderUserName(meData.me)}</Name>
@@ -178,3 +176,5 @@ export function Messages({
     </Grid>
   );
 }
+
+export default withErrorBoundary(Messages, 'Messages');
