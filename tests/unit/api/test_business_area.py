@@ -3,6 +3,7 @@ from rest_framework.reverse import reverse
 from hct_mis_api.api.models import Grant
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import encode_id_base64_required
 from tests.unit.api.base import HOPEApiTestCase, token_grant_permission
 
 
@@ -13,7 +14,7 @@ class APIBusinessAreaTests(HOPEApiTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        cls.list_url = reverse("api:business-area-list")
+        cls.list_url = reverse("api:core:business-areas-list")
 
     def test_list_business_area(self) -> None:
         business_area1: BusinessArea = BusinessAreaFactory(
@@ -36,13 +37,13 @@ class APIBusinessAreaTests(HOPEApiTestCase):
         business_area2.refresh_from_db()
         response = self.client.get(self.list_url)
         assert response.status_code == 403
-        with token_grant_permission(self.token, Grant.API_READ_ONLY):
-            response = self.client.get(self.list_url)
+        self.client.force_authenticate(self.user)
+        response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json()["results"]), 3)
         self.assertIn(
             {
-                "id": str(self.business_area.id),
+                "id": encode_id_base64_required(self.business_area.id, "BusinessArea"),
                 "name": self.business_area.name,
                 "code": self.business_area.code,
                 "long_name": self.business_area.long_name,
@@ -55,7 +56,7 @@ class APIBusinessAreaTests(HOPEApiTestCase):
         )
         self.assertIn(
             {
-                "id": str(business_area1.id),
+                "id": encode_id_base64_required(business_area1.id, "BusinessArea"),
                 "name": business_area1.name,
                 "code": business_area1.code,
                 "long_name": business_area1.long_name,
@@ -68,7 +69,7 @@ class APIBusinessAreaTests(HOPEApiTestCase):
         )
         self.assertIn(
             {
-                "id": str(business_area2.id),
+                "id": encode_id_base64_required(business_area2.id, "BusinessArea"),
                 "name": business_area2.name,
                 "code": business_area2.code,
                 "long_name": business_area2.long_name,
