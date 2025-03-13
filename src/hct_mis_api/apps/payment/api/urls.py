@@ -15,9 +15,9 @@ business_area_nested_router.register(
 )
 program_nested_router = program_base_router.program_nested_router
 program_nested_router.register(
-    "payment-plans/<str:payment_plan_id>/supporting-documents",
+    "payment-plans/(?P<payment_plan_id>[^/.]+)/supporting-documents",
     PaymentPlanSupportingDocumentViewSet,
-    basename="supporting_documents",
+    basename="supporting-documents",
 )
 
 urlpatterns = [
