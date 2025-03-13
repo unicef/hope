@@ -124,7 +124,6 @@ export const GlobalProgramSelect = () => {
     data: programsData,
     isLoading: loadingPrograms,
     refetch: refetchPrograms,
-    // isSuccess,
   } = useQuery({
     queryKey: ['businessAreaProgram', businessArea, queryParams],
     queryFn: () =>
