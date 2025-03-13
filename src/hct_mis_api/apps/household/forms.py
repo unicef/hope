@@ -289,3 +289,27 @@ class DocumentForm(forms.ModelForm):
         # override queryset for Individual
         if "individual" in self.Meta.fields:
             self.fields["individual"].queryset = PendingIndividual.objects.all()
+
+
+class WithdrawHouseholdsForm(forms.Form):
+    business_area = forms.ModelChoiceField(
+        queryset=BusinessArea.objects.all().order_by("name"),
+        required=True,
+        widget=AutocompleteWidget(BusinessArea, ""),
+    )
+    program = forms.ModelChoiceField(
+        queryset=Program.objects.none(),
+        required=True,
+        widget=None,
+    )
+    household_list = forms.CharField(widget=forms.Textarea, required=True, label="Household IDs")
+    tag = forms.CharField(required=True, label="Tag")
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        business_area = kwargs.pop("business_area", None)
+        super().__init__(*args, **kwargs)
+        if business_area:
+            self.fields["program"].queryset = Program.objects.filter(
+                business_area=business_area, status=Program.ACTIVE
+            ).order_by("name")
+            self.fields["program"].widget = AutocompleteWidget(Program, "", business_area=business_area)

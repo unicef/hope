@@ -30,10 +30,10 @@ import { HouseholdCompositionTable } from '../../tables/population/HouseholdComp
 import { AdminButton } from '@core/AdminButton';
 import { CollectorsTable } from '@containers/tables/population/CollectorsTable';
 import { HouseholdMembersTable } from '@containers/tables/population/HouseholdMembersTable';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
-import { PaymentsHouseholdTable } from '@containers/tables/payments/PaymentsHouseholdTable';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import PaymentsHouseholdTable from '@containers/tables/payments/PaymentsHouseholdTable/PaymentsHouseholdTable';
 
 const Container = styled.div`
   padding: 20px;
@@ -59,7 +59,7 @@ const SubTitle = styled(Typography)`
   }
 `;
 
-export const PopulationHouseholdDetailsPage = (): ReactElement => {
+const PopulationHouseholdDetailsPage = (): ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const { baseUrl, businessArea } = useBaseUrl();
@@ -120,14 +120,7 @@ export const PopulationHouseholdDetailsPage = (): ReactElement => {
   const { household } = data;
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'PopulationHouseholdDetailsPage.tsx');
-      }}
-      componentName="PopulationHouseholdDetailsPage"
-    >
+    <>
       <PageHeader
         title={`${beneficiaryGroup?.groupLabel}: ${renderSomethingOrDash(
           household?.unicefId,
@@ -273,6 +266,11 @@ export const PopulationHouseholdDetailsPage = (): ReactElement => {
       {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
         <UniversalActivityLogTable objectId={data.household?.id} />
       )}
-    </UniversalErrorBoundary>
+    </>
   );
 };
+
+export default withErrorBoundary(
+  PopulationHouseholdDetailsPage,
+  'PopulationHouseholdDetailsPage',
+);

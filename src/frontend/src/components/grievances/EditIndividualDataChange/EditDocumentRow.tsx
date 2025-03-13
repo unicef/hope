@@ -11,7 +11,7 @@ import {
   AllIndividualsQuery,
 } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
-import { PhotoModal } from '@core/PhotoModal/PhotoModal';
+import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { DocumentField } from '../DocumentField';
 import { removeItemById } from '../utils/helpers';
 
@@ -107,10 +107,10 @@ export function EditDocumentRow({
           />
         </DisabledDiv>
       </Grid>
-      <Grid size={{ xs:2 }}>
+      <Grid size={{ xs: 2 }}>
         <PhotoModal showRotate={false} src={document.node.photo} />
       </Grid>
-      <Grid size={{ xs:1 }}>
+      <Grid size={{ xs: 1 }}>
         {!removed ? (
           !isEditTicket && (
             <Box display="flex" align-items="center">

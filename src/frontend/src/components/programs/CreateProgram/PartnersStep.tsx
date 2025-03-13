@@ -11,6 +11,7 @@ import { ProgramPartnerCard } from './ProgramPartnerCard';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { DividerLine } from '@core/DividerLine';
 import { partnerAccessChoices } from '@components/programs/constants';
+import { LoadingButton } from '@components/core/LoadingButton';
 
 interface PartnersStepProps {
   values;
@@ -21,6 +22,7 @@ interface PartnersStepProps {
   submitForm: () => void;
   setFieldValue;
   programId?: string;
+  loading: boolean;
 }
 
 export const PartnersStep: FC<PartnersStepProps> = ({
@@ -32,6 +34,7 @@ export const PartnersStep: FC<PartnersStepProps> = ({
   submitForm,
   setFieldValue,
   programId: formProgramId,
+  loading,
 }) => {
   const { t } = useTranslation();
   const { baseUrl, programId, businessArea } = useBaseUrl();
@@ -73,7 +76,7 @@ export const PartnersStep: FC<PartnersStepProps> = ({
   return (
     <>
       <Box display="flex" justifyContent="space-between" mt={2}>
-        <Grid size={{ xs:6 }}>
+        <Grid size={{ xs: 6 }}>
           <Field
             name="partnerAccess"
             label={t('Who should have access to the program?')}
@@ -157,14 +160,15 @@ export const PartnersStep: FC<PartnersStepProps> = ({
               {t('Back')}
             </Button>
           </Box>
-          <Button
+          <LoadingButton
             data-cy="button-save"
             variant="contained"
             color="primary"
             onClick={submitForm}
+            loading={loading}
           >
             {t('Save')}
-          </Button>
+          </LoadingButton>
         </Box>
       </Box>
     </>

@@ -25,6 +25,7 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
+from hct_mis_api.apps.payment.models import DeliveryMechanism, DeliveryMechanismData
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_datahub.tasks.import_program_population import (
@@ -157,7 +158,7 @@ class TestProgramPopulationToPendingObjects(APITestCase):
                 "admin2": AreaFactory(),
                 "admin3": AreaFactory(),
                 "admin4": AreaFactory(),
-                "registration_id": "1234567890",
+                "detail_id": "1234567890",
                 "flex_fields": {"enumerator_id": "123", "some": "thing"},
                 "country": country,
                 "country_origin": country_origin,
@@ -208,6 +209,17 @@ class TestProgramPopulationToPendingObjects(APITestCase):
             individual=cls.individuals[0],
         )
 
+        cls.delivery_mechanism = DeliveryMechanism.objects.create(
+            name="Mobile Money", code="mobile_money", required_fields=["phone_number_test"]
+        )
+        cls.delivery_mechanism_data = DeliveryMechanismData(
+            delivery_mechanism=cls.delivery_mechanism,
+            individual=cls.individuals[0],
+            data={"phone_number_test": "1234567890"},
+            rdi_merge_status=MergeStatusModel.MERGED,
+        )
+        cls.delivery_mechanism_data.save()
+
     def _object_count_before_after(self) -> None:
         self.assertEqual(
             Household.pending_objects.count(),
@@ -233,6 +245,7 @@ class TestProgramPopulationToPendingObjects(APITestCase):
             IndividualRoleInHousehold.pending_objects.count(),
             0,
         )
+        self.assertEqual(DeliveryMechanismData.all_objects.filter(rdi_merge_status=MergeStatusModel.PENDING).count(), 0)
 
         import_program_population(
             import_from_program_id=str(self.program_from.id),
@@ -264,6 +277,7 @@ class TestProgramPopulationToPendingObjects(APITestCase):
             IndividualRoleInHousehold.pending_objects.count(),
             1,
         )
+        self.assertEqual(DeliveryMechanismData.all_objects.filter(rdi_merge_status=MergeStatusModel.PENDING).count(), 1)
 
     def test_create_pending_objects_from_objects(self) -> None:
         self._object_count_before_after()
