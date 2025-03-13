@@ -91,13 +91,15 @@ class ProgramCycleCreateSerializer(EncodedIdSerializerMixin):
         model = ProgramCycle
         fields = ["title", "start_date", "end_date"]
 
-    @staticmethod
-    def get_program(program_id: str) -> Program:
-        program = get_object_or_404(Program, id=decode_id_string(program_id))
+    def get_program(self) -> Program:
+        request = self.context["request"]
+        business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
+        program_slug = request.parser_context["kwargs"]["program_slug"]
+        program = get_object_or_404(Program, business_area__slug=business_area_slug, slug=program_slug)
         return program
 
     def validate_title(self, value: str) -> str:
-        program = self.get_program(self.context["request"].parser_context["kwargs"]["program_id"])
+        program = self.get_program()
         cycles = program.cycles.all()
         if cycles.filter(title=value).exists():
             raise serializers.ValidationError({"title": "Programme Cycles' title should be unique."})
@@ -105,7 +107,7 @@ class ProgramCycleCreateSerializer(EncodedIdSerializerMixin):
 
     def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:
         request = self.context["request"]
-        program = self.get_program(request.parser_context["kwargs"]["program_id"])
+        program = self.get_program()
         start_date = data["start_date"]
         end_date = data.get("end_date")
         data["program"] = program

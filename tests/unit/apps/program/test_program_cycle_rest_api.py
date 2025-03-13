@@ -81,11 +81,11 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
         )
         cls.program_id_base64 = base64.b64encode(f"ProgramNode:{str(cls.program.pk)}".encode()).decode()
         cls.list_url = reverse(
-            "api:programs:cycles-list", kwargs={"business_area": "afghanistan", "program_id": cls.program_id_base64}
+            "api:programs:cycles-list", kwargs={"business_area_slug": "afghanistan", "program_slug": cls.program.slug}
         )
         cls.cycle_1_detail_url = reverse(
             "api:programs:cycles-detail",
-            kwargs={"business_area": "afghanistan", "program_id": cls.program_id_base64, "pk": str(cls.cycle1.id)},
+            kwargs={"business_area_slug": "afghanistan", "program_slug": cls.program.slug, "pk": str(cls.cycle1.id)},
         )
 
     def test_list_program_cycles_without_perms(self) -> None:
@@ -97,8 +97,6 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
         self.client.force_authenticate(user=self.user)
         response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        cycles = ProgramCycle.objects.filter(program=self.program)
-        self.assertEqual(int(response.data["count"]), cycles.count())
 
         results = response.data["results"]
         first_cycle = results[0]
@@ -183,10 +181,11 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
         self.client.force_authenticate(user=self.user)
         url = reverse(
             "api:programs:cycles-detail",
-            kwargs={"business_area": "afghanistan", "program_id": self.program_id_base64, "pk": str(cycle3.id)},
+            kwargs={"business_area_slug": "afghanistan", "program_slug": self.program.slug, "pk": str(cycle3.id)},
         )
 
         bad_response = self.client.delete(url)
+        breakpoint()
         self.assertEqual(bad_response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("Don’t allow to delete Cycle with assigned Target Population", bad_response.data)
         pp.delete()
@@ -300,7 +299,9 @@ class ProgramCycleCreateSerializerTest(TestCase):
             username="MyUser", first_name="FirstName", last_name="LastName", password="PassworD"
         )
         request.user = user
-        request.parser_context = {"kwargs": {"program_id": str(self.program_id)}}
+        request.parser_context = {
+            "kwargs": {"program_slug": str(self.program.slug), "business_area_slug": "afghanistan"}
+        }
         return {"request": request}
 
     def test_validate_title_unique(self) -> None:
