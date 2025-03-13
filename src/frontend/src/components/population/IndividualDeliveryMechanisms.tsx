@@ -33,7 +33,10 @@ export const IndividualDeliveryMechanisms: FC<
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  if (!individual.deliveryMechanismsData.length || !canViewDeliveryMechanisms) {
+  if (
+    !individual?.deliveryMechanismsData?.length ||
+    !canViewDeliveryMechanisms
+  ) {
     return null;
   }
   return (
