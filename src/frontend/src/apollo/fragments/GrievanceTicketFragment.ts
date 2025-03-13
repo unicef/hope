@@ -220,6 +220,7 @@ export const grievanceTicketDetailed = gql`
         }
         dedupEngineSimilarityPair {
           similarityScore
+          statusCode
           individual1 {
             unicefId
             fullName
