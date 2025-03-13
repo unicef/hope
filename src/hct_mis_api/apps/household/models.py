@@ -535,6 +535,7 @@ class Household(
     migrated_at = models.DateTimeField(null=True, blank=True)
     collect_type = models.CharField(choices=CollectType.choices, default=CollectType.STANDARD.value, max_length=8)
 
+    # System fields
     kobo_submission_uuid = models.UUIDField(null=True, default=None)
     kobo_submission_time = models.DateTimeField(max_length=150, blank=True, null=True)
     enumerator_rec_id = models.PositiveIntegerField(blank=True, null=True)
@@ -902,7 +903,7 @@ class Individual(
     middle_name = CICharField(max_length=85, blank=True, db_index=True, help_text="Middle name of the Beneficiary")
     family_name = CICharField(max_length=85, blank=True, db_index=True, help_text="Last name of the Beneficiary")
     sex = models.CharField(max_length=255, choices=SEX_CHOICE, db_index=True, help_text="Beneficiary gender")
-    birth_date = models.DateField(db_index=True, help_text="Beneficiary birth date")
+    birth_date = models.DateField(db_index=True, help_text="Beneficiary date of birth")
     estimated_birth_date = models.BooleanField(default=False, help_text="Estimated birth date")
     marital_status = models.CharField(
         max_length=255,
@@ -916,7 +917,7 @@ class Individual(
     phone_no_alternative = PhoneNumberField(blank=True, db_index=True, help_text="Beneficiary phone number alternative")
     email = models.CharField(max_length=255, blank=True, help_text="Beneficiary email address")
     payment_delivery_phone_no = PhoneNumberField(
-        blank=True, null=True, help_text="Beneficiary payment delivery phone number"
+        blank=True, null=True, help_text="Beneficiary contact phone number"
     )
 
     relationship = models.CharField(
@@ -943,9 +944,6 @@ class Individual(
         blank=True,
         default=NOT_PROVIDED,
         help_text="Work status",
-    )
-    flex_fields = JSONField(
-        default=dict, blank=True, encoder=FlexFieldsEncoder, help_text="FlexFields JSON representation"
     )
     pregnant = models.BooleanField(null=True, help_text="Pregnant status")
 
@@ -979,15 +977,15 @@ class Individual(
     )
 
     who_answers_phone = models.CharField(max_length=150, blank=True, help_text="Who answers phone number")
-    who_answers_alt_phone = models.CharField(max_length=150, blank=True, help_text="Who answers alt phone number")
+    who_answers_alt_phone = models.CharField(max_length=150, blank=True, help_text="Who answers alternative phone number")
 
     preferred_language = models.CharField(
         max_length=6, choices=Languages.get_tuple(), null=True, blank=True, help_text="Preferred language"
     )
     relationship_confirmed = models.BooleanField(default=False, help_text="Relationship confirmed status")
-    wallet_name = models.CharField(max_length=64, blank=True, default="", help_text="Wallet name")
-    blockchain_name = models.CharField(max_length=64, blank=True, default="", help_text="Blockchain name")
-    wallet_address = models.CharField(max_length=128, blank=True, default="", help_text="Wallet address")
+    wallet_name = models.CharField(max_length=64, blank=True, default="", help_text="Cryptocurrency wallet name")
+    blockchain_name = models.CharField(max_length=64, blank=True, default="", help_text="Cryptocurrency blockchain name")
+    wallet_address = models.CharField(max_length=128, blank=True, default="", help_text="Cryptocurrency wallet address")
 
     # System fields
     individual_collection = models.ForeignKey(
@@ -997,11 +995,21 @@ class Individual(
         null=True,
         help_text="Collection of individual representations [sys]",
     )
+    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE, help_text="Business area [sys]")
+    program = models.ForeignKey(
+        "program.Program",
+        db_index=True,
+        related_name="individuals",
+        on_delete=models.PROTECT,
+        help_text="Program [sys]",
+    )
     duplicate = models.BooleanField(default=False, db_index=True, help_text="Duplicate status [sys]")
     duplicate_date = models.DateTimeField(null=True, blank=True, help_text="Duplicate date [sys]")
     withdrawn = models.BooleanField(default=False, db_index=True, help_text="Withdrawn status [sys]")
     withdrawn_date = models.DateTimeField(null=True, blank=True, help_text="Withdrawn date [sys]")
-
+    flex_fields = JSONField(
+        default=dict, blank=True, encoder=FlexFieldsEncoder, help_text="FlexFields JSON representation [sys]"
+    )
     phone_no_valid = models.BooleanField(null=True, db_index=True, help_text="Beneficiary phone number valid [sys]")
     phone_no_alternative_valid = models.BooleanField(
         null=True, db_index=True, help_text="Beneficiary phone number alternative valid [sys]"
@@ -1061,9 +1069,8 @@ class Individual(
     sanction_list_confirmed_match = models.BooleanField(
         default=False, db_index=True, help_text="Sanction list confirmed match [sys]"
     )
-    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE, help_text="Business area [sys]")
-    fchild_hoh = models.BooleanField(default=False, help_text="Fchild hoh status [sys]")
-    child_hoh = models.BooleanField(default=False, help_text="Child hoh status [sys]")
+    fchild_hoh = models.BooleanField(default=False, help_text="Fchild hoh status [sys]")  # TODO: check where we use this field?
+    child_hoh = models.BooleanField(default=False, help_text="Child hoh status [sys]")  # TODO: check where we use this field?
     detail_id = models.CharField(
         max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora registration ID [sys]"
     )
@@ -1075,14 +1082,6 @@ class Individual(
         help_text="Beneficiary Program Registration ID [sys]",
     )
     age_at_registration = models.PositiveSmallIntegerField(null=True, blank=True, help_text="Age at registration [sys]")
-
-    program = models.ForeignKey(
-        "program.Program",
-        db_index=True,
-        related_name="individuals",
-        on_delete=models.PROTECT,
-        help_text="Program [sys]",
-    )
     copied_from = models.ForeignKey(
         "self",
         null=True,
@@ -1098,7 +1097,7 @@ class Individual(
     migrated_at = models.DateTimeField(null=True, blank=True, help_text="Migrated at [sys]")
     mis_unicef_id = models.CharField(max_length=255, null=True, help_text="MIS unicef_id [sys]")
 
-    vector_column = SearchVectorField(null=True, help_text="Vector column [sys]")
+    vector_column = SearchVectorField(null=True, help_text="Database vector column for search [sys]")
 
     def delete(self, *args: Any, **kwargs: Any) -> Tuple[int, Dict[str, int]]:
         individual_deleted.send(self.__class__, instance=self)
