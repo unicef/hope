@@ -129,7 +129,7 @@ class ADUSerMixin:
                 emails = set(form.cleaned_data["emails"].split())
                 role = form.cleaned_data["role"]
                 business_area = form.cleaned_data["business_area"]
-                partner = form.cleaned_data["partner"]  # pragma: no cover
+                partner = form.cleaned_data["partner"]
                 users_to_bulk_create = []
                 users_role_to_bulk_create = []
                 existing = set(account_models.User.objects.filter(email__in=emails).values_list("email", flat=True))
@@ -145,7 +145,7 @@ class ADUSerMixin:
                             else:
                                 user_data = ms_graph.get_user_data(email=email)
                                 user_args = build_arg_dict_from_dict(user_data, DJANGO_USER_MAP)
-                                user = account_models.User(**user_args, partner=partner)  # pragma: no cover
+                                user = account_models.User(**user_args, partner=partner)
                                 if user.first_name is None:
                                     user.first_name = ""
                                 if user.last_name is None:

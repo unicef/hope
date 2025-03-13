@@ -91,6 +91,7 @@ export const NeedsAdjudicationActions: FC<NeedsAdjudicationActionsProps> = ({
             similarityScore={dedupEngineSimilarityPair.similarityScore}
             individual1={dedupEngineSimilarityPair.individual1}
             individual2={dedupEngineSimilarityPair.individual2}
+            statusCode={dedupEngineSimilarityPair.statusCode}
           />
         )}
         {isEditable && canApprove && (
