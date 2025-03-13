@@ -189,7 +189,7 @@ export const PopulationHouseholdDetailsPage = (): ReactElement => {
           </>
         ) : null}
         {hasPermissions(
-          PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS,
+          PERMISSIONS.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS,
           permissions,
         ) && (
           <PaymentsHouseholdTable
@@ -197,7 +197,7 @@ export const PopulationHouseholdDetailsPage = (): ReactElement => {
             household={household as HouseholdNode}
             businessArea={businessArea}
             canViewPaymentRecordDetails={hasPermissions(
-              PERMISSIONS.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS,
+              PERMISSIONS.PM_VIEW_PAYMENT_LIST,
               permissions,
             )}
           />

@@ -229,7 +229,7 @@ export const PeopleDetailsPage = (): ReactElement => {
             </Grid>
           </OverviewPaper>
           {hasPermissions(
-            PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS,
+            PERMISSIONS.PM_VIEW_PAYMENT_LIST,
             permissions,
           ) && (
             <PaymentsPeopleTable
