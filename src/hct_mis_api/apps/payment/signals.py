@@ -31,9 +31,9 @@ def increment_target_population_version_cache(sender: Any, instance: PaymentPlan
         business_area_slug = instance.business_area.slug
         business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
 
-        program_id = instance.program_cycle.program.id
+        program_slug = instance.program_cycle.program.slug
 
-        version_key = f"{business_area_slug}:{business_area_version}:{program_id}:target_population_list"
+        version_key = f"{business_area_slug}:{business_area_version}:{program_slug}:target_population_list"
         get_or_create_cache_key(version_key, 0)
 
         cache.incr(version_key)
