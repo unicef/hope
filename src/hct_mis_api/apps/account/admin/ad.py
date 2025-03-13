@@ -154,7 +154,7 @@ class ADUSerMixin:
                             else:
                                 user_data = ms_graph.get_user_data(email=email)
                                 user_args = build_arg_dict_from_dict(user_data, DJANGO_USER_MAP)
-                                user = account_models.User(**user_args, partner=partner)  # pragma: no cover
+                                user = account_models.User(**user_args, partner=partner)
                                 if user.first_name is None:
                                     user.first_name = ""
                                 if user.last_name is None:
