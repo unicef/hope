@@ -543,10 +543,9 @@ class TestCreateProgram(APITestCase):
         )
         self.program_data["programData"]["programmeCode"] = "AB-2"
 
-        response = self.graphql_request(
+        self.graphql_request(
             request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
         )
-        breakpoint()
 
         program_count = Program.objects.filter(programme_code="AB-2").count()
         self.assertEqual(program_count, 2)

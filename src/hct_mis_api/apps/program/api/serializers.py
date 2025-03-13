@@ -9,7 +9,7 @@ from rest_framework import serializers
 from hct_mis_api.api.utils import EncodedIdSerializerMixin
 from hct_mis_api.apps.account.api.fields import Base64ModelField
 from hct_mis_api.apps.core.api.serializers import DataCollectingTypeSerializer
-from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64_required
+from hct_mis_api.apps.core.utils import encode_id_base64_required
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 
 
