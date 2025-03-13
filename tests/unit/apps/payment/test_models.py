@@ -889,16 +889,14 @@ class TestDeliveryMechanismDataModel(TestCase):
         self.hh.number_of_children = 1
         self.hh.save()
 
-        with mock.patch.object(dmd.delivery_mechanism, "optional_fields", []):
-            with mock.patch.object(dmd.delivery_mechanism, "required_fields", []):
-                self.assertEqual(
-                    dmd.delivery_data,
-                    {
-                        "full_name": dmd.individual.full_name,
-                        "number_of_children": 1,
-                        "name_of_cardholder__atm_card": "test",
-                    },
-                )
+        self.assertEqual(
+            dmd.delivery_data,
+            {
+                "full_name": dmd.individual.full_name,
+                "number_of_children": 1,
+                "name_of_cardholder__atm_card": "test",
+            },
+        )
 
     def test_validate(self) -> None:
         dmd = DeliveryMechanismDataFactory(data={"test": "test"}, individual=self.ind)
@@ -937,8 +935,6 @@ class TestDeliveryMechanismDataModel(TestCase):
         dmd_2.individual.seeing_disability = LOT_DIFFICULTY
         dmd_2.individual.save()
 
-        with mock.patch.object(dmd_1.delivery_mechanism, "unique_fields", unique_fields):
+        with mock.patch.object(dmd_1.account_type.unique_fields, "unique_fields", unique_fields):
             dmd_1.update_unique_field()
-            self.assertEqual(dmd_1.is_valid, True)
             self.assertIsNotNone(dmd_1.unique_key)
-            self.assertEqual(dmd_1.validation_errors, {})

@@ -44,7 +44,6 @@ from hct_mis_api.apps.household.models import (
     Individual,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanism
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
@@ -316,7 +315,6 @@ class TestCloseDataChangeTickets(APITestCase):
             },
             approve_status=True,
         )
-        cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
 
         rebuild_search_index()
 
