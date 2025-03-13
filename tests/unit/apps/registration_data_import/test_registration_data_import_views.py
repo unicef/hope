@@ -61,8 +61,8 @@ class TestRegistrationDataImportViews:
         self.url_list = reverse(
             "api:registration-data:registration-data-imports-list",
             kwargs={
-                "business_area": self.afghanistan.slug,
-                "program_id": id_to_base64(self.program1.id, "Program"),
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program1.slug,
             },
         )
 
@@ -227,7 +227,7 @@ class TestRegistrationDataImportViews:
 
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 15
+            assert len(ctx.captured_queries) == 12
 
         # Test that reoccurring requests use cached data
         with CaptureQueriesContext(connection) as ctx:
@@ -249,7 +249,7 @@ class TestRegistrationDataImportViews:
 
             etag_call_after_update = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 10  # less than the first call because of cached permissions
+            assert len(ctx.captured_queries) == 7  # less than the first call because of cached permissions
 
             assert etag_call_after_update != etag
 
