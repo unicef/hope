@@ -409,18 +409,19 @@ class Household(
         related_name="households",
         on_delete=models.CASCADE,
         null=True,
+        help_text="Collection of household representations [sys]",
     )
-    withdrawn = models.BooleanField(default=False, db_index=True)
-    withdrawn_date = models.DateTimeField(null=True, blank=True, db_index=True)
-    consent_sign = ImageField(validators=[validate_image_file_extension], blank=True)
-    consent = models.BooleanField(null=True)
-    consent_sharing = MultiSelectField(choices=DATA_SHARING_CHOICES, default=BLANK)
-    residence_status = models.CharField(max_length=254, choices=RESIDENCE_STATUS_CHOICE, blank=True)
+    withdrawn = models.BooleanField(default=False, db_index=True, help_text="Household withdrawn [sys]")
+    withdrawn_date = models.DateTimeField(null=True, blank=True, db_index=True, help_text="Household withdrawn date [sys]")
+    consent_sign = ImageField(validators=[validate_image_file_extension], blank=True, help_text="Household consent sign image")
+    consent = models.BooleanField(null=True, help_text="Household consent")
+    consent_sharing = MultiSelectField(choices=DATA_SHARING_CHOICES, default=BLANK, help_text="Household consent sharing")
+    residence_status = models.CharField(max_length=254, choices=RESIDENCE_STATUS_CHOICE, blank=True, help_text="Household residence status")
 
-    country_origin = models.ForeignKey("geo.Country", related_name="+", blank=True, null=True, on_delete=models.PROTECT)
-    country = models.ForeignKey("geo.Country", related_name="+", blank=True, null=True, on_delete=models.PROTECT)
-    address = CICharField(max_length=1024, blank=True)
-    zip_code = models.CharField(max_length=12, blank=True, null=True)
+    country_origin = models.ForeignKey("geo.Country", related_name="+", blank=True, null=True, on_delete=models.PROTECT, help_text="Household country origin")
+    country = models.ForeignKey("geo.Country", related_name="+", blank=True, null=True, on_delete=models.PROTECT, help_text="Household country [sys]")
+    address = CICharField(max_length=1024, blank=True, help_text="Household address")
+    zip_code = models.CharField(max_length=12, blank=True, null=True, help_text="Household zip code")
     """location contains lowest administrative area info"""
     admin_area = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True)
     admin1 = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True, related_name="+")
