@@ -68,7 +68,7 @@ class ProgramCycleViewSet(
         "create": ProgramCycleCreateSerializer,
         "update": ProgramCycleUpdateSerializer,
         "partial_update": ProgramCycleUpdateSerializer,
-        "delete": ProgramCycleDeleteSerializer,
+        "destroy": ProgramCycleDeleteSerializer,
     }
     permissions_by_action = {
         "list": [Permissions.PM_PROGRAMME_CYCLE_VIEW_DETAILS],
@@ -76,7 +76,7 @@ class ProgramCycleViewSet(
         "create": [Permissions.PM_PROGRAMME_CYCLE_CREATE],
         "update": [Permissions.PM_PROGRAMME_CYCLE_UPDATE],
         "partial_update": [Permissions.PM_PROGRAMME_CYCLE_UPDATE],
-        "delete": [Permissions.PM_PROGRAMME_CYCLE_DELETE],
+        "destroy": [Permissions.PM_PROGRAMME_CYCLE_DELETE],
     }
 
     filter_backends = (OrderingFilter, DjangoFilterBackend)
