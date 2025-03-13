@@ -5,7 +5,7 @@ import { DividerLine } from '@core/DividerLine';
 import { LabelizedField } from '@core/LabelizedField';
 import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
-import { ProgrammeChoiceDataQuery, ProgramQuery } from '@generated/graphql';
+import { ProgrammeChoiceDataQuery } from '@generated/graphql';
 import { Box, Grid2 as Grid, Typography } from '@mui/material';
 import { Program } from '@restgenerated/models/Program';
 import { programStatusToColor } from '@utils/utils';
@@ -51,7 +51,7 @@ export const ProgramDetails = ({
   // );
   // const programSectorChoicesDict = choicesToDict(programSectorChoices);
   const renderAdminAreasCount = (
-    partner: ProgramQuery['program']['partners'][0],
+    partner: Program['partners'][0],
   ): ReactElement => {
     const counts = {
       1: 0,
