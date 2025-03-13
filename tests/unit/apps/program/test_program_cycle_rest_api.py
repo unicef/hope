@@ -185,7 +185,6 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
         )
 
         bad_response = self.client.delete(url)
-        breakpoint()
         self.assertEqual(bad_response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("Don’t allow to delete Cycle with assigned Target Population", bad_response.data)
         pp.delete()
