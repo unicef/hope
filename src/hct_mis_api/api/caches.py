@@ -62,7 +62,7 @@ class BusinessAreaVersionKeyBit(KeyBitBase):
     def get_data(
         self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
     ) -> str:
-        business_area_slug = kwargs.get("business_area")
+        business_area_slug = kwargs.get("business_area_slug")
         business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
         return str(business_area_version)
 
@@ -81,7 +81,7 @@ class BusinessAreaKeyBit(KeyBitBase):
     def get_data(
         self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
     ) -> str:
-        business_area_slug = kwargs.get("business_area")
+        business_area_slug = kwargs.get("business_area_slug")
         business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
 
         version_key = f"{business_area_slug}:{business_area_version}:{self.specific_view_cache_key}"

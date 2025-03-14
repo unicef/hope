@@ -25,7 +25,7 @@ pytestmark = pytest.mark.django_db
 
 @freezegun.freeze_time("2022-01-01")
 class TestTargetPopulationViews:
-    def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory, id_to_base64: Callable) -> None:
+    def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory) -> None:
         self.partner = PartnerFactory(name="TestPartner")
         self.user = UserFactory(partner=self.partner)
         self.client = api_client(self.user)
@@ -61,8 +61,8 @@ class TestTargetPopulationViews:
         self.url_list = reverse(
             "api:targeting:target-populations-list",
             kwargs={
-                "business_area": self.afghanistan.slug,
-                "program_id": id_to_base64(self.program1.id, "Program"),
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program1.slug,
             },
         )
 
@@ -99,9 +99,8 @@ class TestTargetPopulationViews:
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
         create_partner_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             permissions,
@@ -124,7 +123,7 @@ class TestTargetPopulationViews:
         create_user_role_with_permissions: Callable,
         id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.TARGETING_VIEW_LIST],
@@ -172,7 +171,7 @@ class TestTargetPopulationViews:
         create_user_role_with_permissions: Callable,
         id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.TARGETING_VIEW_LIST],
@@ -192,7 +191,7 @@ class TestTargetPopulationViews:
         create_user_role_with_permissions: Callable,
         id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.TARGETING_VIEW_LIST],
@@ -212,7 +211,7 @@ class TestTargetPopulationViews:
         create_user_role_with_permissions: Callable,
         id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.TARGETING_VIEW_LIST],
@@ -225,7 +224,7 @@ class TestTargetPopulationViews:
 
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 15
+            assert len(ctx.captured_queries) == 12
 
         # Test that reoccurring requests use cached data
         with CaptureQueriesContext(connection) as ctx:
@@ -247,7 +246,7 @@ class TestTargetPopulationViews:
 
             etag_call_after_update = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 10
+            assert len(ctx.captured_queries) == 7
 
             assert etag_call_after_update != etag
 

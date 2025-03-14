@@ -240,7 +240,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     def save(self, *args: Any, **kwargs: Any) -> None:
         self.clean()
         if not self.programme_code:
-            self.programme_code = self._generate_programme_code()
+            self.programme_code = self.generate_programme_code()
         if not self.slug:
             self.slug = self.generate_slug()
         if self.data_collecting_type_id is None and self.data_collecting_type:
@@ -248,10 +248,10 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
             self.data_collecting_type.save()
         super().save(*args, **kwargs)
 
-    def _generate_programme_code(self) -> str:
+    def generate_programme_code(self) -> str:
         programme_code = "".join(random.choice(string.ascii_uppercase + string.digits + "-") for _ in range(4))
         if Program.objects.filter(business_area_id=self.business_area_id, programme_code=programme_code).exists():
-            return self._generate_programme_code()
+            return self.generate_programme_code()
         return programme_code
 
     def generate_slug(self) -> str:

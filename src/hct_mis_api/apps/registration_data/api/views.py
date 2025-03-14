@@ -1,16 +1,14 @@
 import logging
 from typing import Any
 
-from django.http import HttpRequest
-
 from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
+from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
@@ -52,9 +50,16 @@ class RegistrationDataImportViewSet(
         deduplication_engine_process.delay(str(self.program.id))
         return Response({"message": "Deduplication process started"}, status=status.HTTP_200_OK)
 
-
-class WebhookDeduplicationView(APIView):
-    def get(self, request: HttpRequest, business_area: str, program_id: str) -> Response:
-        program = Program.objects.get(id=program_id)
+    @action(
+        detail=False,
+        methods=["GET"],
+        url_path="webhookdeduplication",
+        url_name="webhook-deduplication",
+        permission_classes=[AllowAny],
+    )
+    def webhook_deduplication(
+        self, request: Request, business_area_slug: str, program_slug: str, *args: Any, **kwargs: Any
+    ) -> Response:
+        program = Program.objects.get(business_area__slug=business_area_slug, slug=program_slug)
         fetch_biometric_deduplication_results_and_process.delay(program.deduplication_set_id)
         return Response(status=status.HTTP_200_OK)

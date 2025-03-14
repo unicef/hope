@@ -65,15 +65,15 @@ class TestPeriodicDataUpdateUploadViews:
         self.url_list = reverse(
             "api:periodic-data-update:periodic-data-update-uploads-list",
             kwargs={
-                "business_area": self.afghanistan.slug,
-                "program_id": id_to_base64(self.program1.id, "Program"),
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program1.slug,
             },
         )
         self.url_upload = reverse(
             "api:periodic-data-update:periodic-data-update-uploads-upload",
             kwargs={
-                "business_area": self.afghanistan.slug,
-                "program_id": id_to_base64(self.program1.id, "Program"),
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program1.slug,
             },
         )
 

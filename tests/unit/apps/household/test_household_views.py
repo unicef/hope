@@ -147,7 +147,7 @@ class TestHouseholdListViewSet:
             user=self.user,
             permissions=[Permissions.RDI_VIEW_DETAILS],
             business_area=self.afghanistan,
-            program=self.program,
+            program=program,
         )
         for _ in range(2):
             self._create_household(program)
@@ -211,7 +211,7 @@ class TestHouseholdListViewSet:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 2
-            assert len(ctx.captured_queries) == 13
+            assert len(ctx.captured_queries) == 15
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
@@ -220,7 +220,7 @@ class TestHouseholdListViewSet:
             assert response.has_header("etag")
             etag_second_call = response.headers["etag"]
             assert etag == etag_second_call
-            assert len(ctx.captured_queries) == 7
+            assert len(ctx.captured_queries) == 8
 
         self.household1.children_count = 100
         self.household1.save()
@@ -232,7 +232,7 @@ class TestHouseholdListViewSet:
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert etag_third_call not in [etag, etag_second_call]
             # 4 queries are saved because of cached permissions calculations
-            assert len(ctx.captured_queries) == 9
+            assert len(ctx.captured_queries) == 10
 
         set_admin_area_limits_in_program(self.partner, self.program, [self.area1])
         with CaptureQueriesContext(connection) as ctx:
@@ -242,7 +242,7 @@ class TestHouseholdListViewSet:
             etag_changed_areas = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert etag_changed_areas not in [etag, etag_second_call, etag_third_call]
-            assert len(ctx.captured_queries) == 9
+            assert len(ctx.captured_queries) == 10
 
         self.household2.delete()
         with CaptureQueriesContext(connection) as ctx:
@@ -252,7 +252,7 @@ class TestHouseholdListViewSet:
             etag_fourth_call = response.headers["etag"]
             assert len(response.json()["results"]) == 1
             assert etag_fourth_call not in [etag, etag_second_call, etag_third_call, etag_changed_areas]
-            assert len(ctx.captured_queries) == 9
+            assert len(ctx.captured_queries) == 10
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
@@ -261,7 +261,7 @@ class TestHouseholdListViewSet:
             assert response.has_header("etag")
             etag_fifth_call = response.headers["etag"]
             assert etag_fifth_call == etag_fourth_call
-            assert len(ctx.captured_queries) == 7
+            assert len(ctx.captured_queries) == 8
 
 
 class TestHouseholdDetailViewSet:
@@ -429,6 +429,29 @@ class TestHouseholdDetailViewSet:
             permissions=permissions,
             business_area=self.afghanistan,
             program=self.program,
+        )
+        encoded_household_id = encode_id_base64_required(self.household.id, "Household")
+        responses = self.client.get(
+            reverse(
+                self.detail_url_name,
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "program_slug": self.program.slug,
+                    "pk": encoded_household_id,
+                },
+            )
+        )
+        assert responses.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_household_detail_with_permissions_in_different_program(
+        self, create_user_role_with_permissions: Any
+    ) -> None:
+        program_other = ProgramFactory(name="Program Other", business_area=self.afghanistan, status=Program.ACTIVE)
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS],
+            business_area=self.afghanistan,
+            program=program_other,
         )
         encoded_household_id = encode_id_base64_required(self.household.id, "Household")
         responses = self.client.get(

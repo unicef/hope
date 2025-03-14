@@ -6,14 +6,14 @@ from hct_mis_api.apps.core.api.views import BusinessAreaViewSet
 app_name = "core"
 
 
-router = routers.SimpleRouter()
+business_area_base_router = routers.SimpleRouter()
 
 
-router.register(r"business-areas", BusinessAreaViewSet, basename="business-areas")
+business_area_base_router.register(r"business-areas", BusinessAreaViewSet, basename="business-areas")
 
 
-urlpatterns = router.urls
+urlpatterns = business_area_base_router.urls
 
 
 def get_business_area_nested_router() -> NestedSimpleRouter:
-    return NestedSimpleRouter(router, r"business-areas", lookup="business_area")
+    return NestedSimpleRouter(business_area_base_router, r"business-areas", lookup="business_area")
