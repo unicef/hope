@@ -404,17 +404,51 @@ class Household(
             "program_registration_id",
         ]
     )
-    consent_sign = ImageField(
-        validators=[validate_image_file_extension], blank=True, help_text="Household consent sign image"
+    business_area = models.ForeignKey(
+        "core.BusinessArea", on_delete=models.CASCADE, help_text="Household business area"
     )
-    consent = models.BooleanField(null=True, help_text="Household consent")
-    consent_sharing = MultiSelectField(
-        choices=DATA_SHARING_CHOICES, default=BLANK, help_text="Household consent sharing"
+    program = models.ForeignKey(
+        "program.Program",
+        db_index=True,
+        on_delete=models.PROTECT,
+        related_name="households",
+        help_text="Household program",
     )
-    residence_status = models.CharField(
-        max_length=254, choices=RESIDENCE_STATUS_CHOICE, blank=True, help_text="Household residence status"
+    registration_data_import = models.ForeignKey(
+        "registration_data.RegistrationDataImport",
+        related_name="households",
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        help_text="Household registration data import",
     )
-
+    household_collection = models.ForeignKey(
+        HouseholdCollection,
+        related_name="households",
+        on_delete=models.CASCADE,
+        null=True,
+        help_text="Collection of household representations",
+    )
+    representatives = models.ManyToManyField(
+        to="household.Individual",
+        through="household.IndividualRoleInHousehold",
+        help_text="""This is only used to track collector (primary or secondary) of a household.
+                    They may still be a HOH of this household or any other household.
+                    Through model will contain the role (ROLE_CHOICE) they are connected with on.""",
+        related_name="represented_households",
+    )
+    storage_obj = models.ForeignKey(
+        StorageFile, on_delete=models.SET_NULL, blank=True, null=True, help_text="Household storage object"
+    )
+    copied_from = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="copied_to",
+        help_text="If this household was copied from another household, "
+        "this field will contain the household it was copied from.",
+    )
     country_origin = models.ForeignKey(
         "geo.Country",
         related_name="+",
@@ -423,8 +457,17 @@ class Household(
         on_delete=models.PROTECT,
         help_text="Household country origin",
     )
-    address = CICharField(max_length=1024, blank=True, help_text="Household address")
-    zip_code = models.CharField(max_length=12, blank=True, null=True, help_text="Household zip code")
+    country = models.ForeignKey(
+        "geo.Country",
+        related_name="+",
+        blank=True,
+        null=True,
+        on_delete=models.PROTECT,
+        help_text="Household country",
+    )
+    admin_area = models.ForeignKey(
+        "geo.Area", null=True, on_delete=models.SET_NULL, blank=True, help_text="Household administrative area"
+    )
     """location contains lowest administrative area info"""
     admin1 = models.ForeignKey(
         "geo.Area",
@@ -458,6 +501,26 @@ class Household(
         related_name="+",
         help_text="Household administrative area level 4",
     )
+    head_of_household = models.OneToOneField(
+        "Individual",
+        related_name="heading_household",
+        on_delete=models.CASCADE,
+        null=True,
+        help_text="Household head of household",
+    )
+    consent_sign = ImageField(
+        validators=[validate_image_file_extension], blank=True, help_text="Household consent sign image"
+    )
+    consent = models.BooleanField(null=True, help_text="Household consent")
+    consent_sharing = MultiSelectField(
+        choices=DATA_SHARING_CHOICES, default=BLANK, help_text="Household consent sharing"
+    )
+    residence_status = models.CharField(
+        max_length=254, choices=RESIDENCE_STATUS_CHOICE, blank=True, help_text="Household residence status"
+    )
+
+    address = CICharField(max_length=1024, blank=True, help_text="Household address")
+    zip_code = models.CharField(max_length=12, blank=True, null=True, help_text="Household zip code")
 
     size = models.PositiveIntegerField(db_index=True, null=True, blank=True, help_text="Household size")
     female_age_group_0_5_count = models.PositiveIntegerField(
@@ -549,12 +612,8 @@ class Household(
     )  # NOT_COLLECTED
 
     returnee = models.BooleanField(null=True, help_text="Household returnee status")
-    fchild_hoh = models.BooleanField(
-        null=True, help_text="Household fchild status"
-    )  # TODO: check where we use this field?
-    child_hoh = models.BooleanField(
-        null=True, help_text="Household child status"
-    )  # TODO: check where we use this field?
+    fchild_hoh = models.BooleanField(null=True, help_text="Female child headed household flag")
+    child_hoh = models.BooleanField(null=True, help_text="Child headed household flag")
     village = models.CharField(max_length=250, blank=True, default=BLANK, help_text="Household village")
     currency = models.CharField(max_length=250, choices=CURRENCY_CHOICES, default=BLANK, help_text="Household currency")
     unhcr_id = models.CharField(
@@ -563,61 +622,17 @@ class Household(
     detail_id = models.CharField(
         max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora registration ID"
     )
+    start = models.DateTimeField(blank=True, null=True, help_text="Data collection start date")
 
     # System fields
-    business_area = models.ForeignKey(
-        "core.BusinessArea", on_delete=models.CASCADE, help_text="Household business area [sys]"
-    )
-    program = models.ForeignKey(
-        "program.Program",
-        db_index=True,
-        on_delete=models.PROTECT,
-        related_name="households",
-        help_text="Household program [sys]",
-    )
-    registration_data_import = models.ForeignKey(
-        "registration_data.RegistrationDataImport",
-        related_name="households",
-        blank=True,
-        null=True,
-        on_delete=models.CASCADE,
-        help_text="Household registration data import [sys]",
-    )
     registration_method = models.CharField(
         max_length=250,
         choices=REGISTRATION_METHOD_CHOICES,
         default=BLANK,
         help_text="Household registration method [sys]",
     )
-    household_collection = models.ForeignKey(
-        HouseholdCollection,
-        related_name="households",
-        on_delete=models.CASCADE,
-        null=True,
-        help_text="Collection of household representations [sys]",
-    )
-    representatives = models.ManyToManyField(
-        to="household.Individual",
-        through="household.IndividualRoleInHousehold",
-        help_text="""This is only used to track collector (primary or secondary) of a household.
-                They may still be a HOH of this household or any other household.
-                Through model will contain the role (ROLE_CHOICE) they are connected with on. [sys]""",
-        related_name="represented_households",
-    )
     family_id = models.CharField(
         max_length=100, blank=True, null=True, help_text="Family ID eDopomoga household id [sys]"
-    )
-    storage_obj = models.ForeignKey(
-        StorageFile, on_delete=models.SET_NULL, blank=True, null=True, help_text="Household storage object [sys]"
-    )
-    copied_from = models.ForeignKey(
-        "self",
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="copied_to",
-        help_text="If this household was copied from another household, "
-        "this field will contain the household it was copied from. [sys]",
     )
     origin_unicef_id = models.CharField(
         max_length=100, blank=True, null=True, help_text="Household origin unicef id [sys]"
@@ -657,32 +672,11 @@ class Household(
     flex_fields = JSONField(default=dict, blank=True, help_text="Household flex fields [sys]")
     first_registration_date = models.DateTimeField(help_text="Household first registration date [sys]")
     last_registration_date = models.DateTimeField(help_text="Household last registration date [sys]")
-    head_of_household = models.OneToOneField(
-        "Individual",
-        related_name="heading_household",
-        on_delete=models.CASCADE,
-        null=True,
-        help_text="Household head of household [sys]",
-    )
     withdrawn = models.BooleanField(default=False, db_index=True, help_text="Household withdrawn [sys]")
     withdrawn_date = models.DateTimeField(
         null=True, blank=True, db_index=True, help_text="Household withdrawn date [sys]"
     )
-    country = models.ForeignKey(
-        "geo.Country",
-        related_name="+",
-        blank=True,
-        null=True,
-        on_delete=models.PROTECT,
-        help_text="Household country [sys]",
-    )
-    admin_area = models.ForeignKey(
-        "geo.Area", null=True, on_delete=models.SET_NULL, blank=True, help_text="Household administrative area [sys]"
-    )
     geopoint = PointField(blank=True, null=True, help_text="Household geopoint [sys]")
-    start = models.DateTimeField(
-        blank=True, null=True, help_text="Household start [sys]"
-    )  # TODO: check where we use this field?
     deviceid = models.CharField(max_length=250, blank=True, default=BLANK, help_text="Household deviceid [sys]")
     name_enumerator = models.CharField(
         max_length=250, blank=True, default=BLANK, help_text="Household name enumerator [sys]"
@@ -1057,6 +1051,49 @@ class Individual(
         ]
     )
 
+    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE, help_text="Business area")
+    program = models.ForeignKey(
+        "program.Program",
+        db_index=True,
+        related_name="individuals",
+        on_delete=models.PROTECT,
+        help_text="Program",
+    )
+    registration_data_import = models.ForeignKey(
+        "registration_data.RegistrationDataImport",
+        related_name="individuals",
+        on_delete=models.CASCADE,
+        help_text="RDI where Beneficiary was imported",
+    )
+    household = models.ForeignKey(
+        "Household",
+        related_name="individuals",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        help_text="""This represents the household this person is a MEMBER,
+            and if null then relationship is NON_BENEFICIARY and that
+            simply means they are a representative of one or more households
+            and not a member of one.""",
+    )
+    individual_collection = models.ForeignKey(
+        IndividualCollection,
+        related_name="individuals",
+        on_delete=models.CASCADE,
+        null=True,
+        help_text="Collection of individual representations",
+    )
+    copied_from = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        db_index=True,
+        related_name="copied_to",
+        on_delete=models.SET_NULL,
+        help_text="If this individual was copied from another individual, "
+        "this field will contain the individual it was copied from.",
+    )
+
     individual_id = models.CharField(max_length=255, blank=True, help_text="Individual ID")
     photo = models.ImageField(blank=True, help_text="Photo")
     full_name = CICharField(
@@ -1088,17 +1125,6 @@ class Individual(
         help_text="""This represents the MEMBER relationship. can be blank
             as well if household is null!""",
     )
-    household = models.ForeignKey(
-        "Household",
-        related_name="individuals",
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        help_text="""This represents the household this person is a MEMBER,
-            and if null then relationship is NON_BENEFICIARY and that
-            simply means they are a representative of one or more households
-            and not a member of one.""",
-    )
     work_status = models.CharField(
         max_length=20,
         choices=WORK_STATUS_CHOICE,
@@ -1107,6 +1133,8 @@ class Individual(
         help_text="Work status",
     )
     pregnant = models.BooleanField(null=True, help_text="Pregnant status")
+    fchild_hoh = models.BooleanField(default=False, help_text="Child is female and Head of Household flag")
+    child_hoh = models.BooleanField(default=False, help_text="Child is Head of Household flag")
 
     disability = models.CharField(
         max_length=20, choices=DISABILITY_CHOICES, default=NOT_DISABLED, help_text="Disability status"
@@ -1153,21 +1181,6 @@ class Individual(
     wallet_address = models.CharField(max_length=128, blank=True, default="", help_text="Cryptocurrency wallet address")
 
     # System fields
-    individual_collection = models.ForeignKey(
-        IndividualCollection,
-        related_name="individuals",
-        on_delete=models.CASCADE,
-        null=True,
-        help_text="Collection of individual representations [sys]",
-    )
-    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE, help_text="Business area [sys]")
-    program = models.ForeignKey(
-        "program.Program",
-        db_index=True,
-        related_name="individuals",
-        on_delete=models.PROTECT,
-        help_text="Program [sys]",
-    )
     duplicate = models.BooleanField(default=False, db_index=True, help_text="Duplicate status [sys]")
     duplicate_date = models.DateTimeField(null=True, blank=True, help_text="Duplicate date [sys]")
     withdrawn = models.BooleanField(default=False, db_index=True, help_text="Withdrawn status [sys]")
@@ -1179,16 +1192,10 @@ class Individual(
     phone_no_alternative_valid = models.BooleanField(
         null=True, db_index=True, help_text="Beneficiary phone number alternative valid [sys]"
     )
-    registration_data_import = models.ForeignKey(
-        "registration_data.RegistrationDataImport",
-        related_name="individuals",
-        on_delete=models.CASCADE,
-        help_text="RDI where Beneficiary was imported [sys]",
-    )
     first_registration_date = models.DateField(help_text="First registration date [sys]")
     last_registration_date = models.DateField(help_text="Last registration date [sys]")
-    enrolled_in_nutrition_programme = models.BooleanField(null=True, help_text="Enrolled in nutrition programe [sys]")
-    administration_of_rutf = models.BooleanField(null=True, help_text="Administration on rutf [sys]")
+    enrolled_in_nutrition_programme = models.BooleanField(null=True, help_text="Enrolled in nutrition program [sys]")
+    administration_of_rutf = models.BooleanField(null=True, help_text="Administration of rutf [sys]")
     deduplication_golden_record_status = models.CharField(
         max_length=50,
         default=UNIQUE,
@@ -1234,12 +1241,6 @@ class Individual(
     sanction_list_confirmed_match = models.BooleanField(
         default=False, db_index=True, help_text="Sanction list confirmed match [sys]"
     )
-    fchild_hoh = models.BooleanField(
-        default=False, help_text="Fchild hoh status [sys]"
-    )  # TODO: check where we use this field?
-    child_hoh = models.BooleanField(
-        default=False, help_text="Child hoh status [sys]"
-    )  # TODO: check where we use this field?
     detail_id = models.CharField(
         max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora registration ID [sys]"
     )
@@ -1251,16 +1252,6 @@ class Individual(
         help_text="Beneficiary Program Registration ID [sys]",
     )
     age_at_registration = models.PositiveSmallIntegerField(null=True, blank=True, help_text="Age at registration [sys]")
-    copied_from = models.ForeignKey(
-        "self",
-        null=True,
-        blank=True,
-        db_index=True,
-        related_name="copied_to",
-        on_delete=models.SET_NULL,
-        help_text="If this individual was copied from another individual, "
-        "this field will contain the individual it was copied from [sys].",
-    )
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True, help_text="Original unicef_id [sys]")
     is_migration_handled = models.BooleanField(default=False, help_text="Migration status [sys]")
     migrated_at = models.DateTimeField(null=True, blank=True, help_text="Migrated at [sys]")
