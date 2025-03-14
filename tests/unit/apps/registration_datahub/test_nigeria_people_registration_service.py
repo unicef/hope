@@ -4,11 +4,6 @@ from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
 
-from apps.payment.models import PendingDeliveryMechanismData
-from contrib.aurora.services.nigeria_people_registration_service import (
-    NigeriaPeopleRegistrationService,
-)
-
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.geo import models as geo_models
@@ -20,6 +15,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
+from hct_mis_api.apps.payment.models import PendingDeliveryMechanismData
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.contrib.aurora.fixtures import (
     OrganizationFactory,
@@ -27,9 +23,12 @@ from hct_mis_api.contrib.aurora.fixtures import (
     RegistrationFactory,
 )
 from hct_mis_api.contrib.aurora.models import Record
+from hct_mis_api.contrib.aurora.services.nigeria_people_registration_service import (
+    NigeriaPeopleRegistrationService,
+)
 
 
-class TestCzechRepublicRegistrationService(TestCase):
+class TestNigeriaPeopleRegistrationService(TestCase):
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
@@ -44,7 +43,7 @@ class TestCzechRepublicRegistrationService(TestCase):
         )
         cls.organization = OrganizationFactory(business_area=cls.business_area, slug=cls.business_area.slug)
         cls.project = ProjectFactory(name="fake_project", organization=cls.organization, programme=cls.program)
-        cls.registration = RegistrationFactory(name="fake_registration", project=cls.project)
+        cls.registration = RegistrationFactory(name="fake_registration", project=cls.project, mapping={})
 
         geo_models.Country.objects.create(name="Nigeria")
         records = [

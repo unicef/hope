@@ -1,10 +1,5 @@
 from typing import Any, Dict, Optional
 
-from contrib.aurora.services.generic_registration_service import (
-    GenericRegistrationService,
-    mergedicts,
-)
-
 from hct_mis_api.apps.core.utils import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     IDENTIFICATION_TYPE_TO_KEY_MAPPING,
@@ -22,6 +17,10 @@ from hct_mis_api.apps.payment.models import (
     PendingDeliveryMechanismData,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.contrib.aurora.services.generic_registration_service import (
+    GenericRegistrationService,
+    mergedicts,
+)
 
 
 class NigeriaPeopleRegistrationService(GenericRegistrationService):
@@ -53,7 +52,7 @@ class NigeriaPeopleRegistrationService(GenericRegistrationService):
             "flex-fields": ["enumerator_code", "who_to_register", "frontline_worker_designation_i_f"],
         }
 
-        mapping = mergedicts(default_mapping, self.registration.mapping, [])
+        mapping = mergedicts(default_mapping, self.registration.mapping or {}, [])
         record_data_dict = record.get_data()
         household_data = record_data_dict.get(mapping["defaults"].get("households_key", "household-info"), [])
         intro_data = record_data_dict.get(mapping["defaults"].get("intro_data_key", "intro-and-consent"), [])
