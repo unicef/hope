@@ -100,7 +100,8 @@ export function LookUpIndividualTable({
 
   const replacements = {
     unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.member_label} ID`,
-    household__id: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} ID`,
+    household__id: (_beneficiaryGroup) =>
+      `${_beneficiaryGroup?.group_label} ID`,
   };
 
   const headCells = isSocialDctType

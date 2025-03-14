@@ -12,7 +12,11 @@ const customRender = (
 ) =>
   render(
     <>
-      <BrowserRouter>
+      <BrowserRouter
+        future={{
+          v7_startTransition: true,
+        }}
+      >
         <Formik initialValues={{}} onSubmit={noop}>
           {ui}
         </Formik>

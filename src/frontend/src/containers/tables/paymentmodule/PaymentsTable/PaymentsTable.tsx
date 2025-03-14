@@ -51,9 +51,9 @@ function PaymentsTable({
 
   const replacements = {
     household__unicef_id: (_beneficiaryGroup) =>
-      `${_beneficiaryGroup?.groupLabel} ${t('ID')}`,
+      `${_beneficiaryGroup?.group_label} ${t('ID')}`,
     household__size: (_beneficiaryGroup) =>
-      `${_beneficiaryGroup?.groupLabel} ${t('Size')}`,
+      `${_beneficiaryGroup?.group_label} ${t('Size')}`,
   };
 
   const adjustedHeadCells = adjustHeadCells(

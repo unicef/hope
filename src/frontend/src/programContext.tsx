@@ -5,36 +5,9 @@ import {
   useContext,
   useState,
 } from 'react';
-import { DataCollectingTypeType, ProgramStatus } from './__generated__/graphql';
+import { DataCollectingTypeType } from './__generated__/graphql';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
-
 import { Status791Enum } from '@restgenerated/models/Status791Enum';
-
-export interface ProgramInterface {
-  id: string;
-  name: string;
-  status: ProgramStatus;
-  programmeCode: string;
-  slug: string;
-  dataCollectingType: {
-    id: number;
-    householdFiltersAvailable: boolean;
-    individualFiltersAvailable: boolean;
-    label: string;
-    code: string;
-    type: string;
-  };
-  pduFields: { id: string }[];
-  beneficiaryGroup: {
-    id: string;
-    name: string;
-    groupLabel: string;
-    groupLabelPlural: string;
-    memberLabel: string;
-    memberLabelPlural: string;
-    masterDetail: boolean;
-  };
-}
 
 export type ProgramContextType = Partial<ProgramDetail> | null;
 

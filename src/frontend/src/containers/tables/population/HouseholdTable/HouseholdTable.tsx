@@ -35,7 +35,7 @@ export const HouseholdTable = ({
   canViewDetails,
 }: HouseholdTableRestProps): ReactElement => {
   const { selectedProgram } = useProgramContext();
-  const { businessArea } = useBaseUrl();
+  const { businessArea, programId } = useBaseUrl();
   const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const initialQueryVariables = useMemo(() => {
@@ -51,7 +51,7 @@ export const HouseholdTable = ({
 
     return {
       businessAreaSlug: businessArea,
-      programProgrammeCode: selectedProgram?.programme_code,
+      programSlug: programId,
       familySize: JSON.stringify({
         min: filter.householdSizeMin,
         max: filter.householdSizeMax,
@@ -66,7 +66,7 @@ export const HouseholdTable = ({
       ordering: filter.orderBy,
       rdiMergeStatus: HouseholdRdiMergeStatus.Merged,
     };
-  }, [businessArea, selectedProgram, filter]);
+  }, [businessArea, filter, programId]);
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
@@ -78,16 +78,16 @@ export const HouseholdTable = ({
     queryKey: [
       'businessAreasProgramsHouseholdsList',
       queryVariables,
-      selectedProgram?.slug,
+      programId,
       businessArea,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsList({
         businessAreaSlug: businessArea,
-        programSlug: selectedProgram?.slug,
+        programSlug: programId,
         ...queryVariables,
       }),
-    enabled: !!businessArea && !!selectedProgram?.slug,
+    enabled: !!businessArea && !!programId,
   });
 
   const replacements = {
@@ -115,6 +115,7 @@ export const HouseholdTable = ({
     const handleClick = (): void => {
       navigate(householdDetailsPath);
     };
+    console.log('beneficiaryGroup', beneficiaryGroup);
     return (
       <ClickableTableRow
         hover
@@ -174,6 +175,7 @@ export const HouseholdTable = ({
     );
   };
 
+  console.log(beneficiaryGroup);
   return (
     <TableWrapper>
       <UniversalRestTable

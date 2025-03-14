@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { MockedProvider } from '@apollo/client/testing';
 import { renderWithProviders } from 'src/testUtils/testUtils';
@@ -46,6 +46,10 @@ it('LookUpHouseholdTable renders correctly after data is fetched', async () => {
       />
     </MockedProvider>,
   );
+
+  await waitFor(() => {
+    expect(screen.queryByText('No results')).not.toBeInTheDocument();
+  });
 
   const table = await screen.findByRole('table');
   const tableRows = await screen.findAllByRole('row');

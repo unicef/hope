@@ -14,7 +14,7 @@ const baseUrl = 'http://localhost:3000/api/rest/business-areas/';
 
 const endpoints = [
   {
-    url: 'http://localhost:3000/api/rest/users/profile/?business_area_slug=:business_area_slug&program_slug=:program_slug',
+    url: 'http://localhost:3000/api/rest/users/profile/',
     response: restUsersProfileRetrieve,
   },
   {

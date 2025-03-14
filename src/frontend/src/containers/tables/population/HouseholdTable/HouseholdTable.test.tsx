@@ -2,9 +2,13 @@ import { MockedProvider } from '@apollo/client/testing';
 import '@testing-library/jest-dom';
 import { screen } from '@testing-library/react';
 import { MeDocument } from 'src/__generated__/graphql';
-import { renderWithProviders } from 'src/testUtils/testUtils';
+import {
+  fakeContextProgram,
+  renderWithProviders,
+} from 'src/testUtils/testUtils';
 import { expect, it } from 'vitest';
 import { HouseholdTable } from './HouseholdTable';
+import { prettyDOM } from '@testing-library/react';
 
 const mocks = [
   {
@@ -25,7 +29,7 @@ const mocks = [
 ];
 
 it('HouseholdTable renders correctly after data is fetched', async () => {
-  const { asFragment } = renderWithProviders(
+  const { container, asFragment } = renderWithProviders(
     <MockedProvider mocks={mocks} addTypename={false}>
       <HouseholdTable
         filter={{
