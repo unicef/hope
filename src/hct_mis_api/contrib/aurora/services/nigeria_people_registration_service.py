@@ -12,10 +12,6 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import (
-    DeliveryMechanism,
-    PendingDeliveryMechanismData,
-)
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.contrib.aurora.services.generic_registration_service import (
     GenericRegistrationService,
@@ -33,13 +29,17 @@ class NigeriaPeopleRegistrationService(GenericRegistrationService):
                 "account_key": "account_details",
                 "country": "NG",
             },
-            "household": {
+            "intro-and-consent": {
+                "enumerator_code": "household.flex_fields",
+                "who_to_register": "household.flex_fields",
+            },
+            "household-info": {
                 "admin1_h_c": "household.admin1",
                 "admin2_h_c": "household.admin2",
                 "admin3_h_c": "household.admin3",
                 "admin4_h_c": "household.admin4",
             },
-            "individuals": {
+            "individual-details": {
                 "given_name_i_c": "individual.given_name",
                 "family_name_i_c": "individual.family_name",
                 "birth_date_i_c": "individual.birth_date",
@@ -48,44 +48,28 @@ class NigeriaPeopleRegistrationService(GenericRegistrationService):
                 "phone_no_i_c": "individual.phone_no",
                 "estimated_birth_date_i_c": "individual.estimated_birth_date",
                 "confirm_phone_no": "individual.phone_no_alternative",
+                "frontline_worker_designation_i_f": "individual.flex_fields",
             },
-            "flex-fields": ["enumerator_code", "who_to_register", "frontline_worker_designation_i_f"],
         }
 
         mapping = mergedicts(default_mapping, self.registration.mapping or {}, [])
-        record_data_dict = record.get_data()
-        household_data = record_data_dict.get(mapping["defaults"].get("households_key", "household-info"), [])
-        intro_data = record_data_dict.get(mapping["defaults"].get("intro_data_key", "intro-and-consent"), [])
-        individual_data = record_data_dict.get(mapping["defaults"].get("individuals_key", "individual-details"), [])
 
-        household_data[0].update(intro_data[0])
         household = self.create_household_data(record, registration_data_import, mapping)
-
         individuals, head, pr_collector, _ = self.create_individuals(
             record,
             household,
             mapping,
         )
 
-        collector = pr_collector or head or individuals[0]
-        head_of_household = head or individuals[0]
+        individual = individuals[0]
+        collector = pr_collector or head or individual
+        head_of_household = head or individual
         household.head_of_household = head_of_household
         PendingIndividualRoleInHousehold.objects.create(individual=collector, household=household, role=ROLE_PRIMARY)
 
-        accounts_data = individual_data[0].get(mapping["defaults"].get("account_key", "account_details"), {})
-        if accounts_data:
-            PendingDeliveryMechanismData.objects.create(
-                individual=pr_collector,
-                delivery_mechanism=DeliveryMechanism.objects.get(code="transfer_to_account"),
-                data={
-                    "bank_account_number__transfer_to_account": accounts_data.get("number", ""),
-                    "bank_name__transfer_to_account": accounts_data.get("name", ""),
-                    "bank_code__transfer_to_account": accounts_data.get("code", ""),
-                    "account_holder_name__transfer_to_account": accounts_data.get("holder_name", ""),
-                },
-            )
-
-        self._prepare_national_id(individual_data, pr_collector)
+        record_data_dict = record.get_data()
+        individual_data = record_data_dict.get(mapping["defaults"].get("individuals_key", "individual-details"), [])[0]
+        self._prepare_national_id(individual_data, individual)
 
         household.registration_id = record.source_id
         household.detail_id = record.source_id
