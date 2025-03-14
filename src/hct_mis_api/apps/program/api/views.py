@@ -9,7 +9,7 @@ from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import OrderingFilter
-from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
+from rest_framework.mixins import DestroyModelMixin, ListModelMixin, RetrieveModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -22,7 +22,6 @@ from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
     Permissions,
 )
-from hct_mis_api.apps.core.api.filters import UpdatedAtFilter
 from hct_mis_api.apps.core.api.mixins import (
     BaseViewSet,
     BusinessAreaMixin,
@@ -46,6 +45,7 @@ from hct_mis_api.apps.program.api.serializers import (
 )
 from hct_mis_api.apps.program.filters import ProgramFilter
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
+from hct_mis_api.apps.program.validators import ProgramDeletionValidator
 
 logger = logging.getLogger(__name__)
 
@@ -53,8 +53,10 @@ logger = logging.getLogger(__name__)
 class ProgramViewSet(
     SerializerActionMixin,
     BusinessAreaMixin,
+    ProgramDeletionValidator,
     RetrieveModelMixin,
     ListModelMixin,
+    DestroyModelMixin,
     BaseViewSet,
 ):
     permissions_by_action = {
@@ -93,6 +95,10 @@ class ProgramViewSet(
             .select_related("beneficiary_group", "data_collecting_type")
             .order_by("custom_order", "start_date")
         )
+
+    def perform_destroy(self, instance: Program) -> None:
+        self.validate(program=instance)
+        super().perform_destroy(instance)
 
 
 class ProgramCycleViewSet(
