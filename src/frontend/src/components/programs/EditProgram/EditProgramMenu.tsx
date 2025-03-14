@@ -5,7 +5,6 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { Button, ListItemText, Menu, MenuItem } from '@mui/material';
 import { styled } from '@mui/system';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
-
 import { MouseEvent, ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';

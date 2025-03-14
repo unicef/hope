@@ -59,7 +59,12 @@ const NewReportForm = (): ReactElement => {
       ),
   });
 
-  const queryVariables = { businessArea, status: ['ACTIVE'] };
+  const queryVariables = {
+    businessAreaSlug: businessArea,
+    businessArea,
+    status: ['ACTIVE'] as Array<'ACTIVE' | 'DRAFT' | 'FINISHED'>,
+    beneficiaryGroupMatch: false,
+  };
 
   const { data: allProgramsData, isLoading: loadingPrograms } = useQuery({
     queryKey: ['businessAreasProgramsList', queryVariables, businessArea],

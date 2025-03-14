@@ -115,7 +115,6 @@ export const HouseholdTable = ({
     const handleClick = (): void => {
       navigate(householdDetailsPath);
     };
-    console.log('beneficiaryGroup', beneficiaryGroup);
     return (
       <ClickableTableRow
         hover
@@ -175,7 +174,6 @@ export const HouseholdTable = ({
     );
   };
 
-  console.log(beneficiaryGroup);
   return (
     <TableWrapper>
       <UniversalRestTable

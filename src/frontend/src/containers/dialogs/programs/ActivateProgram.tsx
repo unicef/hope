@@ -4,7 +4,6 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Button, Dialog, DialogContent, DialogTitle } from '@mui/material';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
-
 import { Status791Enum } from '@restgenerated/models/Status791Enum';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';

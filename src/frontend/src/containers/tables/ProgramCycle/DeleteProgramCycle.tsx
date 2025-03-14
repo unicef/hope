@@ -17,7 +17,6 @@ import {
   IconButton,
 } from '@mui/material';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
-
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { decodeIdString } from '@utils/utils';
 import { ReactElement, useState } from 'react';

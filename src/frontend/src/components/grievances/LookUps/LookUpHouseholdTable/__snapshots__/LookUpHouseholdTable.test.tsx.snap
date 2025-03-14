@@ -156,9 +156,12 @@ exports[`LookUpHouseholdTable renders correctly after data is fetched 1`] = `
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
                 >
-                  <span>
+                  <a
+                    class="sc-fuExOL dUQjWF"
+                    href="/afghanistan/programs/UHJvZ3JhbU5vZGU6ZTRmOGMwNjctNjcwOC00NjZmLWFjYmMtZGE2OTkxZjE0MjY2/population/household/SG91c2Vob2xkTm9kZTo1ZGIzMTI2OS1mNzNhLTRmN2EtOWViNS1lNTQ1MTkzZTFlOGM="
+                  >
                     HH-0
-                  </span>
+                  </a>
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
@@ -233,9 +236,12 @@ exports[`LookUpHouseholdTable renders correctly after data is fetched 1`] = `
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
                 >
-                  <span>
+                  <a
+                    class="sc-fuExOL dUQjWF"
+                    href="/afghanistan/programs/UHJvZ3JhbU5vZGU6ZTRmOGMwNjctNjcwOC00NjZmLWFjYmMtZGE2OTkxZjE0MjY2/population/household/SG91c2Vob2xkTm9kZTozY2IxYWFmYi03NWZhLTQxYTItODQ3OS02Njc0NTkyZGQ0NmI="
+                  >
                     HH-1
-                  </span>
+                  </a>
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
@@ -310,9 +316,12 @@ exports[`LookUpHouseholdTable renders correctly after data is fetched 1`] = `
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
                 >
-                  <span>
+                  <a
+                    class="sc-fuExOL dUQjWF"
+                    href="/afghanistan/programs/UHJvZ3JhbU5vZGU6ZTRmOGMwNjctNjcwOC00NjZmLWFjYmMtZGE2OTkxZjE0MjY2/population/household/SG91c2Vob2xkTm9kZTowN2FmNzUxNi0wN2QwLTQ3ZWEtOGYzZC05NjBiMDQ2ZWE1NDY="
+                  >
                     HH-2
-                  </span>
+                  </a>
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
@@ -387,9 +396,12 @@ exports[`LookUpHouseholdTable renders correctly after data is fetched 1`] = `
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
                 >
-                  <span>
+                  <a
+                    class="sc-fuExOL dUQjWF"
+                    href="/afghanistan/programs/UHJvZ3JhbU5vZGU6ZTRmOGMwNjctNjcwOC00NjZmLWFjYmMtZGE2OTkxZjE0MjY2/population/household/SG91c2Vob2xkTm9kZTphYTAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDE="
+                  >
                     HH-24-0000.0003
-                  </span>
+                  </a>
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
@@ -464,9 +476,12 @@ exports[`LookUpHouseholdTable renders correctly after data is fetched 1`] = `
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
                 >
-                  <span>
+                  <a
+                    class="sc-fuExOL dUQjWF"
+                    href="/afghanistan/programs/UHJvZ3JhbU5vZGU6ZTRmOGMwNjctNjcwOC00NjZmLWFjYmMtZGE2OTkxZjE0MjY2/population/household/SG91c2Vob2xkTm9kZTphYTAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDI="
+                  >
                     HH-24-0000.0004
-                  </span>
+                  </a>
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
@@ -541,9 +556,12 @@ exports[`LookUpHouseholdTable renders correctly after data is fetched 1`] = `
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
                 >
-                  <span>
+                  <a
+                    class="sc-fuExOL dUQjWF"
+                    href="/afghanistan/programs/UHJvZ3JhbU5vZGU6ZTRmOGMwNjctNjcwOC00NjZmLWFjYmMtZGE2OTkxZjE0MjY2/population/household/SG91c2Vob2xkTm9kZTo0MGYwMmU1ZC01YjgxLTRiZDUtYjI0NC1mYTE3ZmI5YTVkODU="
+                  >
                     HH-3
-                  </span>
+                  </a>
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
@@ -618,9 +636,12 @@ exports[`LookUpHouseholdTable renders correctly after data is fetched 1`] = `
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
                 >
-                  <span>
+                  <a
+                    class="sc-fuExOL dUQjWF"
+                    href="/afghanistan/programs/UHJvZ3JhbU5vZGU6ZTRmOGMwNjctNjcwOC00NjZmLWFjYmMtZGE2OTkxZjE0MjY2/population/household/SG91c2Vob2xkTm9kZTo1ZjE4NmRiMS03ZjZhLTRlZjktOWQzMC1jYTAzYmRkMWI3YTM="
+                  >
                     HH-4
-                  </span>
+                  </a>
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"

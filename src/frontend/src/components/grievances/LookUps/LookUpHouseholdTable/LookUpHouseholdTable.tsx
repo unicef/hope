@@ -49,7 +49,7 @@ export function LookUpHouseholdTable({
   redirectedFromRelatedTicket,
   isFeedbackWithHouseholdOnly,
 }: LookUpHouseholdTableProps): ReactElement {
-  const { isAllPrograms } = useBaseUrl();
+  const { isAllPrograms, programId } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
@@ -66,7 +66,7 @@ export function LookUpHouseholdTable({
 
     return {
       businessAreaSlug: businessArea,
-      programSlug: selectedProgram?.slug,
+      programSlug: programId,
       familySize: JSON.stringify({
         min: filter.householdSizeMin,
         max: filter.householdSizeMax,
@@ -80,7 +80,7 @@ export function LookUpHouseholdTable({
       withdrawn: matchWithdrawnValue(),
       rdiMergeStatus: HouseholdRdiMergeStatus.Merged,
     };
-  }, [businessArea, selectedProgram, filter]);
+  }, [businessArea, programId, filter]);
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
@@ -96,12 +96,12 @@ export function LookUpHouseholdTable({
     queryKey: [
       'businessAreasProgramsHouseholdsList',
       queryVariables,
-      selectedProgram?.slug,
+      programId,
       businessArea,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsList(queryVariables),
-    enabled: !!businessArea && !!selectedProgram?.slug,
+    enabled: !!businessArea && !!programId,
   });
 
   const {
@@ -112,7 +112,7 @@ export function LookUpHouseholdTable({
     queryKey: [
       'businessAreasHouseholdsList',
       queryVariables,
-      selectedProgram?.slug,
+      programId,
       businessArea,
     ],
     queryFn: () => {
@@ -195,8 +195,6 @@ export function LookUpHouseholdTable({
       dataCy: 'programs',
     },
   ];
-  console.log('dataHouseholdsAllPrograms', dataHouseholdsAllPrograms);
-  console.log('dataHouseholdsProgram', dataHouseholdsProgram);
 
   const preparedHeadcells = isAllPrograms
     ? headCellsWithProgramColumn

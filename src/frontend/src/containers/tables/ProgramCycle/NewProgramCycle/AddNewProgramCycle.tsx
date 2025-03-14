@@ -6,7 +6,6 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import AddIcon from '@mui/icons-material/Add';
 import { Button, Dialog } from '@mui/material';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
-
 import { useQueryClient } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';

@@ -7,7 +7,6 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Radio } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
-
 import { choicesToDict, programStatusToColor } from '@utils/utils';
 import { ReactElement } from 'react';
 

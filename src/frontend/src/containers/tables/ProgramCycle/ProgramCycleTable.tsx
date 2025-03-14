@@ -16,7 +16,6 @@ import { BlackLink } from '@core/BlackLink';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
-
 import { Status791Enum } from '@restgenerated/models/Status791Enum';
 
 interface ProgramCyclesTableProgramDetailsProps {
