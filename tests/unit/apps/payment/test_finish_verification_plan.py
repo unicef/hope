@@ -1,7 +1,7 @@
 from typing import Any
 from unittest import mock
 
-from django.conf import settings
+from django.core.management import call_command
 from django.test import TestCase, override_settings
 
 from constance.test import override_config
@@ -32,11 +32,10 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 
 
 class TestFinishVerificationPlan(TestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         business_area = create_afghanistan()
         payment_record_amount = 10
         user = UserFactory()

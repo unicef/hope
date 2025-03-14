@@ -1,3 +1,4 @@
+import os
 import random
 import time
 from typing import Any, List
@@ -115,3 +116,26 @@ class AdminAreaLimitedToFactory(DjangoModelFactory):
         if extracted:
             for area in extracted:
                 self.areas.add(area)
+
+
+def create_superuser(**kwargs: Any) -> User:
+    password = os.environ.get("LOCAL_ROOT_PASSWORD", "root123")
+    user_data = {
+        "username": kwargs.get("username") or "root",
+        "email": kwargs.get("email") or "root@root.com",
+        "first_name": kwargs.get("first_name") or "Root",
+        "last_name": kwargs.get("last_name") or "Rootkowski",
+        "partner": kwargs.get("partner") or PartnerFactory(name="UNICEF HQ"),
+        "is_active": True,
+        "password": password,
+    }
+    user = User.objects.create_superuser(**user_data)
+    print("*** Super User Created with password: ", password)
+    return user
+
+
+def generate_unicef_partners() -> None:
+    unicef_main_partner = PartnerFactory(name="UNICEF")
+    PartnerFactory(name="UNICEF HQ", parent=unicef_main_partner)
+    PartnerFactory(name="UNHCR")
+    PartnerFactory(name="WFP")

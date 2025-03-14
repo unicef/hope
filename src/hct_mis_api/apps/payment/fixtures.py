@@ -508,7 +508,7 @@ def generate_payment_plan() -> None:
     address = "Ohio"
 
     program_pk = UUID("00000000-0000-0000-0000-faceb00c0000")
-    data_collecting_type = DataCollectingType.objects.get(code="full")
+    data_collecting_type = DataCollectingType.objects.get(code="full_collection")
     if data_collecting_type.type == DataCollectingType.Type.SOCIAL:
         beneficiary_group = BeneficiaryGroupFactory(name="Social", master_detail=False)
     else:

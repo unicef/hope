@@ -1,6 +1,6 @@
 from typing import Any
 
-from django.conf import settings
+from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 
@@ -25,10 +25,9 @@ from hct_mis_api.apps.reporting.models import Report
 
 
 class TestGenerateReportService(TestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     @classmethod
     def setUpTestData(self) -> None:
+        call_command("init-geo-fixtures")
         self.business_area = create_afghanistan()
         PartnerFactory(name="UNICEF")
         from hct_mis_api.apps.reporting.services.generate_report_service import (
