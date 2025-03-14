@@ -589,7 +589,7 @@ class TestCreateTargeting:
         assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
         assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == household_refugee.unicef_id
         actions = ActionChains(pageTargetingDetails.driver)
-        actions.move_to_element(pageTargetingDetails.getHouseholdTableCell(1, 1)).perform()  # type: ignore
+        actions.move_to_element(pageTargetingDetails.getHouseholdTableCell(1, 1)).perform()
 
     def test_create_targeting_with_pdu_string_criteria(
         self,

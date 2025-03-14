@@ -298,7 +298,7 @@ def browser(driver: Chrome, live_server: LiveServer) -> Chrome:
 def login(browser: Chrome) -> Chrome:
     browser.get(f"{browser.live_server.url}/api/unicorn/")
 
-    browser.execute_script(  # type: ignore
+    browser.execute_script(
         """
     window.indexedDB.databases().then(dbs => dbs.forEach(db => {
         console.log('Deleting database:', db.name);
@@ -322,7 +322,7 @@ def login(browser: Chrome) -> Chrome:
     browser.find_element(By.XPATH, loginButton).click()
     from time import sleep
 
-    sleep(0.5)  # TODO: added just for test in CI
+    sleep(0.3)  # TODO: added just for test in CI
     browser.get(f"{browser.live_server.url}/")
 
     # Clear cache

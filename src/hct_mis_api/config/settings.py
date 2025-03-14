@@ -207,6 +207,7 @@ PROJECT_APPS = [
     "hct_mis_api.apps.periodic_data_update.apps.PeriodicDataUpdateConfig",
     "hct_mis_api.contrib.aurora.apps.Config",
     "hct_mis_api.contrib.vision.apps.Config",
+    "hct_mis_api.apps.universal_update_script.apps.Config",
 ]
 
 DJANGO_APPS = [
