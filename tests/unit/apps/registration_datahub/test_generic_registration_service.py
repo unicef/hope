@@ -21,8 +21,6 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
-from hct_mis_api.apps.payment.models import PendingDeliveryMechanismData
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.contrib.aurora.fixtures import (
     OrganizationFactory,
@@ -41,7 +39,6 @@ class TestGenericRegistrationService(TestCase):
 
     @classmethod
     def setUp(cls) -> None:
-        generate_delivery_mechanisms()
         DocumentType.objects.create(key="tax_id", label="Tax ID")
         DocumentType.objects.create(key="disability_certificate", label="Disability Certificate")
         cls.business_area = BusinessAreaFactory(slug="generic-slug")
@@ -270,16 +267,6 @@ class TestGenericRegistrationService(TestCase):
                     "individuals": [self.individual_with_bank_account_and_tax_and_disability],
                     "enumerators": "ABC",
                     "marketing": {"can_unicef_contact_you": "YES"},
-                    "ind-bank-info": [
-                        {
-                            "account_details": {
-                                "ignore_error": True,
-                                "account_holder": "xxxx",
-                                "account_number": "2087008012",
-                                "institution_code": "000004",
-                            }
-                        }
-                    ],
                 },
                 files=json.dumps(self.files).encode(),
             ),
@@ -311,14 +298,3 @@ class TestGenericRegistrationService(TestCase):
             }
         )
         self.assertEqual(PendingIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).count(), 1)
-        pending_collector = PendingIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).first().individual
-        dmd = PendingDeliveryMechanismData.objects.filter(individual=pending_collector).first()
-        self.assertIsNotNone(dmd)
-        self.assertEqual(
-            dmd.delivery_data,
-            {
-                "bank_account_number__transfer_to_account": "2087008012",
-                "bank_name__transfer_to_account": "000004",
-                "full_name": "",
-            },
-        )
