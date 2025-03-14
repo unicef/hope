@@ -29,8 +29,9 @@ class NigeriaPeopleRegistrationService(GenericRegistrationService):
         default_mapping = {
             "defaults": {
                 "individuals_key": "individual-details",
-                "households_key": "household-details",
-                "bank_key": "ind-bank-info",
+                "households_key": "household-info",
+                "intro_data_key": "intro-and-consent",
+                "account_key": "account_details",
                 "country": "NG",
             },
             "household": {
@@ -38,22 +39,27 @@ class NigeriaPeopleRegistrationService(GenericRegistrationService):
                 "admin2_h_c": "household.admin2",
                 "admin3_h_c": "household.admin3",
                 "admin4_h_c": "household.admin4",
-                "consent_h_c": "household.consent",
             },
             "individuals": {
                 "given_name_i_c": "individual.given_name",
                 "family_name_i_c": "individual.family_name",
                 "birth_date_i_c": "individual.birth_date",
                 "gender_i_c": "individual.sex",
-                "email": "individual.email",
+                "email_i_c": "individual.email",
                 "phone_no_i_c": "individual.phone_no",
                 "estimated_birth_date_i_c": "individual.estimated_birth_date",
-                "confirm_phone_no": "individual.phone_no_alternative",  # ? TODO
+                "confirm_phone_no": "individual.phone_no_alternative",
             },
-            "flex-fields": ["org_enumerator_h_c"],
+            "flex-fields": ["enumerator_code", "who_to_register", "frontline_worker_designation_i_f"],
         }
 
         mapping = mergedicts(default_mapping, self.registration.mapping, [])
+        record_data_dict = record.get_data()
+        household_data = record_data_dict.get(mapping["defaults"].get("households_key", "household-info"), [])
+        intro_data = record_data_dict.get(mapping["defaults"].get("intro_data_key", "intro-and-consent"), [])
+        individual_data = record_data_dict.get(mapping["defaults"].get("individuals_key", "individual-details"), [])
+
+        household_data[0].update(intro_data[0])
         household = self.create_household_data(record, registration_data_import, mapping)
 
         individuals, head, pr_collector, _ = self.create_individuals(
@@ -64,30 +70,23 @@ class NigeriaPeopleRegistrationService(GenericRegistrationService):
 
         collector = pr_collector or head or individuals[0]
         head_of_household = head or individuals[0]
-
         household.head_of_household = head_of_household
-
         PendingIndividualRoleInHousehold.objects.create(individual=collector, household=household, role=ROLE_PRIMARY)
 
-        record_data_dict = record.get_data()
-        accounts_data = record_data_dict.get(mapping["defaults"].get("bank_key", "ind-bank-info"), [])
+        accounts_data = individual_data[0].get(mapping["defaults"].get("account_key", "account_details"), {})
         if accounts_data:
-            if primary_collector_account_details := accounts_data[0].get("account_details"):
-                PendingDeliveryMechanismData.objects.create(
-                    individual=pr_collector,
-                    delivery_mechanism=DeliveryMechanism.objects.get(code="transfer_to_account"),
-                    data={
-                        "bank_account_number__transfer_to_account": primary_collector_account_details.get(
-                            "account_number", ""
-                        ),
-                        "bank_name__transfer_to_account": primary_collector_account_details.get("institution_code", ""),
-                    },
-                )
+            PendingDeliveryMechanismData.objects.create(
+                individual=pr_collector,
+                delivery_mechanism=DeliveryMechanism.objects.get(code="transfer_to_account"),
+                data={
+                    "bank_account_number__transfer_to_account": accounts_data.get("number", ""),
+                    "bank_name__transfer_to_account": accounts_data.get("name", ""),
+                    "bank_code__transfer_to_account": accounts_data.get("code", ""),
+                    "account_holder_name__transfer_to_account": accounts_data.get("holder_name", ""),
+                },
+            )
 
-        ind_data_dict = (
-            record_data_dict.get(mapping["defaults"].get("individuals_key", "individual-details"), [])[0] or {}
-        )
-        self._prepare_national_id(ind_data_dict, pr_collector)
+        self._prepare_national_id(individual_data, pr_collector)
 
         household.registration_id = record.source_id
         household.detail_id = record.source_id
