@@ -5,7 +5,6 @@ from datetime import datetime
 from typing import Any
 
 from django.conf import settings
-from django.core.management import call_command
 
 import pytest
 import redis
@@ -24,6 +23,7 @@ from hct_mis_api.apps.account.fixtures import RoleFactory, UserFactory
 from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment, User
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
+from hct_mis_api.apps.geo.fixtures import generate_small_areas_for_afghanistan_only
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.fixtures import DocumentTypeFactory
 from hct_mis_api.apps.household.models import DocumentType
@@ -320,6 +320,9 @@ def login(browser: Chrome) -> Chrome:
     browser.find_element(By.ID, login).send_keys("superuser")
     browser.find_element(By.ID, password).send_keys("testtest2")
     browser.find_element(By.XPATH, loginButton).click()
+    from time import sleep
+
+    sleep(0.5)  # TODO: added just for test in CI
     browser.get(f"{browser.live_server.url}/")
 
     # Clear cache
@@ -617,7 +620,7 @@ def create_super_user(business_area: BusinessArea) -> User:
     permission_list = [role.value for role in Permissions]
 
     role, _ = Role.objects.update_or_create(name="Role", defaults={"permissions": permission_list})
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data_small.json", verbosity=0)
+    generate_small_areas_for_afghanistan_only()
     country = Country.objects.get(name="Afghanistan")
     business_area.countries.add(country)
 

@@ -1,6 +1,5 @@
 from typing import Any, List
 
-from django.conf import settings
 from django.core.management import call_command
 
 from parameterized import parameterized
@@ -23,7 +22,6 @@ from hct_mis_api.apps.utils.models import MergeStatusModel
 
 class TestImportedHouseholdQuery(APITestCase):
     databases = "__all__"
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     ALL_IMPORTED_HOUSEHOLD_QUERY = """
     query allHouseholds{
@@ -51,6 +49,7 @@ class TestImportedHouseholdQuery(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         call_command("loadbusinessareas")
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.partner = PartnerFactory(name="TEST1")
