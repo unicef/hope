@@ -48,7 +48,7 @@ class NigeriaPeopleRegistrationService(GenericRegistrationService):
                 "phone_no_i_c": "individual.phone_no",
                 "estimated_birth_date_i_c": "individual.estimated_birth_date",
                 "confirm_phone_no": "individual.phone_no_alternative",
-                "frontline_worker_designation_i_f": "individual.flex_fields",
+                "account_details": "account_details.data",
             },
         }
 

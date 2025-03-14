@@ -123,7 +123,14 @@ class TestNigeriaPeopleRegistrationService(TestCase):
         self.assertEqual(primary_collector.sex, MALE)
         self.assertEqual(primary_collector.email, "gfranco@unicef.org")
         self.assertIsNotNone(primary_collector.phone_no_alternative)
-        self.assertEqual(primary_collector.flex_fields, {"frontline_worker_designation_i_f": "H2HCL"})
+        self.assertEqual(
+            primary_collector.flex_fields,
+            {
+                "frontline_worker_designation_i_f": "H2HCL",
+                "national_id_no": "01234567891",
+                "national_id_no_i_c": "01234567891",
+            },
+        )
         self.assertEqual(primary_collector.rdi_merge_status, "PENDING")
         self.assertEqual(PendingIndividualRoleInHousehold.objects.count(), 1)
 
@@ -141,7 +148,7 @@ class TestNigeriaPeopleRegistrationService(TestCase):
                 "account_holder_name__transfer_to_account": "xxxx",
             },
         )
-        self.assertEqual(account.delivery_mechanism__code, "transfer_to_account")
+        self.assertEqual(account.delivery_mechanism.code, "transfer_to_account")
 
         national_id = PendingDocument.objects.filter(document_number="01234567891").first()
         self.assertEqual(national_id.individual, primary_collector)

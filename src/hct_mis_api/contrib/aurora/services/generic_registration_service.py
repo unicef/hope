@@ -274,10 +274,10 @@ class GenericRegistrationService(BaseRegistrationService):
                     individual_id=individual.id,
                     delivery_mechanism=DeliveryMechanism.objects.get(code="transfer_to_account"),
                     data={
-                        "bank_account_number__transfer_to_account": account_data.get("number", ""),
-                        "bank_name__transfer_to_account": account_data.get("name", ""),
-                        "bank_code__transfer_to_account": account_data.get("code", ""),
-                        "account_holder_name__transfer_to_account": account_data.get("holder_name", ""),
+                        "bank_account_number__transfer_to_account": account_data["data"].get("number", ""),
+                        "bank_name__transfer_to_account": account_data["data"].get("name", ""),
+                        "bank_code__transfer_to_account": account_data["data"].get("code", ""),
+                        "account_holder_name__transfer_to_account": account_data["data"].get("holder_name", ""),
                     },
                 )
 
