@@ -1117,7 +1117,6 @@ class Individual(
     phone_no_alternative = PhoneNumberField(blank=True, db_index=True, help_text="Beneficiary phone number alternative")
     email = models.CharField(max_length=255, blank=True, help_text="Beneficiary email address")
     payment_delivery_phone_no = PhoneNumberField(blank=True, null=True, help_text="Beneficiary contact phone number")
-
     relationship = models.CharField(
         max_length=255,
         blank=True,
@@ -1135,7 +1134,7 @@ class Individual(
     pregnant = models.BooleanField(null=True, help_text="Pregnant status")
     fchild_hoh = models.BooleanField(default=False, help_text="Child is female and Head of Household flag")
     child_hoh = models.BooleanField(default=False, help_text="Child is Head of Household flag")
-
+    administration_of_rutf = models.BooleanField(null=True, help_text="Administration of rutf")
     disability = models.CharField(
         max_length=20, choices=DISABILITY_CHOICES, default=NOT_DISABLED, help_text="Disability status"
     )
@@ -1145,7 +1144,6 @@ class Individual(
     disability_certificate_picture = models.ImageField(
         blank=True, null=True, help_text="Disability certificate picture"
     )
-
     seeing_disability = models.CharField(
         max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True, help_text="Seeing disability"
     )
@@ -1169,7 +1167,6 @@ class Individual(
     who_answers_alt_phone = models.CharField(
         max_length=150, blank=True, help_text="Who answers alternative phone number"
     )
-
     preferred_language = models.CharField(
         max_length=6, choices=Languages.get_tuple(), null=True, blank=True, help_text="Preferred language"
     )
@@ -1195,7 +1192,6 @@ class Individual(
     first_registration_date = models.DateField(help_text="First registration date [sys]")
     last_registration_date = models.DateField(help_text="Last registration date [sys]")
     enrolled_in_nutrition_programme = models.BooleanField(null=True, help_text="Enrolled in nutrition program [sys]")
-    administration_of_rutf = models.BooleanField(null=True, help_text="Administration of rutf [sys]")
     deduplication_golden_record_status = models.CharField(
         max_length=50,
         default=UNIQUE,
