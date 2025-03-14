@@ -24,7 +24,6 @@ from hct_mis_api.apps.program.models import Program, ProgramCycle
 
 
 class ProgramFilter(FilterSet):
-    business_area = CharFilter(field_name="business_area__slug")
     search = CharFilter(method="search_filter")
     status = MultipleChoiceFilter(field_name="status", choices=Program.STATUS_CHOICE)
     sector = MultipleChoiceFilter(field_name="sector", choices=Program.SECTOR_CHOICE)
