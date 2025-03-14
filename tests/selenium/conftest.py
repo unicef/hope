@@ -291,7 +291,7 @@ def browser(driver: Chrome, live_server: LiveServer) -> Chrome:
 def login(browser: Chrome) -> Chrome:
     browser.get(f"{browser.live_server.url}/api/unicorn/")
 
-    browser.execute_script(  # type: ignore
+    browser.execute_script(
         """
     window.indexedDB.databases().then(dbs => dbs.forEach(db => {
         console.log('Deleting database:', db.name);
