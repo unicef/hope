@@ -1,15 +1,20 @@
 from typing import Any, Dict, Optional
 
-from django.db.models import Q
+from django.db.models import Q, Value
 from django.shortcuts import get_object_or_404
 from django.utils.dateparse import parse_date
 
 from rest_framework import serializers
+from rest_framework.utils.serializer_helpers import ReturnDict
 
 from hct_mis_api.api.utils import EncodedIdSerializerMixin
 from hct_mis_api.apps.account.api.fields import Base64ModelField
+from hct_mis_api.apps.account.api.serializers import PartnerForProgramSerializer
+from hct_mis_api.apps.account.models import Partner
+from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
 from hct_mis_api.apps.core.api.serializers import DataCollectingTypeSerializer
 from hct_mis_api.apps.core.utils import encode_id_base64_required
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 
 
@@ -237,11 +242,12 @@ class BeneficiaryGroupSerializer(serializers.ModelSerializer):
         )
 
 
-class ProgramSerializer(serializers.ModelSerializer):
+class ProgramListSerializer(serializers.ModelSerializer):
     id = Base64ModelField(model_name="Program")
     data_collecting_type = DataCollectingTypeSerializer()
     pdu_fields = serializers.SerializerMethodField()
     beneficiary_group = BeneficiaryGroupSerializer()
+    just_in_case = serializers.SerializerMethodField()
 
     class Meta:
         model = Program
@@ -262,11 +268,54 @@ class ProgramSerializer(serializers.ModelSerializer):
             "programme_code",
             "status",
             "pdu_fields",
+            "budget",
+            "household_count",
+            "just_in_case",
         )
         extra_kwargs = {"status": {"help_text": "Status"}}  # for swagger purpose
+
+    def get_just_in_case(self, obj: Program) -> str:
+        return "Justin Case"
 
     def get_pdu_fields(self, obj: Program) -> list[str]:
         pdu_field_encoded_ids = []
         for pdu_field in obj.pdu_fields.all():
             pdu_field_encoded_ids.append(encode_id_base64_required(pdu_field, "FlexibleAttribute"))
         return pdu_field_encoded_ids
+
+
+class ProgramDetailSerializer(AdminUrlSerializerMixin, ProgramListSerializer):
+    partners = serializers.SerializerMethodField()
+    registration_imports_total_count = serializers.SerializerMethodField()
+    target_populations_count = serializers.SerializerMethodField()
+
+    class Meta(ProgramListSerializer.Meta):
+        fields = ProgramListSerializer.Meta.fields + (  # type: ignore
+            "admin_url",
+            "description",
+            "administrative_areas_of_implementation",
+            "version",
+            "partners",
+            "partner_access",
+            "registration_imports_total_count",
+            "target_populations_count",
+            "population_goal",
+        )
+
+    def get_registration_imports_total_count(self, obj: Program) -> int:
+        return obj.registration_import.count() if hasattr(obj, "registration_import") else 0
+
+    def get_target_populations_count(self, obj: Program) -> int:
+        return PaymentPlan.objects.filter(program_cycle__program=obj).count()
+
+    def get_partners(self, obj: Program) -> ReturnDict:
+        partners_qs = (
+            Partner.objects.filter(
+                Q(role_assignments__program=obj)
+                | (Q(role_assignments__program=None) & Q(role_assignments__business_area=obj.business_area))
+            )
+            .annotate(partner_program=Value(obj.id))
+            .order_by("name")
+            .distinct()
+        )
+        return PartnerForProgramSerializer(partners_qs, many=True).data

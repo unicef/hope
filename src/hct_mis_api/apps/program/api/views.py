@@ -1,6 +1,8 @@
 import logging
 from typing import Any
 
+from django.db.models import Case, IntegerField, QuerySet, Value, When
+
 from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, status
@@ -16,10 +18,14 @@ from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
-from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.account.permissions import (
+    ALL_GRIEVANCES_CREATE_MODIFY,
+    Permissions,
+)
 from hct_mis_api.apps.core.api.filters import UpdatedAtFilter
 from hct_mis_api.apps.core.api.mixins import (
     BaseViewSet,
+    BusinessAreaMixin,
     ProgramMixin,
     SerializerActionMixin,
 )
@@ -35,24 +41,58 @@ from hct_mis_api.apps.program.api.serializers import (
     ProgramCycleDeleteSerializer,
     ProgramCycleListSerializer,
     ProgramCycleUpdateSerializer,
-    ProgramSerializer,
+    ProgramDetailSerializer,
+    ProgramListSerializer,
 )
+from hct_mis_api.apps.program.filters import ProgramFilter
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 
 logger = logging.getLogger(__name__)
 
 
 class ProgramViewSet(
+    SerializerActionMixin,
+    BusinessAreaMixin,
     RetrieveModelMixin,
     ListModelMixin,
     BaseViewSet,
 ):
-    permission_classes = [IsAuthenticated]
+    permissions_by_action = {
+        "retrieve": [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+        "list": [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS, *ALL_GRIEVANCES_CREATE_MODIFY],
+    }
     queryset = Program.objects.all()
-    serializer_class = ProgramSerializer
+    serializer_classes_by_action = {
+        "list": ProgramListSerializer,
+        "retrieve": ProgramDetailSerializer,
+    }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
-    filterset_class = UpdatedAtFilter
+    filterset_class = ProgramFilter
     lookup_field = "slug"
+
+    def get_queryset(self) -> QuerySet[Program]:
+        queryset = super().get_queryset()
+        user = self.request.user
+        allowed_programs = queryset.filter(id__in=user.get_program_ids_for_business_area(self.business_area.id))
+        return (
+            queryset.filter(
+                data_collecting_type__deprecated=False,
+                data_collecting_type__isnull=False,
+                id__in=allowed_programs.values_list("id", flat=True),
+            )
+            .exclude(data_collecting_type__code="unknown")
+            .annotate(
+                custom_order=Case(
+                    When(status=Program.DRAFT, then=Value(1)),
+                    When(status=Program.ACTIVE, then=Value(2)),
+                    When(status=Program.FINISHED, then=Value(3)),
+                    output_field=IntegerField(),
+                )
+            )
+            .prefetch_related("pdu_fields")
+            .select_related("beneficiary_group", "data_collecting_type")
+            .order_by("custom_order", "start_date")
+        )
 
 
 class ProgramCycleViewSet(
