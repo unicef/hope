@@ -9,7 +9,7 @@ export type HouseholdList = {
     head_of_household: string;
     admin1?: string;
     admin2?: string;
-    program?: string;
+    program: string;
     readonly status: string;
     size?: number | null;
     residence_status?: ResidenceStatusEnum;

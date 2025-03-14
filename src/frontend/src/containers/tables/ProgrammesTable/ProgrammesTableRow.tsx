@@ -6,13 +6,14 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ProgrammeChoiceDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import TableCell from '@mui/material/TableCell';
-import { Program } from '@restgenerated/models/Program';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+
 import { choicesToDict, programStatusToColor } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface ProgrammesTableRowProps {
-  program: Program;
+  program: ProgramDetail;
   choicesData: ProgrammeChoiceDataQuery;
 }
 

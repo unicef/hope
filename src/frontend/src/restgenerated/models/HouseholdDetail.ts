@@ -14,7 +14,7 @@ export type HouseholdDetail = {
     admin2?: string;
     admin3?: string;
     admin4?: string;
-    program?: string;
+    program: string;
     country?: string;
     country_origin?: string;
     readonly status: string;
@@ -68,5 +68,6 @@ export type HouseholdDetail = {
     returnee?: boolean | null;
     size?: number | null;
     residence_status?: ResidenceStatusEnum;
+    program_registration_id?: string | null;
 };
 

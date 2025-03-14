@@ -8,7 +8,6 @@ import {
 } from '@mui/material';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field, Form, Formik } from 'formik';
-import get from 'lodash/get';
 import moment from 'moment';
 import { forwardRef, ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -60,11 +59,12 @@ const NewReportForm = (): ReactElement => {
       ),
   });
 
-  const queryVariables = { businessAreaSlug: businessArea, status: ['ACTIVE'] };
+  const queryVariables = { businessArea, status: ['ACTIVE'] };
 
   const { data: allProgramsData, isLoading: loadingPrograms } = useQuery({
     queryKey: ['businessAreasProgramsList', queryVariables, businessArea],
-    queryFn: () => RestService.restBusinessAreasProgramsList(queryVariables),
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsList({ ...queryVariables }),
   });
   const { data: choicesData, loading: choicesLoading } =
     useReportChoiceDataQuery();

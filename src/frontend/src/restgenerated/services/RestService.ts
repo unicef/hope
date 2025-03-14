@@ -20,7 +20,7 @@ import type { PaginatedPeriodicDataUpdateUploadListList } from '../models/Pagina
 import type { PaginatedPeriodicFieldList } from '../models/PaginatedPeriodicFieldList';
 import type { PaginatedProgramCycleListList } from '../models/PaginatedProgramCycleListList';
 import type { PaginatedProgramGlobalList } from '../models/PaginatedProgramGlobalList';
-import type { PaginatedProgramList } from '../models/PaginatedProgramList';
+import type { PaginatedProgramListList } from '../models/PaginatedProgramListList';
 import type { PaginatedProjectList } from '../models/PaginatedProjectList';
 import type { PaginatedRegistrationDataImportListList } from '../models/PaginatedRegistrationDataImportListList';
 import type { PaginatedRegistrationList } from '../models/PaginatedRegistrationList';
@@ -34,11 +34,11 @@ import type { PeriodicDataUpdateTemplateDetail } from '../models/PeriodicDataUpd
 import type { PeriodicDataUpdateUpload } from '../models/PeriodicDataUpdateUpload';
 import type { PeriodicDataUpdateUploadDetail } from '../models/PeriodicDataUpdateUploadDetail';
 import type { Profile } from '../models/Profile';
-import type { Program } from '../models/Program';
 import type { ProgramAPI } from '../models/ProgramAPI';
 import type { ProgramCycleCreate } from '../models/ProgramCycleCreate';
 import type { ProgramCycleList } from '../models/ProgramCycleList';
 import type { ProgramCycleUpdate } from '../models/ProgramCycleUpdate';
+import type { ProgramDetail } from '../models/ProgramDetail';
 import type { PushPeople } from '../models/PushPeople';
 import type { RDI } from '../models/RDI';
 import type { RDINested } from '../models/RDINested';
@@ -848,33 +848,89 @@ export class RestService {
         });
     }
     /**
-     * @returns PaginatedProgramList
+     * @returns PaginatedProgramListList
      * @throws ApiError
      */
     public static restBusinessAreasProgramsList({
+        beneficiaryGroupMatch,
+        businessArea,
         businessAreaSlug,
+        budget,
+        compatibleDct,
+        dataCollectingType,
+        endDate,
         limit,
+        name,
+        numberOfHouseholds,
+        numberOfHouseholdsWithTpInProgram,
         offset,
+        orderBy,
         ordering,
-        updatedAtAfter,
-        updatedAtBefore,
+        search,
+        sector,
+        startDate,
+        status,
     }: {
+        beneficiaryGroupMatch: any,
+        businessArea: string,
         businessAreaSlug: string,
+        budget?: string,
+        compatibleDct?: any,
+        dataCollectingType?: string,
+        endDate?: string,
         /**
          * Number of results to return per page.
          */
         limit?: number,
+        name?: string,
+        numberOfHouseholds?: string,
+        numberOfHouseholdsWithTpInProgram?: string,
         /**
          * The initial index from which to return the results.
          */
         offset?: number,
         /**
+         * Ordering
+         *
+         * * `name` - Name
+         * * `-name` - Name (descending)
+         * * `status` - Status
+         * * `-status` - Status (descending)
+         * * `start_date` - Start date
+         * * `-start_date` - Start date (descending)
+         * * `end_date` - End date
+         * * `-end_date` - End date (descending)
+         * * `sector` - Sector
+         * * `-sector` - Sector (descending)
+         * * `number_of_households` - Number of households
+         * * `-number_of_households` - Number of households (descending)
+         * * `budget` - Budget
+         * * `-budget` - Budget (descending)
+         */
+        orderBy?: Array<'-budget' | '-end_date' | '-name' | '-number_of_households' | '-sector' | '-start_date' | '-status' | 'budget' | 'end_date' | 'name' | 'number_of_households' | 'sector' | 'start_date' | 'status'>,
+        /**
          * Which field to use when ordering the results.
          */
         ordering?: string,
-        updatedAtAfter?: string,
-        updatedAtBefore?: string,
-    }): CancelablePromise<PaginatedProgramList> {
+        search?: any,
+        /**
+         * * `CHILD_PROTECTION` - Child Protection
+         * * `EDUCATION` - Education
+         * * `HEALTH` - Health
+         * * `MULTI_PURPOSE` - Multi Purpose
+         * * `NUTRITION` - Nutrition
+         * * `SOCIAL_POLICY` - Social Policy
+         * * `WASH` - WASH
+         */
+        sector?: Array<'CHILD_PROTECTION' | 'EDUCATION' | 'HEALTH' | 'MULTI_PURPOSE' | 'NUTRITION' | 'SOCIAL_POLICY' | 'WASH'>,
+        startDate?: string,
+        /**
+         * * `ACTIVE` - Active
+         * * `DRAFT` - Draft
+         * * `FINISHED` - Finished
+         */
+        status?: Array<'ACTIVE' | 'DRAFT' | 'FINISHED'>,
+    }): CancelablePromise<PaginatedProgramListList> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/',
@@ -882,11 +938,23 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
             },
             query: {
+                'beneficiary_group_match': beneficiaryGroupMatch,
+                'budget': budget,
+                'business_area': businessArea,
+                'compatible_dct': compatibleDct,
+                'data_collecting_type': dataCollectingType,
+                'end_date': endDate,
                 'limit': limit,
+                'name': name,
+                'number_of_households': numberOfHouseholds,
+                'number_of_households_with_tp_in_program': numberOfHouseholdsWithTpInProgram,
                 'offset': offset,
+                'order_by': orderBy,
                 'ordering': ordering,
-                'updated_at_after': updatedAtAfter,
-                'updated_at_before': updatedAtBefore,
+                'search': search,
+                'sector': sector,
+                'start_date': startDate,
+                'status': status,
             },
         });
     }
@@ -1863,6 +1931,26 @@ export class RestService {
         });
     }
     /**
+     * @returns RegistrationDataImportList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsRegistrationDataImportsWebhookdeduplicationRetrieve({
+        businessAreaSlug,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+    }): CancelablePromise<RegistrationDataImportList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/webhookdeduplication/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
      * @returns PaginatedTargetPopulationListList
      * @throws ApiError
      */
@@ -1946,7 +2034,7 @@ export class RestService {
         });
     }
     /**
-     * @returns Program
+     * @returns ProgramDetail
      * @throws ApiError
      */
     public static restBusinessAreasProgramsRetrieve({
@@ -1955,7 +2043,7 @@ export class RestService {
     }: {
         businessAreaSlug: string,
         slug: string,
-    }): CancelablePromise<Program> {
+    }): CancelablePromise<ProgramDetail> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{slug}/',
@@ -2332,16 +2420,6 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,
             },
-        });
-    }
-    /**
-     * @returns any No response body
-     * @throws ApiError
-     */
-    public static restWebhookdeduplicationRetrieve(): CancelablePromise<any> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/rest/webhookdeduplication/',
         });
     }
 }

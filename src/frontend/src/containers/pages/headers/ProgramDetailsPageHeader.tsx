@@ -2,7 +2,8 @@ import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { PageHeader } from '@components/core/PageHeader';
 import { AdminButton } from '@core/AdminButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { Program } from '@restgenerated/models/Program';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+
 import { Status791Enum } from '@restgenerated/models/Status791Enum';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -11,7 +12,7 @@ import { DraftProgramDetailsPageHeaderButtons } from './DraftProgramDetailsPageH
 import { FinishedProgramDetailsPageHeaderButtons } from './FinishedProgramDetailsPageHeaderButtons';
 
 export interface ProgramDetailsPageHeaderPropTypes {
-  program: Program;
+  program: ProgramDetail;
   canActivate: boolean;
   canEdit: boolean;
   canRemove: boolean;

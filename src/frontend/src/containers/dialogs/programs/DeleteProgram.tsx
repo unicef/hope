@@ -14,7 +14,7 @@ import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
 import { useNavigate } from 'react-router-dom';
-import { Program } from '@restgenerated/models/Program';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 
 const RemoveButton = styled(Button)`
   && {
@@ -37,7 +37,7 @@ const MidDialog = styled(Dialog)`
 `;
 
 interface DeleteProgramProps {
-  program: Program;
+  program: ProgramDetail;
 }
 
 export function DeleteProgram({ program }: DeleteProgramProps): ReactElement {

@@ -4,10 +4,10 @@ import { ReactElement } from 'react';
 import { ActivateProgram } from '../../dialogs/programs/ActivateProgram';
 import { DeleteProgram } from '../../dialogs/programs/DeleteProgram';
 import { DuplicateProgramButtonLink } from '../../dialogs/programs/DuplicateProgramButtonLink';
-import { Program } from '@restgenerated/models/Program';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 
 export interface DraftProgramDetailsPageHeaderPropTypes {
-  program: Program;
+  program: ProgramDetail;
   canRemove: boolean;
   canEdit: boolean;
   canActivate: boolean;

@@ -6,7 +6,8 @@ import {
   useState,
 } from 'react';
 import { DataCollectingTypeType, ProgramStatus } from './__generated__/graphql';
-import { Program } from '@restgenerated/models/Program';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+
 import { Status791Enum } from '@restgenerated/models/Status791Enum';
 
 export interface ProgramInterface {
@@ -35,11 +36,11 @@ export interface ProgramInterface {
   };
 }
 
-export type ProgramContextType = Partial<Program> | null;
+export type ProgramContextType = Partial<ProgramDetail> | null;
 
 type ProgramContent = {
-  selectedProgram: Partial<Program>;
-  setSelectedProgram: (program: Partial<Program>) => void;
+  selectedProgram: Partial<ProgramDetail>;
+  setSelectedProgram: (program: Partial<ProgramDetail>) => void;
   isActiveProgram: boolean;
   isSocialDctType: boolean;
   isStandardDctType: boolean;

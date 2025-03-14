@@ -7,7 +7,7 @@ import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { ProgrammeChoiceDataQuery } from '@generated/graphql';
 import { Box, Grid2 as Grid, Typography } from '@mui/material';
-import { Program } from '@restgenerated/models/Program';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import {
   choicesToDict,
   isPartnerVisible,
@@ -39,7 +39,7 @@ const StyledBox = styled(Box)`
 `;
 
 interface ProgramDetailsProps {
-  program: Program;
+  program: ProgramDetail;
   choices: ProgrammeChoiceDataQuery;
 }
 
@@ -57,7 +57,7 @@ export const ProgramDetails = ({
   );
   const programSectorChoicesDict = choicesToDict(programSectorChoices);
   const renderAdminAreasCount = (
-    partner: Program['partners'][0],
+    partner: ProgramDetail['partners'][0],
   ): ReactElement => {
     const counts = {
       1: 0,
@@ -181,7 +181,7 @@ export const ProgramDetails = ({
         <NumberOfHouseHolds>
           <LabelizedField label={t('Programme size')}>
             <NumberOfHouseHoldsValue>
-              {program.total_number_of_households}
+              {program.household_count}
             </NumberOfHouseHoldsValue>
           </LabelizedField>
         </NumberOfHouseHolds>

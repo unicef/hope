@@ -19,7 +19,8 @@ import ButtonBase from '@mui/material/ButtonBase';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
 import Popper from '@mui/material/Popper';
 import { styled } from '@mui/material/styles';
-import { Program } from '@restgenerated/models/Program';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { programStatusToColor } from '@utils/utils';
@@ -231,7 +232,7 @@ export const GlobalProgramSelect = () => {
 
   useEffect(() => {
     if (programsData) {
-      const newProgramsList: Partial<Program>[] = [];
+      const newProgramsList: Partial<ProgramDetail>[] = [];
       if (inputValue === '') {
         newProgramsList.push({
           id: 'all',

@@ -2,10 +2,10 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { Program } from './Program';
-export type PaginatedProgramList = {
+import type { ProgramList } from './ProgramList';
+export type PaginatedProgramListList = {
     next?: string | null;
     previous?: string | null;
-    results: Array<Program>;
+    results: Array<ProgramList>;
 };
 

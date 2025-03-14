@@ -16,11 +16,12 @@ import { programCycleStatusToColor } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { Program } from '@restgenerated/models/Program';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+
 import { Status791Enum } from '@restgenerated/models/Status791Enum';
 
 interface ProgramCyclesTableProgramDetailsProps {
-  program: Program;
+  program: ProgramDetail;
 }
 
 const ProgramCyclesTableProgramDetails = ({

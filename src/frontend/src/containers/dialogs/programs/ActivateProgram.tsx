@@ -3,7 +3,8 @@ import { ProgramStatus, useUpdateProgramMutation } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Button, Dialog, DialogContent, DialogTitle } from '@mui/material';
-import { Program } from '@restgenerated/models/Program';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+
 import { Status791Enum } from '@restgenerated/models/Status791Enum';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -15,7 +16,7 @@ import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
 
 interface ActivateProgramProps {
-  program: Program;
+  program: ProgramDetail;
 }
 
 export const ActivateProgram = ({

@@ -131,12 +131,12 @@ const EditProgramPage = (): ReactElement => {
     version,
     partners,
     partner_access = ProgramPartnerAccess.AllPartnersAccess,
-    registration_imports,
+    registration_imports_total_count,
     pdu_fields,
     target_populations_count,
   } = program;
 
-  const programHasRdi = registration_imports?.total_count > 0;
+  const programHasRdi = registration_imports_total_count > 0;
   const programHasTp = target_populations_count > 0;
 
   const handleSubmitProgramDetails = async (values): Promise<void> => {
@@ -191,7 +191,7 @@ const EditProgramPage = (): ReactElement => {
             id,
             ...requestValuesDetails,
             budget: budgetToFixed,
-            population_goal: population_goalParsed,
+            populationGoal: population_goalParsed,
             pduFields: pduFieldsToSend,
           },
           version,
@@ -233,14 +233,6 @@ const EditProgramPage = (): ReactElement => {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }
   };
-
-  const mappedPduFields = Object.entries(pdu_fields).map(([, field]) => {
-    const { ...rest } = field;
-    return {
-      ...rest,
-      label: JSON.parse(field.label)['English(EN)'],
-    };
-  });
 
   const initialValuesProgramDetails = {
     editMode: true,
