@@ -268,7 +268,6 @@ class ProgramListSerializer(serializers.ModelSerializer):
             "programme_code",
             "status",
             "pdu_fields",
-            "budget",
             "household_count",
             "just_in_case",
         )
@@ -279,7 +278,7 @@ class ProgramListSerializer(serializers.ModelSerializer):
 
     def get_pdu_fields(self, obj: Program) -> list[str]:
         pdu_field_encoded_ids = []
-        for pdu_field in obj.pdu_fields.all():
+        for pdu_field in obj.pdu_fields.order_by("created_at"):
             pdu_field_encoded_ids.append(encode_id_base64_required(pdu_field, "FlexibleAttribute"))
         return pdu_field_encoded_ids
 

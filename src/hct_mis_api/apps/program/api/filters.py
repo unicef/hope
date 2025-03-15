@@ -2,14 +2,14 @@ from decimal import Decimal
 from typing import Any
 
 from django.db.models import DecimalField, Q, QuerySet
-from django.db.models.aggregates import Sum
-from django.db.models.functions import Coalesce
+from django.db.models.aggregates import Count, Sum
+from django.db.models.functions import Coalesce, Lower
 
 from django_filters import rest_framework as filters
 
 from hct_mis_api.apps.core.api.filters import UpdatedAtFilter
-from hct_mis_api.apps.core.utils import decode_id_string_required
-from hct_mis_api.apps.program.models import ProgramCycle
+from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string_required
+from hct_mis_api.apps.program.models import Program, ProgramCycle
 
 
 class ProgramCycleFilter(UpdatedAtFilter):
@@ -61,3 +61,67 @@ class ProgramCycleFilter(UpdatedAtFilter):
             )
             filter_dict = {filter_mapping.get(name): value}
         return queryset.filter(**filter_dict)
+
+
+class ProgramFilter(UpdatedAtFilter):
+    search = filters.CharFilter(method="search_filter")
+    status = filters.MultipleChoiceFilter(choices=Program.STATUS_CHOICE)
+    sector = filters.MultipleChoiceFilter(choices=Program.SECTOR_CHOICE)
+    number_of_households = filters.RangeFilter(method="filter_number_of_households")
+    budget = filters.RangeFilter()
+    start_date = filters.DateFilter(lookup_expr="gte")
+    end_date = filters.DateFilter(lookup_expr="lte")
+    data_collecting_type = filters.CharFilter(field_name="data_collecting_type__code", lookup_expr="exact")
+    name = filters.CharFilter(lookup_expr="istartswith")
+    compatible_dct = filters.CharFilter(method="compatible_dct_filter")
+    beneficiary_group_match = filters.CharFilter(method="beneficiary_group_match_filter")
+
+    class Meta:
+        model = Program
+        fields = (
+            "search",
+            "status",
+            "sector",
+            "number_of_households",
+            "budget",
+            "start_date",
+            "end_date",
+            "name",
+            "compatible_dct",
+            "beneficiary_group_match",
+        )
+
+    order_by = CustomOrderingFilter(
+        fields=(Lower("name"), "status", "start_date", "end_date", "sector", "number_of_households", "budget")
+    )
+
+    def filter_number_of_households(self, queryset: QuerySet, name: str, value: slice) -> QuerySet:
+        queryset = queryset.annotate(hh_count=Count("households"))
+        if min_value := value.start:
+            queryset = queryset.filter(hh_count__gte=min_value)
+        if max_value := value.stop:
+            queryset = queryset.filter(hh_count__lte=max_value)
+        return queryset
+
+    def search_filter(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
+        values = value.split(" ")
+        q_obj = Q()
+        for value in values:
+            q_obj |= Q(name__istartswith=value)
+        return qs.filter(q_obj)
+
+    def compatible_dct_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+        business_area_slug = self.request.parser_context.get("kwargs", {}).get("business_area_slug")
+        if value and business_area_slug:
+            current_program = Program.objects.get(slug=value, business_area__slug=business_area_slug)
+            return qs.filter(data_collecting_type__compatible_types=current_program.data_collecting_type).exclude(
+                id=current_program.id
+            )
+        return qs
+
+    def beneficiary_group_match_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+        business_area_slug = self.request.parser_context.get("kwargs", {}).get("business_area_slug")
+        if value and business_area_slug:
+            current_program = Program.objects.get(slug=value, business_area__slug=business_area_slug)
+            return qs.filter(beneficiary_group=current_program.beneficiary_group).exclude(id=current_program.id)
+        return qs

@@ -100,7 +100,7 @@ class ProgramFactory(DjangoModelFactory):
         getter=lambda c: c[0],
     )
     cash_plus = fuzzy.FuzzyChoice((True, False))
-    population_goal = factory.fuzzy.FuzzyDecimal(50000.0, 600000.0)
+    population_goal = factory.fuzzy.FuzzyInteger(50000, 600000)
     administrative_areas_of_implementation = factory.Faker(
         "sentence",
         nb_words=3,

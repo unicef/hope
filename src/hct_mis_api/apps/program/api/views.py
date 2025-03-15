@@ -33,7 +33,7 @@ from hct_mis_api.apps.program.api.caches import (
     BeneficiaryGroupKeyConstructor,
     ProgramCycleKeyConstructor,
 )
-from hct_mis_api.apps.program.api.filters import ProgramCycleFilter
+from hct_mis_api.apps.program.api.filters import ProgramCycleFilter, ProgramFilter
 from hct_mis_api.apps.program.api.serializers import (
     BeneficiaryGroupSerializer,
     ProgramCycleCreateSerializer,
@@ -43,7 +43,6 @@ from hct_mis_api.apps.program.api.serializers import (
     ProgramDetailSerializer,
     ProgramListSerializer,
 )
-from hct_mis_api.apps.program.filters import ProgramFilter
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 from hct_mis_api.apps.program.validators import ProgramDeletionValidator
 
@@ -79,7 +78,6 @@ class ProgramViewSet(
         return (
             queryset.filter(
                 data_collecting_type__deprecated=False,
-                data_collecting_type__isnull=False,
                 id__in=allowed_programs.values_list("id", flat=True),
             )
             .exclude(data_collecting_type__code="unknown")
