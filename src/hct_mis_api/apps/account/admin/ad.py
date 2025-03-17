@@ -15,9 +15,10 @@ from requests import HTTPError
 
 from hct_mis_api.apps.account import models as account_models
 from hct_mis_api.apps.account.microsoft_graph import DJANGO_USER_MAP, MicrosoftGraphAPI
-from hct_mis_api.apps.account.models import User
+from hct_mis_api.apps.account.models import Partner, User
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import build_arg_dict_from_dict
+from hct_mis_api.apps.steficon.admin import AutocompleteWidget
 
 logger = logging.getLogger(__name__)
 
@@ -25,8 +26,16 @@ logger = logging.getLogger(__name__)
 class LoadUsersForm(forms.Form):
     emails = forms.CharField(widget=forms.Textarea, help_text="Emails must be space separated")
     role = forms.ModelChoiceField(queryset=account_models.Role.objects.all())
-    business_area = forms.ModelChoiceField(queryset=BusinessArea.objects.all())
-    partner = forms.ModelChoiceField(queryset=account_models.Partner.objects.all())
+    business_area = forms.ModelChoiceField(
+        queryset=BusinessArea.objects.all().order_by("name"),
+        required=True,
+        widget=AutocompleteWidget(BusinessArea, ""),
+    )
+    partner = forms.ModelChoiceField(
+        queryset=Partner.objects.all().order_by("name"),
+        required=True,
+        widget=AutocompleteWidget(Partner, ""),
+    )
     enable_kobo = forms.BooleanField(required=False)
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
@@ -129,7 +138,7 @@ class ADUSerMixin:
                 emails = set(form.cleaned_data["emails"].split())
                 role = form.cleaned_data["role"]
                 business_area = form.cleaned_data["business_area"]
-                partner = form.cleaned_data["partner"]  # pragma: no cover
+                partner = form.cleaned_data["partner"]
                 users_to_bulk_create = []
                 users_role_to_bulk_create = []
                 existing = set(account_models.User.objects.filter(email__in=emails).values_list("email", flat=True))
@@ -145,7 +154,7 @@ class ADUSerMixin:
                             else:
                                 user_data = ms_graph.get_user_data(email=email)
                                 user_args = build_arg_dict_from_dict(user_data, DJANGO_USER_MAP)
-                                user = account_models.User(**user_args, partner=partner)  # pragma: no cover
+                                user = account_models.User(**user_args, partner=partner)
                                 if user.first_name is None:
                                     user.first_name = ""
                                 if user.last_name is None:

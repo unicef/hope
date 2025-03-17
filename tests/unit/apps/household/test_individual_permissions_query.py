@@ -1,4 +1,4 @@
-from django.conf import settings
+from django.core.management import call_command
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
@@ -16,8 +16,6 @@ from hct_mis_api.apps.program.models import Program
 
 
 class TestIndividualPermissionsQuery(APITestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     QUERY = """
     query Individual($id: ID!) {
       individual(id: $id) {
@@ -33,6 +31,7 @@ class TestIndividualPermissionsQuery(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         unicef = PartnerFactory(name="UNICEF")
         cls.unicef_partner = PartnerFactory(name="UNICEF HQ", parent=unicef)
         cls.not_unicef_partner = PartnerFactory(name="NOT_UNICEF")

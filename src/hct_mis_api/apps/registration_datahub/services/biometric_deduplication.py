@@ -174,6 +174,13 @@ class BiometricDeduplicationService:
             program=program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
         ).update(deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED)
 
+    @staticmethod
+    def mark_rdis_as_error(deduplication_set_id: str) -> None:
+        program = Program.objects.get(deduplication_set_id=deduplication_set_id)
+        RegistrationDataImport.objects.filter(
+            program=program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
+        ).update(deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_ERROR)
+
     def store_rdis_deduplication_statistics(self, deduplication_set_id: str) -> None:
         program = Program.objects.get(deduplication_set_id=deduplication_set_id)
         rdis = RegistrationDataImport.objects.filter(
@@ -286,10 +293,11 @@ class BiometricDeduplicationService:
         return DeduplicationEngineSimilarityPair.objects.filter(
             Q(individual1__in=rdi_individuals) & Q(individual2__in=rdi_individuals),
             program=rdi.program,
+            similarity_score__gt=0,
         ).distinct()
 
     def get_duplicates_for_rdi_against_population(
-        self, rdi: RegistrationDataImport, rdi_merged: bool = False
+        self, rdi: RegistrationDataImport, rdi_merged: bool = False, exclude_not_valid: bool = True
     ) -> QuerySet[DeduplicationEngineSimilarityPair]:
         if rdi_merged:
             rdi_individuals = Individual.objects.filter(registration_data_import=rdi).only("id")
@@ -300,20 +308,25 @@ class BiometricDeduplicationService:
                 id__in=rdi_individuals
             )
 
-        return (
-            DeduplicationEngineSimilarityPair.objects.filter(
-                Q(individual1__in=rdi_individuals) | Q(individual2__in=rdi_individuals),
-                Q(individual1__duplicate=False) & Q(individual2__duplicate=False),
-                Q(individual1__withdrawn=False) & Q(individual2__withdrawn=False),
+        qs = DeduplicationEngineSimilarityPair.objects.filter(
+            Q(individual1__in=rdi_individuals) | Q(individual2__in=rdi_individuals),
+            (Q(individual1__duplicate=False) | Q(individual1__isnull=True))
+            & (Q(individual2__duplicate=False) | Q(individual2__isnull=True)),
+            (Q(individual1__withdrawn=False) | Q(individual1__isnull=True))
+            & (Q(individual2__withdrawn=False) | Q(individual2__isnull=True)),
+            (
                 Q(individual1__rdi_merge_status=MergeStatusModel.MERGED)
-                | Q(individual2__rdi_merge_status=MergeStatusModel.MERGED),
-                program=rdi.program,
-            )
-            .exclude(
-                Q(individual1__in=other_pending_rdis_individuals) | Q(individual2__in=other_pending_rdis_individuals)
-            )
-            .distinct()
-        )
+                | Q(individual1__isnull=True)
+                | Q(individual2__rdi_merge_status=MergeStatusModel.MERGED)
+                | Q(individual2__isnull=True)
+            ),
+            program=rdi.program,
+        ).exclude(Q(individual1__in=other_pending_rdis_individuals) | Q(individual2__in=other_pending_rdis_individuals))
+
+        if exclude_not_valid:
+            qs.exclude(similarity_score=0)
+
+        return qs.distinct()
 
     def create_grievance_tickets_for_duplicates(self, rdi: RegistrationDataImport) -> None:
         # create tickets only against merged individuals
@@ -321,7 +334,9 @@ class BiometricDeduplicationService:
             create_needs_adjudication_tickets_for_biometrics,
         )
 
-        deduplication_pairs = self.get_duplicates_for_rdi_against_population(rdi, rdi_merged=True)
+        deduplication_pairs = self.get_duplicates_for_rdi_against_population(
+            rdi, rdi_merged=True, exclude_not_valid=False
+        )
 
         create_needs_adjudication_tickets_for_biometrics(deduplication_pairs, rdi)
 
@@ -329,19 +344,30 @@ class BiometricDeduplicationService:
         deduplication_set_data = self.get_deduplication_set(deduplication_set_id)
 
         if deduplication_set_data.state == "Clean":
-            data = self.get_deduplication_set_results(deduplication_set_id)
-            similarity_pairs = [
-                SimilarityPair(
-                    score=item["score"],
-                    first=item["first"]["reference_pk"],
-                    second=item["second"]["reference_pk"],
-                )
-                for item in data
-            ]
-            with transaction.atomic():
-                self.store_similarity_pairs(deduplication_set_id, similarity_pairs)
-                self.store_rdis_deduplication_statistics(deduplication_set_id)
-                self.mark_rdis_as_deduplicated(deduplication_set_id)
+            try:
+                data = self.get_deduplication_set_results(deduplication_set_id)
+                similarity_pairs = [
+                    SimilarityPair(
+                        score=item["score"],
+                        status_code=item["status_code"],
+                        first=item["first"]["reference_pk"] or None,
+                        second=item["second"]["reference_pk"] or None,
+                    )
+                    for item in data
+                    if item["status_code"]
+                    in [
+                        DeduplicationEngineSimilarityPair.StatusCode.STATUS_200.value,
+                        DeduplicationEngineSimilarityPair.StatusCode.STATUS_412.value,
+                        DeduplicationEngineSimilarityPair.StatusCode.STATUS_429.value,
+                    ]
+                ]
+                with transaction.atomic():
+                    self.store_similarity_pairs(deduplication_set_id, similarity_pairs)
+                    self.store_rdis_deduplication_statistics(deduplication_set_id)
+                    self.mark_rdis_as_deduplicated(deduplication_set_id)
+            except Exception:
+                logger.exception(f"Dedupe Engine processing results error for dedupe_set_id {deduplication_set_id}")
+                self.mark_rdis_as_error(deduplication_set_id)
 
     def report_false_positive_duplicate(
         self, individual1_photo: str, individual2_photo: str, deduplication_set_id: str

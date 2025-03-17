@@ -33,6 +33,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentPlanSplit,
+    PaymentVerificationSummary,
 )
 from hct_mis_api.apps.payment.services.payment_gateway import (
     AddRecordsResponseData,
@@ -163,6 +164,8 @@ class TestPaymentGatewayService(APITestCase):
 
         pg_service = PaymentGatewayService()
         pg_service.api.get_records_for_payment_instruction = get_records_for_payment_instruction_mock  # type: ignore
+        # check PaymentVerificationSummary before run sync
+        assert PaymentVerificationSummary.objects.filter(payment_plan=self.pp).count() == 0
 
         pg_service.sync_records()
         assert get_records_for_payment_instruction_mock.call_count == 2
@@ -203,6 +206,9 @@ class TestPaymentGatewayService(APITestCase):
         assert get_records_for_payment_instruction_mock.call_count == 0
 
         assert change_payment_instruction_status_mock.call_count == 2
+        assert PaymentVerificationSummary.objects.filter(payment_plan=self.pp).count() == 1
+        self.pp.refresh_from_db()
+        assert self.pp.status == PaymentPlan.Status.FINISHED
 
     @mock.patch(
         "hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
@@ -693,9 +699,9 @@ class TestPaymentGatewayService(APITestCase):
                         "first_name": primary_collector.given_name,
                         "full_name": primary_collector.full_name,
                         "destination_currency": self.payments[0].currency,
-                        "service_provider_code__mobile_money": "ABC",
-                        "delivery_phone_number__mobile_money": "123456789",
-                        "provider__mobile_money": "Provider",
+                        "service_provider_code": "ABC",
+                        "delivery_phone_number": "123456789",
+                        "provider": "Provider",
                     },
                     "extra_data": {},
                 }
@@ -713,6 +719,26 @@ class TestPaymentGatewayService(APITestCase):
         with self.assertRaisesMessage(
             PaymentGatewayAPI.PaymentGatewayAPIException,
             "{'amount': [ErrorDetail(string='This field may not be null.', code='null')]}",
+        ):
+            PaymentGatewayAPI().add_records_to_payment_instruction([payment], "123")
+
+    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
+    def test_api_add_records_to_payment_instruction_no_snapshot(self, post_mock: Any) -> None:
+        payment = self.payments[0]
+        payment.household_snapshot.delete()
+        payment.refresh_from_db()
+
+        post_mock.return_value = {
+            "remote_id": "123",
+            "records": {
+                "1": payment.id,
+            },
+            "errors": None,
+        }, 200
+
+        with self.assertRaisesMessage(
+            PaymentGatewayAPI.PaymentGatewayAPIException,
+            f"Not found snapshot for Payment {payment.unicef_id}",
         ):
             PaymentGatewayAPI().add_records_to_payment_instruction([payment], "123")
 

@@ -3,7 +3,7 @@ from typing import Callable, Dict, Generator
 from unittest import mock
 from unittest.mock import patch
 
-from django.conf import settings
+from django.core.management import call_command
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.forms import model_to_dict
 from django.test import TestCase
@@ -78,17 +78,14 @@ def capture_on_commit_callbacks(
 
 
 class TestRdiMergeTask(TestCase):
-    fixtures = [
-        f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",
-        f"{settings.PROJECT_ROOT}/apps/core/fixtures/data.json",
-    ]
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
+        call_command("init-core-fixtures")
         cls.business_area = create_afghanistan()
         program = ProgramFactory()
-        cls.rdi = RegistrationDataImportFactory(program=program)
+        cls.rdi = RegistrationDataImportFactory(program=program, business_area=cls.business_area)
         cls.rdi.business_area.postpone_deduplication = True
         cls.rdi.business_area.save()
 
@@ -556,14 +553,11 @@ class TestRdiMergeTask(TestCase):
 
 
 class TestRdiMergeTaskDeliveryMechanismData(TestCase):
-    fixtures = [
-        f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",
-        f"{settings.PROJECT_ROOT}/apps/core/fixtures/data.json",
-    ]
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
+        call_command("init-core-fixtures")
         cls.program = ProgramFactory()
         cls.rdi = RegistrationDataImportFactory(program=cls.program)
         generate_delivery_mechanisms()

@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.management import call_command
 from django.test import TestCase
 
 import pytest
@@ -31,13 +32,12 @@ pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 @override_config(SANCTION_LIST_MATCH_SCORE=3.5)
 class TestSanctionListPreMerge(TestCase):
     databases = "__all__"
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     TEST_FILES_PATH = f"{settings.TESTS_ROOT}/apps/sanction_list/test_files"
 
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         full_sanction_list_path = f"{cls.TEST_FILES_PATH}/full_sanction_list.xml"
         task = LoadSanctionListXMLTask(full_sanction_list_path)
         task.execute()

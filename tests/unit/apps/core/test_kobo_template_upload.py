@@ -9,6 +9,7 @@ from django.contrib.messages import get_messages
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.contrib.sessions.backends.base import SessionBase
 from django.core.handlers.wsgi import WSGIRequest
+from django.core.management import call_command
 from django.test import RequestFactory
 from django.urls import reverse
 from django.utils import timezone
@@ -51,11 +52,10 @@ def raise_as_func(exception: BaseException) -> Callable:
 
 
 class TestKoboTemplateUpload(APITestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         cls.factory = RequestFactory()
         cls.site = AdminSite()
         cls.admin = XLSXKoboTemplateAdmin(XLSXKoboTemplate, cls.site)
