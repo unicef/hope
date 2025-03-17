@@ -1,6 +1,6 @@
 from typing import Any, List
 
-from django.conf import settings
+from django.core.management import call_command
 
 from parameterized import parameterized
 
@@ -15,8 +15,6 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 
 
 class TestFilterHouseholdsByProgram(APITestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     QUERY = """
         query AllHouseholds($program: ID){
           allHouseholds(program: $program, orderBy: "size", businessArea: "afghanistan", rdiMergeStatus: "MERGED") {
@@ -51,6 +49,7 @@ class TestFilterHouseholdsByProgram(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         cls.partner = PartnerFactory(name="Partner")
         cls.user = UserFactory(partner=cls.partner)
         cls.business_area = create_afghanistan()

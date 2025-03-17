@@ -557,3 +557,51 @@ def create_individual_document(individual: Individual, document_type: Optional[s
         additional_fields["type"] = document_type
     document = DocumentFactory(individual=individual, **additional_fields)
     return document
+
+
+def generate_additional_doc_types() -> None:
+    for doc_type_data in [
+        {
+            "label": "Disability Card",
+            "key": "disability_card",
+            "is_identity_document": True,
+            "unique_for_individual": False,
+            "valid_for_deduplication": False,
+        },
+        {
+            "label": "Medical Certificate",
+            "key": "medical_certificate",
+            "is_identity_document": True,
+            "unique_for_individual": False,
+            "valid_for_deduplication": False,
+        },
+        {
+            "label": "Proof of Legal Guardianship",
+            "key": "proof_legal_guardianship",
+            "is_identity_document": True,
+            "unique_for_individual": False,
+            "valid_for_deduplication": False,
+        },
+        {
+            "label": "Temporary Protection Visa",
+            "key": "temporary_protection_visa",
+            "is_identity_document": True,
+            "unique_for_individual": False,
+            "valid_for_deduplication": False,
+        },
+        {
+            "label": "Registration Token",
+            "key": "registration_token",
+            "is_identity_document": True,
+            "unique_for_individual": False,
+            "valid_for_deduplication": False,
+        },
+        {
+            "label": "Receiver POI",
+            "key": "receiver_poi",
+            "is_identity_document": False,
+            "unique_for_individual": False,
+            "valid_for_deduplication": False,
+        },
+    ]:
+        DocumentTypeFactory(**doc_type_data)

@@ -59,15 +59,37 @@ from django.db import OperationalError, connections
 from django.utils import timezone
 
 import elasticsearch
+from flags.models import FlagState
 
+from hct_mis_api.apps.account.fixtures import create_superuser, generate_unicef_partners
 from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment, User
+from hct_mis_api.apps.accountability.fixtures import (
+    generate_feedback,
+    generate_messages,
+)
+from hct_mis_api.apps.core.fixtures import (
+    generate_business_areas,
+    generate_country_codes,
+    generate_data_collecting_types,
+    generate_pdu_data,
+)
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.geo.fixtures import generate_area_types, generate_areas
+from hct_mis_api.apps.grievance.fixtures import generate_fake_grievances
+from hct_mis_api.apps.household.fixtures import generate_additional_doc_types
 from hct_mis_api.apps.payment.fixtures import (
     generate_delivery_mechanisms,
     generate_payment_plan,
     generate_reconciled_payment_plan,
     update_fsps,
 )
+from hct_mis_api.apps.program.fixtures import (
+    generate_beneficiary_groups,
+    generate_people_program,
+)
+from hct_mis_api.apps.registration_data.fixtures import generate_rdi
+from hct_mis_api.apps.steficon.fixtures import generate_rule_formulas
+from hct_mis_api.contrib.aurora.fixtures import generate_aurora_test_data
 
 logger = logging.getLogger(__name__)
 
@@ -118,23 +140,45 @@ class Command(BaseCommand):
         call_command("flush", "--noinput")
 
         # Load fixtures
-        fixtures = [
-            "apps/account/fixtures/initial.json",
-            "apps/geo/fixtures/data.json",
-            "apps/core/fixtures/data.json",
-            "apps/account/fixtures/data.json",
-            "apps/program/fixtures/data.json",
-            "apps/registration_data/fixtures/data.json",
-            "apps/household/fixtures/documenttype.json",
-            "apps/household/fixtures/data.json",
-            "apps/accountability/fixtures/data.json",
-            "apps/steficon/fixtures/data.json",
-            "contrib/aurora/fixtures/data.json",
-        ]
         self.stdout.write("Loading fixtures...")
-        for fixture in fixtures:
-            self.stdout.write(f"Loading fixture: {fixture}")
-            call_command("loaddata", f"{settings.PROJECT_ROOT}/{fixture}")
+        generate_unicef_partners()
+        call_command("loadcountries")
+        generate_country_codes()  # core
+        generate_business_areas()  # core
+        self.stdout.write("Creating superuser...")
+        user = create_superuser()
+
+        call_command("generatedocumenttypes")
+        call_command("generateroles")
+        # Create UserRoles for superuser
+        role_with_all_perms = Role.objects.get(name="Role with all permissions")
+        for ba_name in ["Global", "Afghanistan"]:
+            RoleAssignment.objects.get_or_create(
+                user=user, role=role_with_all_perms, business_area=BusinessArea.objects.get(name=ba_name)
+            )
+
+        # Geo app
+        generate_area_types()
+        generate_areas(country_names=["Afghanistan", "Croatia", "Ukraine"])
+        # Core app
+        generate_data_collecting_types()
+        # set accountability flag
+        FlagState.objects.get_or_create(
+            **{"name": "ALLOW_ACCOUNTABILITY_MODULE", "condition": "boolean", "value": "True", "required": False}
+        )
+        generate_beneficiary_groups()
+
+        self.stdout.write("Generating programs...")
+        generate_people_program()
+
+        self.stdout.write("Generating RDIs...")
+        generate_rdi()
+
+        self.stdout.write("Generating additional document types...")
+        generate_additional_doc_types()
+
+        self.stdout.write("Generating Engine core ...")
+        generate_rule_formulas()
 
         try:
             self.stdout.write("Rebuilding search index...")
@@ -153,15 +197,15 @@ class Command(BaseCommand):
         self.stdout.write("Updating FSPs...")
         update_fsps()
 
-        # Load more fixtures
-        additional_fixtures = [
-            "apps/core/fixtures/pdu.json",
-            "apps/grievance/fixtures/data.json",
-        ]
         self.stdout.write("Loading additional fixtures...")
-        for fixture in additional_fixtures:
-            self.stdout.write(f"Loading fixture: {fixture}")
-            call_command("loaddata", f"{settings.PROJECT_ROOT}/{fixture}")
+        generate_pdu_data()
+        self.stdout.write("Generating messages...")
+        generate_messages()
+        generate_feedback()
+        self.stdout.write("Generating aurora test data...")
+        generate_aurora_test_data()
+        self.stdout.write("Generating grievances...")
+        generate_fake_grievances()
 
         # Retrieve email lists from environment variables or command-line arguments
         email_list_env = os.getenv("INITDEMO_EMAIL_LIST")
@@ -184,7 +228,6 @@ class Command(BaseCommand):
         )
 
         if email_list or tester_list:
-            role_with_all_perms = Role.objects.get(name="Role with all permissions")
             afghanistan = BusinessArea.objects.get(slug="afghanistan")
             partner = Partner.objects.get(name="UNICEF")
             unicef_hq = Partner.objects.get(name=settings.UNICEF_HQ_PARTNER, parent=partner)

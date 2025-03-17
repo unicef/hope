@@ -508,7 +508,7 @@ def generate_payment_plan() -> None:
     address = "Ohio"
 
     program_pk = UUID("00000000-0000-0000-0000-faceb00c0000")
-    data_collecting_type = DataCollectingType.objects.get(code="full")
+    data_collecting_type = DataCollectingType.objects.get(code="full_collection")
     if data_collecting_type.type == DataCollectingType.Type.SOCIAL:
         beneficiary_group = BeneficiaryGroupFactory(name="Social", master_detail=False)
     else:
@@ -854,7 +854,12 @@ def generate_delivery_mechanisms() -> None:
             "code": "transfer_to_account",
             "name": "Transfer to Account",
             "requirements": {
-                "required_fields": ["bank_name__transfer_to_account", "bank_account_number__transfer_to_account"],
+                "required_fields": [
+                    "bank_name__transfer_to_account",
+                    "bank_account_number__transfer_to_account",
+                    "bank_code__transfer_to_account",
+                    "account_holder_name__transfer_to_account",
+                ],
                 "optional_fields": [
                     "full_name",
                 ],
