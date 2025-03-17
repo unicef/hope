@@ -41,7 +41,7 @@ const NewReportForm = (): ReactElement => {
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const { businessArea, baseUrl } = useBaseUrl();
+  const { businessArea, baseUrl, programId } = useBaseUrl();
   const validationSchema = Yup.object().shape({
     reportType: Yup.string().required(t('Report type is required')),
     dateFrom: Yup.date().required(t('Date From is required')),
@@ -63,7 +63,8 @@ const NewReportForm = (): ReactElement => {
     businessAreaSlug: businessArea,
     businessArea,
     status: ['ACTIVE'] as Array<'ACTIVE' | 'DRAFT' | 'FINISHED'>,
-    beneficiaryGroupMatch: false,
+    beneficiaryGroupMatch: programId,
+    compatibleDct: programId,
   };
 
   const { data: allProgramsData, isLoading: loadingPrograms } = useQuery({

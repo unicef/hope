@@ -129,8 +129,6 @@ export const GlobalProgramSelect = () => {
     queryFn: () =>
       RestService.restBusinessAreasProgramsList({
         businessAreaSlug: businessArea,
-        //TODO: fix ?
-        // beneficiaryGroupMatch: false,
         ...queryParams,
       }),
   });
