@@ -53,8 +53,8 @@ export const HouseholdTable = ({
       businessAreaSlug: businessArea,
       programSlug: programId,
       familySize: JSON.stringify({
-        min: filter.householdSizeMin,
-        max: filter.householdSizeMax,
+        before: filter.householdSizeMin,
+        after: filter.householdSizeMax,
       }),
       search: filter.search.trim(),
       documentType: filter.documentType,

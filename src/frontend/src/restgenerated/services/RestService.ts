@@ -586,7 +586,6 @@ export class RestService {
         admin1,
         admin2,
         adminArea,
-        businessArea,
         countryOrigin,
         documentNumber,
         documentType,
@@ -595,7 +594,8 @@ export class RestService {
         headOfHouseholdFullNameStartswith,
         headOfHouseholdPhoneNoValid,
         isActiveProgram,
-        lastRegistrationDate,
+        lastRegistrationDateAfter,
+        lastRegistrationDateBefore,
         limit,
         offset,
         orderBy,
@@ -605,10 +605,11 @@ export class RestService {
         rdiMergeStatus,
         residenceStatus,
         search,
-        size,
         sizeGte,
         sizeLte,
         sizeRange,
+        sizeMax,
+        sizeMin,
         withdrawn,
     }: {
         businessAreaSlug: string,
@@ -617,7 +618,6 @@ export class RestService {
         admin1?: string,
         admin2?: string,
         adminArea?: string,
-        businessArea?: string,
         countryOrigin?: string,
         documentNumber?: string,
         documentType?: string,
@@ -626,7 +626,8 @@ export class RestService {
         headOfHouseholdFullNameStartswith?: string,
         headOfHouseholdPhoneNoValid?: boolean,
         isActiveProgram?: boolean,
-        lastRegistrationDate?: string,
+        lastRegistrationDateAfter?: string,
+        lastRegistrationDateBefore?: string,
         /**
          * Number of results to return per page.
          */
@@ -690,13 +691,14 @@ export class RestService {
          */
         residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
-        size?: number | null,
         sizeGte?: number,
         sizeLte?: number,
         /**
          * Multiple values may be separated by commas.
          */
         sizeRange?: Array<number>,
+        sizeMax?: number | null,
+        sizeMin?: number | null,
         withdrawn?: boolean,
     }): CancelablePromise<PaginatedHouseholdListList> {
         return __request(OpenAPI, {
@@ -711,7 +713,6 @@ export class RestService {
                 'admin1': admin1,
                 'admin2': admin2,
                 'admin_area': adminArea,
-                'business_area': businessArea,
                 'country_origin': countryOrigin,
                 'document_number': documentNumber,
                 'document_type': documentType,
@@ -720,7 +721,8 @@ export class RestService {
                 'head_of_household__full_name__startswith': headOfHouseholdFullNameStartswith,
                 'head_of_household__phone_no_valid': headOfHouseholdPhoneNoValid,
                 'is_active_program': isActiveProgram,
-                'last_registration_date': lastRegistrationDate,
+                'last_registration_date_after': lastRegistrationDateAfter,
+                'last_registration_date_before': lastRegistrationDateBefore,
                 'limit': limit,
                 'offset': offset,
                 'order_by': orderBy,
@@ -730,10 +732,11 @@ export class RestService {
                 'rdi_merge_status': rdiMergeStatus,
                 'residence_status': residenceStatus,
                 'search': search,
-                'size': size,
                 'size__gte': sizeGte,
                 'size__lte': sizeLte,
                 'size__range': sizeRange,
+                'size_max': sizeMax,
+                'size_min': sizeMin,
                 'withdrawn': withdrawn,
             },
         });
@@ -848,21 +851,33 @@ export class RestService {
         });
     }
     /**
+     * Base validation class, inherit from this class to create custom validators.
+     * Your custom validators have to implement validation methods that starts
+     * with name "validate_" so validate can call all the validators from your
+     * custom validator.
+     *
+     * Custom validate method have to takes *args, **kwargs parameters.
+     *
+     * validate method with parameters have to be called in mutate method.
+     * If there are validation errors they will be all
+     * returned as one error message.
      * @returns PaginatedProgramListList
      * @throws ApiError
      */
     public static restBusinessAreasProgramsList({
-        beneficiaryGroupMatch,
-        businessArea,
         businessAreaSlug,
-        budget,
+        beneficiaryGroupMatch,
+        budgetMax,
+        budgetMin,
         compatibleDct,
         dataCollectingType,
         endDate,
         limit,
         name,
-        numberOfHouseholds,
-        numberOfHouseholdsWithTpInProgram,
+        numberOfHouseholdsMax,
+        numberOfHouseholdsMin,
+        numberOfHouseholdsWithTpInProgramMax,
+        numberOfHouseholdsWithTpInProgramMin,
         offset,
         orderBy,
         ordering,
@@ -870,12 +885,14 @@ export class RestService {
         sector,
         startDate,
         status,
+        updatedAtAfter,
+        updatedAtBefore,
     }: {
-        beneficiaryGroupMatch: any,
-        businessArea: string,
         businessAreaSlug: string,
-        budget?: string,
-        compatibleDct?: any,
+        beneficiaryGroupMatch?: string,
+        budgetMax?: string,
+        budgetMin?: string,
+        compatibleDct?: string,
         dataCollectingType?: string,
         endDate?: string,
         /**
@@ -883,8 +900,10 @@ export class RestService {
          */
         limit?: number,
         name?: string,
-        numberOfHouseholds?: string,
-        numberOfHouseholdsWithTpInProgram?: string,
+        numberOfHouseholdsMax?: string,
+        numberOfHouseholdsMin?: string,
+        numberOfHouseholdsWithTpInProgramMax?: string,
+        numberOfHouseholdsWithTpInProgramMin?: string,
         /**
          * The initial index from which to return the results.
          */
@@ -930,6 +949,8 @@ export class RestService {
          * * `FINISHED` - Finished
          */
         status?: Array<'ACTIVE' | 'DRAFT' | 'FINISHED'>,
+        updatedAtAfter?: string,
+        updatedAtBefore?: string,
     }): CancelablePromise<PaginatedProgramListList> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -939,15 +960,17 @@ export class RestService {
             },
             query: {
                 'beneficiary_group_match': beneficiaryGroupMatch,
-                'budget': budget,
-                'business_area': businessArea,
+                'budget_max': budgetMax,
+                'budget_min': budgetMin,
                 'compatible_dct': compatibleDct,
                 'data_collecting_type': dataCollectingType,
                 'end_date': endDate,
                 'limit': limit,
                 'name': name,
-                'number_of_households': numberOfHouseholds,
-                'number_of_households_with_tp_in_program': numberOfHouseholdsWithTpInProgram,
+                'number_of_households_max': numberOfHouseholdsMax,
+                'number_of_households_min': numberOfHouseholdsMin,
+                'number_of_households_with_tp_in_program_max': numberOfHouseholdsWithTpInProgramMax,
+                'number_of_households_with_tp_in_program_min': numberOfHouseholdsWithTpInProgramMin,
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
@@ -955,6 +978,8 @@ export class RestService {
                 'sector': sector,
                 'start_date': startDate,
                 'status': status,
+                'updated_at_after': updatedAtAfter,
+                'updated_at_before': updatedAtBefore,
             },
         });
     }
@@ -1235,7 +1260,6 @@ export class RestService {
         admin1,
         admin2,
         adminArea,
-        businessArea,
         countryOrigin,
         documentNumber,
         documentType,
@@ -1244,7 +1268,8 @@ export class RestService {
         headOfHouseholdFullNameStartswith,
         headOfHouseholdPhoneNoValid,
         isActiveProgram,
-        lastRegistrationDate,
+        lastRegistrationDateAfter,
+        lastRegistrationDateBefore,
         limit,
         offset,
         orderBy,
@@ -1254,10 +1279,11 @@ export class RestService {
         rdiMergeStatus,
         residenceStatus,
         search,
-        size,
         sizeGte,
         sizeLte,
         sizeRange,
+        sizeMax,
+        sizeMin,
         withdrawn,
     }: {
         businessAreaSlug: string,
@@ -1267,7 +1293,6 @@ export class RestService {
         admin1?: string,
         admin2?: string,
         adminArea?: string,
-        businessArea?: string,
         countryOrigin?: string,
         documentNumber?: string,
         documentType?: string,
@@ -1276,7 +1301,8 @@ export class RestService {
         headOfHouseholdFullNameStartswith?: string,
         headOfHouseholdPhoneNoValid?: boolean,
         isActiveProgram?: boolean,
-        lastRegistrationDate?: string,
+        lastRegistrationDateAfter?: string,
+        lastRegistrationDateBefore?: string,
         /**
          * Number of results to return per page.
          */
@@ -1340,13 +1366,14 @@ export class RestService {
          */
         residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
-        size?: number | null,
         sizeGte?: number,
         sizeLte?: number,
         /**
          * Multiple values may be separated by commas.
          */
         sizeRange?: Array<number>,
+        sizeMax?: number | null,
+        sizeMin?: number | null,
         withdrawn?: boolean,
     }): CancelablePromise<PaginatedHouseholdListList> {
         return __request(OpenAPI, {
@@ -1362,7 +1389,6 @@ export class RestService {
                 'admin1': admin1,
                 'admin2': admin2,
                 'admin_area': adminArea,
-                'business_area': businessArea,
                 'country_origin': countryOrigin,
                 'document_number': documentNumber,
                 'document_type': documentType,
@@ -1371,7 +1397,8 @@ export class RestService {
                 'head_of_household__full_name__startswith': headOfHouseholdFullNameStartswith,
                 'head_of_household__phone_no_valid': headOfHouseholdPhoneNoValid,
                 'is_active_program': isActiveProgram,
-                'last_registration_date': lastRegistrationDate,
+                'last_registration_date_after': lastRegistrationDateAfter,
+                'last_registration_date_before': lastRegistrationDateBefore,
                 'limit': limit,
                 'offset': offset,
                 'order_by': orderBy,
@@ -1381,10 +1408,11 @@ export class RestService {
                 'rdi_merge_status': rdiMergeStatus,
                 'residence_status': residenceStatus,
                 'search': search,
-                'size': size,
                 'size__gte': sizeGte,
                 'size__lte': sizeLte,
                 'size__range': sizeRange,
+                'size_max': sizeMax,
+                'size_min': sizeMin,
                 'withdrawn': withdrawn,
             },
         });
@@ -2034,6 +2062,16 @@ export class RestService {
         });
     }
     /**
+     * Base validation class, inherit from this class to create custom validators.
+     * Your custom validators have to implement validation methods that starts
+     * with name "validate_" so validate can call all the validators from your
+     * custom validator.
+     *
+     * Custom validate method have to takes *args, **kwargs parameters.
+     *
+     * validate method with parameters have to be called in mutate method.
+     * If there are validation errors they will be all
+     * returned as one error message.
      * @returns ProgramDetail
      * @throws ApiError
      */
@@ -2046,6 +2084,36 @@ export class RestService {
     }): CancelablePromise<ProgramDetail> {
         return __request(OpenAPI, {
             method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{slug}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'slug': slug,
+            },
+        });
+    }
+    /**
+     * Base validation class, inherit from this class to create custom validators.
+     * Your custom validators have to implement validation methods that starts
+     * with name "validate_" so validate can call all the validators from your
+     * custom validator.
+     *
+     * Custom validate method have to takes *args, **kwargs parameters.
+     *
+     * validate method with parameters have to be called in mutate method.
+     * If there are validation errors they will be all
+     * returned as one error message.
+     * @returns void
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsDestroy({
+        businessAreaSlug,
+        slug,
+    }: {
+        businessAreaSlug: string,
+        slug: string,
+    }): CancelablePromise<void> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{slug}/',
             path: {
                 'business_area_slug': businessAreaSlug,
