@@ -9,6 +9,7 @@ from django_filters import rest_framework as filters
 
 from hct_mis_api.apps.core.api.filters import UpdatedAtFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string_required
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 
 
@@ -68,6 +69,9 @@ class ProgramFilter(UpdatedAtFilter):
     status = filters.MultipleChoiceFilter(choices=Program.STATUS_CHOICE)
     sector = filters.MultipleChoiceFilter(choices=Program.SECTOR_CHOICE)
     number_of_households = filters.RangeFilter(method="filter_number_of_households")
+    number_of_households_with_tp_in_program = filters.RangeFilter(
+        method="filter_number_of_households_with_tp_in_program"
+    )
     budget = filters.RangeFilter()
     start_date = filters.DateFilter(lookup_expr="gte")
     end_date = filters.DateFilter(lookup_expr="lte")
@@ -101,6 +105,22 @@ class ProgramFilter(UpdatedAtFilter):
             queryset = queryset.filter(hh_count__gte=min_value)
         if max_value := value.stop:
             queryset = queryset.filter(hh_count__lte=max_value)
+        return queryset
+
+    def filter_number_of_households_with_tp_in_program(self, queryset: QuerySet, name: str, value: slice) -> QuerySet:
+        queryset = queryset.annotate(
+            total_hh_count=Count(
+                "cycles__payment_plans__households",
+                filter=~Q(cycles__payment_plans__status=PaymentPlan.Status.TP_OPEN),
+                distinct=True,
+            ),
+        )
+
+        if min_value := value.start:
+            queryset = queryset.filter(total_hh_count__gte=min_value)
+        if max_value := value.stop:
+            queryset = queryset.filter(total_hh_count__lte=max_value)
+
         return queryset
 
     def search_filter(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
