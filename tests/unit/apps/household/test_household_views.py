@@ -1,10 +1,11 @@
 import json
-from typing import Any
+from typing import Any, Optional, Tuple
 
 from django.contrib.gis.geos import Point
 from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
+from django.utils import timezone
 
 import pytest
 from rest_framework import status
@@ -18,11 +19,16 @@ from hct_mis_api.apps.core.utils import (
     resolve_flex_fields_choices_to_string,
 )
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
-from hct_mis_api.apps.household.models import DUPLICATE, Household
+from hct_mis_api.apps.household.fixtures import (
+    DocumentFactory,
+    DocumentTypeFactory,
+    create_household_and_individuals,
+)
+from hct_mis_api.apps.household.models import DUPLICATE, HOST, REFUGEE, Household
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 pytestmark = pytest.mark.django_db
 
@@ -672,3 +678,268 @@ class TestHouseholdGlobalViewSet:
         assert get_encoded_household_id(household_afghanistan_without_areas) in result_ids
         assert get_encoded_household_id(self.household_ukraine) not in result_ids
         assert get_encoded_household_id(household_afghanistan_different_areas) not in result_ids
+
+
+class TestHouseholdFilter:
+    @pytest.fixture(autouse=True)
+    def setup(self, api_client: Any, create_user_role_with_permissions: Any) -> None:
+        self.afghanistan = create_afghanistan()
+        self.program = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
+        self.list_url = reverse(
+            "api:households:households-list",
+            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program.slug},
+        )
+        self.partner = PartnerFactory(name="TestPartner")
+        self.user = UserFactory(partner=self.partner)
+        self.client = api_client(self.user)
+
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+    def _create_test_households(
+        self,
+        household1_data: Optional[dict] = None,
+        household2_data: Optional[dict] = None,
+        hoh_1_data: Optional[dict] = None,
+        hoh_2_data: Optional[dict] = None,
+    ) -> Tuple[Household, Household]:
+        if household2_data is None:
+            household2_data = {}
+        if household1_data is None:
+            household1_data = {}
+        if hoh_1_data is None:
+            hoh_1_data = {}
+        if hoh_2_data is None:
+            hoh_2_data = {}
+        household1, _ = create_household_and_individuals(
+            household_data={
+                "program": self.program,
+                "business_area": self.afghanistan,
+                **household1_data,
+            },
+            individuals_data=[hoh_1_data, {}],
+        )
+        household2, _ = create_household_and_individuals(
+            household_data={
+                "program": self.program,
+                "business_area": self.afghanistan,
+                **household2_data,
+            },
+            individuals_data=[hoh_2_data, {}],
+        )
+        return household1, household2
+
+    def _test_filter_households_in_list(
+        self,
+        filters: dict,
+        household1_data: Optional[dict] = None,
+        household2_data: Optional[dict] = None,
+        hoh_1_data: Optional[dict] = None,
+        hoh_2_data: Optional[dict] = None,
+    ) -> None:
+        household1, household2 = self._create_test_households(
+            household1_data=household1_data,
+            household2_data=household2_data,
+            hoh_1_data=hoh_1_data,
+            hoh_2_data=hoh_2_data,
+        )
+        response = self.client.get(self.list_url, filters)
+        assert response.status_code == status.HTTP_200_OK, response.json()
+        response_data = response.json()["results"]
+        assert len(response_data) == 1
+        assert response_data[0]["id"] == encode_id_base64_required(household1.id, "Household")
+        return response_data
+
+    def test_filter_by_rdi_id(self) -> None:
+        registration_data_import_household1 = RegistrationDataImportFactory(
+            imported_by=self.user, business_area=self.afghanistan, program=self.program
+        )
+        registration_data_import_household2 = RegistrationDataImportFactory(
+            imported_by=self.user, business_area=self.afghanistan, program=self.program
+        )
+        self._test_filter_households_in_list(
+            filters={
+                "rdi_id": encode_id_base64_required(registration_data_import_household1.id, "RegistrationDataImport")
+            },
+            household1_data={
+                "registration_data_import": registration_data_import_household1,
+            },
+            household2_data={
+                "registration_data_import": registration_data_import_household2,
+            },
+        )
+
+    def test_filter_by_size(self) -> None:
+        self._test_filter_households_in_list(
+            filters={"size_min": "5"},
+            household1_data={"size": 6},
+            household2_data={"size": 4},
+        )
+
+    def test_filter_by_document_number(self) -> None:
+        document_passport = DocumentTypeFactory(key="passport")
+        document_id_card = DocumentTypeFactory(key="id_card")
+        household_passport1, individuals_passport1 = create_household_and_individuals(
+            household_data={
+                "program": self.program,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[{}, {}],
+        )
+        hoh_household_passport1 = individuals_passport1[0]
+        household_passport2, individuals_passport2 = create_household_and_individuals(
+            household_data={
+                "program": self.program,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[{}, {}],
+        )
+        hoh_household_passport2 = individuals_passport2[0]
+        household_id_card, individuals_id_card = create_household_and_individuals(
+            household_data={
+                "program": self.program,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[{}, {}],
+        )
+        hoh_household_id_card = individuals_id_card[0]
+        DocumentFactory(individual=hoh_household_passport1, type=document_passport, document_number="123")
+        DocumentFactory(individual=hoh_household_passport2, type=document_passport, document_number="456")
+        DocumentFactory(individual=hoh_household_id_card, type=document_id_card, document_number="123")
+        response = self.client.get(self.list_url, {"document_number": "123", "document_type": "passport"})
+        assert response.status_code == status.HTTP_200_OK
+        response_data = response.json()["results"]
+        assert len(response_data) == 1
+        assert response_data[0]["id"] == encode_id_base64_required(household_passport1.id, "Household")
+
+    def test_filter_by_address(self) -> None:
+        self._test_filter_households_in_list(
+            filters={"address": "test address"},
+            household1_data={"address": "test address"},
+            household2_data={"address": "different address"},
+        )
+
+    def test_filter_by_head_of_household_full_name(self) -> None:
+        self._test_filter_households_in_list(
+            filters={"head_of_household__full_name": "John"},
+            hoh_1_data={"full_name": "John Doe"},
+            hoh_2_data={"full_name": "Jane Doe"},
+        )
+
+    def test_filter_by_head_of_household_phone_no_valid_true(self) -> None:
+        invalid_phone_number = "12"
+        valid_phone_number = "+48 609 456 789"
+        self._test_filter_households_in_list(
+            filters={"head_of_household__phone_no_valid": True},
+            hoh_1_data={
+                "phone_no": valid_phone_number,
+                "phone_no_alternative": valid_phone_number,
+            },
+            hoh_2_data={
+                "phone_no": invalid_phone_number,
+                "phone_no_alternative": invalid_phone_number,
+            },
+        )
+
+    def test_filter_by_head_of_household_phone_no_valid_false(self) -> None:
+        invalid_phone_number = "12"
+        valid_phone_number = "+48 609 456 789"
+        self._test_filter_households_in_list(
+            filters={"head_of_household__phone_no_valid": False},
+            hoh_1_data={
+                "phone_no": invalid_phone_number,
+                "phone_no_alternative": invalid_phone_number,
+            },
+            hoh_2_data={
+                "phone_no": invalid_phone_number,
+                "phone_no_alternative": valid_phone_number,
+            },
+        )
+
+    def test_filter_by_withdrawn(self) -> None:
+        self._test_filter_households_in_list(
+            filters={"withdrawn": True},
+            household1_data={"withdrawn": True},
+            household2_data={"withdrawn": False},
+        )
+
+    def test_filter_by_country_origin(self) -> None:
+        afghanistan = CountryFactory()
+        ukraine = CountryFactory(name="Ukraine", iso_code3="UKR", iso_code2="UK", iso_num="050")
+        self._test_filter_households_in_list(
+            filters={"country_origin": afghanistan.iso_code3},
+            household1_data={"country_origin": afghanistan},
+            household2_data={"country_origin": ukraine},
+        )
+
+    @pytest.mark.parametrize(
+        "program_status,filter_value,expected_results",
+        [
+            (Program.ACTIVE, True, 2),
+            (Program.FINISHED, True, 0),
+            (Program.ACTIVE, False, 0),
+            (Program.FINISHED, False, 2),
+        ],
+    )
+    def test_filter_by_is_active_program(self, program_status: str, filter_value: bool, expected_results: int) -> None:
+        self.program.status = program_status
+        self.program.save()
+
+        self._create_test_households()
+        response = self.client.get(self.list_url, {"is_active_program": filter_value})
+        assert response.status_code == status.HTTP_200_OK
+        response_data = response.json()["results"]
+        assert len(response_data) == expected_results
+
+    def test_filter_by_rdi_merge_status(self) -> None:
+        self._test_filter_households_in_list(
+            filters={"rdi_merge_status": MergeStatusModel.PENDING},
+            household1_data={"rdi_merge_status": MergeStatusModel.PENDING},
+            household2_data={"rdi_merge_status": MergeStatusModel.MERGED},
+        )
+
+    @pytest.mark.parametrize(
+        "filter_by_field",
+        [
+            "admin_area",
+            "admin1",
+            "admin2",
+        ],
+    )
+    def test_filter_by_area(self, filter_by_field: str) -> None:
+        country = CountryFactory()
+        admin_type_1 = AreaTypeFactory(country=country, area_level=1)
+        admin_type_2 = AreaTypeFactory(country=country, area_level=2, parent=admin_type_1)
+        area1 = AreaFactory(parent=None, p_code="AF01", area_type=admin_type_1)
+        area2 = AreaFactory(parent=area1, p_code="AF0101", area_type=admin_type_2)
+
+        self._test_filter_households_in_list(
+            filters={filter_by_field: area1.id},
+            household1_data={filter_by_field: area1},
+            household2_data={filter_by_field: area2},
+        )
+
+    def test_filter_by_residence_status(self) -> None:
+        self._test_filter_households_in_list(
+            filters={"residence_status": REFUGEE},
+            household1_data={"residence_status": REFUGEE},
+            household2_data={"residence_status": HOST},
+        )
+
+    def test_filter_by_last_registration_date(self) -> None:
+        self._test_filter_households_in_list(
+            filters={"last_registration_date_after": "2022-12-31"},
+            household1_data={"last_registration_date": timezone.make_aware(timezone.datetime(2023, 1, 1))},
+            household2_data={"last_registration_date": timezone.make_aware(timezone.datetime(2021, 1, 1))},
+        )
+
+    def test_filter_by_first_registration_date(self) -> None:
+        self._test_filter_households_in_list(
+            filters={"first_registration_date": "2022-12-31"},
+            household1_data={"first_registration_date": timezone.make_aware(timezone.datetime(2022, 12, 31))},
+            household2_data={"first_registration_date": timezone.make_aware(timezone.datetime(2022, 12, 30))},
+        )

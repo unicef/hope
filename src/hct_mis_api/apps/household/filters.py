@@ -14,6 +14,7 @@ from django_filters import (
     MultipleChoiceFilter,
     OrderingFilter,
 )
+from django_filters import rest_framework as filters
 from graphene_django.filter import GlobalIDMultipleChoiceFilter
 
 from hct_mis_api.apps.core.exceptions import SearchException
@@ -21,7 +22,6 @@ from hct_mis_api.apps.core.filters import (
     AgeRangeFilter,
     BusinessAreaSlugFilter,
     DateRangeFilter,
-    IntegerRangeFilter,
 )
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
 from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
@@ -84,13 +84,13 @@ def _prepare_kobo_asset_id_value(code: str) -> str:  # pragma: no cover
 class HouseholdFilter(FilterSet):
     rdi_id = CharFilter(method="filter_rdi_id")
     business_area = BusinessAreaSlugFilter()
-    size = IntegerRangeFilter(field_name="size")
+    size = filters.RangeFilter(field_name="size")
     search = CharFilter(method="search_filter")
     document_type = CharFilter(method="document_type_filter")
     document_number = CharFilter(method="document_number_filter")
     head_of_household__full_name = CharFilter(field_name="head_of_household__full_name", lookup_expr="startswith")
     head_of_household__phone_no_valid = BooleanFilter(method="phone_no_valid_filter")
-    last_registration_date = DateRangeFilter(field_name="last_registration_date")
+    last_registration_date = filters.DateFromToRangeFilter(field_name="last_registration_date")
     withdrawn = BooleanFilter(field_name="withdrawn")
     country_origin = CharFilter(field_name="country_origin__iso_code3", lookup_expr="startswith")
     is_active_program = BooleanFilter(method="filter_is_active_program")
