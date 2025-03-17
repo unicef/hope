@@ -466,7 +466,7 @@ class Household(
         help_text="Household country",
     )
     admin_area = models.ForeignKey(
-        "geo.Area", null=True, on_delete=models.SET_NULL, blank=True, help_text="Household administrative area"
+        "geo.Area", null=True, on_delete=models.SET_NULL, blank=True, help_text="Household lowest administrative area"
     )
     """location contains lowest administrative area info"""
     admin1 = models.ForeignKey(
@@ -631,6 +631,7 @@ class Household(
         default=BLANK,
         help_text="Household registration method [sys]",
     )
+    # TODO: deprecated maybe remove it as it's not using anywhere
     family_id = models.CharField(
         max_length=100, blank=True, null=True, help_text="Family ID eDopomoga household id [sys]"
     )
@@ -694,6 +695,7 @@ class Household(
     enumerator_rec_id = models.PositiveIntegerField(
         blank=True, null=True, help_text="Household enumerator record [sys]"
     )
+    # TODO: deprecated maybe remove it as it's not using anywhere
     mis_unicef_id = models.CharField(max_length=255, null=True, help_text="Household MIS unicef id [sys]")
     flex_registrations_record_id = models.PositiveIntegerField(
         blank=True, null=True, help_text="Household flex registrations record [sys]"
@@ -1104,7 +1106,7 @@ class Individual(
     family_name = CICharField(max_length=85, blank=True, db_index=True, help_text="Last name of the Beneficiary")
     sex = models.CharField(max_length=255, choices=SEX_CHOICE, db_index=True, help_text="Beneficiary gender")
     birth_date = models.DateField(db_index=True, help_text="Beneficiary date of birth")
-    estimated_birth_date = models.BooleanField(default=False, help_text="Estimated birth date")
+    estimated_birth_date = models.BooleanField(default=False, help_text="Estimated birth date flag")
     marital_status = models.CharField(
         max_length=255,
         choices=MARITAL_STATUS_CHOICE,
@@ -1134,6 +1136,7 @@ class Individual(
     pregnant = models.BooleanField(null=True, help_text="Pregnant status")
     fchild_hoh = models.BooleanField(default=False, help_text="Child is female and Head of Household flag")
     child_hoh = models.BooleanField(default=False, help_text="Child is Head of Household flag")
+    # TODO: deprecated maybe remove it as it's not using anywhere
     administration_of_rutf = models.BooleanField(null=True, help_text="Administration of rutf")
     disability = models.CharField(
         max_length=20, choices=DISABILITY_CHOICES, default=NOT_DISABLED, help_text="Disability status"
@@ -1251,6 +1254,7 @@ class Individual(
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True, help_text="Original unicef_id [sys]")
     is_migration_handled = models.BooleanField(default=False, help_text="Migration status [sys]")
     migrated_at = models.DateTimeField(null=True, blank=True, help_text="Migrated at [sys]")
+    # TODO: deprecated maybe remove it as it's not using anywhere
     mis_unicef_id = models.CharField(max_length=255, null=True, help_text="MIS unicef_id [sys]")
 
     vector_column = SearchVectorField(null=True, help_text="Database vector column for search [sys]")
