@@ -83,7 +83,6 @@ def _prepare_kobo_asset_id_value(code: str) -> str:  # pragma: no cover
 
 class HouseholdFilter(FilterSet):
     rdi_id = CharFilter(method="filter_rdi_id")
-    business_area = BusinessAreaSlugFilter()
     size = filters.RangeFilter(field_name="size")
     search = CharFilter(method="search_filter")
     document_type = CharFilter(method="document_type_filter")
@@ -99,7 +98,6 @@ class HouseholdFilter(FilterSet):
     class Meta:
         model = Household
         fields = {
-            "business_area": ["exact"],
             "address": ["exact", "startswith"],
             "head_of_household__full_name": ["exact", "startswith"],
             "size": ["range", "lte", "gte"],
