@@ -70,7 +70,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='household',
             name='admin_area',
-            field=models.ForeignKey(blank=True, help_text='Household administrative area', null=True,
+            field=models.ForeignKey(blank=True, help_text='Household lowest administrative area', null=True,
                                     on_delete=django.db.models.deletion.SET_NULL, to='geo.area'),
         ),
         migrations.AlterField(
@@ -706,7 +706,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='individual',
             name='estimated_birth_date',
-            field=models.BooleanField(default=False, help_text='Estimated birth date'),
+            field=models.BooleanField(default=False, help_text='Estimated birth date flag'),
         ),
         migrations.AlterField(
             model_name='individual',
