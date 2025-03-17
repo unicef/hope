@@ -86,8 +86,7 @@ class TestUpdateProgram(APITestCase):
         create_afghanistan()
         generate_data_collecting_types()
         data_collecting_type = DataCollectingType.objects.get(code="full_collection")
-        data_collecting_type.type = DataCollectingType.Type.STANDARD
-        data_collecting_type.save()
+        DataCollectingType.objects.filter(code="partial_individuals").update(type=DataCollectingType.Type.STANDARD)
 
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.business_area.data_collecting_types.set(DataCollectingType.objects.all().values_list("id", flat=True))

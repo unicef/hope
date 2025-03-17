@@ -1,6 +1,6 @@
 from typing import Any, List
 
-from django.conf import settings
+from django.core.management import call_command
 
 from parameterized import parameterized
 
@@ -75,7 +75,6 @@ query individual($id: ID!) {
 
 class TestImportedIndividualQuery(APITestCase):
     databases = "__all__"
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     # IMPORTANT!
     # FREEZGUN doesn't work this snapshot have to be updated once a year
@@ -85,6 +84,7 @@ class TestImportedIndividualQuery(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         create_afghanistan()
         cls.partner = PartnerFactory(name="Test1")
         cls.user = UserFactory.create(partner=cls.partner)

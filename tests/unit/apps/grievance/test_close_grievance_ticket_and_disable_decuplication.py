@@ -1,7 +1,7 @@
 from datetime import date
 from unittest import mock
 
-from django.conf import settings
+from django.core.management import call_command
 
 import pytest
 
@@ -39,8 +39,6 @@ pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
 class TestCloseGrievanceTicketAndDisableDeduplication(APITestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     UPDATE_GRIEVANCE_TICKET_STATUS_CHANGE_MUTATION = """
     mutation GrievanceTicketStatusChange($grievanceTicketId: ID, $status: Int) {
         grievanceStatusChange(grievanceTicketId: $grievanceTicketId, status: $status) {
@@ -55,6 +53,7 @@ class TestCloseGrievanceTicketAndDisableDeduplication(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         create_afghanistan()
         cls.generate_document_types_for_all_countries()
         cls.user = UserFactory(id="a5c44eeb-482e-49c2-b5ab-d769f83db116")

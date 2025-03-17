@@ -1,4 +1,4 @@
-from django.conf import settings
+from django.core.management import call_command
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
@@ -12,8 +12,6 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 
 class TestEraseRdiMutation(APITestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     ERASE_IMPORT_QUERY = """
       mutation EraseRegistrationDataImportMutation($id: ID!) {
         eraseRegistrationDataImport(id: $id) {
@@ -28,6 +26,7 @@ class TestEraseRdiMutation(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         cls.user = UserFactory()
         create_afghanistan()
         cls.business_area_slug = "afghanistan"

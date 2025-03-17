@@ -37,6 +37,7 @@ class Command(BaseCommand):
                     Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS,
                     Permissions.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS,
                     Permissions.ALL_VIEW_PII_DATA_ON_LISTS,
+                    Permissions.PM_VIEW_PAYMENT_LIST,
                 ],
             },
             {
@@ -90,6 +91,7 @@ class Command(BaseCommand):
                     Permissions.PM_PROGRAMME_CYCLE_DELETE,
                     Permissions.PM_PROGRAMME_CYCLE_VIEW_DETAILS,
                     Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
+                    Permissions.PM_VIEW_PAYMENT_LIST,
                 ],
             },
             {
@@ -134,6 +136,7 @@ class Command(BaseCommand):
                     Permissions.ACTIVITY_LOG_DOWNLOAD,
                     Permissions.PM_PROGRAMME_CYCLE_VIEW_DETAILS,
                     Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
+                    Permissions.PM_VIEW_PAYMENT_LIST,
                 ],
             },
             {
@@ -154,6 +157,7 @@ class Command(BaseCommand):
                     Permissions.USER_MANAGEMENT_VIEW_LIST,
                     Permissions.ACTIVITY_LOG_VIEW,
                     Permissions.ACTIVITY_LOG_DOWNLOAD,
+                    Permissions.PM_VIEW_PAYMENT_LIST,
                 ],
             },
             {
@@ -184,6 +188,7 @@ class Command(BaseCommand):
                     Permissions.USER_MANAGEMENT_VIEW_LIST,
                     Permissions.ACTIVITY_LOG_VIEW,
                     Permissions.ACTIVITY_LOG_DOWNLOAD,
+                    Permissions.PM_VIEW_PAYMENT_LIST,
                 ],
             },
             {
@@ -203,6 +208,7 @@ class Command(BaseCommand):
                     Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS,
                     Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST,
                     Permissions.GRIEVANCES_FEEDBACK_VIEW_UPDATE,
+                    Permissions.PM_VIEW_PAYMENT_LIST,
                 ],
             },
             {
@@ -218,6 +224,7 @@ class Command(BaseCommand):
                     Permissions.GRIEVANCES_UPDATE_AS_CREATOR,
                     Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_CREATOR,
                     Permissions.GRIEVANCES_ADD_NOTE_AS_CREATOR,
+                    Permissions.PM_VIEW_PAYMENT_LIST,
                 ],
             },
             {
@@ -237,6 +244,7 @@ class Command(BaseCommand):
                     Permissions.GRIEVANCES_SET_ON_HOLD_AS_OWNER,
                     Permissions.GRIEVANCES_SEND_FOR_APPROVAL_AS_OWNER,
                     Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_OWNER,
+                    Permissions.PM_VIEW_PAYMENT_LIST,
                 ],
             },
             {
@@ -251,6 +259,7 @@ class Command(BaseCommand):
                     Permissions.GRIEVANCES_APPROVE_DATA_CHANGE,
                     Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
                     Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+                    Permissions.PM_VIEW_PAYMENT_LIST,
                 ],
             },
             {
