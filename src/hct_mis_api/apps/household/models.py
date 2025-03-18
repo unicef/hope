@@ -1024,7 +1024,6 @@ class Individual(
             "last_registration_date",
             "flex_fields",
             "enrolled_in_nutrition_programme",
-            "administration_of_rutf",
             "unicef_id",
             "deduplication_golden_record_status",
             "deduplication_batch_status",
