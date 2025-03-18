@@ -819,11 +819,11 @@ snapshots['TestIndividualWithDeliveryMechanismsDataQuery::test_individual_query_
             'deliveryMechanismsData': [
                 {
                     'individualTabData': '{"card_number": "123", "card_expiry_date": "2022-01-01", "name_of_cardholder": "Marek"}',
-                    'name': 'ATM Card'
+                    'name': 'Bank'
                 },
                 {
-                    'individualTabData': '{"delivery_phone_number": "123456789", "provider": "Provider", "service_provider_code": "ABC"}',
-                    'name': 'Mobile Money'
+                    'individualTabData': '{"phone_number": "123456789", "provider": "Provider", "service_provider_code": "ABC"}',
+                    'name': 'Mobile'
                 }
             ],
             'familyName': 'Butler',

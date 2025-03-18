@@ -160,7 +160,6 @@ class TestSouthSudanUpdateScript(TestCase):
             "Deduplicating documents",
             "Update successful",
         ]
-
         self.assertEqual(output, expected_output)
         self.individual.refresh_from_db()
         self.individual2.refresh_from_db()
@@ -179,9 +178,9 @@ class TestSouthSudanUpdateScript(TestCase):
         self.assertEqual(
             deliver_mechanism_data.data,
             {
-                "service_provider_code__mobile_money": "CD-VODACASH",
-                "provider__mobile_money": "Vodacash",
-                "delivery_phone_number__mobile_money": "+243837611111",
+                "service_provider_code": "CD-VODACASH",
+                "provider": "Vodacash",
+                "delivery_phone_number": "+243837611111",
             },
         )
         self.assertEqual(str(individual2.phone_no), "+243836122222")
@@ -191,9 +190,9 @@ class TestSouthSudanUpdateScript(TestCase):
         self.assertEqual(
             deliver_mechanism_data2.data,
             {
-                "service_provider_code__mobile_money": "CD-VODACASH",
-                "provider__mobile_money": "Vodacash",
-                "delivery_phone_number__mobile_money": "+243836122222",
+                "service_provider_code": "CD-VODACASH",
+                "provider": "Vodacash",
+                "delivery_phone_number": "+243836122222",
             },
         )
         self.assertEqual(str(individual3.phone_no), "+243831733333")
@@ -202,9 +201,9 @@ class TestSouthSudanUpdateScript(TestCase):
         self.assertEqual(
             deliver_mechanism_data3.data,
             {
-                "service_provider_code__mobile_money": "OLD_CODE",
-                "provider__mobile_money": "OLD_PROVIDER",
-                "delivery_phone_number__mobile_money": "+48602102373",
+                "service_provider_code": "OLD_CODE",
+                "provider": "OLD_PROVIDER",
+                "delivery_phone_number": "+48602102373",
             },
         )
 

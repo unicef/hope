@@ -125,7 +125,6 @@ def wallet(individual: Individual, delivery_mechanism: DeliveryMechanism) -> Del
     return DeliveryMechanismData.objects.create(
         individual=individual,
         data={"phone_number": "1234567890"},
-        delivery_mechanism=delivery_mechanism,
         rdi_merge_status=DeliveryMechanismData.MERGED,
     )
 
