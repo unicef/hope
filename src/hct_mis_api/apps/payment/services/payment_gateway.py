@@ -234,6 +234,14 @@ class FspData(FlexibleArgumentsDataclassMixin):
             self.configs = [FspConfig.create_from_dict(config) for config in self.configs]  # type: ignore
 
 
+@dataclasses.dataclass()
+class AccountTypeData(FlexibleArgumentsDataclassMixin):
+    id: int
+    key: str
+    label: str
+    unique_fields: List[str]
+
+
 # Based on this response fsp.names_mappings table is created and FspConfig table is populated with required fields
 @dataclasses.dataclass()
 class DeliveryMechanismData(FlexibleArgumentsDataclassMixin):
@@ -276,6 +284,7 @@ class PaymentGatewayAPI(BaseAPI):
         GET_FSPS = "fsp/"
         GET_PAYMENT_RECORDS = "payment_records/"
         GET_DELIVERY_MECHANISMS = "delivery_mechanisms/"
+        GET_ACCOUNT_TYPES = "account_types/"
 
     def get_fsps(self) -> List[FspData]:
         response_data, _ = self._get(self.Endpoints.GET_FSPS)
@@ -284,6 +293,10 @@ class PaymentGatewayAPI(BaseAPI):
     def get_delivery_mechanisms(self) -> List[DeliveryMechanismData]:
         response_data, _ = self._get(self.Endpoints.GET_DELIVERY_MECHANISMS)
         return [DeliveryMechanismData.create_from_dict(d) for d in response_data]
+
+    def get_account_types(self) -> List[AccountTypeData]:
+        response_data, _ = self._get(self.Endpoints.GET_ACCOUNT_TYPES)
+        return [AccountTypeData.create_from_dict(fsp_data) for fsp_data in response_data]
 
     def create_payment_instruction(self, data: dict) -> PaymentInstructionData:
         response_data, _ = self._post(self.Endpoints.CREATE_PAYMENT_INSTRUCTION, data)
@@ -429,6 +442,17 @@ class PaymentGatewayService:
                         fsp=fsp,
                         defaults=dict(hope_name=required_field, source=FspNameMapping.SourceModel.ACCOUNT),
                     )
+
+    def sync_account_types(self) -> None:
+        account_types_data = self.api.get_account_types()
+        for account_type_data in account_types_data:
+            AccountType.objects.update_or_create(
+                key=account_type_data.key,
+                defaults={
+                    "label": account_type_data.label,
+                    "unique_fields": account_type_data.unique_fields or [],
+                },
+            )
 
     @staticmethod
     def update_payment(
