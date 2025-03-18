@@ -1,8 +1,13 @@
+from typing import Callable
+
+import pytest
 from django.urls import reverse
+from rest_framework import status
 
 from rest_framework.test import APIClient
 
 from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory
 from tests.unit.api.base import HOPEApiTestCase
 
@@ -20,35 +25,53 @@ class BeneficiaryGroupAPITestCase(HOPEApiTestCase):
         cls.beneficiary_group1 = BeneficiaryGroupFactory(name="Household")
         cls.beneficiary_group2 = BeneficiaryGroupFactory(name="Social Workers")
 
-    def test_list_beneficiary_group(self) -> None:
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([], status.HTTP_403_FORBIDDEN),
+            ([Permissions.BENEFICIARY_GROUP_VIEW_LIST], status.HTTP_200_OK),
+        ],
+    )
+    def test_list_beneficiary_group(
+        self,
+        permissions: list,
+        expected_status: str,
+        create_user_role_with_permissions: Callable,
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            permissions,
+            self.afghanistan,
+        )
         response = self.client.get(self.list_url)
         self.beneficiary_group1.refresh_from_db()
         self.beneficiary_group2.refresh_from_db()
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(
-            {
-                "id": str(self.beneficiary_group1.id),
-                "name": "Household",
-                "group_label": self.beneficiary_group1.group_label,
-                "group_label_plural": self.beneficiary_group1.group_label_plural,
-                "member_label": self.beneficiary_group1.member_label,
-                "member_label_plural": self.beneficiary_group1.member_label_plural,
-                "master_detail": self.beneficiary_group1.master_detail,
-            },
-            response.json()["results"],
-        )
-        self.assertIn(
-            {
-                "id": str(self.beneficiary_group2.id),
-                "name": "Social Workers",
-                "group_label": self.beneficiary_group2.group_label,
-                "group_label_plural": self.beneficiary_group2.group_label_plural,
-                "member_label": self.beneficiary_group2.member_label,
-                "member_label_plural": self.beneficiary_group2.member_label_plural,
-                "master_detail": self.beneficiary_group2.master_detail,
-            },
-            response.json()["results"],
-        )
+        self.assertEqual(response.status_code, expected_status)
+        if expected_status == status.HTTP_200_OK:
+            self.assertIn(
+                {
+                    "id": str(self.beneficiary_group1.id),
+                    "name": "Household",
+                    "group_label": self.beneficiary_group1.group_label,
+                    "group_label_plural": self.beneficiary_group1.group_label_plural,
+                    "member_label": self.beneficiary_group1.member_label,
+                    "member_label_plural": self.beneficiary_group1.member_label_plural,
+                    "master_detail": self.beneficiary_group1.master_detail,
+                },
+                response.json()["results"],
+            )
+            self.assertIn(
+                {
+                    "id": str(self.beneficiary_group2.id),
+                    "name": "Social Workers",
+                    "group_label": self.beneficiary_group2.group_label,
+                    "group_label_plural": self.beneficiary_group2.group_label_plural,
+                    "member_label": self.beneficiary_group2.member_label,
+                    "member_label_plural": self.beneficiary_group2.member_label_plural,
+                    "master_detail": self.beneficiary_group2.master_detail,
+                },
+                response.json()["results"],
+            )
 
     def test_list_beneficiary_group_caching(self) -> None:
         response = self.client.get(self.list_url)
