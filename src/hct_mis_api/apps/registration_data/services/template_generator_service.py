@@ -49,6 +49,7 @@ class TemplateFileGeneratorService:
 
     def _add_individuals_columns(self) -> None:
         self.individuals_fields = {
+            **self.core_fields.associated_with_individual().to_dict_by("xlsx_field"),
             **self.flex_fields["individuals"],
         }
         individuals_rows = self._handle_name_and_label_row(self.individuals_fields)

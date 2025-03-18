@@ -166,7 +166,7 @@ class TestRdiKoboCreateTask(TestCase):
 
         self.assertEqual(PendingDeliveryMechanismData.objects.count(), 2)
         dmd = PendingDeliveryMechanismData.objects.get(individual__full_name="Tesa Testowski")
-        self.assertEqual(dmd.delivery_mechanism.code, "mobile_money")
+        self.assertEqual(dmd.account_type.key, "mobile")
         self.assertEqual(
             dmd.data,
             {

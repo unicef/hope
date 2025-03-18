@@ -1920,7 +1920,7 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
         if hasattr(self, "unique_fields") and isinstance(self.unique_fields, (list, tuple)):
             sha256 = hashlib.sha256()
             sha256.update(self.individual.program.name.encode("utf-8"))
-            sha256.update(self.account_type.key("utf-8"))
+            sha256.update(self.account_type.key.encode("utf-8"))
 
             for field_name in self.unique_fields:
                 value = self.unique_delivery_data_for_account_type.get(field_name, None)
