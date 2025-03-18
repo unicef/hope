@@ -1,5 +1,6 @@
 from typing import Any, Dict, List, Optional, Tuple
 
+from apps.payment.models import AccountType
 from openpyxl import load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
@@ -12,7 +13,7 @@ from hct_mis_api.apps.household.models import (
     Household,
     Individual,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanism, DeliveryMechanismData
+from hct_mis_api.apps.payment.models import DeliveryMechanismData
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
     DeduplicateTask,
@@ -51,11 +52,11 @@ class UniversalIndividualUpdateScript:
         document_types = DocumentType.objects.filter()
         self.countries = {country.name: country for country in Country.objects.all()}
         self.document_types = {f"{document_type.key}_no_i_c": document_type for document_type in document_types}
-        self.delivery_mechanisms = {}
+        self.delivery_mechanisms_account_types = {}
         if deliver_mechanism_data_fields is not None:
-            self.delivery_mechanisms = {
-                dm.code: dm
-                for dm in DeliveryMechanism.objects.filter(code__in=self.deliver_mechanism_data_fields.keys())
+            self.delivery_mechanisms_account_types = {
+                account_type.key: account_type
+                for account_type in AccountType.objects.filter(key__in=self.deliver_mechanism_data_fields.keys())
             }
         self.batch_size = batch_size
 
@@ -221,14 +222,10 @@ class UniversalIndividualUpdateScript:
         if self.deliver_mechanism_data_fields is None:
             return
         individual_delivery_mechanisms_data = individual.delivery_mechanisms_data.all()
-        for delivery_mechanism_code, delivery_mechanism_columns_mapping in self.deliver_mechanism_data_fields.items():
-            delivery_mechanism = self.delivery_mechanisms.get(delivery_mechanism_code)
+        for account_type, delivery_mechanism_columns_mapping in self.deliver_mechanism_data_fields.items():
+            account_type_instance = self.delivery_mechanisms_account_types.get(account_type)
             single_data_object = next(
-                (
-                    d
-                    for d in individual_delivery_mechanisms_data
-                    if str(d.delivery_mechanism_id) == str(delivery_mechanism.id)
-                ),
+                (d for d in individual_delivery_mechanisms_data if str(d.account_type.key) == str(account_type)),
                 None,
             )
 
@@ -239,7 +236,7 @@ class UniversalIndividualUpdateScript:
                 if single_data_object is None:
                     single_data_object = DeliveryMechanismData(
                         individual=individual,
-                        account_type=delivery_mechanism.account_type,
+                        account_type=account_type_instance,
                         rdi_merge_status=DeliveryMechanismData.MERGED,
                     )
                 single_data_object.data[field_name] = value

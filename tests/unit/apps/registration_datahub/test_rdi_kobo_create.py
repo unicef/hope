@@ -170,9 +170,9 @@ class TestRdiKoboCreateTask(TestCase):
         self.assertEqual(
             dmd.data,
             {
-                "service_provider_code__mobile_money": "ABC",
-                "delivery_phone_number__mobile_money": "+48880110456",
-                "provider__mobile_money": "SIGMA",
+                "service_provider_code": "ABC",
+                "delivery_phone_number": "+48880110456",
+                "provider": "SIGMA",
             },
         )
         self.assertEqual(dmd.individual.full_name, "Tesa Testowski")
