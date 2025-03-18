@@ -57,7 +57,7 @@ function ResultsForHouseholds({
 }: ResultsProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   if (targetPopulation.buildStatus !== PaymentPlanBuildStatus.Ok) {
     return null;
@@ -72,7 +72,7 @@ function ResultsForHouseholds({
           <Grid container>
             <Grid size={{ xs: 4 }}>
               <Grid container spacing={0} justifyContent="flex-start">
-                <Grid size={{ xs:6 }}>
+                <Grid size={{ xs: 6 }}>
                   <FieldBorder color={colors.femaleChildren}>
                     <LabelizedField
                       label={t('Female Children')}
@@ -80,7 +80,7 @@ function ResultsForHouseholds({
                     />
                   </FieldBorder>
                 </Grid>
-                <Grid size={{ xs:6 }}>
+                <Grid size={{ xs: 6 }}>
                   <FieldBorder color={colors.femaleAdult}>
                     <LabelizedField
                       label={t('Female Adults')}
@@ -88,7 +88,7 @@ function ResultsForHouseholds({
                     />
                   </FieldBorder>
                 </Grid>
-                <Grid size={{ xs:6 }}>
+                <Grid size={{ xs: 6 }}>
                   <FieldBorder color={colors.maleChildren}>
                     <LabelizedField
                       label={t('Male Children')}
@@ -96,7 +96,7 @@ function ResultsForHouseholds({
                     />
                   </FieldBorder>
                 </Grid>
-                <Grid size={{ xs:6 }}>
+                <Grid size={{ xs: 6 }}>
                   <FieldBorder color={colors.maleAdult}>
                     <LabelizedField
                       label={t('Male Adults')}
@@ -156,10 +156,10 @@ function ResultsForHouseholds({
             </Grid>
             <Grid size={{ xs: 4 }}>
               <Grid container spacing={0} justifyContent="flex-end">
-                <Grid size={{ xs:6 }}>
+                <Grid size={{ xs: 6 }}>
                   <SummaryBorder>
                     <LabelizedField
-                      label={`Total Number of ${beneficiaryGroup?.groupLabelPlural}`}
+                      label={`Total Number of ${beneficiaryGroup?.group_label_plural}`}
                     >
                       <SummaryValue data-cy="total-number-of-households-count">
                         {targetPopulation.totalHouseholdsCount || '0'}
@@ -167,10 +167,10 @@ function ResultsForHouseholds({
                     </LabelizedField>
                   </SummaryBorder>
                 </Grid>
-                <Grid size={{ xs:6 }}>
+                <Grid size={{ xs: 6 }}>
                   <SummaryBorder>
                     <LabelizedField
-                      label={`Targeted ${beneficiaryGroup?.memberLabelPlural}`}
+                      label={`Targeted ${beneficiaryGroup?.member_label_plural}`}
                     >
                       <SummaryValue>
                         {targetPopulation.totalIndividualsCount || '0'}

@@ -42,7 +42,7 @@ export function TargetPopulationTable({
 }: TargetPopulationProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
   const { businessArea, programId } = useBaseUrl();
   const initialVariables: AllTargetPopulationsQueryVariables = {
     name: filter.name,

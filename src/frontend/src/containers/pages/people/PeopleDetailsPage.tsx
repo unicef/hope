@@ -90,11 +90,11 @@ const PeopleDetailsPage = (): ReactElement => {
     useQuery({
       queryKey: ['periodicFields', businessArea, programId],
       queryFn: () =>
-        RestService.restProgramsPeriodicDataUpdatePeriodicFieldsList(
-          businessArea,
-          programId,
-          1000,
-        ),
+        RestService.restBusinessAreasProgramsPeriodicFieldsList({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          limit: 1000,
+        }),
     });
 
   if (

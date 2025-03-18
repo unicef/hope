@@ -7,7 +7,9 @@ from django.utils.dateparse import parse_date
 from rest_framework import serializers
 
 from hct_mis_api.api.utils import EncodedIdSerializerMixin
-from hct_mis_api.apps.core.utils import decode_id_string
+from hct_mis_api.apps.account.api.fields import Base64ModelField
+from hct_mis_api.apps.core.api.serializers import DataCollectingTypeSerializer
+from hct_mis_api.apps.core.utils import encode_id_base64_required
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 
 
@@ -89,13 +91,15 @@ class ProgramCycleCreateSerializer(EncodedIdSerializerMixin):
         model = ProgramCycle
         fields = ["title", "start_date", "end_date"]
 
-    @staticmethod
-    def get_program(program_id: str) -> Program:
-        program = get_object_or_404(Program, id=decode_id_string(program_id))
+    def get_program(self) -> Program:
+        request = self.context["request"]
+        business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
+        program_slug = request.parser_context["kwargs"]["program_slug"]
+        program = get_object_or_404(Program, business_area__slug=business_area_slug, slug=program_slug)
         return program
 
     def validate_title(self, value: str) -> str:
-        program = self.get_program(self.context["request"].parser_context["kwargs"]["program_id"])
+        program = self.get_program()
         cycles = program.cycles.all()
         if cycles.filter(title=value).exists():
             raise serializers.ValidationError({"title": "Programme Cycles' title should be unique."})
@@ -103,7 +107,7 @@ class ProgramCycleCreateSerializer(EncodedIdSerializerMixin):
 
     def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:
         request = self.context["request"]
-        program = self.get_program(request.parser_context["kwargs"]["program_id"])
+        program = self.get_program()
         start_date = data["start_date"]
         end_date = data.get("end_date")
         data["program"] = program
@@ -231,3 +235,38 @@ class BeneficiaryGroupSerializer(serializers.ModelSerializer):
             "member_label_plural",
             "master_detail",
         )
+
+
+class ProgramSerializer(serializers.ModelSerializer):
+    id = Base64ModelField(model_name="Program")
+    data_collecting_type = DataCollectingTypeSerializer()
+    pdu_fields = serializers.SerializerMethodField()
+    beneficiary_group = BeneficiaryGroupSerializer()
+
+    class Meta:
+        model = Program
+        fields = (
+            "id",
+            "programme_code",
+            "slug",
+            "name",
+            "start_date",
+            "end_date",
+            "budget",
+            "frequency_of_payments",
+            "sector",
+            "cash_plus",
+            "population_goal",
+            "data_collecting_type",
+            "beneficiary_group",
+            "programme_code",
+            "status",
+            "pdu_fields",
+        )
+        extra_kwargs = {"status": {"help_text": "Status"}}  # for swagger purpose
+
+    def get_pdu_fields(self, obj: Program) -> list[str]:
+        pdu_field_encoded_ids = []
+        for pdu_field in obj.pdu_fields.all():
+            pdu_field_encoded_ids.append(encode_id_base64_required(pdu_field, "FlexibleAttribute"))
+        return pdu_field_encoded_ids

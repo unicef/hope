@@ -39,11 +39,11 @@ export const ProgramCycleDetailsPage = (): ReactElement => {
       programId,
     ],
     queryFn: () => {
-      return RestService.restProgramsCyclesRetrieve(
-        businessArea,
-        decodedProgramCycleId,
-        programId,
-      );
+      return RestService.restBusinessAreasProgramsCyclesRetrieve({
+        businessAreaSlug: businessArea,
+        id: decodedProgramCycleId,
+        programSlug: programId,
+      });
     },
   });
   const [filter, setFilter] = useState(

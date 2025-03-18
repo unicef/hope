@@ -30,7 +30,7 @@ export function IndividualsListTable({
 }: IndividualsListTableProps): ReactElement {
   const { programId } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
   const initialVariables: AllIndividualsForPopulationTableQueryVariables = {
     age: JSON.stringify({ min: filter.ageMin, max: filter.ageMax }),
     businessArea,
@@ -50,8 +50,8 @@ export function IndividualsListTable({
   };
 
   const replacements = {
-    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
-    fullName: (_beneficiaryGroup) => _beneficiaryGroup?.memberLabel,
+    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.member_label} ID`,
+    fullName: (_beneficiaryGroup) => _beneficiaryGroup?.member_label,
     household__unicef_id: (_beneficiaryGroup) =>
       `${_beneficiaryGroup?.groupLabel} ID`,
     relationship: (_beneficiaryGroup) =>
@@ -67,7 +67,7 @@ export function IndividualsListTable({
   return (
     <TableWrapper>
       <UniversalTable<IndividualNode, AllIndividualsQueryVariables>
-        title={beneficiaryGroup?.memberLabelPlural}
+        title={beneficiaryGroup?.member_label_plural}
         headCells={adjustedHeadCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllIndividualsForPopulationTableQuery}

@@ -43,11 +43,11 @@ export const PaymentPlanDetailsHeader = ({
       programId,
     ],
     queryFn: () => {
-      return RestService.restProgramsCyclesRetrieve(
-        businessArea,
-        decodeIdString(programCycleId),
-        programId,
-      );
+      return RestService.restBusinessAreasProgramsCyclesRetrieve({
+        businessAreaSlug: businessArea,
+        id: decodeIdString(programCycleId),
+        programSlug: programId,
+      });
     },
     enabled: !!programCycleId,
   });

@@ -1,32 +1,50 @@
-import {
-  AllHouseholdsQueryVariables,
-  HouseholdMinimalFragment,
-  HouseholdRdiMergeStatus,
-  useAllHouseholdsQuery,
-} from '@generated/graphql';
-import { ReactElement } from 'react';
-import { UniversalTable } from '../../UniversalTable';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
+import { HouseholdRdiMergeStatus } from '@generated/graphql';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { adjustHeadCells } from '@utils/utils';
+import { ReactElement, useMemo, useState } from 'react';
+import { useProgramContext } from 'src/programContext';
 import { headCells as importedHeadCells } from './ImportedHouseholdTableHeadCells';
 import { ImportedHouseholdTableRow } from './ImportedHouseholdTableRow';
 import { headCells as mergedHeadCells } from './MergedHouseholdTableHeadCells';
-import { useProgramContext } from 'src/programContext';
-import { adjustHeadCells } from '@utils/utils';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
-  const initialVariables = {
-    rdiId: rdi.id,
-    businessArea,
-    rdiMergeStatus: isMerged
-      ? HouseholdRdiMergeStatus.Merged
-      : HouseholdRdiMergeStatus.Pending,
-  };
-
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const { programId } = useBaseUrl();
+
+  const initialQueryVariables = useMemo(
+    () => ({
+      rdiId: rdi.id,
+      businessAreaSlug: businessArea,
+      programSlug: programId,
+      rdiMergeStatus: isMerged
+        ? HouseholdRdiMergeStatus.Merged
+        : HouseholdRdiMergeStatus.Pending,
+    }),
+    [rdi, businessArea, isMerged, programId],
+  );
+
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: [
+      'businessAreasProgramsHouseholdsList',
+      queryVariables,
+      programId,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsHouseholdsList(queryVariables),
+    enabled: !!businessArea && !!programId,
+  });
+
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const mergedReplacements = {
-    id: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
+    id: (_beneficiaryGroup) => `${_beneficiaryGroup?.member_label} ID`,
     head_of_household__full_name: (_beneficiaryGroup) =>
       `Head of ${_beneficiaryGroup?.groupLabel}`,
     size: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} Size`,
@@ -52,40 +70,38 @@ function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
   );
   if (isMerged) {
     return (
-      <UniversalTable<HouseholdMinimalFragment, AllHouseholdsQueryVariables>
-        headCells={adjustedMergedHeadCells}
-        query={useAllHouseholdsQuery}
-        queriedObjectName="allHouseholds"
-        rowsPerPageOptions={[10, 15, 20]}
-        initialVariables={initialVariables}
-        isOnPaper={false}
+      <UniversalRestTable
         renderRow={(row) => (
           <ImportedHouseholdTableRow
             rdi={rdi}
-            isMerged={isMerged}
-            key={row.id}
+            key={(row as any).id}
             household={row}
           />
         )}
+        headCells={adjustedMergedHeadCells}
+        queryVariables={queryVariables}
+        setQueryVariables={setQueryVariables}
+        data={data}
+        isLoading={isLoading}
+        error={error}
       />
     );
   }
   return (
-    <UniversalTable<HouseholdMinimalFragment, AllHouseholdsQueryVariables>
-      headCells={adjustedImportedHeadCells}
-      query={useAllHouseholdsQuery}
-      queriedObjectName="allHouseholds"
-      rowsPerPageOptions={[10, 15, 20]}
-      initialVariables={initialVariables}
-      isOnPaper={false}
+    <UniversalRestTable
       renderRow={(row) => (
         <ImportedHouseholdTableRow
           rdi={rdi}
-          isMerged={isMerged}
-          key={row.id}
+          key={(row as HouseholdDetail).id}
           household={row}
         />
       )}
+      headCells={adjustedImportedHeadCells}
+      queryVariables={queryVariables}
+      setQueryVariables={setQueryVariables}
+      data={data}
+      isLoading={isLoading}
+      error={error}
     />
   );
 }

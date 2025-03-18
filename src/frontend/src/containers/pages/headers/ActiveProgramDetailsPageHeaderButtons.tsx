@@ -1,13 +1,14 @@
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { EditProgramMenu } from '@components/programs/EditProgram/EditProgramMenu';
-import { ProgramQuery, useCashAssistUrlPrefixQuery } from '@generated/graphql';
+import { useCashAssistUrlPrefixQuery } from '@generated/graphql';
 import { Box } from '@mui/material';
 import { DuplicateProgramButtonLink } from '../../dialogs/programs/DuplicateProgramButtonLink';
 import { FinishProgram } from '../../dialogs/programs/FinishProgram';
 import { ReactElement } from 'react';
+import { Program } from '@restgenerated/models/Program';
 
 export interface ActiveProgramDetailsPageHeaderPropTypes {
-  program: ProgramQuery['program'];
+  program: Program;
   canFinish: boolean;
   canEdit: boolean;
   canDuplicate: boolean;

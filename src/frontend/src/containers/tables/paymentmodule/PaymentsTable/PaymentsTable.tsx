@@ -39,7 +39,7 @@ function PaymentsTable({
   const { baseUrl } = useBaseUrl();
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const [dialogPayment, setDialogPayment] = useState<
     AllPaymentsForTableQuery['allPayments']['edges'][number]['node'] | null

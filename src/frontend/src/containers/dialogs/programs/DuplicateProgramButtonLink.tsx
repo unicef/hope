@@ -2,11 +2,11 @@ import { IconButton } from '@mui/material';
 import { FileCopy } from '@mui/icons-material';
 import { ReactElement } from 'react';
 import { Link } from 'react-router-dom';
-import { ProgramQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { Program } from '@restgenerated/models/Program';
 
 interface DuplicateProgramButtonLinkProps {
-  program: ProgramQuery['program'];
+  program: Program;
 }
 
 export function DuplicateProgramButtonLink({

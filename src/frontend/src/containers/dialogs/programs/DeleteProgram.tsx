@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
   AllProgramsForChoicesDocument,
-  ProgramQuery,
   useDeleteProgramMutation,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -15,6 +14,7 @@ import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
 import { useNavigate } from 'react-router-dom';
+import { Program } from '@restgenerated/models/Program';
 
 const RemoveButton = styled(Button)`
   && {
@@ -37,7 +37,7 @@ const MidDialog = styled(Dialog)`
 `;
 
 interface DeleteProgramProps {
-  program: ProgramQuery['program'];
+  program: Program;
 }
 
 export function DeleteProgram({ program }: DeleteProgramProps): ReactElement {

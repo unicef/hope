@@ -85,12 +85,12 @@ export const PeriodicDataUpdatesUpdatesList = (): ReactElement => {
     ],
     queryFn: () => {
       const { ordering } = queryVariables;
-      return RestService.restProgramsPeriodicDataUpdatePeriodicDataUpdateUploadsList(
-        businessAreaSlug,
-        programId,
-        null,
-        null,
-        ordering,
+      return RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsList(
+        {
+          businessAreaSlug,
+          programSlug: programId,
+          ordering,
+        },
       );
     },
   });

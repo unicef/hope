@@ -15,24 +15,17 @@ from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.generics import get_object_or_404
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet
 from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
-from hct_mis_api.apps.account.api.permissions import (
-    PaymentPlanSupportingDocumentDeletePermission,
-    PaymentPlanSupportingDocumentDownloadPermission,
-    PaymentPlanSupportingDocumentUploadPermission,
-    PaymentViewListManagerialPermission,
-    PMViewListPermission,
-)
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.core.api.mixins import (
-    ActionMixin,
-    BusinessAreaMixin,
-    BusinessAreaProgramMixin,
+    BaseViewSet,
+    BusinessAreaProgramsAccessMixin,
+    ProgramMixin,
+    SerializerActionMixin,
 )
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import decode_id_string
@@ -51,7 +44,6 @@ logger = logging.getLogger(__name__)
 
 class PaymentPlanMixin:
     serializer_class = PaymentPlanSerializer
-    permission_classes = []
     filter_backends = (
         filters.DjangoFilterBackend,
         SearchFilter,
@@ -65,40 +57,33 @@ class PaymentPlanMixin:
     )
 
 
-class PaymentPlanViewSet(BusinessAreaProgramMixin, PaymentPlanMixin, mixins.ListModelMixin, GenericViewSet):
-    permission_classes = [
-        PMViewListPermission,
+class PaymentPlanViewSet(ProgramMixin, PaymentPlanMixin, mixins.ListModelMixin, BaseViewSet):
+    program_model_field = "program_cycle__program"
+    queryset = PaymentPlan.objects.all()
+    PERMISSIONS = [Permissions.PM_VIEW_LIST]
+
+
+class PaymentPlanManagerialViewSet(
+    BusinessAreaProgramsAccessMixin, PaymentPlanMixin, mixins.ListModelMixin, BaseViewSet
+):
+    queryset = PaymentPlan.objects.all()
+    PERMISSIONS = [
+        Permissions.PAYMENT_VIEW_LIST_MANAGERIAL,
     ]
-
-    def get_queryset(self) -> QuerySet:  # pragma: no cover
-        business_area = self.get_business_area()
-        program = self.get_program()
-        return PaymentPlan.objects.filter(business_area=business_area, program_cycle__program=program)
-
-
-class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.ListModelMixin, GenericViewSet):
-    permission_classes = [
-        PMViewListPermission,
-        PaymentViewListManagerialPermission,
-    ]
+    program_model_field = "program_cycle__program"
 
     def get_queryset(self) -> QuerySet:
-        business_area = self.get_business_area()
-        queryset = PaymentPlan.objects.filter(business_area=business_area)
-        program_ids = self.request.user.get_program_ids_for_permission_in_business_area(
-            str(business_area.id),
-            [perm for perm_class in self.permission_classes for perm in perm_class.PERMISSIONS],
-            one_of_permissions=False,
-        )
-
-        return queryset.filter(
-            status__in=[
-                PaymentPlan.Status.IN_APPROVAL,
-                PaymentPlan.Status.IN_AUTHORIZATION,
-                PaymentPlan.Status.IN_REVIEW,
-                PaymentPlan.Status.ACCEPTED,
-            ],
-            program_cycle__program__in=program_ids,
+        return (
+            super()
+            .get_queryset()
+            .filter(
+                status__in=[
+                    PaymentPlan.Status.IN_APPROVAL,
+                    PaymentPlan.Status.IN_AUTHORIZATION,
+                    PaymentPlan.Status.IN_REVIEW,
+                    PaymentPlan.Status.ACCEPTED,
+                ],
+            )
         )
 
     # TODO: e2e failed probably because of cache here
@@ -119,14 +104,13 @@ class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.L
         action_name = serializer.validated_data["action"]
         comment = serializer.validated_data.get("comment", "")
         input_data = {"action": action_name, "comment": comment}
-        business_area = self.get_business_area()
 
         with transaction.atomic():
             for payment_plan_id_str in serializer.validated_data["ids"]:
                 self._perform_payment_plan_status_action(
                     payment_plan_id_str,
                     input_data,
-                    business_area,
+                    self.business_area,
                     request,
                 )
 
@@ -181,7 +165,7 @@ class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.L
 
 
 class PaymentPlanSupportingDocumentViewSet(
-    ActionMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin, GenericViewSet
+    SerializerActionMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin, BaseViewSet
 ):
     serializer_class = PaymentPlanSupportingDocumentSerializer
     lookup_field = "file_id"
@@ -190,10 +174,11 @@ class PaymentPlanSupportingDocumentViewSet(
         "create": PaymentPlanSupportingDocumentSerializer,
         "delete": PaymentPlanSupportingDocumentSerializer,
     }
-    permission_classes_by_action = {
-        "create": [PaymentPlanSupportingDocumentUploadPermission],
-        "delete": [PaymentPlanSupportingDocumentDeletePermission],
-        "download": [PaymentPlanSupportingDocumentDownloadPermission],
+    permissions_by_action = {
+        "create": [Permissions.PM_UPLOAD_SUPPORTING_DOCUMENT],
+        "delete": [Permissions.PM_DELETE_SUPPORTING_DOCUMENT],
+        "destroy": [Permissions.PM_DELETE_SUPPORTING_DOCUMENT],
+        "download": [Permissions.PM_DOWNLOAD_SUPPORTING_DOCUMENT],
     }
 
     def get_queryset(self) -> QuerySet:
@@ -207,7 +192,6 @@ class PaymentPlanSupportingDocumentViewSet(
         )
 
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        self.permission_classes = [PaymentPlanSupportingDocumentDeletePermission]
         document = self.get_object()
         document.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

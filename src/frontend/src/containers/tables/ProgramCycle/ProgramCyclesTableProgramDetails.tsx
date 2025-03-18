@@ -8,7 +8,6 @@ import { BlackLink } from '@core/BlackLink';
 import { StatusBox } from '@core/StatusBox';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import { UniversalMoment } from '@core/UniversalMoment';
-import { ProgramQuery, ProgramStatus } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import TableCell from '@mui/material/TableCell';
@@ -17,9 +16,11 @@ import { programCycleStatusToColor } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { Program } from '@restgenerated/models/Program';
+import { Status791Enum } from '@restgenerated/models/Status791Enum';
 
 interface ProgramCyclesTableProgramDetailsProps {
-  program: ProgramQuery['program'];
+  program: Program;
 }
 
 const ProgramCyclesTableProgramDetails = ({
@@ -33,7 +34,7 @@ const ProgramCyclesTableProgramDetails = ({
   const { businessArea, baseUrl, programId } = useBaseUrl();
   const permissions = usePermissions();
   const canCreateProgramCycle =
-    program.status === ProgramStatus.Active &&
+    program.status === Status791Enum.ACTIVE &&
     hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_CREATE, permissions);
 
   const { data, error, isLoading } = useQuery({

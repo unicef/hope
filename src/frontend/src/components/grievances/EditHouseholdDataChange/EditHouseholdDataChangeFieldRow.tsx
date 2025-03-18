@@ -9,16 +9,16 @@ import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import {
   AllEditHouseholdFieldsQuery,
   AllEditPeopleFieldsQuery,
-  HouseholdQuery,
 } from '@generated/graphql';
 import { CurrentValue } from './CurrentValue';
 import { EditHouseholdDataChangeField } from './EditHouseholdDataChangeField';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 export interface EditHouseholdDataChangeFieldRowProps {
   fields:
     | AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes']
     | AllEditPeopleFieldsQuery['allEditPeopleFieldsAttributes'];
-  household: HouseholdQuery['household'];
+  household: HouseholdDetail;
   itemValue: { fieldName: string; fieldValue: string | number | Date };
   index: number;
   notAvailableFields: string[];
@@ -75,7 +75,7 @@ export const EditHouseholdDataChangeFieldRow = ({
       <CurrentValue
         field={field}
         value={
-          !field?.isFlexField ? household[name] : household.flexFields[name]
+          !field?.isFlexField ? household[name] : household.flex_fields[name]
         }
         values={values}
       />
@@ -85,10 +85,10 @@ export const EditHouseholdDataChangeFieldRow = ({
           field={field}
         />
       ) : (
-        <Grid size={{ xs:4 }} />
+        <Grid size={{ xs: 4 }} />
       )}
       {itemValue.fieldName && (
-        <Grid size={{ xs:1 }}>
+        <Grid size={{ xs: 1 }}>
           <IconButton disabled={isEditTicket} onClick={onDelete}>
             <Delete />
           </IconButton>

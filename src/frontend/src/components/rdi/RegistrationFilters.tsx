@@ -32,7 +32,7 @@ const RegistrationFilters = ({
   const navigate = useNavigate();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
@@ -104,7 +104,7 @@ const RegistrationFilters = ({
         <Grid size={{ xs: 3 }}>
           <NumberTextField
             id="minFilter"
-            topLabel={`Num. of ${beneficiaryGroup?.groupLabelPlural}`}
+            topLabel={`Num. of ${beneficiaryGroup?.group_label_plural}`}
             value={filter.sizeMin}
             placeholder="From"
             icon={<GroupIcon />}

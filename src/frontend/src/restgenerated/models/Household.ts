@@ -2,7 +2,6 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { BlankEnum } from './BlankEnum';
 import type { CollectTypeEnum } from './CollectTypeEnum';
 import type { ConsentSharingEnum } from './ConsentSharingEnum';
 import type { CountryEnum } from './CountryEnum';
@@ -21,19 +20,18 @@ export type Household = {
     country_origin?: CountryOriginEnum;
     size?: number | null;
     rdi_merge_status?: RdiMergeStatusEnum;
-    is_original?: boolean;
-    readonly created_at: string;
-    readonly updated_at: string;
     is_removed?: boolean;
     removed_date?: string | null;
+    readonly created_at: string;
+    readonly updated_at: string;
     last_sync_at?: string | null;
     internal_data?: any;
     withdrawn?: boolean;
     withdrawn_date?: string | null;
     consent_sign?: string;
     consent?: boolean | null;
-    consent_sharing?: (ConsentSharingEnum | BlankEnum);
-    residence_status?: (ResidenceStatusEnum | BlankEnum);
+    consent_sharing?: ConsentSharingEnum;
+    residence_status?: ResidenceStatusEnum;
     address?: string;
     zip_code?: string | null;
     female_age_group_0_5_count?: number | null;
@@ -72,11 +70,11 @@ export type Household = {
     start?: string | null;
     deviceid?: string;
     name_enumerator?: string;
-    org_enumerator?: (OrgEnumeratorEnum | BlankEnum);
+    org_enumerator?: OrgEnumeratorEnum;
     org_name_enumerator?: string;
     village?: string;
-    registration_method?: (RegistrationMethodEnum | BlankEnum);
-    currency?: (CurrencyEnum | BlankEnum);
+    registration_method?: RegistrationMethodEnum;
+    currency?: CurrencyEnum;
     unhcr_id?: string;
     program_registration_id?: string | null;
     total_cash_received_usd?: string | null;
@@ -85,6 +83,7 @@ export type Household = {
     origin_unicef_id?: string | null;
     collect_type?: CollectTypeEnum;
     enumerator_rec_id?: number | null;
+    mis_unicef_id?: string | null;
     flex_registrations_record_id?: number | null;
     household_collection?: number | null;
     admin_area?: string | null;

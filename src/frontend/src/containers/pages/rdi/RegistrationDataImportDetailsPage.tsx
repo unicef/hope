@@ -60,7 +60,7 @@ const RegistrationDataImportDetailsPage = (): ReactElement => {
   const { id } = useParams();
   const permissions = usePermissions();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const { businessArea } = useBaseUrl();
   const { data, loading, error, stopPolling, startPolling } =
@@ -128,11 +128,11 @@ const RegistrationDataImportDetailsPage = (): ReactElement => {
                 >
                   <Tab
                     data-cy="tab-Households"
-                    label={beneficiaryGroup?.groupLabelPlural}
+                    label={beneficiaryGroup?.group_label_plural}
                   />
                   <Tab
                     data-cy="tab-Individuals"
-                    label={beneficiaryGroup?.memberLabelPlural}
+                    label={beneficiaryGroup?.member_label_plural}
                   />
                 </StyledTabs>
               </TabsContainer>

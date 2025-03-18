@@ -97,12 +97,12 @@ const BoxWithBottomBorders = styled.div`
 const EditGrievancePage = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
+  const { baseUrl, businessArea, isAllPrograms, programId } = useBaseUrl();
   const { selectedProgram, isSocialDctType } = useProgramContext();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
   const { id } = useParams();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const {
     data: ticketData,
@@ -117,9 +117,12 @@ const EditGrievancePage = (): ReactElement => {
 
   const { data: currentUserData, isLoading: currentUserDataLoading } = useQuery(
     {
-      queryKey: ['profile'],
+      queryKey: ['profile', businessArea, programId],
       queryFn: () => {
-        return RestService.restProfileRetrieve();
+        return RestService.restUsersProfileRetrieve({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+        });
       },
     },
   );
@@ -399,7 +402,7 @@ const EditGrievancePage = (): ReactElement => {
                       <Grid container size={{ xs: 12 }}>
                         <Grid size={{ xs: 3 }}>
                           <LabelizedField
-                            label={`${beneficiaryGroup?.groupLabel}`}
+                            label={`${beneficiaryGroup?.group_label}`}
                           >
                             <span>
                               {ticket.household?.id &&

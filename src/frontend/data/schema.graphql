@@ -2877,6 +2877,7 @@ type ProgramNode implements Node {
   version: BigInt!
   name: String!
   programmeCode: String
+  slug: String!
   status: ProgramStatus!
   description: String!
   startDate: Date!

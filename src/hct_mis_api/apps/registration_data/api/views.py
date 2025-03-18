@@ -1,23 +1,19 @@
 import logging
 from typing import Any
 
-from django.db.models import QuerySet
-from django.http import HttpRequest
-
 from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
+from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework.viewsets import GenericViewSet
 from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
-from hct_mis_api.apps.account.api.permissions import RDIViewListPermission
-from hct_mis_api.apps.core.api.mixins import BusinessAreaProgramMixin
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.api.mixins import BaseViewSet, ProgramMixin
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.api.caches import RDIKeyConstructor
 from hct_mis_api.apps.registration_data.api.filters import RegistrationDataImportFilter
@@ -34,19 +30,15 @@ logger = logging.getLogger(__name__)
 
 
 class RegistrationDataImportViewSet(
-    BusinessAreaProgramMixin,
+    ProgramMixin,
     mixins.ListModelMixin,
-    GenericViewSet,
+    BaseViewSet,
 ):
+    queryset = RegistrationDataImport.objects.all()
     serializer_class = RegistrationDataImportListSerializer
-    permission_classes = [RDIViewListPermission]
+    PERMISSIONS = [Permissions.RDI_VIEW_LIST]
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = RegistrationDataImportFilter
-
-    def get_queryset(self) -> QuerySet:
-        business_area = self.get_business_area()
-        program = self.get_program()
-        return RegistrationDataImport.objects.filter(business_area=business_area, program=program)
 
     @etag_decorator(RDIKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=RDIKeyConstructor())
@@ -55,13 +47,19 @@ class RegistrationDataImportViewSet(
 
     @action(detail=False, methods=["POST"], url_path="run-deduplication")
     def run_deduplication(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        program = self.get_program()
-        deduplication_engine_process.delay(str(program.id))
+        deduplication_engine_process.delay(str(self.program.id))
         return Response({"message": "Deduplication process started"}, status=status.HTTP_200_OK)
 
-
-class WebhookDeduplicationView(APIView):
-    def get(self, request: HttpRequest, business_area: str, program_id: str) -> Response:
-        program = Program.objects.get(id=program_id)
+    @action(
+        detail=False,
+        methods=["GET"],
+        url_path="webhookdeduplication",
+        url_name="webhook-deduplication",
+        permission_classes=[AllowAny],
+    )
+    def webhook_deduplication(
+        self, request: Request, business_area_slug: str, program_slug: str, *args: Any, **kwargs: Any
+    ) -> Response:
+        program = Program.objects.get(business_area__slug=business_area_slug, slug=program_slug)
         fetch_biometric_deduplication_results_and_process.delay(program.deduplication_set_id)
         return Response(status=status.HTTP_200_OK)

@@ -4,14 +4,12 @@
 /* eslint-disable */
 import type { BiometricDeduplicationBatchStatusEnum } from './BiometricDeduplicationBatchStatusEnum';
 import type { BiometricDeduplicationGoldenRecordStatusEnum } from './BiometricDeduplicationGoldenRecordStatusEnum';
-import type { BlankEnum } from './BlankEnum';
 import type { CommsDisabilityEnum } from './CommsDisabilityEnum';
 import type { DeduplicationGoldenRecordStatusEnum } from './DeduplicationGoldenRecordStatusEnum';
 import type { DisabilityEnum } from './DisabilityEnum';
 import type { Document } from './Document';
 import type { HearingDisabilityEnum } from './HearingDisabilityEnum';
 import type { MemoryDisabilityEnum } from './MemoryDisabilityEnum';
-import type { NullEnum } from './NullEnum';
 import type { PhysicalDisabilityEnum } from './PhysicalDisabilityEnum';
 import type { PreferredLanguageEnum } from './PreferredLanguageEnum';
 import type { RdiMergeStatusEnum } from './RdiMergeStatusEnum';
@@ -31,7 +29,6 @@ export type Individual = {
     documents?: Array<Document>;
     birth_date: string;
     rdi_merge_status?: RdiMergeStatusEnum;
-    is_original?: boolean;
     is_removed?: boolean;
     removed_date?: string | null;
     last_sync_at?: string | null;
@@ -77,8 +74,8 @@ export type Individual = {
      * * `FOSTER_CHILD` - Foster child
      * * `FREE_UNION` - Free union
      */
-    relationship?: (RelationshipEnum | BlankEnum);
-    work_status?: (WorkStatusEnum | BlankEnum);
+    relationship?: RelationshipEnum;
+    work_status?: WorkStatusEnum;
     flex_fields?: any;
     enrolled_in_nutrition_programme?: boolean | null;
     administration_of_rutf?: boolean | null;
@@ -93,12 +90,12 @@ export type Individual = {
     pregnant?: boolean | null;
     disability?: DisabilityEnum;
     disability_certificate_picture?: string | null;
-    seeing_disability?: (SeeingDisabilityEnum | BlankEnum);
-    hearing_disability?: (HearingDisabilityEnum | BlankEnum);
-    physical_disability?: (PhysicalDisabilityEnum | BlankEnum);
-    memory_disability?: (MemoryDisabilityEnum | BlankEnum);
-    selfcare_disability?: (SelfcareDisabilityEnum | BlankEnum);
-    comms_disability?: (CommsDisabilityEnum | BlankEnum);
+    seeing_disability?: SeeingDisabilityEnum;
+    hearing_disability?: HearingDisabilityEnum;
+    physical_disability?: PhysicalDisabilityEnum;
+    memory_disability?: MemoryDisabilityEnum;
+    selfcare_disability?: SelfcareDisabilityEnum;
+    comms_disability?: CommsDisabilityEnum;
     who_answers_phone?: string;
     who_answers_alt_phone?: string;
     fchild_hoh?: boolean;
@@ -108,13 +105,14 @@ export type Individual = {
      */
     detail_id?: string | null;
     program_registration_id?: string | null;
-    preferred_language?: (PreferredLanguageEnum | BlankEnum | NullEnum) | null;
+    preferred_language?: PreferredLanguageEnum | null;
     relationship_confirmed?: boolean;
     age_at_registration?: number | null;
     wallet_name?: string;
     blockchain_name?: string;
     wallet_address?: string;
     origin_unicef_id?: string | null;
+    mis_unicef_id?: string | null;
     individual_collection?: number | null;
     /**
      * If this individual was copied from another individual, this field will contain the individual it was copied from.

@@ -167,14 +167,15 @@ const AddFilterTargetingCriteriaDisplay = ({
   };
 
   // const  collectorFiltersAvailable =
-  //   selectedProgram?.dataCollectingType?.collectorFiltersAvailable;
+  //   selectedProgram?.data_collecting_type?.collectorFiltersAvailable;
 
   let individualFiltersAvailable =
-    selectedProgram?.dataCollectingType?.individualFiltersAvailable;
+    selectedProgram?.data_collecting_type?.individual_filters_available;
   let householdFiltersAvailable =
-    selectedProgram?.dataCollectingType?.householdFiltersAvailable;
+    selectedProgram?.data_collecting_type?.household_filters_available;
   const isSocialWorkingProgram =
-    selectedProgram?.dataCollectingType?.type === DataCollectingTypeType.Social;
+    selectedProgram?.data_collecting_type?.type ===
+    DataCollectingTypeType.Social;
   // Allow use filters on non-migrated programs
   if (individualFiltersAvailable === undefined) {
     individualFiltersAvailable = true;

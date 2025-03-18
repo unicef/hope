@@ -1,11 +1,19 @@
 import os
+from functools import cached_property
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+
+from django.db.models import Q, QuerySet
 
 from requests import Response, session
 from requests.adapters import HTTPAdapter
+from rest_framework import serializers
+from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
+from rest_framework.response import Response as DRFResponse
+from rest_framework.viewsets import GenericViewSet
 from urllib3 import Retry
 
+from hct_mis_api.apps.account.api.permissions import BaseRestPermission
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import decode_id_string
 
@@ -72,24 +80,121 @@ class BaseAPI:
 
 
 class BusinessAreaMixin:
-    def get_business_area(self) -> BusinessArea:
-        return get_object_or_404(BusinessArea, slug=self.kwargs.get("business_area"))
+    business_area_model_field = "business_area"
+
+    @property
+    def business_area_slug(self) -> Optional[str]:
+        return self.kwargs.get("business_area_slug")
+
+    @cached_property
+    def business_area(self) -> BusinessArea:
+        return get_object_or_404(BusinessArea, slug=self.business_area_slug)
+
+    def get_queryset(self) -> QuerySet:
+        return super().get_queryset().filter(**{f"{self.business_area_model_field}__slug": self.business_area_slug})
 
 
 class ProgramMixin:
-    def get_program(self) -> "Program":
+    program_model_field = "program"
+
+    @cached_property
+    def business_area(self) -> BusinessArea:
+        return self.program.business_area
+
+    @property
+    def business_area_slug(self) -> Optional[str]:
+        return self.kwargs.get("business_area_slug")
+
+    @property
+    def program_slug(self) -> Optional[str]:
+        return self.kwargs.get("program_slug")
+
+    @cached_property
+    def program(self) -> "Program":
         from hct_mis_api.apps.program.models import Program
 
-        return get_object_or_404(Program, id=decode_id_string(self.kwargs.get("program_id")))
+        return get_object_or_404(Program, slug=self.program_slug, business_area__slug=self.business_area_slug)
+
+    def get_queryset(self) -> QuerySet:
+        return (
+            super()
+            .get_queryset()
+            .filter(
+                **{
+                    f"{self.program_model_field}__slug": self.program_slug,
+                    f"{self.program_model_field}__business_area__slug": self.business_area_slug,
+                }
+            )
+        )
 
 
-class BusinessAreaProgramMixin(BusinessAreaMixin, ProgramMixin):
-    pass
+class BusinessAreaProgramsAccessMixin(BusinessAreaMixin):
+    """
+    Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
+    """
+
+    def get_queryset(self) -> QuerySet:
+        queryset = super().get_queryset()
+
+        program_ids = self.request.user.get_program_ids_for_permissions_in_business_area(
+            self.business_area.id,
+            self.PERMISSIONS,
+        )
+
+        return queryset.filter(**{f"{self.program_model_field}__in": program_ids})
 
 
-class ActionMixin:
+class ProgramVisibilityMixin(ProgramMixin):
+    """
+    Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
+    """
+
+    def get_queryset(self) -> QuerySet:
+        queryset = super().get_queryset()
+
+        if area_limits := self.request.user.partner.get_area_limits_for_program(self.program.id):
+            areas_null = Q(**{f"{field}__isnull": True for field in self.admin_area_model_fields})
+            areas_query = Q()
+            for field in self.admin_area_model_fields:
+                areas_query |= Q(**{f"{field}__in": area_limits})
+            queryset = queryset.filter(Q(areas_null | Q(areas_query)))
+
+        return queryset
+
+
+class BusinessAreaVisibilityMixin(BusinessAreaMixin):
+    """
+    Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
+    """
+
+    def get_queryset(self) -> QuerySet:
+        from hct_mis_api.apps.program.models import Program
+
+        queryset = super().get_queryset()
+        user = self.request.user
+        program_ids = user.get_program_ids_for_permissions_in_business_area(
+            self.business_area.id,
+            self.PERMISSIONS,
+        )
+
+        filter_q = Q()
+        for program_id in (
+            Program.objects.filter(id__in=program_ids).exclude(status=Program.DRAFT).values_list("id", flat=True)
+        ):
+            program_q = Q(program_id=program_id)
+            areas_null = Q(**{f"{field}__isnull": True for field in self.admin_area_model_fields})
+            # apply admin area limits if partner has restrictions
+            areas_query = Q()
+            if area_limits := user.partner.get_area_limits_for_program(program_id):
+                for field in self.admin_area_model_fields:
+                    areas_query |= Q(**{f"{field}__in": area_limits})
+
+            filter_q |= Q(program_q & areas_null) | Q(program_q & areas_query)
+        return queryset.filter(filter_q) if filter_q else queryset.none()  # filter_q empty if no access to any program
+
+
+class PermissionActionMixin:
     permission_classes_by_action = {}
-    serializer_classes_by_action = {}
 
     def get_permissions(self) -> Any:
         if self.action in self.permission_classes_by_action:
@@ -97,8 +202,63 @@ class ActionMixin:
         else:
             return super().get_permissions()  # pragma: no cover
 
+
+class SerializerActionMixin:
+    serializer_classes_by_action = {}
+
     def get_serializer_class(self) -> Any:
         if self.action in self.serializer_classes_by_action:
             return self.serializer_classes_by_action[self.action]
         else:
             return super().get_serializer_class()  # pragma: no cover
+
+
+class ActionMixin(PermissionActionMixin, SerializerActionMixin):
+    pass
+
+
+class CustomSerializerMixin:
+    serializer_classes = {}
+
+    def get_serializer_class(self) -> None:
+        if self.action in ["retrieve", "list"] and (
+            serializer_class := self.serializer_classes.get(self.request.GET.get("serializer"))
+        ):
+            return serializer_class
+        return super().get_serializer_class()
+
+
+class DecodeIdForDetailMixin:
+    def get_object(self) -> Any:
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+        self.kwargs[lookup_url_kwarg] = decode_id_string(self.kwargs[lookup_url_kwarg])
+        return super().get_object()
+
+
+class BaseViewSet(GenericViewSet):
+    permission_classes: list = [BaseRestPermission]
+    PERMISSIONS: list = []
+
+
+class AdminUrlSerializerMixin:
+    admin_url = serializers.SerializerMethodField()
+
+    def resolve_admin_url(self, obj: Any) -> Optional[str]:
+        if self.context.request.user.is_superuser:
+            return obj.admin_url
+        return None
+
+
+class CountActionMixin:
+    """
+    Adds a count action to the viewset that returns the count of the queryset.
+    NOTE: This mixin should be added as the first mixin in the inheritance chain.
+    """
+
+    @action(
+        detail=False,
+        methods=["get"],
+    )
+    def count(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+        queryset_count = super().get_queryset().count()
+        return DRFResponse({"count": queryset_count})

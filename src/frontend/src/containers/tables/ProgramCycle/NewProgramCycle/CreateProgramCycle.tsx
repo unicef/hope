@@ -14,7 +14,6 @@ import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogActions } from '@containers/dialogs/DialogActions';
 import { LoadingButton } from '@core/LoadingButton';
 import { useTranslation } from 'react-i18next';
-import { ProgramQuery } from '@generated/graphql';
 import { Field, Form, Formik, FormikValues } from 'formik';
 import { GreyText } from '@core/GreyText';
 import Grid from '@mui/material/Grid2';
@@ -31,9 +30,10 @@ import type { DefaultError } from '@tanstack/query-core';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { Program } from '@restgenerated/models/Program';
 
 interface CreateProgramCycleProps {
-  program: ProgramQuery['program'];
+  program: Program;
   onClose: () => void;
   onSubmit: () => void;
   step?: string;
@@ -66,9 +66,9 @@ const CreateProgramCycle = ({
           )
         : schema,
     );
-  if (program.endDate) {
+  if (program.end_date) {
     endDate = endDate.max(
-      new Date(program.endDate),
+      new Date(program.end_date),
       t('End Date cannot be after Programme End Date'),
     );
   }
@@ -80,7 +80,7 @@ const CreateProgramCycle = ({
     start_date: Yup.date()
       .required(t('Start Date is required'))
       .min(
-        program.startDate,
+        program.start_date,
         t('Start Date cannot be before Programme Start Date'),
       ),
     end_date: endDate,

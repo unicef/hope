@@ -165,6 +165,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         db_index=True,
     )
     programme_code = models.CharField(max_length=4, null=True, blank=True)
+    slug = models.CharField(max_length=4, db_index=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICE, db_index=True)
     description = models.CharField(
         blank=True,
@@ -239,17 +240,22 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     def save(self, *args: Any, **kwargs: Any) -> None:
         self.clean()
         if not self.programme_code:
-            self.programme_code = self._generate_programme_code()
+            self.programme_code = self.generate_programme_code()
+        if not self.slug:
+            self.slug = self.generate_slug()
         if self.data_collecting_type_id is None and self.data_collecting_type:
             # save the related object before saving Program
             self.data_collecting_type.save()
         super().save(*args, **kwargs)
 
-    def _generate_programme_code(self) -> str:
-        programme_code = "".join(random.choice(string.ascii_uppercase + string.digits + "-/.") for _ in range(4))
+    def generate_programme_code(self) -> str:
+        programme_code = "".join(random.choice(string.ascii_uppercase + string.digits + "-") for _ in range(4))
         if Program.objects.filter(business_area_id=self.business_area_id, programme_code=programme_code).exists():
-            return self._generate_programme_code()
+            return self.generate_programme_code()
         return programme_code
+
+    def generate_slug(self) -> str:
+        return self.programme_code.lower()
 
     @staticmethod
     def get_total_number_of_households_from_payments(qs: models.QuerySet[PaymentPlan]) -> int:
@@ -296,6 +302,11 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
                 fields=["business_area", "programme_code"],
                 condition=Q(is_removed=False),
                 name="unique_for_business_area_and_programme_code_if_not_removed",
+            ),
+            UniqueConstraint(
+                fields=["business_area", "slug"],
+                condition=Q(is_removed=False),
+                name="unique_for_business_area_and_slug_if_not_removed",
             ),
         ]
         permissions = [("enroll_beneficiaries", "Can enroll beneficiaries")]

@@ -3,22 +3,16 @@ import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import {
-  AllProgramsForTableQuery,
-  ProgrammeChoiceDataQuery,
-} from '@generated/graphql';
+import { ProgrammeChoiceDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import TableCell from '@mui/material/TableCell';
-import {
-  choicesToDict,
-  formatCurrency,
-  programStatusToColor,
-} from '@utils/utils';
+import { Program } from '@restgenerated/models/Program';
+import { choicesToDict, programStatusToColor } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface ProgrammesTableRowProps {
-  program: AllProgramsForTableQuery['allPrograms']['edges'][number]['node'];
+  program: Program;
   choicesData: ProgrammeChoiceDataQuery;
 }
 
@@ -56,14 +50,15 @@ function ProgrammesTableRow({
           />
         </TableCell>
         <TableCell align="left">
-          <UniversalMoment>{program.startDate}</UniversalMoment> -{' '}
-          <UniversalMoment>{program.endDate}</UniversalMoment>
+          <UniversalMoment>{program.start_date}</UniversalMoment> -{' '}
+          <UniversalMoment>{program.end_date}</UniversalMoment>
         </TableCell>
         <TableCell align="left">
           {programSectorChoiceDict[program.sector]}
         </TableCell>
-        <TableCell align="right">{program.totalNumberOfHouseholds}</TableCell>
-        <TableCell align="right">{formatCurrency(program.budget)}</TableCell>
+        {/* //TODO: fix */}
+        {/* <TableCell align="right">{program.totalNumberOfHouseholds}</TableCell>
+        <TableCell align="right">{formatCurrency(program.budget)}</TableCell> */}
       </ClickableTableRow>
     </>
   );

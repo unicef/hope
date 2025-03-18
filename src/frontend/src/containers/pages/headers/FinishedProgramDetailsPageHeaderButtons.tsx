@@ -1,12 +1,13 @@
 import { Box } from '@mui/material';
-import { ProgramQuery, useCashAssistUrlPrefixQuery } from '@generated/graphql';
+import { useCashAssistUrlPrefixQuery } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { DuplicateProgramButtonLink } from '../../dialogs/programs/DuplicateProgramButtonLink';
 import { ReactivateProgram } from '../../dialogs/programs/ReactivateProgram';
 import { ReactElement } from 'react';
+import { Program } from '@restgenerated/models/Program';
 
 export interface FinishedProgramDetailsPageHeaderPropTypes {
-  program: ProgramQuery['program'];
+  program: Program;
   canActivate: boolean;
   canDuplicate: boolean;
 }

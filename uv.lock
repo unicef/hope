@@ -1198,6 +1198,19 @@ wheels = [
 ]
 
 [[package]]
+name = "drf-nested-routers"
+version = "0.94.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+    { name = "djangorestframework" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/56/46/6b8b6a6da04032bdaf35a416e6cf60b2a58b14decf409d799d87206960c7/drf-nested-routers-0.94.0.tar.gz", hash = "sha256:c1fb8688cb327988b5d775cce26aedfd573d0c5e9a96672458b96517b410ba8a", size = 18175 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/29/f7/ec0c6e879c0a21d197f56b298d721105afcb83347e8ec1e25453a4ef9f60/drf_nested_routers-0.94.0-py2.py3-none-any.whl", hash = "sha256:1388d77e5f498d16b4e45f009a9033029381b8f1151f316369f2fee195b2991e", size = 36106 },
+]
+
+[[package]]
 name = "drf-spectacular"
 version = "0.28.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1671,6 +1684,7 @@ dependencies = [
     { name = "djangorestframework" },
     { name = "drf-extensions" },
     { name = "drf-jwt" },
+    { name = "drf-nested-routers" },
     { name = "drf-spectacular", extra = ["sidecar"] },
     { name = "elastic-transport" },
     { name = "elasticsearch" },
@@ -1726,6 +1740,7 @@ dev = [
     { name = "django-stubs-ext" },
     { name = "django-webtest" },
     { name = "djangorestframework-stubs" },
+    { name = "drf-nested-routers" },
     { name = "faker" },
     { name = "flake8" },
     { name = "flake8-absolute-import" },
@@ -1822,6 +1837,7 @@ requires-dist = [
     { name = "djangorestframework", specifier = ">=3.13.1,<4.0.0" },
     { name = "drf-extensions", specifier = "==0.7.1" },
     { name = "drf-jwt", specifier = ">=1.19.2,<2.0.0" },
+    { name = "drf-nested-routers", specifier = ">=0.94.0" },
     { name = "drf-spectacular", extras = ["sidecar"], specifier = ">=0.27,<1.0" },
     { name = "elastic-transport", specifier = "==8.13.0" },
     { name = "elasticsearch", specifier = "~=8.14.0" },
@@ -1877,6 +1893,7 @@ dev = [
     { name = "django-stubs-ext", specifier = ">=0.7.0,<1.0.0" },
     { name = "django-webtest", specifier = ">=1.9.10,<2.0.0" },
     { name = "djangorestframework-stubs", specifier = "~=1.7.0" },
+    { name = "drf-nested-routers", specifier = "~=0.94.0" },
     { name = "faker", specifier = ">=17,<18" },
     { name = "flake8", specifier = ">=6,<7" },
     { name = "flake8-absolute-import", specifier = ">=1.0.0.1,<2.0.0.0" },
