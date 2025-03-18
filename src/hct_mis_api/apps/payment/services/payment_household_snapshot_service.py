@@ -14,6 +14,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     BankAccountInfo,
+    Household,
     Individual,
     IndividualRoleInHousehold,
 )
@@ -78,6 +79,11 @@ def bulk_create_payment_snapshot_data(payments_ids: list[str]) -> None:
 
 def create_payment_snapshot_data(payment: Payment) -> PaymentHouseholdSnapshot:
     household = payment.household
+    household_data = get_household_snapshot(household, payment)
+    return PaymentHouseholdSnapshot(payment=payment, snapshot_data=household_data, household_id=household.id)
+
+
+def get_household_snapshot(household: Household, payment: Optional[Payment] = None) -> dict[Any, Any]:
     household_data = {}
     all_household_data_dict = household.__dict__
     keys = [key for key in all_household_data_dict.keys() if key not in excluded_household_fields]
@@ -93,7 +99,6 @@ def create_payment_snapshot_data(payment: Payment) -> PaymentHouseholdSnapshot:
         individuals_dict[str(individual.id)] = individual_data
         household_data["individuals"].append(individual_data)
         household_data["needs_adjudication_tickets_count"] += individual_data["needs_adjudication_tickets_count"]
-
     if household.primary_collector:
         if str(household.primary_collector.id) in individuals_dict:
             household_data["primary_collector"] = individuals_dict[str(household.primary_collector.id)]
@@ -114,10 +119,10 @@ def create_payment_snapshot_data(payment: Payment) -> PaymentHouseholdSnapshot:
         household_data["roles"].append(
             {"role": role.role, "individual": get_individual_snapshot(role.individual, payment)}
         )
-    return PaymentHouseholdSnapshot(payment=payment, snapshot_data=household_data, household_id=household.id)
+    return household_data
 
 
-def get_individual_snapshot(individual: Individual, payment: Payment) -> dict:
+def get_individual_snapshot(individual: Individual, payment: Optional[Payment] = None) -> dict:
     all_individual_data_dict = individual.__dict__
     keys = [key for key in all_individual_data_dict.keys() if key not in excluded_individual_fields]
     individual_data = {}
@@ -157,7 +162,7 @@ def get_individual_snapshot(individual: Individual, payment: Payment) -> dict:
         role__in=[ROLE_PRIMARY, ROLE_ALTERNATE], household=individual.household, individual=individual
     ).exists()
 
-    if is_hh_collector:
+    if is_hh_collector and payment:
         individual_data["accounts_data"] = {
             dmd.account_type.key: dmd.delivery_data(payment.financial_service_provider, payment.delivery_type)
             for dmd in individual.delivery_mechanisms_data.all()

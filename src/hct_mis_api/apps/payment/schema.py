@@ -882,7 +882,7 @@ class Query(graphene.ObjectType):
     all_payments = DjangoPermissionFilterConnectionField(
         PaymentNode,
         filterset_class=PaymentFilter,
-        permission_classes=(hopePermissionClass(Permissions.PM_VIEW_LIST),),
+        permission_classes=(hopePermissionClass(Permissions.PM_VIEW_PAYMENT_LIST),),
     )
 
     financial_service_provider_xlsx_template = relay.Node.Field(FinancialServiceProviderXlsxTemplateNode)
