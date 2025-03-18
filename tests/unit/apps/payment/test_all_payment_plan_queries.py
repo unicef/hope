@@ -310,7 +310,7 @@ class TestPaymentPlanQueries(APITestCase):
         cls.user = UserFactory.create(username="qazxsw321")
         cls.create_user_role_with_permissions(
             cls.user,
-            [Permissions.PM_VIEW_LIST, Permissions.PM_VIEW_DETAILS, Permissions.ACTIVITY_LOG_VIEW],
+            [Permissions.PM_VIEW_PAYMENT_LIST, Permissions.PM_VIEW_LIST, Permissions.PM_VIEW_DETAILS, Permissions.ACTIVITY_LOG_VIEW],
             cls.business_area,
             whole_business_area_access=True,
         )
