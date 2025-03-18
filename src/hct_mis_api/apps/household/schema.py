@@ -214,7 +214,7 @@ class DeliveryMechanismDataNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.account_type.label
 
     def resolve_individual_tab_data(self, info: Any) -> dict:
-        return self.data
+        return dict(sorted(self.data.items()))
 
     class Meta:
         model = DeliveryMechanismData
