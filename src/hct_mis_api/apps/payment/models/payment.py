@@ -19,9 +19,10 @@ from django.core.validators import (
     MinValueValidator,
     ProhibitNullCharactersValidator,
 )
-from django.db import IntegrityError, models
+from django.db import models, transaction
 from django.db.models import Count, JSONField, Q, QuerySet, Sum, UniqueConstraint
 from django.db.models.functions import Coalesce
+from django.db.utils import IntegrityError
 from django.utils import timezone
 from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
@@ -1923,15 +1924,17 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
             sha256.update(self.account_type.key.encode("utf-8"))
 
             for field_name in self.unique_fields:
-                value = self.unique_delivery_data_for_account_type.get(field_name, None)
-                sha256.update(str(value).encode("utf-8"))
+                if value := self.unique_delivery_data_for_account_type.get(field_name, None):
+                    sha256.update(str(value).encode("utf-8"))
 
             self.unique_key = sha256.hexdigest()
             try:
-                self.save(update_fields=["unique_key"])
+                with transaction.atomic():
+                    self.save(update_fields=["unique_key"])
             except IntegrityError:
-                self.is_unique = False  # TODO MB what next? grievance ticket?
-                self.save(update_fields=["is_unique"])
+                with transaction.atomic():
+                    self.is_unique = False
+                    self.save(update_fields=["is_unique"])
 
     @property
     def unique_fields(self) -> List[str]:

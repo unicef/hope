@@ -229,17 +229,19 @@ class UniversalIndividualUpdateScript:
             )
 
             for column_name, field_name in delivery_mechanism_columns_mapping:
-                value = row[headers.index(column_name)]
-                if self.ignore_empty_values and (value is None or value == ""):
-                    continue
-                if single_data_object is None:
-                    single_data_object = DeliveryMechanismData(
-                        individual=individual,
-                        account_type=account_type_instance,
-                        rdi_merge_status=DeliveryMechanismData.MERGED,
-                    )
-                single_data_object.data[field_name] = value
+                if column_name in headers:
+                    value = row[headers.index(column_name)]
+                    if self.ignore_empty_values and (value is None or value == ""):
+                        continue
+                    if single_data_object is None:
+                        single_data_object = DeliveryMechanismData(
+                            individual=individual,
+                            account_type=account_type_instance,
+                            rdi_merge_status=DeliveryMechanismData.MERGED,
+                        )
+                    single_data_object.data[field_name] = value
             if single_data_object:
+                single_data_object.save()
                 single_data_object.update_unique_field()
 
     def handle_update(self, sheet: Worksheet, headers: List[str]) -> List[str]:

@@ -16,7 +16,14 @@ from hct_mis_api.apps.household.models import (
     DocumentType,
     Individual,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanism, DeliveryMechanismData
+from hct_mis_api.apps.payment.fixtures import FinancialServiceProviderFactory
+from hct_mis_api.apps.payment.models import (
+    AccountType,
+    DeliveryMechanism,
+    DeliveryMechanismConfig,
+    DeliveryMechanismData,
+    FinancialServiceProvider,
+)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.universal_update_script.models import UniversalUpdate
@@ -68,7 +75,8 @@ def program(poland: Country, germany: Country) -> Program:
 
 @pytest.fixture
 def delivery_mechanism() -> DeliveryMechanism:
-    return DeliveryMechanism.objects.create(name="Mobile Money", code="mobile_money")
+    ac_mobile, _ = AccountType.objects.update_or_create(key="mobile", label="Mobile")
+    return DeliveryMechanism.objects.create(name="Mobile Money", code="mobile_money", account_type=ac_mobile)
 
 
 @pytest.fixture
@@ -132,7 +140,22 @@ def individual(
 
 @pytest.fixture()
 def wallet(individual: Individual, delivery_mechanism: DeliveryMechanism) -> DeliveryMechanismData:
+    fsp = FinancialServiceProviderFactory(
+        name="Western Union",
+        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+    )
+    DeliveryMechanismConfig.objects.get_or_create(
+        fsp=fsp,
+        delivery_mechanism=delivery_mechanism,
+        required_fields=[
+            "phone_number",
+            "provider",
+            "service_provider_code",
+        ],
+    )
+
     return DeliveryMechanismData.objects.create(
+        account_type=delivery_mechanism.account_type,
         individual=individual,
         data={"phone_number": "1234567890"},
         rdi_merge_status=DeliveryMechanismData.MERGED,
@@ -197,6 +220,7 @@ class TestUniversalIndividualUpdateService:
         universal_update.delivery_mechanisms.add(DeliveryMechanism.objects.first())
         service = UniversalIndividualUpdateService(universal_update)
         template_file = service.generate_xlsx_template()
+
         universal_update.refresh_from_db()
         content = template_file.getvalue()
         universal_update.update_file.save("template.xlsx", ContentFile(content))

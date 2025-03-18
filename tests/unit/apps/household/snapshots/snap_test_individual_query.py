@@ -822,7 +822,7 @@ snapshots['TestIndividualWithDeliveryMechanismsDataQuery::test_individual_query_
                     'name': 'Bank'
                 },
                 {
-                    'individualTabData': '{"phone_number": "123456789", "provider": "Provider", "service_provider_code": "ABC"}',
+                    'individualTabData': '{"delivery_phone_number": "123456789", "provider": "Provider", "service_provider_code": "ABC"}',
                     'name': 'Mobile'
                 }
             ],

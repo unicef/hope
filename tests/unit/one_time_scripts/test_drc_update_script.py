@@ -82,7 +82,7 @@ class TestSouthSudanUpdateScript(TestCase):
             data={
                 "service_provider_code": "OLD_CODE",
                 "provider": "OLD_PROVIDER",
-                "delivery_phone": "+48602102373",
+                "delivery_phone_number": "+48602102373",
             },
             individual=individual2,
             rdi_merge_status=DeliveryMechanismData.MERGED,
@@ -180,7 +180,6 @@ class TestSouthSudanUpdateScript(TestCase):
             {
                 "service_provider_code": "CD-VODACASH",
                 "provider": "Vodacash",
-                "delivery_phone_number": "+243837611111",
             },
         )
         self.assertEqual(str(individual2.phone_no), "+243836122222")
@@ -192,7 +191,7 @@ class TestSouthSudanUpdateScript(TestCase):
             {
                 "service_provider_code": "CD-VODACASH",
                 "provider": "Vodacash",
-                "delivery_phone_number": "+243836122222",
+                "delivery_phone_number": "+48602102373",
             },
         )
         self.assertEqual(str(individual3.phone_no), "+243831733333")

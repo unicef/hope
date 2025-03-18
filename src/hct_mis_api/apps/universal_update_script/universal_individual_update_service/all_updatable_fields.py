@@ -7,7 +7,7 @@ from django.db.models import Model
 
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.household.models import DocumentType
-from hct_mis_api.apps.payment.models import DeliveryMechanism
+from hct_mis_api.apps.payment.models import DeliveryMechanismConfig
 from hct_mis_api.apps.universal_update_script.universal_individual_update_service.validator_and_handlers import (
     handle_admin_field,
     handle_boolean_field,
@@ -178,14 +178,13 @@ def get_document_fields() -> list[Any]:
 
 def get_wallet_fields() -> dict[Any, Any]:
     deliver_mechanism_data_fields = {}
-    for delivery_mechanism in DeliveryMechanism.objects.all():
+    for dm_config in DeliveryMechanismConfig.objects.all():
+        account_type = dm_config.delivery_mechanism.account_type.key
         wallet_fields = []
-        for field in delivery_mechanism.required_fields:
-            wallet_fields.append((f"wallet__{field}", field))
-        for field in delivery_mechanism.optional_fields:
-            wallet_fields.append((f"wallet__{field}", field))
+        for field in dm_config.required_fields:
+            wallet_fields.append((f"account__{account_type}__{field}", field))
         if len(wallet_fields) > 0:
-            deliver_mechanism_data_fields[delivery_mechanism.code] = tuple(wallet_fields)
+            deliver_mechanism_data_fields[account_type] = tuple(wallet_fields)
     return deliver_mechanism_data_fields
 
 
