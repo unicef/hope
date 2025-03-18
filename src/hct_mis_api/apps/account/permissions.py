@@ -227,6 +227,9 @@ class Permissions(Enum):
     UPLOAD_STORAGE_FILE = auto()
     DOWNLOAD_STORAGE_FILE = auto()
 
+    # Beneficiary Group
+    BENEFICIARY_GROUP_VIEW_LIST = auto()
+
     # Communication
     ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST = auto()
     ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS = auto()
@@ -334,9 +337,13 @@ def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: A
     )
     if business_area is None:
         return False
-
-    program = Program.objects.filter(id=get_program_id_from_headers(kwargs)).first()
+    program = None
+    if program_slug := kwargs.get("program"):
+        program = Program.objects.filter(slug=program_slug, business_area=business_area).first()
+    elif kwargs.get("Program"):  # TODO: GraphQL - remove after GraphQL complete removal
+        program = Program.objects.filter(id=get_program_id_from_headers(kwargs)).first()
     obj = program or business_area
+
     return any(user.has_perm(permission.name, obj) for permission in permissions)
 
 

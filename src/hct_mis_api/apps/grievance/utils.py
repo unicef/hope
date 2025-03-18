@@ -172,11 +172,11 @@ def filter_based_on_partner_areas_2(
     try:
         programs_for_business_area = []
         filter_q = Q()
-        if program_id and user.has_program_access(program_id):
+        if program_id:  # and user.has_program_access(program_id):
             programs_for_business_area = [program_id]
-        elif not program_id:
-            programs_for_business_area = user.get_program_ids_for_permission_in_business_area(
-                business_area_id=business_area_id, permissions=permissions, one_of_permissions=True
+        else:
+            programs_for_business_area = user.get_program_ids_for_permissions_in_business_area(
+                business_area_id=business_area_id, permissions=permissions
             )
         # if user does not have access to any program/selected program -> return empty queryset for program-related obj
         if not programs_for_business_area:

@@ -4647,6 +4647,7 @@ export type ProgramNode = Node & {
   roleAssignments: Array<UserRoleNode>;
   scope?: Maybe<ProgramScope>;
   sector: ProgramSector;
+  slug: Scalars['String']['output'];
   startDate: Scalars['Date']['output'];
   status: ProgramStatus;
   surveys: SurveyNodeConnection;
@@ -7950,7 +7951,7 @@ export type IndividualDetailedFragment = { __typename?: 'IndividualNode', givenN
 
 export type MergedIndividualMinimalFragment = { __typename?: 'IndividualNode', id: string, unicefId?: string | null, age?: number | null, fullName: string, birthDate: any, sex: IndividualSex, role?: string | null, relationship?: IndividualRelationship | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, importId?: string | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, age?: number | null, location?: string | null } | null> | null, deduplicationBatchResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, age?: number | null, location?: string | null } | null> | null, registrationDataImport: { __typename?: 'RegistrationDataImportNode', id: string, name: string } };
 
-export type ProgramDetailsFragment = { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate?: any | null, status: ProgramStatus, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, isSocialWorkerProgram?: boolean | null, version: any, adminUrl?: string | null, partnerAccess: ProgramPartnerAccess, targetPopulationsCount?: number | null, canFinish?: boolean | null, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string, type?: DataCollectingTypeType | null } | null, partners?: Array<{ __typename?: 'PartnerNode', id: string, name?: string | null, areaAccess?: string | null, areas?: Array<{ __typename?: 'AreaNode', id: string, level: number } | null> | null } | null> | null, registrationImports: { __typename?: 'RegistrationDataImportNodeConnection', totalCount?: number | null }, pduFields?: Array<{ __typename?: 'PeriodicFieldNode', id: string, label: any, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null> | null, beneficiaryGroup?: { __typename?: 'BeneficiaryGroupNode', id: string, name: string, groupLabel: string, groupLabelPlural: string, memberLabel: string, memberLabelPlural: string, masterDetail: boolean } | null };
+export type ProgramDetailsFragment = { __typename?: 'ProgramNode', id: string, slug: string, name: string, programmeCode?: string | null, startDate: any, endDate?: any | null, status: ProgramStatus, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, isSocialWorkerProgram?: boolean | null, version: any, adminUrl?: string | null, partnerAccess: ProgramPartnerAccess, targetPopulationsCount?: number | null, canFinish?: boolean | null, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string, type?: DataCollectingTypeType | null } | null, partners?: Array<{ __typename?: 'PartnerNode', id: string, name?: string | null, areaAccess?: string | null, areas?: Array<{ __typename?: 'AreaNode', id: string, level: number } | null> | null } | null> | null, registrationImports: { __typename?: 'RegistrationDataImportNodeConnection', totalCount?: number | null }, pduFields?: Array<{ __typename?: 'PeriodicFieldNode', id: string, label: any, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null> | null, beneficiaryGroup?: { __typename?: 'BeneficiaryGroupNode', id: string, name: string, groupLabel: string, groupLabelPlural: string, memberLabel: string, memberLabelPlural: string, masterDetail: boolean } | null };
 
 export type RegistrationMinimalFragment = { __typename?: 'RegistrationDataImportNode', id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, numberOfIndividuals: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, biometricDeduplicated?: string | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate?: any | null, status: ProgramStatus } | null };
 
@@ -8429,7 +8430,7 @@ export type UpdateProgramMutationVariables = Exact<{
 }>;
 
 
-export type UpdateProgramMutation = { __typename?: 'Mutations', updateProgram?: { __typename?: 'UpdateProgram', validationErrors?: any | null, program?: { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate?: any | null, status: ProgramStatus, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, isSocialWorkerProgram?: boolean | null, version: any, adminUrl?: string | null, partnerAccess: ProgramPartnerAccess, targetPopulationsCount?: number | null, canFinish?: boolean | null, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string, type?: DataCollectingTypeType | null } | null, partners?: Array<{ __typename?: 'PartnerNode', id: string, name?: string | null, areaAccess?: string | null, areas?: Array<{ __typename?: 'AreaNode', id: string, level: number } | null> | null } | null> | null, registrationImports: { __typename?: 'RegistrationDataImportNodeConnection', totalCount?: number | null }, pduFields?: Array<{ __typename?: 'PeriodicFieldNode', id: string, label: any, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null> | null, beneficiaryGroup?: { __typename?: 'BeneficiaryGroupNode', id: string, name: string, groupLabel: string, groupLabelPlural: string, memberLabel: string, memberLabelPlural: string, masterDetail: boolean } | null } | null } | null };
+export type UpdateProgramMutation = { __typename?: 'Mutations', updateProgram?: { __typename?: 'UpdateProgram', validationErrors?: any | null, program?: { __typename?: 'ProgramNode', id: string, slug: string, name: string, programmeCode?: string | null, startDate: any, endDate?: any | null, status: ProgramStatus, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, isSocialWorkerProgram?: boolean | null, version: any, adminUrl?: string | null, partnerAccess: ProgramPartnerAccess, targetPopulationsCount?: number | null, canFinish?: boolean | null, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string, type?: DataCollectingTypeType | null } | null, partners?: Array<{ __typename?: 'PartnerNode', id: string, name?: string | null, areaAccess?: string | null, areas?: Array<{ __typename?: 'AreaNode', id: string, level: number } | null> | null } | null> | null, registrationImports: { __typename?: 'RegistrationDataImportNodeConnection', totalCount?: number | null }, pduFields?: Array<{ __typename?: 'PeriodicFieldNode', id: string, label: any, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null> | null, beneficiaryGroup?: { __typename?: 'BeneficiaryGroupNode', id: string, name: string, groupLabel: string, groupLabelPlural: string, memberLabel: string, memberLabelPlural: string, masterDetail: boolean } | null } | null } | null };
 
 export type UpdateProgramPartnersMutationVariables = Exact<{
   programData?: InputMaybe<UpdateProgramPartnersInput>;
@@ -8437,7 +8438,7 @@ export type UpdateProgramPartnersMutationVariables = Exact<{
 }>;
 
 
-export type UpdateProgramPartnersMutation = { __typename?: 'Mutations', updateProgramPartners?: { __typename?: 'UpdateProgramPartners', program?: { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate?: any | null, status: ProgramStatus, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, isSocialWorkerProgram?: boolean | null, version: any, adminUrl?: string | null, partnerAccess: ProgramPartnerAccess, targetPopulationsCount?: number | null, canFinish?: boolean | null, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string, type?: DataCollectingTypeType | null } | null, partners?: Array<{ __typename?: 'PartnerNode', id: string, name?: string | null, areaAccess?: string | null, areas?: Array<{ __typename?: 'AreaNode', id: string, level: number } | null> | null } | null> | null, registrationImports: { __typename?: 'RegistrationDataImportNodeConnection', totalCount?: number | null }, pduFields?: Array<{ __typename?: 'PeriodicFieldNode', id: string, label: any, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null> | null, beneficiaryGroup?: { __typename?: 'BeneficiaryGroupNode', id: string, name: string, groupLabel: string, groupLabelPlural: string, memberLabel: string, memberLabelPlural: string, masterDetail: boolean } | null } | null } | null };
+export type UpdateProgramPartnersMutation = { __typename?: 'Mutations', updateProgramPartners?: { __typename?: 'UpdateProgramPartners', program?: { __typename?: 'ProgramNode', id: string, slug: string, name: string, programmeCode?: string | null, startDate: any, endDate?: any | null, status: ProgramStatus, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, isSocialWorkerProgram?: boolean | null, version: any, adminUrl?: string | null, partnerAccess: ProgramPartnerAccess, targetPopulationsCount?: number | null, canFinish?: boolean | null, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string, type?: DataCollectingTypeType | null } | null, partners?: Array<{ __typename?: 'PartnerNode', id: string, name?: string | null, areaAccess?: string | null, areas?: Array<{ __typename?: 'AreaNode', id: string, level: number } | null> | null } | null> | null, registrationImports: { __typename?: 'RegistrationDataImportNodeConnection', totalCount?: number | null }, pduFields?: Array<{ __typename?: 'PeriodicFieldNode', id: string, label: any, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null> | null, beneficiaryGroup?: { __typename?: 'BeneficiaryGroupNode', id: string, name: string, groupLabel: string, groupLabelPlural: string, memberLabel: string, memberLabelPlural: string, masterDetail: boolean } | null } | null } | null };
 
 export type CreateRegistrationKoboImportMutationVariables = Exact<{
   registrationDataImportData: RegistrationKoboImportMutationInput;
@@ -9092,58 +9093,6 @@ export type CashPlanVerificationSamplingChoicesQueryVariables = Exact<{ [key: st
 
 export type CashPlanVerificationSamplingChoicesQuery = { __typename?: 'Query', cashPlanVerificationSamplingChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
-export type AllHouseholdsQueryVariables = Exact<{
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  businessArea?: InputMaybe<Scalars['String']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  familySize?: InputMaybe<Scalars['String']['input']>;
-  headOfHouseholdFullNameIcontains?: InputMaybe<Scalars['String']['input']>;
-  headOfHouseholdPhoneNoValid?: InputMaybe<Scalars['Boolean']['input']>;
-  adminArea?: InputMaybe<Scalars['ID']['input']>;
-  search?: InputMaybe<Scalars['String']['input']>;
-  residenceStatus?: InputMaybe<Scalars['String']['input']>;
-  lastRegistrationDate?: InputMaybe<Scalars['String']['input']>;
-  admin2?: InputMaybe<Scalars['ID']['input']>;
-  withdrawn?: InputMaybe<Scalars['Boolean']['input']>;
-  program?: InputMaybe<Scalars['ID']['input']>;
-  rdiMergeStatus?: InputMaybe<Scalars['String']['input']>;
-  rdiId?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type AllHouseholdsQuery = { __typename?: 'Query', allHouseholds?: { __typename?: 'HouseholdNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'HouseholdNodeEdge', cursor: string, node?: { __typename?: 'HouseholdNode', id: string, status?: string | null, unicefId?: string | null, hasDuplicates?: boolean | null, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, size?: number | null, address: string, village: string, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, residenceStatus?: string | null, totalCashReceived?: any | null, currency?: string | null, lastRegistrationDate: any, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string, phoneNo: string, birthDate: any, relationship?: IndividualRelationship | null } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null, program: { __typename?: 'ProgramNode', id: string, name: string } } | null } | null> } | null };
-
-export type AllHouseholdsForPopulationTableQueryVariables = Exact<{
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  businessArea?: InputMaybe<Scalars['String']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  familySize?: InputMaybe<Scalars['String']['input']>;
-  headOfHouseholdFullNameIcontains?: InputMaybe<Scalars['String']['input']>;
-  adminArea?: InputMaybe<Scalars['ID']['input']>;
-  search?: InputMaybe<Scalars['String']['input']>;
-  documentType?: InputMaybe<Scalars['String']['input']>;
-  documentNumber?: InputMaybe<Scalars['String']['input']>;
-  residenceStatus?: InputMaybe<Scalars['String']['input']>;
-  lastRegistrationDate?: InputMaybe<Scalars['String']['input']>;
-  admin1?: InputMaybe<Scalars['ID']['input']>;
-  admin2?: InputMaybe<Scalars['ID']['input']>;
-  withdrawn?: InputMaybe<Scalars['Boolean']['input']>;
-  headOfHouseholdPhoneNoValid?: InputMaybe<Scalars['Boolean']['input']>;
-  program?: InputMaybe<Scalars['ID']['input']>;
-  isActiveProgram?: InputMaybe<Scalars['Boolean']['input']>;
-  rdiId?: InputMaybe<Scalars['String']['input']>;
-  rdiMergeStatus?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type AllHouseholdsForPopulationTableQuery = { __typename?: 'Query', allHouseholds?: { __typename?: 'HouseholdNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'HouseholdNodeEdge', cursor: string, node?: { __typename?: 'HouseholdNode', id: string, status?: string | null, unicefId?: string | null, hasDuplicates?: boolean | null, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, size?: number | null, residenceStatus?: string | null, totalCashReceived?: any | null, currency?: string | null, lastRegistrationDate: any, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null, program: { __typename?: 'ProgramNode', id: string, name: string } } | null } | null> } | null };
-
 export type AllIndividualsQueryVariables = Exact<{
   before?: InputMaybe<Scalars['String']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
@@ -9301,7 +9250,7 @@ export type AllProgramsForChoicesQueryVariables = Exact<{
 }>;
 
 
-export type AllProgramsForChoicesQuery = { __typename?: 'Query', allPrograms?: { __typename?: 'ProgramNodeConnection', totalCount?: number | null, edgeCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, endCursor?: string | null, startCursor?: string | null }, edges: Array<{ __typename?: 'ProgramNodeEdge', cursor: string, node?: { __typename?: 'ProgramNode', id: string, name: string, status: ProgramStatus, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, type?: DataCollectingTypeType | null, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string } | null, beneficiaryGroup?: { __typename?: 'BeneficiaryGroupNode', id: string, createdAt: any, updatedAt: any, name: string, groupLabel: string, groupLabelPlural: string, memberLabel: string, memberLabelPlural: string, masterDetail: boolean } | null, pduFields?: Array<{ __typename?: 'PeriodicFieldNode', id: string } | null> | null } | null } | null> } | null };
+export type AllProgramsForChoicesQuery = { __typename?: 'Query', allPrograms?: { __typename?: 'ProgramNodeConnection', totalCount?: number | null, edgeCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, endCursor?: string | null, startCursor?: string | null }, edges: Array<{ __typename?: 'ProgramNodeEdge', cursor: string, node?: { __typename?: 'ProgramNode', id: string, name: string, status: ProgramStatus, slug: string, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, type?: DataCollectingTypeType | null, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string } | null, beneficiaryGroup?: { __typename?: 'BeneficiaryGroupNode', id: string, createdAt: any, updatedAt: any, name: string, groupLabel: string, groupLabelPlural: string, memberLabel: string, memberLabelPlural: string, masterDetail: boolean } | null, pduFields?: Array<{ __typename?: 'PeriodicFieldNode', id: string } | null> | null } | null } | null> } | null };
 
 export type AllProgramsForTableQueryVariables = Exact<{
   before?: InputMaybe<Scalars['String']['input']>;
@@ -9333,7 +9282,7 @@ export type ProgramQueryVariables = Exact<{
 }>;
 
 
-export type ProgramQuery = { __typename?: 'Query', program?: { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate?: any | null, status: ProgramStatus, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, isSocialWorkerProgram?: boolean | null, version: any, adminUrl?: string | null, partnerAccess: ProgramPartnerAccess, targetPopulationsCount?: number | null, canFinish?: boolean | null, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string, type?: DataCollectingTypeType | null } | null, partners?: Array<{ __typename?: 'PartnerNode', id: string, name?: string | null, areaAccess?: string | null, areas?: Array<{ __typename?: 'AreaNode', id: string, level: number } | null> | null } | null> | null, registrationImports: { __typename?: 'RegistrationDataImportNodeConnection', totalCount?: number | null }, pduFields?: Array<{ __typename?: 'PeriodicFieldNode', id: string, label: any, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null> | null, beneficiaryGroup?: { __typename?: 'BeneficiaryGroupNode', id: string, name: string, groupLabel: string, groupLabelPlural: string, memberLabel: string, memberLabelPlural: string, masterDetail: boolean } | null } | null };
+export type ProgramQuery = { __typename?: 'Query', program?: { __typename?: 'ProgramNode', id: string, slug: string, name: string, programmeCode?: string | null, startDate: any, endDate?: any | null, status: ProgramStatus, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, isSocialWorkerProgram?: boolean | null, version: any, adminUrl?: string | null, partnerAccess: ProgramPartnerAccess, targetPopulationsCount?: number | null, canFinish?: boolean | null, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string, type?: DataCollectingTypeType | null } | null, partners?: Array<{ __typename?: 'PartnerNode', id: string, name?: string | null, areaAccess?: string | null, areas?: Array<{ __typename?: 'AreaNode', id: string, level: number } | null> | null } | null> | null, registrationImports: { __typename?: 'RegistrationDataImportNodeConnection', totalCount?: number | null }, pduFields?: Array<{ __typename?: 'PeriodicFieldNode', id: string, label: any, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null> | null, beneficiaryGroup?: { __typename?: 'BeneficiaryGroupNode', id: string, name: string, groupLabel: string, groupLabelPlural: string, memberLabel: string, memberLabelPlural: string, masterDetail: boolean } | null } | null };
 
 export type ProgrammeChoiceDataQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -10458,6 +10407,7 @@ export const MergedIndividualMinimalFragmentDoc = gql`
 export const ProgramDetailsFragmentDoc = gql`
     fragment programDetails on ProgramNode {
   id
+  slug
   name
   programmeCode
   startDate
@@ -17963,251 +17913,6 @@ export type CashPlanVerificationSamplingChoicesQueryHookResult = ReturnType<type
 export type CashPlanVerificationSamplingChoicesLazyQueryHookResult = ReturnType<typeof useCashPlanVerificationSamplingChoicesLazyQuery>;
 export type CashPlanVerificationSamplingChoicesSuspenseQueryHookResult = ReturnType<typeof useCashPlanVerificationSamplingChoicesSuspenseQuery>;
 export type CashPlanVerificationSamplingChoicesQueryResult = Apollo.QueryResult<CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables>;
-export const AllHouseholdsDocument = gql`
-    query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $headOfHouseholdFullNameIcontains: String, $headOfHouseholdPhoneNoValid: Boolean, $adminArea: ID, $search: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: ID, $withdrawn: Boolean, $program: ID, $rdiMergeStatus: String, $rdiId: String) {
-  allHouseholds(
-    after: $after
-    before: $before
-    first: $first
-    last: $last
-    businessArea: $businessArea
-    size: $familySize
-    orderBy: $orderBy
-    headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains
-    headOfHousehold_PhoneNoValid: $headOfHouseholdPhoneNoValid
-    adminArea: $adminArea
-    search: $search
-    residenceStatus: $residenceStatus
-    lastRegistrationDate: $lastRegistrationDate
-    admin2: $admin2
-    withdrawn: $withdrawn
-    program: $program
-    rdiMergeStatus: $rdiMergeStatus
-    rdiId: $rdiId
-  ) {
-    pageInfo {
-      hasNextPage
-      hasPreviousPage
-      startCursor
-      endCursor
-    }
-    totalCount
-    edges {
-      cursor
-      node {
-        id
-        status
-        unicefId
-        hasDuplicates
-        sanctionListPossibleMatch
-        sanctionListConfirmedMatch
-        headOfHousehold {
-          id
-          fullName
-          phoneNo
-          birthDate
-          phoneNo
-          relationship
-        }
-        size
-        address
-        village
-        maleChildrenCount
-        femaleChildrenCount
-        childrenDisabledCount
-        admin1 {
-          id
-          name
-        }
-        admin2 {
-          id
-          name
-        }
-        residenceStatus
-        totalCashReceived
-        currency
-        lastRegistrationDate
-        program {
-          id
-          name
-        }
-      }
-    }
-  }
-}
-    `;
-
-/**
- * __useAllHouseholdsQuery__
- *
- * To run a query within a React component, call `useAllHouseholdsQuery` and pass it any options that fit your needs.
- * When your component renders, `useAllHouseholdsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useAllHouseholdsQuery({
- *   variables: {
- *      after: // value for 'after'
- *      before: // value for 'before'
- *      first: // value for 'first'
- *      last: // value for 'last'
- *      businessArea: // value for 'businessArea'
- *      orderBy: // value for 'orderBy'
- *      familySize: // value for 'familySize'
- *      headOfHouseholdFullNameIcontains: // value for 'headOfHouseholdFullNameIcontains'
- *      headOfHouseholdPhoneNoValid: // value for 'headOfHouseholdPhoneNoValid'
- *      adminArea: // value for 'adminArea'
- *      search: // value for 'search'
- *      residenceStatus: // value for 'residenceStatus'
- *      lastRegistrationDate: // value for 'lastRegistrationDate'
- *      admin2: // value for 'admin2'
- *      withdrawn: // value for 'withdrawn'
- *      program: // value for 'program'
- *      rdiMergeStatus: // value for 'rdiMergeStatus'
- *      rdiId: // value for 'rdiId'
- *   },
- * });
- */
-export function useAllHouseholdsQuery(baseOptions?: Apollo.QueryHookOptions<AllHouseholdsQuery, AllHouseholdsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllHouseholdsQuery, AllHouseholdsQueryVariables>(AllHouseholdsDocument, options);
-      }
-export function useAllHouseholdsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllHouseholdsQuery, AllHouseholdsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllHouseholdsQuery, AllHouseholdsQueryVariables>(AllHouseholdsDocument, options);
-        }
-export function useAllHouseholdsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<AllHouseholdsQuery, AllHouseholdsQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllHouseholdsQuery, AllHouseholdsQueryVariables>(AllHouseholdsDocument, options);
-        }
-export type AllHouseholdsQueryHookResult = ReturnType<typeof useAllHouseholdsQuery>;
-export type AllHouseholdsLazyQueryHookResult = ReturnType<typeof useAllHouseholdsLazyQuery>;
-export type AllHouseholdsSuspenseQueryHookResult = ReturnType<typeof useAllHouseholdsSuspenseQuery>;
-export type AllHouseholdsQueryResult = Apollo.QueryResult<AllHouseholdsQuery, AllHouseholdsQueryVariables>;
-export const AllHouseholdsForPopulationTableDocument = gql`
-    query AllHouseholdsForPopulationTable($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $headOfHouseholdFullNameIcontains: String, $adminArea: ID, $search: String, $documentType: String, $documentNumber: String, $residenceStatus: String, $lastRegistrationDate: String, $admin1: ID, $admin2: ID, $withdrawn: Boolean, $headOfHouseholdPhoneNoValid: Boolean, $program: ID, $isActiveProgram: Boolean, $rdiId: String, $rdiMergeStatus: String) {
-  allHouseholds(
-    after: $after
-    before: $before
-    first: $first
-    last: $last
-    businessArea: $businessArea
-    size: $familySize
-    orderBy: $orderBy
-    headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains
-    adminArea: $adminArea
-    search: $search
-    documentType: $documentType
-    documentNumber: $documentNumber
-    residenceStatus: $residenceStatus
-    lastRegistrationDate: $lastRegistrationDate
-    admin1: $admin1
-    admin2: $admin2
-    withdrawn: $withdrawn
-    headOfHousehold_PhoneNoValid: $headOfHouseholdPhoneNoValid
-    program: $program
-    isActiveProgram: $isActiveProgram
-    rdiId: $rdiId
-    rdiMergeStatus: $rdiMergeStatus
-  ) {
-    pageInfo {
-      hasNextPage
-      hasPreviousPage
-      startCursor
-      endCursor
-    }
-    totalCount
-    edges {
-      cursor
-      node {
-        id
-        status
-        unicefId
-        hasDuplicates
-        sanctionListPossibleMatch
-        sanctionListConfirmedMatch
-        headOfHousehold {
-          id
-          fullName
-        }
-        size
-        admin2 {
-          id
-          name
-        }
-        residenceStatus
-        totalCashReceived
-        currency
-        lastRegistrationDate
-        program {
-          id
-          name
-        }
-        program {
-          id
-          name
-        }
-      }
-    }
-  }
-}
-    `;
-
-/**
- * __useAllHouseholdsForPopulationTableQuery__
- *
- * To run a query within a React component, call `useAllHouseholdsForPopulationTableQuery` and pass it any options that fit your needs.
- * When your component renders, `useAllHouseholdsForPopulationTableQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useAllHouseholdsForPopulationTableQuery({
- *   variables: {
- *      after: // value for 'after'
- *      before: // value for 'before'
- *      first: // value for 'first'
- *      last: // value for 'last'
- *      businessArea: // value for 'businessArea'
- *      orderBy: // value for 'orderBy'
- *      familySize: // value for 'familySize'
- *      headOfHouseholdFullNameIcontains: // value for 'headOfHouseholdFullNameIcontains'
- *      adminArea: // value for 'adminArea'
- *      search: // value for 'search'
- *      documentType: // value for 'documentType'
- *      documentNumber: // value for 'documentNumber'
- *      residenceStatus: // value for 'residenceStatus'
- *      lastRegistrationDate: // value for 'lastRegistrationDate'
- *      admin1: // value for 'admin1'
- *      admin2: // value for 'admin2'
- *      withdrawn: // value for 'withdrawn'
- *      headOfHouseholdPhoneNoValid: // value for 'headOfHouseholdPhoneNoValid'
- *      program: // value for 'program'
- *      isActiveProgram: // value for 'isActiveProgram'
- *      rdiId: // value for 'rdiId'
- *      rdiMergeStatus: // value for 'rdiMergeStatus'
- *   },
- * });
- */
-export function useAllHouseholdsForPopulationTableQuery(baseOptions?: Apollo.QueryHookOptions<AllHouseholdsForPopulationTableQuery, AllHouseholdsForPopulationTableQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllHouseholdsForPopulationTableQuery, AllHouseholdsForPopulationTableQueryVariables>(AllHouseholdsForPopulationTableDocument, options);
-      }
-export function useAllHouseholdsForPopulationTableLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllHouseholdsForPopulationTableQuery, AllHouseholdsForPopulationTableQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllHouseholdsForPopulationTableQuery, AllHouseholdsForPopulationTableQueryVariables>(AllHouseholdsForPopulationTableDocument, options);
-        }
-export function useAllHouseholdsForPopulationTableSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<AllHouseholdsForPopulationTableQuery, AllHouseholdsForPopulationTableQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllHouseholdsForPopulationTableQuery, AllHouseholdsForPopulationTableQueryVariables>(AllHouseholdsForPopulationTableDocument, options);
-        }
-export type AllHouseholdsForPopulationTableQueryHookResult = ReturnType<typeof useAllHouseholdsForPopulationTableQuery>;
-export type AllHouseholdsForPopulationTableLazyQueryHookResult = ReturnType<typeof useAllHouseholdsForPopulationTableLazyQuery>;
-export type AllHouseholdsForPopulationTableSuspenseQueryHookResult = ReturnType<typeof useAllHouseholdsForPopulationTableSuspenseQuery>;
-export type AllHouseholdsForPopulationTableQueryResult = Apollo.QueryResult<AllHouseholdsForPopulationTableQuery, AllHouseholdsForPopulationTableQueryVariables>;
 export const AllIndividualsDocument = gql`
     query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $documentType: String, $documentNumber: String, $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String, $adminArea: ID, $withdrawn: Boolean, $admin2: [ID], $flags: [String], $rdiMergeStatus: String, $rdiId: String) {
   allIndividuals(
@@ -19023,6 +18728,7 @@ export const AllProgramsForChoicesDocument = gql`
         id
         name
         status
+        slug
         dataCollectingType {
           id
           code
@@ -24454,6 +24160,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   roleAssignments?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>;
   scope?: Resolver<Maybe<ResolversTypes['ProgramScope']>, ParentType, ContextType>;
   sector?: Resolver<ResolversTypes['ProgramSector'], ParentType, ContextType>;
+  slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   startDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   status?: Resolver<ResolversTypes['ProgramStatus'], ParentType, ContextType>;
   surveys?: Resolver<ResolversTypes['SurveyNodeConnection'], ParentType, ContextType, Partial<ProgramNodeSurveysArgs>>;

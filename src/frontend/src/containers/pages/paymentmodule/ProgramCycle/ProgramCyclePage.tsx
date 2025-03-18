@@ -27,7 +27,7 @@ export const ProgramCyclePage = (): ReactElement => {
   const permissions = usePermissions();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),

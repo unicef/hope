@@ -38,7 +38,7 @@ export const BeneficiaryGroupAutocompleteRest = ({
       value={value}
       label={t('Beneficiary Group')}
       dataCy="filters-beneficiary-group-autocomplete"
-      fetchFunction={() => RestService.restBeneficiaryGroupsList()}
+      fetchFunction={() => RestService.restBeneficiaryGroupsList({})}
       businessArea={businessArea}
       handleChange={(_, selectedValue) => {
         onChange(selectedValue);

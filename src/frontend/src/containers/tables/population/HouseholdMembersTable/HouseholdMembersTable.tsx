@@ -13,14 +13,11 @@ import {
   populationStatusToColor,
   sexToCapitalize,
 } from '@utils/utils';
-import {
-  HouseholdChoiceDataQuery,
-  HouseholdNode,
-  IndividualNode,
-} from '@generated/graphql';
+import { HouseholdChoiceDataQuery, IndividualNode } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Bold } from '@components/core/Bold';
 import { useProgramContext } from 'src/programContext';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 const headCells: HeadCell<IndividualNode>[] = [
   {
@@ -62,7 +59,7 @@ const headCells: HeadCell<IndividualNode>[] = [
 ];
 
 interface HouseholdMembersTableProps {
-  household: HouseholdNode;
+  household: HouseholdDetail;
   choicesData: HouseholdChoiceDataQuery;
 }
 export const HouseholdMembersTable = ({
@@ -82,11 +79,13 @@ export const HouseholdMembersTable = ({
   const relationshipChoicesDict = choicesToDict(
     choicesData?.relationshipChoices,
   );
-  const allIndividuals = household?.individuals?.edges?.map(
-    (edge) => edge.node,
-  );
+  const allIndividuals = [];
+  //TODO:
+  // household?.individuals?.edges?.map(
+  //   (edge) => edge.node,
+  // );
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   if (orderBy) {
     if (orderDirection === 'asc') {
@@ -99,8 +98,8 @@ export const HouseholdMembersTable = ({
   const totalCount = allIndividuals.length;
 
   const replacements = {
-    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
-    fullName: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel}`,
+    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.member_label} ID`,
+    fullName: (_beneficiaryGroup) => `${_beneficiaryGroup?.member_label}`,
     relationship: (_beneficiaryGroup) =>
       `Relationship to Head of ${_beneficiaryGroup?.groupLabel}`,
   };
@@ -113,7 +112,7 @@ export const HouseholdMembersTable = ({
 
   return (
     <TableComponent<IndividualNode>
-      title={`${beneficiaryGroup?.groupLabel} Members`}
+      title={`${beneficiaryGroup?.group_label} Members`}
       data={allIndividuals.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage,

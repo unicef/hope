@@ -48,7 +48,7 @@ export const IndividualBioData = ({
 }: IndividualBioDataProps): ReactElement => {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const relationshipChoicesDict = choicesToDict(
     choicesData.relationshipChoices,
@@ -67,7 +67,7 @@ export const IndividualBioData = ({
 
   const mappedIndividualDocuments = individual?.documents?.edges?.map(
     (edge) => (
-      <Grid size={{ xs:3 }} key={edge.node.id}>
+      <Grid size={{ xs: 3 }} key={edge.node.id}>
         <Box flexDirection="column">
           <Box mb={1}>
             <LabelizedField label={edge.node.type.label}>
@@ -89,7 +89,7 @@ export const IndividualBioData = ({
   );
 
   const mappedIdentities = individual?.identities?.edges?.map((item) => (
-    <Grid size={{ xs:3 }} key={item.node.id}>
+    <Grid size={{ xs: 3 }} key={item.node.id}>
       <Box flexDirection="column">
         <Box mb={1}>
           <LabelizedField label={`${item.node.partner} ID`}>
@@ -103,7 +103,7 @@ export const IndividualBioData = ({
 
   const mappedRoles = (
     <Grid size={{ xs: 3 }}>
-      <LabelizedField label={`Linked ${beneficiaryGroup?.groupLabelPlural}`}>
+      <LabelizedField label={`Linked ${beneficiaryGroup?.group_label_plural}`}>
         {individual?.householdsAndRoles?.length
           ? individual?.householdsAndRoles?.map((item) => (
               <Box key={item.id}>
@@ -235,7 +235,7 @@ export const IndividualBioData = ({
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
-          <LabelizedField label={`${beneficiaryGroup?.groupLabel} ID`}>
+          <LabelizedField label={`${beneficiaryGroup?.group_label} ID`}>
             {individual?.household?.id ? (
               <ContentLink
                 href={`/${baseUrl}/population/household/${individual?.household?.id}`}
@@ -254,7 +254,7 @@ export const IndividualBioData = ({
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField
-            label={`Relationship to Head Of ${beneficiaryGroup?.groupLabel}`}
+            label={`Relationship to Head Of ${beneficiaryGroup?.group_label}`}
           >
             {relationshipChoicesDict[individual?.relationship]}
           </LabelizedField>
@@ -355,7 +355,7 @@ export const IndividualBioData = ({
             </UniversalMoment>
           </LabelizedField>
         </Grid>
-        <Grid size={{ xs:6 }}>
+        <Grid size={{ xs: 6 }}>
           {individual?.household?.unicefId && (
             <LinkedGrievancesModal
               household={individual?.household}

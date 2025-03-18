@@ -44,7 +44,7 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
   const { id } = useParams();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
   const { t } = useTranslation();
 
   const { baseUrl, businessArea, programId } = useBaseUrl();
@@ -70,10 +70,11 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
     useQuery({
       queryKey: ['periodicFields', businessArea, programId],
       queryFn: () =>
-        RestService.restProgramsPeriodicDataUpdatePeriodicFieldsList(
-          businessArea,
-          programId,
-        ),
+        RestService.restBusinessAreasProgramsPeriodicFieldsList({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          limit: 1000,
+        }),
     });
 
   if (
@@ -99,7 +100,7 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
 
   let breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: `${beneficiaryGroup?.groupLabelPlural}`,
+      title: `${beneficiaryGroup?.group_label_plural}`,
       to: `/${baseUrl}/population/individuals`,
     },
   ];
@@ -121,7 +122,7 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
   return (
     <>
       <PageHeader
-        title={`${t(`${beneficiaryGroup?.memberLabel} ID`)}: ${individual?.unicefId}`}
+        title={`${t(`${beneficiaryGroup?.member_label} ID`)}: ${individual?.unicefId}`}
         breadCrumbs={
           hasPermissions(
             PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST,

@@ -1,15 +1,15 @@
-import { Box, Button } from '@mui/material';
-import { Link, useParams } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { BreadCrumbsItem } from '@core/BreadCrumbs';
-import { PageHeader } from '@core/PageHeader';
 import { LoadingButton } from '@core/LoadingButton';
-import { decodeIdString } from '@utils/utils';
-import { useQuery } from '@tanstack/react-query';
+import { PageHeader } from '@core/PageHeader';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { ReactElement } from 'react';
+import { Box, Button } from '@mui/material';
 import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { decodeIdString } from '@utils/utils';
+import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link, useParams } from 'react-router-dom';
+import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 
 interface CreatePaymentPlanHeaderProps {
   handleSubmit: () => Promise<void>;
@@ -37,11 +37,11 @@ export function CreatePaymentPlanHeader({
         programId,
       ],
       queryFn: () => {
-        return RestService.restProgramsCyclesRetrieve(
-          businessArea,
-          decodedProgramCycleId,
-          programId,
-        );
+        return RestService.restBusinessAreasProgramsCyclesRetrieve({
+          businessAreaSlug: businessArea,
+          id: decodedProgramCycleId,
+          programSlug: programId,
+        });
       },
     },
   );

@@ -4,6 +4,7 @@ import * as React from 'react';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { BlueText, DarkGrey, StyledBox } from '../LookUpStyles';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 const Types = { household: 'household', individual: 'individual' };
 
@@ -16,7 +17,7 @@ interface LookUpHouseholdIndividualSelectionDisplayProps {
   onValueChange;
   disableUnselectIndividual: boolean;
   disableUnselectHousehold: boolean;
-  selectedHousehold;
+  selectedHousehold: HouseholdDetail;
   setSelectedHousehold: (value) => void;
   selectedIndividual;
   setSelectedIndividual: (value) => void;
@@ -32,7 +33,7 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
   setSelectedIndividual,
 }: LookUpHouseholdIndividualSelectionDisplayProps): React.ReactElement => {
   const { selectedProgram, isSocialDctType } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const handleRemove = (type): void => {
     if (type === Types.household) {
@@ -54,14 +55,14 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
             <Grid container alignItems="center" justifyContent="space-between">
               <Grid>
                 <Box display="flex">
-                  {`${beneficiaryGroup?.groupLabel} ID`}:
+                  {`${beneficiaryGroup?.group_label} ID`}:
                   <BlueText>
                     &ensp;
-                    {selectedHousehold?.unicefId || '-'}
+                    {selectedHousehold?.unicef_id || '-'}
                   </BlueText>
                 </Box>
               </Grid>
-              {!disableUnselectHousehold && selectedHousehold?.unicefId && (
+              {!disableUnselectHousehold && selectedHousehold?.unicef_id && (
                 <Grid>
                   <DarkGrey>
                     <Flex>
@@ -83,7 +84,7 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
           <Grid container alignItems="center" justifyContent="space-between">
             <Grid>
               <Box display="flex">
-                {`${beneficiaryGroup?.memberLabel} ID`}:
+                {`${beneficiaryGroup?.member_label} ID`}:
                 <BlueText>
                   &ensp;
                   {selectedIndividual?.unicefId || '-'}

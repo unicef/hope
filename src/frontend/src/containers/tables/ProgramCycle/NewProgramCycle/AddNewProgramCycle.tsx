@@ -1,17 +1,17 @@
-import { Button, Dialog } from '@mui/material';
-import { ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { ProgramQuery } from '@generated/graphql';
-import AddIcon from '@mui/icons-material/Add';
+import { ProgramCycle } from '@api/programCycleApi';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import CreateProgramCycle from '@containers/tables/ProgramCycle/NewProgramCycle/CreateProgramCycle';
 import UpdateProgramCycle from '@containers/tables/ProgramCycle/NewProgramCycle/UpdateProgramCycle';
-import { ProgramCycle } from '@api/programCycleApi';
-import { useQueryClient } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import AddIcon from '@mui/icons-material/Add';
+import { Button, Dialog } from '@mui/material';
+import { Program } from '@restgenerated/models/Program';
+import { useQueryClient } from '@tanstack/react-query';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface AddNewProgramCycleProps {
-  program: ProgramQuery['program'];
+  program: Program;
   lastProgramCycle?: ProgramCycle;
 }
 

@@ -537,17 +537,17 @@ class TestCreateProgram(APITestCase):
 
     def test_programme_code_can_be_reuse_in_different_business_area(self) -> None:
         business_area = BusinessAreaFactory()
-        ProgramFactory(programme_code="AB.2", business_area=business_area)
+        ProgramFactory(programme_code="AB-2", business_area=business_area)
         self.create_user_role_with_permissions(
             self.user, [Permissions.PROGRAMME_CREATE], self.business_area, whole_business_area_access=True
         )
-        self.program_data["programData"]["programmeCode"] = "AB.2"
+        self.program_data["programData"]["programmeCode"] = "AB-2"
 
         self.graphql_request(
             request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
         )
 
-        program_count = Program.objects.filter(programme_code="AB.2").count()
+        program_count = Program.objects.filter(programme_code="AB-2").count()
         self.assertEqual(program_count, 2)
 
     def test_create_program_without_programme_code(self) -> None:

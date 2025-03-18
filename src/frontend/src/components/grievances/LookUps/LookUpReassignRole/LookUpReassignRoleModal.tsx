@@ -47,6 +47,8 @@ export function LookUpReassignRoleModal({
   ticket;
   selectedIndividual;
   selectedHousehold;
+  //TODO: add types
+  // selectedHousehold: HouseholdDetail;
   setSelectedIndividual;
   setSelectedHousehold;
   shouldUseMultiple;

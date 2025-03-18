@@ -38,21 +38,22 @@ export const PeriodicDataUpdatesTemplateDetailsDialog: FC<
       programId,
       template.id,
     ],
+
     queryFn: () =>
-      RestService.restProgramsPeriodicDataUpdatePeriodicDataUpdateTemplatesRetrieve(
-        businessArea,
-        template.id.toString(),
-        programId,
-      ),
+      RestService.restBusinessAreasProgramsPeriodicDataUpdateTemplatesRetrieve({
+        businessAreaSlug: businessArea,
+        id: template.id,
+        programSlug: programId,
+      }),
   });
   const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
     useQuery({
       queryKey: ['periodicFields', businessArea, programId],
       queryFn: () =>
-        RestService.restProgramsPeriodicDataUpdatePeriodicFieldsList(
-          businessArea,
-          programId,
-        ),
+        RestService.restBusinessAreasProgramsPeriodicFieldsList({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+        }),
     });
   const pduDataDict = useArrayToDict(periodicFieldsData?.results, 'name', '*');
   if (isLoading || periodicFieldsLoading || !pduDataDict)

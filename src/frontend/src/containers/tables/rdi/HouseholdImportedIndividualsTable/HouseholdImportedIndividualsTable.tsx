@@ -66,7 +66,7 @@ export function HouseholdImportedIndividualsTable({
   const [orderBy, setOrderBy] = useState(null);
   const [orderDirection, setOrderDirection] = useState('asc');
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const allIndividuals = household.individuals.edges.map((edge) => edge.node);
   if (orderBy) {
@@ -78,8 +78,8 @@ export function HouseholdImportedIndividualsTable({
   }
 
   const replacements = {
-    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
-    fullName: (_beneficiaryGroup) => _beneficiaryGroup?.memberLabel,
+    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.member_label} ID`,
+    fullName: (_beneficiaryGroup) => _beneficiaryGroup?.member_label,
     household__unicef_id: (_beneficiaryGroup) =>
       `${_beneficiaryGroup?.groupLabel} ID`,
     relationship: (_beneficiaryGroup) =>

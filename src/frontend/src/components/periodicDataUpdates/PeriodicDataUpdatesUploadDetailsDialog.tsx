@@ -76,11 +76,11 @@ export const PeriodicDataUpdatesUploadDetailsDialog: FC<
       uploadId,
     ],
     queryFn: () =>
-      RestService.restProgramsPeriodicDataUpdatePeriodicDataUpdateUploadsRetrieve(
-        businessArea,
-        uploadId.toString(),
-        programId,
-      ),
+      RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsRetrieve({
+        businessAreaSlug: businessArea,
+        id: uploadId,
+        programSlug: programId,
+      }),
   });
 
   if (isLoading) return <LoadingComponent />;

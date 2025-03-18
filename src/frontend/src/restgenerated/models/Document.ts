@@ -14,7 +14,7 @@ export type Document = {
     document_number: string;
     rdi_merge_status?: RdiMergeStatusEnum;
     is_removed?: boolean;
-    is_original?: boolean;
+    removed_date?: string | null;
     readonly created_at: string;
     readonly updated_at: string;
     last_sync_at?: string | null;

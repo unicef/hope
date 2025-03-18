@@ -1,28 +1,28 @@
+import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
+import { StatusBox } from '@core/StatusBox';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
 import GetAppIcon from '@mui/icons-material/GetApp';
 import UploadIcon from '@mui/icons-material/Upload';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { IconButton, TableCell, Tooltip } from '@mui/material';
+import { PeriodicDataUpdateTemplateList } from '@restgenerated/models/PeriodicDataUpdateTemplateList';
+import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { periodicDataUpdateTemplateStatusToColor } from '@utils/utils';
 import { ReactElement, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { PeriodicDataUpdatesTemplateDetailsDialog } from './PeriodicDataUpdatesTemplateDetailsDialog';
 import {
   useDownloadPeriodicDataUpdateTemplate,
   useExportPeriodicDataUpdateTemplate,
 } from './PeriodicDataUpdatesTemplatesListActions';
-import { StatusBox } from '@core/StatusBox';
-import { periodicDataUpdateTemplateStatusToColor } from '@utils/utils';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { useTranslation } from 'react-i18next';
-import { ButtonTooltip } from '@components/core/ButtonTooltip';
-import { usePermissions } from '@hooks/usePermissions';
-import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
-import { PeriodicDataUpdateTemplateList } from '@restgenerated/models/PeriodicDataUpdateTemplateList';
-import { RestService } from '@restgenerated/services/RestService';
 
 const templatesHeadCells: HeadCell<PeriodicDataUpdateTemplateList>[] = [
   {
@@ -147,12 +147,12 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
     ],
     queryFn: () => {
       const { ordering } = queryVariables;
-      return RestService.restProgramsPeriodicDataUpdatePeriodicDataUpdateTemplatesList(
-        businessAreaSlug,
-        programId,
-        null,
-        null,
-        ordering,
+      return RestService.restBusinessAreasProgramsPeriodicDataUpdateTemplatesList(
+        {
+          businessAreaSlug,
+          programSlug: programId,
+          ordering,
+        },
       );
     },
   });

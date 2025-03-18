@@ -1,19 +1,19 @@
-import TableCell from '@mui/material/TableCell';
-import React, { ReactElement, ReactNode, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { BlackLink } from '@components/core/BlackLink';
+import { Bold } from '@components/core/Bold';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { Order, TableComponent } from '@components/core/Table/TableComponent';
-import { adjustHeadCells, choicesToDict } from '@utils/utils';
 import {
   HouseholdChoiceDataQuery,
-  HouseholdNode,
   IndividualNode,
   IndividualRoleInHouseholdRole,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { Bold } from '@components/core/Bold';
-import { BlackLink } from '@components/core/BlackLink';
+import TableCell from '@mui/material/TableCell';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { adjustHeadCells, choicesToDict } from '@utils/utils';
+import { ReactElement, ReactNode, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 
 const headCells: HeadCell<IndividualNode>[] = [
@@ -38,7 +38,7 @@ const headCells: HeadCell<IndividualNode>[] = [
 ];
 
 interface CollectorsTableProps {
-  household: HouseholdNode;
+  household: HouseholdDetail;
   choicesData: HouseholdChoiceDataQuery;
 }
 export const CollectorsTable = ({
@@ -55,10 +55,10 @@ export const CollectorsTable = ({
     navigate(`/${baseUrl}/population/individuals/${row.id}`);
   };
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const replacements = {
-    fullName: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel}`,
+    fullName: (_beneficiaryGroup) => `${_beneficiaryGroup?.member_label}`,
     relationship: (_beneficiaryGroup) =>
       `Relationship to ${_beneficiaryGroup?.groupLabel}`,
   };
@@ -74,14 +74,15 @@ export const CollectorsTable = ({
     choicesData?.relationshipChoices,
   );
 
-  const allCollectors =
-    household?.individuals?.edges
-      ?.map((edge) => edge.node)
-      .filter(
-        (el) =>
-          el.role === IndividualRoleInHouseholdRole.Alternate ||
-          el.role === IndividualRoleInHouseholdRole.Primary,
-      ) || [];
+  //TODO:
+  const allCollectors = [];
+  // household?.individuals?.edges
+  //   ?.map((edge) => edge.node)
+  //   .filter(
+  //     (el) =>
+  //       el.role === IndividualRoleInHouseholdRole.Alternate ||
+  //       el.role === IndividualRoleInHouseholdRole.Primary,
+  //   ) || [];
 
   if (orderBy) {
     if (orderDirection === 'asc') {

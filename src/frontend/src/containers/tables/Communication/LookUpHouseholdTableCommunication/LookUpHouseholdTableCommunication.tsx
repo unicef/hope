@@ -1,20 +1,16 @@
-import { MouseEvent, ReactElement, useState } from 'react';
-import styled from 'styled-components';
-import {
-  AllHouseholdsForPopulationTableQueryVariables,
-  AllHouseholdsQuery,
-  AllHouseholdsQueryVariables,
-  HouseholdChoiceDataQuery,
-  useAllHouseholdsForPopulationTableQuery,
-} from '@generated/graphql';
 import { TableWrapper } from '@components/core/TableWrapper';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { UniversalTable } from '../../UniversalTable';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
+import { HouseholdChoiceDataQuery } from '@generated/graphql';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { adjustHeadCells } from '@utils/utils';
+import { MouseEvent, ReactElement, useEffect, useMemo, useState } from 'react';
+import { useProgramContext } from 'src/programContext';
+import styled from 'styled-components';
 import { headCells } from './LookUpHouseholdComunicationTableHeadCells';
 import { LookUpHouseholdTableRowCommunication } from './LookUpHouseholdTableRowCommunication';
-import { adjustHeadCells } from '@utils/utils';
-import { useProgramContext } from 'src/programContext';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface LookUpHouseholdTableCommunicationProps {
   businessArea: string;
@@ -52,33 +48,54 @@ function LookUpHouseholdTableCommunication({
 }: LookUpHouseholdTableCommunicationProps): ReactElement {
   const { programId } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
-  const matchWithdrawnValue = (): boolean | undefined => {
-    if (filter.withdrawn === 'true') {
-      return true;
-    }
-    if (filter.withdrawn === 'false') {
-      return false;
-    }
-    return undefined;
-  };
-  const initialVariables: AllHouseholdsForPopulationTableQueryVariables = {
-    businessArea,
-    familySize: JSON.stringify({
-      min: filter.householdSizeMin,
-      max: filter.householdSizeMax,
-    }),
-    search: filter.search.trim(),
-    documentType: filter.documentType,
-    documentNumber: filter.documentNumber.trim(),
-    admin2: filter.admin2,
-    residenceStatus: filter.residenceStatus,
-    withdrawn: matchWithdrawnValue(),
-    orderBy: filter.orderBy,
-    headOfHouseholdPhoneNoValid: true,
-    program: programId,
-  };
+  const initialQueryVariables = useMemo(() => {
+    const matchWithdrawnValue = (): boolean | undefined => {
+      if (filter.withdrawn === 'true') {
+        return true;
+      }
+      if (filter.withdrawn === 'false') {
+        return false;
+      }
+      return undefined;
+    };
+
+    return {
+      businessAreaSlug: businessArea,
+      programSlug: programId,
+      familySize: JSON.stringify({
+        min: filter.householdSizeMin,
+        max: filter.householdSizeMax,
+      }),
+      search: filter.search.trim(),
+      documentType: filter.documentType,
+      documentNumber: filter.documentNumber.trim(),
+      admin2: filter.admin2,
+      residenceStatus: filter.residenceStatus,
+      withdrawn: matchWithdrawnValue(),
+      orderBy: filter.orderBy,
+      headOfHouseholdPhoneNoValid: true,
+    };
+  }, [businessArea, programId, filter]);
+
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: [
+      'businessAreasProgramsHouseholdsList',
+      queryVariables,
+      programId,
+      businessArea,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsHouseholdsList(queryVariables),
+    enabled: !!businessArea && !!programId,
+  });
 
   const [selected, setSelected] = useState<string[]>(
     householdMultiSelect ? [...selectedHousehold] : [selectedHousehold],
@@ -117,9 +134,7 @@ function LookUpHouseholdTableCommunication({
     }
   };
 
-  const handleRadioChange = (
-    household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'],
-  ): void => {
+  const handleRadioChange = (household): void => {
     setSelectedHousehold(household);
     setFieldValue('selectedHousehold', household);
     setFieldValue('selectedIndividual', null);
@@ -143,23 +158,10 @@ function LookUpHouseholdTableCommunication({
   );
 
   const renderTable = (): ReactElement => (
-    <UniversalTable<
-      AllHouseholdsQuery['allHouseholds']['edges'][number]['node'],
-      AllHouseholdsQueryVariables
-    >
-      headCells={
-        householdMultiSelect ? adjustedHeadCells.slice(1) : adjustedHeadCells
-      }
-      rowsPerPageOptions={[5, 10, 15, 20]}
-      query={useAllHouseholdsForPopulationTableQuery}
-      queriedObjectName="allHouseholds"
-      initialVariables={initialVariables}
-      filterOrderBy={filter.orderBy}
-      onSelectAllClick={householdMultiSelect && handleSelectAllCheckboxesClick}
-      numSelected={householdMultiSelect && selected.length}
+    <UniversalRestTable
       renderRow={(row) => (
         <LookUpHouseholdTableRowCommunication
-          key={row.id}
+          key={(row as any).id}
           household={row}
           radioChangeHandler={handleRadioChange}
           selectedHousehold={selectedHousehold}
@@ -171,6 +173,17 @@ function LookUpHouseholdTableCommunication({
           isFeedbackWithHouseholdOnly={isFeedbackWithHouseholdOnly}
         />
       )}
+      headCells={
+        householdMultiSelect ? adjustedHeadCells.slice(1) : adjustedHeadCells
+      }
+      allowSort={false}
+      onSelectAllClick={householdMultiSelect && handleSelectAllCheckboxesClick}
+      numSelected={householdMultiSelect && selected.length}
+      queryVariables={queryVariables}
+      setQueryVariables={setQueryVariables}
+      data={data}
+      isLoading={isLoading}
+      error={error}
     />
   );
   return noTableStyling ? (

@@ -317,7 +317,6 @@ export function RequestedIndividualDataChange({
           values.selectedPaymentChannelsToEdit;
         const approvedDeliveryMechanismDataToEdit =
           values.selectedDeliveryMechanismDataToEdit;
-        //TODO MS: add when needed
         const approvedDeliveryMechanismDataToCreate = [];
         const approvedDeliveryMechanismDataToRemove = [];
         const flexFieldsApproveData = values.selectedFlexFields.reduce(

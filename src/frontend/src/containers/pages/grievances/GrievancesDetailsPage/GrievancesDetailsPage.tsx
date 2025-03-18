@@ -24,12 +24,16 @@ import { RestService } from '@restgenerated/services/RestService';
 
 const GrievancesDetailsPage = (): ReactElement => {
   const { id } = useParams();
+  const { businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
   const { data: currentUserData, isLoading: currentUserDataLoading } = useQuery(
     {
-      queryKey: ['profile'],
+      queryKey: ['profile', businessArea, programId],
       queryFn: () => {
-        return RestService.restProfileRetrieve();
+        return RestService.restUsersProfileRetrieve({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+        });
       },
     },
   );
@@ -56,7 +60,7 @@ const GrievancesDetailsPage = (): ReactElement => {
     return null;
 
   const ticket = data?.grievanceTicket;
-  const currentUserId = currentUserData?.me?.id;
+  const currentUserId = currentUserData?.id;
   const isCreator = currentUserId === ticket?.createdBy?.id;
   const isOwner = currentUserId === ticket?.assignedTo?.id;
 

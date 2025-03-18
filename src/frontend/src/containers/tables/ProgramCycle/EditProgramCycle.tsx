@@ -32,10 +32,10 @@ import {
 } from '@api/programCycleApi';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { ProgramQuery } from '@generated/graphql';
 import type { DefaultError } from '@tanstack/query-core';
 import { useSnackbar } from '@hooks/useSnackBar';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { Program } from '@restgenerated/models/Program';
 
 interface MutationError extends DefaultError {
   data: any;
@@ -43,7 +43,7 @@ interface MutationError extends DefaultError {
 
 interface EditProgramCycleProps {
   programCycle: ProgramCycle;
-  program: ProgramQuery['program'];
+  program: Program;
 }
 
 const EditProgramCycle = ({
@@ -110,9 +110,9 @@ const EditProgramCycle = ({
           : schema,
       );
 
-    if (program.endDate) {
+    if (program.end_date) {
       validation = validation.max(
-        new Date(program.endDate),
+        new Date(program.end_date),
         t('End Date cannot be after Programme End Date'),
       );
     }
@@ -132,7 +132,7 @@ const EditProgramCycle = ({
     start_date: Yup.date()
       .required(t('Start Date is required'))
       .min(
-        program.startDate,
+        program.start_date,
         t('Start Date cannot be before Programme Start Date'),
       ),
     end_date: endDateValidationSchema(),

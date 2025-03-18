@@ -1,11 +1,7 @@
 import { Button, Dialog, DialogContent, DialogTitle } from '@mui/material';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  ProgramQuery,
-  ProgramStatus,
-  useUpdateProgramMutation,
-} from '@generated/graphql';
+import { ProgramStatus, useUpdateProgramMutation } from '@generated/graphql';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -15,9 +11,11 @@ import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
 import { useProgramContext } from '../../../programContext';
 import { useNavigate } from 'react-router-dom';
+import { Status791Enum } from '@restgenerated/models/Status791Enum';
+import { Program } from '@restgenerated/models/Program';
 
 interface FinishProgramProps {
-  program: ProgramQuery['program'];
+  program: Program;
 }
 
 export function FinishProgram({ program }: FinishProgramProps): ReactElement {
@@ -36,13 +34,15 @@ export function FinishProgram({ program }: FinishProgramProps): ReactElement {
           id: program.id,
           status: ProgramStatus.Finished,
         },
-        version: program.version,
+        //TODO: add
+        version: null,
+        // version: program.version,
       },
     });
     if (!response.errors && response.data.updateProgram) {
       setSelectedProgram({
         ...selectedProgram,
-        status: ProgramStatus.Finished,
+        status: Status791Enum.FINISHED,
       });
 
       showMessage(t('Programme finished.'));

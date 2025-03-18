@@ -26,7 +26,7 @@ export function VerificationRecordsTable({
 }: VerificationRecordsTableProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const replacements = {
     payment_record__head_of_household__family_name: (_beneficiaryGroup) =>

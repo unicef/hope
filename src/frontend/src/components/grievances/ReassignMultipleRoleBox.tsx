@@ -42,7 +42,7 @@ export function ReassignMultipleRoleBox({
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const reassignData = JSON.parse(
     ticket.needsAdjudicationTicketDetails.roleReassignData,
@@ -77,7 +77,9 @@ export function ReassignMultipleRoleBox({
                   <>{capitalize(householdAndRole.role)} Collector</>
                 </LabelizedField>
                 <LabelizedField
-                  label={t(`${beneficiaryGroup?.memberLabel.toUpperCase()} ID`)}
+                  label={t(
+                    `${beneficiaryGroup?.member_label.toUpperCase()} ID`,
+                  )}
                 >
                   <ContentLink
                     href={`/${baseUrl}/population/individuals/${householdAndRole.individual.id}`}
@@ -87,7 +89,7 @@ export function ReassignMultipleRoleBox({
                   {householdAndRole.individual.fullName}
                 </LabelizedField>
                 <LabelizedField
-                  label={t(`${beneficiaryGroup?.groupLabel.toUpperCase()} ID`)}
+                  label={t(`${beneficiaryGroup?.group_label.toUpperCase()} ID`)}
                 >
                   <ContentLink
                     href={`/${baseUrl}/population/household/${householdAndRole.household.id}`}
@@ -105,7 +107,11 @@ export function ReassignMultipleRoleBox({
                 ticket={ticket}
                 household={householdAndRole.household}
                 individualToReassign={selectedIndividualToReassign}
-                initialSelectedIndividualId={reassignDataDictByIndividualId[selectedIndividualToReassign.id]?.new_individual}
+                initialSelectedIndividualId={
+                  reassignDataDictByIndividualId[
+                    selectedIndividualToReassign.id
+                  ]?.new_individual
+                }
               />
             </Box>
           ));
@@ -121,11 +127,11 @@ export function ReassignMultipleRoleBox({
               <Box mb={2} mt={2}>
                 <Box mb={2}>
                   <LabelizedField label={t('ROLE')}>
-                    <>{t(`Head of ${beneficiaryGroup?.groupLabel}`)}</>
+                    <>{t(`Head of ${beneficiaryGroup?.group_label}`)}</>
                   </LabelizedField>
                   <LabelizedField
                     label={t(
-                      `${beneficiaryGroup?.memberLabel.toUpperCase()} ID`,
+                      `${beneficiaryGroup?.member_label.toUpperCase()} ID`,
                     )}
                   >
                     <ContentLink
@@ -137,7 +143,7 @@ export function ReassignMultipleRoleBox({
                   </LabelizedField>
                   <LabelizedField
                     label={t(
-                      `${beneficiaryGroup?.groupLabel.toUpperCase()} ID`,
+                      `${beneficiaryGroup?.group_label.toUpperCase()} ID`,
                     )}
                   >
                     <ContentLink
@@ -153,7 +159,11 @@ export function ReassignMultipleRoleBox({
                   ticket={ticket}
                   household={household}
                   individualToReassign={selectedIndividualToReassign}
-                  initialSelectedIndividualId={reassignDataDictByIndividualId[selectedIndividualToReassign.id]?.new_individual}
+                  initialSelectedIndividualId={
+                    reassignDataDictByIndividualId[
+                      selectedIndividualToReassign.id
+                    ]?.new_individual
+                  }
                 />
               </Box>
             )}
@@ -170,18 +180,18 @@ export function ReassignMultipleRoleBox({
         <Typography variant="h6">
           <WarnIcon />
           {t(
-            `${beneficiaryGroup?.memberLabel} is the Head of ${beneficiaryGroup?.groupLabel} or the collector for the ${beneficiaryGroup?.groupLabel}`,
+            `${beneficiaryGroup?.member_label} is the Head of ${beneficiaryGroup?.group_label} or the collector for the ${beneficiaryGroup?.group_label}`,
           )}
         </Typography>
       </OrangeTitle>
       <Typography variant="body2">
         {t(
-          `Upon changing you will need to select new ${beneficiaryGroup?.memberLabelPlural} for this role.`,
+          `Upon changing you will need to select new ${beneficiaryGroup?.member_label_plural} for this role.`,
         )}
       </Typography>
       <Typography variant="body2">
         {t(
-          `Upon removing you will need to select new ${beneficiaryGroup?.memberLabelPlural} for this role.`,
+          `Upon removing you will need to select new ${beneficiaryGroup?.member_label_plural} for this role.`,
         )}
       </Typography>
       <Box mt={3} display="flex" flexDirection="column">

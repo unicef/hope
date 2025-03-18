@@ -1,4 +1,3 @@
-import { ProgramQuery, ProgramStatus } from '@generated/graphql';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { ReactElement, useState } from 'react';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
@@ -16,9 +15,11 @@ import { fetchProgramCycles, ProgramCycle } from '@api/programCycleApi';
 import { BlackLink } from '@core/BlackLink';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { Program } from '@restgenerated/models/Program';
+import { Status791Enum } from '@restgenerated/models/Status791Enum';
 
 interface ProgramCyclesTableProgramDetailsProps {
-  program: ProgramQuery['program'];
+  program: Program;
 }
 
 export const ProgramCyclesTableProgramDetails = ({
@@ -32,7 +33,7 @@ export const ProgramCyclesTableProgramDetails = ({
   const { businessArea, baseUrl, programId } = useBaseUrl();
   const permissions = usePermissions();
   const canCreateProgramCycle =
-    program.status === ProgramStatus.Active &&
+    program.status === Status791Enum.ACTIVE &&
     hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_CREATE, permissions);
 
   const { data, error, isLoading } = useQuery({

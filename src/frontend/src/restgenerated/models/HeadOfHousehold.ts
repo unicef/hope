@@ -2,6 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type NullEnum = {
+export type HeadOfHousehold = {
+    id: string;
+    full_name: string;
 };
 

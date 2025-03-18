@@ -1,11 +1,14 @@
 import { random } from 'lodash';
+import { configure } from '@testing-library/react';
 import React from 'react';
 import { setupServer } from 'msw/node';
 import setupInternalization from '../src/i18n';
 import * as useBusinessAreaModule from '../src/hooks/useBusinessArea';
 import * as useGlobalProgramModule from '../src/hooks/useGlobalProgram';
+import * as useProgramContextModule from '../src/programContext';
 import { handlers } from '../src/mocks/handlers';
 import { beforeAll, afterAll, afterEach, beforeEach, vi } from 'vitest';
+import { fakeContextProgram } from 'src/testUtils/testUtils';
 
 global.React = React;
 // Set up global mocks and configurations
@@ -20,6 +23,9 @@ beforeEach(() => {
   );
   vi.spyOn(useGlobalProgramModule, 'useGlobalProgram').mockReturnValue(
     'UHJvZ3JhbU5vZGU6ZTRmOGMwNjctNjcwOC00NjZmLWFjYmMtZGE2OTkxZjE0MjY2',
+  );
+  vi.spyOn(useProgramContextModule, 'useProgramContext').mockReturnValue(
+    fakeContextProgram,
   );
 });
 
@@ -40,6 +46,9 @@ const server = setupServer(...handlers);
 
 // Establish API mocking before all tests.
 beforeAll(() => server.listen());
+beforeAll(() => {
+  configure({ testIdAttribute: 'data-cy' });
+});
 
 // Reset any request handlers that are declared as a part of our tests
 // (i.e. for testing one-time error scenarios).
