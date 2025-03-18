@@ -34,7 +34,7 @@ from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismDataFactory,
     generate_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanism
+from hct_mis_api.apps.payment.models import AccountType, DeliveryMechanism
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
@@ -851,18 +851,20 @@ class TestIndividualWithDeliveryMechanismsDataQuery(APITestCase):
         cls.individual = individuals[0]
         DeliveryMechanismDataFactory(
             individual=cls.individual,
+            account_type=AccountType.objects.get(key="bank"),
             data={
-                "card_number__atm_card": "123",
-                "card_expiry_date__atm_card": "2022-01-01",
-                "name_of_cardholder__atm_card": "Marek",
+                "card_number": "123",
+                "card_expiry_date": "2022-01-01",
+                "name_of_cardholder": "Marek",
             },
         )
         DeliveryMechanismDataFactory(
             individual=cls.individual,
+            account_type=AccountType.objects.get(key="mobile"),
             data={
-                "service_provider_code__mobile_money": "ABC",
-                "delivery_phone_number__mobile_money": "123456789",
-                "provider__mobile_money": "Provider",
+                "service_provider_code": "ABC",
+                "delivery_phone_number": "123456789",
+                "provider": "Provider",
             },
         )
 

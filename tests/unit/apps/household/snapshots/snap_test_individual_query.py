@@ -818,13 +818,11 @@ snapshots['TestIndividualWithDeliveryMechanismsDataQuery::test_individual_query_
             'birthDate': '1943-07-30',
             'deliveryMechanismsData': [
                 {
-                    'individualTabData': '{"card_number__atm_card": "123", "card_expiry_date__atm_card": "2022-01-01", "name_of_cardholder__atm_card": "Marek"}',
-                    'isValid': True,
+                    'individualTabData': '{"card_number": "123", "card_expiry_date": "2022-01-01", "name_of_cardholder": "Marek"}',
                     'name': 'ATM Card'
                 },
                 {
-                    'individualTabData': '{"delivery_phone_number__mobile_money": "123456789", "provider__mobile_money": "Provider", "service_provider_code__mobile_money": "ABC"}',
-                    'isValid': False,
+                    'individualTabData': '{"delivery_phone_number": "123456789", "provider": "Provider", "service_provider_code": "ABC"}',
                     'name': 'Mobile Money'
                 }
             ],

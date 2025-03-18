@@ -88,8 +88,8 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
             try:
                 if header_cell.value in self._pdu_column_names:
                     continue
-                elif header_cell.value.startswith(DeliveryMechanismData.ACCOUNT_FIELD_PREFIX):
-                    self._handle_delivery_mechanism_fields(cell.value, header_cell, cell.row, obj_to_create)
+                elif header_cell.value.startswith(f"pp_{DeliveryMechanismData.ACCOUNT_FIELD_PREFIX}"):
+                    self._handle_delivery_mechanism_fields(cell.value, header_cell.value, cell.row, obj_to_create)
                     continue
 
                 header = header_cell.value

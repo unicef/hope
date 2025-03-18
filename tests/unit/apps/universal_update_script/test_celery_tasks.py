@@ -58,7 +58,7 @@ def program(poland: Country, germany: Country) -> Program:
 
 @pytest.fixture
 def delivery_mechanism() -> DeliveryMechanism:
-    return DeliveryMechanism.objects.create(name="Mobile Money", code="mobile_money", required_fields=["phone_number"])
+    return DeliveryMechanism.objects.create(name="Mobile Money", code="mobile_money")
 
 
 @pytest.fixture

@@ -1,6 +1,5 @@
 from typing import Any, Dict, List, Optional, Tuple
 
-from apps.payment.models import AccountType
 from openpyxl import load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
@@ -13,7 +12,7 @@ from hct_mis_api.apps.household.models import (
     Household,
     Individual,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanismData
+from hct_mis_api.apps.payment.models import AccountType, DeliveryMechanismData
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
     DeduplicateTask,
