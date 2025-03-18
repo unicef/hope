@@ -227,6 +227,9 @@ class Permissions(Enum):
     UPLOAD_STORAGE_FILE = auto()
     DOWNLOAD_STORAGE_FILE = auto()
 
+    # Beneficiary Group
+    BENEFICIARY_GROUP_VIEW_LIST = auto()
+
     # Communication
     ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST = auto()
     ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS = auto()

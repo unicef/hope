@@ -129,11 +129,11 @@ class ProgramCycleViewSet(
 
 class BeneficiaryGroupViewSet(
     mixins.ListModelMixin,
-    GenericViewSet,
+    BaseViewSet,
 ):
-    permission_classes = [IsAuthenticated]
     queryset = BeneficiaryGroup.objects.all()
     serializer_class = BeneficiaryGroupSerializer
+    PERMISSIONS = [Permissions.BENEFICIARY_GROUP_VIEW_LIST]
 
     @etag_decorator(BeneficiaryGroupKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=BeneficiaryGroupKeyConstructor())
