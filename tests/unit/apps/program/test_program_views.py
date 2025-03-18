@@ -15,9 +15,18 @@ from hct_mis_api.apps.core.fixtures import (
     create_ukraine,
 )
 from hct_mis_api.apps.core.utils import encode_id_base64_required
-from hct_mis_api.apps.household.fixtures import HouseholdFactory
-from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory, ProgramFactory
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.household.fixtures import (
+    HouseholdFactory,
+    create_household_and_individuals,
+)
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from hct_mis_api.apps.payment.models import PaymentPlan
+from hct_mis_api.apps.program.fixtures import (
+    BeneficiaryGroupFactory,
+    ProgramCycleFactory,
+    ProgramFactory,
+)
+from hct_mis_api.apps.program.models import Program, ProgramCycle
 
 pytestmark = pytest.mark.django_db
 
@@ -204,7 +213,7 @@ class TestProgramFilter:
         self.client = api_client(self.user)
         self.create_user_role_with_permissions = create_user_role_with_permissions
 
-    def _test_two_programs_in_list(
+    def _test_filter_programs_in_list(
         self,
         program1_data: dict,
         program2_data: dict,
@@ -227,23 +236,23 @@ class TestProgramFilter:
         return response_data
 
     def test_filter_by_status(self) -> None:
-        response_data = self._test_two_programs_in_list(
+        response_data = self._test_filter_programs_in_list(
             {"status": Program.ACTIVE}, {"status": Program.FINISHED}, {"status": Program.ACTIVE}
         )
         assert response_data[0]["status"] == Program.ACTIVE
 
     def test_filter_by_sector(self) -> None:
-        response_data = self._test_two_programs_in_list(
+        response_data = self._test_filter_programs_in_list(
             {"sector": Program.HEALTH}, {"sector": Program.EDUCATION}, {"sector": Program.HEALTH}
         )
         assert response_data[0]["sector"] == Program.HEALTH
 
     def test_filter_by_budget(self) -> None:
-        response_data = self._test_two_programs_in_list({"budget": 2000}, {"budget": 1000}, {"budget_min": 1500})
+        response_data = self._test_filter_programs_in_list({"budget": 2000}, {"budget": 1000}, {"budget_min": 1500})
         assert response_data[0]["budget"] == "2000.00"
 
     def test_filter_by_start_date(self) -> None:
-        response_data = self._test_two_programs_in_list(
+        response_data = self._test_filter_programs_in_list(
             {"start_date": datetime.datetime(2023, 1, 1)},
             {"start_date": datetime.datetime(2022, 1, 1)},
             {"start_date": "2022-12-31"},
@@ -251,7 +260,7 @@ class TestProgramFilter:
         assert response_data[0]["start_date"] == "2023-01-01"
 
     def test_filter_by_end_date(self) -> None:
-        response_data = self._test_two_programs_in_list(
+        response_data = self._test_filter_programs_in_list(
             {"start_date": datetime.datetime(2020, 1, 1), "end_date": datetime.datetime(2022, 1, 1)},
             {"start_date": datetime.datetime(2020, 1, 1), "end_date": datetime.datetime(2023, 1, 1)},
             {"end_date": "2022-12-31"},
@@ -259,7 +268,9 @@ class TestProgramFilter:
         assert response_data[0]["end_date"] == "2022-01-01"
 
     def test_filter_by_name(self) -> None:
-        self._test_two_programs_in_list({"name": "Health Program"}, {"name": "Education Program"}, {"name": "Health"})
+        self._test_filter_programs_in_list(
+            {"name": "Health Program"}, {"name": "Education Program"}, {"name": "Health"}
+        )
 
     def test_filter_by_compatible_dct(self) -> None:
         dct1 = DataCollectingTypeFactory(code="type1")
@@ -341,3 +352,91 @@ class TestProgramFilter:
         response_data = response.json()["results"]
         assert len(response_data) == 1
         assert response_data[0]["id"] == encode_id_base64_required(program1.id, "Program")
+
+    def test_filter_number_of_households_with_tp_in_program(self) -> None:
+        def _create_hhs_for_pp(program: Program, payment_plan: PaymentPlan, no_hhs: int) -> list:
+            households = []
+            for _ in range(no_hhs):
+                household, _ = create_household_and_individuals(
+                    {
+                        "business_area": self.afghanistan,
+                        "program": program,
+                    },
+                    [
+                        {
+                            "business_area": self.afghanistan,
+                            "program": program,
+                        },
+                    ],
+                )
+                households.append(household)
+                PaymentFactory(
+                    parent=payment_plan,
+                    household=household,
+                    business_area=self.afghanistan,
+                    program=program,
+                )
+            return households
+
+        def _create_pp_and_hhs_for_program_cycle(
+            program: Program, program_cycle: ProgramCycle, pp_status: str, no_hhs: int
+        ) -> None:
+            payment_plan = PaymentPlanFactory(
+                program_cycle=program_cycle,
+                status=pp_status,
+                business_area=self.afghanistan,
+            )
+            _create_hhs_for_pp(program, payment_plan, no_hhs)
+
+        program1 = ProgramFactory(business_area=self.afghanistan)
+        _create_pp_and_hhs_for_program_cycle(program1, program1.cycles.first(), PaymentPlan.Status.TP_PROCESSING, 5)
+
+        # program with payments in 2 payment plans, one with excluded status, hh_count=7 but 3 excluded
+        program2 = ProgramFactory(business_area=self.afghanistan)
+        _create_pp_and_hhs_for_program_cycle(program2, program2.cycles.first(), PaymentPlan.Status.TP_OPEN, 3)
+        _create_pp_and_hhs_for_program_cycle(program2, program2.cycles.first(), PaymentPlan.Status.TP_PROCESSING, 4)
+
+        # program with payments in 2 payment plans, hh_count=7
+        program3 = ProgramFactory(business_area=self.afghanistan)
+        _create_pp_and_hhs_for_program_cycle(program3, program3.cycles.first(), PaymentPlan.Status.TP_PROCESSING, 3)
+        _create_pp_and_hhs_for_program_cycle(program3, program3.cycles.first(), PaymentPlan.Status.TP_PROCESSING, 4)
+
+        # program with payments in 2 program cycles with payment plans in correct status, hh_count=6
+        program4 = ProgramFactory(business_area=self.afghanistan)
+        _create_pp_and_hhs_for_program_cycle(program4, program4.cycles.first(), PaymentPlan.Status.TP_PROCESSING, 3)
+        program_cycle_program4 = ProgramCycleFactory(program=program4)
+        _create_pp_and_hhs_for_program_cycle(program4, program_cycle_program4, PaymentPlan.Status.TP_PROCESSING, 3)
+
+        # program with repeated household in 2 payments, hh_count=5 but 1 repetition
+        program5 = ProgramFactory(business_area=self.afghanistan)
+        payment_plan_1 = PaymentPlanFactory(
+            program_cycle=program5.cycles.first(),
+            status=PaymentPlan.Status.TP_PROCESSING,
+            business_area=self.afghanistan,
+        )
+        households = _create_hhs_for_pp(program5, payment_plan_1, 4)
+        payment_plan_2 = PaymentPlanFactory(
+            program_cycle=program5.cycles.first(),
+            status=PaymentPlan.Status.TP_PROCESSING,
+            business_area=self.afghanistan,
+        )
+        PaymentFactory(
+            parent=payment_plan_2,
+            household=households[0],
+            business_area=self.afghanistan,
+            program=program5,
+        )
+
+        for program in [program1, program2, program3, program4, program5]:
+            self.create_user_role_with_permissions(
+                self.user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], self.afghanistan, program
+            )
+
+        response = self.client.get(self.list_url, {"number_of_households_with_tp_in_program_min": 5})
+        assert response.status_code == status.HTTP_200_OK
+        response_data = response.json()["results"]
+        assert len(response_data) == 3
+        program_ids = [program["id"] for program in response_data]
+        assert encode_id_base64_required(program1.id, "Program") in program_ids
+        assert encode_id_base64_required(program3.id, "Program") in program_ids
+        assert encode_id_base64_required(program4.id, "Program") in program_ids

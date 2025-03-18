@@ -110,7 +110,7 @@ class ProgramFilter(UpdatedAtFilter):
     def filter_number_of_households_with_tp_in_program(self, queryset: QuerySet, name: str, value: slice) -> QuerySet:
         queryset = queryset.annotate(
             total_hh_count=Count(
-                "cycles__payment_plans__households",
+                "cycles__payment_plans__payment_items__household",
                 filter=~Q(cycles__payment_plans__status=PaymentPlan.Status.TP_OPEN),
                 distinct=True,
             ),
