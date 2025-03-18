@@ -631,7 +631,6 @@ class Household(
         default=BLANK,
         help_text="Household registration method [sys]",
     )
-    # TODO: deprecated maybe remove it as it's not using anywhere
     family_id = models.CharField(
         max_length=100, blank=True, null=True, help_text="Family ID eDopomoga household id [sys]"
     )
@@ -695,8 +694,6 @@ class Household(
     enumerator_rec_id = models.PositiveIntegerField(
         blank=True, null=True, help_text="Household enumerator record [sys]"
     )
-    # TODO: deprecated maybe remove it as it's not using anywhere
-    mis_unicef_id = models.CharField(max_length=255, null=True, help_text="Household MIS unicef id [sys]")
     flex_registrations_record_id = models.PositiveIntegerField(
         blank=True, null=True, help_text="Household flex registrations record [sys]"
     )
@@ -1136,8 +1133,6 @@ class Individual(
     pregnant = models.BooleanField(null=True, help_text="Pregnant status")
     fchild_hoh = models.BooleanField(default=False, help_text="Child is female and Head of Household flag")
     child_hoh = models.BooleanField(default=False, help_text="Child is Head of Household flag")
-    # TODO: deprecated maybe remove it as it's not using anywhere
-    administration_of_rutf = models.BooleanField(null=True, help_text="Administration of rutf")
     disability = models.CharField(
         max_length=20, choices=DISABILITY_CHOICES, default=NOT_DISABLED, help_text="Disability status"
     )
@@ -1254,8 +1249,6 @@ class Individual(
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True, help_text="Original unicef_id [sys]")
     is_migration_handled = models.BooleanField(default=False, help_text="Migration status [sys]")
     migrated_at = models.DateTimeField(null=True, blank=True, help_text="Migrated at [sys]")
-    # TODO: deprecated maybe remove it as it's not using anywhere
-    mis_unicef_id = models.CharField(max_length=255, null=True, help_text="MIS unicef_id [sys]")
 
     vector_column = SearchVectorField(null=True, help_text="Database vector column for search [sys]")
 
