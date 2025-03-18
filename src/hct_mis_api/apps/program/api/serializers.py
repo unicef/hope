@@ -247,7 +247,6 @@ class ProgramListSerializer(serializers.ModelSerializer):
     data_collecting_type = DataCollectingTypeSerializer()
     pdu_fields = serializers.SerializerMethodField()
     beneficiary_group = BeneficiaryGroupSerializer()
-    just_in_case = serializers.SerializerMethodField()
 
     class Meta:
         model = Program
@@ -265,20 +264,15 @@ class ProgramListSerializer(serializers.ModelSerializer):
             "population_goal",
             "data_collecting_type",
             "beneficiary_group",
-            "programme_code",
             "status",
             "pdu_fields",
             "household_count",
-            "just_in_case",
         )
         extra_kwargs = {"status": {"help_text": "Status"}}  # for swagger purpose
 
-    def get_just_in_case(self, obj: Program) -> str:
-        return "Justin Case"
-
     def get_pdu_fields(self, obj: Program) -> list[str]:
         pdu_field_encoded_ids = []
-        for pdu_field in obj.pdu_fields.order_by("created_at"):
+        for pdu_field in obj.pdu_fields.all():
             pdu_field_encoded_ids.append(encode_id_base64_required(pdu_field, "FlexibleAttribute"))
         return pdu_field_encoded_ids
 

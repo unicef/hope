@@ -2,6 +2,9 @@ import datetime
 from enum import Enum
 from typing import Any
 
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
+
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -44,8 +47,11 @@ class TestProgramListViewSet:
         self.user = UserFactory(partner=self.partner)
         self.client = api_client(self.user)
 
+        self.api_client = api_client
+
         self.pdu_field1 = FlexibleAttributeForPDUFactory(program=self.program)
         self.pdu_field2 = FlexibleAttributeForPDUFactory(program=self.program)
+        FlexibleAttributeForPDUFactory()
 
         # programs that should not be on the list
         ukraine = create_ukraine()
@@ -150,6 +156,7 @@ class TestProgramListViewSet:
 
         assert encode_id_base64_required(self.pdu_field1, "FlexibleAttribute") in program_data1["pdu_fields"]
         assert encode_id_base64_required(self.pdu_field2, "FlexibleAttribute") in program_data1["pdu_fields"]
+        assert len(program_data1["pdu_fields"]) == 2
 
     @pytest.mark.parametrize(
         "permissions",
@@ -201,6 +208,49 @@ class TestProgramListViewSet:
         assert response_data[1]["id"] == encode_id_base64_required(program_draft_second.id, "Program")
         assert response_data[2]["id"] == encode_id_base64_required(self.program.id, "Program")
         assert response_data[3]["id"] == encode_id_base64_required(program_finished.id, "Program")
+
+    def test_program_list_caching(self, create_user_role_with_permissions: Any) -> None:
+        no_queries_not_cached_no_permissions = 10
+        no_queries_not_cached_with_permissions = 6
+        no_queries_cached = 4
+
+        program_afghanistan2 = ProgramFactory(business_area=self.afghanistan)
+        for program in [
+            self.program,
+            self.program_in_ukraine,
+        ]:
+            create_user_role_with_permissions(
+                self.user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], self.afghanistan, program
+            )
+
+        def _test_response_len_and_queries(response_len: int, queries_len: int) -> None:
+            if hasattr(self.user, "_program_ids_for_business_area_cache"):
+                del self.user._program_ids_for_business_area_cache
+            with CaptureQueriesContext(connection) as queries:
+                response = self.client.get(self.list_url)
+                assert response.status_code == status.HTTP_200_OK
+                response_data = response.json()["results"]
+                assert len(response_data) == response_len
+                assert len(queries) == queries_len
+
+        _test_response_len_and_queries(1, no_queries_not_cached_no_permissions)
+        # second request should be cached
+        _test_response_len_and_queries(1, no_queries_cached)
+        # caching data should invalidate cache, -4 queries because of cached permissions
+        self.program.name = "New Name"
+        self.program.save()
+        _test_response_len_and_queries(1, no_queries_not_cached_with_permissions)
+        # changing programs form other business area should not invalidate cache
+        self.program_in_ukraine.name = "New Name"
+        self.program_in_ukraine.save()
+        _test_response_len_and_queries(1, no_queries_cached)
+        # changing user permissions should invalidate cache
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], self.afghanistan, program_afghanistan2
+        )
+        _test_response_len_and_queries(2, no_queries_not_cached_no_permissions)
+        # cached data with another call
+        _test_response_len_and_queries(2, no_queries_cached)
 
 
 class TestProgramFilter:

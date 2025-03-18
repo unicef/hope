@@ -2,12 +2,12 @@ from typing import Any
 
 from rest_framework_extensions.key_constructor.bits import KeyBitBase
 
-from hct_mis_api.api.caches import BusinessAreaKeyBit, KeyConstructorMixin
+from hct_mis_api.api.caches import BusinessAreaKeyBitMixin, KeyConstructorMixin
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import BusinessArea
 
 
-class ManagerialPaymentPlanListVersionsKeyBit(BusinessAreaKeyBit):
+class ManagerialPaymentPlanListVersionsKeyBit(BusinessAreaKeyBitMixin):
     specific_view_cache_key = "management_payment_plans_list"
 
 

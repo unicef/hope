@@ -1,7 +1,7 @@
 import logging
 from typing import Any
 
-from django.db.models import Case, IntegerField, QuerySet, Value, When
+from django.db.models import Case, IntegerField, Prefetch, QuerySet, Value, When
 
 from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
@@ -28,10 +28,12 @@ from hct_mis_api.apps.core.api.mixins import (
     ProgramMixin,
     SerializerActionMixin,
 )
+from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.api.caches import (
     BeneficiaryGroupKeyConstructor,
     ProgramCycleKeyConstructor,
+    ProgramListKeyConstructor,
 )
 from hct_mis_api.apps.program.api.filters import ProgramCycleFilter, ProgramFilter
 from hct_mis_api.apps.program.api.serializers import (
@@ -89,10 +91,15 @@ class ProgramViewSet(
                     output_field=IntegerField(),
                 )
             )
-            .prefetch_related("pdu_fields")
+            .prefetch_related(Prefetch("pdu_fields", queryset=FlexibleAttribute.objects.order_by("created_at")))
             .select_related("beneficiary_group", "data_collecting_type")
             .order_by("custom_order", "start_date")
         )
+
+    @etag_decorator(ProgramListKeyConstructor)
+    @cache_response(timeout=config.REST_API_TTL, key_func=ProgramListKeyConstructor())
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().list(request, *args, **kwargs)
 
     def perform_destroy(self, instance: Program) -> None:
         self.validate(program=instance)
