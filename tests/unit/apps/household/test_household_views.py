@@ -51,10 +51,14 @@ class TestHouseholdListViewSet:
             "api:households:households-list",
             kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program.slug},
         )
+        self.count_url = reverse(
+            "api:households:households-count",
+            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program.slug},
+        )
 
         self.partner = PartnerFactory(name="TestPartner")
         self.user = UserFactory(partner=self.partner)
-        self.client = api_client(self.user)
+        self.api_client = api_client
 
         self.country = CountryFactory()
         admin_type_1 = AreaTypeFactory(country=self.country, area_level=1)
@@ -100,10 +104,14 @@ class TestHouseholdListViewSet:
             program=self.program,
         )
 
-        response = self.client.get(self.list_url)
+        response = self.api_client(self.user).get(self.list_url)
         assert response.status_code == status.HTTP_200_OK
         response_results = response.json()["results"]
         assert len(response_results) == 2
+
+        response_count = self.api_client(self.user).get(self.count_url)
+        assert response_count.status_code == status.HTTP_200_OK
+        assert response_count.json()["count"] == 2
 
         response_ids = [result["id"] for result in response_results]
         assert get_encoded_household_id(self.household1) in response_ids
@@ -127,6 +135,31 @@ class TestHouseholdListViewSet:
             )
 
     @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_household_count(
+        self,
+        permissions: list,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
+    ) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=permissions,
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+        response = self.api_client(self.user).get(self.count_url)
+        assert response.status_code == expected_status
+
+        if expected_status == status.HTTP_200_OK:
+            assert response.json()["count"] == 2
+
+    @pytest.mark.parametrize(
         "permissions",
         [
             [],
@@ -143,7 +176,7 @@ class TestHouseholdListViewSet:
             program=self.program,
         )
 
-        response = self.client.get(self.list_url)
+        response = self.api_client(self.user).get(self.list_url)
         assert response.status_code == 403
 
     def test_household_list_on_draft_program(self, create_user_role_with_permissions: Any) -> None:
@@ -161,7 +194,7 @@ class TestHouseholdListViewSet:
         for _ in range(2):
             self._create_household(program)
 
-        response = self.client.get(list_url)
+        response = self.api_client(self.user).get(list_url)
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data["results"]) == 0
 
@@ -190,7 +223,7 @@ class TestHouseholdListViewSet:
         household_different_areas.admin2 = area_different
         household_different_areas.save()
 
-        response = self.client.get(self.list_url)
+        response = self.api_client(self.user).get(self.list_url)
         assert response.status_code == status.HTTP_200_OK
         response_results = response.data["results"]
         assert len(response_results) == 3
@@ -214,63 +247,63 @@ class TestHouseholdListViewSet:
         )
 
         with CaptureQueriesContext(connection) as ctx:
-            response = self.client.get(self.list_url)
+            response = self.api_client(self.user).get(self.list_url)
             assert response.status_code == status.HTTP_200_OK
             assert response.has_header("etag")
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 2
-            assert len(ctx.captured_queries) == 15
+            assert len(ctx.captured_queries) == 17
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
-            response = self.client.get(self.list_url)
+            response = self.api_client(self.user).get(self.list_url)
             assert response.status_code == status.HTTP_200_OK
             assert response.has_header("etag")
             etag_second_call = response.headers["etag"]
             assert etag == etag_second_call
-            assert len(ctx.captured_queries) == 8
+            assert len(ctx.captured_queries) == 10
 
         self.household1.children_count = 100
         self.household1.save()
         with CaptureQueriesContext(connection) as ctx:
-            response = self.client.get(self.list_url)
+            response = self.api_client(self.user).get(self.list_url)
             assert response.status_code == status.HTTP_200_OK
             assert response.has_header("etag")
             etag_third_call = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert etag_third_call not in [etag, etag_second_call]
             # 4 queries are saved because of cached permissions calculations
-            assert len(ctx.captured_queries) == 10
+            assert len(ctx.captured_queries) == 12
 
         set_admin_area_limits_in_program(self.partner, self.program, [self.area1])
         with CaptureQueriesContext(connection) as ctx:
-            response = self.client.get(self.list_url)
+            response = self.api_client(self.user).get(self.list_url)
             assert response.status_code == status.HTTP_200_OK
             assert response.has_header("etag")
             etag_changed_areas = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert etag_changed_areas not in [etag, etag_second_call, etag_third_call]
-            assert len(ctx.captured_queries) == 10
+            assert len(ctx.captured_queries) == 12
 
         self.household2.delete()
         with CaptureQueriesContext(connection) as ctx:
-            response = self.client.get(self.list_url)
+            response = self.api_client(self.user).get(self.list_url)
             assert response.status_code == status.HTTP_200_OK
             assert response.has_header("etag")
             etag_fourth_call = response.headers["etag"]
             assert len(response.json()["results"]) == 1
             assert etag_fourth_call not in [etag, etag_second_call, etag_third_call, etag_changed_areas]
-            assert len(ctx.captured_queries) == 10
+            assert len(ctx.captured_queries) == 12
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
-            response = self.client.get(self.list_url)
+            response = self.api_client(self.user).get(self.list_url)
             assert response.status_code == status.HTTP_200_OK
             assert response.has_header("etag")
             etag_fifth_call = response.headers["etag"]
             assert etag_fifth_call == etag_fourth_call
-            assert len(ctx.captured_queries) == 8
+            assert len(ctx.captured_queries) == 10
 
 
 class TestHouseholdDetailViewSet:
@@ -282,7 +315,7 @@ class TestHouseholdDetailViewSet:
         self.program = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
         self.partner = PartnerFactory(name="TestPartner")
         self.user = UserFactory(partner=self.partner)
-        self.client = api_client(self.user)
+        self.api_client = api_client
 
         self.country = CountryFactory()
         admin_type_1 = AreaTypeFactory(country=self.country, area_level=1)
@@ -334,7 +367,7 @@ class TestHouseholdDetailViewSet:
             program=self.program,
         )
         encoded_household_id = encode_id_base64_required(self.household.id, "Household")
-        responses = self.client.get(
+        responses = self.api_client(self.user).get(
             reverse(
                 self.detail_url_name,
                 kwargs={
@@ -440,7 +473,7 @@ class TestHouseholdDetailViewSet:
             program=self.program,
         )
         encoded_household_id = encode_id_base64_required(self.household.id, "Household")
-        responses = self.client.get(
+        responses = self.api_client(self.user).get(
             reverse(
                 self.detail_url_name,
                 kwargs={
@@ -463,7 +496,7 @@ class TestHouseholdDetailViewSet:
             program=program_other,
         )
         encoded_household_id = encode_id_base64_required(self.household.id, "Household")
-        responses = self.client.get(
+        responses = self.api_client(self.user).get(
             reverse(
                 self.detail_url_name,
                 kwargs={
@@ -480,6 +513,7 @@ class TestHouseholdGlobalViewSet:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
         self.global_url_name = "api:households:households-global-list"
+        self.global_count_url = "api:households:households-global-count"
         self.afghanistan = create_afghanistan()
         self.ukraine = create_ukraine()
         self.program_afghanistan1 = ProgramFactory(
@@ -496,7 +530,7 @@ class TestHouseholdGlobalViewSet:
 
         self.partner = PartnerFactory(name="TestPartner")
         self.user = UserFactory(partner=self.partner)
-        self.client = api_client(self.user)
+        self.api_client = api_client
 
         self.country = CountryFactory()
         self.admin_type_1 = AreaTypeFactory(country=self.country, area_level=1)
@@ -567,10 +601,18 @@ class TestHouseholdGlobalViewSet:
             whole_business_area_access=True,
         )
 
-        response = self.client.get(reverse(self.global_url_name, kwargs={"business_area_slug": self.afghanistan.slug}))
+        response = self.api_client(self.user).get(
+            reverse(self.global_url_name, kwargs={"business_area_slug": self.afghanistan.slug})
+        )
         assert response.status_code == status.HTTP_200_OK
         response_results = response.data["results"]
         assert len(response_results) == 2
+
+        response_count = self.api_client(self.user).get(
+            reverse(self.global_count_url, kwargs={"business_area_slug": self.afghanistan.slug})
+        )
+        assert response_count.status_code == status.HTTP_200_OK
+        assert response_count.json()["count"] == 2
 
         result_ids = [result["id"] for result in response_results]
         assert encode_id_base64_required(self.household_afghanistan1.id, "Household") in result_ids
@@ -605,7 +647,9 @@ class TestHouseholdGlobalViewSet:
             program=self.program_afghanistan1,
         )
 
-        response = self.client.get(reverse(self.global_url_name, kwargs={"business_area_slug": self.afghanistan.slug}))
+        response = self.api_client(self.user).get(
+            reverse(self.global_url_name, kwargs={"business_area_slug": self.afghanistan.slug})
+        )
         assert response.status_code == status.HTTP_200_OK
         response_results = response.data["results"]
         assert len(response_results) == 1
@@ -632,7 +676,9 @@ class TestHouseholdGlobalViewSet:
             whole_business_area_access=True,
         )
 
-        response = self.client.get(reverse(self.global_url_name, kwargs={"business_area_slug": self.afghanistan.slug}))
+        response = self.api_client(self.user).get(
+            reverse(self.global_url_name, kwargs={"business_area_slug": self.afghanistan.slug})
+        )
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_household_global_list_area_limits(
@@ -670,7 +716,9 @@ class TestHouseholdGlobalViewSet:
             individuals_data=[{}, {}],
         )
 
-        response = self.client.get(reverse(self.global_url_name, kwargs={"business_area_slug": self.afghanistan.slug}))
+        response = self.api_client(self.user).get(
+            reverse(self.global_url_name, kwargs={"business_area_slug": self.afghanistan.slug})
+        )
         assert response.status_code == status.HTTP_200_OK
         response_results = response.data["results"]
         assert len(response_results) == 3
@@ -694,7 +742,7 @@ class TestHouseholdFilter:
         )
         self.partner = PartnerFactory(name="TestPartner")
         self.user = UserFactory(partner=self.partner)
-        self.client = api_client(self.user)
+        self.api_client = api_client
 
         create_user_role_with_permissions(
             user=self.user,
@@ -750,7 +798,7 @@ class TestHouseholdFilter:
             hoh_1_data=hoh_1_data,
             hoh_2_data=hoh_2_data,
         )
-        response = self.client.get(self.list_url, filters)
+        response = self.api_client(self.user).get(self.list_url, filters)
         assert response.status_code == status.HTTP_200_OK, response.json()
         response_data = response.json()["results"]
         assert len(response_data) == 1
@@ -813,7 +861,9 @@ class TestHouseholdFilter:
         DocumentFactory(individual=hoh_household_passport1, type=document_passport, document_number="123")
         DocumentFactory(individual=hoh_household_passport2, type=document_passport, document_number="456")
         DocumentFactory(individual=hoh_household_id_card, type=document_id_card, document_number="123")
-        response = self.client.get(self.list_url, {"document_number": "123", "document_type": "passport"})
+        response = self.api_client(self.user).get(
+            self.list_url, {"document_number": "123", "document_type": "passport"}
+        )
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
         assert len(response_data) == 1
@@ -893,7 +943,7 @@ class TestHouseholdFilter:
         self.program.save()
 
         self._create_test_households()
-        response = self.client.get(self.list_url, {"is_active_program": filter_value})
+        response = self.api_client(self.user).get(self.list_url, {"is_active_program": filter_value})
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
         assert len(response_data) == expected_results
@@ -919,9 +969,9 @@ class TestHouseholdFilter:
         admin_type_2 = AreaTypeFactory(country=country, area_level=2, parent=admin_type_1)
         area1 = AreaFactory(parent=None, p_code="AF01", area_type=admin_type_1)
         area2 = AreaFactory(parent=area1, p_code="AF0101", area_type=admin_type_2)
-
+        encoded_id = encode_id_base64_required(area1.id, "Area")
         self._test_filter_households_in_list(
-            filters={filter_by_field: area1.id},
+            filters={filter_by_field: encoded_id},
             household1_data={filter_by_field: area1},
             household2_data={filter_by_field: area2},
         )
@@ -976,7 +1026,7 @@ class TestHouseholdFilter:
             hoh_2_data=hoh_2_data,
         )
         rebuild_search_index()
-        response = self.client.get(self.list_url, filters)
+        response = self.api_client(self.user).get(self.list_url, filters)
         assert response.status_code == status.HTTP_200_OK, response.json()
         response_data = response.json()["results"]
         assert len(response_data) == 1
@@ -1002,7 +1052,7 @@ class TestHouseholdFilter:
         BankAccountInfoFactory(bank_account_number="123456789", individual=individuals1[0])
         BankAccountInfoFactory(bank_account_number="987654321", individual=individuals2[0])
         rebuild_search_index()
-        response = self.client.get(self.list_url, {"search": "123456789"})
+        response = self.api_client(self.user).get(self.list_url, {"search": "123456789"})
         assert response.status_code == status.HTTP_200_OK, response.json()
         response_data = response.json()["results"]
         assert len(response_data) == 1

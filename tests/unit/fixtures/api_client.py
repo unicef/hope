@@ -4,6 +4,7 @@ import pytest
 from rest_framework.test import APIClient
 
 from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.models import User
 
 
 @pytest.fixture()
@@ -12,7 +13,7 @@ def api_client() -> Callable:
         if not user_account:
             user_account = UserFactory()
         client = APIClient()
-        client.force_authenticate(user_account)
+        client.force_authenticate(user=User.objects.get(id=user_account.id))
         return client
 
     return _api_client

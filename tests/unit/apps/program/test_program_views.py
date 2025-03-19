@@ -43,6 +43,10 @@ class TestProgramListViewSet:
             "api:programs:programs-list",
             kwargs={"business_area_slug": self.afghanistan.slug},
         )
+        self.count_url = reverse(
+            "api:programs:programs-count",
+            kwargs={"business_area_slug": self.afghanistan.slug},
+        )
         self.partner = PartnerFactory(name="TestPartner")
         self.user = UserFactory(partner=self.partner)
         self.client = api_client(self.user)
@@ -105,6 +109,11 @@ class TestProgramListViewSet:
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
         assert len(response_data) == 1
+
+        response_count = self.client.get(self.count_url)
+        assert response_count.status_code == status.HTTP_200_OK
+        assert response_count.json()["count"] == 1
+
         program_ids = [program["id"] for program in response_data]
         assert encode_id_base64_required(self.program.id, "Program") in program_ids
         assert encode_id_base64_required(self.program_in_ukraine.id, "Program") not in program_ids
@@ -159,6 +168,31 @@ class TestProgramListViewSet:
         assert len(program_data1["pdu_fields"]) == 2
 
     @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_program_count(
+        self,
+        permissions: list,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
+    ) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=permissions,
+            business_area=self.afghanistan,
+            whole_business_area_access=True,
+        )
+        response = self.client.get(self.count_url)
+        assert response.status_code == expected_status
+
+        if expected_status == status.HTTP_200_OK:
+            assert response.json()["count"] == 3
+
+    @pytest.mark.parametrize(
         "permissions",
         [
             [],
@@ -209,10 +243,10 @@ class TestProgramListViewSet:
         assert response_data[2]["id"] == encode_id_base64_required(self.program.id, "Program")
         assert response_data[3]["id"] == encode_id_base64_required(program_finished.id, "Program")
 
-    def test_program_list_caching(self, create_user_role_with_permissions: Any) -> None:
-        no_queries_not_cached_no_permissions = 10
-        no_queries_not_cached_with_permissions = 6
-        no_queries_cached = 4
+    def test_program_list_caching(self, create_user_role_with_permissions: Any, api_client: Any) -> None:
+        no_queries_not_cached_no_permissions = 11
+        no_queries_not_cached_with_permissions = 7
+        no_queries_cached = 5
 
         program_afghanistan2 = ProgramFactory(business_area=self.afghanistan)
         for program in [
@@ -224,10 +258,8 @@ class TestProgramListViewSet:
             )
 
         def _test_response_len_and_queries(response_len: int, queries_len: int) -> None:
-            if hasattr(self.user, "_program_ids_for_business_area_cache"):
-                del self.user._program_ids_for_business_area_cache
             with CaptureQueriesContext(connection) as queries:
-                response = self.client.get(self.list_url)
+                response = api_client(self.user).get(self.list_url)
                 assert response.status_code == status.HTTP_200_OK
                 response_data = response.json()["results"]
                 assert len(response_data) == response_len
@@ -341,7 +373,7 @@ class TestProgramFilter:
         assert len(response_data) == 1
         assert response_data[0]["id"] == encode_id_base64_required(program2.id, "Program")
 
-    def test_filter_by_beneficiary_group_match(self) -> None:
+    def test_filter_by_beneficiary_group_match(self, api_client: Any) -> None:
         beneficiary_group1 = BeneficiaryGroupFactory(name="Group1")
         beneficiary_group2 = BeneficiaryGroupFactory(name="Group2")
         program1 = ProgramFactory(business_area=self.afghanistan, beneficiary_group=beneficiary_group1)
@@ -355,7 +387,7 @@ class TestProgramFilter:
         )
 
         # additional check to test filter doesn't break allowed_programs constraints
-        response = self.client.get(self.list_url, {"beneficiary_group_match": program1.slug})
+        response = api_client(self.user).get(self.list_url, {"beneficiary_group_match": program1.slug})
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
         assert len(response_data) == 0
@@ -363,7 +395,7 @@ class TestProgramFilter:
         self.create_user_role_with_permissions(
             self.user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], self.afghanistan, program3
         )
-        response = self.client.get(self.list_url, {"beneficiary_group_match": program1.slug})
+        response = api_client(self.user).get(self.list_url, {"beneficiary_group_match": program1.slug})
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
         assert len(response_data) == 1

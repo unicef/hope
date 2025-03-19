@@ -94,6 +94,9 @@ class HouseholdFilter(FilterSet):
     country_origin = CharFilter(field_name="country_origin__iso_code3", lookup_expr="startswith")
     is_active_program = BooleanFilter(method="filter_is_active_program")
     rdi_merge_status = ChoiceFilter(method="rdi_merge_status_filter", choices=MergeStatusModel.STATUS_CHOICE)
+    admin_area = CharFilter(method="admin_field_filter", field_name="admin_area")
+    admin1 = CharFilter(method="admin_field_filter", field_name="admin1")
+    admin2 = CharFilter(method="admin_field_filter", field_name="admin2")
 
     class Meta:
         model = Household
@@ -272,6 +275,12 @@ class HouseholdFilter(FilterSet):
             return qs.filter(rdi_merge_status=MergeStatusModel.PENDING)
         else:
             return qs.filter(rdi_merge_status=MergeStatusModel.MERGED)
+
+    def admin_field_filter(self, qs: QuerySet, field_name: str, value: str) -> QuerySet:
+        if value:
+            encoded_value = decode_id_string(value)
+            return qs.filter(**{field_name: encoded_value})
+        return qs
 
 
 class IndividualFilter(FilterSet):
