@@ -147,7 +147,6 @@ export const individualDetailed = gql`
       }
     }
     enrolledInNutritionProgramme
-    administrationOfRutf
     household {
       registrationDataImport {
         name

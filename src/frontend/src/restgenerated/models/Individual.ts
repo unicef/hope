@@ -78,7 +78,6 @@ export type Individual = {
     work_status?: WorkStatusEnum;
     flex_fields?: any;
     enrolled_in_nutrition_programme?: boolean | null;
-    administration_of_rutf?: boolean | null;
     deduplication_golden_record_status?: DeduplicationGoldenRecordStatusEnum;
     biometric_deduplication_golden_record_status?: BiometricDeduplicationGoldenRecordStatusEnum;
     biometric_deduplication_batch_status?: BiometricDeduplicationBatchStatusEnum;
