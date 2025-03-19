@@ -4,17 +4,26 @@ from django.db import migrations, models
 
 
 # set account type and store only field_name (phone) / value in .data json
-def migrate_delivery_mechanism_data(apps, schema_editor):
+def migrate_delivery_mechanism_data(apps, schema_editor):  # pragma: no cover
     AccountType = apps.get_model("payment", "AccountType")
     DeliveryMechanismData = apps.get_model("payment", "DeliveryMechanismData")
 
-    AccountType.objects.get_or_create(
+    account_type_mobile, _ = AccountType.objects.get_or_create(
         key="mobile",
         defaults=dict(
             label="Mobile",
             unique_fields=["number"] # TODO fields???
         )
     )
+    account_type_bank, _ = AccountType.objects.get_or_create(
+        key="bank",
+        defaults=dict(
+            label="Bank",
+            unique_fields=["number"] # TODO fields???
+        )
+    )
+
+    dmd_to_update = []
 
     for dmd in DeliveryMechanismData.objects.filter(
         delivery_mechanism__code="mobile_money"
@@ -25,6 +34,22 @@ def migrate_delivery_mechanism_data(apps, schema_editor):
             "number": data.get("delivery_phone_number__mobile_money", ""),
             "provider": data.get("provider__mobile_money", ""),
         } # TODO field names???
+        dmd.account_type = account_type_mobile
+        dmd_to_update.append(dmd)
+
+    for dmd in DeliveryMechanismData.objects.filter(
+        delivery_mechanism__code="transfer_to_account"
+    ).iterator(chunk_size=1000):
+        data = dmd.data
+        dmd.data = {
+            "name": data.get("bank_name__transfer_to_account", ""),
+            "number": data.get("bank_account_number__transfer_to_account", ""),
+            "code": data.get("bank_code__transfer_to_account", ""),
+            "account_holder_name": data.get("account_holder_name__transfer_to_account", ""),
+        } # TODO field names???
+        dmd.account_type = account_type_bank
+    if dmd_to_update:
+        DeliveryMechanismData.objects.bulk_update(dmd_to_update, ["data", "account_type"])
 
 
 class Migration(migrations.Migration):

@@ -2,14 +2,16 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
+from django.db.models import F
 
-def migrate_dmppp_pp_fk(apps, schema_editor):
+def migrate_dmppp_pp_fk(apps, schema_editor):  # pragma: no cover
     PaymentPlan = apps.get_model("payment", "PaymentPlan")
-
-    for pp in PaymentPlan.objects.filter(delivery_mechanism_per_payment_plan__isnull=False).select_related("delivery_mechanism_per_payment_plan"):
-        pp.delivery_mechanism_id = pp.delivery_mechanism_per_payment_plan.delivery_mechanism_id
-        pp.financial_service_provider_id = pp.delivery_mechanism_per_payment_plan.financial_service_provider_id
-        pp.save(update_fields=["delivery_mechanism", "financial_service_provider"])
+    PaymentPlan.objects.filter(
+        delivery_mechanism_per_payment_plan__isnull=False
+    ).update(
+        delivery_mechanism=F("delivery_mechanism_per_payment_plan__delivery_mechanism"),
+        financial_service_provider=F("delivery_mechanism_per_payment_plan__financial_service_provider")
+    )
 
 class Migration(migrations.Migration):
 

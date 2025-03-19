@@ -91,6 +91,7 @@ class ModifiedData:
     modified_by: Optional["User"] = None
 
 
+# TODO remove in 2 step
 class PaymentPlanSplitPayments(TimeStampedUUIDModel):
     payment_plan_split = models.ForeignKey(
         "payment.PaymentPlanSplit", on_delete=models.CASCADE, related_name="payment_plan_split"

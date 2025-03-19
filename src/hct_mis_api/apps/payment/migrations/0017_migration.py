@@ -4,19 +4,24 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
-def migrate_payments_to_parent_split(apps, schema_editor):
+def migrate_payments_to_parent_split(apps, schema_editor):  # pragma: no cover
     PaymentPlanSplitPayments = apps.get_model("payment", "PaymentPlanSplitPayments")
+    Payment = apps.get_model("payment", "Payment")
 
-    for split_payment in PaymentPlanSplitPayments.objects.all().select_related("payment"):
+    payments_to_update = []
+    for split_payment in PaymentPlanSplitPayments.objects.select_related("payment"):
         split_payment.payment.parent_split_id = split_payment.payment_plan_split_id
-        split_payment.payment.save(update_fields=["parent_split"])
+        payments_to_update.append(split_payment.payment)
+
+    if payments_to_update:
+        Payment.objects.bulk_update(payments_to_update, ["parent_split"])
 
 
-def migrate_payments_to_default_split(apps, schema_editor):
+def migrate_payments_to_default_split(apps, schema_editor):  # pragma: no cover
     PaymentPlan = apps.get_model("payment", "PaymentPlan")
     PaymentPlanSplit = apps.get_model("payment", "PaymentPlanSplit")
 
-    for payment_plan in PaymentPlan.objects.filter(splits__isnull=True):
+    for payment_plan in PaymentPlan.objects.filter(splits__isnull=True).iterator():
         default_split = PaymentPlanSplit.objects.create(payment_plan=payment_plan)
         if payment_plan.delivery_mechanism.sent_to_payment_gateway:
             # store the old object's id in a variable

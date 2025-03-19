@@ -225,10 +225,6 @@ class TargetingCollectorRuleFilterBlock(
 
 
 class TargetingCollectorBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterBase):
-    """
-    This is one field like 'bank_account_number__transfer_to_account' - YES, NO
-    """
-
     collector_block_filters = models.ForeignKey(
         "TargetingCollectorRuleFilterBlock",
         related_name="collector_block_filters",
