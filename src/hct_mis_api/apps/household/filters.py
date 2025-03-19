@@ -106,7 +106,6 @@ class HouseholdFilter(FilterSet):
             "admin_area": ["exact"],
             "admin1": ["exact"],
             "admin2": ["exact"],
-            "target_populations": ["exact"],
             "residence_status": ["exact"],
             "withdrawn": ["exact"],
             "program": ["exact"],
@@ -120,7 +119,6 @@ class HouseholdFilter(FilterSet):
             "household__id",
             "id",
             "unicef_id",
-            "household_ca_id",
             "size",
             "status_label",
             Lower("head_of_household__full_name"),
@@ -190,7 +188,7 @@ class HouseholdFilter(FilterSet):
                                 "head_of_household.bank_account_info.bank_account_number": {"query": search}
                             }
                         },
-                        {"match_phrase_prefix": {"registration_id": {"query": search}}},
+                        {"match_phrase_prefix": {"detail_id": {"query": search}}},
                         {"match_phrase_prefix": {"program_registration_id": {"query": search}}},
                     ],
                 }
@@ -224,12 +222,12 @@ class HouseholdFilter(FilterSet):
                 Q(head_of_household__phone_no__icontains=search)
                 | Q(head_of_household__phone_no_alternative__icontains=search)
             )
-        if search_type == "registration_id":
+        if search_type == "detail_id":
             try:
                 int(search)
             except ValueError:
                 raise SearchException("The search value for a given search type should be a number")
-            return qs.filter(registration_id__istartswith=search)
+            return qs.filter(detail_id__istartswith=search)
         if search_type == "kobo_asset_id":
             inner_query = Q()
             split_values_list = search.split(" ")
@@ -375,7 +373,7 @@ class IndividualFilter(FilterSet):
                         {"match_phrase_prefix": {"full_name": {"query": search}}},
                         {"match_phrase_prefix": {"phone_no_text": {"query": search}}},
                         {"match_phrase_prefix": {"phone_no_alternative_text": {"query": search}}},
-                        {"match_phrase_prefix": {"registration_id": {"query": search}}},
+                        {"match_phrase_prefix": {"detail_id": {"query": search}}},
                         {"match_phrase_prefix": {"program_registration_id": {"query": search}}},
                         {"match_phrase_prefix": {"bank_account_info.bank_account_number": {"query": search}}},
                     ],
@@ -403,12 +401,12 @@ class IndividualFilter(FilterSet):
             return qs.filter(full_name__icontains=search)
         if search_type == "phone_no":
             return qs.filter(Q(phone_no__icontains=search) | Q(phone_no_alternative__icontains=search))
-        if search_type == "registration_id":
+        if search_type == "detail_id":
             try:
                 int(search)
             except ValueError:
                 raise SearchException("The search value for a given search type should be a number")
-            return qs.filter(registration_id__icontains=search)
+            return qs.filter(detail_id__icontains=search)
         if search_type == "bank_account_number":
             return qs.filter(bank_account_info__bank_account_number__icontains=search)
         if DocumentType.objects.filter(key=search_type).exists():

@@ -18,7 +18,7 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.steficon.admin import AutocompleteWidget
-from hct_mis_api.apps.targeting.models import TargetingCriteria, TargetPopulation
+from hct_mis_api.apps.targeting.models import TargetingCriteria
 
 
 def get_households_from_text(program: Program, text: Any, target_field: Any, separator: Any) -> Union[QuerySet, List]:
@@ -143,40 +143,6 @@ class MassWithdrawForm(WithdrawForm):
 
 class MassRestoreForm(RestoreForm):
     _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
-
-
-class AddToTargetPopulationForm(forms.Form):
-    _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
-    action = forms.CharField(widget=forms.HiddenInput)
-    target_population = forms.ModelChoiceField(
-        queryset=TargetPopulation.objects.filter(status=TargetPopulation.STATUS_OPEN)
-    )
-
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        read_only = kwargs.pop("read_only", False)
-        super().__init__(*args, **kwargs)
-        if read_only:
-            self.fields["target_population"].widget = HiddenInput()
-
-
-class CreateTargetPopulationForm(forms.Form):
-    _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
-    action = forms.CharField(widget=forms.HiddenInput)
-    name = forms.CharField()
-    program = forms.ModelChoiceField(queryset=Program.objects.filter(status=Program.ACTIVE))
-
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        read_only = kwargs.pop("read_only", False)
-        super().__init__(*args, **kwargs)
-        if "initial" in kwargs:
-            first = Household.objects.get(pk=kwargs["initial"]["_selected_action"][0])
-            self.fields["program"].queryset = Program.objects.filter(
-                status=Program.ACTIVE, business_area=first.business_area
-            )
-
-        if read_only:
-            self.fields["program"].widget = HiddenInput()
-            self.fields["name"].widget = HiddenInput()
 
 
 class CreateTargetPopulationTextForm(forms.Form):
@@ -323,3 +289,27 @@ class DocumentForm(forms.ModelForm):
         # override queryset for Individual
         if "individual" in self.Meta.fields:
             self.fields["individual"].queryset = PendingIndividual.objects.all()
+
+
+class WithdrawHouseholdsForm(forms.Form):
+    business_area = forms.ModelChoiceField(
+        queryset=BusinessArea.objects.all().order_by("name"),
+        required=True,
+        widget=AutocompleteWidget(BusinessArea, ""),
+    )
+    program = forms.ModelChoiceField(
+        queryset=Program.objects.none(),
+        required=True,
+        widget=None,
+    )
+    household_list = forms.CharField(widget=forms.Textarea, required=True, label="Household IDs")
+    tag = forms.CharField(required=True, label="Tag")
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        business_area = kwargs.pop("business_area", None)
+        super().__init__(*args, **kwargs)
+        if business_area:
+            self.fields["program"].queryset = Program.objects.filter(
+                business_area=business_area, status=Program.ACTIVE
+            ).order_by("name")
+            self.fields["program"].widget = AutocompleteWidget(Program, "", business_area=business_area)

@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material';
+import { Grid2 as Grid } from '@mui/material';
 import { Field } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
@@ -6,12 +6,13 @@ import { ContentLink } from '@core/ContentLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface HouseholdQuestionnaireProps {
   values;
 }
 
-export function HouseholdQuestionnaire({
+function HouseholdQuestionnaire({
   values,
 }: HouseholdQuestionnaireProps): ReactElement {
   const { baseUrl } = useBaseUrl();
@@ -108,7 +109,7 @@ export function HouseholdQuestionnaire({
           size: 3,
         },
       ].map((el) => (
-        <Grid key={el.name} item xs={3}>
+        <Grid key={el.name} size={{ xs: 3 }}>
           <Field
             data-cy={`input-${el.name}`}
             name={el.name}
@@ -122,3 +123,8 @@ export function HouseholdQuestionnaire({
     </Grid>
   );
 }
+
+export default withErrorBoundary(
+  HouseholdQuestionnaire,
+  'HouseholdQuestionnaire',
+);

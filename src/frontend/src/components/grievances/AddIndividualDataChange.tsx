@@ -1,4 +1,4 @@
-import { Button, Grid, Typography } from '@mui/material';
+import { Button, Grid2 as Grid, Typography } from '@mui/material';
 import { AddCircleOutline } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
@@ -21,6 +21,7 @@ import { FormikBoolFieldGrievances } from './FormikBoolFieldGrievances';
 import { removeItemById } from './utils/helpers';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 export interface AddIndividualDataChangeFieldProps {
   field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
@@ -93,7 +94,7 @@ export function AddIndividualDataChangeField({
   }
   return (
     <>
-      <Grid item xs={8}>
+      <Grid size={{ xs: 8 }}>
         <Field
           name={`individualData${flexField ? '.flexFields' : ''}.${camelCase(
             field.name,
@@ -106,7 +107,7 @@ export function AddIndividualDataChangeField({
           {...fieldProps}
         />
       </Grid>
-      <Grid item xs={4} />
+      <Grid size={{ xs: 4 }} />
     </>
   );
 }
@@ -116,7 +117,7 @@ export interface AddIndividualDataChangeProps {
   setFieldValue?;
 }
 
-export function AddIndividualDataChange({
+function AddIndividualDataChange({
   values,
   setFieldValue,
 }: AddIndividualDataChangeProps): ReactElement {
@@ -146,17 +147,13 @@ export function AddIndividualDataChange({
           </Typography>
         </Title>
         <Grid container spacing={3}>
-          <Grid item xs={12}>
-            {t('Core Fields')}
-          </Grid>
+          <Grid size={{ xs: 12 }}>{t('Core Fields')}</Grid>
 
           {coreFields.map((item) => (
             <AddIndividualDataChangeField key={item.name} field={item} />
           ))}
           {flexFields.length > 0 && (
-            <Grid item xs={12}>
-              {t('Flex Fields')}
-            </Grid>
+            <Grid size={{ xs: 12 }}>{t('Flex Fields')}</Grid>
           )}
           {flexFields.map((item) => (
             <AddIndividualDataChangeField
@@ -193,8 +190,8 @@ export function AddIndividualDataChange({
                     />
                   );
                 })}
-                <Grid item xs={8} />
-                <Grid item xs={12}>
+                <Grid size={{ xs: 8 }} />
+                <Grid size={{ xs: 12 }}>
                   <Button
                     color="primary"
                     startIcon={<AddCircleOutline />}
@@ -241,8 +238,8 @@ export function AddIndividualDataChange({
                     />
                   );
                 })}
-                <Grid item xs={8} />
-                <Grid item xs={12}>
+                <Grid size={{ xs: 8 }} />
+                <Grid size={{ xs: 12 }}>
                   <Button
                     color="primary"
                     startIcon={<AddCircleOutline />}
@@ -266,3 +263,8 @@ export function AddIndividualDataChange({
     )
   );
 }
+
+export default withErrorBoundary(
+  AddIndividualDataChange,
+  'AddIndividualDataChange',
+);

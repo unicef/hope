@@ -12,7 +12,6 @@ import {
   BigValue,
   BigValueContainer,
 } from '@components/rdi/details/RegistrationDetails/RegistrationDetails';
-import { PaymentRecordAndPaymentPeopleTable } from '@containers/tables/payments/PaymentRecordAndPaymentPeopleTable';
 import { AdminButton } from '@core/AdminButton';
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
@@ -27,7 +26,7 @@ import {
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
-import { Box, Grid, Paper, Typography } from '@mui/material';
+import { Box, Grid2 as Grid, Paper, Typography } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import {
   formatCurrencyWithSymbol,
@@ -38,9 +37,10 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { ReactElement } from 'react';
 import { IndividualDeliveryMechanisms } from '@components/population/IndividualDeliveryMechanisms';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import PaymentsPeopleTable from '@containers/tables/payments/PaymentsPeopleTable/PaymentsPeopleTable';
 
 const Container = styled.div`
   padding: 20px 20px 00px 20px;
@@ -64,7 +64,7 @@ const SubTitle = styled(Typography)`
   }
 `;
 
-export const PeopleDetailsPage = (): ReactElement => {
+const PeopleDetailsPage = (): ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const { baseUrl, businessArea, programId } = useBaseUrl();
@@ -124,38 +124,30 @@ export const PeopleDetailsPage = (): ReactElement => {
   const household = individual?.household;
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'PeopleDetailsPage.tsx');
-      }}
-      componentName="PeopleDetailsPage"
-    >
-      <>
-        <PageHeader
-          title={`${t('Individual ID')}: ${individual?.unicefId}`}
-          breadCrumbs={
-            hasPermissions(
-              PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST,
-              permissions,
-            )
-              ? breadCrumbsItems
-              : null
-          }
-          flags={
-            <>
-              <IndividualFlags individual={individual} />
-              <AdminButton adminUrl={individual?.adminUrl} />
-            </>
-          }
-        >
-          <Box mr={2}>
-            {individual?.photo ? (
-              <IndividualPhotoModal individual={individual as IndividualNode} />
-            ) : null}
-          </Box>
-        </PageHeader>
+    <>
+      <PageHeader
+        title={`${t('Individual ID')}: ${individual?.unicefId}`}
+        breadCrumbs={
+          hasPermissions(
+            PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST,
+            permissions,
+          )
+            ? breadCrumbsItems
+            : null
+        }
+        flags={
+          <>
+            <IndividualFlags individual={individual} />
+            <AdminButton adminUrl={individual?.adminUrl} />
+          </>
+        }
+      >
+        <Box mr={2}>
+          {individual?.photo ? (
+            <IndividualPhotoModal individual={individual as IndividualNode} />
+          ) : null}
+        </Box>
+      </PageHeader>
 
         <Container>
           <PeopleBioData
@@ -183,12 +175,12 @@ export const PeopleDetailsPage = (): ReactElement => {
               <Typography variant="h6">{t('Benefits')}</Typography>
             </Title>
             <Grid container>
-              <Grid item xs={3}>
+              <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Cash received')}>
                   {household?.deliveredQuantities?.length ? (
                     <Box mb={2}>
                       <Grid container>
-                        <Grid item xs={6}>
+                        <Grid size={{ xs:6 }}>
                           <Box display="flex" flexDirection="column">
                             {household?.deliveredQuantities?.map((item) => (
                               <Box
@@ -214,7 +206,7 @@ export const PeopleDetailsPage = (): ReactElement => {
                   )}
                 </LabelizedField>
               </Grid>
-              <Grid item xs={3}>
+              <Grid size={{ xs: 3 }}>
                 <BigValueContainer>
                   <LabelizedField label={t('Total Cash Received')}>
                     <BigValue>
@@ -229,10 +221,10 @@ export const PeopleDetailsPage = (): ReactElement => {
             </Grid>
           </OverviewPaper>
           {hasPermissions(
-            PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS,
+            PERMISSIONS.PM_VIEW_PAYMENT_LIST,
             permissions,
           ) && (
-            <PaymentRecordAndPaymentPeopleTable
+            <PaymentsPeopleTable
               openInNewTab
               household={household as HouseholdNode}
               businessArea={businessArea}
@@ -243,68 +235,69 @@ export const PeopleDetailsPage = (): ReactElement => {
             />
           )}
 
-          <Overview>
-            <Title>
-              <Typography variant="h6">{t('Registration Details')}</Typography>
-            </Title>
-            <Grid container spacing={6}>
-              <Grid item xs={3}>
-                <LabelizedField label={t('Source')}>
-                  <div>{household?.registrationDataImport?.dataSource}</div>
-                </LabelizedField>
-              </Grid>
-              <Grid item xs={3}>
-                <LabelizedField label={t('Import name')}>
-                  <div>{household?.registrationDataImport?.name}</div>
-                </LabelizedField>
-              </Grid>
-              <Grid item xs={3}>
-                <LabelizedField label={t('Registration Date')}>
-                  <div>
-                    <UniversalMoment>
-                      {household?.lastRegistrationDate}
-                    </UniversalMoment>
-                  </div>
-                </LabelizedField>
-              </Grid>
-              <Grid item xs={3}>
-                <LabelizedField label={t('User name')}>
-                  {household?.registrationDataImport?.importedBy?.email}
-                </LabelizedField>
-              </Grid>
+        <Overview>
+          <Title>
+            <Typography variant="h6">{t('Registration Details')}</Typography>
+          </Title>
+          <Grid container spacing={6}>
+            <Grid size={{ xs: 3 }}>
+              <LabelizedField label={t('Source')}>
+                <div>{household?.registrationDataImport?.dataSource}</div>
+              </LabelizedField>
             </Grid>
-            {household?.registrationDataImport?.dataSource === 'XLS' ? null : (
-              <>
-                <hr />
-                <SubTitle variant="h6">{t('Data Collection')}</SubTitle>
-                <Grid container spacing={6}>
-                  <Grid item xs={3}>
-                    <LabelizedField label={t('Start time')}>
-                      <UniversalMoment>{household?.start}</UniversalMoment>
-                    </LabelizedField>
-                  </Grid>
-                  <Grid item xs={3}>
-                    <LabelizedField label={t('End time')}>
-                      <UniversalMoment>
-                        {household?.firstRegistrationDate}
-                      </UniversalMoment>
-                    </LabelizedField>
-                  </Grid>
-                  <Grid item xs={3}>
-                    <LabelizedField label={t('Device ID')}>
-                      {/* //TODO: Figure it out. deviceId removed from the model? */}
-                      {/* {household?.deviceid} */} -
-                    </LabelizedField>
-                  </Grid>
+            <Grid size={{ xs: 3 }}>
+              <LabelizedField label={t('Import name')}>
+                <div>{household?.registrationDataImport?.name}</div>
+              </LabelizedField>
+            </Grid>
+            <Grid size={{ xs: 3 }}>
+              <LabelizedField label={t('Registration Date')}>
+                <div>
+                  <UniversalMoment>
+                    {household?.lastRegistrationDate}
+                  </UniversalMoment>
+                </div>
+              </LabelizedField>
+            </Grid>
+            <Grid size={{ xs: 3 }}>
+              <LabelizedField label={t('User name')}>
+                {household?.registrationDataImport?.importedBy?.email}
+              </LabelizedField>
+            </Grid>
+          </Grid>
+          {household?.registrationDataImport?.dataSource === 'XLS' ? null : (
+            <>
+              <hr />
+              <SubTitle variant="h6">{t('Data Collection')}</SubTitle>
+              <Grid container spacing={6}>
+                <Grid size={{ xs: 3 }}>
+                  <LabelizedField label={t('Start time')}>
+                    <UniversalMoment>{household?.start}</UniversalMoment>
+                  </LabelizedField>
                 </Grid>
-              </>
-            )}
-          </Overview>
-        </Container>
-        {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
-          <UniversalActivityLogTable objectId={individual?.id} />
-        )}
-      </>
-    </UniversalErrorBoundary>
+                <Grid size={{ xs: 3 }}>
+                  <LabelizedField label={t('End time')}>
+                    <UniversalMoment>
+                      {household?.firstRegistrationDate}
+                    </UniversalMoment>
+                  </LabelizedField>
+                </Grid>
+                <Grid size={{ xs: 3 }}>
+                  <LabelizedField label={t('Device ID')}>
+                    {/* //TODO: Figure it out. deviceId removed from the model? */}
+                    {/* {household?.deviceid} */} -
+                  </LabelizedField>
+                </Grid>
+              </Grid>
+            </>
+          )}
+        </Overview>
+      </Container>
+      {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
+        <UniversalActivityLogTable objectId={individual?.id} />
+      )}
+    </>
   );
 };
+
+export default withErrorBoundary(PeopleDetailsPage, 'PeopleDetailsPage');

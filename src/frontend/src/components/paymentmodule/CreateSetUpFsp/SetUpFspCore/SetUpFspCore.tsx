@@ -233,7 +233,7 @@ export const SetUpFspCore = ({
                     {/* // button not shown in Payment Module 1.0 */}
                     {/* {activeStep === 0 && (
                           <Grid container>
-                            <Grid item xs={12}>
+                            <Grid size={{xs: 12}}>
                               <Box pt={3}>
                                 <Button
                                   color='primary'

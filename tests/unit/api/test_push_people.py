@@ -10,7 +10,6 @@ from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.household.models import (
-    COLLECT_TYPE_FULL,
     FEMALE,
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
@@ -71,11 +70,11 @@ class TestPushPeople(HOPEApiTestCase):
                 "residence_status": "IDP",
                 "village": "village1",
                 "country": "AF",
-                "collect_individual_data": COLLECT_TYPE_FULL,
                 "full_name": "John Doe",
                 "birth_date": "2000-01-01",
                 "sex": "NOT_COLLECTED",
                 "type": "",
+                "program": str(self.program.id),
             }
         ]
         response = self.client.post(self.url, data, format="json")
@@ -108,7 +107,6 @@ class TestPushPeople(HOPEApiTestCase):
                 "residence_status": "IDP",
                 "village": "village1",
                 "country": "AF",
-                "collect_individual_data": COLLECT_TYPE_FULL,
                 "full_name": "John Doe",
                 "birth_date": "2000-01-01",
                 "sex": "MALE",
@@ -122,6 +120,7 @@ class TestPushPeople(HOPEApiTestCase):
                         "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                     }
                 ],
+                "program": str(self.program.id),
             }
         ]
         response = self.client.post(self.url, data, format="json")
@@ -146,7 +145,6 @@ class TestPushPeople(HOPEApiTestCase):
                 "residence_status": "IDP",
                 "village": "village1",
                 "country": "AF",
-                "collect_individual_data": COLLECT_TYPE_FULL,
                 "full_name": "John Doe",
                 "birth_date": "2000-01-01",
                 "sex": "MALE",
@@ -160,16 +158,17 @@ class TestPushPeople(HOPEApiTestCase):
                         "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                     }
                 ],
+                "program": str(self.program.id),
             },
             {
                 "residence_status": "IDP",
                 "village": "village2",
                 "country": "AF",
-                "collect_individual_data": COLLECT_TYPE_FULL,
                 "full_name": "Mary Doe",
                 "birth_date": "1990-01-01",
                 "sex": "FEMALE",
                 "type": "",
+                "program": str(self.program.id),
             },
         ]
         response = self.client.post(self.url, data, format="json")
@@ -216,14 +215,15 @@ class TestPushPeople(HOPEApiTestCase):
                         "country": "AF",
                     }
                 ],
+                "program": str(self.program.id),
             },
             {
                 "residence_status": "IDP",
                 "village": "village2",
                 "country": "AF",
-                "collect_individual_data": COLLECT_TYPE_FULL,
                 "full_name": "Mary Doe",
                 "sex": "FEMALE",
+                "program": str(self.program.id),
             },
         ]
         response = self.client.post(self.url, data, format="json")
@@ -233,7 +233,6 @@ class TestPushPeople(HOPEApiTestCase):
             [
                 {
                     "birth_date": ["This field is required."],
-                    "collect_individual_data": ["This field is required."],
                     "documents": [
                         {
                             "document_number": ["This field is required."],
@@ -264,12 +263,12 @@ class TestPushPeople(HOPEApiTestCase):
                 "residence_status": "IDP",
                 "village": "village1",
                 "country": "AF",
-                "collect_individual_data": COLLECT_TYPE_FULL,
                 "full_name": "John Doe",
                 "birth_date": "2000-01-01",
                 "sex": "MALE",
                 "type": "",
                 field_name: phone_number,
+                "program": str(self.program.id),
             }
         ]
         response = self.client.post(self.url, data, format="json")
@@ -296,11 +295,11 @@ class TestPushPeople(HOPEApiTestCase):
                 "residence_status": "IDP",
                 "village": village,
                 "country": "AF",
-                "collect_individual_data": COLLECT_TYPE_FULL,
                 "full_name": "John Doe",
                 "birth_date": "2000-01-01",
                 "sex": "MALE",
                 "type": "",
+                "program": str(self.program.id),
             }
         ]
         response = self.client.post(self.url, data, format="json")
@@ -318,7 +317,6 @@ class TestPushPeople(HOPEApiTestCase):
                 "residence_status": "IDP",
                 "village": "village1",
                 "country": "AF",
-                "collect_individual_data": COLLECT_TYPE_FULL,
                 "full_name": "John Doe",
                 "birth_date": "2000-01-01",
                 "sex": "MALE",
@@ -327,6 +325,7 @@ class TestPushPeople(HOPEApiTestCase):
                 "admin2": "AF0101",
                 "admin3": "",
                 "admin4": None,
+                "program": str(self.program.id),
             }
         ]
         response = self.client.post(self.url, data, format="json")

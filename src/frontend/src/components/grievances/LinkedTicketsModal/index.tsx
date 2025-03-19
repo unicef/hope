@@ -1,1 +1,0 @@
-export { LinkedTicketsModal } from './LinkedTicketsModal';

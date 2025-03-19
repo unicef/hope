@@ -91,7 +91,6 @@ from hct_mis_api.apps.registration_data.nodes import (
     DeduplicationEngineSimilarityPairIndividualNode,
     DeduplicationResultNode,
 )
-from hct_mis_api.apps.targeting.models import HouseholdSelection
 from hct_mis_api.apps.utils.graphql import does_path_exist_in_query
 from hct_mis_api.apps.utils.schema import (
     ChartDatasetNode,
@@ -183,11 +182,6 @@ class ExtendedHouseHoldConnection(graphene.Connection):
 
     def resolve_individuals_count(root, info: Any, **kwargs: Any) -> int:
         return root.iterable.aggregate(sum=Sum("size")).get("sum")
-
-
-class HouseholdSelectionNode(DjangoObjectType):
-    class Meta:
-        model = HouseholdSelection
 
 
 class DeliveredQuantityNode(graphene.ObjectType):
@@ -284,7 +278,7 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
 
     @staticmethod
     def resolve_import_id(parent: Individual, info: Any) -> str:
-        return f"{parent.unicef_id} (Detail ID {parent.detail_id})" if parent.unicef_id else parent.unicef_id
+        return f"{parent.unicef_id} (Detail ID {parent.detail_id})" if parent.detail_id else parent.unicef_id
 
     @staticmethod
     def resolve_preferred_language(parent: Individual, info: Any) -> Optional[str]:
@@ -432,7 +426,6 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
     country = graphene.String(description="Country name")
     currency = graphene.String()
     flex_fields = FlexFieldsScalar()
-    selection = graphene.Field(HouseholdSelectionNode)
     sanction_list_possible_match = graphene.Boolean()
     sanction_list_confirmed_match = graphene.Boolean()
     has_duplicates = graphene.Boolean(description="Mark household if any of individuals has Duplicate status")
@@ -484,10 +477,6 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
     @staticmethod
     def resolve_country_origin(parent: Household, info: Any) -> str:
         return getattr(parent.country_origin, "name", "")
-
-    @staticmethod
-    def resolve_selection(parent: Household, info: Any) -> HouseholdSelection:
-        return parent.selections.first()
 
     @staticmethod
     def resolve_individuals(parent: Household, info: Any, *arg: Any, **kwargs: Any) -> QuerySet:

@@ -13,7 +13,6 @@ export const AllIndividuals = gql`
     $search: String
     $documentType: String
     $documentNumber: String
-    $programs: [ID]
     $status: [String]
     $lastRegistrationDate: String
     $householdId: UUID
@@ -38,7 +37,6 @@ export const AllIndividuals = gql`
       search: $search
       documentType: $documentType
       documentNumber: $documentNumber
-      programs: $programs
       status: $status
       lastRegistrationDate: $lastRegistrationDate
       household_Id: $householdId
@@ -116,13 +114,9 @@ export const AllIndividuals = gql`
               id
               name
             }
-            programs {
-              edges {
-                node {
-                  id
-                  name
-                }
-              }
+            program {
+              id
+              name
             }
           }
           relationship

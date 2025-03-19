@@ -1,3 +1,4 @@
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { Dialog } from '@containers/dialogs/Dialog';
 import { DialogActions } from '@containers/dialogs/DialogActions';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
@@ -44,7 +45,7 @@ const Placeholder: FC = () => (
   </Box>
 );
 
-export const BiometricsResultsRdi = ({
+const BiometricsResultsRdi = ({
   similarityScore,
   individual1,
   individual2,
@@ -193,3 +194,5 @@ export const BiometricsResultsRdi = ({
     </>
   );
 };
+
+export default withErrorBoundary(BiometricsResultsRdi, 'BiometricsResultsRdi');

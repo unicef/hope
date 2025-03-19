@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/rules-of-hooks */
+
 import { Box, Button, Paper, Typography } from '@mui/material';
 import { Formik } from 'formik';
 import camelCase from 'lodash/camelCase';

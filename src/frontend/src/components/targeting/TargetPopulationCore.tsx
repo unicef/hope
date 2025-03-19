@@ -1,17 +1,17 @@
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Grid2 as Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import { PaymentPlanBuildStatus } from '@generated/graphql';
 import { PaperContainer } from './PaperContainer';
-import { ResultsForHouseholds } from './ResultsForHouseholds';
-import { TargetingHouseholds } from './TargetingHouseholds';
+import ResultsForHouseholds from './ResultsForHouseholds';
+import TargetingHouseholds from './TargetingHouseholds';
 import { TargetPopulationPeopleTable } from '@containers/tables/targeting/TargetPopulationPeopleTable';
-import { ResultsForPeople } from '@components/targeting/ResultsForPeople';
+import ResultsForPeople from '@components/targeting/ResultsForPeople';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
-import { AddFilterTargetingCriteriaDisplay } from './TargetingCriteriaDisplay/AddFilterTargetingCriteriaDisplay';
+import AddFilterTargetingCriteriaDisplay from './TargetingCriteriaDisplay/AddFilterTargetingCriteriaDisplay';
 
 const Label = styled.p`
   color: #b1b1b5;
@@ -104,14 +104,14 @@ export const TargetPopulationCore = ({
           </Typography>
           <Box mt={2}>
             <Grid container>
-              <Grid item xs={6}>
+              <Grid size={{ xs:6 }}>
                 {targetPopulation?.excludedIds}
               </Grid>
             </Grid>
           </Box>
           <Box mt={2}>
             <Grid container>
-              <Grid item xs={6}>
+              <Grid size={{ xs:6 }}>
                 {targetPopulation?.exclusionReason}
               </Grid>
             </Grid>

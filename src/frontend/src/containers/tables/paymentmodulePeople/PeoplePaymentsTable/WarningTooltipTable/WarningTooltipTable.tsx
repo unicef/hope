@@ -5,7 +5,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid,
+  Grid2 as Grid,
   Table,
   TableBody,
   TableCell,
@@ -126,12 +126,12 @@ export function WarningTooltipTable({
         </Box>
         <GreyBox p={3}>
           <Grid container>
-            <Grid item xs={6}>
+            <Grid size={{ xs:6 }}>
               <LabelizedField label={t('Start Date')}>
                 <UniversalMoment>{paymentPlan.startDate}</UniversalMoment>
               </LabelizedField>
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={{ xs:6 }}>
               <LabelizedField label={t('End Date')}>
                 <UniversalMoment>{paymentPlan.endDate}</UniversalMoment>
               </LabelizedField>

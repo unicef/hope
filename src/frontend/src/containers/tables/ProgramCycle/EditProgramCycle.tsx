@@ -1,4 +1,4 @@
-import React, { ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { decodeIdString, today } from '@utils/utils';
@@ -10,6 +10,7 @@ import {
   DialogContent,
   DialogTitle,
   FormHelperText,
+  Grid2 as Grid,
   IconButton,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/EditRounded';
@@ -18,7 +19,6 @@ import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { DialogDescription } from '@containers/dialogs/DialogDescription';
 import { GreyText } from '@core/GreyText';
-import Grid from '@mui/material/Grid';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
@@ -35,6 +35,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ProgramQuery } from '@generated/graphql';
 import type { DefaultError } from '@tanstack/query-core';
 import { useSnackbar } from '@hooks/useSnackBar';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface MutationError extends DefaultError {
   data: any;
@@ -45,7 +46,7 @@ interface EditProgramCycleProps {
   program: ProgramQuery['program'];
 }
 
-export const EditProgramCycle = ({
+const EditProgramCycle = ({
   programCycle,
   program,
 }: EditProgramCycleProps): ReactElement => {
@@ -167,7 +168,7 @@ export const EditProgramCycle = ({
                   </GreyText>
                 </DialogDescription>
                 <Grid container spacing={3}>
-                  <Grid item xs={12}>
+                  <Grid size={{ xs: 12 }}>
                     <Field
                       name="title"
                       fullWidth
@@ -180,7 +181,7 @@ export const EditProgramCycle = ({
                       <FormHelperText error>{error.data.title}</FormHelperText>
                     )}
                   </Grid>
-                  <Grid item xs={6} data-cy="start-date-cycle">
+                  <Grid size={{ xs: 6 }} data-cy="start-date-cycle">
                     <Field
                       name="start_date"
                       label={t('Start Date')}
@@ -197,7 +198,7 @@ export const EditProgramCycle = ({
                       </FormHelperText>
                     )}
                   </Grid>
-                  <Grid item xs={6} data-cy="end-date-cycle">
+                  <Grid size={{ xs: 6 }} data-cy="end-date-cycle">
                     <Field
                       name="end_date"
                       label={t('End Date')}
@@ -244,3 +245,5 @@ export const EditProgramCycle = ({
     </>
   );
 };
+
+export default withErrorBoundary(EditProgramCycle, 'EditProgramCycle');

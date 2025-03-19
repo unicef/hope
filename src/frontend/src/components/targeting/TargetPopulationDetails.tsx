@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@mui/material';
+import { Grid2 as Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import {
   paymentPlanStatusToColor,
@@ -10,12 +10,13 @@ import { OverviewContainer } from '@core/OverviewContainer';
 import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface ProgramDetailsProps {
   targetPopulation;
 }
 
-export function TargetPopulationDetails({
+function TargetPopulationDetails({
   targetPopulation,
 }: ProgramDetailsProps): ReactElement {
   const { createdBy, program, programCycle } = targetPopulation;
@@ -29,7 +30,7 @@ export function TargetPopulationDetails({
       </Title>
       <OverviewContainer>
         <Grid data-cy="details-grid" container spacing={6}>
-          <Grid item xs={4}>
+          <Grid size={{ xs: 4 }}>
             <LabelizedField label={t('Status')}>
               <StatusBox
                 dataCy="target-population-status"
@@ -39,21 +40,21 @@ export function TargetPopulationDetails({
               />
             </LabelizedField>
           </Grid>
-          <Grid item xs={4}>
+          <Grid size={{ xs: 4 }}>
             <LabelizedField
               dataCy="created-by"
               label={t('created by')}
               value={`${createdBy.firstName} ${createdBy.lastName}`}
             />
           </Grid>
-          <Grid item xs={4}>
+          <Grid size={{ xs: 4 }}>
             <LabelizedField
               dataCy="program-name"
               label={t('Programme')}
               value={programName}
             />
           </Grid>
-          <Grid item xs={4}>
+          <Grid size={{ xs: 4 }}>
             <LabelizedField
               dataCy="programme-cycle-title"
               label={t('Programme Cycle')}
@@ -65,3 +66,8 @@ export function TargetPopulationDetails({
     </ContainerColumnWithBorder>
   );
 }
+
+export default withErrorBoundary(
+  TargetPopulationDetails,
+  'TargetPopulationDetails',
+);

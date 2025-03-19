@@ -125,7 +125,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
     def get_payload(self, obj: Payment) -> Dict:
         snapshot = getattr(obj, "household_snapshot", None)
         if not snapshot:
-            logger.warning(f"Not found snapshot for Payment {obj.unicef_id}")
+            raise PaymentGatewayAPI.PaymentGatewayAPIException(f"Not found snapshot for Payment {obj.unicef_id}")
 
         snapshot_data = snapshot.snapshot_data
         collector_data = snapshot_data.get("primary_collector") or snapshot_data.get("alternate_collector") or dict()
@@ -134,10 +134,12 @@ class PaymentSerializer(ReadOnlyModelSerializer):
         base_data = {
             "amount": obj.entitlement_quantity,
             "destination_currency": obj.currency,
+            "origination_currency": obj.currency,
             "phone_no": collector_data.get("phone_no", ""),
             "last_name": collector_data.get("family_name", ""),
             "first_name": collector_data.get("given_name", ""),
             "full_name": collector_data.get("full_name", ""),
+            "middle_name": collector_data.get("middle_name", ""),
         }
         if obj.delivery_type.code == "mobile_money" and not delivery_mech_data:  # this workaround need to be dropped
             base_data["service_provider_code"] = collector_data.get("flex_fields", {}).get(
@@ -151,7 +153,9 @@ class PaymentSerializer(ReadOnlyModelSerializer):
         payload_data = payload.data
 
         if delivery_mech_data:
-            payload_data.update(delivery_mech_data)
+            payload_data.update(
+                {field_name.split("__")[0]: field_value for field_name, field_value in delivery_mech_data.items()}
+            )
 
         return payload_data
 
@@ -556,6 +560,8 @@ class PaymentGatewayService:
                             self.update_payment(payment, pg_payment_records, instruction, payment_plan, exchange_rate)
 
                 if payment_plan.is_reconciled:
+                    payment_plan.status_finished()
+                    payment_plan.save()
                     for instruction in payment_instructions:
                         self.change_payment_instruction_status(PaymentInstructionStatus.FINALIZED, instruction)
 

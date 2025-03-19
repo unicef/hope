@@ -1,4 +1,4 @@
-import { Button, Grid, Typography } from '@mui/material';
+import { Button, Grid2 as Grid, Typography } from '@mui/material';
 import { AddCircleOutline } from '@mui/icons-material';
 import { FieldArray } from 'formik';
 import { useLocation } from 'react-router-dom';
@@ -13,12 +13,13 @@ import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
 import { EditHouseholdDataChangeFieldRow } from './EditHouseholdDataChangeFieldRow';
 import { useProgramContext } from 'src/programContext';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 export interface EditHouseholdDataChangeProps {
   values;
   setFieldValue;
 }
-export function EditHouseholdDataChange({
+function EditHouseholdDataChange({
   values,
   setFieldValue,
 }: EditHouseholdDataChangeProps): ReactElement {
@@ -90,7 +91,7 @@ export function EditHouseholdDataChange({
                     values={values}
                   />
                 ))}
-                <Grid item xs={4}>
+                <Grid size={{ xs: 4 }}>
                   <Button
                     color="primary"
                     startIcon={<AddCircleOutline />}
@@ -110,3 +111,8 @@ export function EditHouseholdDataChange({
     )
   );
 }
+
+export default withErrorBoundary(
+  EditHouseholdDataChange,
+  'EditHouseholdDataChange',
+);

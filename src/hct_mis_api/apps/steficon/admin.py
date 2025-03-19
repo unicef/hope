@@ -35,6 +35,7 @@ from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.administration.widgets import JsonWidget
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.steficon.forms import (
     RuleCommitAdminForm,
     RuleDownloadCSVFileProcessForm,
@@ -60,6 +61,7 @@ class AutocompleteWidget(forms.Widget):
         choices: Tuple = (),
         using: Optional[Any] = None,
         pk_field: str = "id",
+        business_area: Optional[UUID] = None,
     ) -> None:
         self.model = model
         self.pk_field = pk_field
@@ -67,6 +69,7 @@ class AutocompleteWidget(forms.Widget):
         self.db = using
         self.choices = choices
         self.attrs = {} if attrs is None else attrs.copy()
+        self.business_area = business_area
 
     class Media:
         extra = "" if settings.DEBUG else ".min"
@@ -100,12 +103,15 @@ class AutocompleteWidget(forms.Widget):
         }
 
     def get_url(self) -> str:
-        return reverse("admin:autocomplete")
+        url = reverse("admin:autocomplete")
+        if self.business_area:
+            url += f"?business_area={self.business_area}"  #
+        return url
 
     def get_context(self, name: str, value: Any, attrs: Optional[Dict[str, Any]]) -> Dict:
         return {
             "widget": {
-                "query_string": "",
+                "query_string": f"business_area__exact={self.business_area}" if self.business_area else "",
                 "lookup_kwarg": "term",
                 "url": self.get_url(),
                 "target_opts": {
@@ -186,9 +192,7 @@ class TestRuleMixin:
         else:
             context["form"] = RuleTestForm(initial={"raw_data": '{"a": 1, "b":2}', "opt": "optFile"})
         if "form" in context:
-            from hct_mis_api.apps.targeting.models import TargetPopulation
-
-            context["form"].fields["target_population"].widget = AutocompleteWidget(TargetPopulation, self.admin_site)
+            context["form"].fields["target_population"].widget = AutocompleteWidget(PaymentPlan, self.admin_site)
             context["form"].fields["content_type"].widget = AutocompleteWidget(ContentType, self.admin_site)
         return TemplateResponse(request, "admin/steficon/rule/test.html", context)
 

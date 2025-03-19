@@ -123,14 +123,13 @@
     "org_name_enumerator": "UNICEF",
     "village": "",
     "registration_method": "COMMUNITY",
-    "collect_individual_data": "1",
     "currency": "USD",
     "unhcr_id": "",
     "detail_id": "4",
     "total_cash_received_usd": null,
     "total_cash_received": null,
-    "programs": [],
-    "copied_from": null
+    "copied_from": null,
+    "program_id": "939ff91b-7f89-4e3c-9519-26ed62f51718"
   }
 },
 {
@@ -201,13 +200,11 @@
     "org_name_enumerator": "UNICEF",
     "village": "",
     "registration_method": "COMMUNITY",
-    "collect_individual_data": "1",
     "currency": "USD",
     "unhcr_id": "",
     "detail_id": "3",
     "total_cash_received_usd": null,
     "total_cash_received": null,
-    "programs": [],
     "program_id": "939ff91b-7f89-4e3c-9519-26ed62f51718",
     "copied_from": null
   }
@@ -449,7 +446,6 @@
     "last_registration_date": "1974-12-15",
     "flex_fields": {},
     "enrolled_in_nutrition_programme": null,
-    "administration_of_rutf": null,
     "unicef_id": "IND-74-0000.0001",
     "program_id": "939ff91b-7f89-4e3c-9519-26ed62f51718",
     "deduplication_golden_record_status": "DUPLICATE",
@@ -545,7 +541,6 @@
     "last_registration_date": "1988-06-15",
     "flex_fields": {},
     "enrolled_in_nutrition_programme": null,
-    "administration_of_rutf": null,
     "unicef_id": "IND-88-0000.0002",
     "deduplication_golden_record_status": "UNIQUE",
     "deduplication_batch_status": "UNIQUE_IN_BATCH",
@@ -581,7 +576,8 @@
     "detail_id": 7,
     "disability_certificate_picture": "",
     "vector_column": "'angela':1 'kowalska':2",
-    "copied_from": null
+    "copied_from": null,
+    "program_id": "939ff91b-7f89-4e3c-9519-26ed62f51718"
   }
 },
 {
@@ -622,7 +618,6 @@
     "last_registration_date": "1942-12-12",
     "flex_fields": {},
     "enrolled_in_nutrition_programme": null,
-    "administration_of_rutf": null,
     "unicef_id": "IND-42-0000.0003",
     "deduplication_golden_record_status": "UNIQUE",
     "deduplication_batch_status": "UNIQUE_IN_BATCH",
@@ -658,7 +653,8 @@
     "detail_id": 8,
     "disability_certificate_picture": "",
     "vector_column": "'alicja':1 'kowalska':2",
-    "copied_from": null
+    "copied_from": null,
+    "program_id": "939ff91b-7f89-4e3c-9519-26ed62f51718"
   }
 },
 {
@@ -699,7 +695,6 @@
     "last_registration_date": "1969-06-22",
     "flex_fields": {},
     "enrolled_in_nutrition_programme": null,
-    "administration_of_rutf": null,
     "unicef_id": "IND-69-0000.0004",
     "deduplication_golden_record_status": "UNIQUE",
     "deduplication_batch_status": "UNIQUE_IN_BATCH",
@@ -735,7 +730,8 @@
     "detail_id": 4,
     "disability_certificate_picture": "",
     "vector_column": "'alicja':1 'romaniak':2",
-    "copied_from": null
+    "copied_from": null,
+    "program_id": "939ff91b-7f89-4e3c-9519-26ed62f51718"
   }
 },
 {
@@ -776,7 +772,6 @@
     "last_registration_date": "1988-06-15",
     "flex_fields": {},
     "enrolled_in_nutrition_programme": null,
-    "administration_of_rutf": null,
     "unicef_id": "IND-88-0000.0005",
     "deduplication_golden_record_status": "UNIQUE",
     "deduplication_batch_status": "UNIQUE_IN_BATCH",
@@ -812,7 +807,8 @@
     "detail_id": 6,
     "disability_certificate_picture": "",
     "vector_column": "'agata':1 'kowalska':2",
-    "copied_from": null
+    "copied_from": null,
+    "program_id": "939ff91b-7f89-4e3c-9519-26ed62f51718"
   }
 },
 {
@@ -853,7 +849,6 @@
     "last_registration_date": "1988-06-15",
     "flex_fields": {},
     "enrolled_in_nutrition_programme": null,
-    "administration_of_rutf": null,
     "unicef_id": "IND-88-0000.0006",
     "program_id": "939ff91b-7f89-4e3c-9519-26ed62f51718",
     "deduplication_golden_record_status": "DUPLICATE",
@@ -949,7 +944,6 @@
     "last_registration_date": "1988-06-15",
     "flex_fields": {},
     "enrolled_in_nutrition_programme": null,
-    "administration_of_rutf": null,
     "unicef_id": "IND-88-0000.0999",
     "program_id": "939ff91b-7f89-4e3c-9519-26ed62f51718",
     "deduplication_golden_record_status": "DUPLICATE",

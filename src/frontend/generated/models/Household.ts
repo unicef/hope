@@ -14,7 +14,6 @@ import type { RdiMergeStatusEnum } from './RdiMergeStatusEnum';
 import type { RegistrationMethodEnum } from './RegistrationMethodEnum';
 import type { ResidenceStatusEnum } from './ResidenceStatusEnum';
 export type Household = {
-    collect_individual_data: string;
     first_registration_date?: string;
     last_registration_date?: string;
     members: Array<Individual>;
@@ -28,7 +27,7 @@ export type Household = {
     is_removed?: boolean;
     removed_date?: string | null;
     last_sync_at?: string | null;
-    unicef_id?: string | null;
+    internal_data?: any;
     withdrawn?: boolean;
     withdrawn_date?: string | null;
     consent_sign?: string;
@@ -77,7 +76,6 @@ export type Household = {
     registration_method?: (RegistrationMethodEnum | BlankEnum);
     currency?: (CurrencyEnum | BlankEnum);
     unhcr_id?: string;
-    user_fields?: any;
     registration_id?: string | null;
     program_registration_id?: string | null;
     total_cash_received_usd?: string | null;
@@ -86,7 +84,6 @@ export type Household = {
     origin_unicef_id?: string | null;
     is_migration_handled?: boolean;
     migrated_at?: string | null;
-    is_recalculated_group_ages?: boolean;
     collect_type?: CollectTypeEnum;
     enumerator_rec_id?: number | null;
     mis_unicef_id?: string | null;

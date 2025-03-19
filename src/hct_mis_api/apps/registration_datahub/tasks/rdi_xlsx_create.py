@@ -29,10 +29,6 @@ from hct_mis_api.apps.core.models import (
 from hct_mis_api.apps.core.utils import SheetImageLoader, timezone_datetime
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import (
-    COLLECT_TYPE_FULL,
-    COLLECT_TYPE_NONE,
-    COLLECT_TYPE_PARTIAL,
-    COLLECT_TYPE_UNKNOWN,
     HEAD,
     NON_BENEFICIARY,
     ROLE_ALTERNATE,
@@ -90,25 +86,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             list_of_pdu_column_names.append(f"{flexible_attribute.name}_round_1_value")
             list_of_pdu_column_names.append(f"{flexible_attribute.name}_round_1_collection_date")
         return list_of_pdu_column_names
-
-    def _handle_collect_individual_data(
-        self,
-        value: Any,
-        header: str,
-        row_num: int,
-        individual: PendingIndividual,
-        *args: Any,
-        **kwargs: Any,
-    ) -> str:
-        try:
-            return {
-                "FULL": COLLECT_TYPE_FULL,
-                "PARTIAL": COLLECT_TYPE_PARTIAL,
-                "NONE": COLLECT_TYPE_NONE,
-                "UNKNOWN": COLLECT_TYPE_UNKNOWN,
-            }[value]
-        except KeyError:
-            return COLLECT_TYPE_UNKNOWN
 
     def _handle_bank_account_fields(
         self,
@@ -526,7 +503,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "child_hoh_h_c": self._handle_bool_field,
                 "consent_h_c": self._handle_bool_field,
                 "first_registration_date_h_c": self._handle_datetime,
-                "collect_individual_data": self._handle_collect_individual_data,
             },
         }
         complex_fields["individuals"].update(
@@ -729,8 +705,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 individual.phone_no_valid = is_valid_phone_number(str(individual.phone_no))
             if individual.phone_no_alternative:
                 individual.phone_no_alternative_valid = is_valid_phone_number(str(individual.phone_no_alternative))
-            if individual.household:
-                individual.registration_id = individual.household.registration_id
+            if individual.household and not individual.detail_id:  # pragma: no cover
+                individual.detail_id = individual.household.detail_id
 
     @transaction.atomic
     def execute(

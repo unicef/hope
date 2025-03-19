@@ -1,4 +1,4 @@
-import { FormHelperText, Grid } from '@mui/material';
+import { FormHelperText, Grid2 as Grid } from '@mui/material';
 import { FieldArray } from 'formik';
 import { GrievanceTicketQuery } from '@generated/graphql';
 import { EditDocumentationRow } from './EditDocumentationRow';
