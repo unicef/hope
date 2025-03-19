@@ -168,7 +168,6 @@ class HouseholdFilter(FilterSet):
         return qs.filter(Q(id__in=es_ids) | inner_query).distinct()
 
     def _get_elasticsearch_query_for_households(self, search: str) -> Dict:
-        business_area = self.data["business_area"]
         query: Dict[str, Any] = {
             "size": "100",
             "_source": False,
@@ -193,6 +192,7 @@ class HouseholdFilter(FilterSet):
             },
         }
         if config.USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH_USE_BUSINESS_AREA:  # pragma: no cover
+            business_area = self.request.parser_context["kwargs"]["business_area_slug"]
             query["query"]["bool"]["filter"] = [{"term": {"business_area": business_area}}]
         return query
 

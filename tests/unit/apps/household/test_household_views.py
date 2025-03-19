@@ -8,6 +8,7 @@ from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
 import pytest
+from constance.test import override_config
 from rest_framework import status
 from rest_framework.reverse import reverse
 
@@ -20,6 +21,7 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.household.fixtures import (
+    BankAccountInfoFactory,
     DocumentFactory,
     DocumentTypeFactory,
     create_household_and_individuals,
@@ -28,6 +30,7 @@ from hct_mis_api.apps.household.models import DUPLICATE, HOST, REFUGEE, Househol
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 pytestmark = pytest.mark.django_db
@@ -943,3 +946,63 @@ class TestHouseholdFilter:
             household1_data={"first_registration_date": timezone.make_aware(timezone.datetime(2022, 12, 31))},
             household2_data={"first_registration_date": timezone.make_aware(timezone.datetime(2022, 12, 30))},
         )
+
+    @override_config(USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH=True)
+    @pytest.mark.parametrize(
+        "filters,household1_data,household2_data,hoh_1_data,hoh_2_data",
+        [
+            ({"search": "HH-123"}, {"unicef_id": "HH-123"}, {"unicef_id": "HH-321"}, {}, {}),
+            ({"search": "John"}, {}, {}, {"full_name": "John Doe"}, {"full_name": "Jane Doe"}),
+            ({"search": "IND-123"}, {}, {}, {"unicef_id": "IND-123"}, {"unicef_id": "IND-321"}),
+            ({"search": "123456789"}, {}, {}, {"phone_no": "123456789"}, {"phone_no": "987654321"}),
+            (
+                {"search": "123456789"},
+                {},
+                {},
+                {"phone_no_alternative": "123 456 789"},
+                {"phone_no_alternative": "987 654 321"},
+            ),
+            ({"search": "HOPE-123"}, {"detail_id": "HOPE-123"}, {"detail_id": "HOPE-321"}, {}, {}),
+            ({"search": "456"}, {"program_registration_id": "456"}, {"program_registration_id": "123"}, {}, {}),
+        ],
+    )
+    def test_search(self, filters, household1_data, household2_data, hoh_1_data, hoh_2_data):
+        household1, household2 = self._create_test_households(
+            household1_data=household1_data,
+            household2_data=household2_data,
+            hoh_1_data=hoh_1_data,
+            hoh_2_data=hoh_2_data,
+        )
+        rebuild_search_index()
+        response = self.client.get(self.list_url, filters)
+        assert response.status_code == status.HTTP_200_OK, response.json()
+        response_data = response.json()["results"]
+        assert len(response_data) == 1
+        assert response_data[0]["id"] == encode_id_base64_required(household1.id, "Household")
+        return response_data
+
+    @override_config(USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH=True)
+    def test_search_by_bank_account_number(self):
+        household1, individuals1 = create_household_and_individuals(
+            household_data={
+                "program": self.program,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[{}, {}],
+        )
+        household2, individuals2 = create_household_and_individuals(
+            household_data={
+                "program": self.program,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[{}, {}],
+        )
+        BankAccountInfoFactory(bank_account_number="123456789", individual=individuals1[0])
+        BankAccountInfoFactory(bank_account_number="987654321", individual=individuals2[0])
+        rebuild_search_index()
+        response = self.client.get(self.list_url, {"search": "123456789"})
+        assert response.status_code == status.HTTP_200_OK, response.json()
+        response_data = response.json()["results"]
+        assert len(response_data) == 1
+        assert response_data[0]["id"] == encode_id_base64_required(household1.id, "Household")
+        return response_data
