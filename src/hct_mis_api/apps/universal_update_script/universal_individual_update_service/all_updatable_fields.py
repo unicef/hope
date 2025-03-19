@@ -43,7 +43,6 @@ individual_fields: Dict[str, Tuple[str, Any, Any]] = {
     "first_registration_date": ("first_registration_date", validate_date, handle_simple_field),
     "last_registration_date": ("last_registration_date", validate_date, handle_simple_field),
     "enrolled_in_nutrition_programme": ("enrolled_in_nutrition_programme", validate_boolean, handle_boolean_field),
-    "administration_of_rutf": ("administration_of_rutf", validate_boolean, handle_simple_field),
     "pregnant": ("pregnant", validate_boolean, handle_boolean_field),
     "disability": ("disability", validate_choices, handle_simple_field),
     "observed_disability": ("observed_disability", validate_boolean, handle_boolean_field),
