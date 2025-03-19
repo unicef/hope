@@ -77,6 +77,8 @@ class CommaSeparatedArrayField(forms.Field):
         super().__init__(*args, **kwargs)
 
     def prepare_value(self, value: Any) -> str:
+        if value is None:
+            return ""
         if isinstance(value, list):
             # Prepare value to be displayed as a newline-separated string
             return "\n".join(str(self.base_field.prepare_value(v)) for v in value)
