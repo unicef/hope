@@ -278,107 +278,31 @@ class PaymentPlan(
         "total_undelivered_quantity_usd",
     ]
 
-    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
-    program_cycle = models.ForeignKey("program.ProgramCycle", related_name="payment_plans", on_delete=models.CASCADE)
-    status_date = models.DateTimeField()
-    start_date = models.DateTimeField(
-        db_index=True,
-        blank=True,
-        null=True,
+    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE, help_text="Business Area")
+    program_cycle = models.ForeignKey(
+        "program.ProgramCycle", related_name="payment_plans", on_delete=models.CASCADE, help_text="Program Cycle"
     )
-    end_date = models.DateTimeField(
-        db_index=True,
-        blank=True,
-        null=True,
+    imported_file = models.ForeignKey(
+        FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL, help_text="Imported File"
     )
-    exchange_rate = models.DecimalField(decimal_places=8, blank=True, null=True, max_digits=14)
-
-    total_entitled_quantity = models.DecimalField(
-        decimal_places=2,
-        max_digits=12,
-        validators=[MinValueValidator(Decimal("0"))],
-        db_index=True,
-        null=True,
-    )
-    total_entitled_quantity_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0"))], null=True, blank=True
-    )
-    total_entitled_quantity_revised = models.DecimalField(
-        decimal_places=2,
-        max_digits=12,
-        validators=[MinValueValidator(Decimal("0"))],
-        db_index=True,
-        null=True,
-        blank=True,
-    )
-    total_entitled_quantity_revised_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0"))], null=True, blank=True
-    )
-    total_delivered_quantity = models.DecimalField(
-        decimal_places=2,
-        max_digits=12,
-        validators=[MinValueValidator(Decimal("0"))],
-        db_index=True,
-        null=True,
-        blank=True,
-    )
-    total_delivered_quantity_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0"))], null=True, blank=True
-    )
-    total_undelivered_quantity = models.DecimalField(
-        decimal_places=2,
-        max_digits=12,
-        validators=[MinValueValidator(Decimal("0"))],
-        db_index=True,
-        null=True,
-        blank=True,
-    )
-    total_undelivered_quantity_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0"))], null=True, blank=True
-    )
-
-    created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.PROTECT,
-        related_name="created_payment_plans",
-    )
-    status = FSMField(default=Status.TP_OPEN, protected=False, db_index=True, choices=Status.choices)
-    background_action_status = FSMField(
-        default=None,
-        protected=False,
-        db_index=True,
-        blank=True,
-        null=True,
-        choices=BackgroundActionStatus.choices,
-    )
-    build_status = FSMField(
-        choices=BuildStatus.choices, default=None, protected=False, db_index=True, null=True, blank=True
-    )
-    built_at = models.DateTimeField(null=True, blank=True)
-    targeting_criteria = models.OneToOneField(
-        "targeting.TargetingCriteria",
-        on_delete=models.PROTECT,
-        related_name="payment_plan",
-    )
-    currency = models.CharField(max_length=4, choices=CURRENCY_CHOICES, blank=True, null=True)
-    dispersion_start_date = models.DateField(blank=True, null=True)
-    dispersion_end_date = models.DateField(blank=True, null=True)
-    female_children_count = models.PositiveIntegerField(default=0)
-    male_children_count = models.PositiveIntegerField(default=0)
-    female_adults_count = models.PositiveIntegerField(default=0)
-    male_adults_count = models.PositiveIntegerField(default=0)
-    total_households_count = models.PositiveIntegerField(default=0)
-    total_individuals_count = models.PositiveIntegerField(default=0)
-    imported_file_date = models.DateTimeField(blank=True, null=True)
-    imported_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL)
     export_file_entitlement = models.ForeignKey(
-        FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL
+        FileTemp,
+        null=True,
+        blank=True,
+        related_name="+",
+        on_delete=models.SET_NULL,
+        help_text="Export File Entitlement",
     )
     export_file_per_fsp = models.ForeignKey(
-        FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL
+        FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL, help_text="Export File per FSP"
     )  # save xlsx with auth code for API communication channel FSP, and just xlsx for others
     export_pdf_file_summary = models.ForeignKey(
-        FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL
+        FileTemp,
+        null=True,
+        blank=True,
+        related_name="+",
+        on_delete=models.SET_NULL,
+        help_text="Export PDF File Summary",
     )
     steficon_rule = models.ForeignKey(
         RuleCommit,
@@ -386,25 +310,41 @@ class PaymentPlan(
         on_delete=models.PROTECT,
         related_name="payment_plans",
         blank=True,
+        help_text="Engine Formula for calculation entitlement value",
     )
-    steficon_applied_date = models.DateTimeField(blank=True, null=True)
     steficon_rule_targeting = models.ForeignKey(
         RuleCommit,
         null=True,
         on_delete=models.PROTECT,
         related_name="payment_plans_target",
         blank=True,
+        help_text="Engine Formula for calculation vulnerability score value",
     )
-    steficon_targeting_applied_date = models.DateTimeField(blank=True, null=True)
-
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="created_payment_plans",
+        help_text="Created by user",
+    )
+    targeting_criteria = models.OneToOneField(
+        "targeting.TargetingCriteria",
+        on_delete=models.PROTECT,
+        related_name="payment_plan",
+        help_text="Target Criteria",
+    )
     source_payment_plan = models.ForeignKey(
-        "self", null=True, blank=True, on_delete=models.CASCADE, related_name="follow_ups"
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="follow_ups",
+        help_text="Source Payment Plan (applicable for follow Up Payment Plan)",
     )
-    is_follow_up = models.BooleanField(default=False)
 
-    excluded_ids = models.TextField(blank=True, null=True, help_text="Targeting level exclusion")
-    exclusion_reason = models.TextField(blank=True, null=True)
-    exclude_household_error = models.TextField(blank=True, null=True)
+    storage_file = models.OneToOneField(
+        StorageFile, blank=True, null=True, on_delete=models.SET_NULL, help_text="Storage File"
+    )
+
     name = models.CharField(
         max_length=255,
         validators=[
@@ -416,23 +356,147 @@ class PaymentPlan(
         ],
         null=True,
         blank=True,
+        help_text="Name",
     )
+    start_date = models.DateTimeField(
+        db_index=True,
+        blank=True,
+        null=True,
+        help_text="Payment Plan start date",
+    )
+    end_date = models.DateTimeField(
+        db_index=True,
+        blank=True,
+        null=True,
+        help_text="Payment Plan end date",
+    )
+    currency = models.CharField(max_length=4, choices=CURRENCY_CHOICES, blank=True, null=True, help_text="Currency")
+    dispersion_start_date = models.DateField(blank=True, null=True, help_text="Dispersion Start Date")
+    dispersion_end_date = models.DateField(blank=True, null=True, help_text="Dispersion End Date")
+    excluded_ids = models.TextField(blank=True, help_text="Targeting level exclusion IDs")
+    exclusion_reason = models.TextField(blank=True, help_text="Exclusion reason (Targeting level)")
     vulnerability_score_min = models.DecimalField(
         null=True,
         decimal_places=3,
         max_digits=6,
-        help_text="Written by a tool such as Corticon.",
+        help_text="Written by a tool such as Engine Formula",
         blank=True,
     )
     vulnerability_score_max = models.DecimalField(
         null=True,
         decimal_places=3,
         max_digits=6,
-        help_text="Written by a tool such as Corticon.",
+        help_text="Written by a tool such as Engine Formula",
         blank=True,
     )
-    storage_file = models.OneToOneField(StorageFile, blank=True, null=True, on_delete=models.SET_NULL)
-    is_cash_assist = models.BooleanField(default=False)
+    # System fields
+    status = FSMField(
+        default=Status.TP_OPEN, protected=False, db_index=True, choices=Status.choices, help_text="Status [sys]"
+    )
+    background_action_status = FSMField(
+        default=None,
+        protected=False,
+        db_index=True,
+        blank=True,
+        null=True,
+        choices=BackgroundActionStatus.choices,
+        help_text="Background Action Status for celery task [sys]",
+    )
+    build_status = FSMField(
+        choices=BuildStatus.choices,
+        default=None,
+        protected=False,
+        db_index=True,
+        null=True,
+        blank=True,
+        help_text="Build Status for celery task [sys]",
+    )
+    built_at = models.DateTimeField(null=True, blank=True, help_text="Built at [sys]")
+    exchange_rate = models.DecimalField(
+        decimal_places=8, blank=True, null=True, max_digits=14, help_text="Exchange Rate [sys]"
+    )
+    female_children_count = models.PositiveIntegerField(default=0, help_text="Female Children Count [sys]")
+    male_children_count = models.PositiveIntegerField(default=0, help_text="Male Children Count [sys]")
+    female_adults_count = models.PositiveIntegerField(default=0, help_text="Female Adults Count [sys]")
+    male_adults_count = models.PositiveIntegerField(default=0, help_text="Male Adults Count [sys]")
+    total_households_count = models.PositiveIntegerField(default=0, help_text="Total Households Count [sys]")
+    total_individuals_count = models.PositiveIntegerField(default=0, help_text="Total Individuals Count [sys]")
+    imported_file_date = models.DateTimeField(blank=True, null=True, help_text="Imported File Date [sys]")
+    total_entitled_quantity = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0"))],
+        db_index=True,
+        null=True,
+        help_text="Total Entitled Quantity [sys]",
+    )
+    total_entitled_quantity_usd = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0"))],
+        null=True,
+        blank=True,
+        help_text="Total Entitled Quantity USD [sys]",
+    )
+    total_entitled_quantity_revised = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0"))],
+        db_index=True,
+        null=True,
+        blank=True,
+        help_text="Total Entitled Quantity Revised [sys]",
+    )
+    total_entitled_quantity_revised_usd = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0"))],
+        null=True,
+        blank=True,
+        help_text="Total Entitled Quantity Revised USD [sys]",
+    )
+    total_delivered_quantity = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0"))],
+        db_index=True,
+        null=True,
+        blank=True,
+        help_text="Total Delivered Quantity [sys]",
+    )
+    total_delivered_quantity_usd = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0"))],
+        null=True,
+        blank=True,
+        help_text="Total Delivered Quantity USD [sys]",
+    )
+    total_undelivered_quantity = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0"))],
+        db_index=True,
+        null=True,
+        blank=True,
+        help_text="Total Undelivered Quantity [sys]",
+    )
+    total_undelivered_quantity_usd = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0"))],
+        null=True,
+        blank=True,
+        help_text="Total Undelivered Quantity USD [sys]",
+    )
+    steficon_targeting_applied_date = models.DateTimeField(
+        blank=True, null=True, help_text="Engine Formula applied date for targeting [sys]"
+    )
+    steficon_applied_date = models.DateTimeField(blank=True, null=True, help_text="Engine Formula applied date [sys]")
+    is_follow_up = models.BooleanField(default=False, help_text="Follow Up Payment Plan flag [sys]")
+    exclude_household_error = models.TextField(blank=True, help_text="Exclusion reason (Targeting level) [sys]")
+    status_date = models.DateTimeField(help_text="Date and time of Payment Plan status [sys]")
+    is_cash_assist = models.BooleanField(default=False, help_text="Cash Assist Flag [sys]")
     delivery_mechanism = models.ForeignKey("payment.DeliveryMechanism", blank=True, null=True, on_delete=models.PROTECT)
     financial_service_provider = models.ForeignKey(
         "payment.FinancialServiceProvider", blank=True, null=True, on_delete=models.PROTECT
