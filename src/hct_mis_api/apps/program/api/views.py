@@ -27,6 +27,7 @@ from hct_mis_api.apps.core.api.mixins import (
     BusinessAreaMixin,
     ProgramMixin,
     SerializerActionMixin,
+    CountActionMixin,
 )
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.payment.models import PaymentPlan
@@ -52,6 +53,7 @@ logger = logging.getLogger(__name__)
 
 
 class ProgramViewSet(
+    CountActionMixin,
     SerializerActionMixin,
     BusinessAreaMixin,
     ProgramDeletionValidator,
