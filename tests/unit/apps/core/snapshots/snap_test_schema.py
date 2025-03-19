@@ -11,6 +11,10 @@ snapshots['TestAllCollectorsFields::test_collectors_fields_choices_data 1'] = {
     'data': {
         'allCollectorFieldsAttributes': [
             {
+                'labelEn': 'Bank Number',
+                'name': 'bank__number'
+            },
+            {
                 'labelEn': 'Mobile Number',
                 'name': 'mobile__number'
             }
