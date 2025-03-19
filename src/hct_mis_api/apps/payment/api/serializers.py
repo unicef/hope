@@ -1,7 +1,9 @@
 import base64
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from decimal import Decimal
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Sum
+from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 
 from rest_framework import serializers
@@ -9,15 +11,18 @@ from rest_framework import serializers
 from hct_mis_api.apps.account.api.fields import Base64ModelField
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
-from hct_mis_api.apps.core.utils import decode_id_string
+from hct_mis_api.apps.core.api.serializers import ChoiceSerializer
+from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object
 from hct_mis_api.apps.household.api.serializers.household import (
     HouseholdDetailSerializer,
 )
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.payment.models import (
+    DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     Payment,
     PaymentPlan,
+    PaymentPlanSplit,
     PaymentPlanSupportingDocument,
 )
 
@@ -135,6 +140,81 @@ class PaymentPlanListSerializer(serializers.ModelSerializer):
         )
 
 
+class FinancialServiceProviderSerializer(serializers.ModelSerializer):
+    is_payment_gateway = serializers.BooleanField(source="is_payment_gateway")
+
+    class Meta:
+        model = FinancialServiceProvider
+        fields = (
+            "id",
+            "name",
+            "communication_channel",
+            "is_payment_gateway",
+        )
+
+
+class DeliveryMechanismPerPaymentPlanSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source="delivery_mechanism.name")
+    code = serializers.CharField(source="delivery_mechanism.code")
+    order = serializers.CharField(source="delivery_mechanism_order")
+    fsp = FinancialServiceProviderSerializer(read_only=True)
+
+    class Meta:
+        model = DeliveryMechanismPerPaymentPlan
+        fields = (
+            "id",
+            "name",
+            "code",
+            "order",
+            "chosen_configuration",
+            "fsp",
+        )
+
+
+class ReconciliationSummarySerializer(serializers.Serializer):
+    delivered_fully = serializers.IntegerField()
+    delivered_partially = serializers.IntegerField()
+    not_delivered = serializers.IntegerField()
+    unsuccessful = serializers.IntegerField()
+    pending = serializers.IntegerField()
+    force_failed = serializers.IntegerField()
+    number_of_payments = serializers.IntegerField()
+    reconciled = serializers.IntegerField()
+
+
+def _calculate_volume(
+    delivery_mechanism_per_payment_plan: "DeliveryMechanismPerPaymentPlan", field: str
+) -> Optional[Decimal]:
+    if not delivery_mechanism_per_payment_plan.financial_service_provider:
+        return None
+    payments = delivery_mechanism_per_payment_plan.payment_plan.eligible_payments.filter(
+        financial_service_provider=delivery_mechanism_per_payment_plan.financial_service_provider,
+    )
+    return payments.aggregate(entitlement_sum=Coalesce(Sum(field), Decimal(0.0)))["entitlement_sum"]
+
+
+class VolumeByDeliveryMechanismSerializer(serializers.ModelSerializer):
+    delivery_mechanism = DeliveryMechanismPerPaymentPlanSerializer(read_only=True)
+    volume = serializers.FloatField()
+    volume_usd = serializers.FloatField()
+
+    def get_delivery_mechanism(self, info: Any) -> "VolumeByDeliveryMechanismSerializer":
+        return self
+
+    def get_volume(self, info: Any) -> Optional[Decimal]:  # non-usd
+        return _calculate_volume(self, "entitlement_quantity")  # type: ignore
+
+    def get_volume_usd(self, info: Any) -> Optional[Decimal]:
+        return _calculate_volume(self, "entitlement_quantity_usd")  # type: ignore
+
+    class Meta:
+        model = DeliveryMechanismPerPaymentPlan
+        fields = (
+            "id",
+            "delivery_mechanism",
+        )
+
+
 class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
     id = Base64ModelField(model_name="Household")
     status = serializers.CharField(source="get_status_display")
@@ -146,12 +226,13 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeri
     has_fsp_delivery_mechanism_xlsx_template = serializers.SerializerMethodField()
     imported_file_name = serializers.CharField(source="imported_file_name")
     payments_conflicts_count = serializers.SerializerMethodField()
-    # delivery_mechanisms = DeliveryMechanismPerPaymentPlanSerializer(many=True, read_only=True)
+    volume_by_delivery_mechanism = VolumeByDeliveryMechanismSerializer(many=True, read_only=True)
+    delivery_mechanisms = DeliveryMechanismPerPaymentPlanSerializer(many=True, read_only=True)
     bank_reconciliation_success = serializers.IntegerField(source="bank_reconciliation_success")
     bank_reconciliation_error = serializers.IntegerField(source="bank_reconciliation_error")
     can_create_payment_verification_plan = serializers.BooleanField(source="can_create_payment_verification_plan")
     available_payment_records_count = serializers.SerializerMethodField()
-    # reconciliation_summary = ReconciliationSummarySerializer(read_only=True)
+    reconciliation_summary = ReconciliationSummarySerializer(read_only=True)
     excluded_households = HouseholdDetailSerializer(many=True, read_only=True)
     # excluded_individuals = IndividualDetailSerializer(many=True, read_only=True)
     can_create_follow_up = serializers.SerializerMethodField()
@@ -166,6 +247,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeri
     can_export_xlsx = serializers.SerializerMethodField()
     can_download_xlsx = serializers.SerializerMethodField()
     can_send_xlsx_password = serializers.SerializerMethodField()
+    split_choices = ChoiceSerializer(many=True, read_only=True)
 
     # TODO: add payment list here?
 
@@ -195,14 +277,14 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeri
             "has_fsp_delivery_mechanism_xlsx_template",
             "imported_file_name",
             "payments_conflicts_count",
-            # "delivery_mechanisms",  # TODO: add soon
-            # "volume_by_delivery_mechanism", # TODO: add soon
-            # "split_choices", # TODO: add soon if needed
+            "delivery_mechanisms",
+            "volume_by_delivery_mechanism",
+            "split_choices",
             "bank_reconciliation_success",
             "bank_reconciliation_error",
             "can_create_payment_verification_plan",
             "available_payment_records_count",
-            # "reconciliation_summary",
+            "reconciliation_summary",
             "excluded_households",
             # "excluded_individuals",
             "can_create_follow_up",
@@ -372,6 +454,14 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeri
                     return False
                 return parent.has_export_file
         return False
+
+    @staticmethod
+    def get_split_choices(parent: PaymentPlan, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return to_choice_object(PaymentPlanSplit.SplitType.choices)
+
+    @staticmethod
+    def get_volume_by_delivery_mechanism(parent: PaymentPlan, info: Any) -> "QuerySet[DeliveryMechanismPerPaymentPlan]":
+        return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=parent).order_by("delivery_mechanism_order")
 
 
 class PaymentPlanBulkActionSerializer(serializers.Serializer):
