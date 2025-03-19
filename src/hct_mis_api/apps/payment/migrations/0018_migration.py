@@ -2,15 +2,25 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-from django.db.models import F
+from django.db.models import Subquery, OuterRef
 
 def migrate_dmppp_pp_fk(apps, schema_editor):  # pragma: no cover
     PaymentPlan = apps.get_model("payment", "PaymentPlan")
+    DeliveryMechanismPerPaymentPlan = apps.get_model("payment", "DeliveryMechanismPerPaymentPlan")
+
+    subquery_dm = DeliveryMechanismPerPaymentPlan.objects.filter(
+        payment_plan=OuterRef("pk")
+    ).values("delivery_mechanism")[:1]
+
+    subquery_fsp = DeliveryMechanismPerPaymentPlan.objects.filter(
+        payment_plan=OuterRef("pk")
+    ).values("financial_service_provider")[:1]
+
     PaymentPlan.objects.filter(
         delivery_mechanism_per_payment_plan__isnull=False
     ).update(
-        delivery_mechanism=F("delivery_mechanism_per_payment_plan__delivery_mechanism"),
-        financial_service_provider=F("delivery_mechanism_per_payment_plan__financial_service_provider")
+        delivery_mechanism=Subquery(subquery_dm),
+        financial_service_provider=Subquery(subquery_fsp)
     )
 
 class Migration(migrations.Migration):
