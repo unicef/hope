@@ -227,7 +227,7 @@ class TestRegistrationDataImportViews:
 
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 12
+            assert len(ctx.captured_queries) == 13
 
         # Test that reoccurring requests use cached data
         with CaptureQueriesContext(connection) as ctx:
