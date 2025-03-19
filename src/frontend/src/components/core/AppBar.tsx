@@ -65,7 +65,7 @@ const StyledIconButton = styled(IconButton)<AppBarProps>(({ open }) => ({
 export const AppBar = ({ open, handleDrawerOpen }): ReactElement => {
   const { businessArea, programId } = useBaseUrl();
 
-  const { data: meData, isLoading: meLoading } = useQuery({
+  const { data: meData } = useQuery({
     queryKey: ['profile', businessArea, programId],
     queryFn: () => {
       return RestService.restUsersProfileRetrieve({
@@ -81,9 +81,6 @@ export const AppBar = ({ open, handleDrawerOpen }): ReactElement => {
     window.location.href
   }`;
 
-  if (meLoading) {
-    return null;
-  }
   return (
     <StyledAppBar open={open}>
       <StyledToolbar>
