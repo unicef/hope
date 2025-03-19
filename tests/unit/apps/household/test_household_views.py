@@ -1,5 +1,5 @@
 import json
-from typing import Any, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 from django.contrib.gis.geos import Point
 from django.core.cache import cache
@@ -966,7 +966,9 @@ class TestHouseholdFilter:
             ({"search": "456"}, {"program_registration_id": "456"}, {"program_registration_id": "123"}, {}, {}),
         ],
     )
-    def test_search(self, filters, household1_data, household2_data, hoh_1_data, hoh_2_data):
+    def test_search(
+        self, filters: Dict, household1_data: Dict, household2_data: Dict, hoh_1_data: Dict, hoh_2_data: Dict
+    ) -> None:
         household1, household2 = self._create_test_households(
             household1_data=household1_data,
             household2_data=household2_data,
@@ -982,7 +984,7 @@ class TestHouseholdFilter:
         return response_data
 
     @override_config(USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH=True)
-    def test_search_by_bank_account_number(self):
+    def test_search_by_bank_account_number(self) -> None:
         household1, individuals1 = create_household_and_individuals(
             household_data={
                 "program": self.program,
