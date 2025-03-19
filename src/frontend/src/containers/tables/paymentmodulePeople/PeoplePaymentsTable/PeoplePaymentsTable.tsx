@@ -16,6 +16,7 @@ import { PeoplePaymentsTableRow } from './PeoplePaymentsTableRow';
 import { WarningTooltipTable } from './WarningTooltipTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { headCells } from './PeoplePaymentsTableHeadCells';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const StyledBox = styled(Box)`
   background-color: #fff;
@@ -27,7 +28,7 @@ interface PeoplePaymentsTableProps {
   canViewDetails?: boolean;
 }
 
-export const PeoplePaymentsTable = ({
+const PeoplePaymentsTable = ({
   businessArea,
   paymentPlan,
   permissions,
@@ -95,3 +96,4 @@ export const PeoplePaymentsTable = ({
     </>
   );
 };
+export default withErrorBoundary(PeoplePaymentsTable, 'PeoplePaymentsTable');

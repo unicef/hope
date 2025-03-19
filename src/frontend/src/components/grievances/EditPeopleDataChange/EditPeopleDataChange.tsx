@@ -1,4 +1,4 @@
-import { Button, Grid, Typography } from '@mui/material';
+import { Box, Button, Grid2 as Grid, Typography } from '@mui/material';
 import { AddCircleOutline } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
@@ -13,6 +13,11 @@ import {
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
 import { EditPeopleDataChangeFieldRow } from './EditPeopleDataChangeFieldRow';
+import { ExistingDocumentFieldArray } from '@components/grievances/EditIndividualDataChange/ExistingDocumentFieldArray';
+import { NewDocumentFieldArray } from '@components/grievances/EditIndividualDataChange/NewDocumentFieldArray';
+import { ExistingPaymentChannelFieldArray } from '../EditIndividualDataChange/ExistingPaymentChannelFieldArray';
+import { NewPaymentChannelFieldArray } from '../EditIndividualDataChange/NewPaymentChannelFieldArray';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -26,7 +31,7 @@ export interface EditPeopleDataChangeProps {
   field;
 }
 
-export function EditPeopleDataChange({
+function EditPeopleDataChange({
   values,
   setFieldValue,
 }: EditPeopleDataChangeProps): ReactElement {
@@ -103,7 +108,7 @@ export function EditPeopleDataChange({
                       values={values}
                     />
                   ))}
-                  <Grid item xs={4}>
+                  <Grid size={{ xs: 4 }}>
                     <Button
                       color="primary"
                       onClick={() => {
@@ -122,6 +127,45 @@ export function EditPeopleDataChange({
           </Grid>
         </BoxWithBorders>
       )}
+      <BoxWithBorders>
+        <Box mt={3}>
+          <Title>
+            <Typography variant="h6">
+              {t(
+                'Documents: change/upload of document with other info (country, number etc.): add label beneficiary personal documents',
+              )}
+            </Typography>
+          </Title>
+          <ExistingDocumentFieldArray
+            values={values}
+            setFieldValue={setFieldValue}
+            individual={fullIndividual.individual}
+            addIndividualFieldsData={editPeopleFieldsData}
+          />
+          {!isEditTicket && (
+            <NewDocumentFieldArray
+              values={values}
+              addIndividualFieldsData={editPeopleFieldsData}
+              setFieldValue={setFieldValue}
+            />
+          )}
+        </Box>
+      </BoxWithBorders>
+      <BoxWithBorders>
+        <Box mt={3}>
+          <Title>
+            <Typography variant="h6">{t('Payment Channels')}</Typography>
+          </Title>
+          <ExistingPaymentChannelFieldArray
+            values={values}
+            setFieldValue={setFieldValue}
+            individual={fullIndividual.individual}
+          />
+          {!isEditTicket && <NewPaymentChannelFieldArray values={values} />}
+        </Box>
+      </BoxWithBorders>
     </>
   );
 }
+
+export default withErrorBoundary(EditPeopleDataChange, 'EditPeopleDataChange');

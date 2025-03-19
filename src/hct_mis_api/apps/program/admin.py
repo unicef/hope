@@ -44,6 +44,7 @@ class ProgramCycleAdmin(LastSyncDateResetMixin, HOPEModelAdminBase):
     list_display = ("title", "program", "status", "start_date", "end_date", "created_by")
     date_hierarchy = "start_date"
     list_filter = (
+        ("program__business_area", AutoCompleteFilter),
         ("program", AutoCompleteFilter),
         ("created_by", AutoCompleteFilter),
         ("status", ChoicesFieldComboFilter),
@@ -111,7 +112,7 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
         "is_visible",
     )
     search_fields = ("name", "programme_code")
-    raw_id_fields = ("business_area", "data_collecting_type", "beneficiary_group")
+    raw_id_fields = ("business_area", "data_collecting_type", "beneficiary_group", "admin_areas")
     filter_horizontal = ("admin_areas", "partners")
 
     inlines = (ProgramCycleAdminInline,)

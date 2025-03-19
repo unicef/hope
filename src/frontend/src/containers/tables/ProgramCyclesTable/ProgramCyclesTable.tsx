@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import TableCell from '@mui/material/TableCell';
 import { StatusBox } from '@core/StatusBox';
@@ -23,13 +23,14 @@ import { BlackLink } from '@core/BlackLink';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@mui/material';
 import { useSnackbar } from '@hooks/useSnackBar';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface ProgramCyclesTablePaymentModuleProps {
   program;
   filters;
 }
 
-export const ProgramCyclesTablePaymentModule = ({
+const ProgramCyclesTablePaymentModule = ({
   program,
   filters,
 }: ProgramCyclesTablePaymentModuleProps) => {
@@ -90,7 +91,9 @@ export const ProgramCyclesTablePaymentModule = ({
       await finishMutation({ programCycleId: decodedProgramCycleId });
       showMessage(t('Programme Cycle Finished'));
     } catch (e) {
-      e.data?.forEach((message: string) => showMessage(message));
+      if (e.data && Array.isArray(e.data)) {
+        e.data.forEach((message: string) => showMessage(message));
+      }
     }
   };
 
@@ -100,7 +103,9 @@ export const ProgramCyclesTablePaymentModule = ({
       await reactivateMutation({ programCycleId: decodedProgramCycleId });
       showMessage(t('Programme Cycle Reactivated'));
     } catch (e) {
-      e.data?.forEach((message: string) => showMessage(message));
+      if (e.data && Array.isArray(e.data)) {
+        e.data.forEach((message: string) => showMessage(message));
+      }
     }
   };
 
@@ -163,3 +168,8 @@ export const ProgramCyclesTablePaymentModule = ({
     />
   );
 };
+
+export default withErrorBoundary(
+  ProgramCyclesTablePaymentModule,
+  'ProgramCyclesTablePaymentModule',
+);

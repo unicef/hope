@@ -1,4 +1,4 @@
-import { Box, Grid } from '@mui/material';
+import { Box, Grid2 as Grid } from '@mui/material';
 import { Field } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
@@ -35,8 +35,8 @@ export function DeliveryMechanismRow({
   return (
     <Box flexDirection="column">
       <Grid alignItems="flex-end" container>
-        <Grid item xs={3}>
-          <Grid item xs={12}>
+        <Grid size={{ xs: 3 }}>
+          <Grid size={{ xs: 12 }}>
             <Box display="flex" alignItems="center">
               {/* <Box mr={4}>{index + 1}</Box> */}
               {step === 0 && deliveryMechanismsChoices && (
@@ -59,8 +59,8 @@ export function DeliveryMechanismRow({
         </Grid>
         {step === 1 && fspsChoices && (
           <>
-            <Grid item xs={3}>
-              <Grid item xs={10}>
+            <Grid size={{ xs: 3 }}>
+              <Grid size={{ xs:10 }}>
                 <Field
                   name={`deliveryMechanisms[${index}].fsp`}
                   variant="outlined"
@@ -73,8 +73,8 @@ export function DeliveryMechanismRow({
             </Grid>
             {fspsChoices.find((el) => el.value == chosenFsp)?.configurations
               .length > 0 && (
-              <Grid item xs={3}>
-                <Grid item xs={8}>
+              <Grid size={{ xs: 3 }}>
+                <Grid size={{ xs:8 }}>
                   <Field
                     name={`deliveryMechanisms[${index}].chosenConfiguration`}
                     variant="outlined"
@@ -98,7 +98,7 @@ export function DeliveryMechanismRow({
           </>
         )}
         {/* {step === 0 && values.deliveryMechanisms[index].deliveryMechanism && (
-          <Grid item xs={3}>
+          <Grid size={{xs: 3}}>
             {hasPermissions(
               PERMISSIONS.PM_LOCK_AND_UNLOCK_FSP,
               permissions,

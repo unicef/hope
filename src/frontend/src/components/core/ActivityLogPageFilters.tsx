@@ -1,5 +1,5 @@
 import ViewModuleRoundedIcon from '@mui/icons-material/ViewModuleRounded';
-import { Grid, MenuItem } from '@mui/material';
+import { Grid2 as Grid, MenuItem } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AssigneeAutocomplete } from '@shared/autocompletes/AssigneeAutocomplete';
@@ -64,7 +64,7 @@ export function ActivityLogPageFilters({
       applyHandler={handleApplyFilter}
     >
       <Grid container alignItems="center" spacing={3}>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SearchTextField
             label={t('Search')}
             value={filter.search}
@@ -72,7 +72,7 @@ export function ActivityLogPageFilters({
             data-cy="filters-search"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SelectFilter
             onChange={(e) => handleFilterChange('module', e.target.value)}
             label={t('Module')}
@@ -94,7 +94,7 @@ export function ActivityLogPageFilters({
               ))}
           </SelectFilter>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <AssigneeAutocomplete
             label={t('User')}
             filter={filter}

@@ -60,14 +60,12 @@ export const grievanceTicketDetailed = gql`
     }
     paymentRecord {
       id
-      caId
+      unicefId
       deliveredQuantity
       entitlementQuantity
-      objType
       parent {
         id
         unicefId
-        objType
       }
       verification {
         id
@@ -222,6 +220,7 @@ export const grievanceTicketDetailed = gql`
         }
         dedupEngineSimilarityPair {
           similarityScore
+          statusCode
           individual1 {
             unicefId
             fullName

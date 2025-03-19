@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Grid2 as Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { paymentVerificationStatusToColor } from '@utils/utils';
 import { PaymentPlanQuery } from '@generated/graphql';
@@ -18,14 +18,14 @@ export function VerificationPlansSummary({
   const { t } = useTranslation();
   return (
     <Grid container>
-      <Grid data-cy="grid-verification-plans-summary" item xs={9}>
+      <Grid data-cy="grid-verification-plans-summary" size={{ xs: 9 }}>
         <Title>
           <Typography variant="h6" data-cy="table-label">
             {t('Verification Plans Summary')}
           </Typography>
         </Title>
         <Grid container>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <Box pt={2} pb={2}>
               <LabelizedField label={t('Status')}>
                 <StatusBox
@@ -36,7 +36,7 @@ export function VerificationPlansSummary({
               </LabelizedField>
             </Box>
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <Box pt={2} pb={2}>
               <LabelizedField
                 dataCy="summary-activation-date"
@@ -48,7 +48,7 @@ export function VerificationPlansSummary({
               </LabelizedField>
             </Box>
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <Box pt={2} pb={2}>
               <LabelizedField
                 dataCy="summary-completion-date"
@@ -60,7 +60,7 @@ export function VerificationPlansSummary({
               </LabelizedField>
             </Box>
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <Box pt={2} pb={2}>
               <LabelizedField
                 dataCy="summary-number-of-plans"

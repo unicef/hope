@@ -162,13 +162,8 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
 
 class User(AbstractUser, NaturalKeyModel, UUIDModel):
     status = models.CharField(choices=USER_STATUS_CHOICES, max_length=10, default=INVITED)
-    # TODO: in future will remove null=True after migrate prod data
-    partner = models.ForeignKey(Partner, on_delete=models.PROTECT, null=True)
+    partner = models.ForeignKey(Partner, on_delete=models.PROTECT)
     email = models.EmailField(_("email address"), unique=True)
-    # TODO: remove
-    available_for_export = models.BooleanField(
-        default=True, help_text="Indicating if a User can be exported to CashAssist"
-    )
     custom_fields = JSONField(default=dict, blank=True)
 
     job_title = models.CharField(max_length=255, blank=True)
@@ -182,7 +177,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         return self.email or self.username
 
     def save(self, *args: Any, **kwargs: Any) -> None:
-        if not self.partner:
+        if not self.partner_id:
             self.partner, _ = Partner.objects.get_or_create(name=settings.DEFAULT_EMPTY_PARTNER)
         if not self.partner.pk:
             self.partner.save()

@@ -80,7 +80,7 @@ class ProjectListViewTests(HOPEApiTestCase):
         self.assertEqual(org["hope_id"], str(self.business_area.pk))
         self.assertEqual(org["aurora_id"], 777)
 
-        cache_key = f"{Organization.objects.latest('updated_at').updated_at}:{Organization.objects.all().count()}:{OrganizationListVersionsKeyBit.specific_view_cache_key}"
+        cache_key = f"{OrganizationListVersionsKeyBit.specific_view_cache_key}:{Organization.objects.latest('updated_at').updated_at}:{Organization.objects.all().count()}"
         self.assertIsNotNone(cache.get(cache_key))
         self.assertGreater(len(queries), 0)
         # second call
@@ -108,7 +108,7 @@ class ProjectListViewTests(HOPEApiTestCase):
         self.assertEqual(project["hope_id"], str(self.program.pk))
         self.assertEqual(project["organization"], "test_organization")
 
-        cache_key = f"{Project.objects.latest('updated_at').updated_at}:{Project.objects.all().count()}:{ProjectListVersionsKeyBit.specific_view_cache_key}"
+        cache_key = f"{ProjectListVersionsKeyBit.specific_view_cache_key}:{Project.objects.latest('updated_at').updated_at}:{Project.objects.all().count()}"
         self.assertIsNotNone(cache.get(cache_key))
         self.assertGreater(len(queries), 0)
         # second call
@@ -152,7 +152,7 @@ class ProjectListViewTests(HOPEApiTestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 3)
 
-        cache_key = f"{Registration.objects.latest('updated_at').updated_at}:{Registration.objects.all().count()}:{RegistrationListVersionsKeyBit.specific_view_cache_key}"
+        cache_key = f"{RegistrationListVersionsKeyBit.specific_view_cache_key}:{Registration.objects.latest('updated_at').updated_at}:{Registration.objects.all().count()}"
         self.assertIsNotNone(cache.get(cache_key))
         self.assertGreater(len(queries), 0)
         # second call

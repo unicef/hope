@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material';
+import { Grid2 as Grid } from '@mui/material';
 import { Field } from 'formik';
 import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -8,12 +8,13 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AllHouseholdsQuery, useHouseholdLazyQuery } from '@generated/graphql';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { useProgramContext } from 'src/programContext';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface HouseholdQuestionnaireProps {
   values;
 }
 
-export function HouseholdQuestionnaire({
+function HouseholdQuestionnaire({
   values,
 }: HouseholdQuestionnaireProps): ReactElement {
   const { baseUrl } = useBaseUrl();
@@ -125,7 +126,7 @@ export function HouseholdQuestionnaire({
           size: 3,
         },
       ].map((el) => (
-        <Grid key={el.name} item xs={3}>
+        <Grid key={el.name} size={{ xs: 3 }}>
           <Field
             name={el.name}
             data-cy={`input-${el.name}`}
@@ -139,3 +140,8 @@ export function HouseholdQuestionnaire({
     </Grid>
   );
 }
+
+export default withErrorBoundary(
+  HouseholdQuestionnaire,
+  'HouseholdQuestionnaire',
+);

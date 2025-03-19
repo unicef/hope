@@ -9,30 +9,26 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/He
       class="MuiBox-root css-hpgf8j"
     >
       <button
-        class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary css-xfwdk1-MuiButtonBase-root-MuiButton-root"
+        class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary css-1cl7z2v-MuiButtonBase-root-MuiButton-root"
         data-cy="button-reject"
+        id=":r0:"
         tabindex="0"
         type="button"
       >
         Reject
-        <span
-          class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
-        />
       </button>
     </div>
     <div
       class="MuiBox-root css-hpgf8j"
     >
       <button
-        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary css-dl1jos-MuiButtonBase-root-MuiButton-root"
+        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary css-cx92lf-MuiButtonBase-root-MuiButton-root"
         data-cy="button-approve"
+        id=":r2:"
         tabindex="0"
         type="button"
       >
         Approve
-        <span
-          class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
-        />
       </button>
     </div>
   </div>

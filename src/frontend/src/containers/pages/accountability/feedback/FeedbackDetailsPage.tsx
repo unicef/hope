@@ -1,21 +1,20 @@
-import { Grid } from '@mui/material';
-import { useLocation, useParams } from 'react-router-dom';
+import { Grid2 as Grid } from '@mui/material';
+import { useParams } from 'react-router-dom';
 import { useFeedbackQuery } from '@generated/graphql';
-import { FeedbackDetails } from '@components/accountability/Feedback/FeedbackDetails/FeedbackDetails';
-import { FeedbackDetailsToolbar } from '@components/accountability/Feedback/FeedbackDetailsToolbar';
-import { LinkedGrievance } from '@components/accountability/Feedback/LinkedGrievance/LinkedGrievance';
+import FeedbackDetailsToolbar from '@components/accountability/Feedback/FeedbackDetailsToolbar';
+import LinkedGrievance from '@components/accountability/Feedback/LinkedGrievance/LinkedGrievance';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import FeedbackDetails from '@components/accountability/Feedback/FeedbackDetails/FeedbackDetails';
 
-export function FeedbackDetailsPage(): ReactElement {
+function FeedbackDetailsPage(): ReactElement {
   const { id } = useParams();
-  const location = useLocation();
   const permissions = usePermissions();
 
   const { data, loading, error } = useFeedbackQuery({
@@ -44,14 +43,7 @@ export function FeedbackDetailsPage(): ReactElement {
     permissions,
   );
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'FeedbackDetailsPage.tsx');
-      }}
-      componentName="FeedbackDetailsPage"
-    >
+    <>
       <FeedbackDetailsToolbar canEdit={canEdit} feedback={feedback} />
       <Grid container>
         <FeedbackDetails
@@ -64,6 +56,7 @@ export function FeedbackDetailsPage(): ReactElement {
       {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
         <UniversalActivityLogTable objectId={feedback.id} />
       )}
-    </UniversalErrorBoundary>
+    </>
   );
 }
+export default withErrorBoundary(FeedbackDetailsPage, 'FeedbackDetailsPage');

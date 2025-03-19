@@ -62,7 +62,6 @@ class SurveyFactory(DjangoModelFactory):
     title = factory.Faker("sentence", nb_words=2, variable_nb_words=True, ext_word_list=None)
     category = factory.fuzzy.FuzzyChoice(Survey.CATEGORY_CHOICES, getter=lambda c: c[0])
     created_by = factory.SubFactory(UserFactory)
-    target_population = None
     payment_plan = None
     program = None
     business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())

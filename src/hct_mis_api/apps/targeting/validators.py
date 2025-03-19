@@ -7,67 +7,13 @@ from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldF
 from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 from hct_mis_api.apps.core.models import DataCollectingType, FlexibleAttribute
 from hct_mis_api.apps.core.utils import get_attr_value
-from hct_mis_api.apps.core.validators import BaseValidator
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.payment.models import DeliveryMechanism
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.choices import FlexFieldClassification
-from hct_mis_api.apps.targeting.models import (
-    TargetingCriteriaRuleFilter,
-    TargetPopulation,
-)
+from hct_mis_api.apps.targeting.models import TargetingCriteriaRuleFilter
 
 logger = logging.getLogger(__name__)
-
-
-class TargetValidator(BaseValidator):
-    """Validator for Target Population."""
-
-    @staticmethod
-    def validate_is_finalized(target_status: str) -> None:
-        if target_status == "FINALIZED":
-            logger.warning("Target Population has been finalized. Cannot change.")
-            raise ValidationError("Target Population has been finalized. Cannot change.")
-
-
-class RebuildTargetPopulationValidator:
-    @staticmethod
-    def validate(target_population: TargetPopulation) -> None:
-        if target_population.status != TargetPopulation.STATUS_OPEN:
-            message = f"Only Target Population with status {TargetPopulation.STATUS_OPEN} can be rebuild"
-            logger.warning(message)
-            raise ValidationError(message)
-
-
-class LockTargetPopulationValidator:
-    @staticmethod
-    def validate(target_population: TargetPopulation) -> None:
-        if target_population.status != TargetPopulation.STATUS_OPEN:
-            message = f"Only Target Population with status {TargetPopulation.STATUS_OPEN} can be approved"
-            logger.warning(message)
-            raise ValidationError(message)
-
-
-class UnlockTargetPopulationValidator:
-    @staticmethod
-    def validate(target_population: TargetPopulation) -> None:
-        if not target_population.is_locked():
-            message = "Only locked Target Population with status can be unlocked"
-            logger.warning(message)
-            raise ValidationError(message)
-
-
-class FinalizeTargetPopulationValidator:
-    @staticmethod
-    def validate(target_population: TargetPopulation) -> None:
-        if not target_population.is_locked():
-            message = "Only locked Target Population with status can be finalized"
-            logger.warning(message)
-            raise ValidationError(message)
-        if target_population.program.status != Program.ACTIVE:
-            message = f"Only Target Population assigned to program with status {Program.ACTIVE} can be send"
-            logger.warning(message)
-            raise ValidationError(message)
 
 
 class TargetingCriteriaRuleFilterInputValidator:

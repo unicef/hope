@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@mui/material';
+import { Grid2 as Grid, Typography } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -47,17 +47,17 @@ export function RegistrationDetails({
         <Typography variant="h6">{t('Registration Details')}</Typography>
       </Title>
       <Grid container spacing={6}>
-        <Grid item xs={4}>
+        <Grid size={{ xs: 4 }}>
           <LabelizedField label={t('Source')}>
             {registrationDataImport.dataSource}
           </LabelizedField>
         </Grid>
-        <Grid item xs={4}>
+        <Grid size={{ xs: 4 }}>
           <LabelizedField label={t('Title')}>
             {registrationDataImport.name}
           </LabelizedField>
         </Grid>
-        <Grid item xs={4}>
+        <Grid size={{ xs: 4 }}>
           <LabelizedField label={t('Registered Date')}>
             <UniversalMoment>{registrationDate}</UniversalMoment>
           </LabelizedField>
@@ -68,23 +68,23 @@ export function RegistrationDetails({
           <hr />
           <Typography variant="h6">{t('Data Collection')}</Typography>
           <Grid container spacing={6}>
-            <Grid item xs={4}>
+            <Grid size={{ xs: 4 }}>
               <LabelizedField label={t('Start time')}>
                 <UniversalMoment>{start}</UniversalMoment>
               </LabelizedField>
             </Grid>
-            <Grid item xs={4}>
+            <Grid size={{ xs: 4 }}>
               <LabelizedField label={t('End time')}>
                 <UniversalMoment>{registrationDate}</UniversalMoment>
               </LabelizedField>
             </Grid>
-            <Grid item xs={4}>
+            <Grid size={{ xs: 4 }}>
               <LabelizedField label={t('Device ID')}>{deviceid}</LabelizedField>
             </Grid>
-            <Grid item xs={4}>
+            <Grid size={{ xs: 4 }}>
               <LabelizedField label={t('Detail ID')}>{detailId}</LabelizedField>
             </Grid>
-            <Grid item xs={4}>
+            <Grid size={{ xs: 4 }}>
               <LabelizedField label={t('User name')}>
                 {`${registrationDataImport.importedBy?.firstName} ${registrationDataImport.importedBy?.lastName}`}
               </LabelizedField>

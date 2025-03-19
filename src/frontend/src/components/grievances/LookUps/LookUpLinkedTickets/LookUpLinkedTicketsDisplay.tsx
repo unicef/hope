@@ -1,4 +1,4 @@
-import { Box, Grid } from '@mui/material';
+import { Box, Grid2 as Grid } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useLocation } from 'react-router-dom';
 import EditIcon from '@mui/icons-material/Edit';
@@ -38,16 +38,16 @@ export const LookUpLinkedTicketsDisplay = ({
   return (
     <StyledBox disabled={disabled}>
       <Grid container justifyContent="space-between">
-        <Grid item>
+        <Grid>
           <Box display="flex" flexDirection="column">
             {t('Ticket ID')}:{renderLinkedTickets()}
           </Box>
         </Grid>
         {!isEditTicket && (
-          <Grid item>
+          <Grid>
             <Box p={2}>
               <Grid container justifyContent="center" alignItems="center">
-                <Grid item>
+                <Grid>
                   <LightGrey>
                     <EditIcon
                       color="inherit"
@@ -57,7 +57,7 @@ export const LookUpLinkedTicketsDisplay = ({
                     />
                   </LightGrey>
                 </Grid>
-                <Grid item>
+                <Grid>
                   <DarkGrey>
                     <DeleteIcon
                       color="inherit"

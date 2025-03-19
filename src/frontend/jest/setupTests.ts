@@ -1,6 +1,5 @@
 import '@testing-library/jest-dom';
 import 'jest-canvas-mock';
-import replaceAllInserter from 'string.prototype.replaceall';
 import setupInternalization from '../src/i18n';
 import { fakeContextProgram, random, seed } from '../src/testUtils/testUtils';
 import * as useBusinessAreaModule from '../src/hooks/useBusinessArea';
@@ -18,7 +17,6 @@ import * as usePermissionsModule from '@hooks/usePermissions';
 
 global.Date.now = () => new Date('1970-01-01T00:00:00.000Z').getTime();
 process.env.TZ = 'UTC';
-replaceAllInserter.shim();
 setupInternalization();
 global.beforeEach(() => {
   seed(0);
@@ -35,7 +33,7 @@ global.beforeEach(() => {
   jest.spyOn(usePermissionsModule, 'usePermissions').mockReturnValue([]);
 });
 
-global.ResizeObserver = class {
+globalThis.ResizeObserver = class {
   observe() {}
 
   unobserve() {}
@@ -43,6 +41,6 @@ global.ResizeObserver = class {
   disconnect() {}
 };
 
-global.crypto.randomUUID = () => 'd7a794d1-0ead-4424-9ff2-38d14db32b99';
+globalThis.crypto.randomUUID = () => 'd7a794d1-0ead-4424-9ff2-38d14db32b99';
 
 ChartJS.register(ArcElement, LinearScale, CategoryScale, BarElement);

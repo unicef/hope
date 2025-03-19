@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Grid2 as Grid, Typography } from '@mui/material';
 import { Doughnut } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -44,7 +44,7 @@ export function CashPlanDetailsSection({
 
   return (
     <Grid container>
-      <Grid item xs={7}>
+      <Grid size={{ xs:7 }}>
         <Title data-cy="div-payment-plan-details">
           <Typography variant="h6">{t('Payment Plan Details')}</Typography>
         </Title>
@@ -72,14 +72,14 @@ export function CashPlanDetailsSection({
                 value: <UniversalMoment>{planNode.endDate}</UniversalMoment>,
               },
             ].map((el) => (
-              <Grid item xs={3} key={el.label}>
+              <Grid size={{ xs:3 }} key={el.label}>
                 <LabelizedField label={el.label}>{el.value}</LabelizedField>
               </Grid>
             ))}
           </Grid>
         </Box>
       </Grid>
-      <Grid data-cy="grid-bank-reconciliation" item xs={5}>
+      <Grid data-cy="grid-bank-reconciliation" size={{ xs: 5 }}>
         <BorderLeftBox>
           <Title>
             <Typography variant="h6" data-cy="table-label">
@@ -87,7 +87,7 @@ export function CashPlanDetailsSection({
             </Typography>
           </Title>
           <Grid container>
-            <Grid item xs={3}>
+            <Grid size={{ xs: 3 }}>
               <Grid container direction="column">
                 <LabelizedField label={t('SUCCESSFUL')}>
                   <p>{bankReconciliationSuccessPercentage}%</p>
@@ -97,7 +97,7 @@ export function CashPlanDetailsSection({
                 </LabelizedField>
               </Grid>
             </Grid>
-            <Grid item xs={9}>
+            <Grid size={{ xs:9 }}>
               <ChartContainer>
                 <Doughnut
                   options={

@@ -6,8 +6,9 @@ import type { Admin1Enum } from './Admin1Enum';
 import type { Admin2Enum } from './Admin2Enum';
 import type { Admin3Enum } from './Admin3Enum';
 import type { Admin4Enum } from './Admin4Enum';
+import type { BiometricDeduplicationBatchStatusEnum } from './BiometricDeduplicationBatchStatusEnum';
+import type { BiometricDeduplicationGoldenRecordStatusEnum } from './BiometricDeduplicationGoldenRecordStatusEnum';
 import type { BlankEnum } from './BlankEnum';
-import type { CollectIndividualDataEnum } from './CollectIndividualDataEnum';
 import type { CommsDisabilityEnum } from './CommsDisabilityEnum';
 import type { CountryEnum } from './CountryEnum';
 import type { CountryOriginEnum } from './CountryOriginEnum';
@@ -37,7 +38,6 @@ export type PushPeople = {
     type: (PushPeopleTypeEnum | BlankEnum);
     country_origin?: CountryOriginEnum;
     country: CountryEnum;
-    collect_individual_data: (CollectIndividualDataEnum | BlankEnum);
     residence_status: (ResidenceStatusEnum | BlankEnum);
     village?: string | null;
     phone_no?: string | null;
@@ -55,6 +55,7 @@ export type PushPeople = {
      * record revision number
      */
     version?: number;
+    internal_data?: any;
     duplicate?: boolean;
     duplicate_date?: string | null;
     withdrawn?: boolean;
@@ -97,10 +98,12 @@ export type PushPeople = {
     relationship?: (RelationshipEnum | BlankEnum);
     work_status?: (WorkStatusEnum | BlankEnum);
     flex_fields?: any;
-    user_fields?: any;
     enrolled_in_nutrition_programme?: boolean | null;
-    administration_of_rutf?: boolean | null;
     deduplication_golden_record_status?: DeduplicationGoldenRecordStatusEnum;
+    biometric_deduplication_golden_record_status?: BiometricDeduplicationGoldenRecordStatusEnum;
+    biometric_deduplication_batch_status?: BiometricDeduplicationBatchStatusEnum;
+    biometric_deduplication_golden_record_results?: any;
+    biometric_deduplication_batch_results?: any;
     imported_individual_id?: string | null;
     sanction_list_possible_match?: boolean;
     sanction_list_confirmed_match?: boolean;

@@ -7,6 +7,33 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
+snapshots['TestPaymentPlanQueries::test_all_payment_plans_filter_by_delivery_types 1'] = {
+    'data': {
+        'allPaymentPlans': {
+            'edges': [
+                {
+                    'node': {
+                        'dispersionEndDate': '2020-12-10',
+                        'dispersionStartDate': '2020-08-10',
+                        'status': 'OPEN',
+                        'totalEntitledQuantity': 100.0,
+                        'unicefId': 'PP-01'
+                    }
+                },
+                {
+                    'node': {
+                        'dispersionEndDate': '2020-10-10',
+                        'dispersionStartDate': '2020-10-10',
+                        'status': 'LOCKED',
+                        'totalEntitledQuantity': 100.0,
+                        'unicefId': 'PP-02'
+                    }
+                }
+            ]
+        }
+    }
+}
+
 snapshots['TestPaymentPlanQueries::test_all_payment_verification_log_entries 1'] = {
     'data': {
         'allPaymentVerificationLogEntries': {
@@ -15,6 +42,37 @@ snapshots['TestPaymentPlanQueries::test_all_payment_verification_log_entries 1']
                     'node': {
                         'action': 'CREATE',
                         'isUserGenerated': None
+                    }
+                }
+            ],
+            'totalCount': 1
+        }
+    }
+}
+
+snapshots['TestPaymentPlanQueries::test_all_payments_filter_by_household_id 1'] = {
+    'data': {
+        'allPayments': {
+            'edgeCount': 1,
+            'edges': [
+                {
+                    'node': {
+                        'conflicted': False,
+                        'deliveredQuantity': 50.0,
+                        'deliveredQuantityUsd': 100.0,
+                        'entitlementQuantity': 100.0,
+                        'entitlementQuantityUsd': 200.0,
+                        'fspAuthCode': '',
+                        'parent': {
+                            'unicefId': 'PP-01'
+                        },
+                        'paymentPlanHardConflicted': False,
+                        'paymentPlanHardConflictedData': [
+                        ],
+                        'paymentPlanSoftConflicted': False,
+                        'paymentPlanSoftConflictedData': [
+                        ],
+                        'unicefId': 'RCPT-0060-20-0.000.001'
                     }
                 }
             ],
@@ -222,6 +280,15 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans_filters 1'] = {
                         'totalEntitledQuantity': 100.0,
                         'unicefId': 'PP-01'
                     }
+                },
+                {
+                    'node': {
+                        'dispersionEndDate': '2020-10-10',
+                        'dispersionStartDate': '2020-10-10',
+                        'status': 'LOCKED',
+                        'totalEntitledQuantity': 100.0,
+                        'unicefId': 'PP-02'
+                    }
                 }
             ]
         }
@@ -234,11 +301,11 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans_filters 2'] = {
             'edges': [
                 {
                     'node': {
-                        'dispersionEndDate': '2020-12-10',
-                        'dispersionStartDate': '2020-08-10',
-                        'status': 'OPEN',
+                        'dispersionEndDate': '2020-10-10',
+                        'dispersionStartDate': '2020-10-10',
+                        'status': 'LOCKED',
                         'totalEntitledQuantity': 100.0,
-                        'unicefId': 'PP-01'
+                        'unicefId': 'PP-02'
                     }
                 }
             ]
@@ -277,15 +344,6 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans_filters 4'] = {
     'data': {
         'allPaymentPlans': {
             'edges': [
-                {
-                    'node': {
-                        'dispersionEndDate': '2020-10-10',
-                        'dispersionStartDate': '2020-10-10',
-                        'status': 'LOCKED',
-                        'totalEntitledQuantity': 100.0,
-                        'unicefId': 'PP-02'
-                    }
-                }
             ]
         }
     }
@@ -303,15 +361,6 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans_filters 5'] = {
                         'totalEntitledQuantity': 100.0,
                         'unicefId': 'PP-01'
                     }
-                },
-                {
-                    'node': {
-                        'dispersionEndDate': '2020-10-10',
-                        'dispersionStartDate': '2020-10-10',
-                        'status': 'LOCKED',
-                        'totalEntitledQuantity': 100.0,
-                        'unicefId': 'PP-02'
-                    }
                 }
             ]
         }
@@ -322,6 +371,42 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans_filters 6'] = {
     'data': {
         'allPaymentPlans': {
             'edges': [
+                {
+                    'node': {
+                        'dispersionEndDate': '2020-12-10',
+                        'dispersionStartDate': '2020-08-10',
+                        'status': 'OPEN',
+                        'totalEntitledQuantity': 100.0,
+                        'unicefId': 'PP-01'
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans_filters 7'] = {
+    'data': {
+        'allPaymentPlans': {
+            'edges': [
+            ]
+        }
+    }
+}
+
+snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans_filters 8'] = {
+    'data': {
+        'allPaymentPlans': {
+            'edges': [
+                {
+                    'node': {
+                        'dispersionEndDate': '2020-12-10',
+                        'dispersionStartDate': '2020-08-10',
+                        'status': 'OPEN',
+                        'totalEntitledQuantity': 100.0,
+                        'unicefId': 'PP-01'
+                    }
+                }
             ]
         }
     }
@@ -452,14 +537,6 @@ snapshots['TestPaymentPlanQueries::test_fetch_payment_plan_status_choices 1'] = 
             {
                 'name': 'Locked FSP',
                 'value': 'LOCKED_FSP'
-            },
-            {
-                'name': 'Migration Blocked',
-                'value': 'MIGRATION_BLOCKED'
-            },
-            {
-                'name': 'Migration Failed',
-                'value': 'MIGRATION_FAILED'
             },
             {
                 'name': 'Open',
@@ -910,9 +987,9 @@ snapshots['TestPaymentPlanQueries::test_payment_plan_filter_total_households_cou
 snapshots['TestPaymentPlanQueries::test_payment_plans_export_download_properties_0_with_permission_api 1'] = {
     'data': {
         'paymentPlan': {
-            'canCreateXlsxWithFspAuthCode': True,
+            'canCreateXlsxWithFspAuthCode': False,
             'canDownloadXlsx': False,
-            'canExportXlsx': True,
+            'canExportXlsx': False,
             'canSendToPaymentGateway': False,
             'canSendXlsxPassword': False,
             'fspCommunicationChannel': 'API',
@@ -925,7 +1002,7 @@ snapshots['TestPaymentPlanQueries::test_payment_plans_export_download_properties
 snapshots['TestPaymentPlanQueries::test_payment_plans_export_download_properties_1_without_permission_api 1'] = {
     'data': {
         'paymentPlan': {
-            'canCreateXlsxWithFspAuthCode': True,
+            'canCreateXlsxWithFspAuthCode': False,
             'canDownloadXlsx': False,
             'canExportXlsx': False,
             'canSendToPaymentGateway': False,
@@ -963,6 +1040,21 @@ snapshots['TestPaymentPlanQueries::test_payment_plans_export_download_properties
             'fspCommunicationChannel': 'XLSX',
             'name': 'Test Finished PP',
             'status': 'FINISHED'
+        }
+    }
+}
+
+snapshots['TestPaymentPlanQueries::test_payment_plans_with_targeting_criteria 1'] = {
+    'data': {
+        'paymentPlan': {
+            'name': 'Test PP with TargetingCriteria',
+            'status': 'TP_OPEN',
+            'targetingCriteria': {
+                'flagExcludeIfActiveAdjudicationTicket': False,
+                'flagExcludeIfOnSanctionList': False,
+                'householdIds': 'HH-1, HH-2',
+                'individualIds': 'IND-01, IND-02'
+            }
         }
     }
 }

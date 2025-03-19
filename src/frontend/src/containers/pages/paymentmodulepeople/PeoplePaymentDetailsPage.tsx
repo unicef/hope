@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
@@ -13,18 +13,17 @@ import {
   useCashAssistUrlPrefixQuery,
   usePaymentQuery,
 } from '@generated/graphql';
-import { PaymentDetails } from '@components/paymentmodule/PaymentDetails';
 import { RevertForceFailedButton } from '@components/paymentmodule/RevertForceFailedButton';
 import { ForceFailedButton } from '@components/paymentmodule/ForceFailedButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AdminButton } from '@core/AdminButton';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { PaymentDetails } from '@components/paymentmodulepeople/PaymentDetails';
 
 export const PeoplePaymentDetailsPage = (): ReactElement => {
   const { t } = useTranslation();
   const { paymentId } = useParams();
-  const location = useLocation();
   const { data: caData, loading: caLoading } = useCashAssistUrlPrefixQuery({
     fetchPolicy: 'cache-first',
   });
@@ -79,33 +78,28 @@ export const PeoplePaymentDetailsPage = (): ReactElement => {
   );
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'PeoplePaymentDetailsPage.tsx');
-      }}
-      componentName="PeoplePaymentDetailsPage"
-    >
-      <>
-        <PageHeader
-          title={`Payment ${payment.unicefId}`}
-          breadCrumbs={breadCrumbsItems}
-          flags={<AdminButton adminUrl={payment.adminUrl} />}
-        >
-          {renderButton()}
-        </PageHeader>
-        <Box display="flex" flexDirection="column">
-          <PaymentDetails
-            payment={payment}
-            canViewActivityLog={hasPermissions(
-              PERMISSIONS.ACTIVITY_LOG_VIEW,
-              permissions,
-            )}
-            canViewHouseholdDetails={canViewHouseholdDetails}
-          />
-        </Box>
-      </>
-    </UniversalErrorBoundary>
+    <>
+      <PageHeader
+        title={`Payment ${payment.unicefId}`}
+        breadCrumbs={breadCrumbsItems}
+        flags={<AdminButton adminUrl={payment.adminUrl} />}
+      >
+        {renderButton()}
+      </PageHeader>
+      <Box display="flex" flexDirection="column">
+        <PaymentDetails
+          payment={payment}
+          canViewActivityLog={hasPermissions(
+            PERMISSIONS.ACTIVITY_LOG_VIEW,
+            permissions,
+          )}
+          canViewHouseholdDetails={canViewHouseholdDetails}
+        />
+      </Box>
+    </>
   );
 };
+export default withErrorBoundary(
+  PeoplePaymentDetailsPage,
+  'PeoplePaymentDetailsPage',
+);

@@ -12,6 +12,7 @@ import { useArrayToDict } from '@hooks/useArrayToDict';
 import { MainActivityLogTableRow } from './MainActivityLogTableRow';
 import { headCells } from './MainActivityLogTableHeadCells';
 import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const Table = styled.div`
   display: flex;
@@ -136,3 +137,5 @@ export function MainActivityLogTable({
     </PaperContainer>
   );
 }
+
+export default withErrorBoundary(MainActivityLogTable, 'MainActivityLogTable');

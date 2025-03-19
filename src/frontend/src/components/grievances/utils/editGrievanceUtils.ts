@@ -1,17 +1,14 @@
 import camelCase from 'lodash/camelCase';
-import {
-  GrievanceTicketQuery,
-  PaymentRecordAndPaymentNode,
-} from '@generated/graphql';
+import { GrievanceTicketQuery, PaymentNode } from '@generated/graphql';
 import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import {
   camelizeArrayObjects,
   thingForSpecificGrievanceType,
 } from '@utils/utils';
-import { AddIndividualDataChange } from '../AddIndividualDataChange';
-import { EditHouseholdDataChange } from '../EditHouseholdDataChange/EditHouseholdDataChange';
-import { EditIndividualDataChange } from '../EditIndividualDataChange/EditIndividualDataChange';
 import { ReactElement } from 'react';
+import AddIndividualDataChange from '../AddIndividualDataChange';
+import EditHouseholdDataChange from '../EditHouseholdDataChange/EditHouseholdDataChange';
+import EditIndividualDataChange from '../EditIndividualDataChange/EditIndividualDataChange';
 
 interface EditValuesTypes {
   priority?: number | string;
@@ -27,8 +24,8 @@ interface EditValuesTypes {
   selectedHousehold?;
   selectedIndividual?;
   selectedPaymentRecords: Pick<
-    PaymentRecordAndPaymentNode,
-    'id' | 'caId' | 'deliveredQuantity' | 'entitlementQuantity' | 'objType'
+    PaymentNode,
+    'id' | 'deliveredQuantity' | 'entitlementQuantity'
   >[];
   paymentRecord?: string;
   selectedLinkedTickets: string[];

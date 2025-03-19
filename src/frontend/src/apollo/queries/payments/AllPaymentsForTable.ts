@@ -8,7 +8,8 @@ export const AllPaymentsForTable = gql`
     $last: Int
     $orderBy: String
     $businessArea: String!
-    $paymentPlanId: String!
+    $paymentPlanId: String
+    $householdId: String
   ) {
     allPayments(
       after: $after
@@ -18,6 +19,7 @@ export const AllPaymentsForTable = gql`
       orderBy: $orderBy
       businessArea: $businessArea
       paymentPlanId: $paymentPlanId
+      householdId: $householdId
     ) {
       pageInfo {
         hasNextPage
@@ -33,6 +35,12 @@ export const AllPaymentsForTable = gql`
           unicefId
           status
           vulnerabilityScore
+          parent {
+            program {
+              id
+              name
+            }
+          }
           household {
             id
             unicefId
