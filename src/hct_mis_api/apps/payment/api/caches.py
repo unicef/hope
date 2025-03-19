@@ -3,7 +3,6 @@ from typing import Any
 from rest_framework_extensions.key_constructor.bits import KeyBitBase
 
 from hct_mis_api.api.caches import BusinessAreaKeyBitMixin, KeyConstructorMixin
-from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import BusinessArea
 
 
@@ -18,7 +17,7 @@ class PaymentPlanProgramsPermissionsKeyBit(KeyBitBase):
         business_area = BusinessArea.objects.get(slug=kwargs.get("business_area_slug"))
         program_ids = request.user.get_program_ids_for_permissions_in_business_area(
             str(business_area.id),
-            [Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
+            view_instance.PERMISSIONS,
         )
         program_ids.sort()
         return str(program_ids)
