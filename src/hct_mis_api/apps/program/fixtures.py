@@ -109,7 +109,7 @@ class ProgramFactory(DjangoModelFactory):
     )
     data_collecting_type = factory.SubFactory(DataCollectingTypeFactory)
     programme_code = factory.LazyAttribute(
-        lambda o: "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4))
+        lambda o: ProgramFactory.generate_programme_code(o)
     )
     beneficiary_group = factory.LazyAttribute(
         lambda o: BeneficiaryGroupFactory(
@@ -119,6 +119,13 @@ class ProgramFactory(DjangoModelFactory):
             ),
         )
     )
+
+    @staticmethod
+    def generate_programme_code(self) -> str:
+        programme_code = "".join(random.choice(string.ascii_uppercase + string.digits + "-") for _ in range(4))
+        if Program.objects.filter(business_area_id=self.business_area.id, programme_code=programme_code).exists():
+            return self.generate_programme_code()
+        return programme_code
 
     @factory.post_generation
     def cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
