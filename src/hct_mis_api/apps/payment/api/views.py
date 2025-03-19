@@ -33,8 +33,10 @@ from hct_mis_api.apps.payment.api.caches import PaymentPlanKeyConstructor
 from hct_mis_api.apps.payment.api.filters import PaymentPlanFilter
 from hct_mis_api.apps.payment.api.serializers import (
     PaymentPlanBulkActionSerializer,
+    PaymentPlanDetailSerializer,
+    PaymentPlanListSerializer,
     PaymentPlanSerializer,
-    PaymentPlanSupportingDocumentSerializer, PaymentPlanDetailSerializer, PaymentPlanListSerializer,
+    PaymentPlanSupportingDocumentSerializer,
 )
 from hct_mis_api.apps.payment.models import PaymentPlan, PaymentPlanSupportingDocument
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
