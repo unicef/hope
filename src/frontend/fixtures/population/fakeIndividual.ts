@@ -98,7 +98,6 @@ export const fakeIndividual = {
   photo: null,
   workStatus: 'NOT_PROVIDED',
   enrolledInNutritionProgramme: null,
-  administrationOfRutf: null,
   headingHousehold: null,
   flexFields: {
     muac_i_f: 334,
