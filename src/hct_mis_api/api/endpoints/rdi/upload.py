@@ -29,6 +29,7 @@ from hct_mis_api.apps.household.models import (
     PendingHousehold,
     PendingIndividual,
 )
+from hct_mis_api.apps.payment.models import AccountType, PendingDeliveryMechanismData
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
@@ -96,6 +97,15 @@ class DocumentSerializer(serializers.ModelSerializer):
         ]
 
 
+class AccountSerializer(serializers.ModelSerializer):
+    account_type = serializers.SlugRelatedField(slug_field="key", required=True, queryset=AccountType.objects.all())
+    data = serializers.JSONField(required=False, default=dict)  # type: ignore
+
+    class Meta:
+        model = PendingDeliveryMechanismData
+        exclude = ["individual", "unique_key", "is_unique", "signature_hash"]
+
+
 class IndividualSerializer(serializers.ModelSerializer):
     first_registration_date = serializers.DateTimeField(default=timezone.now)
     last_registration_date = serializers.DateTimeField(default=timezone.now)
@@ -106,6 +116,7 @@ class IndividualSerializer(serializers.ModelSerializer):
     marital_status = serializers.CharField(allow_blank=True, required=False)
     documents = DocumentSerializer(many=True, required=False)
     birth_date = serializers.DateField(validators=[BirthDateValidator()])
+    delivery_mechanisms_data = AccountSerializer(many=True, required=False)
 
     class Meta:
         model = PendingIndividual
