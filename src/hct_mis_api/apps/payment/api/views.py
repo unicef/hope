@@ -34,7 +34,7 @@ from hct_mis_api.apps.payment.api.filters import PaymentPlanFilter
 from hct_mis_api.apps.payment.api.serializers import (
     PaymentPlanBulkActionSerializer,
     PaymentPlanSerializer,
-    PaymentPlanSupportingDocumentSerializer,
+    PaymentPlanSupportingDocumentSerializer, PaymentPlanDetailSerializer, PaymentPlanListSerializer,
 )
 from hct_mis_api.apps.payment.models import PaymentPlan, PaymentPlanSupportingDocument
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
@@ -59,8 +59,20 @@ class PaymentPlanMixin:
 
 class PaymentPlanViewSet(ProgramMixin, PaymentPlanMixin, mixins.ListModelMixin, BaseViewSet):
     program_model_field = "program_cycle__program"
-    queryset = PaymentPlan.objects.all()
+    queryset = PaymentPlan.objects.all().order_by("unicef_id")
     PERMISSIONS = [Permissions.PM_VIEW_LIST]
+    serializer_classes_by_action = {
+        "list": PaymentPlanListSerializer,
+        "retrieve": PaymentPlanDetailSerializer,
+    }
+    permissions_by_action = {
+        "list": [
+            Permissions.PM_VIEW_LIST,
+        ],
+        "retrieve": [
+            Permissions.PM_VIEW_DETAILS,
+        ],
+    }
 
 
 class PaymentPlanManagerialViewSet(
