@@ -119,7 +119,7 @@ class AdminAreaLimitedToFactory(DjangoModelFactory):
 
 
 def create_superuser(**kwargs: Any) -> User:
-    password = os.environ.get("LOCAL_ROOT_PASSWORD", "root123")
+    password = os.environ.get("LOCAL_ROOT_PASSWORD", "root1234")
     user_data = {
         "username": kwargs.get("username") or "root",
         "email": kwargs.get("email") or "root@root.com",

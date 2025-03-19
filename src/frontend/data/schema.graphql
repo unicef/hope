@@ -83,7 +83,6 @@ input AddIndividualDataObjectType {
   disability: String
   workStatus: String
   enrolledInNutritionProgramme: Boolean
-  administrationOfRutf: Boolean
   pregnant: Boolean
   observedDisability: [String]
   seeingDisability: String
@@ -484,8 +483,8 @@ type CommunicationMessageNodeEdge {
 
 type CommunicationMessageRecipientMapNode implements Node {
   id: ID!
-  size: Int
   headOfHousehold: IndividualNode
+  size: Int
 }
 
 type CommunicationMessageRecipientMapNodeConnection {
@@ -1468,8 +1467,8 @@ input HouseholdDeleteIssueTypeExtras {
 
 type HouseholdNode implements Node {
   id: ID!
-  size: Int
   headOfHousehold: IndividualNode
+  size: Int
   rdiMergeStatus: HouseholdRdiMergeStatus!
   isRemoved: Boolean!
   removedDate: DateTime
@@ -1479,23 +1478,24 @@ type HouseholdNode implements Node {
   version: BigInt!
   unicefId: String
   internalData: JSONString!
-  withdrawn: Boolean!
-  withdrawnDate: DateTime
-  consentSign: String!
-  consent: Boolean
-  consentSharing: [String]
-  residenceStatus: String
+  businessArea: UserBusinessAreaNode!
+  program: ProgramNode!
+  registrationDataImport: RegistrationDataImportNode
+  representatives(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
+  copiedFrom: HouseholdNode
   countryOrigin: String
   country: String
-  address: String!
-  zipCode: String
   adminArea: AreaNode
   admin1: AreaNode
   admin2: AreaNode
   admin3: AreaNode
   admin4: AreaNode
-  geopoint: GeoJSON
-  representatives(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
+  consentSign: String!
+  consent: Boolean
+  consentSharing: [String]
+  residenceStatus: String
+  address: String!
+  zipCode: String
   femaleAgeGroup05Count: Int
   femaleAgeGroup611Count: Int
   femaleAgeGroup1217Count: Int
@@ -1525,36 +1525,36 @@ type HouseholdNode implements Node {
   femaleChildrenDisabledCount: Int
   otherSexGroupCount: Int
   unknownSexGroupCount: Int
-  registrationDataImport: RegistrationDataImportNode
   returnee: Boolean
+  fchildHoh: Boolean
+  childHoh: Boolean
+  village: String!
+  currency: String
+  unhcrId: String!
+  detailId: String
+  start: DateTime
+  registrationMethod: HouseholdRegistrationMethod!
+  familyId: String
+  originUnicefId: String
+  isMigrationHandled: Boolean!
+  migratedAt: DateTime
+  collectType: HouseholdCollectType!
+  programRegistrationId: String
+  totalCashReceivedUsd: Decimal
+  totalCashReceived: Decimal
   flexFields: FlexFieldsScalar
   firstRegistrationDate: DateTime!
   lastRegistrationDate: DateTime!
-  fchildHoh: Boolean
-  childHoh: Boolean
-  businessArea: UserBusinessAreaNode!
-  start: DateTime
+  withdrawn: Boolean!
+  withdrawnDate: DateTime
+  geopoint: GeoJSON
   deviceid: String!
   nameEnumerator: String!
   orgEnumerator: HouseholdOrgEnumerator!
   orgNameEnumerator: String!
-  village: String!
-  registrationMethod: HouseholdRegistrationMethod!
-  currency: String
-  unhcrId: String!
-  detailId: String
-  programRegistrationId: String
-  totalCashReceivedUsd: Decimal
-  totalCashReceived: Decimal
-  familyId: String
-  program: ProgramNode!
-  copiedFrom: HouseholdNode
-  originUnicefId: String
-  collectType: HouseholdCollectType!
   koboSubmissionUuid: UUID
   koboSubmissionTime: DateTime
   enumeratorRecId: Int
-  misUnicefId: String
   flexRegistrationsRecordId: Int
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individualsAndRoles: [IndividualRoleInHouseholdNode!]!
@@ -1836,10 +1836,11 @@ type IndividualNode implements Node {
   version: BigInt!
   unicefId: String
   internalData: JSONString!
-  duplicate: Boolean!
-  duplicateDate: DateTime
-  withdrawn: Boolean!
-  withdrawnDate: DateTime
+  businessArea: UserBusinessAreaNode!
+  program: ProgramNode!
+  registrationDataImport: RegistrationDataImportNode!
+  household: HouseholdNode
+  copiedFrom: IndividualNode
   individualId: String!
   photo: String
   fullName: String!
@@ -1851,32 +1852,14 @@ type IndividualNode implements Node {
   estimatedBirthDate: Boolean
   maritalStatus: IndividualMaritalStatus!
   phoneNo: String!
-  phoneNoValid: Boolean
   phoneNoAlternative: String!
-  phoneNoAlternativeValid: Boolean
   email: String
   paymentDeliveryPhoneNo: String
   relationship: IndividualRelationship
-  household: HouseholdNode
-  registrationDataImport: RegistrationDataImportNode!
   workStatus: String!
-  firstRegistrationDate: Date!
-  lastRegistrationDate: Date!
-  flexFields: FlexFieldsScalar
-  enrolledInNutritionProgramme: Boolean
-  administrationOfRutf: Boolean
-  deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus!
-  deduplicationBatchStatus: IndividualDeduplicationBatchStatus!
-  deduplicationGoldenRecordResults: [DeduplicationResultNode]
-  deduplicationBatchResults: [DeduplicationResultNode]
-  biometricDeduplicationGoldenRecordStatus: IndividualBiometricDeduplicationGoldenRecordStatus!
-  biometricDeduplicationBatchStatus: IndividualBiometricDeduplicationBatchStatus!
-  biometricDeduplicationGoldenRecordResults: [DeduplicationEngineSimilarityPairIndividualNode]
-  biometricDeduplicationBatchResults: [DeduplicationEngineSimilarityPairIndividualNode]
-  importedIndividualId: UUID
-  sanctionListPossibleMatch: Boolean!
-  sanctionListConfirmedMatch: Boolean!
   pregnant: Boolean
+  fchildHoh: Boolean!
+  childHoh: Boolean!
   disability: IndividualDisability!
   observedDisability: [String]
   disabilityCertificatePicture: String
@@ -1888,21 +1871,38 @@ type IndividualNode implements Node {
   commsDisability: String!
   whoAnswersPhone: String!
   whoAnswersAltPhone: String!
-  businessArea: UserBusinessAreaNode!
-  fchildHoh: Boolean!
-  childHoh: Boolean!
-  detailId: String
-  programRegistrationId: String
   preferredLanguage: String
   relationshipConfirmed: Boolean!
-  ageAtRegistration: Int
   walletName: String!
   blockchainName: String!
   walletAddress: String!
-  program: ProgramNode!
-  copiedFrom: IndividualNode
+  duplicate: Boolean!
+  duplicateDate: DateTime
+  withdrawn: Boolean!
+  withdrawnDate: DateTime
+  flexFields: FlexFieldsScalar
+  phoneNoValid: Boolean
+  phoneNoAlternativeValid: Boolean
+  firstRegistrationDate: Date!
+  lastRegistrationDate: Date!
+  enrolledInNutritionProgramme: Boolean
+  deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus!
+  deduplicationBatchStatus: IndividualDeduplicationBatchStatus!
+  deduplicationGoldenRecordResults: [DeduplicationResultNode]
+  deduplicationBatchResults: [DeduplicationResultNode]
+  biometricDeduplicationGoldenRecordStatus: IndividualBiometricDeduplicationGoldenRecordStatus!
+  biometricDeduplicationBatchStatus: IndividualBiometricDeduplicationBatchStatus!
+  biometricDeduplicationGoldenRecordResults: [DeduplicationEngineSimilarityPairIndividualNode]
+  biometricDeduplicationBatchResults: [DeduplicationEngineSimilarityPairIndividualNode]
+  importedIndividualId: UUID
+  sanctionListPossibleMatch: Boolean!
+  sanctionListConfirmedMatch: Boolean!
+  detailId: String
+  programRegistrationId: String
+  ageAtRegistration: Int
   originUnicefId: String
-  misUnicefId: String
+  isMigrationHandled: Boolean!
+  migratedAt: DateTime
   representedHouseholds(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   headingHousehold: HouseholdNode
   documents(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection
@@ -2024,7 +2024,6 @@ input IndividualUpdateDataObjectType {
   disability: String
   workStatus: String
   enrolledInNutritionProgramme: Boolean
-  administrationOfRutf: Boolean
   pregnant: Boolean
   observedDisability: [String]
   seeingDisability: String
@@ -2501,10 +2500,33 @@ type PaymentPlanNode implements Node {
   internalData: JSONString!
   businessArea: UserBusinessAreaNode!
   programCycle: ProgramCycleNode!
-  statusDate: DateTime!
+  steficonRule: RuleCommitNode
+  steficonRuleTargeting: RuleCommitNode
+  createdBy: UserNode!
+  targetingCriteria: TargetingCriteriaNode!
+  sourcePaymentPlan: PaymentPlanNode
+  name: String
   startDate: Date
   endDate: Date
+  currency: String
+  dispersionStartDate: Date
+  dispersionEndDate: Date
+  excludedIds: String!
+  exclusionReason: String!
+  vulnerabilityScoreMin: Float
+  vulnerabilityScoreMax: Float
+  status: PaymentPlanStatus!
+  backgroundActionStatus: PaymentPlanBackgroundActionStatus
+  buildStatus: PaymentPlanBuildStatus
+  builtAt: DateTime
   exchangeRate: Float
+  femaleChildrenCount: Int!
+  maleChildrenCount: Int!
+  femaleAdultsCount: Int!
+  maleAdultsCount: Int!
+  totalHouseholdsCount: Int!
+  totalIndividualsCount: Int!
+  importedFileDate: DateTime
   totalEntitledQuantity: Float
   totalEntitledQuantityUsd: Float
   totalEntitledQuantityRevised: Float
@@ -2513,34 +2535,11 @@ type PaymentPlanNode implements Node {
   totalDeliveredQuantityUsd: Float
   totalUndeliveredQuantity: Float
   totalUndeliveredQuantityUsd: Float
-  createdBy: UserNode!
-  status: PaymentPlanStatus!
-  backgroundActionStatus: PaymentPlanBackgroundActionStatus
-  buildStatus: PaymentPlanBuildStatus
-  builtAt: DateTime
-  targetingCriteria: TargetingCriteriaNode!
-  currency: String
-  dispersionStartDate: Date
-  dispersionEndDate: Date
-  femaleChildrenCount: Int!
-  maleChildrenCount: Int!
-  femaleAdultsCount: Int!
-  maleAdultsCount: Int!
-  totalHouseholdsCount: Int!
-  totalIndividualsCount: Int!
-  importedFileDate: DateTime
-  steficonRule: RuleCommitNode
-  steficonAppliedDate: DateTime
-  steficonRuleTargeting: RuleCommitNode
   steficonTargetingAppliedDate: DateTime
-  sourcePaymentPlan: PaymentPlanNode
+  steficonAppliedDate: DateTime
   isFollowUp: Boolean!
-  excludedIds: String!
-  exclusionReason: String!
   excludeHouseholdError: String!
-  name: String
-  vulnerabilityScoreMin: Float
-  vulnerabilityScoreMax: Float
+  statusDate: DateTime!
   isCashAssist: Boolean!
   approvalProcess(offset: Int, before: String, after: String, first: Int, last: Int): ApprovalProcessNodeConnection!
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
@@ -2875,31 +2874,31 @@ type ProgramNode implements Node {
   updatedAt: DateTime!
   lastSyncAt: DateTime
   version: BigInt!
-  name: String!
-  programmeCode: String
-  slug: String!
-  status: ProgramStatus!
-  description: String!
-  startDate: Date!
-  endDate: Date
   dataCollectingType: DataCollectingTypeNode
   beneficiaryGroup: BeneficiaryGroupNode
   businessArea: UserBusinessAreaNode!
+  partners: [PartnerNode]
   adminAreas(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection!
+  name: String!
+  programmeCode: String
+  status: ProgramStatus!
+  slug: String!
+  description: String!
+  startDate: Date!
+  endDate: Date
   sector: ProgramSector!
   budget: Decimal
   frequencyOfPayments: ProgramFrequencyOfPayments!
   scope: ProgramScope
-  partners: [PartnerNode]
   partnerAccess: ProgramPartnerAccess!
   cashPlus: Boolean!
   populationGoal: Int!
   administrativeAreasOfImplementation: String!
+  biometricDeduplicationEnabled: Boolean!
   isVisible: Boolean!
   householdCount: Int!
   individualCount: Int!
   deduplicationSetId: UUID
-  biometricDeduplicationEnabled: Boolean!
   pduFields: [PeriodicFieldNode]
   roleAssignments: [UserRoleNode!]!
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
@@ -3177,8 +3176,8 @@ type ReassignRoleMutation {
 
 type RecipientNode implements Node {
   id: ID!
-  size: Int
   headOfHousehold: IndividualNode
+  size: Int
 }
 
 type RecipientNodeConnection {
