@@ -272,7 +272,7 @@ class TestProgramListViewSet:
         self.program.name = "New Name"
         self.program.save()
         _test_response_len_and_queries(1, no_queries_not_cached_with_permissions)
-        # changing programs form other business area should not invalidate cache
+        # changing programs from other business area should not invalidate cache
         self.program_in_ukraine.name = "New Name"
         self.program_in_ukraine.save()
         _test_response_len_and_queries(1, no_queries_cached)
