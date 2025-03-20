@@ -4,7 +4,7 @@ from typing import Any
 from unittest import mock
 from unittest.mock import patch
 
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.utils import timezone
 
 from aniso8601 import parse_date
@@ -28,7 +28,7 @@ from hct_mis_api.apps.household.fixtures import (
     create_household_and_individuals,
     create_household_with_individual_with_collectors,
 )
-from hct_mis_api.apps.household.models import ROLE_PRIMARY
+from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
 from hct_mis_api.apps.payment.celery_tasks import (
     prepare_follow_up_payment_plan_task,
     prepare_payment_plan_task,
@@ -955,6 +955,27 @@ class TestPaymentPlanServices(APITestCase):
         self.payment_plan.refresh_from_db(fields=("build_status",))
         self.assertEqual(pp.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_PENDING)
 
+    def test_lock_fsp_validation(self) -> None:
+        payment_plan = PaymentPlanFactory(
+            program_cycle=self.cycle,
+            created_by=self.user,
+            status=PaymentPlan.Status.LOCKED,
+        )
+        PaymentFactory(
+            parent=payment_plan,
+            program_id=self.program.id,
+            business_area_id=payment_plan.business_area_id,
+            status=Payment.PENDING_STATUSES,
+            financial_service_provider=None,
+        )
+
+        with self.assertRaises(GraphQLError) as e:
+            PaymentPlanService(payment_plan).lock_fsp()
+        self.assertEqual(
+            e.exception.message,
+            "All Payments must have assigned FSP",
+        )
+
     def test_unlock_fsp(self) -> None:
         payment_plan = PaymentPlanFactory(
             program_cycle=self.cycle,
@@ -1033,6 +1054,25 @@ class TestPaymentPlanServices(APITestCase):
         payment_plan.refresh_from_db()
         self.assertEqual(payment_plan.dispersion_end_date, timezone.now().date() + timedelta(days=3))
 
+    def test_update_pp_dm_fsp(self) -> None:
+        payment_plan = PaymentPlanFactory(
+            program_cycle=self.cycle,
+            created_by=self.user,
+            status=PaymentPlan.Status.OPEN,
+            currency="AMD",
+            delivery_mechanism=None,
+            financial_service_provider=None,
+        )
+        PaymentPlanService(payment_plan).update(
+            {
+                "fsp_id": encode_id_base64(self.fsp.id, "FinancialServiceProvider"),
+                "delivery_mechanism_code": self.dm_transfer_to_account.code,
+            }
+        )
+        payment_plan.refresh_from_db()
+        self.assertEqual(payment_plan.delivery_mechanism, self.dm_transfer_to_account)
+        self.assertEqual(payment_plan.financial_service_provider, self.fsp)
+
     def test_export_xlsx(self) -> None:
         payment_plan = PaymentPlanFactory(
             program_cycle=self.cycle, created_by=self.user, status=PaymentPlan.Status.LOCKED
@@ -1076,9 +1116,18 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(hh_qs.count(), 1)
         self.assertEqual(hh_qs.first().unicef_id, household.unicef_id)
 
-        with self.assertRaises(IntegrityError) as error:
-            PaymentPlanService.create_payments(payment_plan)
+        with transaction.atomic():
+            with self.assertRaises(IntegrityError) as error:
+                PaymentPlanService.create_payments(payment_plan)
 
-        self.assertIn(
-            'duplicate key value violates unique constraint "payment_plan_and_household"', str(error.exception)
-        )
+            self.assertIn(
+                'duplicate key value violates unique constraint "payment_plan_and_household"', str(error.exception)
+            )
+
+        with transaction.atomic():
+            IndividualRoleInHousehold.objects.filter(household=household, role=ROLE_PRIMARY).delete()
+
+            with self.assertRaises(GraphQLError) as error:
+                PaymentPlanService.create_payments(payment_plan)
+
+            self.assertIn(f"Couldn't find a primary collector in {household.unicef_id}", str(error.exception))
