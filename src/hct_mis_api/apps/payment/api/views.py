@@ -24,6 +24,8 @@ from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.core.api.mixins import (
     BaseViewSet,
     BusinessAreaProgramsAccessMixin,
+    CountActionMixin,
+    DecodeIdForDetailMixin,
     ProgramMixin,
     SerializerActionMixin,
 )
@@ -59,7 +61,16 @@ class PaymentPlanMixin:
     )
 
 
-class PaymentPlanViewSet(ProgramMixin, PaymentPlanMixin, mixins.ListModelMixin, BaseViewSet):
+class PaymentPlanViewSet(
+    CountActionMixin,
+    ProgramMixin,
+    SerializerActionMixin,
+    PaymentPlanMixin,
+    DecodeIdForDetailMixin,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    BaseViewSet,
+):
     program_model_field = "program_cycle__program"
     queryset = PaymentPlan.objects.all().order_by("unicef_id")
     PERMISSIONS = [Permissions.PM_VIEW_LIST]

@@ -224,13 +224,13 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeri
     program = serializers.CharField(source="program_cycle.program.name")
     has_payment_list_export_file = serializers.BooleanField(source="has_export_file")
     has_fsp_delivery_mechanism_xlsx_template = serializers.SerializerMethodField()
-    imported_file_name = serializers.CharField(source="imported_file_name")
+    imported_file_name = serializers.CharField()
     payments_conflicts_count = serializers.SerializerMethodField()
     volume_by_delivery_mechanism = VolumeByDeliveryMechanismSerializer(many=True, read_only=True)
     delivery_mechanisms = DeliveryMechanismPerPaymentPlanSerializer(many=True, read_only=True)
-    bank_reconciliation_success = serializers.IntegerField(source="bank_reconciliation_success")
-    bank_reconciliation_error = serializers.IntegerField(source="bank_reconciliation_error")
-    can_create_payment_verification_plan = serializers.BooleanField(source="can_create_payment_verification_plan")
+    bank_reconciliation_success = serializers.IntegerField()
+    bank_reconciliation_error = serializers.IntegerField()
+    can_create_payment_verification_plan = serializers.BooleanField()
     available_payment_records_count = serializers.SerializerMethodField()
     reconciliation_summary = ReconciliationSummarySerializer(read_only=True)
     excluded_households = HouseholdDetailSerializer(many=True, read_only=True)
@@ -238,12 +238,12 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeri
     can_create_follow_up = serializers.SerializerMethodField()
     total_withdrawn_households_count = serializers.SerializerMethodField()
     unsuccessful_payments_count = serializers.SerializerMethodField()
-    can_send_to_payment_gateway = serializers.BooleanField(source="can_send_to_payment_gateway")
+    can_send_to_payment_gateway = serializers.BooleanField()
     can_split = serializers.SerializerMethodField()
     supporting_documents = PaymentPlanSupportingDocumentSerializer(many=True, read_only=True)
     total_households_count_with_valid_phone_no = serializers.SerializerMethodField()
-    can_create_xlsx_with_fsp_auth_code = serializers.BooleanField(source="can_create_xlsx_with_fsp_auth_code")
-    fsp_communication_channel = serializers.CharField(source="fsp_communication_channel")
+    can_create_xlsx_with_fsp_auth_code = serializers.BooleanField()
+    fsp_communication_channel = serializers.CharField()
     can_export_xlsx = serializers.SerializerMethodField()
     can_download_xlsx = serializers.SerializerMethodField()
     can_send_xlsx_password = serializers.SerializerMethodField()
@@ -416,43 +416,43 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeri
             household__head_of_household__phone_no_alternative_valid=False,
         ).count()
 
-    @classmethod
-    def get_can_export_xlsx(cls, parent: PaymentPlan, info: Any) -> bool:
-        if parent.status in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
-            if parent.fsp_communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_API:
-                if not info.context.user.has_perm(Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value, parent.business_area):
+    def get_can_export_xlsx(self, obj: PaymentPlan) -> bool:
+        if obj.status in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
+            user = self.context.get("request").user
+            if obj.fsp_communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_API:
+                if not user.has_perm(Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value, obj.business_area):
                     return False
-                return parent.can_create_xlsx_with_fsp_auth_code
+                return obj.can_create_xlsx_with_fsp_auth_code
 
-            if parent.fsp_communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX:
-                if not info.context.user.has_perm(Permissions.PM_EXPORT_XLSX_FOR_FSP.value, parent.business_area):
+            if obj.fsp_communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX:
+                if not user.has_perm(Permissions.PM_EXPORT_XLSX_FOR_FSP.value, obj.business_area):
                     return False
-                return cls._has_fsp_delivery_mechanism_xlsx_template(parent)
+                return self._has_fsp_delivery_mechanism_xlsx_template(obj)
 
         return False
 
-    @staticmethod
-    def get_can_download_xlsx(parent: PaymentPlan, info: Any) -> bool:
-        if parent.status in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
-            if parent.fsp_communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_API:
-                if not info.context.user.has_perm(Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value, parent.business_area):
+    def get_can_download_xlsx(self, obj: PaymentPlan) -> bool:
+        if obj.status in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
+            user = self.context.get("request").user
+            if obj.fsp_communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_API:
+                if not user.has_perm(Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value, obj.business_area):
                     return False
-                return parent.has_export_file
+                return obj.has_export_file
 
-            if parent.fsp_communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX:
-                if not info.context.user.has_perm(Permissions.PM_DOWNLOAD_XLSX_FOR_FSP.value, parent.business_area):
+            if obj.fsp_communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX:
+                if not user.has_perm(Permissions.PM_DOWNLOAD_XLSX_FOR_FSP.value, obj.business_area):
                     return False
-                return parent.has_export_file
+                return obj.has_export_file
 
         return False
 
-    @staticmethod
-    def get_can_send_xlsx_password(parent: PaymentPlan, info: Any) -> bool:
-        if parent.status in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
-            if parent.fsp_communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_API:
-                if not info.context.user.has_perm(Permissions.PM_SEND_XLSX_PASSWORD.value, parent.business_area):
+    def get_can_send_xlsx_password(self, obj: PaymentPlan) -> bool:
+        if obj.status in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
+            user = self.context.get("request").user
+            if obj.fsp_communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_API:
+                if not user.has_perm(Permissions.PM_SEND_XLSX_PASSWORD.value, obj.business_area):
                     return False
-                return parent.has_export_file
+                return obj.has_export_file
         return False
 
     @staticmethod
