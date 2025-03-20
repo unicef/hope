@@ -1928,14 +1928,15 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
 
         for field in dm_config.required_fields:
             if fsp_name_mapping := fsp_names_mappings.get(field, None):
-                field = fsp_name_mapping.hope_name
+                internal_field = fsp_name_mapping.hope_name
                 associated_object = self.get_associated_object(fsp_name_mapping.source)
             else:
+                internal_field = field
                 associated_object = self.data
             if isinstance(associated_object, dict):
-                delivery_data[field] = associated_object.get(field, None)
+                delivery_data[field] = associated_object.get(internal_field, None)
             else:
-                delivery_data[field] = getattr(associated_object, field, None)
+                delivery_data[field] = getattr(associated_object, internal_field, None)
 
         return delivery_data
 

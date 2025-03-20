@@ -37,14 +37,18 @@ from hct_mis_api.apps.payment.fixtures import (
     ApprovalFactory,
     ApprovalProcessFactory,
     DeliveryMechanismDataFactory,
+    FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
     RealProgramFactory,
     generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import (
+    AccountType,
     Approval,
     DeliveryMechanism,
+    DeliveryMechanismConfig,
+    DeliveryMechanismData,
     FinancialServiceProviderXlsxTemplate,
     FspNameMapping,
     Payment,
@@ -869,6 +873,7 @@ class TestDeliveryMechanismDataModel(TestCase):
         cls.ind2.household = cls.hh
         cls.ind2.save()
 
+        cls.fsp = FinancialServiceProviderFactory()
         generate_delivery_mechanisms()
         cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
 
@@ -885,20 +890,72 @@ class TestDeliveryMechanismDataModel(TestCase):
         self.assertEqual(dmd.get_associated_object(FspNameMapping.SourceModel.INDIVIDUAL.value), dmd.individual)
 
     def test_delivery_data(self) -> None:
-        pass
-        # TODO validate per fsp/dm
-        # dmd = DeliveryMechanismDataFactory(data={"name_of_cardholder__atm_card": "test"}, individual=self.ind)
-        # self.hh.number_of_children = 1
-        # self.hh.save()
-        #
-        # self.assertEqual(
-        #     dmd.delivery_data,
-        #     {
-        #         "full_name": dmd.individual.full_name,
-        #         "number_of_children": 1,
-        #         "name_of_cardholder__atm_card": "test",
-        #     },
-        # )
+        dmd = DeliveryMechanismDataFactory(
+            data={
+                "number": "test",
+                "expiry_date": "12.12.2024",
+                "name_of_cardholder": "Marek",
+            },
+            individual=self.ind,
+            account_type=AccountType.objects.get(key="bank"),
+        )
+
+        fsp2 = FinancialServiceProviderFactory()  # no dm config
+        self.assertEqual(
+            dmd.delivery_data(fsp2, self.dm_atm_card),
+            {},
+        )
+
+        dm_config = DeliveryMechanismConfig.objects.get(fsp=self.fsp, delivery_mechanism=self.dm_atm_card)
+        dm_config.required_fields.extend(["custom_ind_name", "custom_hh_address", "address"])
+        dm_config.save()
+
+        FspNameMapping.objects.create(
+            external_name="number", hope_name="number", source=FspNameMapping.SourceModel.ACCOUNT, fsp=self.fsp
+        )
+        FspNameMapping.objects.create(
+            external_name="expiry_date",
+            hope_name="expiry_date",
+            source=FspNameMapping.SourceModel.ACCOUNT,
+            fsp=self.fsp,
+        )
+        FspNameMapping.objects.create(
+            external_name="custom_ind_name",
+            hope_name="my_custom_ind_name",
+            source=FspNameMapping.SourceModel.INDIVIDUAL,
+            fsp=self.fsp,
+        )
+        FspNameMapping.objects.create(
+            external_name="custom_hh_address",
+            hope_name="my_custom_hh_address",
+            source=FspNameMapping.SourceModel.HOUSEHOLD,
+            fsp=self.fsp,
+        )
+        FspNameMapping.objects.create(
+            external_name="address", hope_name="address", source=FspNameMapping.SourceModel.HOUSEHOLD, fsp=self.fsp
+        )
+
+        def my_custom_ind_name(self: Any) -> str:
+            return f"{self.full_name} Custom"
+
+        dmd.individual.__class__.my_custom_ind_name = property(my_custom_ind_name)
+
+        def my_custom_hh_address(self: Any) -> str:
+            return f"{self.address} Custom"
+
+        self.hh.__class__.my_custom_hh_address = property(my_custom_hh_address)
+
+        self.assertEqual(
+            dmd.delivery_data(self.fsp, self.dm_atm_card),
+            {
+                "number": "test",
+                "expiry_date": "12.12.2024",
+                "name_of_cardholder": "Marek",
+                "custom_ind_name": f"{dmd.individual.full_name} Custom",
+                "custom_hh_address": f"{self.hh.address} Custom",
+                "address": self.hh.address,
+            },
+        )
 
     def test_validate(self) -> None:
         pass
@@ -924,6 +981,12 @@ class TestDeliveryMechanismDataModel(TestCase):
         #         },
         #     )
         #     self.assertEqual(dmd.is_valid, False)
+
+    def test_validate_uniqueness(self) -> None:
+        DeliveryMechanismDataFactory(data={"name_of_cardholder": "test"}, individual=self.ind)
+        DeliveryMechanismData.update_unique_field = mock.Mock()  # type: ignore
+        DeliveryMechanismData.validate_uniqueness(DeliveryMechanismData.objects.all())
+        DeliveryMechanismData.update_unique_field.assert_called_once()
 
     def test_update_unique_fields(self) -> None:
         unique_fields = [
