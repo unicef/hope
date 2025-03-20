@@ -958,29 +958,36 @@ class TestDeliveryMechanismDataModel(TestCase):
         )
 
     def test_validate(self) -> None:
-        pass
-        # TODO validate per fsp/dm
-        # dmd = DeliveryMechanismDataFactory(data={"test": "test"}, individual=self.ind)
-        # dmd.individual.household.number_of_children = None
-        # dmd.individual.household.save()
-        # dmd.individual.seeing_disability = ""
-        # dmd.individual.save()
-        # required_fields = [
-        #     "seeing_disability",
-        #     "number_of_children",
-        #     "name_of_cardholder__atm_card",
-        # ]
-        # with mock.patch.object(dmd.delivery_mechanism, "required_fields", required_fields):
-        #     dmd.validate()
-        #     self.assertEqual(
-        #         dmd.validation_errors,
-        #         {
-        #             "seeing_disability": "Missing required payment data",
-        #             "number_of_children": "Missing required payment data",
-        #             "name_of_cardholder__atm_card": "Missing required payment data",
-        #         },
-        #     )
-        #     self.assertEqual(dmd.is_valid, False)
+        dmd = DeliveryMechanismDataFactory(
+            data={
+                "number": "test",
+                "expiry_date": "12.12.2024",
+                "name_of_cardholder": "Marek",
+            },
+            individual=self.ind,
+            account_type=AccountType.objects.get(key="bank"),
+        )
+        self.assertEqual(dmd.validate(self.fsp, self.dm_atm_card), True)
+
+        dm_config = DeliveryMechanismConfig.objects.get(fsp=self.fsp, delivery_mechanism=self.dm_atm_card)
+        dm_config.required_fields.extend(["address"])
+        dm_config.save()
+
+        FspNameMapping.objects.create(
+            external_name="address", hope_name="address", source=FspNameMapping.SourceModel.HOUSEHOLD, fsp=self.fsp
+        )
+        self.assertEqual(dmd.validate(self.fsp, self.dm_atm_card), True)
+
+        dm_config.required_fields.extend(["missing_field"])
+        dm_config.save()
+
+        FspNameMapping.objects.create(
+            external_name="missing_field",
+            hope_name="missing_field",
+            source=FspNameMapping.SourceModel.INDIVIDUAL,
+            fsp=self.fsp,
+        )
+        self.assertEqual(dmd.validate(self.fsp, self.dm_atm_card), False)
 
     def test_validate_uniqueness(self) -> None:
         DeliveryMechanismDataFactory(data={"name_of_cardholder": "test"}, individual=self.ind)
