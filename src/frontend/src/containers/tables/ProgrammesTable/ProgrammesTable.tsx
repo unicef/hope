@@ -9,6 +9,7 @@ import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { headCells } from './ProgrammesHeadCells';
 import ProgrammesTableRow from './ProgrammesTableRow';
+import { filterEmptyParams } from '@utils/utils';
 
 interface ProgrammesTableProps {
   businessArea: string;
@@ -22,14 +23,14 @@ function ProgrammesTable({
   choicesData,
 }: ProgrammesTableProps): ReactElement {
   const { t } = useTranslation();
-  const { programId } = useBaseUrl();
+  const { programId, isAllPrograms } = useBaseUrl();
 
   const initialQueryVariables = useMemo(
     () => ({
       businessAreaSlug: businessArea,
       programSlug: programId,
-      beneficiaryGroupMatch: programId,
-      compatibleDct: programId,
+      beneficiaryGroupMatch: isAllPrograms ? '' : programId,
+      compatibleDct: isAllPrograms ? '' : programId,
       search: filter.search,
       startDate: filter.startDate || null,
       endDate: filter.endDate || null,
@@ -42,13 +43,22 @@ function ProgrammesTable({
       budget: JSON.stringify({ min: filter.budgetMin, max: filter.budgetMax }),
       dataCollectingType: filter.dataCollectingType,
     }),
-    [businessArea, filter, programId],
+    [businessArea, filter, programId, isAllPrograms],
   );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
   useEffect(() => {
     setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
+
+  const filteredQueryVariables = useMemo(() => {
+    const filtered = filterEmptyParams(initialQueryVariables);
+    return {
+      ...filtered,
+      businessAreaSlug: initialQueryVariables.businessAreaSlug,
+      programSlug: initialQueryVariables.programSlug,
+    };
   }, [initialQueryVariables]);
 
   const {
@@ -58,12 +68,25 @@ function ProgrammesTable({
   } = useQuery({
     queryKey: [
       'businessAreasProgramsList',
-      queryVariables,
+      filteredQueryVariables,
       programId,
       businessArea,
     ],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsHouseholdsList(queryVariables),
+      RestService.restBusinessAreasProgramsList(filteredQueryVariables),
+  });
+
+  const { data: dataProgramsCount } = useQuery({
+    queryKey: [
+      'businessAreasProgramsCount',
+      filteredQueryVariables,
+      programId,
+      businessArea,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsCountRetrieve(
+        filteredQueryVariables,
+      ),
   });
 
   return (
@@ -77,6 +100,7 @@ function ProgrammesTable({
           data={dataPrograms}
           isLoading={isLoadingPrograms}
           error={errorPrograms}
+          itemsCount={dataProgramsCount?.count}
           renderRow={(row) => (
             <ProgrammesTableRow
               key={row.id}

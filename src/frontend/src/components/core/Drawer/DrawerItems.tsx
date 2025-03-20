@@ -64,7 +64,6 @@ export const DrawerItems = ({
   const { baseUrl, businessArea, programId, isAllPrograms } = useBaseUrl();
   const { isSocialDctType, selectedProgram } = useProgramContext();
   const permissions = usePermissions();
-  console.log('permissions', permissions);
   const { data: businessAreaData } = useBusinessAreaDataQuery({
     variables: { businessAreaSlug: businessArea },
     fetchPolicy: 'cache-first',

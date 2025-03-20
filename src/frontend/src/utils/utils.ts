@@ -21,6 +21,7 @@ import {
   PROGRAM_STATES,
   TARGETING_STATES,
 } from './constants';
+import { CancelablePromise } from '@restgenerated/core/CancelablePromise';
 
 const Gender = new Map([
   ['MALE', 'Male'],
@@ -1220,3 +1221,11 @@ export function adjustHeadCells(
     return cell;
   });
 }
+
+export const filterEmptyParams = (params) => {
+  return Object.fromEntries(
+    Object.entries(params).filter(
+      ([_, value]) => value !== undefined && value !== null && value !== '',
+    ),
+  );
+};

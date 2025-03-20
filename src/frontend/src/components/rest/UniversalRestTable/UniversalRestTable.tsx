@@ -30,6 +30,7 @@ interface UniversalRestTableProps<T = any, K = any> {
   isLoading: boolean;
   queryVariables: any;
   setQueryVariables: (variables: K) => void;
+  itemsCount?: number;
 }
 type QueryVariables = {
   offset: number;
@@ -55,6 +56,7 @@ export const UniversalRestTable = <T, K>({
   isLoading,
   queryVariables,
   setQueryVariables,
+  itemsCount,
 }: UniversalRestTableProps<T, K>): ReactElement => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(rowsPerPageOptions[0]);
@@ -113,7 +115,7 @@ export const UniversalRestTable = <T, K>({
       rowsPerPageOptions={rowsPerPageOptions}
       rowsPerPage={rowsPerPage}
       page={page}
-      itemsCount={data?.count ?? 0}
+      itemsCount={itemsCount ?? 0}
       handleChangePage={(_event, newPage) => {
         setPage(newPage);
       }}

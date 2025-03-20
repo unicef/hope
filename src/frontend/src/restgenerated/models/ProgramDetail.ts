@@ -10,15 +10,56 @@ import type { SectorEnum } from './SectorEnum';
 import type { Status791Enum } from './Status791Enum';
 export type ProgramDetail = {
     id: string;
+    /**
+     * Program code
+     */
     programme_code?: string | null;
+    /**
+     * Program slug [sys]
+     */
     slug: string;
+    /**
+     * Program name
+     */
     name: string;
+    /**
+     * Program start date
+     */
     start_date: string;
+    /**
+     * Program end date
+     */
     end_date?: string | null;
+    /**
+     * Program budget
+     */
     budget: string;
+    /**
+     * Program frequency of payments
+     *
+     * * `ONE_OFF` - One-off
+     * * `REGULAR` - Regular
+     */
     frequency_of_payments: FrequencyOfPaymentsEnum;
+    /**
+     * Program sector
+     *
+     * * `CHILD_PROTECTION` - Child Protection
+     * * `EDUCATION` - Education
+     * * `HEALTH` - Health
+     * * `MULTI_PURPOSE` - Multi Purpose
+     * * `NUTRITION` - Nutrition
+     * * `SOCIAL_POLICY` - Social Policy
+     * * `WASH` - WASH
+     */
     sector: SectorEnum;
+    /**
+     * Program cash+
+     */
     cash_plus: boolean;
+    /**
+     * Program population goal
+     */
     population_goal: number;
     data_collecting_type: DataCollectingType;
     beneficiary_group: BeneficiaryGroup;
@@ -31,16 +72,31 @@ export type ProgramDetail = {
      */
     status: Status791Enum;
     readonly pdu_fields: Array<string>;
+    /**
+     * Program household count [sys]
+     */
     household_count?: number;
-    readonly just_in_case: string;
     readonly admin_url: string;
+    /**
+     * Program description
+     */
     description?: string;
+    /**
+     * Program administrative area of implementation
+     */
     administrative_areas_of_implementation?: string;
     /**
      * record revision number
      */
     version?: number;
     readonly partners: Record<string, any>;
+    /**
+     * Program partner access
+     *
+     * * `ALL_PARTNERS_ACCESS` - All partners access
+     * * `NONE_PARTNERS_ACCESS` - None partners access
+     * * `SELECTED_PARTNERS_ACCESS` - Selected partners access
+     */
     partner_access?: PartnerAccessEnum;
     readonly registration_imports_total_count: number;
     readonly target_populations_count: number;
