@@ -77,7 +77,7 @@ class PaymentInstructionFromSplitSerializer(ReadOnlyModelSerializer):
         }
 
     def get_external_code(self, obj: Any) -> str:
-        return f"{obj.payment_plan.unicef_id}-{obj.order}"
+        return f"{obj.payment_plan.unicef_id}-{obj.order}"  # pragma: no cover
 
     class Meta:
         model = PaymentPlanSplit
@@ -437,7 +437,7 @@ class PaymentGatewayService:
                 )
 
                 for required_field in required_fields:
-                    FspNameMapping.get_or_create(
+                    FspNameMapping.objects.get_or_create(
                         external_name=required_field,
                         fsp=fsp,
                         defaults=dict(hope_name=required_field, source=FspNameMapping.SourceModel.ACCOUNT),

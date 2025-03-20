@@ -29,6 +29,7 @@ from hct_mis_api.apps.payment.models import (
     AccountType,
     DeliveryMechanism,
     FinancialServiceProvider,
+    FspNameMapping,
     Payment,
     PaymentHouseholdSnapshot,
     PaymentPlan,
@@ -36,11 +37,13 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerificationSummary,
 )
 from hct_mis_api.apps.payment.services.payment_gateway import (
+    AccountTypeData,
     AddRecordsResponseData,
     DeliveryMechanismData,
     FspData,
     PaymentGatewayAPI,
     PaymentGatewayService,
+    PaymentInstructionData,
     PaymentInstructionStatus,
     PaymentRecordData,
 )
@@ -590,6 +593,59 @@ class TestPaymentGatewayService(APITestCase):
         ):
             PaymentGatewayAPI().add_records_to_payment_instruction([payment], "123")
 
+    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._get")
+    def test_api_get_fsps(self, get_mock: Any) -> None:
+        get_mock.return_value = [
+            {
+                "id": "123",
+                "remote_id": "123",
+                "name": "123",
+                "vendor_number": "123",
+                "configs": [
+                    {
+                        "id": "123",
+                        "key": "123",
+                        "delivery_mechanism": "123",
+                        "delivery_mechanism_name": "123",
+                        "label": "123",
+                        "required_fields": ["123", "123"],
+                    }
+                ],
+            }
+        ], 200
+
+        response_data = PaymentGatewayAPI().get_fsps()
+        assert isinstance(response_data[0], FspData)
+
+    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._get")
+    def test_api_get_account_types(self, get_mock: Any) -> None:
+        get_mock.return_value = [
+            {
+                "id": "123",
+                "key": "123",
+                "label": "123",
+                "unique_fields": ["123"],
+            }
+        ], 200
+
+        response_data = PaymentGatewayAPI().get_account_types()
+        assert isinstance(response_data[0], AccountTypeData)
+
+    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
+    def test_api_create_payment_instruction(self, post_mock: Any) -> None:
+        post_mock.return_value = {
+            "remote_id": "123",
+            "external_code": "123",
+            "status": "123",
+            "fsp": "123",
+            "system": "123",
+            "payload": "123",
+            "extra": "123",
+        }, 200
+
+        response_data = PaymentGatewayAPI().create_payment_instruction({})
+        assert isinstance(response_data, PaymentInstructionData)
+
     @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_delivery_mechanisms")
     def test_sync_delivery_mechanisms(self, get_delivery_mechanisms_mock: Any) -> None:
         assert DeliveryMechanism.objects.all().count() == 14
@@ -640,6 +696,7 @@ class TestPaymentGatewayService(APITestCase):
                         "delivery_mechanism": self.dm_cash_over_the_counter.payment_gateway_id,
                         "delivery_mechanism_name": self.dm_cash_over_the_counter.code,
                         "label": "label21",
+                        "required_fields": ["field1", "field2"],
                     },
                     {
                         "id": 22,
@@ -647,6 +704,7 @@ class TestPaymentGatewayService(APITestCase):
                         "delivery_mechanism": self.dm_transfer.payment_gateway_id,
                         "delivery_mechanism_name": self.dm_transfer.code,
                         "label": "label22",
+                        "required_fields": ["field3", "field4"],
                     },
                 ],
             ),
@@ -662,6 +720,7 @@ class TestPaymentGatewayService(APITestCase):
                         "delivery_mechanism": self.dm_transfer.payment_gateway_id,
                         "delivery_mechanism_name": self.dm_transfer.code,
                         "label": "label23",
+                        "required_fields": ["field3", "field4"],
                     },
                 ],
             ),
@@ -680,6 +739,12 @@ class TestPaymentGatewayService(APITestCase):
         fsp_new = FinancialServiceProvider.objects.get(name="New FSP")
         assert fsp_new.payment_gateway_id == "33"
         assert list(fsp_new.delivery_mechanisms.values_list("code", flat=True)) == ["cash_over_the_counter", "transfer"]
+
+        assert FspNameMapping.objects.count() == 6
+        fsp_name_mapping = FspNameMapping.objects.get(external_name="field1")
+        assert fsp_name_mapping.fsp == fsp_new
+        assert fsp_name_mapping.hope_name == "field1"
+        assert fsp_name_mapping.source == FspNameMapping.SourceModel.ACCOUNT
 
     @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayService.sync_delivery_mechanisms")
     def test_periodic_sync_payment_gateway_delivery_mechanisms(self, sync_delivery_mechanisms_mock: Any) -> None:
