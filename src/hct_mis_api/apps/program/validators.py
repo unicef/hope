@@ -2,7 +2,7 @@ import logging
 import re
 from typing import TYPE_CHECKING, Any, Optional
 
-from django.core.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError
 
 from hct_mis_api.apps.core.validators import BaseValidator
 from hct_mis_api.apps.payment.models import PaymentPlan

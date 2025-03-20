@@ -40,7 +40,7 @@ def get_encoded_household_id(household: Household) -> str:
     return encode_id_base64_required(household.id, "Household")
 
 
-class TestHouseholdListView:
+class TestHouseholdList:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
         self.afghanistan = create_afghanistan()
@@ -306,7 +306,7 @@ class TestHouseholdListView:
             assert len(ctx.captured_queries) == 10
 
 
-class TestHouseholdDetailView:
+class TestHouseholdDetail:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
         self.detail_url_name = "api:households:households-detail"

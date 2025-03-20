@@ -41,7 +41,7 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 pytestmark = pytest.mark.django_db
 
 
-class TestProgramListView:
+class TestProgramList:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
         self.afghanistan = create_afghanistan()
@@ -290,7 +290,7 @@ class TestProgramListView:
         _test_response_len_and_queries(2, no_queries_cached)
 
 
-class TestProgramDetailView:
+class TestProgramDetail:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any, create_partner_role_with_permissions: Any) -> None:
         self.afghanistan = create_afghanistan()
@@ -480,6 +480,44 @@ class TestProgramDetailView:
         assert response_data["population_goal"] == self.program.population_goal
 
 
+class TestProgramDestroy:
+    @pytest.fixture(autouse=True)
+    def setup(self, api_client: Any, create_user_role_with_permissions: Any) -> None:
+        self.afghanistan = create_afghanistan()
+        self.program = ProgramFactory(business_area=self.afghanistan, status=Program.DRAFT)
+        self.destroy_url = reverse(
+            "api:programs:programs-detail",
+            kwargs={"business_area_slug": self.afghanistan.slug, "slug": self.program.slug},
+        )
+        self.partner = PartnerFactory(name="TestPartner")
+        self.user = UserFactory(partner=self.partner)
+        self.client = api_client(self.user)
+
+    def test_program_destroy_without_permissions(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [], self.afghanistan, self.program)
+
+        response = self.client.delete(self.destroy_url)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert Program.objects.filter(id=self.program.id).exists()
+
+    def test_program_destroy(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_REMOVE], self.afghanistan, self.program)
+
+        response = self.client.delete(self.destroy_url)
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+        assert not Program.objects.filter(id=self.program.id).exists()
+
+    def test_program_destroy_active(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_REMOVE], self.afghanistan, self.program)
+        self.program.status = Program.ACTIVE
+        self.program.save()
+        response = self.client.delete(self.destroy_url)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json() == ["Only Draft Program can be deleted."]
+
+        assert Program.objects.filter(id=self.program.id).exists()
+
+
 class TestProgramFilter:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any, create_user_role_with_permissions: Any) -> None:
@@ -624,11 +662,17 @@ class TestProgramFilter:
             self.user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], self.afghanistan, program2
         )
 
-        response = self.client.get(self.list_url, {"number_of_households_min": 4})
-        assert response.status_code == status.HTTP_200_OK
-        response_data = response.json()["results"]
-        assert len(response_data) == 1
-        assert response_data[0]["id"] == encode_id_base64_required(program1.id, "Program")
+        response_min = self.client.get(self.list_url, {"number_of_households_min": 4})
+        assert response_min.status_code == status.HTTP_200_OK
+        response_data_min = response_min.json()["results"]
+        assert len(response_data_min) == 1
+        assert response_data_min[0]["id"] == encode_id_base64_required(program1.id, "Program")
+
+        response_max = self.client.get(self.list_url, {"number_of_households_max": 4})
+        assert response_max.status_code == status.HTTP_200_OK
+        response_data_max = response_max.json()["results"]
+        assert len(response_data_max) == 1
+        assert response_data_max[0]["id"] == encode_id_base64_required(program2.id, "Program")
 
     def test_filter_number_of_households_with_tp_in_program(self) -> None:
         def _create_hhs_for_pp(program: Program, payment_plan: PaymentPlan, no_hhs: int) -> list:
@@ -709,11 +753,36 @@ class TestProgramFilter:
                 self.user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], self.afghanistan, program
             )
 
-        response = self.client.get(self.list_url, {"number_of_households_with_tp_in_program_min": 5})
-        assert response.status_code == status.HTTP_200_OK
-        response_data = response.json()["results"]
-        assert len(response_data) == 3
-        program_ids = [program["id"] for program in response_data]
-        assert encode_id_base64_required(program1.id, "Program") in program_ids
-        assert encode_id_base64_required(program3.id, "Program") in program_ids
-        assert encode_id_base64_required(program4.id, "Program") in program_ids
+        response_min = self.client.get(self.list_url, {"number_of_households_with_tp_in_program_min": 5})
+        assert response_min.status_code == status.HTTP_200_OK
+        response_data_min = response_min.json()["results"]
+        assert len(response_data_min) == 3
+        program_ids_min = [program["id"] for program in response_data_min]
+        assert encode_id_base64_required(program1.id, "Program") in program_ids_min
+        assert encode_id_base64_required(program3.id, "Program") in program_ids_min
+        assert encode_id_base64_required(program4.id, "Program") in program_ids_min
+
+        assert encode_id_base64_required(program2.id, "Program") not in program_ids_min
+        assert encode_id_base64_required(program5.id, "Program") not in program_ids_min
+
+        response_max = self.client.get(self.list_url, {"number_of_households_with_tp_in_program_max": 5})
+        assert response_max.status_code == status.HTTP_200_OK
+        response_data_max = response_max.json()["results"]
+        assert len(response_data_max) == 3
+        program_ids_max = [program["id"] for program in response_data_max]
+        assert encode_id_base64_required(program1.id, "Program") in program_ids_max
+        assert encode_id_base64_required(program2.id, "Program") in program_ids_max
+        assert encode_id_base64_required(program5.id, "Program") in program_ids_max
+
+        assert encode_id_base64_required(program3.id, "Program") not in program_ids_max
+        assert encode_id_base64_required(program4.id, "Program") not in program_ids_max
+
+        response_min_max = self.client.get(
+            self.list_url,
+            {"number_of_households_with_tp_in_program_min": 5, "number_of_households_with_tp_in_program_max": 5},
+        )
+        assert response_min_max.status_code == status.HTTP_200_OK
+        response_data_min_max = response_min_max.json()["results"]
+        assert len(response_data_min_max) == 1
+        program_ids_min_max = [program["id"] for program in response_data_min_max]
+        assert encode_id_base64_required(program1.id, "Program") in program_ids_min_max

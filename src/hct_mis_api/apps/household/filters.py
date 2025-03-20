@@ -265,22 +265,16 @@ class HouseholdFilter(FilterSet):
     def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
         if value is True:
             return qs.filter(program__status=Program.ACTIVE)
-        elif value is False:
-            return qs.filter(program__status=Program.FINISHED)
-        else:
-            return qs
+        return qs.filter(program__status=Program.FINISHED)
 
     def rdi_merge_status_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         if value == MergeStatusModel.PENDING:
             return qs.filter(rdi_merge_status=MergeStatusModel.PENDING)
-        else:
-            return qs.filter(rdi_merge_status=MergeStatusModel.MERGED)
+        return qs.filter(rdi_merge_status=MergeStatusModel.MERGED)
 
     def admin_field_filter(self, qs: QuerySet, field_name: str, value: str) -> QuerySet:
-        if value:
-            encoded_value = decode_id_string(value)
-            return qs.filter(**{field_name: encoded_value})
-        return qs
+        encoded_value = decode_id_string(value)
+        return qs.filter(**{field_name: encoded_value})
 
 
 class IndividualFilter(FilterSet):

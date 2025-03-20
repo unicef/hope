@@ -65,6 +65,7 @@ class ProgramViewSet(
     permissions_by_action = {
         "retrieve": [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
         "list": [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS, *ALL_GRIEVANCES_CREATE_MODIFY],
+        "destroy": [Permissions.PROGRAMME_REMOVE],
     }
     queryset = Program.objects.all()
     serializer_classes_by_action = {
