@@ -5,10 +5,10 @@ import { Box } from '@mui/material';
 import { DuplicateProgramButtonLink } from '../../dialogs/programs/DuplicateProgramButtonLink';
 import { FinishProgram } from '../../dialogs/programs/FinishProgram';
 import { ReactElement } from 'react';
-import { Program } from '@restgenerated/models/Program';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 
 export interface ActiveProgramDetailsPageHeaderPropTypes {
-  program: Program;
+  program: ProgramDetail;
   canFinish: boolean;
   canEdit: boolean;
   canDuplicate: boolean;

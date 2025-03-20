@@ -30,10 +30,10 @@ import type { DefaultError } from '@tanstack/query-core';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { Program } from '@restgenerated/models/Program';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 
 interface CreateProgramCycleProps {
-  program: Program;
+  program: ProgramDetail;
   onClose: () => void;
   onSubmit: () => void;
   step?: string;

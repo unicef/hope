@@ -16,7 +16,7 @@ import {
   DialogTitle,
   IconButton,
 } from '@mui/material';
-import { Program } from '@restgenerated/models/Program';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { decodeIdString } from '@utils/utils';
 import { ReactElement, useState } from 'react';
@@ -28,7 +28,7 @@ const WhiteDeleteIcon = styled(DeleteIcon)`
 `;
 
 interface DeleteProgramCycleProps {
-  program: Program;
+  program: ProgramDetail;
   programCycle: ProgramCycle;
 }
 

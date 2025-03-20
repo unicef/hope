@@ -224,7 +224,7 @@ class TestTargetPopulationViews:
 
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 12
+            assert len(ctx.captured_queries) == 14
 
         # Test that reoccurring requests use cached data
         with CaptureQueriesContext(connection) as ctx:
@@ -233,7 +233,7 @@ class TestTargetPopulationViews:
 
             etag_second_call = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 3
+            assert len(ctx.captured_queries) == 4
 
             assert etag_second_call == etag
 
@@ -246,7 +246,7 @@ class TestTargetPopulationViews:
 
             etag_call_after_update = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 7
+            assert len(ctx.captured_queries) == 8
 
             assert etag_call_after_update != etag
 
@@ -257,6 +257,6 @@ class TestTargetPopulationViews:
 
             etag_call_after_update_second_call = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 3
+            assert len(ctx.captured_queries) == 4
 
             assert etag_call_after_update_second_call == etag_call_after_update

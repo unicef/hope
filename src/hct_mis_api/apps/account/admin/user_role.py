@@ -59,14 +59,14 @@ class RoleAssignmentInline(admin.TabularInline):
     def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         if isinstance(obj, Partner):
             if obj.is_unicef_subpartner:
-                return False  # Disable editing if Partner is a parent or is a UNICEF subpartner
+                return False  # Disable editing if Partner is a UNICEF subpartner
             return request.user.can_add_business_area_to_partner()
         return True
 
     def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         if isinstance(obj, Partner):
             if obj.is_unicef_subpartner:
-                return False  # Disable deleting if Partner is a parent or is a UNICEF subpartner
+                return False  # Disable deleting if Partner is a UNICEF subpartner
             return request.user.can_add_business_area_to_partner()
         return True
 

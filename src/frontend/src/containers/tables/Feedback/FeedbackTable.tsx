@@ -45,7 +45,7 @@ function FeedbackTable({
 
   const replacements = {
     household_lookup: (_beneficiaryGroup) =>
-      `${_beneficiaryGroup?.groupLabel} ID`,
+      `${_beneficiaryGroup?.group_label} ID`,
   };
 
   const adjustedHeadCells = adjustHeadCells(

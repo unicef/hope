@@ -37,10 +37,8 @@
   "include": [
     "src",
     "__tests__",
-    "jest",
     "tsconfig.json",
     ".eslintrc.cjs",
-    "jest.config",
     "babel.config.cjs",
     "vitest"
   ],

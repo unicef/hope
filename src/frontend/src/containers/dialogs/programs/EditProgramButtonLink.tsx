@@ -4,10 +4,10 @@ import EditIcon from '@mui/icons-material/EditRounded';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { Program } from '@restgenerated/models/Program';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 
 interface EditProgramButtonLinkProps {
-  program: Program;
+  program: ProgramDetail;
 }
 
 export function EditProgramButtonLink({

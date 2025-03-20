@@ -38,10 +38,10 @@ function PaymentsHouseholdTable({
 
   const replacements = {
     headOfHousehold: (_beneficiaryGroup) =>
-      `Head of ${_beneficiaryGroup?.groupLabel}`,
+      `Head of ${_beneficiaryGroup?.group_label}`,
     fullName: (_beneficiaryGroup) => `${_beneficiaryGroup?.member_label}`,
     relationship: (_beneficiaryGroup) =>
-      `Relationship to Head of ${_beneficiaryGroup?.groupLabel}`,
+      `Relationship to Head of ${_beneficiaryGroup?.group_label}`,
   };
 
   const adjustedHeadCells = adjustHeadCells(

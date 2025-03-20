@@ -35,7 +35,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import type { DefaultError } from '@tanstack/query-core';
 import { useSnackbar } from '@hooks/useSnackBar';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { Program } from '@restgenerated/models/Program';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 
 interface MutationError extends DefaultError {
   data: any;
@@ -43,7 +43,7 @@ interface MutationError extends DefaultError {
 
 interface EditProgramCycleProps {
   programCycle: ProgramCycle;
-  program: Program;
+  program: ProgramDetail;
 }
 
 const EditProgramCycle = ({

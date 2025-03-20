@@ -100,7 +100,7 @@ class ProgramFactory(DjangoModelFactory):
         getter=lambda c: c[0],
     )
     cash_plus = fuzzy.FuzzyChoice((True, False))
-    population_goal = factory.fuzzy.FuzzyDecimal(50000.0, 600000.0)
+    population_goal = factory.fuzzy.FuzzyInteger(50000, 600000)
     administrative_areas_of_implementation = factory.Faker(
         "sentence",
         nb_words=3,
@@ -108,9 +108,7 @@ class ProgramFactory(DjangoModelFactory):
         ext_word_list=None,
     )
     data_collecting_type = factory.SubFactory(DataCollectingTypeFactory)
-    programme_code = factory.LazyAttribute(
-        lambda o: "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4))
-    )
+    programme_code = factory.LazyAttribute(lambda o: ProgramFactory.generate_programme_code(o))
     beneficiary_group = factory.LazyAttribute(
         lambda o: BeneficiaryGroupFactory(
             master_detail=False if o.data_collecting_type.type == DataCollectingType.Type.SOCIAL else True,
@@ -119,6 +117,13 @@ class ProgramFactory(DjangoModelFactory):
             ),
         )
     )
+
+    @staticmethod
+    def generate_programme_code(obj: Any) -> str:
+        programme_code = "".join(random.choice(string.ascii_uppercase + string.digits + "-") for _ in range(4))
+        if Program.objects.filter(business_area_id=obj.business_area.id, programme_code=programme_code).exists():
+            return ProgramFactory.generate_programme_code(obj)
+        return programme_code
 
     @factory.post_generation
     def cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:

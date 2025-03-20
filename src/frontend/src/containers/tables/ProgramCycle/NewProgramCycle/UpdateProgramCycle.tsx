@@ -23,7 +23,7 @@ import {
   FormHelperText,
 } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import { Program } from '@restgenerated/models/Program';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import type { DefaultError } from '@tanstack/query-core';
 import { useMutation } from '@tanstack/react-query';
@@ -34,7 +34,7 @@ import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 
 interface UpdateProgramCycleProps {
-  program: Program;
+  program: ProgramDetail;
   programCycle?: ProgramCycle;
   onClose: () => void;
   onSubmit: () => void;

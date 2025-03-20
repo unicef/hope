@@ -10,3 +10,11 @@ class AreaListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Area
         fields = ("id", "name", "p_code")
+
+
+class AreaLevelSerializer(serializers.ModelSerializer):
+    id = Base64ModelField(model_name="Area")
+
+    class Meta:
+        model = Area
+        fields = ("id", "level")

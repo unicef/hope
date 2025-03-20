@@ -75,7 +75,7 @@ class KeyConstructorMixin(KeyConstructor):
     pagination = bits.PaginationKeyBit()
 
 
-class BusinessAreaKeyBit(KeyBitBase):
+class BusinessAreaKeyBitMixin(KeyBitBase):
     specific_view_cache_key = ""
 
     def get_data(
@@ -89,7 +89,7 @@ class BusinessAreaKeyBit(KeyBitBase):
         return str(version)
 
 
-class BusinessAreaAndProgramKeyBit(KeyBitBase):
+class BusinessAreaAndProgramKeyBitMixin(KeyBitBase):
     specific_view_cache_key = ""
 
     def get_data(

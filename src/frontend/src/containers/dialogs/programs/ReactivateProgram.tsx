@@ -17,10 +17,10 @@ import { DialogTitleWrapper } from '../DialogTitleWrapper';
 import { useProgramContext } from '../../../programContext';
 import { useNavigate } from 'react-router-dom';
 import { Status791Enum } from '@restgenerated/models/Status791Enum';
-import { Program } from '@restgenerated/models/Program';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 
 interface ReactivateProgramProps {
-  program: Program;
+  program: ProgramDetail;
 }
 
 export function ReactivateProgram({
