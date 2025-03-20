@@ -51,8 +51,6 @@ class TestProgramListViewSet:
         self.user = UserFactory(partner=self.partner)
         self.client = api_client(self.user)
 
-        self.api_client = api_client
-
         self.pdu_field1 = FlexibleAttributeForPDUFactory(program=self.program)
         self.pdu_field2 = FlexibleAttributeForPDUFactory(program=self.program)
         FlexibleAttributeForPDUFactory()
@@ -243,7 +241,7 @@ class TestProgramListViewSet:
         assert response_data[2]["id"] == encode_id_base64_required(self.program.id, "Program")
         assert response_data[3]["id"] == encode_id_base64_required(program_finished.id, "Program")
 
-    def test_program_list_caching(self, create_user_role_with_permissions: Any, api_client: Any) -> None:
+    def test_program_list_caching(self, create_user_role_with_permissions: Any) -> None:
         no_queries_not_cached_no_permissions = 11
         no_queries_not_cached_with_permissions = 7
         no_queries_cached = 5
@@ -259,7 +257,7 @@ class TestProgramListViewSet:
 
         def _test_response_len_and_queries(response_len: int, queries_len: int) -> None:
             with CaptureQueriesContext(connection) as queries:
-                response = api_client(self.user).get(self.list_url)
+                response = self.client.get(self.list_url)
                 assert response.status_code == status.HTTP_200_OK
                 response_data = response.json()["results"]
                 assert len(response_data) == response_len
@@ -373,7 +371,7 @@ class TestProgramFilter:
         assert len(response_data) == 1
         assert response_data[0]["id"] == encode_id_base64_required(program2.id, "Program")
 
-    def test_filter_by_beneficiary_group_match(self, api_client: Any) -> None:
+    def test_filter_by_beneficiary_group_match(self) -> None:
         beneficiary_group1 = BeneficiaryGroupFactory(name="Group1")
         beneficiary_group2 = BeneficiaryGroupFactory(name="Group2")
         program1 = ProgramFactory(business_area=self.afghanistan, beneficiary_group=beneficiary_group1)
@@ -387,7 +385,7 @@ class TestProgramFilter:
         )
 
         # additional check to test filter doesn't break allowed_programs constraints
-        response = api_client(self.user).get(self.list_url, {"beneficiary_group_match": program1.slug})
+        response = self.client.get(self.list_url, {"beneficiary_group_match": program1.slug})
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
         assert len(response_data) == 0
@@ -395,7 +393,7 @@ class TestProgramFilter:
         self.create_user_role_with_permissions(
             self.user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], self.afghanistan, program3
         )
-        response = api_client(self.user).get(self.list_url, {"beneficiary_group_match": program1.slug})
+        response = self.client.get(self.list_url, {"beneficiary_group_match": program1.slug})
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
         assert len(response_data) == 1
