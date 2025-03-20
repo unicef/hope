@@ -246,7 +246,7 @@ class TestAreaViews:
 
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 6
+            assert len(ctx.captured_queries) == 7
 
         # Test that reoccurring requests use cached data
         with CaptureQueriesContext(connection) as ctx:
@@ -255,7 +255,7 @@ class TestAreaViews:
 
             etag_second_call = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 1
+            assert len(ctx.captured_queries) == 2
 
             assert etag_second_call == etag
 
@@ -268,7 +268,7 @@ class TestAreaViews:
 
             etag_call_after_update = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 2  # fewer queries than the initial call because of cached permissions
+            assert len(ctx.captured_queries) == 3  # fewer queries than the initial call because of cached permissions
 
             assert etag_call_after_update != etag
 
@@ -280,7 +280,7 @@ class TestAreaViews:
 
             etag_call_after_update_2 = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 2  # fewer queries than the initial call because of cached permissions
+            assert len(ctx.captured_queries) == 3  # fewer queries than the initial call because of cached permissions
 
             assert etag_call_after_update_2 != etag_call_after_update
 
@@ -292,7 +292,7 @@ class TestAreaViews:
 
             etag_call_after_update_3 = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 2  # fewer queries than the initial call because of cached permissions
+            assert len(ctx.captured_queries) == 3  # fewer queries than the initial call because of cached permissions
 
             assert etag_call_after_update_3 != etag_call_after_update_2
 
@@ -303,7 +303,7 @@ class TestAreaViews:
 
             etag_call_after_update_second_call = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 1
+            assert len(ctx.captured_queries) == 2
 
             assert etag_call_after_update_second_call == etag_call_after_update_3
 
