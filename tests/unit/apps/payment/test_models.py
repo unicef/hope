@@ -996,19 +996,46 @@ class TestDeliveryMechanismDataModel(TestCase):
         DeliveryMechanismData.update_unique_field.assert_called_once()
 
     def test_update_unique_fields(self) -> None:
-        unique_fields = [
+        account_type_bank = AccountType.objects.get(key="bank")
+        account_type_bank.unique_fields = [
             "seeing_disability",
             "name_of_cardholder__atm_card",
         ]
+        account_type_bank.save()
 
-        dmd_1 = DeliveryMechanismDataFactory(data={"name_of_cardholder__atm_card": "test"}, individual=self.ind)
+        dmd_1 = DeliveryMechanismDataFactory(
+            data={"name_of_cardholder__atm_card": "test"}, individual=self.ind, account_type=account_type_bank
+        )
         dmd_1.individual.seeing_disability = LOT_DIFFICULTY
         dmd_1.individual.save()
+        self.assertIsNone(dmd_1.unique_key)
+        self.assertEqual(dmd_1.is_unique, True)
 
-        dmd_2 = DeliveryMechanismDataFactory(data={"name_of_cardholder__atm_card": "test2"}, individual=self.ind2)
+        dmd_2 = DeliveryMechanismDataFactory(
+            data={"name_of_cardholder__atm_card": "test2"}, individual=self.ind2, account_type=account_type_bank
+        )
         dmd_2.individual.seeing_disability = LOT_DIFFICULTY
         dmd_2.individual.save()
+        self.assertIsNone(dmd_2.unique_key)
+        self.assertEqual(dmd_2.is_unique, True)
 
-        with mock.patch.object(dmd_1.account_type, "unique_fields", unique_fields):
-            dmd_1.update_unique_field()
-            self.assertIsNotNone(dmd_1.unique_key)
+        dmd_1.update_unique_field()
+        dmd_1.refresh_from_db()
+        self.assertIsNotNone(dmd_1.unique_key)
+
+        dmd_2.data["name_of_cardholder__atm_card"] = "test"
+        dmd_2.save()
+        dmd_2.update_unique_field()
+        dmd_2.refresh_from_db()
+        self.assertEqual(dmd_2.is_unique, False)
+
+
+class TestAccountTypeModel(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        cls.fsp = FinancialServiceProviderFactory()
+        generate_delivery_mechanisms()
+
+    def test_get_targeting_field_names(self) -> None:
+        self.assertEqual(AccountType.get_targeting_field_names(), ["bank__number", "mobile__number"])
