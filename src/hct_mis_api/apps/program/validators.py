@@ -2,7 +2,9 @@ import logging
 import re
 from typing import TYPE_CHECKING, Any, Optional
 
-from rest_framework.exceptions import ValidationError
+from django.core.exceptions import ValidationError
+
+from rest_framework.exceptions import ValidationError as RestValidationError
 
 from hct_mis_api.apps.core.validators import BaseValidator
 from hct_mis_api.apps.payment.models import PaymentPlan
@@ -74,7 +76,7 @@ class ProgramDeletionValidator(BaseValidator):
     def validate_is_deletable(cls, program: Program, *args: Any, **kwargs: Any) -> None:
         if program.status != Program.DRAFT:
             logger.error("Only Draft Program can be deleted.")
-            raise ValidationError("Only Draft Program can be deleted.")
+            raise RestValidationError("Only Draft Program can be deleted.")
 
 
 class ProgrammeCodeValidator(BaseValidator):
