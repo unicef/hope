@@ -13,7 +13,6 @@ import {
   ProgramPartnerAccess,
   useAllAreasTreeQuery,
   usePduSubtypeChoicesDataQuery,
-  useProgramQuery,
   useUpdateProgramMutation,
   useUpdateProgramPartnersMutation,
   useUserPartnerChoicesQuery,
@@ -39,6 +38,8 @@ import {
 } from '@components/programs/CreateProgram/editProgramValidationSchema';
 import { omit } from 'lodash';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 
 const EditProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -54,10 +55,16 @@ const EditProgramPage = (): ReactElement => {
   const { data: treeData, loading: treeLoading } = useAllAreasTreeQuery({
     variables: { businessArea },
   });
-  const { data, loading: loadingProgram } = useProgramQuery({
-    variables: { id },
-    fetchPolicy: 'cache-and-network',
+
+  const { data: program, isLoading: loadingProgram } = useQuery({
+    queryKey: ['businessAreaProgram', businessArea, id],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsRetrieve({
+        businessAreaSlug: businessArea,
+        slug: id,
+      }),
   });
+
   const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } =
     useUserPartnerChoicesQuery();
 
@@ -99,42 +106,47 @@ const EditProgramPage = (): ReactElement => {
   )
     return <LoadingComponent />;
 
-  if (!data || !treeData || !userPartnerChoicesData || !pdusubtypeChoicesData)
+  if (
+    !program ||
+    !treeData ||
+    !userPartnerChoicesData ||
+    !pdusubtypeChoicesData
+  )
     return null;
 
   const {
     name,
-    programmeCode,
-    startDate,
-    endDate,
+    programme_code,
+    start_date,
+    end_date,
     sector,
-    dataCollectingType,
-    beneficiaryGroup,
+    data_collecting_type,
+    beneficiary_group,
     description,
     budget = '',
-    administrativeAreasOfImplementation,
-    populationGoal = '',
-    cashPlus = false,
-    frequencyOfPayments = 'REGULAR',
+    administrative_areas_of_implementation,
+    population_goal = '',
+    cash_plus = false,
+    frequency_of_payments = 'REGULAR',
     version,
     partners,
-    partnerAccess = ProgramPartnerAccess.AllPartnersAccess,
-    registrationImports,
-    pduFields,
-    targetPopulationsCount,
-  } = data.program;
+    partner_access = ProgramPartnerAccess.AllPartnersAccess,
+    registration_imports_total_count,
+    pdu_fields,
+    target_populations_count,
+  } = program;
 
-  const programHasRdi = registrationImports?.totalCount > 0;
-  const programHasTp = targetPopulationsCount > 0;
+  const programHasRdi = registration_imports_total_count > 0;
+  const programHasTp = target_populations_count > 0;
 
   const handleSubmitProgramDetails = async (values): Promise<void> => {
     const budgetValue = parseFloat(values.budget) ?? 0;
     const budgetToFixed = !Number.isNaN(budgetValue)
       ? budgetValue.toFixed(2)
       : 0;
-    const populationGoalValue = parseInt(values.populationGoal, 10) ?? 0;
-    const populationGoalParsed = !Number.isNaN(populationGoalValue)
-      ? populationGoalValue
+    const population_goalValue = parseInt(values.population_goal, 10) ?? 0;
+    const population_goalParsed = !Number.isNaN(population_goalValue)
+      ? population_goalValue
       : 0;
 
     const pduFieldsToSend = values.pduFields
@@ -179,7 +191,7 @@ const EditProgramPage = (): ReactElement => {
             id,
             ...requestValuesDetails,
             budget: budgetToFixed,
-            populationGoal: populationGoalParsed,
+            populationGoal: population_goalParsed,
             pduFields: pduFieldsToSend,
           },
           version,
@@ -222,36 +234,28 @@ const EditProgramPage = (): ReactElement => {
     }
   };
 
-  const mappedPduFields = Object.entries(pduFields).map(([, field]) => {
-    const { ...rest } = field;
-    return {
-      ...rest,
-      label: JSON.parse(field.label)['English(EN)'],
-    };
-  });
-
   const initialValuesProgramDetails = {
     editMode: true,
     name,
-    programmeCode,
-    startDate,
-    endDate,
+    programmeCode: programme_code,
+    startDate: start_date,
+    endDate: end_date,
     sector,
-    dataCollectingTypeCode: dataCollectingType?.code,
-    beneficiaryGroup: decodeIdString(beneficiaryGroup?.id),
+    dataCollectingTypeCode: data_collecting_type.code,
+    beneficiaryGroup: decodeIdString(beneficiary_group.id),
     description,
     budget,
-    administrativeAreasOfImplementation,
-    populationGoal,
-    cashPlus,
-    frequencyOfPayments,
-    pduFields: mappedPduFields,
+    administrativeAreasOfImplementation: administrative_areas_of_implementation,
+    populationGoal: population_goal,
+    cashPlus: cash_plus,
+    frequencyOfPayments: frequency_of_payments,
+    pduFields: pdu_fields,
   };
 
   initialValuesProgramDetails.budget =
-    data.program.budget === '0.00' ? '' : data.program.budget;
+    program.budget === '0.00' ? '' : program.budget;
   initialValuesProgramDetails.populationGoal =
-    data.program.populationGoal === 0 ? '' : data.program.populationGoal;
+    program.population_goal === 0 ? '' : program.population_goal;
 
   const initialValuesPartners = {
     partners:
@@ -264,7 +268,7 @@ const EditProgramPage = (): ReactElement => {
               areaAccess: partner.areaAccess,
             }))
         : [],
-    partnerAccess,
+    partner_access,
   };
 
   const stepFields = [
@@ -279,7 +283,7 @@ const EditProgramPage = (): ReactElement => {
       'description',
       'budget',
       'administrativeAreasOfImplementation',
-      'populationGoal',
+      'population_goal',
       'cashPlus',
       'frequencyOfPayments',
     ],
@@ -392,7 +396,7 @@ const EditProgramPage = (): ReactElement => {
                             programHasRdi={programHasRdi}
                             programHasTp={programHasTp}
                             programId={id}
-                            program={data.program}
+                            program={program}
                             setFieldValue={setFieldValue}
                             submitForm={submitForm}
                           />

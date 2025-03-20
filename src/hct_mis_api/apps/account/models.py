@@ -113,13 +113,24 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
     def get_program_ids_for_business_area(self, business_area_id: str) -> List[str]:
         from hct_mis_api.apps.program.models import Program
 
+        if not hasattr(self, "_program_ids_for_business_area_cache"):
+            self._program_ids_for_business_area_cache = {}
+        if business_area_id in self._program_ids_for_business_area_cache:
+            return self._program_ids_for_business_area_cache[business_area_id]
+
         if self.role_assignments.filter(business_area_id=business_area_id, program=None).exists():
             programs_ids = Program.objects.filter(business_area_id=business_area_id).values_list("id", flat=True)
         else:
-            programs_ids = self.role_assignments.filter(business_area_id=business_area_id).values_list(
-                "program_id", flat=True
+            programs_ids = (
+                self.role_assignments.filter(business_area_id=business_area_id)
+                .order_by("program_id")
+                .values_list("program_id", flat=True)
             )
-        return [str(program_id) for program_id in programs_ids]
+        program_ids_list = [str(program_id) for program_id in programs_ids]
+
+        self._program_ids_for_business_area_cache[business_area_id] = program_ids_list
+
+        return program_ids_list
 
     def get_program_ids_for_permissions_in_business_area(
         self, business_area_id: str, permissions: List[Permissions]
@@ -183,16 +194,28 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         """
         from hct_mis_api.apps.program.models import Program
 
+        if not hasattr(self, "_program_ids_for_business_area_cache"):
+            self._program_ids_for_business_area_cache = {}
+        if business_area_id in self._program_ids_for_business_area_cache:
+            return self._program_ids_for_business_area_cache[business_area_id]
+
         if RoleAssignment.objects.filter(
             Q(user=self) | Q(partner__user=self), business_area_id=business_area_id, program=None
         ).exists():
             programs_ids = Program.objects.filter(business_area_id=business_area_id).values_list("id", flat=True)
         else:
-            programs_ids = RoleAssignment.objects.filter(
-                Q(user=self) | Q(partner__user=self),
-                business_area_id=business_area_id,
-            ).values_list("program_id", flat=True)
-        return [str(program_id) for program_id in programs_ids]
+            programs_ids = (
+                RoleAssignment.objects.filter(
+                    Q(user=self) | Q(partner__user=self),
+                    business_area_id=business_area_id,
+                )
+                .order_by("program_id")
+                .values_list("program_id", flat=True)
+            )
+
+        program_ids_list = [str(program_id) for program_id in programs_ids]
+        self._program_ids_for_business_area_cache[business_area_id] = program_ids_list
+        return program_ids_list
 
     def get_program_ids_for_permissions_in_business_area(
         self, business_area_id: str, permissions: List[Permissions]

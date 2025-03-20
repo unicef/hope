@@ -73,9 +73,9 @@ function RegistrationDataImportTable({
     numberOfIndividuals: (_beneficiaryGroup) =>
       `Num. of ${_beneficiaryGroup?.member_label_plural}`,
     numberOfHouseholds: (_beneficiaryGroup) =>
-      `Num. of ${_beneficiaryGroup?.groupLabelPlural}`,
+      `Num. of ${_beneficiaryGroup?.group_labelPlural}`,
     household__unicef_id: (_beneficiaryGroup) =>
-      `${_beneficiaryGroup?.groupLabel} ID`,
+      `${_beneficiaryGroup?.group_label} ID`,
   };
 
   const adjustedHeadCells = adjustHeadCells(

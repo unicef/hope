@@ -1,4 +1,4 @@
-export const restProgramsPeriodicDataUpdatePeriodicDataUpdateTemplatesList = {
+export const restBusinessAreasProgramsPeriodicDataUpdateTemplatesList = {
   count: 1,
   next: null,
   previous: null,

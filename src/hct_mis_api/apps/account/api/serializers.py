@@ -4,8 +4,9 @@ from flags.state import flag_state
 from rest_framework import serializers
 from rest_framework.utils.serializer_helpers import ReturnDict
 
-from hct_mis_api.apps.account.models import Role, User
+from hct_mis_api.apps.account.models import Partner, Role, User
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.geo.api.serializers import AreaLevelSerializer
 from hct_mis_api.apps.program.models import Program
 
 
@@ -86,3 +87,27 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         fields = ("first_name", "last_name", "email", "username")
+
+
+class PartnerForProgramSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Partner model
+    It expects Partner objects to be annotated with partner_program which is the program that is serializing the object
+    """
+
+    areas = serializers.SerializerMethodField()
+    area_access = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Partner
+        fields = ("id", "name", "area_access", "areas")
+
+    def get_area_access(self, obj: Partner) -> str:
+        if obj.has_area_limits_in_program(obj.partner_program):
+            return "ADMIN_AREA"
+        else:
+            return "BUSINESS_AREA"
+
+    def get_areas(self, obj: Partner) -> ReturnDict:
+        areas_qs = obj.get_areas_for_program(obj.partner_program).order_by("name")
+        return AreaLevelSerializer(areas_qs, many=True).data

@@ -5,35 +5,41 @@ import { DividerLine } from '@core/DividerLine';
 import { LabelizedField } from '@core/LabelizedField';
 import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
-import { ProgrammeChoiceDataQuery, ProgramQuery } from '@generated/graphql';
+import { ProgrammeChoiceDataQuery } from '@generated/graphql';
 import { Box, Grid2 as Grid, Typography } from '@mui/material';
-import { Program } from '@restgenerated/models/Program';
-import { programStatusToColor } from '@utils/utils';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import {
+  choicesToDict,
+  isPartnerVisible,
+  programStatusToColor,
+} from '@utils/utils';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
+import { MiśTheme } from 'src/theme';
 import styled from 'styled-components';
+import { PartnerAccess } from '../constants';
 
-// const NumberOfHouseHolds = styled.div`
-//   padding: ${({ theme }) => theme.spacing(8)};
-//   border-color: #b1b1b5;
-//   border-left-width: 1px;
-//   border-left-style: solid;
-// `;
-// const NumberOfHouseHoldsValue = styled.div`
-//   font-family: ${({ theme }: { theme: MiśTheme }) =>
-//     theme.hctTypography.fontFamily};
-//   color: #253b46;
-//   font-size: 36px;
-//   line-height: 32px;
-//   margin-top: ${({ theme }) => theme.spacing(2)};
-// `;
+const NumberOfHouseHolds = styled.div`
+  padding: ${({ theme }) => theme.spacing(8)};
+  border-color: #b1b1b5;
+  border-left-width: 1px;
+  border-left-style: solid;
+`;
+const NumberOfHouseHoldsValue = styled.div`
+  font-family: ${({ theme }: { theme: MiśTheme }) =>
+    theme.hctTypography.fontFamily};
+  color: #253b46;
+  font-size: 36px;
+  line-height: 32px;
+  margin-top: ${({ theme }) => theme.spacing(2)};
+`;
 
 const StyledBox = styled(Box)`
   border: 1px solid #e3e3e3;
 `;
 
 interface ProgramDetailsProps {
-  program: Program;
+  program: ProgramDetail;
   choices: ProgrammeChoiceDataQuery;
 }
 
@@ -45,13 +51,13 @@ export const ProgramDetails = ({
   //TODO: remove console.log
   //TODO: uncomment all fields
   console.log(program, choices);
-  // const { programFrequencyOfPaymentsChoices, programSectorChoices } = choices;
-  // const programFrequencyOfPaymentsChoicesDict = choicesToDict(
-  //   programFrequencyOfPaymentsChoices,
-  // );
-  // const programSectorChoicesDict = choicesToDict(programSectorChoices);
+  const { programFrequencyOfPaymentsChoices, programSectorChoices } = choices;
+  const programFrequencyOfPaymentsChoicesDict = choicesToDict(
+    programFrequencyOfPaymentsChoices,
+  );
+  const programSectorChoicesDict = choicesToDict(programSectorChoices);
   const renderAdminAreasCount = (
-    partner: ProgramQuery['program']['partners'][0],
+    partner: ProgramDetail['partners'][0],
   ): ReactElement => {
     const counts = {
       1: 0,
@@ -80,10 +86,10 @@ export const ProgramDetails = ({
     );
   };
 
-  const partners = [];
-  // program.partners.filter((partner) =>
-  //   isPartnerVisible(partner.name),
-  // );
+  let partners = [];
+  partners = program.partners.filter((partner) =>
+    isPartnerVisible(partner.name),
+  );
 
   const showPartners = partners.length > 0;
   return (
@@ -119,13 +125,12 @@ export const ProgramDetails = ({
               value={program.programme_code}
             />
           </Grid>
-          {/* //TODO: */}
-          {/* <Grid size={{ xs: 4 }}>
+          <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('Sector')}
               value={programSectorChoicesDict[program.sector]}
             />
-          </Grid> */}
+          </Grid>
           <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('Data Collecting Type')}
@@ -138,7 +143,7 @@ export const ProgramDetails = ({
               value={program?.beneficiary_group?.name}
             />
           </Grid>
-          {/* <Grid size={{ xs: 4 }}>
+          <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('Frequency of Payment')}
               value={
@@ -151,35 +156,35 @@ export const ProgramDetails = ({
           <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('Administrative Areas of implementation')}
-              value={program.administrativeAreasOfImplementation}
+              value={program.administrative_areas_of_implementation}
             />
-          </Grid> */}
-          {/* <Grid size={{ xs: 4 }}>
+          </Grid>
+          <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('Description')}
               value={program.description}
             />
-          </Grid> */}
+          </Grid>
           <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('CASH+')}
               value={program.cash_plus ? t('Yes') : t('No')}
             />
           </Grid>
-          {/* <Grid size={{ xs: 4 }}>
+          <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('Partner Access')}
-              value={PartnerAccess[program.partnerAccess]}
+              value={PartnerAccess[program.partner_access]}
             />
-          </Grid> */}
+          </Grid>
         </Grid>
-        {/* <NumberOfHouseHolds>
+        <NumberOfHouseHolds>
           <LabelizedField label={t('Programme size')}>
             <NumberOfHouseHoldsValue>
-              {program.totalNumberOfHouseholds}
+              {program.household_count}
             </NumberOfHouseHoldsValue>
           </LabelizedField>
-        </NumberOfHouseHolds>  */}
+        </NumberOfHouseHolds>
       </OverviewContainer>
       {showPartners && (
         <>

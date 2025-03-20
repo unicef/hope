@@ -6,13 +6,17 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ProgrammeChoiceDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import TableCell from '@mui/material/TableCell';
-import { Program } from '@restgenerated/models/Program';
-import { choicesToDict, programStatusToColor } from '@utils/utils';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import {
+  choicesToDict,
+  formatCurrency,
+  programStatusToColor,
+} from '@utils/utils';
 import { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface ProgrammesTableRowProps {
-  program: Program;
+  program: ProgramDetail;
   choicesData: ProgrammeChoiceDataQuery;
 }
 
@@ -22,7 +26,7 @@ function ProgrammesTableRow({
 }: ProgrammesTableRowProps): ReactElement {
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
-  const programDetailsPath = `/${baseUrl}/details/${program.id}`;
+  const programDetailsPath = `/${baseUrl}/details/${program.slug}`;
   const handleClick = (): void => {
     navigate(programDetailsPath);
   };
@@ -56,9 +60,10 @@ function ProgrammesTableRow({
         <TableCell align="left">
           {programSectorChoiceDict[program.sector]}
         </TableCell>
-        {/* //TODO: fix */}
-        {/* <TableCell align="right">{program.totalNumberOfHouseholds}</TableCell>
-        <TableCell align="right">{formatCurrency(program.budget)}</TableCell> */}
+        <TableCell align="right">{program.household_count}</TableCell>
+        <TableCell align="right">
+          {formatCurrency(Number(program.budget))}
+        </TableCell>
       </ClickableTableRow>
     </>
   );

@@ -4,10 +4,10 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 import { DuplicateProgramButtonLink } from '../../dialogs/programs/DuplicateProgramButtonLink';
 import { ReactivateProgram } from '../../dialogs/programs/ReactivateProgram';
 import { ReactElement } from 'react';
-import { Program } from '@restgenerated/models/Program';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 
 export interface FinishedProgramDetailsPageHeaderPropTypes {
-  program: Program;
+  program: ProgramDetail;
   canActivate: boolean;
   canDuplicate: boolean;
 }

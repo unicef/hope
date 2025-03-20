@@ -115,6 +115,9 @@ class FlexibleAttributeForPDUFactory(DjangoModelFactory):
     type = FlexibleAttribute.PDU
     pdu_data = factory.SubFactory(PeriodicFieldDataFactory)
 
+    class Meta:
+        model = FlexibleAttribute
+
     @factory.lazy_attribute
     def program(self) -> Any:
         from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -127,9 +130,6 @@ class FlexibleAttributeForPDUFactory(DjangoModelFactory):
         kwargs["label"] = {"English(EN)": label}
         obj = super()._create(target_class, *args, **kwargs)
         return obj
-
-    class Meta:
-        model = FlexibleAttribute
 
 
 def create_pdu_flexible_attribute(

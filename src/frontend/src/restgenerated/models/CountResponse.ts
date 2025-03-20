@@ -2,9 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type AreaList = {
-    id: string;
-    name: string;
-    p_code?: string | null;
+export type CountResponse = {
+    count: number;
 };
 

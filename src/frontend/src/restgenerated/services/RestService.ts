@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { BusinessArea } from '../models/BusinessArea';
+import type { CountResponse } from '../models/CountResponse';
 import type { DelegatePeople } from '../models/DelegatePeople';
 import type { HouseholdDetail } from '../models/HouseholdDetail';
 import type { HouseholdList } from '../models/HouseholdList';
@@ -20,7 +21,7 @@ import type { PaginatedPeriodicDataUpdateUploadListList } from '../models/Pagina
 import type { PaginatedPeriodicFieldList } from '../models/PaginatedPeriodicFieldList';
 import type { PaginatedProgramCycleListList } from '../models/PaginatedProgramCycleListList';
 import type { PaginatedProgramGlobalList } from '../models/PaginatedProgramGlobalList';
-import type { PaginatedProgramList } from '../models/PaginatedProgramList';
+import type { PaginatedProgramListList } from '../models/PaginatedProgramListList';
 import type { PaginatedProjectList } from '../models/PaginatedProjectList';
 import type { PaginatedRegistrationDataImportListList } from '../models/PaginatedRegistrationDataImportListList';
 import type { PaginatedRegistrationList } from '../models/PaginatedRegistrationList';
@@ -34,11 +35,11 @@ import type { PeriodicDataUpdateTemplateDetail } from '../models/PeriodicDataUpd
 import type { PeriodicDataUpdateUpload } from '../models/PeriodicDataUpdateUpload';
 import type { PeriodicDataUpdateUploadDetail } from '../models/PeriodicDataUpdateUploadDetail';
 import type { Profile } from '../models/Profile';
-import type { Program } from '../models/Program';
 import type { ProgramAPI } from '../models/ProgramAPI';
 import type { ProgramCycleCreate } from '../models/ProgramCycleCreate';
 import type { ProgramCycleList } from '../models/ProgramCycleList';
 import type { ProgramCycleUpdate } from '../models/ProgramCycleUpdate';
+import type { ProgramDetail } from '../models/ProgramDetail';
 import type { PushPeople } from '../models/PushPeople';
 import type { RDI } from '../models/RDI';
 import type { RDINested } from '../models/RDINested';
@@ -586,7 +587,6 @@ export class RestService {
         admin1,
         admin2,
         adminArea,
-        businessArea,
         countryOrigin,
         documentNumber,
         documentType,
@@ -595,7 +595,8 @@ export class RestService {
         headOfHouseholdFullNameStartswith,
         headOfHouseholdPhoneNoValid,
         isActiveProgram,
-        lastRegistrationDate,
+        lastRegistrationDateAfter,
+        lastRegistrationDateBefore,
         limit,
         offset,
         orderBy,
@@ -605,10 +606,11 @@ export class RestService {
         rdiMergeStatus,
         residenceStatus,
         search,
-        size,
         sizeGte,
         sizeLte,
         sizeRange,
+        sizeMax,
+        sizeMin,
         withdrawn,
     }: {
         businessAreaSlug: string,
@@ -617,7 +619,6 @@ export class RestService {
         admin1?: string,
         admin2?: string,
         adminArea?: string,
-        businessArea?: string,
         countryOrigin?: string,
         documentNumber?: string,
         documentType?: string,
@@ -626,7 +627,8 @@ export class RestService {
         headOfHouseholdFullNameStartswith?: string,
         headOfHouseholdPhoneNoValid?: boolean,
         isActiveProgram?: boolean,
-        lastRegistrationDate?: string,
+        lastRegistrationDateAfter?: string,
+        lastRegistrationDateBefore?: string,
         /**
          * Number of results to return per page.
          */
@@ -680,6 +682,8 @@ export class RestService {
          */
         rdiMergeStatus?: 'MERGED' | 'PENDING',
         /**
+         * Household residence status
+         *
          * * `` - None
          * * `IDP` - Displaced  |  Internally Displaced People
          * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
@@ -690,13 +694,20 @@ export class RestService {
          */
         residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
-        size?: number | null,
         sizeGte?: number,
         sizeLte?: number,
         /**
          * Multiple values may be separated by commas.
          */
         sizeRange?: Array<number>,
+        /**
+         * Household size
+         */
+        sizeMax?: number | null,
+        /**
+         * Household size
+         */
+        sizeMin?: number | null,
         withdrawn?: boolean,
     }): CancelablePromise<PaginatedHouseholdListList> {
         return __request(OpenAPI, {
@@ -711,7 +722,6 @@ export class RestService {
                 'admin1': admin1,
                 'admin2': admin2,
                 'admin_area': adminArea,
-                'business_area': businessArea,
                 'country_origin': countryOrigin,
                 'document_number': documentNumber,
                 'document_type': documentType,
@@ -720,7 +730,8 @@ export class RestService {
                 'head_of_household__full_name__startswith': headOfHouseholdFullNameStartswith,
                 'head_of_household__phone_no_valid': headOfHouseholdPhoneNoValid,
                 'is_active_program': isActiveProgram,
-                'last_registration_date': lastRegistrationDate,
+                'last_registration_date_after': lastRegistrationDateAfter,
+                'last_registration_date_before': lastRegistrationDateBefore,
                 'limit': limit,
                 'offset': offset,
                 'order_by': orderBy,
@@ -730,11 +741,30 @@ export class RestService {
                 'rdi_merge_status': rdiMergeStatus,
                 'residence_status': residenceStatus,
                 'search': search,
-                'size': size,
                 'size__gte': sizeGte,
                 'size__lte': sizeLte,
                 'size__range': sizeRange,
+                'size_max': sizeMax,
+                'size_min': sizeMin,
                 'withdrawn': withdrawn,
+            },
+        });
+    }
+    /**
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasHouseholdsCountRetrieve({
+        businessAreaSlug,
+    }: {
+        businessAreaSlug: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/households/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
             },
         });
     }
@@ -781,6 +811,8 @@ export class RestService {
          */
         search?: string,
         /**
+         * Status [sys]
+         *
          * * `TP_OPEN` - Open
          * * `TP_LOCKED` - Locked
          * * `PROCESSING` - Processing
@@ -848,33 +880,117 @@ export class RestService {
         });
     }
     /**
-     * @returns PaginatedProgramList
+     * Base validation class, inherit from this class to create custom validators.
+     * Your custom validators have to implement validation methods that starts
+     * with name "validate_" so validate can call all the validators from your
+     * custom validator.
+     *
+     * Custom validate method have to takes *args, **kwargs parameters.
+     *
+     * validate method with parameters have to be called in mutate method.
+     * If there are validation errors they will be all
+     * returned as one error message.
+     * @returns PaginatedProgramListList
      * @throws ApiError
      */
     public static restBusinessAreasProgramsList({
         businessAreaSlug,
+        beneficiaryGroupMatch,
+        budgetMax,
+        budgetMin,
+        compatibleDct,
+        dataCollectingType,
+        endDate,
         limit,
+        name,
+        numberOfHouseholdsMax,
+        numberOfHouseholdsMin,
+        numberOfHouseholdsWithTpInProgramMax,
+        numberOfHouseholdsWithTpInProgramMin,
         offset,
+        orderBy,
         ordering,
+        search,
+        sector,
+        startDate,
+        status,
         updatedAtAfter,
         updatedAtBefore,
     }: {
         businessAreaSlug: string,
+        beneficiaryGroupMatch?: string,
+        /**
+         * Program budget
+         */
+        budgetMax?: string,
+        /**
+         * Program budget
+         */
+        budgetMin?: string,
+        compatibleDct?: string,
+        dataCollectingType?: string,
+        endDate?: string,
         /**
          * Number of results to return per page.
          */
         limit?: number,
+        name?: string,
+        numberOfHouseholdsMax?: string,
+        numberOfHouseholdsMin?: string,
+        numberOfHouseholdsWithTpInProgramMax?: string,
+        numberOfHouseholdsWithTpInProgramMin?: string,
         /**
          * The initial index from which to return the results.
          */
         offset?: number,
         /**
+         * Ordering
+         *
+         * * `name` - Name
+         * * `-name` - Name (descending)
+         * * `status` - Status
+         * * `-status` - Status (descending)
+         * * `start_date` - Start date
+         * * `-start_date` - Start date (descending)
+         * * `end_date` - End date
+         * * `-end_date` - End date (descending)
+         * * `sector` - Sector
+         * * `-sector` - Sector (descending)
+         * * `number_of_households` - Number of households
+         * * `-number_of_households` - Number of households (descending)
+         * * `budget` - Budget
+         * * `-budget` - Budget (descending)
+         */
+        orderBy?: Array<'-budget' | '-end_date' | '-name' | '-number_of_households' | '-sector' | '-start_date' | '-status' | 'budget' | 'end_date' | 'name' | 'number_of_households' | 'sector' | 'start_date' | 'status'>,
+        /**
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        search?: any,
+        /**
+         * Program sector
+         *
+         * * `CHILD_PROTECTION` - Child Protection
+         * * `EDUCATION` - Education
+         * * `HEALTH` - Health
+         * * `MULTI_PURPOSE` - Multi Purpose
+         * * `NUTRITION` - Nutrition
+         * * `SOCIAL_POLICY` - Social Policy
+         * * `WASH` - WASH
+         */
+        sector?: Array<'CHILD_PROTECTION' | 'EDUCATION' | 'HEALTH' | 'MULTI_PURPOSE' | 'NUTRITION' | 'SOCIAL_POLICY' | 'WASH'>,
+        startDate?: string,
+        /**
+         * Program status
+         *
+         * * `ACTIVE` - Active
+         * * `DRAFT` - Draft
+         * * `FINISHED` - Finished
+         */
+        status?: Array<'ACTIVE' | 'DRAFT' | 'FINISHED'>,
         updatedAtAfter?: string,
         updatedAtBefore?: string,
-    }): CancelablePromise<PaginatedProgramList> {
+    }): CancelablePromise<PaginatedProgramListList> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/',
@@ -882,9 +998,25 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
             },
             query: {
+                'beneficiary_group_match': beneficiaryGroupMatch,
+                'budget_max': budgetMax,
+                'budget_min': budgetMin,
+                'compatible_dct': compatibleDct,
+                'data_collecting_type': dataCollectingType,
+                'end_date': endDate,
                 'limit': limit,
+                'name': name,
+                'number_of_households_max': numberOfHouseholdsMax,
+                'number_of_households_min': numberOfHouseholdsMin,
+                'number_of_households_with_tp_in_program_max': numberOfHouseholdsWithTpInProgramMax,
+                'number_of_households_with_tp_in_program_min': numberOfHouseholdsWithTpInProgramMin,
                 'offset': offset,
+                'order_by': orderBy,
                 'ordering': ordering,
+                'search': search,
+                'sector': sector,
+                'start_date': startDate,
+                'status': status,
                 'updated_at_after': updatedAtAfter,
                 'updated_at_before': updatedAtBefore,
             },
@@ -1154,8 +1286,7 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
-     * NOTE: This mixin should be added as the first mixin in the inheritance chain.
+     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
      * @returns PaginatedHouseholdListList
      * @throws ApiError
      */
@@ -1167,7 +1298,6 @@ export class RestService {
         admin1,
         admin2,
         adminArea,
-        businessArea,
         countryOrigin,
         documentNumber,
         documentType,
@@ -1176,7 +1306,8 @@ export class RestService {
         headOfHouseholdFullNameStartswith,
         headOfHouseholdPhoneNoValid,
         isActiveProgram,
-        lastRegistrationDate,
+        lastRegistrationDateAfter,
+        lastRegistrationDateBefore,
         limit,
         offset,
         orderBy,
@@ -1186,10 +1317,11 @@ export class RestService {
         rdiMergeStatus,
         residenceStatus,
         search,
-        size,
         sizeGte,
         sizeLte,
         sizeRange,
+        sizeMax,
+        sizeMin,
         withdrawn,
     }: {
         businessAreaSlug: string,
@@ -1199,7 +1331,6 @@ export class RestService {
         admin1?: string,
         admin2?: string,
         adminArea?: string,
-        businessArea?: string,
         countryOrigin?: string,
         documentNumber?: string,
         documentType?: string,
@@ -1208,7 +1339,8 @@ export class RestService {
         headOfHouseholdFullNameStartswith?: string,
         headOfHouseholdPhoneNoValid?: boolean,
         isActiveProgram?: boolean,
-        lastRegistrationDate?: string,
+        lastRegistrationDateAfter?: string,
+        lastRegistrationDateBefore?: string,
         /**
          * Number of results to return per page.
          */
@@ -1262,6 +1394,8 @@ export class RestService {
          */
         rdiMergeStatus?: 'MERGED' | 'PENDING',
         /**
+         * Household residence status
+         *
          * * `` - None
          * * `IDP` - Displaced  |  Internally Displaced People
          * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
@@ -1272,13 +1406,20 @@ export class RestService {
          */
         residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
-        size?: number | null,
         sizeGte?: number,
         sizeLte?: number,
         /**
          * Multiple values may be separated by commas.
          */
         sizeRange?: Array<number>,
+        /**
+         * Household size
+         */
+        sizeMax?: number | null,
+        /**
+         * Household size
+         */
+        sizeMin?: number | null,
         withdrawn?: boolean,
     }): CancelablePromise<PaginatedHouseholdListList> {
         return __request(OpenAPI, {
@@ -1294,7 +1435,6 @@ export class RestService {
                 'admin1': admin1,
                 'admin2': admin2,
                 'admin_area': adminArea,
-                'business_area': businessArea,
                 'country_origin': countryOrigin,
                 'document_number': documentNumber,
                 'document_type': documentType,
@@ -1303,7 +1443,8 @@ export class RestService {
                 'head_of_household__full_name__startswith': headOfHouseholdFullNameStartswith,
                 'head_of_household__phone_no_valid': headOfHouseholdPhoneNoValid,
                 'is_active_program': isActiveProgram,
-                'last_registration_date': lastRegistrationDate,
+                'last_registration_date_after': lastRegistrationDateAfter,
+                'last_registration_date_before': lastRegistrationDateBefore,
                 'limit': limit,
                 'offset': offset,
                 'order_by': orderBy,
@@ -1313,17 +1454,17 @@ export class RestService {
                 'rdi_merge_status': rdiMergeStatus,
                 'residence_status': residenceStatus,
                 'search': search,
-                'size': size,
                 'size__gte': sizeGte,
                 'size__lte': sizeLte,
                 'size__range': sizeRange,
+                'size_max': sizeMax,
+                'size_min': sizeMin,
                 'withdrawn': withdrawn,
             },
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
-     * NOTE: This mixin should be added as the first mixin in the inheritance chain.
+     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
      * @returns HouseholdDetail
      * @throws ApiError
      */
@@ -1350,8 +1491,7 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
-     * NOTE: This mixin should be added as the first mixin in the inheritance chain.
+     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
      * @returns HouseholdList
      * @throws ApiError
      */
@@ -1382,9 +1522,8 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
-     * NOTE: This mixin should be added as the first mixin in the inheritance chain.
-     * @returns HouseholdList
+     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
+     * @returns CountResponse
      * @throws ApiError
      */
     public static restBusinessAreasProgramsHouseholdsCountRetrieve({
@@ -1393,7 +1532,7 @@ export class RestService {
     }: {
         businessAreaSlug: string,
         programSlug: string,
-    }): CancelablePromise<HouseholdList> {
+    }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/households/count/',
@@ -1863,6 +2002,26 @@ export class RestService {
         });
     }
     /**
+     * @returns RegistrationDataImportList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsRegistrationDataImportsWebhookdeduplicationRetrieve({
+        businessAreaSlug,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+    }): CancelablePromise<RegistrationDataImportList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/webhookdeduplication/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
      * @returns PaginatedTargetPopulationListList
      * @throws ApiError
      */
@@ -1901,6 +2060,8 @@ export class RestService {
         ordering?: string,
         program?: string,
         /**
+         * Status [sys]
+         *
          * * `TP_OPEN` - Open
          * * `TP_LOCKED` - Locked
          * * `PROCESSING` - Processing
@@ -1946,7 +2107,17 @@ export class RestService {
         });
     }
     /**
-     * @returns Program
+     * Base validation class, inherit from this class to create custom validators.
+     * Your custom validators have to implement validation methods that starts
+     * with name "validate_" so validate can call all the validators from your
+     * custom validator.
+     *
+     * Custom validate method have to takes *args, **kwargs parameters.
+     *
+     * validate method with parameters have to be called in mutate method.
+     * If there are validation errors they will be all
+     * returned as one error message.
+     * @returns ProgramDetail
      * @throws ApiError
      */
     public static restBusinessAreasProgramsRetrieve({
@@ -1955,13 +2126,70 @@ export class RestService {
     }: {
         businessAreaSlug: string,
         slug: string,
-    }): CancelablePromise<Program> {
+    }): CancelablePromise<ProgramDetail> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{slug}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'slug': slug,
+            },
+        });
+    }
+    /**
+     * Base validation class, inherit from this class to create custom validators.
+     * Your custom validators have to implement validation methods that starts
+     * with name "validate_" so validate can call all the validators from your
+     * custom validator.
+     *
+     * Custom validate method have to takes *args, **kwargs parameters.
+     *
+     * validate method with parameters have to be called in mutate method.
+     * If there are validation errors they will be all
+     * returned as one error message.
+     * @returns void
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsDestroy({
+        businessAreaSlug,
+        slug,
+    }: {
+        businessAreaSlug: string,
+        slug: string,
+    }): CancelablePromise<void> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{slug}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'slug': slug,
+            },
+        });
+    }
+    /**
+     * Base validation class, inherit from this class to create custom validators.
+     * Your custom validators have to implement validation methods that starts
+     * with name "validate_" so validate can call all the validators from your
+     * custom validator.
+     *
+     * Custom validate method have to takes *args, **kwargs parameters.
+     *
+     * validate method with parameters have to be called in mutate method.
+     * If there are validation errors they will be all
+     * returned as one error message.
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsCountRetrieve({
+        businessAreaSlug,
+    }: {
+        businessAreaSlug: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
             },
         });
     }
@@ -2198,6 +2426,8 @@ export class RestService {
          */
         ordering?: string,
         /**
+         * Program status
+         *
          * * `ACTIVE` - Active
          * * `DRAFT` - Draft
          * * `FINISHED` - Finished
@@ -2332,16 +2562,6 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,
             },
-        });
-    }
-    /**
-     * @returns any No response body
-     * @throws ApiError
-     */
-    public static restWebhookdeduplicationRetrieve(): CancelablePromise<any> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/rest/webhookdeduplication/',
         });
     }
 }

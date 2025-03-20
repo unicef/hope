@@ -23,8 +23,8 @@ from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 
 
+# TODO: delete with GraphQL
 class ProgramFilter(FilterSet):
-    business_area = CharFilter(field_name="business_area__slug", required=True)
     search = CharFilter(method="search_filter")
     status = MultipleChoiceFilter(field_name="status", choices=Program.STATUS_CHOICE)
     sector = MultipleChoiceFilter(field_name="sector", choices=Program.SECTOR_CHOICE)
@@ -41,6 +41,7 @@ class ProgramFilter(FilterSet):
     beneficiary_group_match = BooleanFilter(method="beneficiary_group_match_filter", required=True)
 
     class Meta:
+        model = Program
         fields = (
             "business_area",
             "search",
@@ -53,7 +54,6 @@ class ProgramFilter(FilterSet):
             "name",
             "beneficiary_group_match",
         )
-        model = Program
 
     order_by = CustomOrderingFilter(
         fields=(Lower("name"), "status", "start_date", "end_date", "sector", "number_of_households", "budget")

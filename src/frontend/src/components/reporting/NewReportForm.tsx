@@ -8,7 +8,6 @@ import {
 } from '@mui/material';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field, Form, Formik } from 'formik';
-import get from 'lodash/get';
 import moment from 'moment';
 import { forwardRef, ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -24,7 +23,6 @@ import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { REPORT_TYPES } from '@utils/constants';
 import {
-  useAllProgramsQuery,
   useCreateReportMutation,
   useReportChoiceDataQuery,
 } from '@generated/graphql';
@@ -35,13 +33,15 @@ import { LoadingComponent } from '@core/LoadingComponent';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useNavigate } from 'react-router-dom';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 
 const NewReportForm = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const { businessArea, baseUrl } = useBaseUrl();
+  const { businessArea, baseUrl, programId } = useBaseUrl();
   const validationSchema = Yup.object().shape({
     reportType: Yup.string().required(t('Report type is required')),
     dateFrom: Yup.date().required(t('Date From is required')),
@@ -59,20 +59,27 @@ const NewReportForm = (): ReactElement => {
       ),
   });
 
-  const { data: allProgramsData, loading: loadingPrograms } =
-    useAllProgramsQuery({
-      variables: { businessArea, status: ['ACTIVE'] },
-      fetchPolicy: 'cache-and-network',
-    });
+  const queryVariables = {
+    businessAreaSlug: businessArea,
+    businessArea,
+    status: ['ACTIVE'] as Array<'ACTIVE' | 'DRAFT' | 'FINISHED'>,
+    beneficiaryGroupMatch: programId,
+    compatibleDct: programId,
+  };
+
+  const { data: allProgramsData, isLoading: loadingPrograms } = useQuery({
+    queryKey: ['businessAreasProgramsList', queryVariables, businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsList({ ...queryVariables }),
+  });
   const { data: choicesData, loading: choicesLoading } =
     useReportChoiceDataQuery();
   const [mutate, { loading }] = useCreateReportMutation();
 
   if (loadingPrograms || choicesLoading) return <LoadingComponent />;
-  const allProgramsEdges = get(allProgramsData, 'allPrograms.edges', []);
-  const mappedPrograms = allProgramsEdges.map((edge) => ({
-    name: edge.node.name,
-    value: edge.node.id,
+  const mappedPrograms = allProgramsData?.results?.map((program) => ({
+    name: program.name,
+    value: program.id,
   }));
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -277,7 +284,7 @@ const NewReportForm = (): ReactElement => {
                       </FieldLabel>
 
                       <Grid container spacing={3}>
-                        <Grid size={{ xs:6 }}>
+                        <Grid size={{ xs: 6 }}>
                           <Field
                             name="dateFrom"
                             label={t('From Date')}
@@ -289,7 +296,7 @@ const NewReportForm = (): ReactElement => {
                             }
                           />
                         </Grid>
-                        <Grid size={{ xs:6 }}>
+                        <Grid size={{ xs: 6 }}>
                           <Field
                             name="dateTo"
                             label={t('To Date')}

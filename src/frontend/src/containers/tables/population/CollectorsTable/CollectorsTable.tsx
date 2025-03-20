@@ -60,7 +60,7 @@ export const CollectorsTable = ({
   const replacements = {
     fullName: (_beneficiaryGroup) => `${_beneficiaryGroup?.member_label}`,
     relationship: (_beneficiaryGroup) =>
-      `Relationship to ${_beneficiaryGroup?.groupLabel}`,
+      `Relationship to ${_beneficiaryGroup?.group_label}`,
   };
 
   const adjustedHeadCells = adjustHeadCells(

@@ -49,3 +49,14 @@ def increment_beneficiary_group_version_cache(sender: Any, instance: Beneficiary
     version_key = "beneficiary_group_list"
     get_or_create_cache_key(version_key, 0)
     cache.incr(version_key)
+
+
+@receiver([post_save, post_delete], sender=Program)
+def increase_program_version_cache(sender: Any, instance: Program, **kwargs: dict) -> None:
+    business_area_slug = instance.business_area.slug
+    business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
+
+    version_key = f"{business_area_slug}:{business_area_version}:program_list"
+    get_or_create_cache_key(version_key, 0)
+
+    cache.incr(version_key)
