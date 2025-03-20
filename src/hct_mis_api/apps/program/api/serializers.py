@@ -296,7 +296,7 @@ class ProgramDetailSerializer(AdminUrlSerializerMixin, ProgramListSerializer):
         )
 
     def get_registration_imports_total_count(self, obj: Program) -> int:
-        return obj.registration_import.count() if hasattr(obj, "registration_import") else 0
+        return obj.registration_imports.count() if hasattr(obj, "registration_imports") else 0
 
     def get_target_populations_count(self, obj: Program) -> int:
         return PaymentPlan.objects.filter(program_cycle__program=obj).count()

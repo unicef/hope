@@ -40,7 +40,7 @@ def get_encoded_household_id(household: Household) -> str:
     return encode_id_base64_required(household.id, "Household")
 
 
-class TestHouseholdListViewSet:
+class TestHouseholdListView:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
         self.afghanistan = create_afghanistan()
@@ -306,7 +306,7 @@ class TestHouseholdListViewSet:
             assert len(ctx.captured_queries) == 10
 
 
-class TestHouseholdDetailViewSet:
+class TestHouseholdDetailView:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
         self.detail_url_name = "api:households:households-detail"
@@ -367,7 +367,7 @@ class TestHouseholdDetailViewSet:
             program=self.program,
         )
         encoded_household_id = encode_id_base64_required(self.household.id, "Household")
-        responses = self.api_client.get(
+        response = self.api_client.get(
             reverse(
                 self.detail_url_name,
                 kwargs={
@@ -377,8 +377,8 @@ class TestHouseholdDetailViewSet:
                 },
             )
         )
-        assert responses.status_code == status.HTTP_200_OK
-        data = responses.data
+        assert response.status_code == status.HTTP_200_OK
+        data = response.data
         assert data["id"] == encoded_household_id
         assert data["unicef_id"] == self.household.unicef_id
         assert data["head_of_household"] == {
@@ -473,7 +473,7 @@ class TestHouseholdDetailViewSet:
             program=self.program,
         )
         encoded_household_id = encode_id_base64_required(self.household.id, "Household")
-        responses = self.api_client.get(
+        response = self.api_client.get(
             reverse(
                 self.detail_url_name,
                 kwargs={
@@ -483,7 +483,7 @@ class TestHouseholdDetailViewSet:
                 },
             )
         )
-        assert responses.status_code == status.HTTP_403_FORBIDDEN
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_household_detail_with_permissions_in_different_program(
         self, create_user_role_with_permissions: Any
@@ -496,7 +496,7 @@ class TestHouseholdDetailViewSet:
             program=program_other,
         )
         encoded_household_id = encode_id_base64_required(self.household.id, "Household")
-        responses = self.api_client.get(
+        response = self.api_client.get(
             reverse(
                 self.detail_url_name,
                 kwargs={
@@ -506,7 +506,7 @@ class TestHouseholdDetailViewSet:
                 },
             )
         )
-        assert responses.status_code == status.HTTP_403_FORBIDDEN
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 class TestHouseholdGlobalViewSet:
