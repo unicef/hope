@@ -25,7 +25,7 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentPlanFactory,
 )
 from hct_mis_api.apps.payment.models import Approval, PaymentPlan
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db
@@ -551,4 +551,127 @@ class TestPaymentPlanFilter:
         assert response_data[0]["name"] == self.pp.name
 
     def test_filter_by_program_cycle(self) -> None:
-        pass
+        new_pp = PaymentPlanFactory(
+            name="TEST_ABC_123",
+            business_area=self.afghanistan,
+            program_cycle=ProgramCycleFactory(program=self.program_active),
+            status=PaymentPlan.Status.ACCEPTED,
+            created_by=self.user,
+        )
+        response = self.client.get(
+            self.list_url, {"program_cycle": encode_id_base64_required(new_pp.program_cycle.id, "ProgramCycle")}
+        )
+        assert response.status_code == status.HTTP_200_OK
+        response_data = response.json()["results"]
+        assert len(response_data) == 1
+        assert response_data[0]["name"] == "TEST_ABC_123"
+        assert response_data[0]["status"] == "Accepted"
+
+    def test_filter_by_search(self) -> None:
+        new_pp = PaymentPlanFactory(
+            name="TEST_ABC_999",
+            business_area=self.afghanistan,
+            program_cycle=self.cycle,
+            status=PaymentPlan.Status.ACCEPTED,
+            created_by=self.user,
+        )
+        new_pp.refresh_from_db()
+        # name
+        response = self.client.get(self.list_url, {"search": "TEST_ABC"})
+        assert response.status_code == status.HTTP_200_OK
+        response_data = response.json()["results"]
+        assert len(response_data) == 1
+        assert response_data[0]["name"] == "TEST_ABC_999"
+        assert response_data[0]["status"] == "Accepted"
+        # id
+        response = self.client.get(self.list_url, {"search": str(new_pp.id)})
+        assert response.status_code == status.HTTP_200_OK
+        response_data = response.json()["results"]
+        assert len(response_data) == 1
+        assert response_data[0]["name"] == "TEST_ABC_999"
+        # unicef_id
+        response = self.client.get(self.list_url, {"search": new_pp.unicef_id})
+        assert response.status_code == status.HTTP_200_OK
+        response_data = response.json()["results"]
+        assert len(response_data) == 1
+        assert response_data[0]["name"] == "TEST_ABC_999"
+
+    def test_filter_by_entitled_quantity(self) -> None:
+        PaymentPlanFactory(
+            name="PP_1",
+            business_area=self.afghanistan,
+            program_cycle=self.cycle,
+            status=PaymentPlan.Status.LOCKED_FSP,
+            created_by=self.user,
+            total_entitled_quantity=100,
+        )
+        PaymentPlanFactory(
+            name="PP_2",
+            business_area=self.afghanistan,
+            program_cycle=self.cycle,
+            status=PaymentPlan.Status.LOCKED_FSP,
+            created_by=self.user,
+            total_entitled_quantity=200,
+        )
+        response = self.client.get(
+            self.list_url, {"total_entitled_quantity__gte": "99", "total_entitled_quantity__lte": 201}
+        )
+        assert response.status_code == status.HTTP_200_OK
+        response_data = response.json()["results"]
+        assert len(response_data) == 2
+        assert response_data[0]["name"] == "PP_1"
+        assert response_data[1]["name"] == "PP_2"
+
+        response = self.client.get(self.list_url, {"total_entitled_quantity__lte": 101})
+        assert response.status_code == status.HTTP_200_OK
+        response_data = response.json()["results"]
+        assert len(response_data) == 1
+        assert response_data[0]["name"] == "PP_1"
+
+    def test_filter_by_dispersion_date(self) -> None:
+        PaymentPlanFactory(
+            name="PP_abc",
+            business_area=self.afghanistan,
+            program_cycle=self.cycle,
+            status=PaymentPlan.Status.LOCKED_FSP,
+            created_by=self.user,
+            dispersion_start_date="2022-02-24",
+            dispersion_end_date="2022-03-03",
+        )
+        PaymentPlanFactory(
+            name="PP_xyz",
+            business_area=self.afghanistan,
+            program_cycle=self.cycle,
+            status=PaymentPlan.Status.LOCKED_FSP,
+            created_by=self.user,
+            dispersion_start_date="2022-01-01",
+            dispersion_end_date="2022-01-17",
+        )
+        response = self.client.get(
+            self.list_url, {"dispersion_start_date__gte": "2022-02-23", "dispersion_end_date__lte": "2022-03-04"}
+        )
+        assert response.status_code == status.HTTP_200_OK
+        response_data = response.json()["results"]
+        assert len(response_data) == 1
+        assert response_data[0]["name"] == "PP_abc"
+
+        response = self.client.get(self.list_url, {"dispersion_end_date__lte": "2022-01-18"})
+        assert response.status_code == status.HTTP_200_OK
+        response_data = response.json()["results"]
+        assert len(response_data) == 1
+        assert response_data[0]["name"] == "PP_xyz"
+
+    def test_filter_by_is_follow_up(self) -> None:
+        PaymentPlanFactory(
+            name="NEW_FOLLOW_up",
+            is_follow_up=True,
+            business_area=self.afghanistan,
+            program_cycle=self.cycle,
+            status=PaymentPlan.Status.OPEN,
+            created_by=self.user,
+        )
+        response = self.client.get(self.list_url, {"is_follow_up": True})
+        assert response.status_code == status.HTTP_200_OK
+        response_data = response.json()["results"]
+        assert len(response_data) == 1
+        assert response_data[0]["name"] == "NEW_FOLLOW_up"

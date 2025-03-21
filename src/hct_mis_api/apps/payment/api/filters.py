@@ -1,4 +1,4 @@
-from django.db.models import QuerySet
+from django.db.models import Q, QuerySet
 
 import django_filters
 from django_filters import FilterSet
@@ -8,6 +8,7 @@ from hct_mis_api.apps.payment.models import PaymentPlan
 
 
 class PaymentPlanFilter(FilterSet):
+    search = django_filters.CharFilter(method="search_filter")
     status = django_filters.ChoiceFilter(
         choices=PaymentPlan.Status.choices,
     )
@@ -29,3 +30,6 @@ class PaymentPlanFilter(FilterSet):
 
     def filter_by_program_cycle(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         return qs.filter(program_cycle_id=decode_id_string_required(value))
+
+    def search_filter(self, qs: QuerySet, name: str, value: str) -> "QuerySet[PaymentPlan]":
+        return qs.filter(Q(id__icontains=value) | Q(unicef_id__icontains=value) | Q(name__istartswith=value))
