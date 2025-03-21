@@ -32,10 +32,10 @@ from hct_mis_api.apps.program.models import Program
 
 
 class HouseholdViewSet(
-    CountActionMixin,
     ProgramVisibilityMixin,
     SerializerActionMixin,
     DecodeIdForDetailMixin,
+    CountActionMixin,
     RetrieveModelMixin,
     ListModelMixin,
     BaseViewSet,
@@ -83,6 +83,7 @@ class HouseholdViewSet(
 
 class HouseholdGlobalViewSet(
     BusinessAreaVisibilityMixin,
+    CountActionMixin,
     ListModelMixin,
     BaseViewSet,
 ):
@@ -97,4 +98,9 @@ class HouseholdGlobalViewSet(
     admin_area_model_fields = ["admin1", "admin2", "admin3"]
 
     def get_queryset(self) -> QuerySet:
-        return super().get_queryset().select_related("head_of_household", "program", "admin1", "admin2")
+        return (
+            super()
+            .get_queryset()
+            .select_related("head_of_household", "program", "admin1", "admin2")
+            .order_by("created_at")
+        )

@@ -1,10 +1,3 @@
-import { GraphQLError } from 'graphql';
-import localForage from 'localforage';
-import camelCase from 'lodash/camelCase';
-import moment from 'moment';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { ValidationGraphQLError } from '../apollo/ValidationGraphQLError';
-import { theme as themeObj } from '../theme';
 import {
   AllProgramsQuery,
   ChoiceObject,
@@ -14,6 +7,13 @@ import {
   PaymentStatus,
   ProgramStatus,
 } from '@generated/graphql';
+import { GraphQLError } from 'graphql';
+import localForage from 'localforage';
+import camelCase from 'lodash/camelCase';
+import moment from 'moment';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { ValidationGraphQLError } from '../apollo/ValidationGraphQLError';
+import { theme as themeObj } from '../theme';
 import {
   GRIEVANCE_CATEGORIES,
   PAYMENT_PLAN_BACKGROUND_ACTION_STATES,
@@ -1220,3 +1220,11 @@ export function adjustHeadCells(
     return cell;
   });
 }
+
+export const filterEmptyParams = (params) => {
+  return Object.fromEntries(
+    Object.entries(params).filter(
+      ([, value]) => value !== undefined && value !== null && value !== '',
+    ),
+  );
+};

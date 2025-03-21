@@ -336,7 +336,11 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
     def __init__(self, model: Type, admin_site: Any) -> None:
         super().__init__(model, admin_site)
 
+<<<<<<< HEAD
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
+=======
+    def formfield_for_foreignkey(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+>>>>>>> e509e33f3be98f6d786746662626b55f342b0433
         if db_field.name == "partner":  # Exclude partners that are parent partners
             kwargs["queryset"] = Partner.objects.exclude(
                 id__in=Partner.objects.exclude(parent__isnull=True).values_list("parent", flat=True)

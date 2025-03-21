@@ -2,11 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type HeadOfHousehold = {
-    id: string;
-    /**
-     * Full Name of the Beneficiary
-     */
-    full_name: string;
+export type CountResponse = {
+    count: number;
 };
 

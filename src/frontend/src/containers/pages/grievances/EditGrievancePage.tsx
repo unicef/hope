@@ -121,7 +121,7 @@ const EditGrievancePage = (): ReactElement => {
       queryFn: () => {
         return RestService.restUsersProfileRetrieve({
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programSlug: programId === 'all' ? undefined : programId,
         });
       },
     },

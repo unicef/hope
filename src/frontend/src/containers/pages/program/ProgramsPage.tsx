@@ -41,7 +41,7 @@ function ProgramsPage(): ReactElement {
   const { data: choicesData } = useProgrammeChoiceDataQuery();
   const { t } = useTranslation();
 
-  if (permissions === null || !choicesData) return null;
+  if (!permissions || !choicesData) return null;
   if (
     !hasPermissions(
       [

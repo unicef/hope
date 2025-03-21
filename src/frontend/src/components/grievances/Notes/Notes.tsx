@@ -53,7 +53,7 @@ export function Notes({
     queryFn: () => {
       return RestService.restUsersProfileRetrieve({
         businessAreaSlug: businessArea,
-        programSlug: programId,
+        programSlug: programId === 'all' ? undefined : programId,
       });
     },
   });

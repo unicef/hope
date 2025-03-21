@@ -70,7 +70,7 @@ export const AppBar = ({ open, handleDrawerOpen }): ReactElement => {
     queryFn: () => {
       return RestService.restUsersProfileRetrieve({
         businessAreaSlug: businessArea,
-        programSlug: programId,
+        programSlug: programId === 'all' ? undefined : programId,
       });
     },
   });

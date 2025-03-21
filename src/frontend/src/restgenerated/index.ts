@@ -22,6 +22,7 @@ export type { BusinessArea } from './models/BusinessArea';
 export { CollectTypeEnum } from './models/CollectTypeEnum';
 export { CommsDisabilityEnum } from './models/CommsDisabilityEnum';
 export { ConsentSharingEnum } from './models/ConsentSharingEnum';
+export type { CountResponse } from './models/CountResponse';
 export type { Country } from './models/Country';
 export { CountryEnum } from './models/CountryEnum';
 export { CountryOriginEnum } from './models/CountryOriginEnum';

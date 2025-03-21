@@ -25,6 +25,10 @@ from hct_mis_api.apps.account.permissions import (
 from hct_mis_api.apps.core.api.mixins import (
     BaseViewSet,
     BusinessAreaMixin,
+<<<<<<< HEAD
+=======
+    CountActionMixin,
+>>>>>>> e509e33f3be98f6d786746662626b55f342b0433
     ProgramMixin,
     SerializerActionMixin,
 )
@@ -55,6 +59,10 @@ class ProgramViewSet(
     SerializerActionMixin,
     BusinessAreaMixin,
     ProgramDeletionValidator,
+<<<<<<< HEAD
+=======
+    CountActionMixin,
+>>>>>>> e509e33f3be98f6d786746662626b55f342b0433
     RetrieveModelMixin,
     ListModelMixin,
     DestroyModelMixin,
@@ -63,6 +71,10 @@ class ProgramViewSet(
     permissions_by_action = {
         "retrieve": [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
         "list": [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS, *ALL_GRIEVANCES_CREATE_MODIFY],
+<<<<<<< HEAD
+=======
+        "destroy": [Permissions.PROGRAMME_REMOVE],
+>>>>>>> e509e33f3be98f6d786746662626b55f342b0433
     }
     queryset = Program.objects.all()
     serializer_classes_by_action = {
