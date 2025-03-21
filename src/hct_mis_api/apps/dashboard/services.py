@@ -29,9 +29,7 @@ pwdSum = Sum(
     default=0,
 )
 
-finished_payment_plans = Count(
-    "parent__id", filter=Q(parent__payment_verification_plans__status="FINISHED"), distinct=True
-)
+finished_payment_plans = Count("parent__id", filter=Q(parent__payment_verification_plans__status="FINISHED"), distinct=True,)
 
 total_payment_plans = Count("parent__id", filter=Q(parent__status="FINISHED"), distinct=True)
 
@@ -94,14 +92,23 @@ class DashboardDataCache(Protocol):
                     is_removed=False,
                     conflicted=False,
                 )  # noqa
-                .exclude(status__in=["Transaction Erroneous", "Not Distributed", "Force failed", "Manually Cancelled"])
+                .exclude(
+                    status__in=[
+                        "Transaction Erroneous",
+                        "Not Distributed",
+                        "Force failed",
+                        "Manually Cancelled",
+                    ]
+                )
                 .annotate(
                     year=ExtractYear(Coalesce("delivery_date", "entitlement_date", "status_date")),
                     month=ExtractMonth(Coalesce("delivery_date", "entitlement_date", "status_date")),
                     programs=Coalesce(F("household__program__name"), Value("Unknown program")),
                     sectors=Coalesce(F("household__program__sector"), Value("Unknown sector")),
                     admin1=Coalesce(
-                        F("household__admin1__name"), F("household__admin_area__name"), Value("Unknown admin area")
+                        F("household__admin1__name"),
+                        F("household__admin_area__name"),
+                        Value("Unknown admin area"),
                     ),
                     fsp=Coalesce(F("financial_service_provider__name"), Value("Unknown fsp")),
                     delivery_types=F("delivery_type__name"),
@@ -121,16 +128,30 @@ class DashboardDataCache(Protocol):
                 .annotate(
                     total_usd=Sum(
                         Case(
-                            When(delivered_quantity_usd__isnull=False, then="delivered_quantity_usd"),
-                            When(entitlement_quantity_usd__isnull=False, then="entitlement_quantity_usd"),
+                            When(
+                                delivered_quantity_usd__isnull=False,
+                                then="delivered_quantity_usd",
+                            ),
+                            When(
+                                delivered_quantity_usd__isnull=True,
+                                entitlement_quantity_usd__isnull=False,
+                                then="entitlement_quantity_usd",
+                            ),
                             default=Value(0.0),
                             output_field=DecimalField(),
                         )
                     ),
                     total_quantity=Sum(
                         Case(
-                            When(delivered_quantity__isnull=False, then="delivered_quantity"),
-                            When(entitlement_quantity__isnull=False, then="entitlement_quantity"),
+                            When(
+                                delivered_quantity__isnull=False,
+                                then="delivered_quantity",
+                            ),
+                            When(
+                                delivered_quantity__isnull=True,
+                                entitlement_quantity__isnull=False,
+                                then="entitlement_quantity",
+                            ),
                             default=Value(0.0),
                             output_field=DecimalField(),
                         )
@@ -139,7 +160,11 @@ class DashboardDataCache(Protocol):
                     individuals=Sum(Coalesce("household__size", Value(1))),
                     households=Count("household", distinct=True),
                     children_counts=Sum("household__children_count"),
-                    reconciled=Count("pk", distinct=False, filter=Q(payment_verifications__isnull=False)),
+                    reconciled=Count(
+                        "pk",
+                        distinct=False,
+                        filter=Q(payment_verifications__isnull=False),
+                    ),
                     pwd_counts=pwdSum,
                     finished_payment_plans=finished_payment_plans,
                     total_payment_plans=total_payment_plans,
@@ -184,7 +209,17 @@ class DashboardDataCache(Protocol):
                 summary[key]["finished_payment_plans"] += item["finished_payment_plans"]
                 summary[key]["total_payment_plans"] += item["total_payment_plans"]
 
-            for (currency, year, month, program, sector, status, admin1, fsp, delivery_type), totals in summary.items():
+            for (
+                currency,
+                year,
+                month,
+                program,
+                sector,
+                status,
+                admin1,
+                fsp,
+                delivery_type,
+            ), totals in summary.items():
                 result.append(
                     {
                         "currency": currency,
@@ -237,7 +272,14 @@ class DashboardGlobalDataCache(DashboardDataCache):
                 is_removed=False,
                 conflicted=False,
             )  # noqa
-            .exclude(status__in=["Transaction Erroneous", "Not Distributed", "Force failed", "Manually Cancelled"])
+            .exclude(
+                status__in=[
+                    "Transaction Erroneous",
+                    "Not Distributed",
+                    "Force failed",
+                    "Manually Cancelled",
+                ]
+            )
             .annotate(
                 country=F("business_area__name"),
                 year=ExtractYear(Coalesce("delivery_date", "entitlement_date", "status_date")),
@@ -256,8 +298,15 @@ class DashboardGlobalDataCache(DashboardDataCache):
             .annotate(
                 total_usd=Sum(
                     Case(
-                        When(delivered_quantity_usd__isnull=False, then="delivered_quantity_usd"),
-                        When(entitlement_quantity_usd__isnull=False, then="entitlement_quantity_usd"),
+                        When(
+                            delivered_quantity_usd__isnull=False,
+                            then="delivered_quantity_usd",
+                        ),
+                        When(
+                            delivered_quantity_usd__isnull=True,
+                            entitlement_quantity_usd__isnull=False,
+                            then="entitlement_quantity_usd",
+                        ),
                         default=Value(0.0),
                         output_field=DecimalField(),
                     )

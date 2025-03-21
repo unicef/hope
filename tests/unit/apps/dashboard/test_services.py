@@ -1,4 +1,5 @@
 import json
+from decimal import Decimal
 from typing import Any, Callable, Dict, Optional
 
 from django.core.cache import cache
@@ -11,6 +12,7 @@ from hct_mis_api.apps.dashboard.services import (
     DashboardDataCache,
     DashboardGlobalDataCache,
 )
+from hct_mis_api.apps.payment.models import Payment
 
 CACHE_CONFIG = [
     ("DashboardDataCache", DashboardDataCache, "test-area"),
@@ -29,7 +31,11 @@ def test_get_cache_key(cache_name: str, cache_class: Any, slug: str) -> None:
 @pytest.mark.django_db(databases=["default", "read_only"])
 def test_get_data_cache_hit(cache_name: str, cache_class: Any, slug: str) -> None:
     """Test get_data when data is found in the cache."""
-    cache.set(f"dashboard_data_{slug}", json.dumps({"test": f"{cache_name}_data"}), 60 * 60 * 24)
+    cache.set(
+        f"dashboard_data_{slug}",
+        json.dumps({"test": f"{cache_name}_data"}),
+        60 * 60 * 24,
+    )
     data: Optional[Dict[str, Any]] = cache_class.get_data(slug)
     assert data == {"test": f"{cache_name}_data"}
 
@@ -99,3 +105,64 @@ def test_refresh_data(
         ), f"Expected optional fields {expected_optional_fields} are missing in {cache_name}: {item.keys()}"
     cached_data = cache.get(cache_key)
     assert cached_data is not None, "Data not cached"
+
+
+TEST_CASES = [
+    (
+        "delivered_quantity_usd prioritized",
+        {"delivered_quantity_usd": Decimal("100.0"), "entitlement_quantity_usd": Decimal("50.0")},
+        Decimal("500.0"),
+        DashboardDataCache,
+    ),
+    (
+        "entitlement_quantity_usd used when delivered_quantity_usd is null",
+        {"delivered_quantity_usd": None, "entitlement_quantity_usd": Decimal("50.0")},
+        Decimal("250.0"),
+        DashboardDataCache,
+    ),
+    (
+        "both fields null",
+        {"delivered_quantity_usd": None, "entitlement_quantity_usd": None},
+        Decimal("0.0"),
+        DashboardDataCache,
+    ),
+    (
+        "Pending status with null delivered_quantity_usd",
+        {"status": "Pending", "delivered_quantity_usd": None, "entitlement_quantity_usd": Decimal("50.0")},
+        Decimal("250.0"),
+        DashboardDataCache,
+    ),
+    (
+        "global cache prioritizes delivered_quantity_usd",
+        {"delivered_quantity_usd": Decimal("100.0"), "entitlement_quantity_usd": Decimal("50.0")},
+        Decimal("500.0"),
+        DashboardGlobalDataCache,
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    "test_name, payment_updates, expected_total, cache_service",
+    TEST_CASES,
+    ids=[case[0] for case in TEST_CASES],
+)
+@pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
+def test_dashboard_data_cache(
+    test_name: str,
+    payment_updates: Dict[str, Any],
+    expected_total: Decimal,
+    cache_service: Any,
+    populate_dashboard_cache: Callable,
+) -> None:
+    """Test DashboardDataCache and DashboardGlobalDataCache behavior."""
+    business_area = BusinessAreaFactory(slug="test-area")
+    household = populate_dashboard_cache(business_area)
+    Payment.objects.filter(household=household).update(**payment_updates)
+    if cache_service == DashboardDataCache:
+        result = cache_service.refresh_data(business_area.slug)
+    else:
+        result = cache_service.refresh_data()
+
+    total_usd = sum(Decimal(item["total_delivered_quantity_usd"]) for item in result)
+    assert len(result) > 0
+    assert total_usd == expected_total
