@@ -116,6 +116,7 @@ class PaymentPlanSerializer(serializers.ModelSerializer):
 
 
 class PaymentPlanListSerializer(serializers.ModelSerializer):
+    id = Base64ModelField(model_name="PaymentPlan")
     status = serializers.CharField(source="get_status_display")
     currency = serializers.CharField(source="get_currency_display")
     follow_ups = FollowUpPaymentPlanSerializer(many=True, read_only=True)
@@ -215,12 +216,8 @@ class VolumeByDeliveryMechanismSerializer(serializers.ModelSerializer):
         )
 
 
-class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
-    id = Base64ModelField(model_name="Household")
-    status = serializers.CharField(source="get_status_display")
+class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerializer):
     background_action_status = serializers.CharField(source="get_background_action_status_display")
-    currency = serializers.CharField(source="get_currency_display")
-    follow_ups = FollowUpPaymentPlanSerializer(many=True, read_only=True)
     program = serializers.CharField(source="program_cycle.program.name")
     has_payment_list_export_file = serializers.BooleanField(source="has_export_file")
     has_fsp_delivery_mechanism_xlsx_template = serializers.SerializerMethodField()
@@ -249,29 +246,12 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeri
     can_send_xlsx_password = serializers.SerializerMethodField()
     split_choices = ChoiceSerializer(many=True, read_only=True)
 
-    # TODO: add payment list here?
-
-    class Meta:
-        model = PaymentPlan
-        fields = (
-            "id",
-            "unicef_id",
-            "name",
-            "status",
+    class Meta(PaymentPlanListSerializer.Meta):
+        fields = PaymentPlanListSerializer.Meta.fields + (  # type: ignore
             "created_by",
             "background_action_status",
-            "total_households_count",
-            "total_individuals_count",
-            "currency",
-            "total_entitled_quantity",
-            "total_delivered_quantity",
-            "total_undelivered_quantity",
             "start_date",
             "end_date",
-            "dispersion_start_date",
-            "dispersion_end_date",
-            "is_follow_up",
-            "follow_ups",
             "program",
             "has_payment_list_export_file",
             "has_fsp_delivery_mechanism_xlsx_template",

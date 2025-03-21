@@ -72,7 +72,7 @@ class PaymentPlanViewSet(
     BaseViewSet,
 ):
     program_model_field = "program_cycle__program"
-    queryset = PaymentPlan.objects.all().order_by("unicef_id")
+    queryset = PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).order_by("unicef_id")
     PERMISSIONS = [Permissions.PM_VIEW_LIST]
     serializer_classes_by_action = {
         "list": PaymentPlanListSerializer,

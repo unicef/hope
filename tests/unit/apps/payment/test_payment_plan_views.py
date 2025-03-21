@@ -16,7 +16,8 @@ from hct_mis_api.apps.account.fixtures import (
     UserFactory,
 )
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.utils import encode_id_base64
+from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.utils import encode_id_base64, encode_id_base64_required
 from hct_mis_api.apps.payment.api.views import PaymentPlanManagerialViewSet
 from hct_mis_api.apps.payment.fixtures import (
     ApprovalFactory,
@@ -25,6 +26,7 @@ from hct_mis_api.apps.payment.fixtures import (
 )
 from hct_mis_api.apps.payment.models import Approval, PaymentPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db
 
@@ -317,84 +319,78 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         assert payment_plan_managerial_viewset._get_action_permission(action_name) == result
 
 
-#  commented until we have payment plans used via API
-# class TestPaymentPlanList(PaymentPlanTestMixin):
-#     def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory, id_to_base64: Callable) -> None:
-#         super().set_up(api_client, afghanistan, id_to_base64)
-#         self.url = reverse(
-#             "api:payments:payment-plans-list",
-#             kwargs={
-#                 "business_area": self.afghanistan.slug,
-#                 "program_id": id_to_base64(self.program1.id, "Program"),
-#             },
-#         )
-#
-#     @pytest.mark.parametrize(
-#         "permissions, expected_status",
-#         [
-#             ([], status.HTTP_403_FORBIDDEN),
-#             ([Permissions.PAYMENT_VIEW_LIST_MANAGERIAL], status.HTTP_403_FORBIDDEN),
-#             ([Permissions.PM_VIEW_LIST], status.HTTP_200_OK),
-#             ([Permissions.PM_VIEW_LIST, Permissions.PAYMENT_VIEW_LIST_MANAGERIAL], status.HTTP_200_OK),
-#         ],
-#     )
-#     def test_list_payment_plans_permissions(
-#         self,
-#         permissions: list,
-#         expected_status: str,
-#         api_client: Callable,
-#         afghanistan: BusinessAreaFactory,
-#         create_user_role_with_permissions: Callable,
-#         id_to_base64: Callable,
-#     ) -> None:
-#         self.set_up(api_client, afghanistan, id_to_base64)
-#         create_user_role_with_permissions(
-#             self.user,
-#             permissions,
-#             self.afghanistan,
-#             self.program1,
-#         )
-#         response = self.client.get(self.url)
-#         assert response.status_code == expected_status
-#
-#     def test_list_payment_plans(
-#         self,
-#         api_client: Callable,
-#         afghanistan: BusinessAreaFactory,
-#         create_user_role_with_permissions: Callable,
-#         update_partner_access_to_program: Callable,
-#         id_to_base64: Callable,
-#     ) -> None:
-#         self.set_up(api_client, afghanistan, id_to_base64)
-#         create_user_role_with_permissions(
-#             self.user,
-#             [Permissions.PM_VIEW_LIST, Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
-#             self.afghanistan,
-#             self.program1,
-#         )
-#         update_partner_access_to_program(self.partner, self.program2)
-#         response = self.client.get(self.url)
-#         assert response.status_code == status.HTTP_200_OK
-#         response_json = response.json()["results"]
-#         assert len(response_json) == 1
-#
-#         assert response_json[0] == {
-#             "id": encode_id_base64(self.payment_plan1.id, "PaymentPlan"),
-#             "unicef_id": self.payment_plan1.unicef_id,
-#             "name": self.payment_plan1.name,
-#             "status": self.payment_plan1.get_status_display(),
-#             "target_population": self.payment_plan1.target_population.name,
-#             "total_households_count": self.payment_plan1.total_households_count,
-#             "currency": self.payment_plan1.get_currency_display(),
-#             "total_entitled_quantity": str(self.payment_plan1.total_entitled_quantity),
-#             "total_delivered_quantity": str(self.payment_plan1.total_delivered_quantity),
-#             "total_undelivered_quantity": str(self.payment_plan1.total_undelivered_quantity),
-#             "dispersion_start_date": self.payment_plan1.dispersion_start_date.strftime("%Y-%m-%d"),
-#             "dispersion_end_date": self.payment_plan1.dispersion_end_date.strftime("%Y-%m-%d"),
-#             "is_follow_up": self.payment_plan1.is_follow_up,
-#             "follow_ups": [],
-#             "program": self.program1.name,
-#             "program_id": encode_id_base64(self.program1.id, "Program"),
-#             "last_approval_process_date": self.payment_plan1.updated_at.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
-#             "last_approval_process_by": None,
-#         }
+class TestPaymentPlanList:
+    @pytest.fixture(autouse=True)
+    def setup(self, api_client: Any) -> None:
+        self.afghanistan = create_afghanistan()
+        self.partner = PartnerFactory(name="unittest")
+        self.user = UserFactory(partner=self.partner)
+        self.program_active = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
+        self.cycle = self.program_active.cycles.first()
+        self.pp = PaymentPlanFactory(
+            business_area=self.afghanistan,
+            program_cycle=self.cycle,
+            status=PaymentPlan.Status.IN_APPROVAL,
+            created_by=self.user,
+        )
+        # add TP
+        PaymentPlanFactory(
+            business_area=self.afghanistan,
+            program_cycle=self.cycle,
+            status=PaymentPlan.Status.TP_OPEN,
+            created_by=self.user,
+        )
+        self.pp_list_url = reverse(
+            "api:payments:payment-plans-list",
+            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program_active.slug},
+        )
+        self.pp_count_url = reverse(
+            "api:payments:payment-plans-count",
+            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program_active.slug},
+        )
+        self.client = api_client(self.user)
+
+    # api:payments:payment-plans-detail
+
+    @pytest.mark.parametrize(
+        "permissions",
+        [
+            [Permissions.PM_VIEW_LIST],
+        ],
+    )
+    def test_program_list_with_permissions(
+        self,
+        permissions: list,
+        create_user_role_with_permissions: Any,
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            permissions,
+            self.afghanistan,
+            self.program_active,
+        )
+        response = self.client.get(self.pp_list_url)
+        assert response.status_code == status.HTTP_200_OK
+        response_data = response.json()["results"]
+        assert len(response_data) == 1
+
+        self.pp.refresh_from_db()
+        response_count = self.client.get(self.pp_count_url)
+        assert response_count.status_code == status.HTTP_200_OK
+        assert response_count.json()["count"] == 1
+
+        payment_plan = response_data[0]
+        assert encode_id_base64_required(self.pp.id, "PaymentPlan") == payment_plan["id"]
+        assert payment_plan["unicef_id"] == self.pp.unicef_id
+        assert payment_plan["name"] == self.pp.name
+        assert payment_plan["status"] == self.pp.get_status_display()
+        assert payment_plan["total_households_count"] == self.pp.total_households_count
+        assert payment_plan["currency"] == self.pp.get_currency_display()
+        assert payment_plan["excluded_ids"] == self.pp.excluded_ids
+        assert payment_plan["total_entitled_quantity"] == str(self.pp.total_entitled_quantity)
+        assert payment_plan["total_delivered_quantity"] == str(self.pp.total_delivered_quantity)
+        assert payment_plan["total_undelivered_quantity"] == str(self.pp.total_undelivered_quantity)
+        assert payment_plan["dispersion_start_date"] == self.pp.dispersion_start_date.strftime("%Y-%m-%d")
+        assert payment_plan["dispersion_end_date"] == self.pp.dispersion_end_date.strftime("%Y-%m-%d")
+        assert payment_plan["is_follow_up"] == self.pp.is_follow_up
+        assert payment_plan["follow_ups"] == []
