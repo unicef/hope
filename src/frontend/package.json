@@ -122,7 +122,7 @@
     "eslint-plugin-react-hooks": "^4.3.0",
     "faker": "^6.6.6",
     "globals": "^15.14.0",
-    "micromatch": "3.1.4",
+    "micromatch": "4.0.8",
     "msw": "^2.7.3",
     "openapi-typescript-codegen": "^0.29.0",
     "prettier": "3.4.2",

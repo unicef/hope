@@ -37,8 +37,8 @@ def create_and_save_snapshot_chunked(universal_update: UniversalUpdate) -> None:
     log_message: Callable[[str], None] = lambda message_log: universal_update.save_logs(message_log)
     program_id = universal_update.program_id
     content = create_snapshot_content(log_message, str(program_id), unicef_ids)
-
-    universal_update.backup_snapshot.save("snapshot.json", ContentFile(content))
+    content_bytes = content.encode("utf-8")
+    universal_update.backup_snapshot.save("snapshot.json", ContentFile(content_bytes))
     universal_update.save()
 
 
