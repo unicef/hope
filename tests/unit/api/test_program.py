@@ -199,6 +199,15 @@ class APIGlobalProgramTests(HOPEApiTestCase):
                 "sector": program.sector,
                 "status": program.status,
                 "start_date": program.start_date.strftime("%Y-%m-%d"),
+                "beneficiary_group": {
+                    "id": str(program.beneficiary_group.id),
+                    "name": program.beneficiary_group.name,
+                    "group_label": program.beneficiary_group.group_label,
+                    "group_label_plural": program.beneficiary_group.group_label_plural,
+                    "member_label": program.beneficiary_group.member_label,
+                    "member_label_plural": program.beneficiary_group.member_label_plural,
+                    "master_detail": program.beneficiary_group.master_detail
+                }
             }
 
         cls.program_from_another_ba_expected_response = expected_response(
