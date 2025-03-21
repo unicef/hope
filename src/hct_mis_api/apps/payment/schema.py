@@ -591,10 +591,6 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
         return parent.get_currency_display()
 
     @staticmethod
-    def resolve_delivery_mechanism(parent: PaymentPlan, info: Any) -> Optional[DeliveryMechanismPerPaymentPlanNode]:
-        return parent
-
-    @staticmethod
     def resolve_has_payment_list_export_file(parent: PaymentPlan, info: Any) -> bool:
         return parent.has_export_file
 
