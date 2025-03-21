@@ -1,13 +1,15 @@
 import logging
 from typing import Any
 
+from django.db.models import Case, IntegerField, Prefetch, QuerySet, Value, When
+
 from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import OrderingFilter
-from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
+from rest_framework.mixins import DestroyModelMixin, ListModelMixin, RetrieveModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -16,43 +18,95 @@ from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.api.filters import UpdatedAtFilter
+from hct_mis_api.apps.account.permissions import (
+    ALL_GRIEVANCES_CREATE_MODIFY,
+    Permissions,
+)
 from hct_mis_api.apps.core.api.mixins import (
     BaseViewSet,
+    BusinessAreaMixin,
+    CountActionMixin,
     ProgramMixin,
     SerializerActionMixin,
 )
+from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.api.caches import (
     BeneficiaryGroupKeyConstructor,
     ProgramCycleKeyConstructor,
+    ProgramListKeyConstructor,
 )
-from hct_mis_api.apps.program.api.filters import ProgramCycleFilter
+from hct_mis_api.apps.program.api.filters import ProgramCycleFilter, ProgramFilter
 from hct_mis_api.apps.program.api.serializers import (
     BeneficiaryGroupSerializer,
     ProgramCycleCreateSerializer,
     ProgramCycleDeleteSerializer,
     ProgramCycleListSerializer,
     ProgramCycleUpdateSerializer,
-    ProgramSerializer,
+    ProgramDetailSerializer,
+    ProgramListSerializer,
 )
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
+from hct_mis_api.apps.program.validators import ProgramDeletionValidator
 
 logger = logging.getLogger(__name__)
 
 
 class ProgramViewSet(
+    SerializerActionMixin,
+    BusinessAreaMixin,
+    ProgramDeletionValidator,
+    CountActionMixin,
     RetrieveModelMixin,
     ListModelMixin,
+    DestroyModelMixin,
     BaseViewSet,
 ):
-    permission_classes = [IsAuthenticated]
+    permissions_by_action = {
+        "retrieve": [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+        "list": [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS, *ALL_GRIEVANCES_CREATE_MODIFY],
+        "destroy": [Permissions.PROGRAMME_REMOVE],
+    }
     queryset = Program.objects.all()
-    serializer_class = ProgramSerializer
+    serializer_classes_by_action = {
+        "list": ProgramListSerializer,
+        "retrieve": ProgramDetailSerializer,
+    }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
-    filterset_class = UpdatedAtFilter
+    filterset_class = ProgramFilter
     lookup_field = "slug"
+
+    def get_queryset(self) -> QuerySet[Program]:
+        queryset = super().get_queryset()
+        user = self.request.user
+        allowed_programs = queryset.filter(id__in=user.get_program_ids_for_business_area(self.business_area.id))
+        return (
+            queryset.filter(
+                data_collecting_type__deprecated=False,
+                id__in=allowed_programs.values_list("id", flat=True),
+            )
+            .exclude(data_collecting_type__code="unknown")
+            .annotate(
+                custom_order=Case(
+                    When(status=Program.DRAFT, then=Value(1)),
+                    When(status=Program.ACTIVE, then=Value(2)),
+                    When(status=Program.FINISHED, then=Value(3)),
+                    output_field=IntegerField(),
+                )
+            )
+            .prefetch_related(Prefetch("pdu_fields", queryset=FlexibleAttribute.objects.order_by("created_at")))
+            .select_related("beneficiary_group", "data_collecting_type")
+            .order_by("custom_order", "start_date")
+        )
+
+    @etag_decorator(ProgramListKeyConstructor)
+    @cache_response(timeout=config.REST_API_TTL, key_func=ProgramListKeyConstructor())
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().list(request, *args, **kwargs)
+
+    def perform_destroy(self, instance: Program) -> None:
+        self.validate(program=instance)
+        super().perform_destroy(instance)
 
 
 class ProgramCycleViewSet(

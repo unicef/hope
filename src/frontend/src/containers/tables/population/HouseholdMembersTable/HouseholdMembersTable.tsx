@@ -101,7 +101,7 @@ export const HouseholdMembersTable = ({
     unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.member_label} ID`,
     fullName: (_beneficiaryGroup) => `${_beneficiaryGroup?.member_label}`,
     relationship: (_beneficiaryGroup) =>
-      `Relationship to Head of ${_beneficiaryGroup?.groupLabel}`,
+      `Relationship to Head of ${_beneficiaryGroup?.group_label}`,
   };
 
   const adjustedHeadCells = adjustHeadCells(

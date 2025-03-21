@@ -3,10 +3,10 @@ import { FileCopy } from '@mui/icons-material';
 import { ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { Program } from '@restgenerated/models/Program';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 
 interface DuplicateProgramButtonLinkProps {
-  program: Program;
+  program: ProgramDetail;
 }
 
 export function DuplicateProgramButtonLink({

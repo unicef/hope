@@ -72,7 +72,15 @@ const Root: FC = () => (
 
 const sentryCreateBrowserRouter =
   Sentry.wrapCreateBrowserRouter(createBrowserRouter);
-const router = sentryCreateBrowserRouter([{ path: '*', Component: Root }]);
+const router = sentryCreateBrowserRouter([
+  {
+    path: '*',
+    Component: Root,
+    future: {
+      v7_fetcherPersist: true,
+    },
+  },
+]);
 
 export const App: FC = () => (
   <Providers>

@@ -54,7 +54,7 @@ export const GrievancesTable = ({
 
   const replacements = {
     household_unicef_id: (_beneficiaryGroup) =>
-      `${_beneficiaryGroup?.groupLabel} ID`,
+      `${_beneficiaryGroup?.group_label} ID`,
   };
 
   const adjustedHeadCells = adjustHeadCells(
@@ -143,7 +143,7 @@ export const GrievancesTable = ({
       queryFn: () => {
         return RestService.restUsersProfileRetrieve({
           businessAreaSlug: businessArea,
-          programSlug: programId,
+          programSlug: programId === 'all' ? undefined : programId,
         });
       },
     },

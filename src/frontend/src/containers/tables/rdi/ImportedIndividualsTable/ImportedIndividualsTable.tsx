@@ -58,7 +58,7 @@ function ImportedIndividualsTable({
     id: (_beneficiaryGroup) => `${_beneficiaryGroup?.member_label} ID`,
     full_name: (_beneficiaryGroup) => _beneficiaryGroup?.member_label,
     relationship: (_beneficiaryGroup) =>
-      `Relationship to Head of ${_beneficiaryGroup?.groupLabel}`,
+      `Relationship to Head of ${_beneficiaryGroup?.group_label}`,
   };
 
   const adjustedMergedIndividualsHeadCells = adjustHeadCells(

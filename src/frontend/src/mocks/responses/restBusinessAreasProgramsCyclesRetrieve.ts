@@ -1,4 +1,4 @@
-export const restProgramsCyclesRetrieve = {
+export const restBusinessAreasProgramsCyclesRetrieve = {
   count: 1,
   next: null,
   previous: null,

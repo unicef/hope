@@ -4,9 +4,10 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 from django.db.models import Q, QuerySet
 
+from drf_spectacular.utils import extend_schema, inline_serializer
 from requests import Response, session
 from requests.adapters import HTTPAdapter
-from rest_framework import serializers
+from rest_framework import serializers, status
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response as DRFResponse
@@ -252,13 +253,17 @@ class AdminUrlSerializerMixin:
 class CountActionMixin:
     """
     Adds a count action to the viewset that returns the count of the queryset.
-    NOTE: This mixin should be added as the first mixin in the inheritance chain.
     """
 
+    @extend_schema(
+        responses={
+            status.HTTP_200_OK: inline_serializer("CountResponse", fields={"count": serializers.IntegerField()})
+        },
+    )
     @action(
         detail=False,
         methods=["get"],
     )
     def count(self, request: Any, *args: Any, **kwargs: Any) -> Any:
-        queryset_count = super().get_queryset().count()
+        queryset_count = self.get_queryset().count()
         return DRFResponse({"count": queryset_count})

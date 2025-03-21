@@ -19,7 +19,7 @@ import ButtonBase from '@mui/material/ButtonBase';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
 import Popper from '@mui/material/Popper';
 import { styled } from '@mui/material/styles';
-import { Program } from '@restgenerated/models/Program';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { programStatusToColor } from '@utils/utils';
@@ -124,7 +124,6 @@ export const GlobalProgramSelect = () => {
     data: programsData,
     isLoading: loadingPrograms,
     refetch: refetchPrograms,
-    // isSuccess,
   } = useQuery({
     queryKey: ['businessAreaProgram', businessArea, queryParams],
     queryFn: () =>
@@ -232,7 +231,7 @@ export const GlobalProgramSelect = () => {
 
   useEffect(() => {
     if (programsData) {
-      const newProgramsList: Partial<Program>[] = [];
+      const newProgramsList: Partial<ProgramDetail>[] = [];
       if (inputValue === '') {
         newProgramsList.push({
           id: 'all',
@@ -258,7 +257,7 @@ export const GlobalProgramSelect = () => {
     setAnchorEl(null);
   };
 
-  const onChange = (_event: any, selectedValue: Program): void => {
+  const onChange = (_event: any, selectedValue: ProgramDetail): void => {
     if (selectedValue) {
       handleClose();
       if (selectedValue.id === 'all') {

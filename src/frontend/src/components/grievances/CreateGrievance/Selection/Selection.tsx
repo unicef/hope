@@ -54,10 +54,13 @@ function Selection({
     return choices.map((choice) => {
       let newName = choice.name;
       if (_beneficiaryGroup?.member_label) {
-        newName = newName.replace(/Individual/g, _beneficiaryGroup.memberLabel);
+        newName = newName.replace(
+          /Individual/g,
+          _beneficiaryGroup.member_label,
+        );
       }
-      if (_beneficiaryGroup?.groupLabel) {
-        newName = newName.replace(/Household/g, _beneficiaryGroup.groupLabel);
+      if (_beneficiaryGroup?.group_label) {
+        newName = newName.replace(/Household/g, _beneficiaryGroup.group_label);
       }
       return { ...choice, name: newName };
     });

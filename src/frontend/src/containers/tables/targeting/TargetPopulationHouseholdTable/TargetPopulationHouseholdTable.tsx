@@ -31,10 +31,10 @@ export function TargetPopulationHouseholdTable({
   const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const replacements = {
-    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} ID`,
+    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.group_label} ID`,
     head_of_household__full_name: (_beneficiaryGroup) =>
-      `Head of ${_beneficiaryGroup?.groupLabel}`,
-    size: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} Size`,
+      `Head of ${_beneficiaryGroup?.group_label}`,
+    size: (_beneficiaryGroup) => `${_beneficiaryGroup?.group_label} Size`,
   };
 
   const adjustedHeadCells = adjustHeadCells(

@@ -12,7 +12,11 @@ const customRender = (
 ) =>
   render(
     <>
-      <BrowserRouter>
+      <BrowserRouter
+        future={{
+          v7_startTransition: true,
+        }}
+      >
         <Formik initialValues={{}} onSubmit={noop}>
           {ui}
         </Formik>
@@ -64,7 +68,7 @@ export const fakeContextProgram = {
       type: 'full',
       children: null,
     },
-    beneficiaryGroup: {
+    beneficiary_group: {
       id: '2',
       created_at: '2023-01-01T00:00:00Z',
       updated_at: '2023-01-01T00:00:00Z',

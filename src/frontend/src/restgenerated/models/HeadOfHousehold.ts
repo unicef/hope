@@ -4,6 +4,9 @@
 /* eslint-disable */
 export type HeadOfHousehold = {
     id: string;
+    /**
+     * Full Name of the Beneficiary
+     */
     full_name: string;
 };
 

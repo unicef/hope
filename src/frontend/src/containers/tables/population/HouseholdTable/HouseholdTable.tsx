@@ -35,7 +35,7 @@ export const HouseholdTable = ({
   canViewDetails,
 }: HouseholdTableRestProps): ReactElement => {
   const { selectedProgram } = useProgramContext();
-  const { businessArea } = useBaseUrl();
+  const { businessArea, programId } = useBaseUrl();
   const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const initialQueryVariables = useMemo(() => {
@@ -51,10 +51,10 @@ export const HouseholdTable = ({
 
     return {
       businessAreaSlug: businessArea,
-      programProgrammeCode: selectedProgram?.programme_code,
+      programSlug: programId,
       familySize: JSON.stringify({
-        min: filter.householdSizeMin,
-        max: filter.householdSizeMax,
+        before: filter.householdSizeMin,
+        after: filter.householdSizeMax,
       }),
       search: filter.search.trim(),
       documentType: filter.documentType,
@@ -66,7 +66,7 @@ export const HouseholdTable = ({
       ordering: filter.orderBy,
       rdiMergeStatus: HouseholdRdiMergeStatus.Merged,
     };
-  }, [businessArea, selectedProgram, filter]);
+  }, [businessArea, filter, programId]);
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
@@ -78,23 +78,35 @@ export const HouseholdTable = ({
     queryKey: [
       'businessAreasProgramsHouseholdsList',
       queryVariables,
-      selectedProgram?.slug,
+      programId,
       businessArea,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsList({
         businessAreaSlug: businessArea,
-        programSlug: selectedProgram?.slug,
+        programSlug: programId,
         ...queryVariables,
       }),
-    enabled: !!businessArea && !!selectedProgram?.slug,
+    enabled: !!businessArea && !!programId,
   });
 
+  const { data: countData } = useQuery({
+    queryKey: ['businessAreasProgramsHouseholdsCount', programId, businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsHouseholdsCountRetrieve({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+      }),
+    enabled: !!businessArea && !!programId,
+  });
+
+  console.log(countData);
+
   const replacements = {
-    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} ID`,
+    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.group_label} ID`,
     head_of_household__full_name: (_beneficiaryGroup) =>
-      `Head of ${_beneficiaryGroup?.groupLabel}`,
-    size: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} Size`,
+      `Head of ${_beneficiaryGroup?.group_label}`,
+    size: (_beneficiaryGroup) => `${_beneficiaryGroup?.group_label} Size`,
   };
 
   const adjustedHeadCells = adjustHeadCells(

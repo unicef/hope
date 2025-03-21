@@ -49,7 +49,7 @@ export function LookUpHouseholdTable({
   redirectedFromRelatedTicket,
   isFeedbackWithHouseholdOnly,
 }: LookUpHouseholdTableProps): ReactElement {
-  const { isAllPrograms } = useBaseUrl();
+  const { isAllPrograms, programId } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
@@ -66,10 +66,10 @@ export function LookUpHouseholdTable({
 
     return {
       businessAreaSlug: businessArea,
-      programSlug: selectedProgram?.slug,
+      programSlug: programId,
       familySize: JSON.stringify({
-        min: filter.householdSizeMin,
-        max: filter.householdSizeMax,
+        before: filter.householdSizeMin,
+        after: filter.householdSizeMax,
       }),
       search: filter.search.trim(),
       documentType: filter.documentType,
@@ -80,7 +80,7 @@ export function LookUpHouseholdTable({
       withdrawn: matchWithdrawnValue(),
       rdiMergeStatus: HouseholdRdiMergeStatus.Merged,
     };
-  }, [businessArea, selectedProgram, filter]);
+  }, [businessArea, programId, filter]);
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
@@ -96,12 +96,12 @@ export function LookUpHouseholdTable({
     queryKey: [
       'businessAreasProgramsHouseholdsList',
       queryVariables,
-      selectedProgram?.slug,
+      programId,
       businessArea,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsList(queryVariables),
-    enabled: !!businessArea && !!selectedProgram?.slug,
+    enabled: !!businessArea && !!programId,
   });
 
   const {
@@ -112,7 +112,7 @@ export function LookUpHouseholdTable({
     queryKey: [
       'businessAreasHouseholdsList',
       queryVariables,
-      selectedProgram?.slug,
+      programId,
       businessArea,
     ],
     queryFn: () => {
@@ -173,10 +173,10 @@ export function LookUpHouseholdTable({
   };
 
   const replacements = {
-    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} ID`,
+    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.group_label} ID`,
     head_of_household__full_name: (_beneficiaryGroup) =>
-      `Head of ${_beneficiaryGroup?.groupLabel}`,
-    size: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} Size`,
+      `Head of ${_beneficiaryGroup?.group_label}`,
+    size: (_beneficiaryGroup) => `${_beneficiaryGroup?.group_label} Size`,
   };
 
   const adjustedHeadCells = adjustHeadCells(
@@ -195,7 +195,6 @@ export function LookUpHouseholdTable({
       dataCy: 'programs',
     },
   ];
-  console.log('dataHouseholdsAllPrograms', dataHouseholdsAllPrograms);
 
   const preparedHeadcells = isAllPrograms
     ? headCellsWithProgramColumn

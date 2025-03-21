@@ -29,6 +29,7 @@ from hct_mis_api.apps.account.admin.forms import (
 )
 from hct_mis_api.apps.account.admin.mixins import KoboAccessMixin
 from hct_mis_api.apps.account.admin.user_role import RoleAssignmentInline
+from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.utils.admin import HopeModelAdminMixin
 
 if TYPE_CHECKING:
@@ -334,3 +335,10 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
 
     def __init__(self, model: Type, admin_site: Any) -> None:
         super().__init__(model, admin_site)
+
+    def formfield_for_foreignkey(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
+        if db_field.name == "partner":  # Exclude partners that are parent partners
+            kwargs["queryset"] = Partner.objects.exclude(
+                id__in=Partner.objects.exclude(parent__isnull=True).values_list("parent", flat=True)
+            )
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
