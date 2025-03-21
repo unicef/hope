@@ -206,8 +206,8 @@ class APIGlobalProgramTests(HOPEApiTestCase):
                     "group_label_plural": program.beneficiary_group.group_label_plural,
                     "member_label": program.beneficiary_group.member_label,
                     "member_label_plural": program.beneficiary_group.member_label_plural,
-                    "master_detail": program.beneficiary_group.master_detail
-                }
+                    "master_detail": program.beneficiary_group.master_detail,
+                },
             }
 
         cls.program_from_another_ba_expected_response = expected_response(
