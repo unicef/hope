@@ -32,16 +32,15 @@ from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 class ArrayFieldFilteredSelectMultiple(FilteredSelectMultiple):
     def format_value(self, value: Union[str, tuple, list]) -> list[str]:  # type: ignore
         """Return selected values as a list."""
-        processed_value = []
         if value is None and self.allow_multiple_selected:
             return []
         elif self.allow_multiple_selected:
-            processed_value = value.split(",")
+            value = value.split(",")
 
         if not isinstance(value, (tuple, list)):
-            processed_value = [value]
+            value = [value]
 
-        results = [str(v) if v is not None else "" for v in processed_value]
+        results = [str(v) if v is not None else "" for v in value]
         return results
 
 

@@ -22,4 +22,5 @@ class ProgramGlobalSerializer(serializers.ModelSerializer):
             "cash_plus",
             "population_goal",
             "business_area_code",
+            "beneficiary_group",
         )
