@@ -236,7 +236,6 @@ class FspData(FlexibleArgumentsDataclassMixin):
 
 @dataclasses.dataclass()
 class AccountTypeData(FlexibleArgumentsDataclassMixin):
-    id: int
     key: str
     label: str
     unique_fields: List[str]
