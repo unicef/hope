@@ -1,10 +1,12 @@
 from rest_framework import serializers
 
+from hct_mis_api.apps.program.api.serializers import BeneficiaryGroupSerializer
 from hct_mis_api.apps.program.models import Program
 
 
 class ProgramGlobalSerializer(serializers.ModelSerializer):
     business_area_code = serializers.CharField(source="business_area.code", read_only=True)
+    beneficiary_group = BeneficiaryGroupSerializer()
 
     class Meta:
         model = Program
@@ -22,4 +24,5 @@ class ProgramGlobalSerializer(serializers.ModelSerializer):
             "cash_plus",
             "population_goal",
             "business_area_code",
+            "beneficiary_group",
         )
