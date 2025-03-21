@@ -245,6 +245,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     can_download_xlsx = serializers.SerializerMethodField()
     can_send_xlsx_password = serializers.SerializerMethodField()
     split_choices = ChoiceSerializer(many=True, read_only=True)
+    created_by = serializers.SerializerMethodField()
 
     class Meta(PaymentPlanListSerializer.Meta):
         fields = PaymentPlanListSerializer.Meta.fields + (  # type: ignore
@@ -297,6 +298,11 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
                 ):
                     return False
             return True
+
+    def get_created_by(self, obj: PaymentPlan) -> str:
+        if not obj.created_by:
+            return "-"
+        return f"{obj.created_by.first_name} {obj.created_by.last_name}"
 
     def get_has_fsp_delivery_mechanism_xlsx_template(self, payment_plan: PaymentPlan) -> bool:
         return self._has_fsp_delivery_mechanism_xlsx_template(payment_plan)
