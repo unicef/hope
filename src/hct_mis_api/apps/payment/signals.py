@@ -27,13 +27,15 @@ def increment_payment_plan_version_cache(sender: Any, instance: PaymentPlan, cre
 @receiver(post_save, sender=PaymentPlan)
 @receiver(pre_delete, sender=PaymentPlan)
 def increment_target_population_version_cache(sender: Any, instance: PaymentPlan, **kwargs: dict) -> None:
+    business_area_slug = instance.business_area.slug
+    business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
+    program_slug = instance.program_cycle.program.slug
+
     if instance.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES:
-        business_area_slug = instance.business_area.slug
-        business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
-
-        program_slug = instance.program_cycle.program.slug
-
         version_key = f"{business_area_slug}:{business_area_version}:{program_slug}:target_population_list"
         get_or_create_cache_key(version_key, 0)
-
+        cache.incr(version_key)
+    else:
+        version_key = f"{business_area_slug}:{business_area_version}:{program_slug}:payment_plan_list"
+        get_or_create_cache_key(version_key, 0)
         cache.incr(version_key)

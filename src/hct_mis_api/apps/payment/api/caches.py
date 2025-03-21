@@ -1,13 +1,30 @@
-from typing import Any
+from typing import Any, Optional
+
+from django.db.models import QuerySet
 
 from rest_framework_extensions.key_constructor.bits import KeyBitBase
 
-from hct_mis_api.api.caches import BusinessAreaKeyBitMixin, KeyConstructorMixin
+from hct_mis_api.api.caches import (
+    BusinessAreaAndProgramLastUpdatedKeyBit,
+    BusinessAreaKeyBitMixin,
+    KeyConstructorMixin,
+)
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.payment.models import PaymentPlan
 
 
 class ManagerialPaymentPlanListVersionsKeyBit(BusinessAreaKeyBitMixin):
     specific_view_cache_key = "management_payment_plans_list"
+
+
+class PaymentPlanListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
+    specific_view_cache_key = "payment_plan_list"
+
+    def _get_queryset(self, business_area_slug: Optional[Any], program_slug: Optional[Any]) -> QuerySet:
+        return PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).filter(
+            program_cycle__program__slug=program_slug,
+            business_area__slug=business_area_slug,
+        )
 
 
 class PaymentPlanProgramsPermissionsKeyBit(KeyBitBase):
@@ -26,3 +43,4 @@ class PaymentPlanProgramsPermissionsKeyBit(KeyBitBase):
 class PaymentPlanKeyConstructor(KeyConstructorMixin):
     managerial_payment_plan_list_versions = ManagerialPaymentPlanListVersionsKeyBit()
     permissions_to_programs = PaymentPlanProgramsPermissionsKeyBit()
+    payment_plan_list = PaymentPlanListKeyBit()
