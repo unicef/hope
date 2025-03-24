@@ -11,7 +11,6 @@ from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
 
 
 class ModifiedPaymentFactory(PaymentFactory):
@@ -62,4 +61,3 @@ def populate_dashboard_cache() -> Callable[[BusinessAreaFactory], Household]:
         return household
 
     return _populate_dashboard_cache
-
