@@ -188,7 +188,7 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
                     self.payout_amount, entitlement_quantity
                 )
             except Exception:
-                logger.error(f"Invalid delivered_quantity {self.payout_amount} for Payment {self.remote_id}")
+                logger.warning(f"Invalid delivered_quantity {self.payout_amount} for Payment {self.remote_id}")
                 _hope_status = Payment.STATUS_ERROR
             return _hope_status
 
@@ -204,7 +204,7 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
 
         hope_status = mapping.get(self.status)
         if not hope_status:
-            logger.error(f"Invalid Payment status: {self.status}")
+            logger.warning(f"Invalid Payment status: {self.status}")
             hope_status = Payment.STATUS_ERROR
 
         return hope_status() if callable(hope_status) else hope_status
