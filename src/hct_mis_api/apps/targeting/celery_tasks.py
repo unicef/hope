@@ -53,5 +53,5 @@ def create_tp_from_list(form_data: Dict[str, str], user_id: str, program_pk: str
             logger.exception(e)
     else:
         error_message = f"Form validation failed: {form.errors}."
-        logger.error(error_message)
+        logger.warning(error_message)
         raise TaskError(error_message)
