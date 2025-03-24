@@ -190,6 +190,7 @@ def create_payment_plan_lock_social_worker(social_worker_program: Program) -> Pa
 
 @pytest.fixture
 def create_payment_plan_open(social_worker_program: Program) -> PaymentPlan:
+    generate_delivery_mechanisms()
     dm_cash = DeliveryMechanism.objects.get(code="cash")
     fsp = FinancialServiceProviderFactory()
     fsp.delivery_mechanisms.set([dm_cash])
