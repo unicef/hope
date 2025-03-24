@@ -2078,6 +2078,7 @@ input IndividualUpdateDataObjectType {
   orgEnumerator: String
   orgNameEnumerator: String
   registrationMethod: String
+  adminAreaTitle: String
 }
 
 type InvalidPaymentVerificationPlan {

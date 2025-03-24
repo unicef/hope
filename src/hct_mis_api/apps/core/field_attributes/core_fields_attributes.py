@@ -2215,9 +2215,9 @@ class FieldFactory(list):
         if not label_with_template:
             return None
         mapping_dict = (
-            TEMPLATE_MAPPING_NORMAL
-            if Scope.XLSX_PEOPLE and Scope.PEOPLE_UPDATE not in self.scopes
-            else TEMPLATE_MAPPING_PEOPLE
+            TEMPLATE_MAPPING_PEOPLE
+            if Scope.XLSX_PEOPLE or Scope.PEOPLE_UPDATE in self.scopes
+            else TEMPLATE_MAPPING_NORMAL
         )
         for mapping in mapping_dict.items():
             label_with_template = label_with_template.replace(mapping[0], mapping[1])

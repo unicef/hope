@@ -60,7 +60,7 @@ class TemplateFileGeneratorService:
 
     def _add_people_columns(self) -> None:
         people_fields = {
-            **FieldFactory.from_scopes([Scope.XLSX_PEOPLE])
+            **FieldFactory.from_scope(Scope.XLSX_PEOPLE)
             .apply_business_area(business_area_slug=self.business_area.slug)
             .to_dict_by("xlsx_field"),
             **self.flex_fields["individuals"],
