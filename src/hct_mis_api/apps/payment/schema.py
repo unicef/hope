@@ -440,10 +440,10 @@ class DeliveryMechanismPerPaymentPlanNode(DjangoObjectType):
     fsp = graphene.Field(FinancialServiceProviderNode)
 
     def resolve_name(self, info: Any) -> graphene.String:
-        return self.delivery_mechanism.name
+        return str(self.delivery_mechanism.name) if self.delivery_mechanism else ""  # type: ignore
 
     def resolve_code(self, info: Any) -> graphene.String:
-        return self.delivery_mechanism.code
+        return str(self.delivery_mechanism.code) if self.delivery_mechanism else ""  # type: ignore
 
     def resolve_fsp(self, info: Any) -> graphene.Field:
         return self.financial_service_provider

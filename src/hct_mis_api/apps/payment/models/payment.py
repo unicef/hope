@@ -763,7 +763,7 @@ class PaymentPlan(
 
     @property
     def is_payment_gateway(self) -> bool:  # pragma: no cover
-        if not hasattr(self, "financial_service_provider"):
+        if not getattr(self, "financial_service_provider", None):
             return False
         return self.financial_service_provider.is_payment_gateway
 
@@ -918,7 +918,7 @@ class PaymentPlan(
     @property
     def can_send_to_payment_gateway(self) -> bool:
         status_accepted = self.status == PaymentPlan.Status.ACCEPTED
-        has_payment_gateway_fsp = self.financial_service_provider.is_payment_gateway
+        has_payment_gateway_fsp = self.financial_service_provider and self.financial_service_provider.is_payment_gateway
         has_not_sent_to_payment_gateway_splits = self.splits.filter(
             sent_to_payment_gateway=False,
         ).exists()
