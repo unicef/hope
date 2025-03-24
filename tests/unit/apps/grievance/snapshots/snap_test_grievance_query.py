@@ -1665,7 +1665,7 @@ snapshots['TestGrievanceQuery::test_people_upd_individual_data_admin_area_title 
                 'individualData': {
                     'admin_area_title': {
                         'approve_status': True,
-                        'previous_value': None,
+                        'previous_value': 'Old_Name - A22',
                         'value': 'Test_Name - AAA333'
                     }
                 }

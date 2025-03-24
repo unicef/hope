@@ -831,7 +831,8 @@ class TestGrievanceQuery(APITestCase):
             self.program,
         )
         AreaFactory(p_code="AAA333", name="Test_Name")
-        individual_data = {"admin_area_title": {"value": "AAA333", "approve_status": True, "previous_value": None}}
+        AreaFactory(p_code="A22", name="Old_Name")
+        individual_data = {"admin_area_title": {"value": "AAA333", "approve_status": True, "previous_value": "A22"}}
         ticket = GrievanceTicket.objects.first()
         TicketIndividualDataUpdateDetailsFactory(
             ticket=ticket, individual_data=individual_data, individual=self.individual_1
