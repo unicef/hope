@@ -120,6 +120,7 @@ class PaymentPlanListSerializer(serializers.ModelSerializer):
     status = serializers.CharField(source="get_status_display")
     currency = serializers.CharField(source="get_currency_display")
     follow_ups = FollowUpPaymentPlanSerializer(many=True, read_only=True)
+    created_by = serializers.SerializerMethodField()
 
     class Meta:
         model = PaymentPlan
@@ -129,6 +130,7 @@ class PaymentPlanListSerializer(serializers.ModelSerializer):
             "name",
             "status",
             "total_households_count",
+            "total_individuals_count",
             "currency",
             "excluded_ids",
             "total_entitled_quantity",
@@ -138,11 +140,19 @@ class PaymentPlanListSerializer(serializers.ModelSerializer):
             "dispersion_end_date",
             "is_follow_up",
             "follow_ups",
+            "created_by",
+            "created_at",
+            "updated_at",
         )
+
+    def get_created_by(self, obj: PaymentPlan) -> str:
+        if not obj.created_by:
+            return "-"
+        return f"{obj.created_by.first_name} {obj.created_by.last_name}"
 
 
 class FinancialServiceProviderSerializer(serializers.ModelSerializer):
-    is_payment_gateway = serializers.BooleanField(source="is_payment_gateway")
+    is_payment_gateway = serializers.BooleanField()
 
     class Meta:
         model = FinancialServiceProvider
@@ -213,6 +223,8 @@ class VolumeByDeliveryMechanismSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "delivery_mechanism",
+            "volume",
+            "volume_usd",
         )
 
 
@@ -245,11 +257,9 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     can_download_xlsx = serializers.SerializerMethodField()
     can_send_xlsx_password = serializers.SerializerMethodField()
     split_choices = ChoiceSerializer(many=True, read_only=True)
-    created_by = serializers.SerializerMethodField()
 
     class Meta(PaymentPlanListSerializer.Meta):
         fields = PaymentPlanListSerializer.Meta.fields + (  # type: ignore
-            "created_by",
             "background_action_status",
             "start_date",
             "end_date",
@@ -298,11 +308,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
                 ):
                     return False
             return True
-
-    def get_created_by(self, obj: PaymentPlan) -> str:
-        if not obj.created_by:
-            return "-"
-        return f"{obj.created_by.first_name} {obj.created_by.last_name}"
 
     def get_has_fsp_delivery_mechanism_xlsx_template(self, payment_plan: PaymentPlan) -> bool:
         return self._has_fsp_delivery_mechanism_xlsx_template(payment_plan)
@@ -454,3 +459,25 @@ class PaymentPlanBulkActionSerializer(serializers.Serializer):
     ids = serializers.ListField(child=serializers.CharField())
     action = serializers.ChoiceField(PaymentPlan.Action.choices)
     comment = serializers.CharField(required=False, allow_blank=True)
+
+
+class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerializer):
+    background_action_status = serializers.CharField(source="get_background_action_status_display")
+    program = serializers.CharField(source="program_cycle.program.name")
+    program_cycle = serializers.CharField(source="program_cycle.title")
+    # TODO: add Steficon formula
+    # TODO: add Targeting Criteria
+    # TODO: add HH list
+
+    class Meta(PaymentPlanListSerializer.Meta):
+        fields = PaymentPlanListSerializer.Meta.fields + (  # type: ignore
+            "background_action_status",
+            "start_date",
+            "end_date",
+            "program",
+            "program_cycle",
+            "male_children_count",
+            "female_children_count",
+            "male_adults_count",
+            "female_adults_count",
+        )

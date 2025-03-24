@@ -27,6 +27,16 @@ class PaymentPlanListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
         )
 
 
+class TargetPopulationListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
+    specific_view_cache_key = "target_population_list"
+
+    def _get_queryset(self, business_area_slug: Optional[Any], program_slug: Optional[Any]) -> QuerySet:
+        return PaymentPlan.objects.filter(
+            program_cycle__program__slug=program_slug,
+            business_area__slug=business_area_slug,
+        )
+
+
 class PaymentPlanProgramsPermissionsKeyBit(KeyBitBase):
     def get_data(
         self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict

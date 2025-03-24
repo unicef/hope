@@ -548,7 +548,6 @@ class TestPaymentPlanDetail:
         self.pp.refresh_from_db()
 
         assert payment_plan["id"] == encode_id_base64_required(self.pp.id, "PaymentPlan")
-        assert payment_plan["name"] == self.pp.name
         assert payment_plan["unicef_id"] == self.pp.unicef_id
         assert payment_plan["name"] == self.pp.name
         assert payment_plan["status"] == self.pp.get_status_display()
@@ -766,3 +765,303 @@ class TestPaymentPlanFilter:
         response_data = response.json()["results"]
         assert len(response_data) == 1
         assert response_data[0]["name"] == "NEW_FOLLOW_up"
+
+
+class TestTargetPopulationList:
+    @pytest.fixture(autouse=True)
+    def setup(self, api_client: Any) -> None:
+        self.afghanistan = create_afghanistan()
+        self.partner = PartnerFactory(name="unittest")
+        self.user = UserFactory(partner=self.partner)
+        self.program_active = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
+        self.cycle = self.program_active.cycles.first()
+        self.tp = PaymentPlanFactory(
+            name="Test new TP",
+            business_area=self.afghanistan,
+            program_cycle=self.cycle,
+            status=PaymentPlan.Status.TP_OPEN,
+            created_by=self.user,
+        )
+        # add PaymentPlan
+        self.pp = PaymentPlanFactory(
+            business_area=self.afghanistan,
+            program_cycle=self.cycle,
+            status=PaymentPlan.Status.LOCKED_FSP,
+            created_by=self.user,
+        )
+        self.pp_list_url = reverse(
+            "api:payments:target-populations-list",
+            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program_active.slug},
+        )
+        self.pp_count_url = reverse(
+            "api:payments:target-populations-count",
+            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program_active.slug},
+        )
+        self.client = api_client(self.user)
+
+    def test_target_population_list_without_permissions(
+        self,
+        create_user_role_with_permissions: Any,
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
+            self.afghanistan,
+            self.program_active,
+        )
+        response = self.client.get(self.pp_list_url)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    @pytest.mark.parametrize(
+        "permissions",
+        [
+            [Permissions.TARGETING_VIEW_LIST],
+        ],
+    )
+    def test_target_population_list_with_permissions(
+        self,
+        permissions: list,
+        create_user_role_with_permissions: Any,
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            permissions,
+            self.afghanistan,
+            self.program_active,
+        )
+        response = self.client.get(self.pp_list_url)
+        assert response.status_code == status.HTTP_200_OK
+        response_data = response.json()["results"]
+        assert len(response_data) == 1
+
+        response_count = self.client.get(self.pp_count_url)
+        assert response_count.status_code == status.HTTP_200_OK
+        assert response_count.json()["count"] == 1
+
+        self.tp.refresh_from_db()
+        tp = response_data[0]
+        assert encode_id_base64_required(self.tp.id, "PaymentPlan") == tp["id"]
+        assert tp["name"] == "Test new TP"
+        assert tp["status"] == self.tp.get_status_display()
+        assert tp["total_households_count"] == self.tp.total_households_count
+        assert tp["total_individuals_count"] == self.tp.total_individuals_count
+        assert tp["created_at"] == self.tp.created_at.isoformat().replace("+00:00", "Z")
+        assert tp["updated_at"] == self.tp.updated_at.isoformat().replace("+00:00", "Z")
+        assert tp["created_by"] == self.user.get_full_name()
+
+    def test_target_population_caching(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.TARGETING_VIEW_LIST],
+            self.afghanistan,
+            self.program_active,
+        )
+        # TODO: add later
+
+
+class TestTargetPopulationDetail:
+    @pytest.fixture(autouse=True)
+    def setup(self, api_client: Any) -> None:
+        self.afghanistan = create_afghanistan()
+        self.partner = PartnerFactory(name="unittest")
+        self.user = UserFactory(partner=self.partner)
+        self.program_active = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
+        self.cycle = self.program_active.cycles.first()
+        self.tp = PaymentPlanFactory(
+            business_area=self.afghanistan,
+            program_cycle=self.cycle,
+            status=PaymentPlan.Status.TP_LOCKED,
+            created_by=self.user,
+        )
+        tp_id = encode_id_base64_required(self.tp.id, "PaymentPlan")
+        self.tp_detail_url = reverse(
+            "api:payments:target-populations-detail",
+            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program_active.slug, "pk": tp_id},
+        )
+        self.client = api_client(self.user)
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.TARGETING_VIEW_DETAILS], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_target_population_detail_permissions(
+        self, permissions: list, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+
+        response = self.client.get(self.tp_detail_url)
+        assert response.status_code == expected_status
+
+    def test_target_population_detail(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.TARGETING_VIEW_DETAILS], self.afghanistan, self.program_active
+        )
+        response = self.client.get(self.tp_detail_url)
+        assert response.status_code == status.HTTP_200_OK
+
+        tp = response.json()
+        self.tp.refresh_from_db()
+
+        assert tp["id"] == encode_id_base64_required(self.tp.id, "PaymentPlan")
+        assert tp["name"] == self.tp.name
+        assert tp["program_cycle"] == self.cycle.title
+        assert tp["program"] == self.program_active.name
+        assert tp["status"] == self.tp.get_status_display()
+        assert tp["total_households_count"] == self.tp.total_households_count
+        assert tp["total_individuals_count"] == self.tp.total_individuals_count
+        assert tp["created_by"] == f"{self.user.first_name} {self.user.last_name}"
+        assert tp["background_action_status"] is None
+        assert tp["male_children_count"] == self.tp.male_children_count
+        assert tp["female_children_count"] == self.tp.female_children_count
+        assert tp["male_adults_count"] == self.tp.male_adults_count
+        assert tp["female_adults_count"] == self.tp.female_adults_count
+
+
+class TestTargetPopulationFilter:
+    @pytest.fixture(autouse=True)
+    def setup(self, api_client: Any, create_user_role_with_permissions: Any) -> None:
+        self.afghanistan = create_afghanistan()
+        self.partner = PartnerFactory(name="unittest")
+        self.user = UserFactory(partner=self.partner)
+        self.program_active = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
+        self.cycle = self.program_active.cycles.first()
+        self.tp = PaymentPlanFactory(
+            name="OPEN",
+            business_area=self.afghanistan,
+            program_cycle=self.cycle,
+            status=PaymentPlan.Status.TP_OPEN,
+            created_by=self.user,
+            total_households_count=999,
+        )
+        self.tp_locked = PaymentPlanFactory(
+            name="LOCKED",
+            business_area=self.afghanistan,
+            program_cycle=self.cycle,
+            status=PaymentPlan.Status.TP_LOCKED,
+            created_by=self.user,
+            total_households_count=888,
+        )
+        self.tp_assigned = PaymentPlanFactory(
+            name="Assigned TP",
+            business_area=self.afghanistan,
+            program_cycle=self.cycle,
+            status=PaymentPlan.Status.FINISHED,
+            created_by=self.user,
+            total_households_count=777,
+        )
+        self.list_url = reverse(
+            "api:payments:target-populations-list",
+            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program_active.slug},
+        )
+        self.partner = PartnerFactory(name="ABC")
+        self.user = UserFactory(partner=self.partner)
+        self.client = api_client(self.user)
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.TARGETING_VIEW_LIST],
+            self.afghanistan,
+            self.program_active,
+        )
+
+    def test_filter_by_status(self) -> None:
+        response = self.client.get(self.list_url, {"status": PaymentPlan.Status.TP_LOCKED.value})
+        self.tp_locked.refresh_from_db()
+        assert response.status_code == status.HTTP_200_OK
+        response_data = response.json()["results"]
+        assert len(response_data) == 1
+        assert response_data[0]["id"] == encode_id_base64_required(self.tp_locked.id, "PaymentPlan")
+        assert response_data[0]["status"] == "Locked"
+        assert response_data[0]["name"] == "LOCKED"
+
+        response = self.client.get(self.list_url, {"status": "ASSIGNED"})
+        self.tp_assigned.refresh_from_db()
+        assert response.status_code == status.HTTP_200_OK
+        response_data = response.json()["results"]
+        assert len(response_data) == 1
+        assert response_data[0]["id"] == encode_id_base64_required(self.tp_assigned.id, "PaymentPlan")
+        assert response_data[0]["name"] == "Assigned TP"
+
+    def test_filter_by_program_cycle(self) -> None:
+        new_tp = PaymentPlanFactory(
+            name="TEST_ABC_QWOOL",
+            business_area=self.afghanistan,
+            program_cycle=ProgramCycleFactory(program=self.program_active),
+            status=PaymentPlan.Status.TP_STEFICON_RUN,
+            created_by=self.user,
+        )
+        response = self.client.get(
+            self.list_url, {"program_cycle": encode_id_base64_required(new_tp.program_cycle.id, "ProgramCycle")}
+        )
+        assert response.status_code == status.HTTP_200_OK
+        response_data = response.json()["results"]
+        assert len(response_data) == 1
+        assert response_data[0]["name"] == "TEST_ABC_QWOOL"
+        assert response_data[0]["status"] == "Steficon Run"
+
+    def test_filter_by_number_of_hh(self) -> None:
+        PaymentPlanFactory(
+            name="PP_1",
+            business_area=self.afghanistan,
+            program_cycle=self.cycle,
+            status=PaymentPlan.Status.TP_LOCKED,
+            created_by=self.user,
+            total_households_count=100,
+        )
+        PaymentPlanFactory(
+            name="PP_2",
+            business_area=self.afghanistan,
+            program_cycle=self.cycle,
+            status=PaymentPlan.Status.TP_LOCKED,
+            created_by=self.user,
+            total_households_count=200,
+        )
+        response = self.client.get(
+            self.list_url, {"total_households_count__gte": "99", "total_households_count__lte": 201}
+        )
+        assert response.status_code == status.HTTP_200_OK
+        response_data = response.json()["results"]
+        assert len(response_data) == 2
+        assert response_data[0]["name"] == "PP_1"
+        assert response_data[1]["name"] == "PP_2"
+
+        response = self.client.get(self.list_url, {"total_households_count__lte": 101})
+        assert response.status_code == status.HTTP_200_OK
+        response_data = response.json()["results"]
+        assert len(response_data) == 1
+        assert response_data[0]["name"] == "PP_1"
+
+    def test_filter_by_created_date(self) -> None:
+        tp_1 = PaymentPlanFactory(
+            name="TP_Mmmmmmm",
+            business_area=self.afghanistan,
+            program_cycle=self.cycle,
+            status=PaymentPlan.Status.LOCKED_FSP,
+            created_by=self.user,
+            created_at="2022-02-24",
+        )
+        tp_2 = PaymentPlanFactory(
+            name="TP_Uuuuu_Aaaaa",
+            business_area=self.afghanistan,
+            program_cycle=self.cycle,
+            status=PaymentPlan.Status.LOCKED_FSP,
+            created_by=self.user,
+            created_at="2022-01-01",
+        )
+        tp_1.created_at = "2022-02-24"
+        tp_1.save()
+        tp_2.created_at = "2022-01-01"
+        tp_2.save()
+        response = self.client.get(self.list_url, {"created_at__gte": "2022-02-23", "created_at__lte": "2022-03-04"})
+        assert response.status_code == status.HTTP_200_OK
+        response_data = response.json()["results"]
+        assert len(response_data) == 1
+        assert response_data[0]["name"] == "TP_Mmmmmmm"
+
+        response = self.client.get(self.list_url, {"created_at__lte": "2022-01-18"})
+        assert response.status_code == status.HTTP_200_OK
+        response_data = response.json()["results"]
+        assert len(response_data) == 1
+        assert response_data[0]["name"] == "TP_Uuuuu_Aaaaa"

@@ -32,13 +32,17 @@ from hct_mis_api.apps.core.api.mixins import (
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.payment.api.caches import PaymentPlanKeyConstructor
-from hct_mis_api.apps.payment.api.filters import PaymentPlanFilter
+from hct_mis_api.apps.payment.api.filters import (
+    PaymentPlanFilter,
+    TargetPopulationFilter,
+)
 from hct_mis_api.apps.payment.api.serializers import (
     PaymentPlanBulkActionSerializer,
     PaymentPlanDetailSerializer,
     PaymentPlanListSerializer,
     PaymentPlanSerializer,
     PaymentPlanSupportingDocumentSerializer,
+    TargetPopulationDetailSerializer,
 )
 from hct_mis_api.apps.payment.models import PaymentPlan, PaymentPlanSupportingDocument
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
@@ -87,6 +91,30 @@ class PaymentPlanViewSet(
         ],
     }
 
+    @etag_decorator(PaymentPlanKeyConstructor)
+    @cache_response(timeout=config.REST_API_TTL, key_func=PaymentPlanKeyConstructor())
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().list(request, *args, **kwargs)
+
+
+class TargetPopulationViewSet(PaymentPlanViewSet):
+    queryset = PaymentPlan.objects.all().order_by("created_at")
+    PERMISSIONS = [Permissions.TARGETING_VIEW_LIST]
+    serializer_classes_by_action = {
+        "list": PaymentPlanListSerializer,
+        "retrieve": TargetPopulationDetailSerializer,
+    }
+    permissions_by_action = {
+        "list": [
+            Permissions.TARGETING_VIEW_LIST,
+        ],
+        "retrieve": [
+            Permissions.TARGETING_VIEW_DETAILS,
+        ],
+    }
+    filterset_class = TargetPopulationFilter
+
+    # TODO check with cache
     @etag_decorator(PaymentPlanKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=PaymentPlanKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:

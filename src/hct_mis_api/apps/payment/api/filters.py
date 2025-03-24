@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.db.models import Q, QuerySet
 
 import django_filters
@@ -33,3 +35,34 @@ class PaymentPlanFilter(FilterSet):
 
     def search_filter(self, qs: QuerySet, name: str, value: str) -> "QuerySet[PaymentPlan]":
         return qs.filter(Q(id__icontains=value) | Q(unicef_id__icontains=value) | Q(name__istartswith=value))
+
+
+class TargetPopulationFilter(PaymentPlanFilter):
+    status = django_filters.ChoiceFilter(
+        method="filter_by_status", choices=PaymentPlan.Status.choices + [("ASSIGNED", "Assigned")]
+    )
+
+    class Meta:
+        model = PaymentPlan
+        fields = {
+            "created_at": ["gte", "lte"],
+            "total_households_count": ["gte", "lte"],
+            "total_individuals_count": ["gte", "lte"],
+        }
+
+    @staticmethod
+    def filter_by_status(queryset: "QuerySet", model_field: str, value: Any) -> "QuerySet":
+        # assigned TP statuses
+        is_assigned = [
+            PaymentPlan.Status.PREPARING.value,
+            PaymentPlan.Status.OPEN.value,
+            PaymentPlan.Status.LOCKED.value,
+            PaymentPlan.Status.LOCKED_FSP.value,
+            PaymentPlan.Status.IN_APPROVAL.value,
+            PaymentPlan.Status.IN_AUTHORIZATION.value,
+            PaymentPlan.Status.IN_REVIEW.value,
+            PaymentPlan.Status.ACCEPTED.value,
+            PaymentPlan.Status.FINISHED.value,
+        ]
+        value_list = is_assigned if value == "ASSIGNED" else [value]
+        return queryset.filter(status__in=value_list)
