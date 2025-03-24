@@ -14,6 +14,7 @@ from hct_mis_api.apps.dashboard.services import (
 )
 from hct_mis_api.apps.payment.models import Payment
 
+
 CACHE_CONFIG = [
     ("DashboardDataCache", DashboardDataCache, "test-area"),
     ("DashboardGlobalDataCache", DashboardGlobalDataCache, "global"),
@@ -90,7 +91,8 @@ def test_refresh_data(
     cache_key = cache_class.get_cache_key(slug)
     cache.delete(cache_key)
 
-    _ = populate_dashboard_cache(afghanistan)
+    household = populate_dashboard_cache(afghanistan)
+
     refreshed_data = cache_class.refresh_data() if slug == "global" else cache_class.refresh_data(afghanistan.slug)
     assert refreshed_data is not None, "Refresh data returned None"
     assert len(refreshed_data) > 0, "No data returned by refresh"
@@ -157,6 +159,7 @@ def test_dashboard_data_cache(
     """Test DashboardDataCache and DashboardGlobalDataCache behavior."""
     business_area = BusinessAreaFactory(slug="test-area")
     household = populate_dashboard_cache(business_area)
+
     Payment.objects.filter(household=household).update(**payment_updates)
     if cache_service == DashboardDataCache:
         result = cache_service.refresh_data(business_area.slug)
