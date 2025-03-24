@@ -29,7 +29,11 @@ pwdSum = Sum(
     default=0,
 )
 
-finished_payment_plans = Count("parent__id", filter=Q(parent__payment_verification_plans__status="FINISHED"), distinct=True,)
+finished_payment_plans = Count(
+    "parent__id",
+    filter=Q(parent__payment_verification_plans__status="FINISHED"),
+    distinct=True,
+)
 
 total_payment_plans = Count("parent__id", filter=Q(parent__status="FINISHED"), distinct=True)
 
