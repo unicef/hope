@@ -2216,7 +2216,7 @@ class FieldFactory(list):
             return None
         mapping_dict = (
             TEMPLATE_MAPPING_PEOPLE
-            if Scope.XLSX_PEOPLE or Scope.PEOPLE_UPDATE in self.scopes
+            if Scope.XLSX_PEOPLE in self.scopes or Scope.PEOPLE_UPDATE in self.scopes
             else TEMPLATE_MAPPING_NORMAL
         )
         for mapping in mapping_dict.items():
