@@ -773,6 +773,10 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
 
     @staticmethod
     def resolve_failed_wallet_validation_collectors_ids(parent: PaymentPlan, info: Any) -> List[str]:
+        fsp = getattr(parent, "financial_service_provider", None)
+        dm = getattr(parent, "delivery_mechanism", None)
+        if not fsp or not dm:
+            return []
         return list(
             parent.payment_items.select_related("collector")
             .filter(

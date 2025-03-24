@@ -382,7 +382,7 @@ class PaymentPlanService:
                 logging.exception(msg)
                 raise GraphQLError(msg)
 
-            has_valid_wallet = False
+            has_valid_wallet = True
             if payment_plan.delivery_mechanism and payment_plan.financial_service_provider:
                 wallet = DeliveryMechanismData.objects.filter(
                     individual_id=collector_id, account_type=payment_plan.delivery_mechanism.account_type
