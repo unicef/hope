@@ -190,6 +190,10 @@ def create_payment_plan_lock_social_worker(social_worker_program: Program) -> Pa
 
 @pytest.fixture
 def create_payment_plan_open(social_worker_program: Program) -> PaymentPlan:
+    dm_cash = DeliveryMechanism.objects.get(code="cash")
+    fsp = FinancialServiceProviderFactory()
+    fsp.delivery_mechanisms.set([dm_cash])
+
     program_cycle = ProgramCycleFactory(
         program=social_worker_program,
         title="Cycle for PaymentPlan",
@@ -204,6 +208,8 @@ def create_payment_plan_open(social_worker_program: Program) -> PaymentPlan:
         program_cycle=program_cycle,
         business_area=social_worker_program.business_area,
         dispersion_start_date=datetime.now().date(),
+        financial_service_provider=fsp,
+        delivery_mechanism=dm_cash,
     )
     hoh1 = IndividualFactory(household=None)
     household_1 = HouseholdFactory(
@@ -230,6 +236,8 @@ def create_payment_plan_open(social_worker_program: Program) -> PaymentPlan:
         dispersion_start_date=datetime.now().date(),
         is_follow_up=True,
         source_payment_plan=payment_plan,
+        financial_service_provider=fsp,
+        delivery_mechanism=dm_cash,
     )
 
     yield payment_plan
