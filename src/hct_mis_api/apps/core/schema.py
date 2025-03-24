@@ -315,10 +315,10 @@ def resolve_asset(business_area_slug: str, uid: str) -> Dict:
     try:
         assets = KoboAPI(business_area_slug).get_single_project_data(uid)
     except ObjectDoesNotExist as e:
-        logger.exception(f"Provided business area: {business_area_slug}, does not exist.")
+        logger.warning(f"Provided business area: {business_area_slug}, does not exist.")
         raise GraphQLError("Provided business area does not exist.") from e
     except AttributeError as error:
-        logger.exception(error)
+        logger.warning(error)
         raise GraphQLError(str(error)) from error
 
     return reduce_asset(assets)
@@ -328,10 +328,10 @@ def resolve_assets_list(business_area_slug: str, only_deployed: bool = False) ->
     try:
         assets = KoboAPI(business_area_slug).get_all_projects_data()
     except ObjectDoesNotExist as e:
-        logger.exception(f"Provided business area: {business_area_slug}, does not exist.")
+        logger.warning(f"Provided business area: {business_area_slug}, does not exist.")
         raise GraphQLError("Provided business area does not exist.") from e
     except AttributeError as error:
-        logger.exception(error)
+        logger.warning(error)
         raise GraphQLError(str(error)) from error
 
     return reduce_assets_list(assets, only_deployed=only_deployed)

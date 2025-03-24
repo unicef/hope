@@ -1396,7 +1396,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
 
         snapshot = getattr(payment, "household_snapshot", None)
         if not snapshot:
-            logger.error(f"Not found snapshot for Payment {payment.unicef_id}")
+            logger.warning(f"Not found snapshot for Payment {payment.unicef_id}")
             return None
 
         snapshot_data = FinancialServiceProviderXlsxTemplate.get_data_from_payment_snapshot(
@@ -1410,7 +1410,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         # we can get if needed payment.parent.program.is_social_worker_program
         snapshot = getattr(payment, "household_snapshot", None)
         if not snapshot:
-            logger.error(f"Not found snapshot for Payment {payment.unicef_id}")
+            logger.warning(f"Not found snapshot for Payment {payment.unicef_id}")
             return None
         snapshot_data = snapshot.snapshot_data
         primary_collector = snapshot_data.get("primary_collector", {})

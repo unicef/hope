@@ -33,7 +33,7 @@ def export_survey_sample_task(survey_id: str, user_id: str) -> None:
             send_email_notification(service, user)
 
     except Exception as e:
-        logger.exception(e)
+        logger.warning(e)
         raise
 
 

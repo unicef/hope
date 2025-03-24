@@ -732,7 +732,7 @@ def log_and_withdraw_household_if_needed(
 
 def save_images(flex_fields: Dict, associated_with: str) -> None:
     if associated_with not in ("households", "individuals"):
-        logger.error("associated_with argument must be one of ['household', 'individual']")
+        logger.warning("associated_with argument must be one of ['household', 'individual']")
         raise ValueError("associated_with argument must be one of ['household', 'individual']")
 
     all_flex_fields = serialize_flex_attributes().get(associated_with, {})
@@ -740,7 +740,7 @@ def save_images(flex_fields: Dict, associated_with: str) -> None:
     for name, value in flex_fields.items():
         flex_field = all_flex_fields.get(name)
         if flex_field is None:
-            logger.error(f"{name} is not a correct `flex field")
+            logger.warning(f"{name} is not a correct `flex field")
             raise ValueError(f"{name} is not a correct `flex field")
 
         if flex_field["type"] == TYPE_IMAGE:

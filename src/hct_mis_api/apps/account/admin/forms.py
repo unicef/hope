@@ -121,7 +121,7 @@ class KoboImportUsersForm(forms.Form):
             except ValidationError:
                 errors.append(e)
         if errors:
-            logger.error("Invalid emails {}".format(", ".join(errors)))
+            logger.warning("Invalid emails {}".format(", ".join(errors)))
             raise ValidationError("Invalid emails {}".format(", ".join(errors)))
         return self.cleaned_data["emails"]
 

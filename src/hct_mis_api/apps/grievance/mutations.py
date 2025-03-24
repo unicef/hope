@@ -87,7 +87,7 @@ def get_partner(partner: int) -> Optional[Partner]:
         try:
             return Partner.objects.get(id=partner)
         except Partner.DoesNotExist as dne:
-            logger.error(f"Partner {partner} does not exist")
+            logger.warning(f"Partner {partner} does not exist")
             raise GraphQLError(f"Partner {partner} does not exist") from dne
     return None
 
