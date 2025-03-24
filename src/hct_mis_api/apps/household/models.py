@@ -869,7 +869,7 @@ class Document(AbstractSyncable, SoftDeletableRepresentationMergeStatusModel, Ti
 
         for validator in self.type.validators.all():
             if not re.match(validator.regex, self.document_number):
-                logger.error("Document number is not validating")
+                logger.warning("Document number is not validating")
                 raise ValidationError("Document number is not validating")
 
     class Meta:
