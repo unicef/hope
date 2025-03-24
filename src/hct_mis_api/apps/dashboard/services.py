@@ -275,6 +275,8 @@ class DashboardGlobalDataCache(DashboardDataCache):
             )
             .filter(
                 parent__status__in=["ACCEPTED", "FINISHED"],
+                program__is_visible=True,
+                parent__is_removed=False,
                 is_removed=False,
                 conflicted=False,
             )  # noqa
