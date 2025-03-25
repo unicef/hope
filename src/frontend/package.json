@@ -126,14 +126,10 @@
     "msw": "^2.7.3",
     "openapi-typescript-codegen": "^0.29.0",
     "prettier": "3.4.2",
-<<<<<<< HEAD
     "typescript": "^5.5.4",
-    "vitest": "^3.0.7"
-=======
+    "vitest": "^3.0.7",
     "react-test-renderer": "^19.0.0",
     "ts-jest": "^29.1.2",
-    "typescript": "~5.3.0",
     "vite-plugin-csp-guard": "^2.1.0"
->>>>>>> 2ee96e53d7 (init commit)
   }
 }
