@@ -24,7 +24,6 @@ function generateNginxHeaderFile(builtPolicy: string) {
   const filePath = 'dist/nginx-csp-header.conf';
   const dir = dirname(filePath);
 
-  // Check if the directory exists, if not, create it
   if (!existsSync(dir)) {
     mkdirSync(dir, { recursive: true });
   }
