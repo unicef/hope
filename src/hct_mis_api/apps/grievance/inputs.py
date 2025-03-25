@@ -200,6 +200,7 @@ class IndividualUpdateDataObjectType(graphene.InputObjectType):
     org_enumerator = graphene.String(description="People update")
     org_name_enumerator = graphene.String(description="People update")
     registration_method = graphene.String(description="People update")
+    admin_area_title = graphene.String(description="People update")
 
 
 class AddIndividualDataObjectType(graphene.InputObjectType):

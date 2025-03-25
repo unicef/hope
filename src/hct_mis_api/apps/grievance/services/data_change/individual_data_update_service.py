@@ -11,7 +11,7 @@ from graphql import GraphQLError
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.core.utils import decode_id_string, to_snake_case
-from hct_mis_api.apps.geo.models import Country
+from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.grievance.celery_tasks import (
     deduplicate_and_check_against_sanctions_list_task,
 )
@@ -310,16 +310,17 @@ class IndividualDataUpdateService(DataChangeService):
             "org_enumerator",
             "org_name_enumerator",
             "registration_method",
+            "admin_area_title",
         ]
         # move HH fields from only_approved_data into hh_approved_data
         hh_approved_data = {hh_f: only_approved_data.pop(hh_f) for hh_f in hh_fields if hh_f in only_approved_data}
         if hh_approved_data:
-            hh_country_origin = hh_approved_data.get("country_origin")
-            hh_country = hh_approved_data.get("country")
-            if hh_country_origin is not None:
+            if hh_country_origin := hh_approved_data.get("country_origin"):
                 hh_approved_data["country_origin"] = Country.objects.filter(iso_code3=hh_country_origin).first()
-            if hh_country is not None:
+            if hh_country := hh_approved_data.get("country"):
                 hh_approved_data["country"] = Country.objects.filter(iso_code3=hh_country).first()
+            if admin_area_title := hh_approved_data.pop("admin_area_title", None):
+                hh_approved_data["admin_area"] = Area.objects.filter(p_code=admin_area_title).first()
             # people update HH
             Household.objects.filter(id=household.id).update(**hh_approved_data, updated_at=timezone.now())
         # upd Individual
