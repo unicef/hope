@@ -147,7 +147,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
             etag = response.headers["etag"]
 
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 10
+            assert len(ctx.captured_queries) == 12
 
         # Test that reoccurring request use cached data
         with CaptureQueriesContext(connection) as ctx:
@@ -155,7 +155,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
             etag_second_call = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
             assert etag_second_call == etag
-            assert len(ctx.captured_queries) == 10
+            assert len(ctx.captured_queries) == 12
 
     def test_list_payment_plans_approval_process_data(
         self,
@@ -413,6 +413,7 @@ class TestPaymentPlanList:
             self.afghanistan,
             self.program_active,
         )
+        # first api call no cache
         with CaptureQueriesContext(connection) as ctx:
             response = self.client.get(self.pp_list_url)
             assert response.status_code == status.HTTP_200_OK
@@ -420,35 +421,36 @@ class TestPaymentPlanList:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 1
-            assert len(ctx.captured_queries) == 20
+            assert len(ctx.captured_queries) == 23
 
+        # second call get from cache
         with CaptureQueriesContext(connection) as ctx:
             response = self.client.get(self.pp_list_url)
             assert response.status_code == status.HTTP_200_OK
             assert response.has_header("etag")
             etag_second_call = response.headers["etag"]
             assert etag == etag_second_call
-            assert len(ctx.captured_queries) == 12
-
+            assert len(ctx.captured_queries) == 14
         # upd PP
         self.pp.status = PaymentPlan.Status.IN_REVIEW
         self.pp.save()
+        # PaymentPlan updated, invalidate cache... new call
         with CaptureQueriesContext(connection) as ctx:
             response = self.client.get(self.pp_list_url)
             assert response.status_code == status.HTTP_200_OK
             assert response.has_header("etag")
-            etag = response.headers["etag"]
-            assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
+            new_etag = response.headers["etag"]
+            assert json.loads(cache.get(new_etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 1
-            assert len(ctx.captured_queries) == 14
+            assert len(ctx.captured_queries) == 17
         with CaptureQueriesContext(connection) as ctx:
             response = self.client.get(self.pp_list_url)
             assert response.status_code == status.HTTP_200_OK
             assert response.has_header("etag")
             etag_second_call = response.headers["etag"]
-            assert etag == etag_second_call
-            assert len(ctx.captured_queries) == 12
-        # add new PP
+            assert new_etag == etag_second_call
+            assert len(ctx.captured_queries) == 14
+        # add new PP cache invalidate... new call
         PaymentPlanFactory(
             business_area=self.afghanistan,
             program_cycle=self.cycle,
@@ -462,14 +464,14 @@ class TestPaymentPlanList:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 2
-            assert len(ctx.captured_queries) == 15
+            assert len(ctx.captured_queries) == 19
         with CaptureQueriesContext(connection) as ctx:
             response = self.client.get(self.pp_list_url)
             assert response.status_code == status.HTTP_200_OK
             assert response.has_header("etag")
             etag_second_call = response.headers["etag"]
             assert etag == etag_second_call
-            assert len(ctx.captured_queries) == 12
+            assert len(ctx.captured_queries) == 14
 
         # delete PP
         self.pp.delete()
@@ -480,25 +482,27 @@ class TestPaymentPlanList:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 1
-            assert len(ctx.captured_queries) == 14
+            assert len(ctx.captured_queries) == 17
         with CaptureQueriesContext(connection) as ctx:
             response = self.client.get(self.pp_list_url)
             assert response.status_code == status.HTTP_200_OK
             assert response.has_header("etag")
-            etag_second_call = response.headers["etag"]
-            assert etag == etag_second_call
-            assert len(ctx.captured_queries) == 12
+            last_etag_second_call = response.headers["etag"]
+            assert etag == last_etag_second_call
+            assert len(ctx.captured_queries) == 14
 
         # upd TP no changes in cache
         self.tp.status = PaymentPlan.Status.TP_LOCKED
         self.tp.save()
+        # cache will update because in TargetPopulationListKeyBit query set getting all PPs
         with CaptureQueriesContext(connection) as ctx:
             response = self.client.get(self.pp_list_url)
             assert response.status_code == status.HTTP_200_OK
+            assert len(response.json()["results"]) == 1
             assert response.has_header("etag")
-            etag_second_call = response.headers["etag"]
-            assert etag == etag_second_call
-            assert len(ctx.captured_queries) == 12
+            get_etag = response.headers["etag"]
+            assert get_etag != last_etag_second_call
+            assert len(ctx.captured_queries) == 17
 
 
 class TestPaymentPlanDetail:
@@ -789,11 +793,11 @@ class TestTargetPopulationList:
             status=PaymentPlan.Status.LOCKED_FSP,
             created_by=self.user,
         )
-        self.pp_list_url = reverse(
+        self.tp_list_url = reverse(
             "api:payments:target-populations-list",
             kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program_active.slug},
         )
-        self.pp_count_url = reverse(
+        self.tp_count_url = reverse(
             "api:payments:target-populations-count",
             kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program_active.slug},
         )
@@ -809,7 +813,7 @@ class TestTargetPopulationList:
             self.afghanistan,
             self.program_active,
         )
-        response = self.client.get(self.pp_list_url)
+        response = self.client.get(self.tp_list_url)
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     @pytest.mark.parametrize(
@@ -829,14 +833,14 @@ class TestTargetPopulationList:
             self.afghanistan,
             self.program_active,
         )
-        response = self.client.get(self.pp_list_url)
+        response = self.client.get(self.tp_list_url)
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
-        assert len(response_data) == 1
+        assert len(response_data) == 2
 
-        response_count = self.client.get(self.pp_count_url)
+        response_count = self.client.get(self.tp_count_url)
         assert response_count.status_code == status.HTTP_200_OK
-        assert response_count.json()["count"] == 1
+        assert response_count.json()["count"] == 2
 
         self.tp.refresh_from_db()
         tp = response_data[0]
@@ -856,7 +860,46 @@ class TestTargetPopulationList:
             self.afghanistan,
             self.program_active,
         )
-        # TODO: add later
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.client.get(self.tp_list_url)
+            assert response.status_code == status.HTTP_200_OK
+
+            etag = response.headers["etag"]
+            assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
+            assert len(ctx.captured_queries) == 35
+
+        # Test that reoccurring requests use cached data
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.client.get(self.tp_list_url)
+            assert response.status_code == status.HTTP_200_OK
+
+            etag_second_call = response.headers["etag"]
+            assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
+            assert len(ctx.captured_queries) == 14
+            assert etag_second_call == etag
+
+        # After update, it does not use the cached data
+        self.tp.status = PaymentPlan.Status.TP_PROCESSING
+        self.tp.save()
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.client.get(self.tp_list_url)
+            assert response.status_code == status.HTTP_200_OK
+
+            etag_call_after_update = response.headers["etag"]
+            assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
+            assert len(ctx.captured_queries) == 29
+
+            assert etag_call_after_update != etag
+
+        # Cached data again
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.client.get(self.tp_list_url)
+            assert response.status_code == status.HTTP_200_OK
+
+            etag_call_after_update_second_call = response.headers["etag"]
+            assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
+            assert len(ctx.captured_queries) == 14
+            assert etag_call_after_update_second_call == etag_call_after_update
 
 
 class TestTargetPopulationDetail:

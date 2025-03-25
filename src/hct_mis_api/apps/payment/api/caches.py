@@ -18,7 +18,7 @@ class ManagerialPaymentPlanListVersionsKeyBit(BusinessAreaKeyBitMixin):
 
 
 class PaymentPlanListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
-    specific_view_cache_key = "payment_plan_list"
+    specific_view_cache_key = "payment_plans_list"
 
     def _get_queryset(self, business_area_slug: Optional[Any], program_slug: Optional[Any]) -> QuerySet:
         return PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).filter(
@@ -28,7 +28,7 @@ class PaymentPlanListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
 
 
 class TargetPopulationListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
-    specific_view_cache_key = "target_population_list"
+    specific_view_cache_key = "target_populations_list"
 
     def _get_queryset(self, business_area_slug: Optional[Any], program_slug: Optional[Any]) -> QuerySet:
         return PaymentPlan.objects.filter(
@@ -54,3 +54,4 @@ class PaymentPlanKeyConstructor(KeyConstructorMixin):
     managerial_payment_plan_list_versions = ManagerialPaymentPlanListVersionsKeyBit()
     permissions_to_programs = PaymentPlanProgramsPermissionsKeyBit()
     payment_plan_list = PaymentPlanListKeyBit()
+    target_population_list = TargetPopulationListKeyBit()

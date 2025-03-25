@@ -20,19 +20,20 @@ from hct_mis_api.apps.targeting.api.serializers import TargetPopulationListSeria
 logger = logging.getLogger(__name__)
 
 
-class TargetPopulationViewSet(
-    ProgramMixin,
-    mixins.ListModelMixin,
-    BaseViewSet,
-):
-    queryset = PaymentPlan.objects.all()
-    program_model_field = "program_cycle__program"
-    serializer_class = TargetPopulationListSerializer
-    PERMISSIONS = [Permissions.TARGETING_VIEW_LIST]
-    filter_backends = (OrderingFilter, DjangoFilterBackend)
-    filterset_class = PaymentPlanFilter
-
-    @etag_decorator(TPKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=TPKeyConstructor())
-    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        return super().list(request, *args, **kwargs)
+# # TODO: do we us it anywhere?
+# class TargetPopulationViewSet(
+#     ProgramMixin,
+#     mixins.ListModelMixin,
+#     BaseViewSet,
+# ):
+#     queryset = PaymentPlan.objects.all()
+#     program_model_field = "program_cycle__program"
+#     serializer_class = TargetPopulationListSerializer
+#     PERMISSIONS = [Permissions.TARGETING_VIEW_LIST]
+#     filter_backends = (OrderingFilter, DjangoFilterBackend)
+#     filterset_class = PaymentPlanFilter
+#
+#     @etag_decorator(TPKeyConstructor)
+#     @cache_response(timeout=config.REST_API_TTL, key_func=TPKeyConstructor())
+#     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+#         return super().list(request, *args, **kwargs)
