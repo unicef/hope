@@ -19,12 +19,17 @@ from hct_mis_api.apps.payment.celery_tasks import (
     send_payment_plan_payment_list_xlsx_per_fsp_password,
 )
 from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismPerPaymentPlanFactory,
+    FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    generate_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import FinancialServiceProvider, PaymentPlan
+from hct_mis_api.apps.payment.models import (
+    DeliveryMechanism,
+    FinancialServiceProvider,
+    PaymentPlan,
+)
 from hct_mis_api.apps.payment.utils import generate_cache_key
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory
@@ -33,9 +38,16 @@ from hct_mis_api.apps.steficon.models import Rule
 
 class TestPaymentCeleryTask(TestCase):
     def setUp(self) -> None:
+        generate_delivery_mechanisms()
         self.ba = create_afghanistan()
         self.program = ProgramFactory(name="Test AAA")
         self.user = UserFactory()
+
+        self.financial_service_provider = FinancialServiceProviderFactory(
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+            payment_gateway_id="test123",
+        )
+        self.dm_cash = DeliveryMechanism.objects.get(code="cash")
 
         logging.config.dictConfig(settings.LOGGING)
         self.TEST_LOGGING = {
@@ -206,6 +218,8 @@ class TestPaymentCeleryTask(TestCase):
             created_by=self.user,
             status=PaymentPlan.Status.TP_OPEN,
             build_status=PaymentPlan.BuildStatus.BUILD_STATUS_FAILED,
+            financial_service_provider=self.financial_service_provider,
+            delivery_mechanism=self.dm_cash,
         )
         PaymentFactory(parent=payment_plan)
         payment_plan_full_rebuild(str(payment_plan.pk))
@@ -240,12 +254,8 @@ class TestPaymentCeleryTask(TestCase):
             background_action_status=PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING,
             program_cycle=self.program.cycles.first(),
             created_by=self.user,
-        )
-        DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=payment_plan,
-            financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-            created_by=self.user,
-            sent_by=self.user,
+            financial_service_provider=self.financial_service_provider,
+            delivery_mechanism=self.dm_cash,
         )
         fsp_template = FinancialServiceProviderXlsxTemplateFactory()
         # create zip file with passwords
@@ -270,12 +280,8 @@ class TestPaymentCeleryTask(TestCase):
             background_action_status=PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING,
             program_cycle=self.program.cycles.first(),
             created_by=self.user,
-        )
-        DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=payment_plan,
-            financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-            created_by=self.user,
-            sent_by=self.user,
+            financial_service_provider=self.financial_service_provider,
+            delivery_mechanism=self.dm_cash,
         )
         fsp_template = FinancialServiceProviderXlsxTemplateFactory()
         # create zip file with passwords
