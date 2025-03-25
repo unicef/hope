@@ -4,18 +4,19 @@ from hct_mis_api.apps.payment.models.acceptance import (
     ApprovalProcess,
 )
 from hct_mis_api.apps.payment.models.payment import (
+    AccountType,
     DeliveryMechanism,
+    DeliveryMechanismConfig,
     DeliveryMechanismData,
-    DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FlexFieldArrayField,
+    FspNameMapping,
     FspXlsxTemplatePerDeliveryMechanism,
     Payment,
     PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentPlanSplit,
-    PaymentPlanSplitPayments,
     PaymentPlanSupportingDocument,
     PendingDeliveryMechanismData,
 )
@@ -28,11 +29,12 @@ from hct_mis_api.apps.payment.models.verification import (
 
 __all__ = [
     "AcceptanceProcessThreshold",
+    "AccountType",
+    "FspNameMapping",
     "Approval",
     "ApprovalProcess",
     "DeliveryMechanism",
     "DeliveryMechanismData",
-    "DeliveryMechanismPerPaymentPlan",
     "FinancialServiceProvider",
     "FinancialServiceProviderXlsxTemplate",
     "FspXlsxTemplatePerDeliveryMechanism",
@@ -40,7 +42,6 @@ __all__ = [
     "PaymentHouseholdSnapshot",
     "PaymentPlan",
     "PaymentPlanSplit",
-    "PaymentPlanSplitPayments",
     "PaymentPlanSupportingDocument",
     "PendingDeliveryMechanismData",
     "PaymentVerification",
@@ -48,4 +49,5 @@ __all__ = [
     "PaymentVerificationSummary",
     "FlexFieldArrayField",
     "build_summary",
+    "DeliveryMechanismConfig",
 ]
