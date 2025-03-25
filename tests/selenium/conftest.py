@@ -313,6 +313,9 @@ def login(browser: Chrome) -> Chrome:
     browser.find_element(By.ID, login).send_keys("superuser")
     browser.find_element(By.ID, password).send_keys("testtest2")
     browser.find_element(By.XPATH, loginButton).click()
+    from time import sleep
+
+    sleep(0.2)
     browser.get(f"{browser.live_server.url}/")
     from django.core.cache import cache
 
