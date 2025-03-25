@@ -1917,6 +1917,10 @@ class Payment(
         self.delivery_date = delivery_date
 
     @property
+    def household_admin2(self) -> str:
+        return self.household.admin2.name if self.household.admin2 else ""
+
+    @property
     def payment_status(self) -> str:  # pragma: no cover
         status = "-"
         if self.status == Payment.STATUS_PENDING:

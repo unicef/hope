@@ -1,6 +1,6 @@
 import base64
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from django.db.models import Count, Q, Sum
 from django.db.models.functions import Coalesce
@@ -467,7 +467,6 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
     program_cycle = serializers.CharField(source="program_cycle.title")
     # TODO: add Steficon formula
     # TODO: add Targeting Criteria
-    # TODO: add HH list
 
     class Meta(PaymentPlanListSerializer.Meta):
         fields = PaymentPlanListSerializer.Meta.fields + (  # type: ignore
@@ -481,3 +480,79 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
             "male_adults_count",
             "female_adults_count",
         )
+
+
+class PaymentListSerializer(serializers.ModelSerializer):
+    id = Base64ModelField(model_name="Payment")
+    status = serializers.CharField(source="get_status_display")
+    household_unicef_id = serializers.CharField(source="household.unicef_id")
+    household_size = serializers.IntegerField(source="household.size")
+    snapshot_collector_full_name = serializers.SerializerMethodField(help_text="Get from Household Snapshot")
+    fsp_name = serializers.SerializerMethodField()
+    fsp_auth_code = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Payment
+        fields = (
+            "id",
+            "unicef_id",
+            "household_unicef_id",
+            "household_size",
+            "household_admin2",
+            "snapshot_collector_full_name",
+            "fsp_name",
+            "entitlement_quantity",
+            "delivered_quantity",
+            "status",
+            "fsp_auth_code",
+        )
+
+    @classmethod
+    def get_collector_field(cls, payment: "Payment", field_name: str) -> Union[None, str, Dict]:
+        """return primary_collector or alternate_collector field value or None"""
+        if household_snapshot := getattr(payment, "household_snapshot", None):
+            household_snapshot_data = household_snapshot.snapshot_data
+            collector_data = (
+                household_snapshot_data.get("primary_collector")
+                or household_snapshot_data.get("alternate_collector")
+                or dict()
+            )
+            return collector_data.get(field_name)
+        return None
+
+    def get_snapshot_collector_full_name(self, obj: Payment) -> Any:
+        return PaymentListSerializer.get_collector_field(obj, "full_name")
+
+    def get_fsp_name(self, obj: Payment) -> str:
+        return obj.financial_service_provider.name if obj.financial_service_provider else ""
+
+    def get_fsp_auth_code(self, obj: Payment) -> str:
+        user = self.context.get("request").user
+
+        if not user.has_perm(
+            Permissions.PM_VIEW_FSP_AUTH_CODE.value,
+            obj.program or obj.business_area,
+        ):
+            return ""
+        return obj.fsp_auth_code or ""
+
+
+class TPHouseholdListSerializer(serializers.ModelSerializer):
+    id = Base64ModelField(model_name="Payment")
+    household_unicef_id = serializers.CharField(source="household.unicef_id")
+    hoh_full_name = serializers.SerializerMethodField()
+    household_size = serializers.IntegerField(source="household.size")
+
+    class Meta:
+        model = Payment
+        fields = (
+            "id",
+            "household_unicef_id",
+            "hoh_full_name",
+            "household_size",
+            "household_admin2",
+            "vulnerability_score",
+        )
+
+    def get_hoh_full_name(self, obj: Payment) -> str:
+        return obj.head_of_household.full_name if obj.head_of_household else ""

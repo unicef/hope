@@ -5,7 +5,9 @@ from hct_mis_api.apps.payment.api.views import (
     PaymentPlanManagerialViewSet,
     PaymentPlanSupportingDocumentViewSet,
     PaymentPlanViewSet,
+    PaymentViewSet,
     TargetPopulationViewSet,
+    TPHouseholdViewSet,
 )
 from hct_mis_api.apps.program.api.urls import program_base_router
 
@@ -21,12 +23,6 @@ program_nested_router.register(
     PaymentPlanSupportingDocumentViewSet,
     basename="supporting-documents",
 )
-# TODO: will add soon
-# program_nested_router.register(
-#     "payment-plans/(?P<program_cycle_id>[^/.]+)",
-#     PaymentPlanViewSet,
-#     basename="payment-plans-by-cycle",
-# )
 program_nested_router.register(
     "payment-plans",
     PaymentPlanViewSet,
@@ -36,6 +32,16 @@ program_nested_router.register(
     "target-populations",
     TargetPopulationViewSet,
     basename="target-populations",
+)
+program_nested_router.register(
+    r"target-populations/(?P<target_population_id>[^/.]+)/households",
+    TPHouseholdViewSet,
+    basename="tp-households",
+)
+program_nested_router.register(
+    r"payment-plans/(?P<payment_plan_id>[^/.]+)/payments",
+    PaymentViewSet,
+    basename="payments",
 )
 
 urlpatterns = [
