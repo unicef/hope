@@ -41,12 +41,19 @@ export default defineConfig({
     splitVendorChunkPlugin(),
     csp({
       dev: {
-        run: true, // Run plugin in development mode
+        run: true,
       },
+      algorithm: 'sha256',
       policy: {
         'default-src': ["'self'"],
         'frame-ancestors': ["'none'"],
         'style-src': [
+          "'self'",
+          "'unsafe-inline'",
+          "'unsafe-eval'",
+          'https://fonts.googleapis.com',
+        ],
+        'style-src-elem': [
           "'self'",
           "'unsafe-inline'",
           "'unsafe-eval'",
@@ -59,12 +66,12 @@ export default defineConfig({
           'https://excubo.unicef.io',
           'https://sentry.io',
         ],
-        ...(cspReportUri ? { 'report-uri': [cspReportUri] } : {}),
       },
       build: {
-        sri: true, // Enable Subresource Integrity
+        sri: true,
       },
     }),
+
     {
       name: 'vite-plugin-generate-nginx-csp',
       apply: 'build',
@@ -85,8 +92,8 @@ export default defineConfig({
   optimizeDeps: {
     esbuildOptions: {
       loader: {
-        '.ts': 'ts', // Pure TypeScript for .ts
-        '.tsx': 'tsx', // TypeScript with JSX for .tsx
+        '.ts': 'ts',
+        '.tsx': 'tsx',
       },
     },
   },
