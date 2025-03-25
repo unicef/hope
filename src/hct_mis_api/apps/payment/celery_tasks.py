@@ -568,7 +568,7 @@ def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id: st
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def periodic_sync_payment_gateway_fsp(self: Any) -> None:
+def periodic_sync_payment_gateway_fsp(self: Any) -> None:  # pragma: no cover
     from hct_mis_api.apps.payment.services.payment_gateway import PaymentGatewayAPI
 
     try:
@@ -577,6 +577,25 @@ def periodic_sync_payment_gateway_fsp(self: Any) -> None:
         )
 
         PaymentGatewayService().sync_fsps()
+    except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsException:
+        return
+    except Exception as e:
+        logger.exception(e)
+        raise self.retry(exc=e)
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def periodic_sync_payment_gateway_account_types(self: Any) -> None:  # pragma: no cover
+    from hct_mis_api.apps.payment.services.payment_gateway import PaymentGatewayAPI
+
+    try:
+        from hct_mis_api.apps.payment.services.payment_gateway import (
+            PaymentGatewayService,
+        )
+
+        PaymentGatewayService().sync_account_types()
     except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsException:
         return
     except Exception as e:

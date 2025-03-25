@@ -48,10 +48,10 @@ def age_to_birth_date_query(comparison_method: str, args: Any, is_social_worker_
     }
     args_count = comparison_method_args_count.get(comparison_method)
     if args_count is None:
-        logger.error(f"Age filter query don't supports {comparison_method} type")
+        logger.warning(f"Age filter query don't supports {comparison_method} type")
         raise ValidationError(f"Age filter query don't supports {comparison_method} type")
     if len(args) != args_count:
-        logger.error(f"Age {comparison_method} filter query expect {args_count} arguments")
+        logger.warning(f"Age {comparison_method} filter query expect {args_count} arguments")
         raise ValidationError(f"Age {comparison_method} filter query expect {args_count} arguments")
     if comparison_method == "RANGE":
         return age_to_birth_date_range_query(field_name, *args, is_social_worker_query=is_social_worker_query)
@@ -69,7 +69,7 @@ def age_to_birth_date_query(comparison_method: str, args: Any, is_social_worker_
         return age_to_birth_date_range_query(field_name, args[0], None, is_social_worker_query=is_social_worker_query)
     if comparison_method == "LESS_THAN":
         return age_to_birth_date_range_query(field_name, None, args[0], is_social_worker_query=is_social_worker_query)
-    logger.error(f"Age filter query don't supports {comparison_method} type")  # pragma: no cover
+    logger.warning(f"Age filter query don't supports {comparison_method} type")  # pragma: no cover
     raise ValidationError(f"Age filter query don't supports {comparison_method} type")  # pragma: no cover
 
 
@@ -248,7 +248,7 @@ def country_generic_query(comparison_method: str, args: Any, lookup: Any, is_soc
         return query
     elif comparison_method == "NOT_EQUALS":
         return ~query
-    logger.error(f"Country filter query does not support {comparison_method} type")
+    logger.warning(f"Country filter query does not support {comparison_method} type")
     raise ValidationError(f"Country filter query does not support {comparison_method} type")
 
 

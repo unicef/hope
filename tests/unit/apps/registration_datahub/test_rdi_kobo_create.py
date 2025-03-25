@@ -166,13 +166,13 @@ class TestRdiKoboCreateTask(TestCase):
 
         self.assertEqual(PendingDeliveryMechanismData.objects.count(), 2)
         dmd = PendingDeliveryMechanismData.objects.get(individual__full_name="Tesa Testowski")
-        self.assertEqual(dmd.delivery_mechanism.code, "mobile_money")
+        self.assertEqual(dmd.account_type.key, "mobile")
         self.assertEqual(
             dmd.data,
             {
-                "service_provider_code__mobile_money": "ABC",
-                "delivery_phone_number__mobile_money": "+48880110456",
-                "provider__mobile_money": "SIGMA",
+                "service_provider_code": "ABC",
+                "delivery_phone_number": "+48880110456",
+                "provider": "SIGMA",
             },
         )
         self.assertEqual(dmd.individual.full_name, "Tesa Testowski")
@@ -595,7 +595,6 @@ class TestRdiKoboCreateTask(TestCase):
             households_to_create,
             individuals_ids_hash_dict,
             submission_meta_data,
-            [],
             1,
         )
         hh = households_to_create[0]

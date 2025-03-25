@@ -7,7 +7,8 @@ from django.test import TestCase
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
-from hct_mis_api.apps.payment.models import DeliveryMechanism, DeliveryMechanismData
+from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
+from hct_mis_api.apps.payment.models import AccountType, DeliveryMechanismData
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
@@ -30,16 +31,14 @@ class TestSouthSudanUpdateScript(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        generate_delivery_mechanisms()
+        cls.account_type_mobile = AccountType.objects.get(key="mobile")
         business_area = create_afghanistan()
         program = ProgramFactory(name="Test Program for Household", status=Program.ACTIVE, business_area=business_area)
         cls.program = program
 
         business_area = create_afghanistan()
         cls.business_area = business_area
-        deliver_mechanism = DeliveryMechanism.objects.create(
-            code="mobile_money",
-            name="Mobile Money",
-        )
 
         household, individuals = create_household_and_individuals(
             household_data={
@@ -81,13 +80,13 @@ class TestSouthSudanUpdateScript(TestCase):
         cls.individual2 = individual2
         cls.deliver_mechanism_data2 = DeliveryMechanismData.objects.create(
             data={
-                "service_provider_code__mobile_money": "OLD_CODE",
-                "provider__mobile_money": "OLD_PROVIDER",
-                "delivery_phone_number__mobile_money": "+48602102373",
+                "service_provider_code": "OLD_CODE",
+                "provider": "OLD_PROVIDER",
+                "delivery_phone_number": "+48602102373",
             },
             individual=individual2,
-            delivery_mechanism=deliver_mechanism,
             rdi_merge_status=DeliveryMechanismData.MERGED,
+            account_type=cls.account_type_mobile,
         )
 
         household3, individuals3 = create_household_and_individuals(
@@ -112,13 +111,13 @@ class TestSouthSudanUpdateScript(TestCase):
         cls.individual3 = individual3
         cls.deliver_mechanism_data3 = DeliveryMechanismData.objects.create(
             data={
-                "service_provider_code__mobile_money": "OLD_CODE",
-                "provider__mobile_money": "OLD_PROVIDER",
-                "delivery_phone_number__mobile_money": "+48602102373",
+                "service_provider_code": "OLD_CODE",
+                "provider": "OLD_PROVIDER",
+                "delivery_phone_number": "+48602102373",
             },
             individual=individual3,
-            delivery_mechanism=deliver_mechanism,
             rdi_merge_status=DeliveryMechanismData.MERGED,
+            account_type=cls.account_type_mobile,
         )
 
         household4, individuals4 = create_household_and_individuals(
@@ -161,7 +160,6 @@ class TestSouthSudanUpdateScript(TestCase):
             "Deduplicating documents",
             "Update successful",
         ]
-
         self.assertEqual(output, expected_output)
         self.individual.refresh_from_db()
         self.individual2.refresh_from_db()
@@ -180,9 +178,8 @@ class TestSouthSudanUpdateScript(TestCase):
         self.assertEqual(
             deliver_mechanism_data.data,
             {
-                "service_provider_code__mobile_money": "CD-VODACASH",
-                "provider__mobile_money": "Vodacash",
-                "delivery_phone_number__mobile_money": "+243837611111",
+                "service_provider_code": "CD-VODACASH",
+                "provider": "Vodacash",
             },
         )
         self.assertEqual(str(individual2.phone_no), "+243836122222")
@@ -192,9 +189,9 @@ class TestSouthSudanUpdateScript(TestCase):
         self.assertEqual(
             deliver_mechanism_data2.data,
             {
-                "service_provider_code__mobile_money": "CD-VODACASH",
-                "provider__mobile_money": "Vodacash",
-                "delivery_phone_number__mobile_money": "+243836122222",
+                "service_provider_code": "CD-VODACASH",
+                "provider": "Vodacash",
+                "delivery_phone_number": "+48602102373",
             },
         )
         self.assertEqual(str(individual3.phone_no), "+243831733333")
@@ -203,9 +200,9 @@ class TestSouthSudanUpdateScript(TestCase):
         self.assertEqual(
             deliver_mechanism_data3.data,
             {
-                "service_provider_code__mobile_money": "OLD_CODE",
-                "provider__mobile_money": "OLD_PROVIDER",
-                "delivery_phone_number__mobile_money": "+48602102373",
+                "service_provider_code": "OLD_CODE",
+                "provider": "OLD_PROVIDER",
+                "delivery_phone_number": "+48602102373",
             },
         )
 
