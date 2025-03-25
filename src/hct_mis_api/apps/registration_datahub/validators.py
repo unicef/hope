@@ -25,11 +25,7 @@ from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
     TYPE_SELECT_ONE,
     FieldFactory,
 )
-from hct_mis_api.apps.core.field_attributes.fields_types import (
-    _DELIVERY_MECHANISM_DATA,
-    _INDIVIDUAL,
-    Scope,
-)
+from hct_mis_api.apps.core.field_attributes.fields_types import _INDIVIDUAL, Scope
 from hct_mis_api.apps.core.kobo.common import (
     KOBO_FORM_INDIVIDUALS_COLUMN_NAME,
     get_field_name,
@@ -52,7 +48,6 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanism, DeliveryMechanismData
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import KoboImportedSubmission
 from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
@@ -128,17 +123,10 @@ class ImportDataInstanceValidator:
     def __init__(self, program: Program) -> None:
         self.is_social_worker_program = program.is_social_worker_program
         self.all_fields = self.get_all_fields()
-        self.delivery_mechanisms_xlsx_fields = DeliveryMechanismData.get_all_delivery_mechanisms_fields(
-            by_xlsx_name=True
-        )
-        if self.is_social_worker_program:
-            self.delivery_mechanisms_xlsx_fields = [f"pp_{field}" for field in self.delivery_mechanisms_xlsx_fields]
 
     def get_combined_attributes(self) -> Dict:
         scope_list = (
-            [Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID, Scope.DELIVERY_MECHANISM]
-            if not self.is_social_worker_program
-            else [Scope.XLSX_PEOPLE, Scope.DELIVERY_MECHANISM]
+            [Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID] if not self.is_social_worker_program else [Scope.XLSX_PEOPLE]
         )
         fields = FieldFactory.from_scopes(scope_list).apply_business_area()
 
@@ -149,7 +137,7 @@ class ImportDataInstanceValidator:
         return {
             **fields.associated_with_household().to_dict_by("xlsx_field"),
             **flex_attrs["individuals"],
-            **fields._associated_with([_INDIVIDUAL, _DELIVERY_MECHANISM_DATA]).to_dict_by("xlsx_field"),
+            **fields._associated_with([_INDIVIDUAL]).to_dict_by("xlsx_field"),
             **flex_attrs["households"],
         }
 
@@ -294,61 +282,6 @@ class ImportDataInstanceValidator:
             logger.warning(e)
             raise
 
-    def delivery_mechanisms_validator(self, xlsx_delivery_mechanisms_dict: Dict) -> List[Dict[str, Any]]:
-        delivery_mechanisms_to_required_fields_mapping = (
-            DeliveryMechanism.get_delivery_mechanisms_to_xlsx_fields_mapping()
-        )
-        if self.is_social_worker_program:
-            delivery_mechanisms_to_required_fields_mapping = {
-                dm: [f"pp_{field}" for field in fields]
-                for dm, fields in delivery_mechanisms_to_required_fields_mapping.items()
-            }
-        global_scope_xlsx_fields = list(
-            FieldFactory.not_from_scope(Scope.DELIVERY_MECHANISM).to_dict_by("xlsx_field").keys()
-        )
-
-        try:
-            all_rows_delivery_mechanisms_errors = []
-            for row_number, data in xlsx_delivery_mechanisms_dict.items():
-                delivery_mechanisms_errors = []
-                delivery_mechanisms_fields_values_dict = defaultdict(dict)
-
-                for delivery_mechanism_xlsx_field_name, value in data.items():
-                    if not value:
-                        continue
-                    for dm, fields in delivery_mechanisms_to_required_fields_mapping.items():
-                        if delivery_mechanism_xlsx_field_name in fields:
-                            delivery_mechanisms_fields_values_dict[dm][delivery_mechanism_xlsx_field_name] = value
-
-                dm_to_drop = []
-                # drop delivery mechanism data validation for delivery mechanisms that contains only Scope.GLOBAL fields
-                for dm, fields in delivery_mechanisms_fields_values_dict.items():  # type: ignore
-                    # if all fields are Scope.GLOBAL, drop delivery mechanism data
-                    if all([field in global_scope_xlsx_fields for field in fields.keys()]):
-                        dm_to_drop.append(dm)
-                for dm in dm_to_drop:
-                    delivery_mechanisms_fields_values_dict.pop(dm)
-
-                for dm, fields in delivery_mechanisms_to_required_fields_mapping.items():
-                    if dm not in delivery_mechanisms_fields_values_dict:
-                        continue
-
-                    for field in fields:
-                        if not delivery_mechanisms_fields_values_dict[dm].get(field, None):
-                            delivery_mechanisms_errors.append(
-                                {
-                                    "row_number": row_number,
-                                    "header": field,
-                                    "message": f"Field {field} is required for delivery mechanism {dm}",
-                                }
-                            )
-                all_rows_delivery_mechanisms_errors.extend(delivery_mechanisms_errors)
-
-            return all_rows_delivery_mechanisms_errors
-        except Exception as e:  # pragma: no cover
-            logger.warning(e)
-            raise
-
 
 class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
     def __init__(self, program: Program) -> None:
@@ -359,23 +292,22 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         self.household_ids = []
 
         self.errors = []
-        self.delivery_mechanisms_errors = []
         self.pdu_flexible_attributes = FlexibleAttribute.objects.filter(
             type=FlexibleAttribute.PDU, program=program
         ).select_related("pdu_data")
 
     def get_combined_fields(self) -> Dict:
         core_fields = (
-            FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID, Scope.DELIVERY_MECHANISM])
+            FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID])
             if not self.is_social_worker_program
-            else FieldFactory.from_scopes([Scope.XLSX_PEOPLE, Scope.DELIVERY_MECHANISM])
+            else FieldFactory.from_scopes([Scope.XLSX_PEOPLE])
         )
         # TODO: update flex field for People
         flex_fields = serialize_flex_attributes()
         if self.is_social_worker_program:
             return {
                 "people": {
-                    **core_fields._associated_with([_INDIVIDUAL, _DELIVERY_MECHANISM_DATA]).to_dict_by("xlsx_field"),
+                    **core_fields._associated_with([_INDIVIDUAL]).to_dict_by("xlsx_field"),
                     **flex_fields["individuals"],
                 },
             }
@@ -386,7 +318,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     **flex_fields["households"],
                 },
                 "individuals": {
-                    **core_fields._associated_with([_INDIVIDUAL, _DELIVERY_MECHANISM_DATA]).to_dict_by("xlsx_field"),
+                    **core_fields._associated_with([_INDIVIDUAL]).to_dict_by("xlsx_field"),
                     **flex_fields["individuals"],
                 },
             }
@@ -686,8 +618,6 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 "other_id_no_i_c": {},
             }
 
-            delivery_mechanisms_data = defaultdict(dict)
-
             def has_value(cell: Cell) -> bool:
                 if cell.value is None:
                     return False
@@ -777,9 +707,6 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     if header_value_doc in identities_numbers:
                         identities_numbers[header_value_doc]["numbers"].append(str(value) if value else None)
 
-                    if header.value in self.delivery_mechanisms_xlsx_fields:
-                        delivery_mechanisms_data[row_number][header.value] = value
-
                 if current_household_id and current_household_id not in self.household_ids:
                     message = f"Sheet: 'Individuals', There is no household with provided id: {current_household_id}"
                     invalid_rows.append({"row_number": row_number, "header": "relationship_i_c", "message": message})
@@ -809,14 +736,11 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
             invalid_doc_rows = []
             invalid_ident_rows = []
-            invalid_delivery_mechanisms = []
             if sheet.title in ["Individuals", "People"]:
                 invalid_doc_rows = self.documents_validator(documents_numbers)
                 invalid_ident_rows = self.identity_validator(identities_numbers)
-                invalid_delivery_mechanisms = self.delivery_mechanisms_validator(delivery_mechanisms_data)
 
             self.errors.extend([*invalid_rows, *invalid_doc_rows, *invalid_ident_rows])
-            self.delivery_mechanisms_errors.extend(invalid_delivery_mechanisms)
 
         except Exception as e:  # pragma: no cover
             logger.warning(e)
@@ -895,24 +819,20 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.warning(e)
             raise
 
-    def validate_everything(
-        self, xlsx_file: Any, business_area_slug: str
-    ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    def validate_everything(self, xlsx_file: Any, business_area_slug: str) -> List[Dict[str, Any]]:
         try:
             self.validate_file_extension(xlsx_file)
             if self.errors:
-                return self.errors, self.delivery_mechanisms_errors
+                return self.errors
             try:
                 wb = openpyxl.load_workbook(xlsx_file, data_only=True)
             except BadZipfile:
-                return [
-                    {"row_number": 1, "header": f"{xlsx_file.name}", "message": "Invalid .xlsx file"}
-                ], self.delivery_mechanisms_errors
+                return [{"row_number": 1, "header": f"{xlsx_file.name}", "message": "Invalid .xlsx file"}]
 
             self.validate_file_with_template(wb)
             if self.errors:  # pragma: no cover
                 # return error if WS do not exist in the import file
-                return self.errors, self.delivery_mechanisms_errors
+                return self.errors
 
             self.validate_index_id(wb)
             self.validate_collectors_size(wb)
@@ -931,7 +851,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 self.image_loader = SheetImageLoader(individuals_sheet)
                 self.rows_validator(individuals_sheet)
 
-            return self.errors, self.delivery_mechanisms_errors
+            return self.errors
         except Exception as e:  # pragma: no cover
             logger.warning(e)
             raise

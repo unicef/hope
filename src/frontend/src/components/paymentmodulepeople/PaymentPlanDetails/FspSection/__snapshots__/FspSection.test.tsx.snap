@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Edit FSP 1`] = `
+exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render FSP 1`] = `
 <div>
   <div
     class="MuiBox-root css-zwiamn"
@@ -123,7 +123,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
 </div>
 `;
 
-exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Set Up FSP 1`] = `
+exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render not setup FSP 1`] = `
 <div>
   <div
     class="MuiBox-root css-zwiamn"
@@ -140,15 +140,106 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Se
         >
           FSPs
         </h6>
-        <a
-          class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary css-cx92lf-MuiButtonBase-root-MuiButton-root"
-          data-cy="button-set-up-fsp"
-          href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/payment-module/followup-payment-plans/undefined/setup-fsp/create"
-          id=":r0:"
-          tabindex="0"
+      </div>
+      <div
+        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-3 css-17oen6o-MuiGrid2-root"
+      >
+        <div
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
         >
-          Set up FSP
-        </a>
+          <div>
+            <span
+              class="sc-fLDLck ivXKQK"
+              color="textSecondary"
+            >
+              -
+            </span>
+            <div
+              data-cy="label--"
+            >
+              <span
+                class="sc-dycHyt kguSQI"
+                color="textSecondary"
+              >
+                Test FSP 1
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="sc-gjcoXW jQCndt"
+      >
+        <div
+          class="sc-dVBluf cFSYVV"
+        />
+      </div>
+      <div
+        class="MuiBox-root css-j7qwjs"
+      >
+        <div
+          class="sc-gNZgCX lhjjcp"
+        >
+          <h6
+            class="MuiTypography-root MuiTypography-h6 css-66ugg1-MuiTypography-root"
+          >
+            Volume by Delivery Mechanism
+          </h6>
+           
+        </div>
+        <div
+          class="sc-kfeOyU bQxXsK"
+        >
+          <div
+            class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-188izze-MuiGrid2-root"
+          >
+            <div
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
+            >
+              <div
+                class="sc-jbAkgO iOCnQX"
+                color="#D8E1EE"
+              >
+                <div>
+                  <span
+                    class="sc-fLDLck ivXKQK"
+                    color="textSecondary"
+                  >
+                    Cash (Test FSP 1)
+                  </span>
+                  <div
+                    data-cy="label-Cash (Test FSP 1)"
+                  >
+                    <span
+                      class="sc-dycHyt kguSQI"
+                      color="textSecondary"
+                    >
+                      424 USD (424 USD)
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-xg0rmm-MuiGrid2-root"
+          >
+            <div
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
+            >
+              <div
+                class="sc-hRDKVd bCxRDr"
+              >
+                <canvas
+                  height="0"
+                  role="img"
+                  style="display: block; box-sizing: border-box; height: 0px; width: 0px;"
+                  width="0"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

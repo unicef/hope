@@ -21,10 +21,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import (
-    DeliveryMechanism,
-    PendingDeliveryMechanismData,
-)
+from hct_mis_api.apps.payment.models import AccountType, PendingDeliveryMechanismData
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.contrib.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
@@ -272,12 +269,12 @@ class GenericRegistrationService(BaseRegistrationService):
             if account_data:
                 PendingDeliveryMechanismData.objects.create(
                     individual_id=individual.id,
-                    delivery_mechanism=DeliveryMechanism.objects.get(code="transfer_to_account"),
+                    account_type=AccountType.objects.get(key="bank"),
                     data={
-                        "bank_account_number__transfer_to_account": account_data["data"].get("number", ""),
-                        "bank_name__transfer_to_account": account_data["data"].get("name", ""),
-                        "bank_code__transfer_to_account": account_data["data"].get("code", ""),
-                        "account_holder_name__transfer_to_account": account_data["data"].get("holder_name", ""),
+                        "bank_account_number": account_data["data"].get("number", ""),
+                        "bank_name": account_data["data"].get("name", ""),
+                        "bank_code": account_data["data"].get("code", ""),
+                        "account_holder_name": account_data["data"].get("holder_name", ""),
                     },
                 )
 

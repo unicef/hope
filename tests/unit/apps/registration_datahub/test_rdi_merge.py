@@ -14,10 +14,6 @@ from parameterized import parameterized
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
-from hct_mis_api.apps.grievance.models import (
-    GrievanceTicket,
-    TicketIndividualDataUpdateDetails,
-)
 from hct_mis_api.apps.household.fixtures import (
     HouseholdCollectionFactory,
     HouseholdFactory,
@@ -38,11 +34,6 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismDataFactory,
-    generate_delivery_mechanisms,
-)
-from hct_mis_api.apps.payment.models import DeliveryMechanism, DeliveryMechanismData
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import (
@@ -553,133 +544,3 @@ class TestRdiMergeTask(TestCase):
             RdiMergeTask().execute(self.rdi.pk)
         create_grievance_tickets_for_duplicates_mock.assert_called_once_with(self.rdi)
         update_rdis_deduplication_statistics_mock.assert_called_once_with(program, exclude_rdi=self.rdi)
-
-
-class TestRdiMergeTaskDeliveryMechanismData(TestCase):
-    fixtures = [
-        f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",
-        f"{settings.PROJECT_ROOT}/apps/core/fixtures/data.json",
-    ]
-
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        cls.program = ProgramFactory()
-        cls.rdi = RegistrationDataImportFactory(program=cls.program)
-        generate_delivery_mechanisms()
-
-    def test_create_grievance_tickets_for_delivery_mechanisms_errors(self) -> None:
-        program = ProgramFactory()
-        ind = IndividualFactory(household=None, program=program)
-        ind2 = IndividualFactory(household=None, program=program)
-        ind3 = IndividualFactory(household=None, program=program)
-        hh = HouseholdFactory(head_of_household=ind)
-        ind.household = hh
-        ind.save()
-        ind2.household = hh
-        ind2.save()
-        ind3.household = hh
-        ind3.full_name = ind.full_name
-        ind3.save()
-
-        dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
-
-        # valid data
-        dmd = DeliveryMechanismDataFactory(
-            individual=ind,
-            delivery_mechanism=dm_atm_card,
-            data={
-                "card_number__atm_card": "123",
-                "card_expiry_date__atm_card": "2022-01-01",
-                "name_of_cardholder__atm_card": "Marek",
-            },
-        )
-        # invalid data, ticket should be created
-        dmd2 = DeliveryMechanismDataFactory(
-            individual=ind2,
-            delivery_mechanism=dm_atm_card,
-            data={
-                "card_number__atm_card": "123",
-                "card_expiry_date__atm_card": None,
-                "name_of_cardholder__atm_card": "Marek",
-            },
-        )
-        # not unique data, ticket should be created
-        dmd3 = DeliveryMechanismDataFactory(
-            individual=ind3,
-            delivery_mechanism=dm_atm_card,
-            data={
-                "card_number__atm_card": "123",
-                "card_expiry_date__atm_card": "2022-01-01",
-                "name_of_cardholder__atm_card": "Marek",
-            },
-        )
-
-        self.assertEqual(0, self.rdi.grievanceticket_set.count())
-        RdiMergeTask()._create_grievance_tickets_for_delivery_mechanisms_errors(
-            DeliveryMechanismData.objects.all(), self.rdi
-        )
-        self.assertEqual(2, self.rdi.grievanceticket_set.count())
-        self.assertEqual(2, TicketIndividualDataUpdateDetails.objects.count())
-
-        data_not_valid_ticket = TicketIndividualDataUpdateDetails.objects.get(
-            individual=ind2,
-        )
-
-        self.assertEqual(
-            data_not_valid_ticket.individual_data,
-            {
-                "delivery_mechanism_data_to_edit": [
-                    {
-                        "approve_status": False,
-                        "data_fields": [{"name": "card_expiry_date__atm_card", "previous_value": None, "value": None}],
-                        "id": str(dmd2.id),
-                        "label": "ATM Card",
-                    }
-                ]
-            },
-        )
-        self.assertEqual(data_not_valid_ticket.ticket.comments, f"This is a system generated ticket for RDI {self.rdi}")
-        self.assertEqual(
-            data_not_valid_ticket.ticket.description,
-            f"Missing required fields ['card_expiry_date__atm_card'] values for delivery mechanism {dmd2.delivery_mechanism}",
-        )
-        self.assertEqual(
-            data_not_valid_ticket.ticket.issue_type, GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE
-        )
-        self.assertEqual(data_not_valid_ticket.ticket.category, GrievanceTicket.CATEGORY_DATA_CHANGE)
-        self.assertEqual(data_not_valid_ticket.ticket.registration_data_import, self.rdi)
-
-        data_not_unique_ticket = TicketIndividualDataUpdateDetails.objects.get(
-            individual=ind3,
-        )
-        self.assertEqual(
-            data_not_unique_ticket.individual_data,
-            {
-                "delivery_mechanism_data_to_edit": [
-                    {
-                        "approve_status": False,
-                        "data_fields": [
-                            {"name": "card_number__atm_card", "previous_value": "123", "value": None},
-                            {"name": "card_expiry_date__atm_card", "previous_value": "2022-01-01", "value": None},
-                            {"name": "name_of_cardholder__atm_card", "previous_value": "Marek", "value": None},
-                        ],
-                        "id": str(dmd3.id),
-                        "label": "ATM Card",
-                    }
-                ],
-            },
-        )
-        self.assertEqual(
-            data_not_unique_ticket.ticket.comments, f"This is a system generated ticket for RDI {self.rdi}"
-        )
-        self.assertEqual(
-            data_not_unique_ticket.ticket.description,
-            f"Fields not unique ['card_number__atm_card', 'card_expiry_date__atm_card', 'name_of_cardholder__atm_card'] across program"
-            f" for delivery mechanism {dmd3.delivery_mechanism}, possible duplicate of {dmd}",
-        )
-        self.assertEqual(
-            data_not_unique_ticket.ticket.issue_type, GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE
-        )
-        self.assertEqual(data_not_unique_ticket.ticket.category, GrievanceTicket.CATEGORY_DATA_CHANGE)
-        self.assertEqual(data_not_unique_ticket.ticket.registration_data_import, self.rdi)

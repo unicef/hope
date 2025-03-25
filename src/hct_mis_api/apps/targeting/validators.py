@@ -8,7 +8,6 @@ from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 from hct_mis_api.apps.core.models import DataCollectingType, FlexibleAttribute
 from hct_mis_api.apps.core.utils import get_attr_value
 from hct_mis_api.apps.household.models import Household, Individual
-from hct_mis_api.apps.payment.models import DeliveryMechanism
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.choices import FlexFieldClassification
 from hct_mis_api.apps.targeting.models import TargetingCriteriaRuleFilter
@@ -75,20 +74,11 @@ class TargetingCriteriaRuleFilterInputValidator:
             )
 
 
-class TargetingCriteriaCollectorRuleFilterInputValidator:
-    @staticmethod
-    def validate(rule_filter: Any) -> None:
-        field_name = rule_filter["field_name"]
-        if not [f for f in DeliveryMechanism.get_all_core_fields_definitions() if f["name"] == field_name]:
-            raise ValidationError(f"Can't field field '{field_name}' in Delivery Mechanism data")
-
-
 class TargetingCriteriaRuleInputValidator:
     @staticmethod
     def validate(rule: "Dict", program: "Program") -> None:
         households_filters_blocks = rule.get("households_filters_blocks", [])
         individuals_filters_blocks = rule.get("individuals_filters_blocks", [])
-        collectors_filters_blocks = rule.get("collectors_filters_blocks", [])
 
         for households_block_filter in households_filters_blocks:
             TargetingCriteriaRuleFilterInputValidator.validate(rule_filter=households_block_filter, program=program)
@@ -96,10 +86,6 @@ class TargetingCriteriaRuleInputValidator:
         for individuals_filters_block in individuals_filters_blocks:
             for individuals_filter in individuals_filters_block.get("individual_block_filters", []):
                 TargetingCriteriaRuleFilterInputValidator.validate(rule_filter=individuals_filter, program=program)
-
-        for collectors_filters_block in collectors_filters_blocks:
-            for collectors_filter in collectors_filters_block.get("collector_block_filters", []):
-                TargetingCriteriaCollectorRuleFilterInputValidator.validate(rule_filter=collectors_filter)
 
 
 class TargetingCriteriaInputValidator:
