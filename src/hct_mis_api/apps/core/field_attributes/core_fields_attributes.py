@@ -1984,7 +1984,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "admin_area_h_c",
-        "scope": [Scope.HOUSEHOLD_UPDATE],
+        "scope": [Scope.HOUSEHOLD_UPDATE, Scope.PEOPLE_UPDATE],
         "snapshot_field": "admin_area_id__p_code",
     },
     {
@@ -2211,7 +2211,11 @@ class FieldFactory(list):
         label_with_template = field["label"].get(language)
         if not label_with_template:
             return None
-        mapping_dict = TEMPLATE_MAPPING_NORMAL if Scope.XLSX_PEOPLE not in self.scopes else TEMPLATE_MAPPING_PEOPLE
+        mapping_dict = (
+            TEMPLATE_MAPPING_PEOPLE
+            if Scope.XLSX_PEOPLE in self.scopes or Scope.PEOPLE_UPDATE in self.scopes
+            else TEMPLATE_MAPPING_NORMAL
+        )
         for mapping in mapping_dict.items():
             label_with_template = label_with_template.replace(mapping[0], mapping[1])
         field["label"][language] = label_with_template

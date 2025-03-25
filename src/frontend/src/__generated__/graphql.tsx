@@ -2981,6 +2981,7 @@ export enum IndividualSex {
 
 export type IndividualUpdateDataObjectType = {
   address?: InputMaybe<Scalars['String']['input']>;
+  adminAreaTitle?: InputMaybe<Scalars['String']['input']>;
   birthDate?: InputMaybe<Scalars['Date']['input']>;
   blockchainName?: InputMaybe<Scalars['String']['input']>;
   commsDisability?: InputMaybe<Scalars['String']['input']>;
