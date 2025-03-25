@@ -178,8 +178,6 @@ export const DrawerItems = ({
   return (
     <div data-cy="drawer-items">
       {preparedMenuItems?.map((item, index) => {
-        const itemName = item?.name ? encodeURIComponent(item.name) : '';
-        const itemFlag = item?.flag ? encodeURIComponent(item.flag) : '';
         if (
           item.permissionModule &&
           !hasPermissionInModule(item.permissionModule, permissions)
@@ -189,7 +187,7 @@ export const DrawerItems = ({
         if (item.permissions && !hasPermissions(item.permissions, permissions))
           return null;
 
-        if (itemFlag && !flags[itemFlag]) {
+        if (item.flag && !flags[item.flag]) {
           return null;
         }
 
@@ -198,29 +196,25 @@ export const DrawerItems = ({
             item.secondaryActions,
           );
 
-          const safeHrefForCollapsibleItem = encodeURIComponent(
-            hrefForCollapsibleItem || '',
-          );
-
           return (
-            <div key={`${itemName}-${safeHrefForCollapsibleItem}`}>
+            <div key={item?.name + hrefForCollapsibleItem}>
               <ListItemButton
                 component={NavLink}
-                data-cy={`nav-${itemName}`}
-                to={`/${baseUrl}${safeHrefForCollapsibleItem}`}
+                data-cy={`nav-${item?.name}`}
+                to={`/${baseUrl}${hrefForCollapsibleItem}`}
                 onClick={() => {
                   if (index === expandedItem) {
                     setExpandedItem(null);
                   } else {
                     setExpandedItem(index);
                   }
-                  if (safeHrefForCollapsibleItem) {
-                    navigate(`/${baseUrl}${safeHrefForCollapsibleItem}`);
+                  if (hrefForCollapsibleItem) {
+                    navigate(`/${baseUrl}${hrefForCollapsibleItem}`);
                   }
                 }}
               >
                 <Icon>{item.icon}</Icon>
-                <Text primary={itemName} />
+                <Text primary={item?.name} />
                 {expandedItem !== null && expandedItem === index ? (
                   <ArrowIconWrapper>
                     <ExpandLess />
@@ -260,15 +254,12 @@ export const DrawerItems = ({
             </div>
           );
         }
-
-        const safeHref = item?.href ? encodeURIComponent(item.href) : '';
-
         return item.external ? (
           <ListItemButton
-            data-cy={`nav-${itemName}`}
+            data-cy={`nav-${item?.name}`}
             component={NavLink}
-            key={itemName + safeHref}
-            to={safeHref}
+            key={item?.name + item.href}
+            to={item.href}
             target="_blank"
           >
             <Box display="flex">
@@ -280,8 +271,8 @@ export const DrawerItems = ({
           <ListItemButton
             data-cy={`nav-${item?.name}`}
             component={NavLink}
-            key={item?.name + safeHref}
-            to={`/${baseUrl}${safeHref}`}
+            key={item?.name + item.href}
+            to={`/${baseUrl}${item.href}`}
             onClick={() => {
               setExpandedItem(null);
             }}
