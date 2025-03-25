@@ -16,12 +16,11 @@ from hct_mis_api.apps.household.models import (
     Household,
     Individual,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanism, DeliveryMechanismData
+from hct_mis_api.apps.payment.models import AccountType, DeliveryMechanismData
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
     DeduplicateTask,
     HardDocumentDeduplication,
 )
-from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
 from hct_mis_api.apps.universal_update_script.models import UniversalUpdate
 from hct_mis_api.apps.universal_update_script.universal_individual_update_service.all_updatable_fields import (
     get_document_fields,
@@ -80,20 +79,15 @@ class UniversalIndividualUpdateService:
             if key in universal_update.document_types.values_list("key", flat=True):
                 self.document_fields.append((document_no_column_name, f"{key}_country_i_c"))
         self.deliver_mechanism_data_fields = {
-            delivery_mechanism_name: data
-            for delivery_mechanism_name, data in get_wallet_fields().items()
-            if delivery_mechanism_name in universal_update.delivery_mechanisms.values_list("code", flat=True)
+            account_type: data
+            for account_type, data in get_wallet_fields().items()
+            if account_type in universal_update.delivery_mechanisms.values_list("account_type__key", flat=True)
         }
         self.ignore_empty_values = ignore_empty_values
         self.deduplicate_es = deduplicate_es
         self.deduplicate_documents = deduplicate_documents
         self.countries = {country.name: country for country in Country.objects.all()}
-        self.delivery_mechanisms = {}
-        if self.deliver_mechanism_data_fields is not None:
-            self.delivery_mechanisms = {
-                dm.code: dm
-                for dm in DeliveryMechanism.objects.filter(code__in=self.deliver_mechanism_data_fields.keys())
-            }
+        self.delivery_mechanisms_account_types = {at.key: at for at in AccountType.objects.all()}
         self.batch_size = batch_size
 
     def print_message(self, text: str) -> None:
@@ -272,36 +266,28 @@ class UniversalIndividualUpdateService:
         self, row: Tuple[Any, ...], headers: List[str], individual: Individual
     ) -> None:
         individual_delivery_mechanisms_data = individual.delivery_mechanisms_data.all()
-        for delivery_mechanism_code, delivery_mechanism_columns_mapping in self.deliver_mechanism_data_fields.items():
-            delivery_mechanism = self.delivery_mechanisms.get(delivery_mechanism_code)
+        for account_type, delivery_mechanism_columns_mapping in self.deliver_mechanism_data_fields.items():
+            account_type_instance = self.delivery_mechanisms_account_types.get(account_type)
             single_data_object = next(
-                (
-                    d
-                    for d in individual_delivery_mechanisms_data
-                    if str(d.delivery_mechanism_id) == str(delivery_mechanism.id)
-                ),
+                (d for d in individual_delivery_mechanisms_data if str(d.account_type.key) == str(account_type)),
                 None,
             )
 
             for column_name, field_name in delivery_mechanism_columns_mapping:
-                value = row[headers.index(column_name)]
-                if self.ignore_empty_values and (value is None or value == ""):
-                    continue
-                if single_data_object is None:
-                    single_data_object = DeliveryMechanismData(
-                        individual=individual,
-                        delivery_mechanism=delivery_mechanism,
-                        rdi_merge_status=DeliveryMechanismData.MERGED,
-                    )
-                single_data_object.data[field_name] = value
+                if column_name in headers:
+                    value = row[headers.index(column_name)]
+                    if self.ignore_empty_values and (value is None or value == ""):
+                        continue
+                    if single_data_object is None:
+                        single_data_object = DeliveryMechanismData(
+                            individual=individual,
+                            account_type=account_type_instance,
+                            rdi_merge_status=DeliveryMechanismData.MERGED,
+                        )
+                    single_data_object.data[field_name] = value
             if single_data_object:
-                single_data_object.validate()
-                if single_data_object.is_valid:
-                    single_data_object.update_unique_field()
                 single_data_object.save()
-                RdiMergeTask()._create_grievance_tickets_for_delivery_mechanisms_errors(
-                    [single_data_object], single_data_object.individual.registration_data_import
-                )
+                single_data_object.update_unique_field()
 
     def handle_update(self, sheet: Worksheet, headers: List[str]) -> List[str]:
         row_index = 1
@@ -414,8 +400,8 @@ class UniversalIndividualUpdateService:
                 row.append(None)
                 row.append(None)
         all_wallets = individual.delivery_mechanisms_data.all()
-        for delivery_mechanism_code, data_fields in self.deliver_mechanism_data_fields.items():
-            wallet = [x for x in all_wallets if x.delivery_mechanism.code == delivery_mechanism_code]
+        for account_type, data_fields in self.deliver_mechanism_data_fields.items():
+            wallet = [x for x in all_wallets if x.account_type.key == account_type]
             if len(wallet) > 1:
                 raise ValueError("Multiple wallets found")
             if len(wallet) == 1:

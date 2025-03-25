@@ -3,7 +3,7 @@ import { AvailableFspsForDeliveryMechanismsQuery } from '../../src/__generated__
 export const fakeFspsData = {
   availableFspsForDeliveryMechanisms: [
     {
-      deliveryMechanism: 'Cash by FSP',
+      deliveryMechanism: {"code": 'cash_by_fsp', "name": 'Cash by FSP'},
       fsps: [
         {
           id: 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTo0ZTE3Y2NjMy0xYjNjLTQ1NDctODFiMC04YTQ2NTFiNWJmNTA=',
@@ -24,7 +24,7 @@ export const fakeFspsData = {
       __typename: 'FspChoices',
     },
     {
-      deliveryMechanism: 'Cheque',
+      deliveryMechanism: {"code": 'cheque', "name": 'Cheque'},
       fsps: [
         {
           id: 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTozNmJjYjkxYy05ZDhiLTRhNTEtYjU3NC01OGYzYzU2YzIyNWQ=',
@@ -45,7 +45,7 @@ export const fakeFspsData = {
       __typename: 'FspChoices',
     },
     {
-      deliveryMechanism: 'In Kind',
+      deliveryMechanism: {"code": 'in_kind', "name": 'In Kind'},
       fsps: [
         {
           id: 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTo0ZTE3Y2NjMy0xYjNjLTQ1NDctODFiMC04YTQ2NTFiNWJmNTA=',
@@ -66,7 +66,7 @@ export const fakeFspsData = {
       __typename: 'FspChoices',
     },
     {
-      deliveryMechanism: 'Cash',
+      deliveryMechanism: {"code": 'cash', "name": 'Cash'},
       fsps: [
         {
           id: 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC1mMDAwMDAwMDAwMDE=',

@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { Box, CircularProgress } from '@mui/material';
+import { CircularProgress } from '@mui/material';
 import { Field, FormikProvider, useFormik } from 'formik';
 import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -58,8 +58,6 @@ export function CreateImportFromKoboForm({
             name: values.name,
             screenBeneficiary: values.screenBeneficiary,
             businessAreaSlug: businessArea,
-            allowDeliveryMechanismsValidationErrors:
-              values.allowDeliveryMechanismsValidationErrors,
             pullPictures: values.pullPictures,
           },
         },
@@ -77,7 +75,6 @@ export function CreateImportFromKoboForm({
       koboAssetId: '',
       onlyActiveSubmissions: true,
       screenBeneficiary: false,
-      allowDeliveryMechanismsValidationErrors: false,
       pullPictures: true,
     },
     validationSchema,
@@ -109,16 +106,12 @@ export function CreateImportFromKoboForm({
   }, [formik.submitForm]);
   useEffect(() => {
     if (
-      koboImportData?.status === ImportDataStatus.Finished ||
-      (koboImportData?.status ===
-        ImportDataStatus.DeliveryMechanismsValidationError &&
-        formik.values.allowDeliveryMechanismsValidationErrors)
-    ) {
+      koboImportData?.status === ImportDataStatus.Finished) {
       setSubmitDisabled(false);
     } else {
       setSubmitDisabled(true);
     }
-  }, [koboImportData, formik.values.allowDeliveryMechanismsValidationErrors]);
+  }, [koboImportData]);
 
   return (
     <div>
@@ -144,22 +137,6 @@ export function CreateImportFromKoboForm({
           variant="outlined"
           component={FormikTextField}
         />
-        <Box mt={2}>
-          {koboImportData?.status ===
-            ImportDataStatus.DeliveryMechanismsValidationError && (
-            <Box mt={2}>
-              <Field
-                name="allowDeliveryMechanismsValidationErrors"
-                fullWidth
-                label={t(
-                  'Ignore Delivery Mechanisms Validation Errors and Create Grievance Tickets',
-                )}
-                variant="outlined"
-                component={FormikCheckboxField}
-              />
-            </Box>
-          )}
-        </Box>
         <ScreenBeneficiaryField />
         {saveKoboLoading ? (
           <CircularProgressContainer>
