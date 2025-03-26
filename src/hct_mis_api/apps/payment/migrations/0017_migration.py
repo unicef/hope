@@ -81,10 +81,6 @@ class Migration(migrations.Migration):
         ),
         migrations.RemoveField(
             model_name='deliverymechanismperpaymentplan',
-            name='sent_to_payment_gateway',
-        ),
-        migrations.RemoveField(
-            model_name='deliverymechanismperpaymentplan',
             name='status',
         ),
         migrations.AddField(
