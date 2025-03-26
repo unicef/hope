@@ -146,8 +146,6 @@ class PaymentPlanListSerializer(serializers.ModelSerializer):
         )
 
     def get_created_by(self, obj: PaymentPlan) -> str:
-        if not obj.created_by:
-            return "-"
         return f"{obj.created_by.first_name} {obj.created_by.last_name}"
 
 
