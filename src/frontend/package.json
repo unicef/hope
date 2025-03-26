@@ -101,8 +101,8 @@
     "@graphql-codegen/typescript-react-apollo": "^4.2.0",
     "@graphql-codegen/typescript-resolvers": "^4.0.1",
     "@tanstack/eslint-plugin-query": "^5.27.7",
-    "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
+    "@testing-library/jest-dom": "^6.6.3",
     "@types/graphql": "^14.5.0",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
@@ -127,6 +127,8 @@
     "openapi-typescript-codegen": "^0.29.0",
     "prettier": "3.4.2",
     "typescript": "^5.5.4",
-    "vitest": "^3.0.7"
+    "vitest": "^3.0.7",
+    "react-test-renderer": "^19.0.0",
+    "vite-plugin-csp-guard": "^2.1.0"
   }
 }
