@@ -13,7 +13,6 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import {
-  PaymentPlanQuery,
   useAllAdminAreasQuery,
   useAllRapidProFlowsLazyQuery,
   useEditPaymentVerificationPlanMutation,
@@ -110,7 +109,7 @@ function prepareVariables(
 }
 
 export interface Props {
-  paymentVerificationPlanNode: PaymentPlanQuery['paymentPlan']['verificationPlans']['edges'][0]['node'];
+  paymentVerificationPlanNode: PaymentPlanDetail['verificationPlans']['edges'][0]['node'];
   cashOrPaymentPlanId: string;
   isPaymentPlan: boolean;
 }
@@ -309,8 +308,11 @@ export const EditVerificationPlan = ({
                       variant="fullWidth"
                       aria-label="full width tabs example"
                     >
-                      <Tab  data-cy="tab-full-list" label={t('FULL LIST')} />
-                      <Tab data-cy="tab-random-sampling" label={t('RANDOM SAMPLING')} />
+                      <Tab data-cy="tab-full-list" label={t('FULL LIST')} />
+                      <Tab
+                        data-cy="tab-random-sampling"
+                        label={t('RANDOM SAMPLING')}
+                      />
                     </StyledTabs>
                   </TabsContainer>
                   <TabPanel value={selectedTab} index={0}>
@@ -351,9 +353,21 @@ export const EditVerificationPlan = ({
                           label={t('Verification Channel')}
                           style={{ flexDirection: 'row', alignItems: 'center' }}
                           choices={[
-                            { value: 'RAPIDPRO', name: 'RAPIDPRO', dataCy: 'radio-rapidpro' },
-                            { value: 'XLSX', name: 'XLSX', dataCy: 'radio-xlsx' },
-                            { value: 'MANUAL', name: 'MANUAL', dataCy: 'radio-manual' },
+                            {
+                              value: 'RAPIDPRO',
+                              name: 'RAPIDPRO',
+                              dataCy: 'radio-rapidpro',
+                            },
+                            {
+                              value: 'XLSX',
+                              name: 'XLSX',
+                              dataCy: 'radio-xlsx',
+                            },
+                            {
+                              value: 'MANUAL',
+                              name: 'MANUAL',
+                              dataCy: 'radio-manual',
+                            },
                           ]}
                           component={FormikRadioGroup}
                           alignItems="center"
@@ -458,7 +472,7 @@ export const EditVerificationPlan = ({
                             </Grid>
                           )}
                           {values.sexCheckbox && (
-                            <Grid size={{ xs:5 }}>
+                            <Grid size={{ xs: 5 }}>
                               <Box mt={6}>
                                 <Field
                                   name="filterSex"
@@ -468,8 +482,14 @@ export const EditVerificationPlan = ({
                                     { value: 'FEMALE', name: t('Female') },
                                     { value: 'MALE', name: t('Male') },
                                     { value: 'OTHER', name: t('Other') },
-                                    { value: 'NOT_COLLECTED', name: t('Not Collected') },
-                                    { value: 'NOT_ANSWERED', name: t('Not Answered') },
+                                    {
+                                      value: 'NOT_COLLECTED',
+                                      name: t('Not Collected'),
+                                    },
+                                    {
+                                      value: 'NOT_ANSWERED',
+                                      name: t('Not Answered'),
+                                    },
                                   ]}
                                   component={FormikSelectField}
                                 />
@@ -503,9 +523,17 @@ export const EditVerificationPlan = ({
                         }}
                         alignItems="center"
                         choices={[
-                            { value: 'RAPIDPRO', name: 'RAPIDPRO', dataCy: 'radio-rapidpro' },
-                            { value: 'XLSX', name: 'XLSX', dataCy: 'radio-xlsx' },
-                            { value: 'MANUAL', name: 'MANUAL', dataCy: 'radio-manual' },
+                          {
+                            value: 'RAPIDPRO',
+                            name: 'RAPIDPRO',
+                            dataCy: 'radio-rapidpro',
+                          },
+                          { value: 'XLSX', name: 'XLSX', dataCy: 'radio-xlsx' },
+                          {
+                            value: 'MANUAL',
+                            name: 'MANUAL',
+                            dataCy: 'radio-manual',
+                          },
                         ]}
                         component={FormikRadioGroup}
                       />

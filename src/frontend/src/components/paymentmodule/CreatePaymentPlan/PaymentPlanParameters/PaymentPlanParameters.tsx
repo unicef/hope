@@ -57,7 +57,7 @@ export const PaymentPlanParameters = ({
             name="currency"
             component={FormikCurrencyAutocomplete}
             required
-            disabled={Boolean(paymentPlan?.isFollowUp)}
+            disabled={Boolean(paymentPlan?.is_follow_up)}
           />
         </Grid>
       </Grid>

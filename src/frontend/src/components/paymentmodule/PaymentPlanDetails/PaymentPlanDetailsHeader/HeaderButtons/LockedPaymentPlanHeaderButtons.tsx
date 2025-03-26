@@ -9,7 +9,7 @@ import { useProgramContext } from '../../../../../programContext';
 import { ReactElement } from 'react';
 
 export interface LockedPaymentPlanHeaderButtonsProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
   canUnlock: boolean;
   permissions: string[];
 }

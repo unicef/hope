@@ -1,11 +1,11 @@
 import { Box } from '@mui/material';
-import { PaymentPlanQuery } from '@generated/graphql';
+
 import { ApprovePaymentPlan } from '../ApprovePaymentPlan';
 import { RejectPaymentPlan } from '../RejectPaymentPlan';
 import { ReactElement } from 'react';
 
 export interface InApprovalPaymentPlanHeaderButtonsProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
   canReject: boolean;
   canApprove: boolean;
 }

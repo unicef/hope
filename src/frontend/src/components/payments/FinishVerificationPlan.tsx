@@ -14,14 +14,11 @@ import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { getPercentage } from '@utils/utils';
-import {
-  PaymentPlanQuery,
-  useFinishPaymentVerificationPlanMutation,
-} from '@generated/graphql';
+import { useFinishPaymentVerificationPlanMutation } from '@generated/graphql';
 import { useProgramContext } from '../../programContext';
 
 export interface FinishVerificationPlanProps {
-  verificationPlan: PaymentPlanQuery['paymentPlan']['verificationPlans']['edges'][0]['node'];
+  verificationPlan: PaymentPlanDetail['verificationPlans']['edges'][0]['node'];
 }
 
 export function FinishVerificationPlan({

@@ -1,11 +1,11 @@
 import { Doughnut } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { PaymentPlanQuery } from '@generated/graphql';
+
 import { ReactElement } from 'react';
 
 interface VerificationPlanDetailsChartProps {
-  verificationPlan: PaymentPlanQuery['paymentPlan']['verificationPlans']['edges'][0]['node'];
+  verificationPlan: PaymentPlanDetail['verificationPlans']['edges'][0]['node'];
 }
 
 const ChartContainer = styled.div`

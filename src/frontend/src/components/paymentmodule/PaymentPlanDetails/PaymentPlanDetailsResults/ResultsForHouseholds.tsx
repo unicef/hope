@@ -4,11 +4,11 @@ import {
   SummaryValue,
 } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults/Styles';
 import { LabelizedField } from '@core/LabelizedField';
-import { PaymentPlanQuery } from '@generated/graphql';
+
 import { useProgramContext } from 'src/programContext';
 
 interface ResultsForHouseholdsProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export const ResultsForHouseholds = ({

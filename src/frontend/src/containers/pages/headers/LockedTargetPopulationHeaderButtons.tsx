@@ -2,7 +2,6 @@ import { LoadingButton } from '@components/core/LoadingButton';
 import {
   Action,
   BusinessAreaDataQuery,
-  PaymentPlanQuery,
   ProgramStatus,
 } from '@generated/graphql';
 import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
@@ -28,7 +27,7 @@ const IconContainer = styled.span`
 `;
 
 export interface ApprovedTargetPopulationHeaderButtonsPropTypes {
-  targetPopulation: PaymentPlanQuery['paymentPlan'];
+  targetPopulation: PaymentPlanDetail;
   canUnlock: boolean;
   canDuplicate: boolean;
   canSend: boolean;

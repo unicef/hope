@@ -119,7 +119,7 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
   const isFinished =
     paymentPlan?.paymentVerificationSummary?.status === 'FINISHED';
 
-  const { isFollowUp } = paymentPlan;
+  const { is_follow_up } = paymentPlan;
 
   const toolbar = (
     <PageHeader
@@ -128,7 +128,7 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
         <BlackLink
           data-cy="plan-link"
           to={`/${baseUrl}/payment-module/${
-            isFollowUp ? 'followup-payment-plans' : 'payment-plans'
+            is_follow_up ? 'followup-payment-plans' : 'payment-plans'
           }/${paymentPlan.id}`}
           fullWidth
         >

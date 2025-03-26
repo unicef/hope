@@ -1,10 +1,7 @@
 import { Box, Grid2 as Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import {
-  CashPlanVerificationSamplingChoicesQuery,
-  PaymentPlanQuery,
-} from '@generated/graphql';
+import { CashPlanVerificationSamplingChoicesQuery } from '@generated/graphql';
 import { choicesToDict, paymentVerificationStatusToColor } from '@utils/utils';
 import { LabelizedField } from '@core/LabelizedField';
 import { StatusBox } from '@core/StatusBox';
@@ -29,9 +26,9 @@ const Container = styled.div`
 `;
 
 interface VerificationPlanDetailsProps {
-  verificationPlan: PaymentPlanQuery['paymentPlan']['verificationPlans']['edges'][0]['node'];
+  verificationPlan: PaymentPlanDetail['verificationPlans']['edges'][0]['node'];
   samplingChoicesData: CashPlanVerificationSamplingChoicesQuery;
-  planNode: PaymentPlanQuery['paymentPlan'];
+  planNode: PaymentPlanDetail;
 }
 
 export function VerificationPlanDetails({
@@ -48,7 +45,10 @@ export function VerificationPlanDetails({
     <Container>
       <Box display="flex" alignItems="center" justifyContent="space-between">
         <Title>
-          <Typography data-cy={`verification-plan-${verificationPlan.unicefId}`} variant="h6">
+          <Typography
+            data-cy={`verification-plan-${verificationPlan.unicefId}`}
+            variant="h6"
+          >
             {t('Verification Plan')} #{verificationPlan.unicefId}
             <AdminButton adminUrl={verificationPlan.adminUrl} sx={{ ml: 2 }} />
           </Typography>
@@ -60,7 +60,7 @@ export function VerificationPlanDetails({
         />
       </Box>
       <Grid container>
-        <Grid size={{ xs:9 }}>
+        <Grid size={{ xs: 9 }}>
           <Grid container spacing={3}>
             <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('STATUS')}>
@@ -117,7 +117,7 @@ export function VerificationPlanDetails({
                 ),
               },
             ].map((el) => (
-              <Grid size={{ xs:3 }} key={el.label}>
+              <Grid size={{ xs: 3 }} key={el.label}>
                 <LabelizedField label={el.label} value={el.value} />
               </Grid>
             ))}

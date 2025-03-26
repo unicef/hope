@@ -71,5 +71,9 @@ export type ProgramGlobal = {
      */
     population_goal: number;
     readonly business_area_code: string;
+    /**
+     * Program beneficiary group
+     */
+    beneficiary_group: string;
 };
 

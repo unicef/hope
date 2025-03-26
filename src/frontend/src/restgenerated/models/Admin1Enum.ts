@@ -3,24 +3,24 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * * `AF31` - Andersonbury
- * * `HR30` - East Alexanderfurt
- * * `UA53` - East Christina
- * * `AF37` - Mitchellport
- * * `HR56` - North Maria
- * * `UA35` - South Jonathanland
- * * `HR59` - Westburgh
- * * `UA73` - Wilkinsonview
- * * `AF27` - Wilsonport
+ * * `HR55` - Cranechester
+ * * `HR25` - Everettfurt
+ * * `AF76` - Lynchtown
+ * * `AF20` - North Annachester
+ * * `UA65` - Rodriguezton
+ * * `HR61` - Smithborough
+ * * `UA99` - West Christine
+ * * `UA24` - West Scott
+ * * `AF34` - Williamsberg
  */
 export enum Admin1Enum {
-    AF31 = 'AF31',
-    HR30 = 'HR30',
-    UA53 = 'UA53',
-    AF37 = 'AF37',
-    HR56 = 'HR56',
-    UA35 = 'UA35',
-    HR59 = 'HR59',
-    UA73 = 'UA73',
-    AF27 = 'AF27',
+    HR55 = 'HR55',
+    HR25 = 'HR25',
+    AF76 = 'AF76',
+    AF20 = 'AF20',
+    UA65 = 'UA65',
+    HR61 = 'HR61',
+    UA99 = 'UA99',
+    UA24 = 'UA24',
+    AF34 = 'AF34',
 }

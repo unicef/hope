@@ -7,7 +7,6 @@ import { ImportXlsxPaymentPlanPaymentListPerFsp } from '@components/paymentmodul
 import {
   AllPaymentsForTableQuery,
   AllPaymentsForTableQueryVariables,
-  PaymentPlanQuery,
   PaymentPlanStatus,
   useAllPaymentsForTableQuery,
 } from '@generated/graphql';
@@ -23,7 +22,7 @@ const StyledBox = styled(Box)`
 `;
 interface PeoplePaymentsTableProps {
   businessArea: string;
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
   permissions: string[];
   canViewDetails?: boolean;
 }

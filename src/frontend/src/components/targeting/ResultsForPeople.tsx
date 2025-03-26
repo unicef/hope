@@ -48,7 +48,7 @@ const SummaryValue = styled.div`
 `;
 
 interface ResultsProps {
-  targetPopulation: PaymentPlanQuery['paymentPlan'];
+  targetPopulation: PaymentPlanDetail;
 }
 
 function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
@@ -66,7 +66,7 @@ function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
           <Grid container>
             <Grid size={{ xs: 4 }}>
               <Grid container spacing={0} justifyContent="flex-start">
-                <Grid size={{ xs:6 }}>
+                <Grid size={{ xs: 6 }}>
                   <FieldBorder color={colors.femaleChildren}>
                     <LabelizedField
                       label={t('Female Children')}
@@ -74,7 +74,7 @@ function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
                     />
                   </FieldBorder>
                 </Grid>
-                <Grid size={{ xs:6 }}>
+                <Grid size={{ xs: 6 }}>
                   <FieldBorder color={colors.femaleAdult}>
                     <LabelizedField
                       label={t('Female Adults')}
@@ -82,7 +82,7 @@ function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
                     />
                   </FieldBorder>
                 </Grid>
-                <Grid size={{ xs:6 }}>
+                <Grid size={{ xs: 6 }}>
                   <FieldBorder color={colors.maleChildren}>
                     <LabelizedField
                       label={t('Male Children')}
@@ -90,7 +90,7 @@ function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
                     />
                   </FieldBorder>
                 </Grid>
-                <Grid size={{ xs:6 }}>
+                <Grid size={{ xs: 6 }}>
                   <FieldBorder color={colors.maleAdult}>
                     <LabelizedField
                       label={t('Male Adults')}
@@ -150,7 +150,7 @@ function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
             </Grid>
             <Grid size={{ xs: 4 }}>
               <Grid container spacing={0} justifyContent="flex-end">
-                <Grid size={{ xs:6 }}>
+                <Grid size={{ xs: 6 }}>
                   <SummaryBorder>
                     <LabelizedField label={t('Total Number of People')}>
                       <SummaryValue>

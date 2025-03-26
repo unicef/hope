@@ -32,7 +32,7 @@ function PaymentDetailsPage(): ReactElement {
     fetchPolicy: 'cache-and-network',
   });
   const paymentPlanStatus = data?.payment?.parent?.status;
-  const paymentPlanIsFollowUp = data?.payment?.parent?.isFollowUp;
+  const paymentPlanis_follow_up = data?.payment?.parent?.is_follow_up;
   const permissions = usePermissions();
   const { baseUrl } = useBaseUrl();
   if (loading || caLoading) return <LoadingComponent />;
@@ -48,11 +48,11 @@ function PaymentDetailsPage(): ReactElement {
       to: `/${baseUrl}/payment-module/payment-plans`,
     },
     {
-      title: ` ${paymentPlanIsFollowUp ? 'Follow-up ' : ''} Payment Plan ${
+      title: ` ${paymentPlanis_follow_up ? 'Follow-up ' : ''} Payment Plan ${
         payment.parent.unicefId
       }`,
       to: `/${baseUrl}/payment-module/${
-        paymentPlanIsFollowUp ? 'followup-payment-plans' : 'payment-plans'
+        paymentPlanis_follow_up ? 'followup-payment-plans' : 'payment-plans'
       }/${data.payment.parent.id}/`,
     },
   ];

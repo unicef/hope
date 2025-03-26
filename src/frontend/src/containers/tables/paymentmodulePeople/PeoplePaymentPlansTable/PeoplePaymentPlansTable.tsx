@@ -30,7 +30,7 @@ export const PeoplePaymentPlansTable = ({
     totalEntitledQuantityTo: filter.totalEntitledQuantityTo || null,
     dispersionStartDate: filter.dispersionStartDate || null,
     dispersionEndDate: filter.dispersionEndDate || null,
-    isFollowUp: filter.isFollowUp ? true : null,
+    is_follow_up: filter.is_follow_up ? true : null,
     program: programId,
     isPaymentPlan: true,
   };

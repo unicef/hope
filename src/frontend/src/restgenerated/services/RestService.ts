@@ -15,7 +15,9 @@ import type { PaginatedBusinessAreaList } from '../models/PaginatedBusinessAreaL
 import type { PaginatedCountryList } from '../models/PaginatedCountryList';
 import type { PaginatedHouseholdListList } from '../models/PaginatedHouseholdListList';
 import type { PaginatedOrganizationList } from '../models/PaginatedOrganizationList';
+import type { PaginatedPaymentListList } from '../models/PaginatedPaymentListList';
 import type { PaginatedPaymentPlanList } from '../models/PaginatedPaymentPlanList';
+import type { PaginatedPaymentPlanListList } from '../models/PaginatedPaymentPlanListList';
 import type { PaginatedPeriodicDataUpdateTemplateListList } from '../models/PaginatedPeriodicDataUpdateTemplateListList';
 import type { PaginatedPeriodicDataUpdateUploadListList } from '../models/PaginatedPeriodicDataUpdateUploadListList';
 import type { PaginatedPeriodicFieldList } from '../models/PaginatedPeriodicFieldList';
@@ -25,10 +27,12 @@ import type { PaginatedProgramListList } from '../models/PaginatedProgramListLis
 import type { PaginatedProjectList } from '../models/PaginatedProjectList';
 import type { PaginatedRegistrationDataImportListList } from '../models/PaginatedRegistrationDataImportListList';
 import type { PaginatedRegistrationList } from '../models/PaginatedRegistrationList';
-import type { PaginatedTargetPopulationListList } from '../models/PaginatedTargetPopulationListList';
+import type { PaginatedTPHouseholdListList } from '../models/PaginatedTPHouseholdListList';
 import type { PatchedProgramCycleUpdate } from '../models/PatchedProgramCycleUpdate';
 import type { PatchedRDI } from '../models/PatchedRDI';
+import type { PaymentList } from '../models/PaymentList';
 import type { PaymentPlanBulkAction } from '../models/PaymentPlanBulkAction';
+import type { PaymentPlanDetail } from '../models/PaymentPlanDetail';
 import type { PaymentPlanSupportingDocument } from '../models/PaymentPlanSupportingDocument';
 import type { PeriodicDataUpdateTemplateCreate } from '../models/PeriodicDataUpdateTemplateCreate';
 import type { PeriodicDataUpdateTemplateDetail } from '../models/PeriodicDataUpdateTemplateDetail';
@@ -44,6 +48,8 @@ import type { PushPeople } from '../models/PushPeople';
 import type { RDI } from '../models/RDI';
 import type { RDINested } from '../models/RDINested';
 import type { RegistrationDataImportList } from '../models/RegistrationDataImportList';
+import type { TargetPopulationDetail } from '../models/TargetPopulationDetail';
+import type { TPHouseholdList } from '../models/TPHouseholdList';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
@@ -783,6 +789,7 @@ export class RestService {
         offset,
         ordering,
         program,
+        programCycle,
         search,
         status,
         totalEntitledQuantityGte,
@@ -806,6 +813,7 @@ export class RestService {
          */
         ordering?: string,
         program?: string,
+        programCycle?: string,
         /**
          * A search term.
          */
@@ -850,6 +858,7 @@ export class RestService {
                 'offset': offset,
                 'ordering': ordering,
                 'program': program,
+                'program_cycle': programCycle,
                 'search': search,
                 'status': status,
                 'total_entitled_quantity__gte': totalEntitledQuantityGte,
@@ -1543,6 +1552,193 @@ export class RestService {
         });
     }
     /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaginatedPaymentPlanListList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlansList({
+        businessAreaSlug,
+        programSlug,
+        dispersionEndDateLte,
+        dispersionStartDateGte,
+        isFollowUp,
+        limit,
+        name,
+        offset,
+        ordering,
+        program,
+        programCycle,
+        search,
+        status,
+        totalEntitledQuantityGte,
+        totalEntitledQuantityLte,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        dispersionEndDateLte?: string,
+        dispersionStartDateGte?: string,
+        isFollowUp?: boolean,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        name?: string,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        program?: string,
+        programCycle?: string,
+        /**
+         * A search term.
+         */
+        search?: string,
+        /**
+         * Status [sys]
+         *
+         * * `TP_OPEN` - Open
+         * * `TP_LOCKED` - Locked
+         * * `PROCESSING` - Processing
+         * * `STEFICON_WAIT` - Steficon Wait
+         * * `STEFICON_RUN` - Steficon Run
+         * * `STEFICON_COMPLETED` - Steficon Completed
+         * * `STEFICON_ERROR` - Steficon Error
+         * * `DRAFT` - Draft
+         * * `PREPARING` - Preparing
+         * * `OPEN` - Open
+         * * `LOCKED` - Locked
+         * * `LOCKED_FSP` - Locked FSP
+         * * `IN_APPROVAL` - In Approval
+         * * `IN_AUTHORIZATION` - In Authorization
+         * * `IN_REVIEW` - In Review
+         * * `ACCEPTED` - Accepted
+         * * `FINISHED` - Finished
+         */
+        status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        totalEntitledQuantityGte?: number,
+        totalEntitledQuantityLte?: number,
+    }): CancelablePromise<PaginatedPaymentPlanListList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            query: {
+                'dispersion_end_date__lte': dispersionEndDateLte,
+                'dispersion_start_date__gte': dispersionStartDateGte,
+                'is_follow_up': isFollowUp,
+                'limit': limit,
+                'name': name,
+                'offset': offset,
+                'ordering': ordering,
+                'program': program,
+                'program_cycle': programCycle,
+                'search': search,
+                'status': status,
+                'total_entitled_quantity__gte': totalEntitledQuantityGte,
+                'total_entitled_quantity__lte': totalEntitledQuantityLte,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaginatedPaymentListList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlansPaymentsList({
+        businessAreaSlug,
+        paymentPlanId,
+        programSlug,
+        limit,
+        offset,
+    }: {
+        businessAreaSlug: string,
+        paymentPlanId: string,
+        programSlug: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+    }): CancelablePromise<PaginatedPaymentListList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_id}/payments/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'payment_plan_id': paymentPlanId,
+                'program_slug': programSlug,
+            },
+            query: {
+                'limit': limit,
+                'offset': offset,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaymentList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlansPaymentsRetrieve({
+        businessAreaSlug,
+        id,
+        paymentPlanId,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this payment.
+         */
+        id: string,
+        paymentPlanId: string,
+        programSlug: string,
+    }): CancelablePromise<PaymentList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_id}/payments/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'payment_plan_id': paymentPlanId,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlansPaymentsCountRetrieve({
+        businessAreaSlug,
+        paymentPlanId,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        paymentPlanId: string,
+        programSlug: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_id}/payments/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'payment_plan_id': paymentPlanId,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
      * @returns PaymentPlanSupportingDocument
      * @throws ApiError
      */
@@ -1617,6 +1813,54 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
                 'file_id': fileId,
                 'payment_plan_id': paymentPlanId,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaymentPlanDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlansRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<PaymentPlanDetail> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlansCountRetrieve({
+        businessAreaSlug,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,
             },
         });
@@ -2022,29 +2266,32 @@ export class RestService {
         });
     }
     /**
-     * @returns PaginatedTargetPopulationListList
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaginatedPaymentPlanListList
      * @throws ApiError
      */
     public static restBusinessAreasProgramsTargetPopulationsList({
         businessAreaSlug,
         programSlug,
-        dispersionEndDateLte,
-        dispersionStartDateGte,
-        isFollowUp,
+        createdAtGte,
+        createdAtLte,
         limit,
         name,
         offset,
         ordering,
         program,
+        programCycle,
+        search,
         status,
-        totalEntitledQuantityGte,
-        totalEntitledQuantityLte,
+        totalHouseholdsCountGte,
+        totalHouseholdsCountLte,
+        totalIndividualsCountGte,
+        totalIndividualsCountLte,
     }: {
         businessAreaSlug: string,
         programSlug: string,
-        dispersionEndDateLte?: string,
-        dispersionStartDateGte?: string,
-        isFollowUp?: boolean,
+        createdAtGte?: string,
+        createdAtLte?: string,
         /**
          * Number of results to return per page.
          */
@@ -2059,9 +2306,12 @@ export class RestService {
          */
         ordering?: string,
         program?: string,
+        programCycle?: string,
         /**
-         * Status [sys]
-         *
+         * A search term.
+         */
+        search?: string,
+        /**
          * * `TP_OPEN` - Open
          * * `TP_LOCKED` - Locked
          * * `PROCESSING` - Processing
@@ -2079,11 +2329,14 @@ export class RestService {
          * * `IN_REVIEW` - In Review
          * * `ACCEPTED` - Accepted
          * * `FINISHED` - Finished
+         * * `ASSIGNED` - Assigned
          */
-        status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
-        totalEntitledQuantityGte?: number,
-        totalEntitledQuantityLte?: number,
-    }): CancelablePromise<PaginatedTargetPopulationListList> {
+        status?: 'ACCEPTED' | 'ASSIGNED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        totalHouseholdsCountGte?: number,
+        totalHouseholdsCountLte?: number,
+        totalIndividualsCountGte?: number,
+        totalIndividualsCountLte?: number,
+    }): CancelablePromise<PaginatedPaymentPlanListList> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/',
@@ -2092,17 +2345,160 @@ export class RestService {
                 'program_slug': programSlug,
             },
             query: {
-                'dispersion_end_date__lte': dispersionEndDateLte,
-                'dispersion_start_date__gte': dispersionStartDateGte,
-                'is_follow_up': isFollowUp,
+                'created_at__gte': createdAtGte,
+                'created_at__lte': createdAtLte,
                 'limit': limit,
                 'name': name,
                 'offset': offset,
                 'ordering': ordering,
                 'program': program,
+                'program_cycle': programCycle,
+                'search': search,
                 'status': status,
-                'total_entitled_quantity__gte': totalEntitledQuantityGte,
-                'total_entitled_quantity__lte': totalEntitledQuantityLte,
+                'total_households_count__gte': totalHouseholdsCountGte,
+                'total_households_count__lte': totalHouseholdsCountLte,
+                'total_individuals_count__gte': totalIndividualsCountGte,
+                'total_individuals_count__lte': totalIndividualsCountLte,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns TargetPopulationDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsTargetPopulationsRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<TargetPopulationDetail> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaginatedTPHouseholdListList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsTargetPopulationsHouseholdsList({
+        businessAreaSlug,
+        programSlug,
+        targetPopulationId,
+        limit,
+        offset,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        targetPopulationId: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+    }): CancelablePromise<PaginatedTPHouseholdListList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/{target_population_id}/households/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+                'target_population_id': targetPopulationId,
+            },
+            query: {
+                'limit': limit,
+                'offset': offset,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns TPHouseholdList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsTargetPopulationsHouseholdsRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+        targetPopulationId,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this payment.
+         */
+        id: string,
+        programSlug: string,
+        targetPopulationId: string,
+    }): CancelablePromise<TPHouseholdList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/{target_population_id}/households/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+                'target_population_id': targetPopulationId,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsTargetPopulationsHouseholdsCountRetrieve({
+        businessAreaSlug,
+        programSlug,
+        targetPopulationId,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        targetPopulationId: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/{target_population_id}/households/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+                'target_population_id': targetPopulationId,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsTargetPopulationsCountRetrieve({
+        businessAreaSlug,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
             },
         });
     }

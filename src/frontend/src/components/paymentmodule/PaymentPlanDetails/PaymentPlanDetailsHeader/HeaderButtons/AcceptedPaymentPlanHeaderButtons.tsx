@@ -17,7 +17,6 @@ import { usePaymentPlanAction } from '../../../../../hooks/usePaymentPlanAction'
 import {
   Action,
   PaymentPlanBackgroundActionStatus,
-  PaymentPlanQuery,
   useAllFinancialServiceProviderXlsxTemplatesQuery,
   useExportXlsxPpListPerFspMutation,
 } from '../../../../../__generated__/graphql';
@@ -28,7 +27,7 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 export interface AcceptedPaymentPlanHeaderButtonsProps {
   canSendToPaymentGateway: boolean;
   canSplit: boolean;
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export function AcceptedPaymentPlanHeaderButtons({

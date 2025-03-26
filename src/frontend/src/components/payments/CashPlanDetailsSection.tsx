@@ -3,7 +3,7 @@ import { Doughnut } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { countPercentage } from '@utils/utils';
-import { PaymentPlanQuery } from '@generated/graphql';
+
 import { BlackLink } from '@core/BlackLink';
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
@@ -23,7 +23,7 @@ const BorderLeftBox = styled.div`
 `;
 
 interface CashPlanDetailsSectionProps {
-  planNode: PaymentPlanQuery['paymentPlan'];
+  planNode: PaymentPlanDetail;
 }
 
 export function CashPlanDetailsSection({
@@ -44,7 +44,7 @@ export function CashPlanDetailsSection({
 
   return (
     <Grid container>
-      <Grid size={{ xs:7 }}>
+      <Grid size={{ xs: 7 }}>
         <Title data-cy="div-payment-plan-details">
           <Typography variant="h6">{t('Payment Plan Details')}</Typography>
         </Title>
@@ -72,7 +72,7 @@ export function CashPlanDetailsSection({
                 value: <UniversalMoment>{planNode.endDate}</UniversalMoment>,
               },
             ].map((el) => (
-              <Grid size={{ xs:3 }} key={el.label}>
+              <Grid size={{ xs: 3 }} key={el.label}>
                 <LabelizedField label={el.label}>{el.value}</LabelizedField>
               </Grid>
             ))}
@@ -97,7 +97,7 @@ export function CashPlanDetailsSection({
                 </LabelizedField>
               </Grid>
             </Grid>
-            <Grid size={{ xs:9 }}>
+            <Grid size={{ xs: 9 }}>
               <ChartContainer>
                 <Doughnut
                   options={

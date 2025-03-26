@@ -20,7 +20,7 @@ export function SetUpFspButtonActions({
 }: SetUpFspButtonActionsProps): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
-  const isFollowUp = location.pathname.indexOf('followup') !== -1;
+  const is_follow_up = location.pathname.indexOf('followup') !== -1;
 
   return (
     <Box pt={3} display="flex">
@@ -29,7 +29,7 @@ export function SetUpFspButtonActions({
           <Button
             component={Link}
             to={`/${baseUrl}/payment-module/${
-              isFollowUp ? 'followup-payment-plans' : 'payment-plans'
+              is_follow_up ? 'followup-payment-plans' : 'payment-plans'
             }/${paymentPlanId}`}
           >
             {t('Cancel')}

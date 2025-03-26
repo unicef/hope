@@ -12,7 +12,6 @@ import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import {
   PaymentPlanDocument,
-  PaymentPlanQuery,
   PaymentPlanStatus,
   useExcludeHouseholdsPpMutation,
 } from '@generated/graphql';
@@ -27,10 +26,11 @@ import { PaperContainer } from '../../../targeting/PaperContainer';
 import { useProgramContext } from '../../../../programContext';
 import { ExcludedItem } from './ExcludedItem';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface ExcludeSectionProps {
   initialOpen?: boolean;
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 function ExcludeSection({

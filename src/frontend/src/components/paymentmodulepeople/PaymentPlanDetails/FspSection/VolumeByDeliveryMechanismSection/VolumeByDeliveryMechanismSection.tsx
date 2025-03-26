@@ -2,11 +2,11 @@ import { Box, Grid2 as Grid, Typography } from '@mui/material';
 import { Pie } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { PaymentPlanQuery } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import { FieldBorder } from '@core/FieldBorder';
 import type { ChartData, ChartOptions } from 'chart.js';
 import { FC } from 'react';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(2)};
@@ -23,7 +23,7 @@ const ChartContainer = styled.div`
 `;
 
 interface VolumeByDeliveryMechanismSectionProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 const DeliveryMechanismsColorsMap = new Map([

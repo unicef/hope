@@ -18,7 +18,6 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import {
   PaymentPlanBackgroundActionStatus,
   PaymentPlanDocument,
-  PaymentPlanQuery,
   PaymentPlanStatus,
   useAllSteficonRulesQuery,
   useExportXlsxPpListMutation,
@@ -34,6 +33,7 @@ import { BigValue } from '../../../rdi/details/RegistrationDetails/RegistrationD
 import { ImportXlsxPaymentPlanPaymentList } from '../ImportXlsxPaymentPlanPaymentList/ImportXlsxPaymentPlanPaymentList';
 import { useProgramContext } from '../../../../programContext';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const GreyText = styled.p`
   color: #9e9e9e;
@@ -90,7 +90,7 @@ const BoxWithBorderRight = styled(Box)`
 `;
 
 interface EntitlementProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
   permissions: string[];
 }
 

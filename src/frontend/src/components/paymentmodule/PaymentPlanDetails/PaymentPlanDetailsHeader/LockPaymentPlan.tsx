@@ -13,13 +13,14 @@ import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { Action, PaymentPlanQuery } from '@generated/graphql';
+import { Action } from '@generated/graphql';
 import { GreyText } from '@core/GreyText';
 import { LoadingButton } from '@core/LoadingButton';
 import { useProgramContext } from 'src/programContext';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 export interface LockPaymentPlanProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export function LockPaymentPlan({

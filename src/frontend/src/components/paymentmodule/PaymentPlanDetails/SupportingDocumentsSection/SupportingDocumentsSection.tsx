@@ -51,7 +51,7 @@ const StyledBox = styled(Box)`
 
 interface SupportingDocumentsSectionProps {
   initialOpen?: boolean;
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export const SupportingDocumentsSection = ({

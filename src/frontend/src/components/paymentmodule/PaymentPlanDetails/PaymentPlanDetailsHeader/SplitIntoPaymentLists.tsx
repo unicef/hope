@@ -19,6 +19,7 @@ import {
   Grid2 as Grid,
 } from '@mui/material';
 import ReorderIcon from '@mui/icons-material/Reorder';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface FormValues {
   splitType: string;
@@ -31,7 +32,7 @@ const initialValues: FormValues = {
 };
 
 interface SplitIntoPaymentListsProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
   canSplit: boolean;
 }
 

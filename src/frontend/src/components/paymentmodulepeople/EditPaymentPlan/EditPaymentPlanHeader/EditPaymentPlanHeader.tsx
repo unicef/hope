@@ -7,7 +7,7 @@ import {
   paymentPlanBackgroundActionStatusToColor,
   paymentPlanStatusToColor,
 } from '@utils/utils';
-import { PaymentPlanQuery } from '@generated/graphql';
+
 import { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { PageHeader } from '@core/PageHeader';
 import { StatusBox } from '@core/StatusBox';
@@ -21,7 +21,7 @@ interface EditPaymentPlanHeaderProps {
   handleSubmit: () => Promise<void>;
   baseUrl: string;
   permissions: string[];
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export function EditPaymentPlanHeader({
@@ -31,13 +31,13 @@ export function EditPaymentPlanHeader({
   paymentPlan,
 }: EditPaymentPlanHeaderProps): ReactElement {
   const { t } = useTranslation();
-  const { id, isFollowUp } = paymentPlan;
+  const { id, is_follow_up } = paymentPlan;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
       to: `/${baseUrl}/payment-module/${
-        isFollowUp ? 'followup-payment-plans' : 'payment-plans'
+        is_follow_up ? 'followup-payment-plans' : 'payment-plans'
       }/${id}`,
     },
   ];
@@ -46,7 +46,7 @@ export function EditPaymentPlanHeader({
     <PageHeader
       title={
         <Box display="flex" alignItems="center">
-          {t(isFollowUp ? 'Follow-up Payment Plan' : 'Payment Plan')} ID{' '}
+          {t(is_follow_up ? 'Follow-up Payment Plan' : 'Payment Plan')} ID{' '}
           {paymentPlan.unicefId}
           <StatusWrapper>
             <StatusBox

@@ -2,15 +2,15 @@ import { Box, Button } from '@mui/material';
 import { EditRounded } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { PaymentPlanQuery } from '@generated/graphql';
 import { DeletePaymentPlan } from '../DeletePaymentPlan';
 import { LockPaymentPlan } from '../LockPaymentPlan';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from '../../../../../programContext';
 import { ReactElement } from 'react';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 export interface OpenPaymentPlanHeaderButtonsProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
   canRemove: boolean;
   canEdit: boolean;
   canLock: boolean;
@@ -25,7 +25,7 @@ export function OpenPaymentPlanHeaderButtons({
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const { isActiveProgram } = useProgramContext();
-  const { id, isFollowUp } = paymentPlan;
+  const { id, is_follow_up } = paymentPlan;
 
   return (
     <Box display="flex" alignItems="center">
@@ -38,7 +38,7 @@ export function OpenPaymentPlanHeaderButtons({
             startIcon={<EditRounded />}
             component={Link}
             to={`/${baseUrl}/payment-module/${
-              isFollowUp ? 'followup-payment-plans' : 'payment-plans'
+              is_follow_up ? 'followup-payment-plans' : 'payment-plans'
             }/${id}/edit`}
             disabled={!isActiveProgram}
           >

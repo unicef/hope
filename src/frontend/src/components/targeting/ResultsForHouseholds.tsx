@@ -49,7 +49,7 @@ const ChartContainer = styled.div`
 `;
 
 interface ResultsProps {
-  targetPopulation: PaymentPlanQuery['paymentPlan'];
+  targetPopulation: PaymentPlanDetail;
 }
 
 function ResultsForHouseholds({

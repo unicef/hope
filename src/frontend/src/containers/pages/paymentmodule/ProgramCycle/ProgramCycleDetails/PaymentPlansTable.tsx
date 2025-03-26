@@ -37,7 +37,7 @@ export const PaymentPlansTable = ({
     totalEntitledQuantityTo: filter.totalEntitledQuantityTo,
     dispersionStartDate: filter.dispersionStartDate,
     dispersionEndDate: filter.dispersionEndDate,
-    isFollowUp: null,
+    is_follow_up: null,
     program: programId,
     programCycle: programCycle.id,
     isPaymentPlan: true,

@@ -37,7 +37,7 @@ export const AllTargetPopulations = gql`
           id
           unicefId
           name
-          isFollowUp
+          is_follow_up
           followUps {
             totalCount
             edges {

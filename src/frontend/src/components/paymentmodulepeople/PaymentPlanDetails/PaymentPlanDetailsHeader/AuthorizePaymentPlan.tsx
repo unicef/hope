@@ -23,7 +23,7 @@ import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { useProgramContext } from '../../../../programContext';
 
 export interface AuthorizePaymentPlanProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export function AuthorizePaymentPlan({

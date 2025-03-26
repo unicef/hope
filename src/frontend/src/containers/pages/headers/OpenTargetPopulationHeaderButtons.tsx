@@ -18,7 +18,7 @@ import { t } from 'i18next';
 import { useSnackbar } from '@hooks/useSnackBar';
 
 export interface InProgressTargetPopulationHeaderButtonsPropTypes {
-  targetPopulation: PaymentPlanQuery['paymentPlan'];
+  targetPopulation: PaymentPlanDetail;
   canDuplicate: boolean;
   canRemove: boolean;
   canEdit: boolean;

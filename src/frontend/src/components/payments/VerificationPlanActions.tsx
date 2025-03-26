@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
   CashPlanVerificationSamplingChoicesQuery,
-  PaymentPlanQuery,
   PaymentVerificationPlanStatus,
   PaymentVerificationPlanVerificationChannel,
   useExportXlsxPaymentVerificationPlanFileMutation,
@@ -28,9 +27,9 @@ const StyledLink = styled.a`
 `;
 
 interface VerificationPlanActionsProps {
-  verificationPlan: PaymentPlanQuery['paymentPlan']['verificationPlans']['edges'][0]['node'];
+  verificationPlan: PaymentPlanDetail['verificationPlans']['edges'][0]['node'];
   samplingChoicesData: CashPlanVerificationSamplingChoicesQuery;
-  planNode: PaymentPlanQuery['paymentPlan'];
+  planNode: PaymentPlanDetail;
 }
 
 export function VerificationPlanActions({

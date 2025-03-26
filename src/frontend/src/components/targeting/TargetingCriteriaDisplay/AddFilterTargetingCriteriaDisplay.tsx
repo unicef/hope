@@ -1,7 +1,6 @@
 import { TargetingCriteriaForm } from '@containers/forms/TargetingCriteriaForm';
 import {
   DataCollectingTypeType,
-  PaymentPlanQuery,
   useAllCollectorFieldsAttributesQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -75,7 +74,7 @@ const AddCriteria = styled.div`
 interface AddFilterTargetingCriteriaDisplayProps {
   rules?;
   helpers?;
-  targetPopulation?: PaymentPlanQuery['paymentPlan'];
+  targetPopulation?: PaymentPlanDetail;
   isEdit?: boolean;
   screenBeneficiary: boolean;
   isSocialDctType: boolean;

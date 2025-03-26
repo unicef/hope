@@ -1,4 +1,3 @@
-import { PaymentPlanQuery } from '@generated/graphql';
 import { useTranslation } from 'react-i18next';
 import { Grid2 as Grid } from '@mui/material';
 import {
@@ -6,14 +5,15 @@ import {
   SummaryValue,
 } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults/Styles';
 import { LabelizedField } from '@core/LabelizedField';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface ResultsForPeopleProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export const ResultsForPeople = ({ paymentPlan }: ResultsForPeopleProps) => {
   const { t } = useTranslation();
-  const { totalHouseholdsCount } = paymentPlan;
+  const { total_households_count } = paymentPlan;
 
   return (
     <Grid size={{ xs: 4 }}>
@@ -21,7 +21,7 @@ export const ResultsForPeople = ({ paymentPlan }: ResultsForPeopleProps) => {
         <Grid>
           <SummaryBorder>
             <LabelizedField label={t('Total Number of People')}>
-              <SummaryValue>{totalHouseholdsCount || '0'}</SummaryValue>
+              <SummaryValue>{total_households_count || '0'}</SummaryValue>
             </LabelizedField>
           </SummaryBorder>
         </Grid>

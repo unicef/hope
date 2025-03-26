@@ -13,18 +13,16 @@ import { Delete } from '@mui/icons-material';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import {
-  PaymentPlanQuery,
-  useDeletePaymentPMutation,
-} from '@generated/graphql';
+import { useDeletePaymentPMutation } from '@generated/graphql';
 import { LoadingButton } from '@core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useProgramContext } from '../../../../programContext';
 import { useNavigate } from 'react-router-dom';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 export interface DeletePaymentPlanProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export function DeletePaymentPlan({

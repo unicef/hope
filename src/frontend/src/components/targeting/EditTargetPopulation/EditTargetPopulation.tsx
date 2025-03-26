@@ -1,9 +1,5 @@
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
-import {
-  PaymentPlanQuery,
-  PaymentPlanStatus,
-  useUpdatePpMutation,
-} from '@generated/graphql';
+import { PaymentPlanStatus, useUpdatePpMutation } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Divider, Grid2 as Grid, Typography } from '@mui/material';
@@ -28,7 +24,7 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import EditTargetPopulationHeader from './EditTargetPopulationHeader';
 
 interface EditTargetPopulationProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
   screenBeneficiary: boolean;
 }
 

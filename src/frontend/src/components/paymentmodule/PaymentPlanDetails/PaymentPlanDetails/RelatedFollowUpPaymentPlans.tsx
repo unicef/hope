@@ -2,13 +2,13 @@ import { ReactElement, useState } from 'react';
 import Button from '@mui/material/Button';
 import { Box } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { PaymentPlanQuery } from '@generated/graphql';
 import { BlackLink } from '@core/BlackLink';
 import { LabelizedField } from '@core/LabelizedField';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface RelatedFollowUpPaymentPlansProps {
   baseUrl: string;
-  followUps: PaymentPlanQuery['paymentPlan']['followUps'];
+  followUps: PaymentPlanDetail['followUps'];
 }
 
 export function RelatedFollowUpPaymentPlans({

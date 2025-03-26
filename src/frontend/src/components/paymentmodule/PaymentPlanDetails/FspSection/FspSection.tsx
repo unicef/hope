@@ -1,17 +1,18 @@
 import { Box, Button, Grid2 as Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
-import { PaymentPlanQuery, PaymentPlanStatus } from '@generated/graphql';
+import { PaymentPlanStatus } from '@generated/graphql';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { DividerLine } from '@core/DividerLine';
 import { LabelizedField } from '@core/LabelizedField';
 import { useProgramContext } from '../../../../programContext';
 import { VolumeByDeliveryMechanismSection } from './VolumeByDeliveryMechanismSection';
 import { ReactElement } from 'react';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface FspSectionProps {
   baseUrl: string;
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export const FspSection = ({
@@ -22,13 +23,13 @@ export const FspSection = ({
   const { paymentPlanId } = useParams();
   const { isActiveProgram } = useProgramContext();
 
-  const { deliveryMechanisms, isFollowUp } = paymentPlan;
-  const showFspDisplay = deliveryMechanisms?.length;
+  const { delivery_mechanisms, is_follow_up } = paymentPlan;
+  const showFspDisplay = delivery_mechanisms?.length;
   const shouldDisableSetUpFsp = (): boolean => {
-    if (paymentPlan.isFollowUp) {
+    if (paymentPlan.is_follow_up) {
       return false;
     }
-    if (!paymentPlan.totalEntitledQuantityUsd) {
+    if (!paymentPlan.total_entitled_quantity_usd) {
       return true;
     }
     if (!isActiveProgram) {
@@ -53,7 +54,7 @@ export const FspSection = ({
               variant="contained"
               component={Link}
               to={`/${baseUrl}/payment-module/${
-                isFollowUp ? 'followup-payment-plans' : 'payment-plans'
+                is_follow_up ? 'followup-payment-plans' : 'payment-plans'
               }/${paymentPlanId}/setup-fsp/edit`}
               disabled={!isActiveProgram}
             >
@@ -62,16 +63,16 @@ export const FspSection = ({
           )}
         </Box>
         <Grid container spacing={3}>
-          {deliveryMechanisms.map((el) => (
+          {delivery_mechanisms.map((el) => (
             <>
               <Grid key={`${el.name}-${el.fsp?.name}`} size={{ xs: 3 }}>
                 <LabelizedField label={el.name} value={el.fsp?.name} />
               </Grid>
-              {el.chosenConfiguration && (
-                <Grid key={el.chosenConfiguration} size={{ xs: 3 }}>
+              {el.chosen_configuration && (
+                <Grid key={el.chosen_configuration} size={{ xs: 3 }}>
                   <LabelizedField
                     label="Configuration"
-                    value={el.chosenConfiguration}
+                    value={el.chosen_configuration}
                   />
                 </Grid>
               )}
@@ -99,7 +100,7 @@ export const FspSection = ({
             data-cy="button-set-up-fsp"
             component={Link}
             to={`/${baseUrl}/payment-module/${
-              isFollowUp ? 'followup-payment-plans' : 'payment-plans'
+              is_follow_up ? 'followup-payment-plans' : 'payment-plans'
             }/${paymentPlanId}/setup-fsp/create`}
           >
             {t('Set up FSP')}

@@ -1,4 +1,10 @@
-import { Box, Checkbox, FormControlLabel, Grid2 as Grid, MenuItem } from '@mui/material';
+import {
+  Box,
+  Checkbox,
+  FormControlLabel,
+  Grid2 as Grid,
+  MenuItem,
+} from '@mui/material';
 import moment from 'moment';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -23,7 +29,7 @@ export type FilterProps = Pick<
   | 'totalEntitledQuantityTo'
   | 'dispersionStartDate'
   | 'dispersionEndDate'
-  | 'isFollowUp'
+  | 'is_follow_up'
 >;
 
 interface PaymentPlansFiltersProps {
@@ -195,14 +201,14 @@ export function PaymentPlansFilters({
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={Boolean(filter.isFollowUp)}
-                  value={filter.isFollowUp}
+                  checked={Boolean(filter.is_follow_up)}
+                  value={filter.is_follow_up}
                   color="primary"
                   onChange={(e) => {
                     if (e.target.checked) {
-                      handleFilterChange('isFollowUp', true);
+                      handleFilterChange('is_follow_up', true);
                     } else {
-                      handleFilterChange('isFollowUp', false);
+                      handleFilterChange('is_follow_up', false);
                     }
                   }}
                 />
