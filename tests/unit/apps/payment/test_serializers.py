@@ -6,15 +6,26 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import Role, RoleAssignment
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.utils import encode_id_base64_required
+from hct_mis_api.apps.core.utils import encode_id_base64_required, to_choice_object
 from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.payment.api.serializers import (
     PaymentListSerializer,
+    PaymentPlanDetailSerializer,
     PaymentPlanListSerializer,
     TPHouseholdListSerializer,
 )
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from hct_mis_api.apps.payment.fixtures import (
+    DeliveryMechanismPerPaymentPlanFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+)
+from hct_mis_api.apps.payment.models import (
+    FinancialServiceProvider,
+    PaymentHouseholdSnapshot,
+    PaymentPlan,
+    PaymentPlanSplit,
+)
 
 
 class TPHouseholdListSerializerTest(TestCase):
@@ -61,7 +72,6 @@ class PaymentListSerializerTest(TestCase):
         admin2 = AreaFactory(name="New admin22")
         cls.hoh = IndividualFactory(household=None)
         cls.hh1 = HouseholdFactory(admin2=admin2, head_of_household=cls.hoh, size=2)
-
         cls.payment = PaymentFactory(
             parent=cls.pp,
             household=cls.hh1,
@@ -98,6 +108,21 @@ class PaymentListSerializerTest(TestCase):
 
         self.assertEqual(data["fsp_auth_code"], "AUTH_123")
 
+    def test_get_snapshot_collector_full_name(self) -> None:
+        household_data = {
+            "primary_collector": {
+                "full_name": "Name_from_Snapshot",
+            },
+            "alternate_collector": {},
+        }
+        PaymentHouseholdSnapshot.objects.create(
+            payment=self.payment, snapshot_data=household_data, household_id=self.payment.household.id
+        )
+        serializer = PaymentListSerializer(instance=self.payment, context={"request": Mock(user=self.user)})
+        data = serializer.data
+
+        self.assertEqual(data["snapshot_collector_full_name"], "Name_from_Snapshot")
+
 
 class PaymentPlanListSerializerTest(TestCase):
     @classmethod
@@ -113,3 +138,49 @@ class PaymentPlanListSerializerTest(TestCase):
         serializer = PaymentPlanListSerializer(instance=self.pp)
         data = serializer.data
         self.assertEqual(data["created_by"], f"{self.user.first_name} {self.user.last_name}")
+
+
+class PaymentPlanDetailSerializerTest(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        cls.business_area = create_afghanistan()
+        cls.user = UserFactory()
+        cls.pp = PaymentPlanFactory(
+            created_by=cls.user, business_area=cls.business_area, dispersion_start_date=None, dispersion_end_date=None
+        )
+        cls.program = cls.pp.program_cycle.program
+        admin2 = AreaFactory(name="New for PP details")
+        cls.hoh = IndividualFactory(household=None)
+        cls.hh1 = HouseholdFactory(admin2=admin2, head_of_household=cls.hoh, size=2)
+        cls.payment = PaymentFactory(
+            parent=cls.pp,
+            household=cls.hh1,
+            vulnerability_score=999.012,
+            entitlement_quantity=100,
+            delivered_quantity=155,
+            financial_service_provider__name="FSP ABC",
+        )
+
+    def test_serializer_all_data(self) -> None:
+        self.pp.status = PaymentPlan.Status.ACCEPTED
+        self.pp.save()
+        DeliveryMechanismPerPaymentPlanFactory(payment_plan=self.pp)
+
+        serializer = PaymentPlanDetailSerializer(instance=self.pp, context={"request": Mock(user=self.user)})
+        data = serializer.data
+        # print("Data PP ", data)
+
+        self.assertEqual(data["id"], encode_id_base64_required(str(self.pp.id), "PaymentPlan"))
+        self.assertEqual(data["reconciliation_summary"]["pending"], 1)
+        self.assertEqual(data["reconciliation_summary"]["number_of_payments"], 1)
+        self.assertEqual(data["excluded_households"], [])
+        self.assertEqual(data["excluded_individuals"], [])
+        self.assertEqual(data["fsp_communication_channel"], "XLSX")
+        self.assertEqual(data["can_create_follow_up"], False)
+        self.assertEqual(data["can_split"], True)
+        self.assertEqual(data["can_export_xlsx"], False)
+        self.assertEqual(data["can_download_xlsx"], False)
+        self.assertEqual(data["can_send_xlsx_password"], False)
+        self.assertEqual(data["split_choices"], to_choice_object(PaymentPlanSplit.SplitType.choices))
+        # self.assertEqual(data["volume_by_delivery_mechanism"], "")

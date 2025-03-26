@@ -11,7 +11,6 @@ from rest_framework import serializers
 from hct_mis_api.apps.account.api.fields import Base64ModelField
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
-from hct_mis_api.apps.core.api.serializers import ChoiceSerializer
 from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object
 from hct_mis_api.apps.household.api.serializers.household import (
     HouseholdDetailSerializer,
@@ -233,15 +232,15 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     has_fsp_delivery_mechanism_xlsx_template = serializers.SerializerMethodField()
     imported_file_name = serializers.CharField()
     payments_conflicts_count = serializers.SerializerMethodField()
-    volume_by_delivery_mechanism = VolumeByDeliveryMechanismSerializer(many=True, read_only=True)
-    delivery_mechanisms = DeliveryMechanismPerPaymentPlanSerializer(many=True, read_only=True)
+    volume_by_delivery_mechanism = serializers.SerializerMethodField()
+    # delivery_mechanisms = DeliveryMechanismPerPaymentPlanSerializer(many=True, read_only=True)
     bank_reconciliation_success = serializers.IntegerField()
     bank_reconciliation_error = serializers.IntegerField()
     can_create_payment_verification_plan = serializers.BooleanField()
     available_payment_records_count = serializers.SerializerMethodField()
-    reconciliation_summary = ReconciliationSummarySerializer(read_only=True)
-    excluded_households = HouseholdDetailSerializer(many=True, read_only=True)
-    # excluded_individuals = IndividualDetailSerializer(many=True, read_only=True)
+    reconciliation_summary = serializers.SerializerMethodField()
+    excluded_households = serializers.SerializerMethodField()
+    excluded_individuals = serializers.SerializerMethodField()
     can_create_follow_up = serializers.SerializerMethodField()
     total_withdrawn_households_count = serializers.SerializerMethodField()
     unsuccessful_payments_count = serializers.SerializerMethodField()
@@ -254,7 +253,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     can_export_xlsx = serializers.SerializerMethodField()
     can_download_xlsx = serializers.SerializerMethodField()
     can_send_xlsx_password = serializers.SerializerMethodField()
-    split_choices = ChoiceSerializer(many=True, read_only=True)
+    split_choices = serializers.SerializerMethodField()
 
     class Meta(PaymentPlanListSerializer.Meta):
         fields = PaymentPlanListSerializer.Meta.fields + (  # type: ignore
@@ -266,7 +265,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "has_fsp_delivery_mechanism_xlsx_template",
             "imported_file_name",
             "payments_conflicts_count",
-            "delivery_mechanisms",
+            # "delivery_mechanisms",
             "volume_by_delivery_mechanism",
             "split_choices",
             "bank_reconciliation_success",
@@ -275,7 +274,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "available_payment_records_count",
             "reconciliation_summary",
             "excluded_households",
-            # "excluded_individuals",
+            "excluded_individuals",
             "can_create_follow_up",
             "total_withdrawn_households_count",
             "unsuccessful_payments_count",
@@ -320,6 +319,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
 
     @staticmethod
     def get_reconciliation_summary(parent: PaymentPlan) -> Dict[str, int]:
+        # ReconciliationSummarySerializer()
         return parent.eligible_payments.aggregate(
             delivered_fully=Count("id", filter=Q(status=Payment.STATUS_DISTRIBUTION_SUCCESS)),
             delivered_partially=Count("id", filter=Q(status=Payment.STATUS_DISTRIBUTION_PARTIAL)),
@@ -335,19 +335,23 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
 
     @staticmethod
     def get_excluded_households(parent: PaymentPlan) -> "QuerySet [Household]":
-        return (
+        qs = (
             Household.objects.filter(unicef_id__in=parent.excluded_beneficiaries_ids)
             if not parent.is_social_worker_program
             else Household.objects.none()
         )
+        # return HouseholdDetailSerializer(qs, read_only=True).data
+        return []
 
     @staticmethod
     def get_excluded_individuals(parent: PaymentPlan) -> "QuerySet [Individual]":
-        return (
+        qs = (
             Individual.objects.filter(unicef_id__in=parent.excluded_beneficiaries_ids)
             if parent.is_social_worker_program
             else Individual.objects.none()
         )
+        return []
+        # return IndividualDetailSerializer(qs, read_only=True).data
 
     @staticmethod
     def get_can_create_follow_up(parent: PaymentPlan) -> bool:
@@ -444,13 +448,13 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
                 return obj.has_export_file
         return False
 
-    @staticmethod
-    def get_split_choices(parent: PaymentPlan, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def get_split_choices(self, obj) -> List[Dict[str, Any]]:
         return to_choice_object(PaymentPlanSplit.SplitType.choices)
 
-    @staticmethod
-    def get_volume_by_delivery_mechanism(parent: PaymentPlan, info: Any) -> "QuerySet[DeliveryMechanismPerPaymentPlan]":
-        return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=parent).order_by("delivery_mechanism_order")
+    def get_volume_by_delivery_mechanism(self, obj: PaymentPlan) -> "QuerySet[DeliveryMechanismPerPaymentPlan]":
+        qs = DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=obj).order_by("delivery_mechanism_order")
+        return []
+        # return VolumeByDeliveryMechanismSerializer(qs, many=True).data
 
 
 class PaymentPlanBulkActionSerializer(serializers.Serializer):
@@ -506,7 +510,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
         )
 
     @classmethod
-    def get_collector_field(cls, payment: "Payment", field_name: str) -> Union[None, str, Dict]:
+    def get_collector_field(cls, payment: "Payment", field_name: str) -> Optional[str]:
         """return primary_collector or alternate_collector field value or None"""
         if household_snapshot := getattr(payment, "household_snapshot", None):
             household_snapshot_data = household_snapshot.snapshot_data
