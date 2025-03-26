@@ -65,7 +65,7 @@ class Migration(migrations.Migration):
         ),
         migrations.RemoveConstraint(
             model_name='deliverymechanismperpaymentplan',
-            name='unique payment_plan_delivery_mechanism',
+            name='unique_payment_plan_delivery_mechanism',
         ),
         migrations.RemoveField(
             model_name='deliverymechanismperpaymentplan',
