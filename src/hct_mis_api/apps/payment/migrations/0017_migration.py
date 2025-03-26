@@ -63,10 +63,6 @@ class Migration(migrations.Migration):
             name='payment_gateway_id',
             field=models.CharField(blank=True, max_length=255, null=True),
         ),
-        migrations.RemoveConstraint(
-            model_name='deliverymechanismperpaymentplan',
-            name='unique_payment_plan_delivery_mechanism',
-        ),
         migrations.RemoveField(
             model_name='deliverymechanismperpaymentplan',
             name='chosen_configuration',
@@ -74,10 +70,6 @@ class Migration(migrations.Migration):
         migrations.RemoveField(
             model_name='deliverymechanismperpaymentplan',
             name='created_by',
-        ),
-        migrations.RemoveField(
-            model_name='deliverymechanismperpaymentplan',
-            name='delivery_mechanism_order',
         ),
         migrations.RemoveField(
             model_name='deliverymechanismperpaymentplan',
