@@ -1,12 +1,12 @@
 import { Box, Button } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
-
 import { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { LoadingButton } from '@core/LoadingButton';
 import { PageHeader } from '@core/PageHeader';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface EditTargetPopulationProps {
   handleSubmit: () => Promise<void>;

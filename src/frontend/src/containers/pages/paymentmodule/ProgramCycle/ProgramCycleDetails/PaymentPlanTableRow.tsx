@@ -35,9 +35,9 @@ export const PaymentPlanTableRow = ({
       <TableCell align="left">
         {paymentPlan.is_follow_up ? 'Follow-up: ' : ''}
         {canViewDetails ? (
-          <BlackLink to={paymentPlanPath}>{paymentPlan.unicefId}</BlackLink>
+          <BlackLink to={paymentPlanPath}>{paymentPlan.unicef_id}</BlackLink>
         ) : (
-          paymentPlan.unicefId
+          paymentPlan.unicef_id
         )}
       </TableCell>
       <TableCell align="left">

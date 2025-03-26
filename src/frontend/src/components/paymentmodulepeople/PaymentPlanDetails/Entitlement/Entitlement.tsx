@@ -204,7 +204,7 @@ export function Entitlement({
                     loadingSetSteficonRule ||
                     !steficonRuleValue ||
                     paymentPlan.status !== PaymentPlanStatus.Locked ||
-                    paymentPlan.backgroundActionStatus ===
+                    paymentPlan.background_action_status ===
                       PaymentPlanBackgroundActionStatus.RuleEngineRun ||
                     !isActiveProgram
                   }

@@ -16,6 +16,7 @@ import { WarningTooltipTable } from './WarningTooltipTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { headCells } from './PeoplePaymentsTableHeadCells';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const StyledBox = styled(Box)`
   background-color: #fff;

@@ -43,10 +43,10 @@ const DeliveryMechanismsColorsMap = new Map([
 ]);
 
 export const getDeliveryMechanismColor = (
-  deliveryMechanism: string,
+  delivery_mechanism: string,
 ): string => {
-  if (DeliveryMechanismsColorsMap.has(deliveryMechanism)) {
-    return DeliveryMechanismsColorsMap.get(deliveryMechanism);
+  if (DeliveryMechanismsColorsMap.has(delivery_mechanism)) {
+    return DeliveryMechanismsColorsMap.get(delivery_mechanism);
   }
   return '#CCC';
 };
@@ -62,14 +62,14 @@ export const VolumeByDeliveryMechanismSection: FC<
       <Grid
         size={{ xs: 6 }}
         /* eslint-disable-next-line react/no-array-index-key */
-        key={`${vdm.deliveryMechanism.id}-${index}`}
+        key={`${vdm.delivery_mechanism.id}-${index}`}
       >
         <FieldBorder
-          color={getDeliveryMechanismColor(vdm.deliveryMechanism.name)}
+          color={getDeliveryMechanismColor(vdm.delivery_mechanism.name)}
         >
           <LabelizedField
-            label={`${vdm.deliveryMechanism.name} (${vdm.deliveryMechanism.fsp?.name ?? '-'})`}
-            value={`${vdm.volume ?? '0.00'} ${paymentPlan.currency} (${vdm.volumeUsd ?? '0.00'} USD)`}
+            label={`${vdm.delivery_mechanism.name} (${vdm.delivery_mechanism.fsp?.name ?? '-'})`}
+            value={`${vdm.volume ?? '0.00'} ${paymentPlan.currency} (${vdm.volume_usd ?? '0.00'} USD)`}
           />
         </FieldBorder>
       </Grid>

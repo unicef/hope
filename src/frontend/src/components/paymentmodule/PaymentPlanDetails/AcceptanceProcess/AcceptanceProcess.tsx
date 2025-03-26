@@ -35,7 +35,7 @@ function AcceptanceProcess({
   const permissions = usePermissions();
   const { isActiveProgram } = useProgramContext();
 
-  const { edges } = paymentPlan.approvalProcess;
+  const { edges } = paymentPlan.approval_process;
   const [showAll, setShowAll] = useState(false);
   const [mutate, { loading: exportPdfLoading }] =
     useExportPdfPpSummaryMutation();

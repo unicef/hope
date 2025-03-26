@@ -64,8 +64,8 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
       PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION,
       permissions,
     ) &&
-    allowedState.includes(paymentPlan.backgroundActionStatus) &&
-    paymentPlan.fspCommunicationChannel == 'XLSX';
+    allowedState.includes(paymentPlan.background_action_status) &&
+    paymentPlan.fsp_communication_channel == 'XLSX';
 
   const handleImport = async (): Promise<void> => {
     if (fileToImport) {

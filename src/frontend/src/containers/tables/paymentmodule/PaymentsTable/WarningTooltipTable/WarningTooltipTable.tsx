@@ -28,6 +28,7 @@ import { DialogFooter } from '../../../../dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../../dialogs/DialogTitleWrapper';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const StyledTable = styled(Table)`
   min-width: 100px;
@@ -120,19 +121,19 @@ export function WarningTooltipTable({
       </DialogTitleWrapper>
       <DialogContent>
         <Box mt={4} mb={2} display="flex">
-          {t('Payment Plan ID')} <Bold>{paymentPlan.unicefId}</Bold>{' '}
+          {t('Payment Plan ID')} <Bold>{paymentPlan.unicef_id}</Bold>{' '}
           {t('details')}:
         </Box>
         <GreyBox p={3}>
           <Grid container>
             <Grid size={{ xs: 6 }}>
               <LabelizedField label={t('Start Date')}>
-                <UniversalMoment>{paymentPlan.startDate}</UniversalMoment>
+                <UniversalMoment>{paymentPlan.start_date}</UniversalMoment>
               </LabelizedField>
             </Grid>
             <Grid size={{ xs: 6 }}>
               <LabelizedField label={t('End Date')}>
-                <UniversalMoment>{paymentPlan.endDate}</UniversalMoment>
+                <UniversalMoment>{paymentPlan.end_date}</UniversalMoment>
               </LabelizedField>
             </Grid>
           </Grid>

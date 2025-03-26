@@ -7,7 +7,7 @@ import {
   FileCopy,
   RefreshRounded,
 } from '@mui/icons-material';
-import { Action, PaymentPlanQuery } from '@generated/graphql';
+import { Action } from '@generated/graphql';
 import { DeleteTargetPopulation } from '../../dialogs/targetPopulation/DeleteTargetPopulation';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { LockTargetPopulationDialog } from '../../dialogs/targetPopulation/LockTargetPopulationDialog';
@@ -16,6 +16,7 @@ import { useProgramContext } from '../../../programContext';
 import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
 import { t } from 'i18next';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 export interface InProgressTargetPopulationHeaderButtonsPropTypes {
   targetPopulation: PaymentPlanDetail;

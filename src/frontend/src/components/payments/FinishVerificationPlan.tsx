@@ -16,6 +16,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { getPercentage } from '@utils/utils';
 import { useFinishPaymentVerificationPlanMutation } from '@generated/graphql';
 import { useProgramContext } from '../../programContext';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 export interface FinishVerificationPlanProps {
   verificationPlan: PaymentPlanDetail['verificationPlans']['edges'][0]['node'];

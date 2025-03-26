@@ -151,7 +151,7 @@ export function PaymentPlanDetailsHeader({
           <Box display="flex" flexDirection="column">
             <Box> {t('Payment Plan')} ID: </Box>
             <Box>
-              <span data-cy="pp-unicef-id">{paymentPlan.unicefId}</span>
+              <span data-cy="pp-unicef-id">{paymentPlan.unicef_id}</span>
             </Box>
           </Box>
           <Box ml={2}>
@@ -160,10 +160,10 @@ export function PaymentPlanDetailsHeader({
               statusToColor={paymentPlanStatusToColor}
             />
           </Box>
-          {paymentPlan.backgroundActionStatus && (
+          {paymentPlan.background_action_status && (
             <Box>
               <StatusBox
-                status={paymentPlan.backgroundActionStatus}
+                status={paymentPlan.background_action_status}
                 statusToColor={paymentPlanBackgroundActionStatusToColor}
               />
             </Box>

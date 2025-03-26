@@ -59,7 +59,7 @@ export function AcceptedPaymentPlanHeaderButtons({
   const shouldDisableExportXlsx =
     loadingExport ||
     !paymentPlan.canExportXlsx ||
-    paymentPlan.backgroundActionStatus ===
+    paymentPlan.background_action_status ===
       PaymentPlanBackgroundActionStatus.XlsxExporting;
 
   const shouldDisableDownloadXlsx = !paymentPlan.canDownloadXlsx;

@@ -68,15 +68,15 @@ export function LockPaymentPlan({
                 'After you lock this Payment Plan, you will be able to run entitlement formula for selected target population.',
               )}
             </Box>
-            {paymentPlan.paymentsConflictsCount > 0 && (
+            {paymentPlan.payments_conflicts_count > 0 && (
               <Box p={5}>
                 <GreyText>
                   {t('Note:')}{' '}
-                  {paymentPlan.paymentsConflictsCount === 1
+                  {paymentPlan.payments_conflicts_count === 1
                     ? t('There is')
                     : t('There are')}{' '}
-                  {paymentPlan.paymentsConflictsCount}{' '}
-                  {paymentPlan.paymentsConflictsCount === 1
+                  {paymentPlan.payments_conflicts_count}{' '}
+                  {paymentPlan.payments_conflicts_count === 1
                     ? t(beneficiaryGroup?.group_label)
                     : t(beneficiaryGroup?.group_label_plural)}{' '}
                   {t('that will be ignored in this Payment Plan.')}

@@ -21,6 +21,7 @@ import { EditVerificationPlan } from './EditVerificationPlan';
 import { FinishVerificationPlan } from './FinishVerificationPlan';
 import { ImportXlsx } from './ImportXlsx';
 import { ReactElement } from 'react';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const StyledLink = styled.a`
   text-decoration: none;

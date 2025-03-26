@@ -35,11 +35,11 @@ export function FollowUpPaymentPlanDetails({
     end_date,
     dispersion_start_date,
     dispersion_end_date,
-    sourcePaymentPlan: {
+    source_payment_plan: {
       id: sourcePaymentPlanId,
       unicefId: sourcePaymentPlanUnicefId,
     },
-    exchangeRate,
+    exchange_rate,
   } = paymentPlan;
 
   return (
@@ -107,7 +107,7 @@ export function FollowUpPaymentPlanDetails({
               <Box display="flex" alignItems="center">
                 <Box mr={1}>
                   <LabelizedField label={t('FX Rate Applied')}>
-                    {exchangeRate}
+                    {exchange_rate}
                   </LabelizedField>
                 </Box>
                 <Tooltip

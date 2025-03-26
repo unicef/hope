@@ -55,11 +55,11 @@ export const PeoplePaymentPlanDetailsResults = ({
 }: PeoplePaymentPlanDetailsResultsProps): ReactElement => {
   const { t } = useTranslation();
   const {
-    femaleChildrenCount,
-    maleChildrenCount,
-    femaleAdultsCount,
-    maleAdultsCount,
-    totalIndividualsCount,
+    female_children_count,
+    male_children_count,
+    female_adults_count,
+    male_adults_count,
+    total_individuals_count,
   } = paymentPlan;
 
   return (

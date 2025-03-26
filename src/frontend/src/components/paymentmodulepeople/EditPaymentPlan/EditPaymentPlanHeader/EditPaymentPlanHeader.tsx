@@ -47,17 +47,17 @@ export function EditPaymentPlanHeader({
       title={
         <Box display="flex" alignItems="center">
           {t(is_follow_up ? 'Follow-up Payment Plan' : 'Payment Plan')} ID{' '}
-          {paymentPlan.unicefId}
+          {paymentPlan.unicef_id}
           <StatusWrapper>
             <StatusBox
               status={paymentPlan.status}
               statusToColor={paymentPlanStatusToColor}
             />
           </StatusWrapper>
-          {paymentPlan.backgroundActionStatus && (
+          {paymentPlan.background_action_status && (
             <StatusWrapper>
               <StatusBox
-                status={paymentPlan.backgroundActionStatus}
+                status={paymentPlan.background_action_status}
                 statusToColor={paymentPlanBackgroundActionStatusToColor}
               />
             </StatusWrapper>

@@ -3,13 +3,13 @@ import { Doughnut } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { countPercentage } from '@utils/utils';
-
 import { BlackLink } from '@core/BlackLink';
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const ChartContainer = styled.div`
   width: 100%;
@@ -33,12 +33,12 @@ export function CashPlanDetailsSection({
   const { baseUrl } = useBaseUrl();
 
   const bankReconciliationSuccessPercentage = countPercentage(
-    planNode.bankReconciliationSuccess,
+    planNode.bank_reconciliation_success,
     planNode.paymentItems.totalCount,
   );
 
   const bankReconciliationErrorPercentage = countPercentage(
-    planNode.bankReconciliationError,
+    planNode.bank_reconciliation_error,
     planNode.paymentItems.totalCount,
   );
 
@@ -61,15 +61,15 @@ export function CashPlanDetailsSection({
               },
               {
                 label: t('PAYMENT RECORDS'),
-                value: planNode.availablePaymentRecordsCount,
+                value: planNode.available_payment_records_count,
               },
               {
                 label: t('START DATE'),
-                value: <UniversalMoment>{planNode.startDate}</UniversalMoment>,
+                value: <UniversalMoment>{planNode.start_date}</UniversalMoment>,
               },
               {
                 label: t('END DATE'),
-                value: <UniversalMoment>{planNode.endDate}</UniversalMoment>,
+                value: <UniversalMoment>{planNode.end_date}</UniversalMoment>,
               },
             ].map((el) => (
               <Grid size={{ xs: 3 }} key={el.label}>

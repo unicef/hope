@@ -11,6 +11,7 @@ import { VerificationPlanActions } from './VerificationPlanActions';
 import { VerificationPlanDetailsChart } from './VerificationPlanChart';
 import { AdminButton } from '@core/AdminButton';
 import { ReactElement } from 'react';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const Container = styled.div`
   display: flex;

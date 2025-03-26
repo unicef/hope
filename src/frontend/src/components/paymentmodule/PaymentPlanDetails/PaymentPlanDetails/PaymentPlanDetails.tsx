@@ -79,12 +79,12 @@ const PaymentPlanDetails = ({
               </Grid>
               <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Start Date')}>
-                  <UniversalMoment>{startDate}</UniversalMoment>
+                  <UniversalMoment>{start_date}</UniversalMoment>
                 </LabelizedField>
               </Grid>
               <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('End Date')}>
-                  <UniversalMoment>{endDate}</UniversalMoment>
+                  <UniversalMoment>{end_date}</UniversalMoment>
                 </LabelizedField>
               </Grid>
               <Grid size={{ xs: 3 }}>

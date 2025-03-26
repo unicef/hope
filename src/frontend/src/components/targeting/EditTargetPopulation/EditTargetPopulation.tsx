@@ -22,6 +22,7 @@ import { PaperContainer } from '../PaperContainer';
 import AddFilterTargetingCriteriaDisplay from '../TargetingCriteriaDisplay/AddFilterTargetingCriteriaDisplay';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import EditTargetPopulationHeader from './EditTargetPopulationHeader';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface EditTargetPopulationProps {
   paymentPlan: PaymentPlanDetail;
@@ -39,17 +40,17 @@ const EditTargetPopulation = ({
     id: paymentPlan.id,
     name: paymentPlan.name || '',
     program: paymentPlan.program?.id || '',
-    targetingCriteria: paymentPlan.targetingCriteria.rules || [],
-    excludedIds: paymentPlan.excludedIds || '',
-    exclusionReason: paymentPlan.exclusionReason || '',
+    targetingCriteria: paymentPlan.targeting_criteria.rules || [],
+    excludedIds: paymentPlan.excluded_ids || '',
+    exclusionReason: paymentPlan.exclusion_reason || '',
     flagExcludeIfActiveAdjudicationTicket:
-      paymentPlan.targetingCriteria.flagExcludeIfActiveAdjudicationTicket ||
+      paymentPlan.targeting_criteria.flagExcludeIfActiveAdjudicationTicket ||
       false,
     flagExcludeIfOnSanctionList:
-      paymentPlan.targetingCriteria.flagExcludeIfOnSanctionList || false,
+      paymentPlan.targeting_criteria.flagExcludeIfOnSanctionList || false,
     programCycleId: {
-      value: paymentPlan.programCycle.id,
-      name: paymentPlan.programCycle.title,
+      value: paymentPlan.program_cycle.id,
+      name: paymentPlan.program_cycle.title,
     },
   };
 

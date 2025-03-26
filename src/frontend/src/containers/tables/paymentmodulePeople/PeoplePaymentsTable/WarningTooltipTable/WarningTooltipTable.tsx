@@ -121,19 +121,19 @@ export function WarningTooltipTable({
       </DialogTitleWrapper>
       <DialogContent>
         <Box mt={4} mb={2} display="flex">
-          {t('Payment Plan ID')} <Bold>{paymentPlan.unicefId}</Bold>{' '}
+          {t('Payment Plan ID')} <Bold>{paymentPlan.unicef_id}</Bold>{' '}
           {t('details')}:
         </Box>
         <GreyBox p={3}>
           <Grid container>
             <Grid size={{ xs: 6 }}>
               <LabelizedField label={t('Start Date')}>
-                <UniversalMoment>{paymentPlan.startDate}</UniversalMoment>
+                <UniversalMoment>{paymentPlan.start_date}</UniversalMoment>
               </LabelizedField>
             </Grid>
             <Grid size={{ xs: 6 }}>
               <LabelizedField label={t('End Date')}>
-                <UniversalMoment>{paymentPlan.endDate}</UniversalMoment>
+                <UniversalMoment>{paymentPlan.end_date}</UniversalMoment>
               </LabelizedField>
             </Grid>
           </Grid>

@@ -133,7 +133,7 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
           fullWidth
         >
           {t('Payment Plan')}{' '}
-          <span data-cy="plan-id">{paymentPlan.unicefId}</span>
+          <span data-cy="plan-id">{paymentPlan.unicef_id}</span>
         </BlackLink>
       }
       breadCrumbs={

@@ -19,6 +19,7 @@ import TargetingCriteriaDisplayDisabled, {
 import { VulnerabilityScoreComponent } from './VulnerabilityScoreComponent';
 import { useCachedIndividualFieldsQuery } from '@hooks/useCachedIndividualFields';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const Title = styled.div`
   padding: ${({ theme }) => theme.spacing(3)} ${({ theme }) => theme.spacing(4)};

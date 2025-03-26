@@ -87,10 +87,10 @@ export const FollowUpPaymentPlansModal = ({
                     to={`/${baseUrl}/payment-module/payment-plans
                 /${paymentPlan.id}`}
                   >
-                    {paymentPlan.unicefId}
+                    {paymentPlan.unicef_id}
                   </BlackLink>
                 ) : (
-                  paymentPlan.unicefId
+                  paymentPlan.unicef_id
                 )}
               </LabelizedField>
             </Box>

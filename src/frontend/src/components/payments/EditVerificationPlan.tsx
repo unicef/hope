@@ -39,6 +39,7 @@ import { FormikEffect } from '@core/FormikEffect';
 import { LoadingButton } from '@core/LoadingButton';
 import { TabPanel } from '@core/TabPanel';
 import { RapidProFlowsLoader } from './RapidProFlowsLoader';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const StyledTabs = styled(Tabs)`
   && {

@@ -10,6 +10,7 @@ import { PaperContainer } from './PaperContainer';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const colors = {
   femaleChildren: '#5F02CF',

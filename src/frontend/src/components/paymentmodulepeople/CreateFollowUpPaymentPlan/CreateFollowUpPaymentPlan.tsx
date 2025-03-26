@@ -50,7 +50,7 @@ export function CreateFollowUpPaymentPlan({
   const { showMessage } = useSnackbar();
   const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
-  const { id, totalWithdrawnHouseholdsCount, unsuccessfulPaymentsCount } =
+  const { id, total_withdrawn_households_count, unsuccessful_payments_count } =
     paymentPlan;
 
   if (permissions === null) return null;
@@ -137,7 +137,7 @@ export function CreateFollowUpPaymentPlan({
               <DialogContainer>
                 <Box p={5}>
                   <Box display="flex" flexDirection="column">
-                    {unsuccessfulPaymentsCount === 0 && (
+                    {unsuccessful_payments_count === 0 && (
                       <Box mb={2}>
                         <FieldBorder color="#FF0200">
                           <GreyText>
@@ -148,7 +148,7 @@ export function CreateFollowUpPaymentPlan({
                         </FieldBorder>
                       </Box>
                     )}
-                    {totalWithdrawnHouseholdsCount > 0 && (
+                    {total_withdrawn_households_count > 0 && (
                       <Box mb={4}>
                         <FieldBorder color="#FF0200">
                           <GreyText>
@@ -177,7 +177,7 @@ export function CreateFollowUpPaymentPlan({
                     </Grid> */}
                     <Grid size={{ xs: 6 }}>
                       <LabelizedField label={t('Unsuccessful payments')}>
-                        {unsuccessfulPaymentsCount}
+                        {unsuccessful_payments_count}
                       </LabelizedField>
                     </Grid>
                     {/* <Grid size={{xs:6}}>
@@ -194,7 +194,7 @@ export function CreateFollowUpPaymentPlan({
                         )}
                       >
                         {' '}
-                        {totalWithdrawnHouseholdsCount}
+                        {total_withdrawn_households_count}
                       </LabelizedField>
                     </Grid>
                   </Grid>

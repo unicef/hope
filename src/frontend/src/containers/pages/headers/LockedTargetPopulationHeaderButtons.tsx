@@ -14,6 +14,7 @@ import styled from 'styled-components';
 import { useProgramContext } from '../../../programContext';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { FinalizeTargetPopulationPaymentPlan } from '../../dialogs/targetPopulation/FinalizeTargetPopulationPaymentPlan';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const IconContainer = styled.span`
   button {

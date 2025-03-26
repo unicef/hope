@@ -18,6 +18,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
 import { adjustHeadCells } from '@utils/utils';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const StyledBox = styled(Box)`
   background-color: #fff;
