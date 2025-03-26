@@ -1934,7 +1934,8 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
                 internal_field = field
                 associated_object = self.data
             if isinstance(associated_object, dict):
-                delivery_data[field] = associated_object.get(internal_field, None)
+                value = associated_object.get(internal_field, None)
+                delivery_data[field] = value and str(value)
             else:
                 delivery_data[field] = getattr(associated_object, internal_field, None)
 
