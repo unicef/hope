@@ -10,6 +10,7 @@ from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class ModifiedPaymentFactory(PaymentFactory):
@@ -35,6 +36,8 @@ def populate_dashboard_cache() -> Callable[[BusinessAreaFactory], Household]:
         Create household and related records
         """
         with transaction.atomic(using="default"):
+            program = ProgramFactory(business_area=afghanistan)
+
             household, _ = create_household(
                 household_args={
                     "business_area": afghanistan,
@@ -50,9 +53,10 @@ def populate_dashboard_cache() -> Callable[[BusinessAreaFactory], Household]:
                     "male_age_group_18_59_disabled_count": 0,
                     "male_age_group_60_disabled_count": 1,
                     "admin1": AreaFactory(name="Kabul", area_type__name="Province", area_type__area_level=1),
+                    "program": program,
                 }
             )
-            ModifiedPaymentFactory.create_batch(5, household=household)
+            ModifiedPaymentFactory.create_batch(5, household=household, program=program)
 
         return household
 
