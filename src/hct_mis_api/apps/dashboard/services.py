@@ -91,6 +91,8 @@ class DashboardDataCache(Protocol):
                 .filter(
                     business_area=area,
                     parent__status__in=["ACCEPTED", "FINISHED"],
+                    program__is_visible=True,
+                    parent__is_removed=False,
                     is_removed=False,
                     conflicted=False,
                 )  # noqa
@@ -122,7 +124,11 @@ class DashboardDataCache(Protocol):
                     total_usd=Sum(
                         Case(
                             When(delivered_quantity_usd__isnull=False, then="delivered_quantity_usd"),
-                            When(entitlement_quantity_usd__isnull=False, then="entitlement_quantity_usd"),
+                            When(
+                                delivered_quantity_usd__isnull=True,
+                                entitlement_quantity_usd__isnull=False,
+                                then="entitlement_quantity_usd",
+                            ),
                             default=Value(0.0),
                             output_field=DecimalField(),
                         )
@@ -130,7 +136,11 @@ class DashboardDataCache(Protocol):
                     total_quantity=Sum(
                         Case(
                             When(delivered_quantity__isnull=False, then="delivered_quantity"),
-                            When(entitlement_quantity__isnull=False, then="entitlement_quantity"),
+                            When(
+                                delivered_quantity__isnull=True,
+                                entitlement_quantity__isnull=False,
+                                then="entitlement_quantity",
+                            ),
                             default=Value(0.0),
                             output_field=DecimalField(),
                         )
@@ -234,6 +244,8 @@ class DashboardGlobalDataCache(DashboardDataCache):
             )
             .filter(
                 parent__status__in=["ACCEPTED", "FINISHED"],
+                program__is_visible=True,
+                parent__is_removed=False,
                 is_removed=False,
                 conflicted=False,
             )  # noqa
@@ -257,7 +269,11 @@ class DashboardGlobalDataCache(DashboardDataCache):
                 total_usd=Sum(
                     Case(
                         When(delivered_quantity_usd__isnull=False, then="delivered_quantity_usd"),
-                        When(entitlement_quantity_usd__isnull=False, then="entitlement_quantity_usd"),
+                        When(
+                            delivered_quantity_usd__isnull=True,
+                            entitlement_quantity_usd__isnull=False,
+                            then="entitlement_quantity_usd",
+                        ),
                         default=Value(0.0),
                         output_field=DecimalField(),
                     )
