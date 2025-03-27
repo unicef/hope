@@ -14,13 +14,15 @@ from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import (
+    FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
+    generate_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import Payment, PaymentPlan
+from hct_mis_api.apps.payment.models import DeliveryMechanism, Payment, PaymentPlan
 from hct_mis_api.apps.payment.models import PaymentVerification as PV
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -192,6 +194,7 @@ def add_payment_verification_xlsx() -> PV:
 
 
 def payment_verification_creator(channel: str = PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL) -> PV:
+    generate_delivery_mechanisms()
     user = User.objects.first()
     business_area = BusinessArea.objects.first()
     registration_data_import = RegistrationDataImportFactory(imported_by=user, business_area=business_area)
@@ -205,6 +208,10 @@ def payment_verification_creator(channel: str = PaymentVerificationPlan.VERIFICA
         {"registration_data_import": registration_data_import},
     )
 
+    dm_cash = DeliveryMechanism.objects.get(code="cash")
+    fsp = FinancialServiceProviderFactory()
+    fsp.delivery_mechanisms.set([dm_cash])
+
     payment_plan = PaymentPlanFactory(
         name="TEST",
         status=PaymentPlan.Status.FINISHED,
@@ -213,6 +220,8 @@ def payment_verification_creator(channel: str = PaymentVerificationPlan.VERIFICA
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
         created_by=user,
+        financial_service_provider=fsp,
+        delivery_mechanism=dm_cash,
     )
 
     payment_plan.unicef_id = "PP-0000-00-1122334"
@@ -267,7 +276,7 @@ class TestSmokePaymentVerification:
         assert "Timeframe" in pagePaymentVerification.getStartdate().text
         assert "Last Modified Date" in pagePaymentVerification.getUpdatedat().text
         assert "PP-0000-00-1122334" in pagePaymentVerification.getCashPlanTableRow().text
-        assert "FINISHED" in pagePaymentVerification.getStatusContainer().text
+        assert "PENDING" in pagePaymentVerification.getStatusContainer().text
         assert "Rows per page: 5 1–1 of 1" in pagePaymentVerification.getTablePagination().text.replace("\n", " ")
 
     def test_smoke_payment_verification_details(

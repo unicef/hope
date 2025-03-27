@@ -121,7 +121,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
 
             self.message_user(request, "RDI task has started")
         except Exception as e:
-            logger.exception(e)
+            logger.warning(e)
             self.message_user(request, "An error occurred while processing RDI task", messages.ERROR)
 
     @button(
@@ -135,7 +135,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
 
             self.message_user(request, "RDI Merge task has started")
         except Exception as e:
-            logger.exception(e)
+            logger.warning(e)
             self.message_user(request, "An error occurred while processing RDI Merge task", messages.ERROR)
 
     @staticmethod
@@ -182,7 +182,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
                     "Successfully executed",
                 )
         except Exception as e:
-            logger.exception(e)
+            logger.warning(e)
             self.message_user(request, "An error occurred while processing RDI delete", messages.ERROR)
 
     @staticmethod
@@ -268,7 +268,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
                     "Successfully executed",
                 )
         except Exception as e:
-            logger.exception(e)
+            logger.warning(e)
             self.message_user(request, "An error occurred while processing RDI delete", messages.ERROR)
             return None
 

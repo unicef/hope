@@ -41,7 +41,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividualIdentity,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import PendingDeliveryMechanismData
+from hct_mis_api.apps.payment.models import DeliveryMechanismData
 from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_import_service import (
     PeriodicDataUpdateImportService,
 )
@@ -472,9 +472,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             )
 
     def _create_objects(self, sheet: Worksheet, registration_data_import: RegistrationDataImport) -> None:
-        delivery_mechanism_xlsx_fields = PendingDeliveryMechanismData.get_scope_delivery_mechanisms_fields(
-            by="xlsx_field"
-        )
         complex_fields: Dict[str, Dict[str, Callable]] = {
             "individuals": {
                 "photo_i_c": self._handle_image_field,
@@ -505,9 +502,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "first_registration_date_h_c": self._handle_datetime,
             },
         }
-        complex_fields["individuals"].update(
-            {field: self._handle_delivery_mechanism_fields for field in delivery_mechanism_xlsx_fields}
-        )
+
         document_complex_types: Dict[str, Callable] = {}
         for document_type in DocumentType.objects.all():
             document_complex_types[f"{document_type.key}_i_c"] = self._handle_document_fields
@@ -558,6 +553,10 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                         header = header_cell.value
                         if header in self._pdu_column_names:
                             continue
+                        elif header.startswith(DeliveryMechanismData.ACCOUNT_FIELD_PREFIX):
+                            self._handle_delivery_mechanism_fields(cell.value, header, cell.row, obj_to_create)
+                            continue
+
                         combined_fields = self.COMBINED_FIELDS
                         current_field = combined_fields.get(header, {})
 
@@ -659,6 +658,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                                 )
                             if value is not None:
                                 obj_to_create.flex_fields[header] = value
+
                     except Exception as e:
                         raise Exception(
                             f"Error processing cell {header_cell} with `{cell}`: {e.__class__.__name__}({e})"

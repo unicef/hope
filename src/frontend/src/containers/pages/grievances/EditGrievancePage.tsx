@@ -271,10 +271,6 @@ const EditGrievancePage = (): ReactElement => {
     (element) => ({ name: element.node.name, value: element.node.id }),
   );
 
-  const deliveryMechanismDataToEdit =
-    ticket?.individualDataUpdateTicketDetails?.individualData
-      ?.delivery_mechanism_data_to_edit;
-
   const individualFieldsDictForValidation = isSocialDctType
     ? peopleFieldsDict
     : individualFieldsDict;
@@ -602,92 +598,6 @@ const EditGrievancePage = (): ReactElement => {
                             setFieldValue={setFieldValue}
                           />
                           {dataChangeErrors(errors, touched)}
-                        </BoxPadding>
-                        <BoxPadding>
-                          {deliveryMechanismDataToEdit && (
-                            <>
-                              <Title>
-                                <Typography variant="h6">
-                                  {t('Delivery Mechanisms Data to Edit')}
-                                </Typography>
-                              </Title>
-                              <Grid container spacing={3}>
-                                {values.individualDataUpdateDeliveryMechanismDataToEdit?.map(
-                                  (
-                                    item: {
-                                      id: string;
-                                      label: string;
-                                      dataFields: Record<
-                                        string,
-                                        {
-                                          name: string;
-                                          previousValue: string;
-                                          value: string;
-                                        }
-                                      >;
-                                    },
-                                    index: number,
-                                  ) => (
-                                    <Grid
-                                      container
-                                      size={{ xs: 12 }}
-                                      key={item.id}
-                                    >
-                                      <Typography variant="subtitle1">
-                                        Delivery Mechanism: {item.label}
-                                      </Typography>
-                                      {Object.entries(item.dataFields).map(
-                                        (
-                                          [, field]: [
-                                            string,
-                                            {
-                                              name: string;
-                                              previousValue: string;
-                                              value: string;
-                                            },
-                                          ],
-                                          fieldIndex: number,
-                                        ) => (
-                                          <Grid
-                                            key={field.name}
-                                            container
-                                            alignItems="flex-end"
-                                            spacing={3}
-                                          >
-                                            <Grid size={{ xs: 4 }}>
-                                              <LabelizedField
-                                                label={t('Field Name')}
-                                              >
-                                                {field.name}
-                                              </LabelizedField>
-                                            </Grid>
-                                            <Grid size={{ xs: 4 }}>
-                                              <Field
-                                                name={`individualDataUpdateDeliveryMechanismDataToEdit[${index}].dataFields[${fieldIndex}].previous_value`}
-                                                type="text"
-                                                label={t('Current Value')}
-                                                component={FormikTextField}
-                                                disabled
-                                              />
-                                            </Grid>
-                                            <Grid size={{ xs: 4 }}>
-                                              <Field
-                                                name={`individualDataUpdateDeliveryMechanismDataToEdit[${index}].dataFields[${fieldIndex}].value`}
-                                                type="text"
-                                                label={t('New Value')}
-                                                component={FormikTextField}
-                                                required
-                                              />
-                                            </Grid>
-                                          </Grid>
-                                        ),
-                                      )}
-                                    </Grid>
-                                  ),
-                                )}
-                              </Grid>
-                            </>
-                          )}
                         </BoxPadding>
                       </>
                     )}

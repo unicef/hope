@@ -154,6 +154,10 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                             {
                                 'name': 'By Records',
                                 'value': 'BY_RECORDS'
+                            },
+                            {
+                                'name': 'No Split',
+                                'value': 'NO_SPLIT'
                             }
                         ],
                         'status': 'OPEN',
@@ -241,6 +245,10 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                             {
                                 'name': 'By Records',
                                 'value': 'BY_RECORDS'
+                            },
+                            {
+                                'name': 'No Split',
+                                'value': 'NO_SPLIT'
                             }
                         ],
                         'status': 'LOCKED',
@@ -987,9 +995,9 @@ snapshots['TestPaymentPlanQueries::test_payment_plan_filter_total_households_cou
 snapshots['TestPaymentPlanQueries::test_payment_plans_export_download_properties_0_with_permission_api 1'] = {
     'data': {
         'paymentPlan': {
-            'canCreateXlsxWithFspAuthCode': False,
+            'canCreateXlsxWithFspAuthCode': True,
             'canDownloadXlsx': False,
-            'canExportXlsx': False,
+            'canExportXlsx': True,
             'canSendToPaymentGateway': False,
             'canSendXlsxPassword': False,
             'fspCommunicationChannel': 'API',
@@ -1002,7 +1010,7 @@ snapshots['TestPaymentPlanQueries::test_payment_plans_export_download_properties
 snapshots['TestPaymentPlanQueries::test_payment_plans_export_download_properties_1_without_permission_api 1'] = {
     'data': {
         'paymentPlan': {
-            'canCreateXlsxWithFspAuthCode': False,
+            'canCreateXlsxWithFspAuthCode': True,
             'canDownloadXlsx': False,
             'canExportXlsx': False,
             'canSendToPaymentGateway': False,

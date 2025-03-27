@@ -2210,3 +2210,39 @@ snapshots['TestGrievanceQuery::test_grievance_ticket_query_list_partner_with_ful
         }
     }
 }
+
+snapshots['TestGrievanceQuery::test_grievance_ticket_query_partner_access_list_partner_without_program_for_program 1'] = {
+    'data': {
+        'allGrievanceTicket': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'allGrievanceTicket'
+            ]
+        }
+    ]
+}
+
+snapshots['TestGrievanceQuery::test_people_upd_individual_data_admin_area_title 1'] = {
+    'data': {
+        'grievanceTicket': {
+            'individualDataUpdateTicketDetails': {
+                'individualData': {
+                    'admin_area_title': {
+                        'approve_status': True,
+                        'previous_value': 'Old_Name - A22',
+                        'value': 'Test_Name - AAA333'
+                    }
+                }
+            }
+        }
+    }
+}
