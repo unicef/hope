@@ -49,12 +49,6 @@ from hct_mis_api.apps.household.models import (
     DocumentType,
     IndividualIdentity,
 )
-from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
-from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismDataFactory,
-    generate_delivery_mechanisms,
-)
-from hct_mis_api.apps.payment.models import DeliveryMechanism
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.models import MergeStatusModel
@@ -96,7 +90,6 @@ class TestUpdateGrievanceTickets(APITestCase):
         super().setUpTestData()
         call_command("init-geo-fixtures")
         create_afghanistan()
-        generate_delivery_mechanisms()
         cls.generate_document_types_for_all_countries()
         partner = PartnerFactory(name="Partner")
         cls.user = UserFactory(id="a5c44eeb-482e-49c2-b5ab-d769f83db116", partner=partner)
@@ -289,11 +282,6 @@ class TestUpdateGrievanceTickets(APITestCase):
             number="3456",
             country=country_pl,
             rdi_merge_status=MergeStatusModel.MERGED,
-        )
-        cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
-        cls.dmd = DeliveryMechanismDataFactory(
-            individual=cls.individuals[0],
-            delivery_mechanism=cls.dm_atm_card,
         )
 
     @parameterized.expand(
@@ -488,16 +476,6 @@ class TestUpdateGrievanceTickets(APITestCase):
                                     "number": "3333",
                                 }
                             ],
-                            "deliveryMechanismDataToEdit": [
-                                {
-                                    "id": str(self.dmd.id),
-                                    "label": DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD,
-                                    "approveStatus": False,
-                                    "dataFields": [
-                                        {"name": "phone_number", "value": "+1234567890"},
-                                    ],
-                                },
-                            ],
                         }
                     }
                 },
@@ -568,22 +546,6 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "documents_to_remove": [],
                 "previous_identities": {},
                 "identities_to_remove": [],
-                "delivery_mechanism_data": [],
-                "delivery_mechanism_data_to_edit": [
-                    {
-                        "id": str(self.dmd.id),
-                        "label": self.dmd.delivery_mechanism.name,
-                        "approve_status": False,
-                        "data_fields": [
-                            {
-                                "name": "phone_number",
-                                "value": "+1234567890",
-                                "previous_value": None,
-                            }
-                        ],
-                    }
-                ],
-                "delivery_mechanism_data_to_remove": [],
             }
 
         else:

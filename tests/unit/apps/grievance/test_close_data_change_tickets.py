@@ -44,11 +44,6 @@ from hct_mis_api.apps.household.models import (
     Individual,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismDataFactory,
-    generate_delivery_mechanisms,
-)
-from hct_mis_api.apps.payment.models import DeliveryMechanism
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
@@ -76,7 +71,6 @@ class TestCloseDataChangeTickets(APITestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         create_afghanistan()
-        generate_delivery_mechanisms()
         call_command("loadcountries")
         cls.generate_document_types_for_all_countries()
         partner = PartnerFactory(name="Partner")
@@ -321,7 +315,6 @@ class TestCloseDataChangeTickets(APITestCase):
             },
             approve_status=True,
         )
-        cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
 
         rebuild_search_index()
 
@@ -721,53 +714,3 @@ class TestCloseDataChangeTickets(APITestCase):
         bank_account_info = BankAccountInfo.objects.get(individual=individual)
         self.assertEqual(bank_account_info.bank_name, "privatbank")
         self.assertEqual(bank_account_info.bank_account_number, "1111222233334444")
-
-    def test_close_update_individual_delivery_mechanism_data(self) -> None:
-        self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area, self.program
-        )
-        dmd = DeliveryMechanismDataFactory(
-            individual=self.individuals[0],
-            delivery_mechanism=self.dm_atm_card,
-        )
-        self.assertEqual(dmd.data, {})
-        ticket = GrievanceTicketFactory(
-            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-            issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
-            admin2=self.admin_area_1,
-            business_area=self.business_area,
-            status=GrievanceTicket.STATUS_FOR_APPROVAL,
-        )
-        TicketIndividualDataUpdateDetailsFactory(
-            ticket=ticket,
-            individual=self.individuals[0],
-            individual_data={
-                "delivery_mechanism_data_to_edit": [
-                    {
-                        "id": str(dmd.id),
-                        "label": self.dm_atm_card.name,
-                        "approve_status": True,
-                        "data_fields": [
-                            {"name": "name_of_cardholder__atm_card", "value": "Marek"},
-                            {"name": "full_name", "value": "MarekMarek"},
-                        ],
-                    },
-                ],
-            },
-        )
-
-        response = self.graphql_request(
-            request_string=self.STATUS_CHANGE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
-            variables={
-                "grievanceTicketId": self.id_to_base64(ticket.id, "GrievanceTicketNode"),
-                "status": GrievanceTicket.STATUS_CLOSED,
-            },
-        )
-        assert "errors" not in response, response["errors"]
-
-        individual = self.individuals[0]
-        individual.refresh_from_db()
-        self.assertEqual(individual.full_name, "MarekMarek")
-        dmd.refresh_from_db()
-        self.assertEqual(dmd.data, {"name_of_cardholder__atm_card": "Marek"})

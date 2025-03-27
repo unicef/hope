@@ -58,7 +58,7 @@ def program(poland: Country, germany: Country) -> Program:
 
 @pytest.fixture
 def delivery_mechanism() -> DeliveryMechanism:
-    return DeliveryMechanism.objects.create(name="Mobile Money", code="mobile_money", required_fields=["phone_number"])
+    return DeliveryMechanism.objects.create(name="Mobile Money", code="mobile_money")
 
 
 @pytest.fixture
@@ -125,7 +125,6 @@ def wallet(individual: Individual, delivery_mechanism: DeliveryMechanism) -> Del
     return DeliveryMechanismData.objects.create(
         individual=individual,
         data={"phone_number": "1234567890"},
-        delivery_mechanism=delivery_mechanism,
         rdi_merge_status=DeliveryMechanismData.MERGED,
     )
 

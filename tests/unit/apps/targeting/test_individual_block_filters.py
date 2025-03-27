@@ -19,7 +19,9 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismDataFactory,
     PaymentPlanFactory,
+    generate_delivery_mechanisms,
 )
+from hct_mis_api.apps.payment.models import AccountType
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.targeting.choices import FlexFieldClassification
 from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
@@ -44,6 +46,7 @@ class TestIndividualBlockFilter(TestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         call_command("loadflexfieldsattributes")
+        generate_delivery_mechanisms()
         cls.business_area = create_afghanistan()
         cls.user = UserFactory()
         cls.program = ProgramFactory(business_area=cls.business_area, name="Test Program")
@@ -381,7 +384,7 @@ class TestIndividualBlockFilter(TestCase):
         )
         collector = IndividualRoleInHousehold.objects.get(household_id=hh.pk, role=ROLE_PRIMARY).individual
         DeliveryMechanismDataFactory(
-            individual=collector, is_valid=True, data={"delivery_data_field__random_name": "test123"}
+            individual=collector, data={"phone_number": "test123"}, account_type=AccountType.objects.get(key="mobile")
         )
         # Target population
         tc = TargetingCriteriaFactory()
@@ -393,7 +396,7 @@ class TestIndividualBlockFilter(TestCase):
         collector_filter = TargetingCollectorBlockRuleFilter(
             collector_block_filters=col_block,
             comparison_method="EQUALS",
-            field_name="delivery_data_field__random_name",
+            field_name="mobile__phone_number",
             arguments=["Yes"],
         )
         collectors_filters_block = TargetingCollectorRuleFilterBlockBase(collector_block_filters=[collector_filter])

@@ -1,16 +1,26 @@
-import { Grid2 as Grid, Typography } from '@mui/material';
-import { Pie } from 'react-chartjs-2';
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid2 as Grid,
+  List,
+  ListItem,
+  Typography,
+} from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { PaymentPlanBuildStatus, PaymentPlanQuery } from '@generated/graphql';
+import { PaymentPlanBuildStatus } from '@generated/graphql';
 import { MiśTheme } from '../../theme';
 import { FieldBorder } from '@core/FieldBorder';
 import { LabelizedField } from '@core/LabelizedField';
 import { PaperContainer } from './PaperContainer';
 import { useProgramContext } from 'src/programContext';
-import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { Pointer } from '@components/core/Pointer';
+import { ReactElement, useState } from 'react';
 
 const colors = {
   femaleChildren: '#5F02CF',
@@ -43,12 +53,6 @@ const SummaryValue = styled.div`
   margin-top: ${({ theme }) => theme.spacing(2)};
 `;
 
-const ChartContainer = styled.div`
-  width: 100px;
-  height: 100px;
-  margin: 0 auto;
-`;
-
 interface ResultsProps {
   targetPopulation: PaymentPlanDetail;
 }
@@ -59,10 +63,18 @@ function ResultsForHouseholds({
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const [openDialog, setOpenDialog] = useState(false);
+  const handleOpen = () => {
+    if (targetPopulation?.failed_wallet_validation_collectors_ids?.length > 0) {
+      setOpenDialog(true);
+    }
+  };
+  const handleClose = () => setOpenDialog(false);
 
   if (targetPopulation.build_status !== PaymentPlanBuildStatus.Ok) {
     return null;
   }
+
   return (
     <div>
       <PaperContainer>
@@ -77,7 +89,7 @@ function ResultsForHouseholds({
                   <FieldBorder color={colors.femaleChildren}>
                     <LabelizedField
                       label={t('Female Children')}
-                      value={targetPopulation.femaleChildrenCount}
+                      value={targetPopulation.female_children_count}
                     />
                   </FieldBorder>
                 </Grid>
@@ -85,7 +97,7 @@ function ResultsForHouseholds({
                   <FieldBorder color={colors.femaleAdult}>
                     <LabelizedField
                       label={t('Female Adults')}
-                      value={targetPopulation.femaleAdultsCount}
+                      value={targetPopulation.female_adults_count}
                     />
                   </FieldBorder>
                 </Grid>
@@ -93,7 +105,7 @@ function ResultsForHouseholds({
                   <FieldBorder color={colors.maleChildren}>
                     <LabelizedField
                       label={t('Male Children')}
-                      value={targetPopulation.maleChildrenCount}
+                      value={targetPopulation.male_children_count}
                     />
                   </FieldBorder>
                 </Grid>
@@ -101,7 +113,7 @@ function ResultsForHouseholds({
                   <FieldBorder color={colors.maleAdult}>
                     <LabelizedField
                       label={t('Male Adults')}
-                      value={targetPopulation.maleAdultsCount}
+                      value={targetPopulation.male_adults_count}
                     />
                   </FieldBorder>
                 </Grid>
@@ -114,7 +126,47 @@ function ResultsForHouseholds({
                 justifyContent="flex-start"
                 alignItems="center"
               >
-                <Grid size={{ xs: 4 }}>
+                <Grid size={{ xs: 6 }}>
+                  <SummaryBorder>
+                    <>
+                      <LabelizedField
+                        label={t(
+                          'Collectors failed payment channel validation',
+                        )}
+                      >
+                        <SummaryValue
+                          onClick={() => handleOpen()}
+                          data-cy="total-collectors-failed-count"
+                        >
+                          <Pointer>
+                            {targetPopulation
+                              ?.failed_wallet_validation_collectors_ids
+                              ?.length || '-'}
+                          </Pointer>
+                        </SummaryValue>
+                      </LabelizedField>
+                      <Dialog open={openDialog} onClose={handleClose}>
+                        <DialogTitle>View IDs</DialogTitle>
+                        <DialogContent>
+                          <List>
+                            {targetPopulation?.failed_wallet_validation_collectors_ids?.map(
+                              (id, index) => (
+                                <ListItem key={index}>{id}</ListItem>
+                              ),
+                            )}
+                          </List>
+                        </DialogContent>
+                        <DialogActions>
+                          <Button onClick={handleClose} color="primary">
+                            Close
+                          </Button>
+                        </DialogActions>
+                      </Dialog>
+                    </>
+                  </SummaryBorder>
+                </Grid>
+
+                {/* <Grid item xs={4}>
                   <ChartContainer>
                     <Pie
                       width={100}
@@ -152,7 +204,7 @@ function ResultsForHouseholds({
                       }}
                     />
                   </ChartContainer>
-                </Grid>
+                </Grid> */}
               </Grid>
             </Grid>
             <Grid size={{ xs: 4 }}>
@@ -163,7 +215,7 @@ function ResultsForHouseholds({
                       label={`Total Number of ${beneficiaryGroup?.group_label_plural}`}
                     >
                       <SummaryValue data-cy="total-number-of-households-count">
-                        {targetPopulation.totalHouseholdsCount || '0'}
+                        {targetPopulation.total_households_count || '0'}
                       </SummaryValue>
                     </LabelizedField>
                   </SummaryBorder>
@@ -174,7 +226,7 @@ function ResultsForHouseholds({
                       label={`Targeted ${beneficiaryGroup?.member_label_plural}`}
                     >
                       <SummaryValue>
-                        {targetPopulation.totalIndividualsCount || '0'}
+                        {targetPopulation.total_individuals_count || '0'}
                       </SummaryValue>
                     </LabelizedField>
                   </SummaryBorder>

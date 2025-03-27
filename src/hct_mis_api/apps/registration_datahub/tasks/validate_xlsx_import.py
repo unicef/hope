@@ -16,19 +16,14 @@ class ValidateXlsxImport:
     def execute(self, import_data: ImportData, program: Program) -> Dict:
         import_data.status = ImportData.STATUS_RUNNING
         import_data.save()
-        errors, delivery_mechanisms_validation_errors = UploadXLSXInstanceValidator(program).validate_everything(
+        errors = UploadXLSXInstanceValidator(program).validate_everything(
             import_data.file, import_data.business_area_slug
         )
-        if delivery_mechanisms_validation_errors:
-            delivery_mechanisms_validation_errors.sort(key=operator.itemgetter("row_number", "header"))
-            import_data.delivery_mechanisms_validation_errors = json.dumps(delivery_mechanisms_validation_errors)
-            import_data.status = ImportData.STATUS_DELIVERY_MECHANISMS_VALIDATION_ERROR
         if errors:
             errors.sort(key=operator.itemgetter("row_number", "header"))
             import_data.status = ImportData.STATUS_VALIDATION_ERROR
             import_data.validation_errors = json.dumps(errors)
-
-        if not errors and not delivery_mechanisms_validation_errors:
+        else:
             import_data.status = ImportData.STATUS_FINISHED
 
         wb = openpyxl.load_workbook(import_data.file)
