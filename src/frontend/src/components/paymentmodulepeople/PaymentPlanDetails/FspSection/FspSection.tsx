@@ -23,13 +23,13 @@ export function FspSection({
   const { paymentPlanId } = useParams();
   const { isActiveProgram } = useProgramContext();
 
-  const { deliveryMechanisms, is_follow_up } = paymentPlan;
-  const showFspDisplay = deliveryMechanisms?.length;
+  const { delivery_mechanisms, is_follow_up } = paymentPlan;
+  const showFspDisplay = delivery_mechanisms?.length;
   const shouldDisableSetUpFsp = (): boolean => {
     if (paymentPlan.is_follow_up) {
       return false;
     }
-    if (!paymentPlan.totalEntitledQuantityUsd) {
+    if (!paymentPlan.total_entitled_quantity_usd) {
       return true;
     }
     if (!isActiveProgram) {

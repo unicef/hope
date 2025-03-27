@@ -32,15 +32,15 @@ export const PaymentPlanDetails = ({
   const {
     id,
     name,
-    createdBy,
+    created_by,
     program,
     currency,
-    startDate,
-    endDate,
-    dispersionStartDate,
-    dispersionEndDate,
-    followUps,
-    exchangeRate,
+    start_date,
+    end_date,
+    dispersion_start_date,
+    dispersion_end_date,
+    follow_ups,
+    exchange_rate,
   } = paymentPlan;
 
   return (

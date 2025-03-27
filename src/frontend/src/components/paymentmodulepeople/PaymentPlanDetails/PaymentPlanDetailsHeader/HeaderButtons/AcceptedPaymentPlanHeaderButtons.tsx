@@ -58,11 +58,11 @@ export function AcceptedPaymentPlanHeaderButtons({
 
   const shouldDisableExportXlsx =
     loadingExport ||
-    !paymentPlan.canExportXlsx ||
+    !paymentPlan.can_export_xlsx ||
     paymentPlan.background_action_status ===
       PaymentPlanBackgroundActionStatus.XlsxExporting;
 
-  const shouldDisableDownloadXlsx = !paymentPlan.canDownloadXlsx;
+  const shouldDisableDownloadXlsx = !paymentPlan.can_download_xlsx;
 
   if (loading) return <LoadingComponent />;
   if (!data) return null;
@@ -111,7 +111,7 @@ export function AcceptedPaymentPlanHeaderButtons({
   return (
     <Box display="flex" alignItems="center">
       <>
-        {paymentPlan.canCreateFollowUp && (
+        {paymentPlan.can_create_follow_up && (
           <Box p={2}>
             <CreateFollowUpPaymentPlan paymentPlan={paymentPlan} />
           </Box>
@@ -122,7 +122,7 @@ export function AcceptedPaymentPlanHeaderButtons({
             canSplit={canSplit}
           />
         </Box>
-        {!paymentPlan.hasPaymentListExportFile && (
+        {!paymentPlan.has_payment_list_export_file && (
           <Box m={2}>
             <LoadingButton
               loading={loadingExport}
@@ -132,7 +132,7 @@ export function AcceptedPaymentPlanHeaderButtons({
               startIcon={<GetApp />}
               data-cy="button-export-xlsx"
               onClick={
-                paymentPlan.fspCommunicationChannel === 'API'
+                paymentPlan.fsp_communication_channel === 'API'
                   ? handleClickOpen
                   : handleExport
               }
@@ -179,7 +179,7 @@ export function AcceptedPaymentPlanHeaderButtons({
             </Button>
           </DialogActions>
         </Dialog>
-        {paymentPlan.hasPaymentListExportFile && (
+        {paymentPlan.has_payment_list_export_file && (
           <>
             <Box m={2}>
               <Button

@@ -75,7 +75,7 @@ export const PeoplePaymentPlanDetailsResults = ({
                 <FieldBorder color={colors.femaleChildren}>
                   <LabelizedField
                     label={t('Female Children')}
-                    value={femaleChildrenCount}
+                    value={female_children_count}
                   />
                 </FieldBorder>
               </Grid>
@@ -83,7 +83,7 @@ export const PeoplePaymentPlanDetailsResults = ({
                 <FieldBorder color={colors.femaleAdult}>
                   <LabelizedField
                     label={t('Female Adults')}
-                    value={femaleAdultsCount}
+                    value={female_adults_count}
                   />
                 </FieldBorder>
               </Grid>
@@ -91,7 +91,7 @@ export const PeoplePaymentPlanDetailsResults = ({
                 <FieldBorder color={colors.maleChildren}>
                   <LabelizedField
                     label={t('Male Children')}
-                    value={maleChildrenCount}
+                    value={male_children_count}
                   />
                 </FieldBorder>
               </Grid>
@@ -99,7 +99,7 @@ export const PeoplePaymentPlanDetailsResults = ({
                 <FieldBorder color={colors.maleAdult}>
                   <LabelizedField
                     label={t('Male Adults')}
-                    value={maleAdultsCount}
+                    value={male_adults_count}
                   />
                 </FieldBorder>
               </Grid>

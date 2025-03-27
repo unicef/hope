@@ -71,7 +71,7 @@ function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
                   <FieldBorder color={colors.femaleChildren}>
                     <LabelizedField
                       label={t('Female Children')}
-                      value={targetPopulation.femaleChildrenCount}
+                      value={targetPopulation.female_children_count}
                     />
                   </FieldBorder>
                 </Grid>
@@ -79,7 +79,7 @@ function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
                   <FieldBorder color={colors.femaleAdult}>
                     <LabelizedField
                       label={t('Female Adults')}
-                      value={targetPopulation.femaleAdultsCount}
+                      value={targetPopulation.female_adults_count}
                     />
                   </FieldBorder>
                 </Grid>
@@ -87,7 +87,7 @@ function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
                   <FieldBorder color={colors.maleChildren}>
                     <LabelizedField
                       label={t('Male Children')}
-                      value={targetPopulation.maleChildrenCount}
+                      value={targetPopulation.male_children_count}
                     />
                   </FieldBorder>
                 </Grid>
@@ -95,7 +95,7 @@ function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
                   <FieldBorder color={colors.maleAdult}>
                     <LabelizedField
                       label={t('Male Adults')}
-                      value={targetPopulation.maleAdultsCount}
+                      value={targetPopulation.male_adults_count}
                     />
                   </FieldBorder>
                 </Grid>
@@ -130,10 +130,10 @@ function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
                         datasets: [
                           {
                             data: [
-                              targetPopulation.femaleChildrenCount,
-                              targetPopulation.femaleAdultsCount,
-                              targetPopulation.maleChildrenCount,
-                              targetPopulation.maleAdultsCount,
+                              targetPopulation.female_children_count,
+                              targetPopulation.female_adults_count,
+                              targetPopulation.male_children_count,
+                              targetPopulation.male_adults_count,
                             ],
                             backgroundColor: [
                               colors.femaleChildren,
@@ -155,7 +155,7 @@ function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
                   <SummaryBorder>
                     <LabelizedField label={t('Total Number of People')}>
                       <SummaryValue>
-                        {targetPopulation.totalHouseholdsCount || '0'}
+                        {targetPopulation.total_households_count || '0'}
                       </SummaryValue>
                     </LabelizedField>
                   </SummaryBorder>

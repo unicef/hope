@@ -102,7 +102,7 @@ export function Entitlement({
   const { isActiveProgram } = useProgramContext();
 
   const [steficonRuleValue, setSteficonRuleValue] = useState<string>(
-    paymentPlan.steficonRule?.rule.id || '',
+    paymentPlan.steficon_rule?.rule.id || '',
   );
   const options = {
     refetchQueries: () => [

@@ -38,6 +38,7 @@ import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import styled from 'styled-components';
 import { useDownloadSupportingDocument } from './SupportingDocumentsSectionActions';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const StyledBox = styled(Box)`
   max-width: 300px;
@@ -68,7 +69,7 @@ export const SupportingDocumentsSection = ({
 
   const { businessArea, programId } = useBaseUrl();
   const [documents, setDocuments] = useState(
-    paymentPlan?.supportingDocuments || [],
+    paymentPlan?.supporting_documents || [],
   );
   const [fileToImport, setFileToImport] = useState<File | null>(null);
   const [title, setTitle] = useState('');

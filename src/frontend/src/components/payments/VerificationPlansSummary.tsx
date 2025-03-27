@@ -30,7 +30,7 @@ export function VerificationPlansSummary({
               <LabelizedField label={t('Status')}>
                 <StatusBox
                   dataCy="verification-plans-summary-status"
-                  status={planNode.paymentVerificationSummary?.status}
+                  status={planNode.payment_verification_summary?.status}
                   statusToColor={paymentVerificationStatusToColor}
                 />
               </LabelizedField>

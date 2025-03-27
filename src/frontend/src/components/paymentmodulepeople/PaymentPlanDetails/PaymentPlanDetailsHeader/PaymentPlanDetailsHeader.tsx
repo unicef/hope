@@ -60,9 +60,9 @@ export function PaymentPlanDetailsHeader({
   );
   const canSendToPaymentGateway =
     hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
-    paymentPlan.canSendToPaymentGateway;
+    paymentPlan.can_send_to_payment_gateway;
   const canSplit =
-    hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
+    hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.can_split;
 
   let buttons: ReactElement | null = null;
   switch (paymentPlan.status) {
@@ -175,7 +175,7 @@ export function PaymentPlanDetailsHeader({
           ? breadCrumbsItems
           : null
       }
-      flags={<AdminButton adminUrl={paymentPlan.adminUrl} />}
+      flags={<AdminButton adminUrl={paymentPlan.admin_url} />}
     >
       {buttons}
     </PageHeader>

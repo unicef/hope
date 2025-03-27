@@ -41,8 +41,8 @@ function AcceptanceProcess({
     useExportPdfPpSummaryMutation();
 
   const matchDataSize = (
-    data: PaymentPlanDetail['approvalProcess']['edges'],
-  ): PaymentPlanDetail['approvalProcess']['edges'] =>
+    data: PaymentPlanDetail['approval_process']['edges'],
+  ): PaymentPlanDetail['approval_process']['edges'] =>
     showAll ? data : [data[0]];
 
   if (!edges.length) {

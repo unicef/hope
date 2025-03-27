@@ -38,12 +38,12 @@ export function ExcludeSection({
 }: ExcludeSectionProps): ReactElement {
   const {
     status,
-    backgroundActionStatus,
-    exclusionReason,
-    excludeHouseholdError,
+    background_action_status,
+    exclusion_reason,
+    exclude_household_error,
   } = paymentPlan;
 
-  const initialExcludedIds = paymentPlan?.excludedHouseholds?.map(
+  const initialExcludedIds = paymentPlan?.excluded_households?.map(
     (el) => el.unicefId,
   );
   const [isExclusionsOpen, setExclusionsOpen] = useState(initialOpen);

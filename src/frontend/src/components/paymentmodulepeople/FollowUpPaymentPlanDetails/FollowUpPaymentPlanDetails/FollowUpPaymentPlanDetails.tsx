@@ -30,18 +30,18 @@ export function FollowUpPaymentPlanDetails({
   const {
     id,
     name,
-    createdBy,
+    created_by,
     program,
     currency,
-    startDate,
-    endDate,
-    dispersionStartDate,
-    dispersionEndDate,
-    sourcePaymentPlan: {
+    start_date,
+    end_date,
+    dispersion_start_date,
+    dispersion_end_date,
+    source_payment_plan: {
       id: sourcePaymentPlanId,
       unicefId: sourcePaymentPlanUnicefId,
     },
-    exchangeRate,
+    exchange_rate,
   } = paymentPlan;
 
   return (
@@ -63,7 +63,7 @@ export function FollowUpPaymentPlanDetails({
             </Grid>
             <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Created By')}>
-                {renderUserName(createdBy)}
+                {renderUserName(created_by)}
               </LabelizedField>
             </Grid>
             <Grid size={{ xs: 3 }}>
@@ -85,17 +85,17 @@ export function FollowUpPaymentPlanDetails({
             </Grid>
             <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Start Date')}>
-                <UniversalMoment>{startDate}</UniversalMoment>
+                <UniversalMoment>{start_date}</UniversalMoment>
               </LabelizedField>
             </Grid>
             <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('End Date')}>
-                <UniversalMoment>{endDate}</UniversalMoment>
+                <UniversalMoment>{end_date}</UniversalMoment>
               </LabelizedField>
             </Grid>
             <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Dispersion Start Date')}>
-                <UniversalMoment>{dispersionStartDate}</UniversalMoment>
+                <UniversalMoment>{dispersion_start_date}</UniversalMoment>
               </LabelizedField>
             </Grid>
             <Grid size={{ xs: 3 }}>

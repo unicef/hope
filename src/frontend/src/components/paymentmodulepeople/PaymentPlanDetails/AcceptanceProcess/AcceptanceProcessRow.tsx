@@ -13,7 +13,7 @@ const StyledBox = styled(Box)`
 `;
 
 interface AcceptanceProcessRowProps {
-  acceptanceProcess: PaymentPlanDetail['approvalProcess']['edges'][0]['node'];
+  acceptanceProcess: PaymentPlanDetail['approval_process']['edges'][0]['node'];
   paymentPlan: PaymentPlanDetail;
 }
 

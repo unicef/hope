@@ -34,12 +34,12 @@ export function CashPlanDetailsSection({
 
   const bankReconciliationSuccessPercentage = countPercentage(
     planNode.bank_reconciliation_success,
-    planNode.paymentItems.totalCount,
+    planNode.payment_items_total_count,
   );
 
   const bankReconciliationErrorPercentage = countPercentage(
     planNode.bank_reconciliation_error,
-    planNode.paymentItems.totalCount,
+    planNode.payment_items_total_count,
   );
 
   return (

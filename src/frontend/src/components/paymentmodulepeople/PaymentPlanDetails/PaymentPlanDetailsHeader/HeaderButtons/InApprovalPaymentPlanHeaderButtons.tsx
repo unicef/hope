@@ -1,8 +1,8 @@
 import { Box } from '@mui/material';
-
 import { ApprovePaymentPlan } from '../ApprovePaymentPlan';
 import { RejectPaymentPlan } from '../RejectPaymentPlan';
 import { ReactElement } from 'react';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 export interface InApprovalPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanDetail;

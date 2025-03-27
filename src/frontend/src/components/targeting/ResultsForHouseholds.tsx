@@ -60,7 +60,7 @@ function ResultsForHouseholds({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
-  if (targetPopulation.buildStatus !== PaymentPlanBuildStatus.Ok) {
+  if (targetPopulation.build_status !== PaymentPlanBuildStatus.Ok) {
     return null;
   }
   return (

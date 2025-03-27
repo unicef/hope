@@ -36,12 +36,12 @@ export function ReconciliationSummary({
   const { t } = useTranslation();
 
   const {
-    reconciliationSummary: {
-      deliveredFully,
-      deliveredPartially,
+    reconciliation_summary: {
+      delivered_fully,
+      delivered_partially,
       unsuccessful,
-      notDelivered,
-      numberOfPayments,
+      not_delivered,
+      number_of_payments,
       pending,
       reconciled,
     },
@@ -50,17 +50,17 @@ export function ReconciliationSummary({
   const datasets = [
     {
       label: t('Delivered fully'),
-      value: deliveredFully,
+      value: delivered_fully,
       color: '#10CB16',
     },
     {
       label: t('Delivered partially'),
-      value: deliveredPartially,
+      value: delivered_partially,
       color: '#FC942A',
     },
     {
       label: t('Not delivered'),
-      value: notDelivered,
+      value: not_delivered,
       color: '#EF4343',
     },
     {
@@ -75,7 +75,7 @@ export function ReconciliationSummary({
     },
   ];
 
-  const reconciledInPercent = ((reconciled / numberOfPayments) * 100).toFixed(
+  const reconciledInPercent = ((reconciled / number_of_payments) * 100).toFixed(
     0,
   );
   return (
@@ -130,7 +130,7 @@ export function ReconciliationSummary({
                     <FieldBorder color="#4E606A">
                       <LabelizedField
                         label={t('Number of payments')}
-                        value={numberOfPayments}
+                        value={number_of_payments}
                       />
                     </FieldBorder>
                   </Grid>

@@ -81,7 +81,7 @@ export const VolumeByDeliveryMechanismSection: FC<
       `${el.delivery_mechanism.name} (${el.delivery_mechanism.fsp?.name})`,
   );
 
-  const chartData = volume_by_delivery_mechanism.map((el) => el.volumeUsd);
+  const chartData = volume_by_delivery_mechanism.map((el) => el.volume_usd);
 
   const chartColors = (): string[] => {
     return volume_by_delivery_mechanism.map((el) =>
