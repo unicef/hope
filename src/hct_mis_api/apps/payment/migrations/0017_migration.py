@@ -98,21 +98,6 @@ class Migration(migrations.Migration):
             name='split_type',
             field=models.CharField(choices=[('NO_SPLIT', 'No Split'), ('BY_RECORDS', 'By Records'), ('BY_COLLECTOR', 'By Collector'), ('BY_ADMIN_AREA1', 'By Admin Area 1'), ('BY_ADMIN_AREA2', 'By Admin Area 2'), ('BY_ADMIN_AREA3', 'By Admin Area 3')], default='NO_SPLIT', max_length=24),
         ),
-        migrations.AlterField(
-            model_name='paymentplan',
-            name='exclude_household_error',
-            field=models.TextField(blank=True, null=True),
-        ),
-        migrations.AlterField(
-            model_name='paymentplan',
-            name='excluded_ids',
-            field=models.TextField(blank=True, help_text='Targeting level exclusion', null=True),
-        ),
-        migrations.AlterField(
-            model_name='paymentplan',
-            name='exclusion_reason',
-            field=models.TextField(blank=True, null=True),
-        ),
         migrations.RunPython(migrate_payments_to_parent_split, reverse_code=migrations.RunPython.noop),
         migrations.RunPython(migrate_payments_to_default_split, reverse_code=migrations.RunPython.noop),
         migrations.RemoveField(
