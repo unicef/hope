@@ -17,6 +17,8 @@ from hct_mis_api.apps.household.api.serializers.household import (
 )
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.payment.models import (
+    Approval,
+    ApprovalProcess,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     Payment,
@@ -161,6 +163,64 @@ class FinancialServiceProviderSerializer(serializers.ModelSerializer):
         )
 
 
+class ApprovalSerializer(serializers.ModelSerializer):
+    created_by = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Approval
+        fields = (
+            "type",
+            "comment",
+            "created_by",
+        )
+
+    def get_created_by(self, obj: PaymentPlan) -> str:
+        return f"{obj.created_by.first_name} {obj.created_by.last_name}" if obj.created_by else ""
+
+
+class ApprovalProcessSerializer(serializers.ModelSerializer):
+    approvals = ApprovalSerializer(many=True, read_only=True)
+    sent_for_approval_by = serializers.SerializerMethodField()
+    sent_for_finance_release_by = serializers.SerializerMethodField()
+    sent_for_authorization_by = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ApprovalProcess
+        fields = (
+            "approvals",
+            "sent_for_approval_by",
+            "sent_for_authorization_by",
+            "sent_for_finance_release_by",
+            "sent_for_approval_date",
+            "sent_for_authorization_date",
+            "sent_for_finance_release_date",
+            "approval_number_required",
+            "authorization_number_required",
+            "finance_release_number_required",
+        )
+
+    def get_sent_for_approval_by(self, obj: PaymentPlan) -> str:
+        return (
+            f"{obj.sent_for_approval_by.first_name} {obj.sent_for_approval_by.last_name}"
+            if obj.sent_for_approval_by
+            else ""
+        )
+
+    def get_sent_for_authorization_by(self, obj: PaymentPlan) -> str:
+        return (
+            f"{obj.sent_for_authorization_by.first_name} {obj.sent_for_authorization_by.last_name}"
+            if obj.sent_for_authorization_by
+            else ""
+        )
+
+    def get_sent_for_finance_release_by(self, obj: PaymentPlan) -> str:
+        return (
+            f"{obj.sent_for_finance_release_by.first_name} {obj.sent_for_finance_release_by.last_name}"
+            if obj.sent_for_finance_release_by
+            else ""
+        )
+
+
 class DeliveryMechanismPerPaymentPlanSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source="delivery_mechanism.name")
     code = serializers.CharField(source="delivery_mechanism.code")
@@ -254,6 +314,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     can_download_xlsx = serializers.SerializerMethodField()
     can_send_xlsx_password = serializers.SerializerMethodField()
     split_choices = serializers.SerializerMethodField()
+    approval_process = ApprovalProcessSerializer(read_only=True, many=True)
 
     class Meta(PaymentPlanListSerializer.Meta):
         fields = PaymentPlanListSerializer.Meta.fields + (  # type: ignore
@@ -287,6 +348,11 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "can_export_xlsx",
             "can_download_xlsx",
             "can_send_xlsx_password",
+            "approval_process",
+            "total_entitled_quantity_usd",
+            "total_entitled_quantity_revised_usd",
+            "total_delivered_quantity_usd",
+            "total_undelivered_quantity_usd",
         )
 
     @staticmethod
