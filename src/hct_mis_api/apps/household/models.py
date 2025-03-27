@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 from django.conf import settings
 from django.contrib.gis.db.models import Q, UniqueConstraint
+from django.contrib.gis.geos import Point
 from django.contrib.postgres.fields import ArrayField, CICharField
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVectorField
@@ -783,6 +784,20 @@ class Household(
         from hct_mis_api.contrib.aurora.models import Record
 
         return Record.objects.filter(id=self.flex_registrations_record_id).first()
+
+    @property
+    def geopoint(self) -> Optional[str]:
+        if self.latitude and self.longitude:
+            return f"{self.latitude},{self.longitude}"
+        return None
+
+    @geopoint.setter
+    def geopoint(self, value: Optional[Point]) -> None:
+        if value:
+            self.latitude, self.longitude = value.y, value.x
+        else:
+            self.latitude = None
+            self.longitude = None
 
     def __str__(self) -> str:
         return self.unicef_id or ""

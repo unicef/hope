@@ -18,7 +18,7 @@ def migrate_gis_geopoint(apps, schema_editor):  # pragma: no cover
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('household', '0016_migration'),
+        ('household', '0017_migration'),
     ]
 
     operations = [
