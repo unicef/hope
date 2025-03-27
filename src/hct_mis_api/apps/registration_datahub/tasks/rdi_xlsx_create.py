@@ -5,8 +5,9 @@ from collections import defaultdict
 from datetime import date, datetime
 from functools import cached_property, partial
 from io import BytesIO
-from typing import Any, Callable, Dict, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Optional, Union
 
+from django.contrib.gis.geos import Point
 from django.core.files import File
 from django.core.files.storage import default_storage
 from django.db import transaction
@@ -232,15 +233,15 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 return True
         return value
 
-    def _handle_geopoint_field(self, value: Any, *args: Any, **kwargs: Any) -> Optional[Tuple[float, float]]:
+    def _handle_geopoint_field(self, value: Any, *args: Any, **kwargs: Any) -> Union[str, Point]:
         if not value:
-            return None
+            return ""
 
         values_as_list = value.split(",")
         longitude = values_as_list[0].strip()
         latitude = values_as_list[1].strip()
 
-        return float(longitude), float(latitude)
+        return Point(x=float(longitude), y=float(latitude), srid=4326)
 
     def _handle_string_field(
         self,
@@ -596,15 +597,11 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                                 is_field_required=current_field.get("required", False),
                             )
                             if value is not None:
-                                if combined_fields[header]["name"] == "geopoint":
-                                    obj_to_create.longitude = value[0]
-                                    obj_to_create.latitude = value[1]
-                                else:
-                                    setattr(
-                                        obj_to_create,
-                                        combined_fields[header]["name"],
-                                        value,
-                                    )
+                                setattr(
+                                    obj_to_create,
+                                    combined_fields[header]["name"],
+                                    value,
+                                )
                         elif (
                             hasattr(
                                 obj_to_create,
