@@ -60,8 +60,4 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(migrate_delivery_mechanism_data, reverse_code=migrations.RunPython.noop),
-        migrations.RemoveField(
-            model_name='deliverymechanismdata',
-            name='delivery_mechanism',
-        ),
     ]
