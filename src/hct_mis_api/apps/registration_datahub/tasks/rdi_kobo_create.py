@@ -1,9 +1,8 @@
 import json
 import logging
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
-from django.contrib.gis.geos import Point
 from django.core.files import File
 from django.core.files.storage import default_storage
 from django.db import transaction
@@ -106,11 +105,11 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         logger.info(f"Image field processed: {value}")
         return file
 
-    def _handle_geopoint_field(self, value: Any, is_flex_field: bool) -> Point:
+    def _handle_geopoint_field(self, value: Any, is_flex_field: bool) -> Tuple[float, float]:
         geopoint = value.split(" ")
         x = float(geopoint[0])
         y = float(geopoint[1])
-        return Point(x=x, y=y, srid=4326)
+        return (x, y)
 
     def _handle_decimal_field(self, value: Any, is_flex_field: bool) -> Any:
         if not is_flex_field:
@@ -147,7 +146,11 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         if is_flex_field:
             obj.flex_fields[field_data_dict["name"]] = correct_value
         else:
-            setattr(obj, field_data_dict["name"], correct_value)
+            if field_data_dict["name"] == "geopoint":
+                obj.latitude = correct_value[0]
+                obj.longitude = correct_value[1]
+            else:
+                setattr(obj, field_data_dict["name"], correct_value)
 
     def _handle_documents_and_identities(self, documents_and_identities: List) -> None:
         identity_fields = {
