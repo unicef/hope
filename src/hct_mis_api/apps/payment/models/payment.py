@@ -373,8 +373,8 @@ class PaymentPlan(
     currency = models.CharField(max_length=4, choices=CURRENCY_CHOICES, blank=True, null=True, help_text="Currency")
     dispersion_start_date = models.DateField(blank=True, null=True, help_text="Dispersion Start Date")
     dispersion_end_date = models.DateField(blank=True, null=True, help_text="Dispersion End Date")
-    excluded_ids = models.TextField(blank=True, help_text="Targeting level exclusion IDs")
-    exclusion_reason = models.TextField(blank=True, help_text="Exclusion reason (Targeting level)")
+    excluded_ids = models.TextField(blank=True, null=True, help_text="Targeting level exclusion IDs")
+    exclusion_reason = models.TextField(blank=True, null=True, help_text="Exclusion reason (Targeting level)")
     vulnerability_score_min = models.DecimalField(
         null=True,
         decimal_places=3,
@@ -494,7 +494,9 @@ class PaymentPlan(
     )
     steficon_applied_date = models.DateTimeField(blank=True, null=True, help_text="Engine Formula applied date [sys]")
     is_follow_up = models.BooleanField(default=False, help_text="Follow Up Payment Plan flag [sys]")
-    exclude_household_error = models.TextField(blank=True, help_text="Exclusion reason (Targeting level) [sys]")
+    exclude_household_error = models.TextField(
+        blank=True, null=True, help_text="Exclusion reason (Targeting level) [sys]"
+    )
     status_date = models.DateTimeField(help_text="Date and time of Payment Plan status [sys]")
     is_cash_assist = models.BooleanField(default=False, help_text="Cash Assist Flag [sys]")
     delivery_mechanism = models.ForeignKey("payment.DeliveryMechanism", blank=True, null=True, on_delete=models.PROTECT)
