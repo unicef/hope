@@ -1607,6 +1607,7 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
     )
     delivery_mechanism = models.ForeignKey("DeliveryMechanism", on_delete=models.SET_NULL, null=True)
     delivery_mechanism_order = models.PositiveIntegerField()
+    sent_to_payment_gateway = models.BooleanField(default=False)
 
     class Meta:
         constraints = [
