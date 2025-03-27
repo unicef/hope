@@ -23,7 +23,8 @@ def migrate_payments_to_default_split(apps, schema_editor):  # pragma: no cover
 
     for payment_plan in PaymentPlan.objects.filter(splits__isnull=True).iterator():
         default_split = PaymentPlanSplit.objects.create(payment_plan=payment_plan)
-        if payment_plan.delivery_mechanism.sent_to_payment_gateway:
+        dm = getattr(payment_plan, "delivery_mechanism", None)
+        if dm and dm.sent_to_payment_gateway:
             # store the old object's id in a variable
             old_obj_id = default_split.id
             # it creates a new object
@@ -32,7 +33,7 @@ def migrate_payments_to_default_split(apps, schema_editor):  # pragma: no cover
             default_split.save()
             # and delete the old object
             PaymentPlanSplit.objects.filter(id=old_obj_id).delete()
-        payment_plan.payment_items.eligible().update(parent_split=default_split)
+        payment_plan.payment_items.all().update(parent_split=default_split)
 
 
 class Migration(migrations.Migration):
