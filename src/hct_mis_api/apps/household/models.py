@@ -784,12 +784,6 @@ class Household(
 
         return Record.objects.filter(id=self.flex_registrations_record_id).first()
 
-    @property
-    def geopoint(self) -> Optional[str]:
-        if self.latitude and self.longitude:
-            return f"{self.latitude},{self.longitude}"
-        return None
-
     def __str__(self) -> str:
         return self.unicef_id or ""
 

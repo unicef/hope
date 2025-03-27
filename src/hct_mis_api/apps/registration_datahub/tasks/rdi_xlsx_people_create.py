@@ -122,15 +122,11 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                         is_field_required=current_field.get("required", False),
                     )
                     if value is not None:
-                        if current_field["name"] == "geopoint":
-                            obj_to_create.longitude = value[0]
-                            obj_to_create.latitude = value[1]
-                        else:
-                            setattr(
-                                obj_to_create,
-                                current_field["name"],
-                                value,
-                            )
+                        setattr(
+                            obj_to_create,
+                            current_field["name"],
+                            value,
+                        )
                 elif header in self.FLEX_FIELDS[sheet_title]:
                     value = self._cast_value(cell_value, header)
                     type_name = self.FLEX_FIELDS[sheet_title][header]["type"]
