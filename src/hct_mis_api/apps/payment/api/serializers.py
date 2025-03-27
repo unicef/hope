@@ -293,7 +293,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     imported_file_name = serializers.CharField()
     payments_conflicts_count = serializers.SerializerMethodField()
     volume_by_delivery_mechanism = serializers.SerializerMethodField()
-    # delivery_mechanisms = DeliveryMechanismPerPaymentPlanSerializer(many=True, read_only=True)
+    delivery_mechanisms = serializers.SerializerMethodField()
     bank_reconciliation_success = serializers.IntegerField()
     bank_reconciliation_error = serializers.IntegerField()
     can_create_payment_verification_plan = serializers.BooleanField()
@@ -326,9 +326,11 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "has_fsp_delivery_mechanism_xlsx_template",
             "imported_file_name",
             "payments_conflicts_count",
-            # "delivery_mechanisms",
+            "delivery_mechanisms",
             "volume_by_delivery_mechanism",
             "split_choices",
+            "exclusion_reason",
+            "exclude_household_error",
             "bank_reconciliation_success",
             "bank_reconciliation_error",
             "can_create_payment_verification_plan",
@@ -353,6 +355,10 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "total_entitled_quantity_revised_usd",
             "total_delivered_quantity_usd",
             "total_undelivered_quantity_usd",
+            "male_children_count",
+            "female_children_count",
+            "male_adults_count",
+            "female_adults_count",
         )
 
     @staticmethod
@@ -406,8 +412,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             if not parent.is_social_worker_program
             else Household.objects.none()
         )
-        # return HouseholdDetailSerializer(qs, read_only=True).data
-        return []
+        return []  # HouseholdSerializer(qs, read_only=True).data
 
     @staticmethod
     def get_excluded_individuals(parent: PaymentPlan) -> "QuerySet [Individual]":
@@ -416,8 +421,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             if parent.is_social_worker_program
             else Individual.objects.none()
         )
-        return []
-        # return IndividualDetailSerializer(qs, read_only=True).data
+        return []  # IndividualSerializer(qs, read_only=True).data
 
     @staticmethod
     def get_can_create_follow_up(parent: PaymentPlan) -> bool:
