@@ -129,7 +129,6 @@ export const individualDetailed = gql`
     }
     deliveryMechanismsData {
       name
-      isValid
       individualTabData
     }
     documents {

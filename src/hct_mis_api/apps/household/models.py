@@ -29,6 +29,10 @@ from hct_mis_api.apps.core.languages import Languages
 from hct_mis_api.apps.core.models import BusinessArea, StorageFile
 from hct_mis_api.apps.core.utils import FlexFieldsEncoder
 from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.household.mixins import (
+    HouseholdDeliveryDataMixin,
+    IndividualDeliveryDataMixin,
+)
 from hct_mis_api.apps.household.signals import (
     household_deleted,
     household_withdrawn,
@@ -331,6 +335,7 @@ class Household(
     ConcurrencyModel,
     UnicefIdentifiedModel,
     AdminUrlMixin,
+    HouseholdDeliveryDataMixin,
 ):
     class CollectType(models.TextChoices):
         STANDARD = "STANDARD", "Standard"
@@ -865,7 +870,7 @@ class Document(AbstractSyncable, SoftDeletableMergeStatusModel, TimeStampedUUIDM
 
         for validator in self.type.validators.all():
             if not re.match(validator.regex, self.document_number):
-                logger.error("Document number is not validating")
+                logger.warning("Document number is not validating")
                 raise ValidationError("Document number is not validating")
 
     class Meta:
@@ -988,6 +993,7 @@ class Individual(
     ConcurrencyModel,
     UnicefIdentifiedModel,
     AdminUrlMixin,
+    IndividualDeliveryDataMixin,
 ):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
