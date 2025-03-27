@@ -56,7 +56,7 @@ class MicrosoftGraphAPI:
         try:
             response.raise_for_status()
         except requests.exceptions.HTTPError as e:
-            logger.exception(e)
+            logger.warning(e)
             raise
         json_response = response.json()
         return json_response
@@ -71,12 +71,12 @@ class MicrosoftGraphAPI:
                 data = self.get_results(q)
                 value = data["value"][0]
             else:
-                logger.error("You must provide 'uuid' or 'email' argument.")
+                logger.warning("You must provide 'uuid' or 'email' argument.")
                 raise ValueError("You must provide 'uuid' or 'email' argument.")
         except IndexError:
-            logger.error(f"User not found using email={email},uuid={uuid}")
+            logger.warning(f"User not found using email={email},uuid={uuid}")
             raise Http404("User not found")
         if not value:
-            logger.error(f"User not found using email={email},uuid={uuid}")
+            logger.warning(f"User not found using email={email},uuid={uuid}")
             raise Http404("User not found")
         return value

@@ -8,7 +8,6 @@ from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.payment.fixtures import (
     ApprovalFactory,
     ApprovalProcessFactory,
-    DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
     PaymentPlanFactory,
     generate_delivery_mechanisms,
@@ -25,23 +24,17 @@ class TestPaymentPlanPDFExportService(TestCase):
         generate_delivery_mechanisms()
         create_afghanistan()
         self.dm_cash = DeliveryMechanism.objects.get(code="cash")
+        financial_service_provider1 = FinancialServiceProviderFactory()
+        financial_service_provider1.delivery_mechanisms.add(self.dm_cash)
         program = ProgramFactory(data_collecting_type__type=DataCollectingType.Type.STANDARD)
         self.payment_plan = PaymentPlanFactory(
             program_cycle=program.cycles.first(),
+            delivery_mechanism=self.dm_cash,
+            financial_service_provider=financial_service_provider1,
         )
         self.payment_plan.unicef_id = "PP-0060-24-00000007"
         self.payment_plan.save()
         self.pdf_export_service = PaymentPlanPDFExportService(self.payment_plan)
-
-        financial_service_provider1 = FinancialServiceProviderFactory()
-        financial_service_provider1.delivery_mechanisms.add(self.dm_cash)
-
-        DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=self.payment_plan,
-            delivery_mechanism=self.dm_cash,
-            financial_service_provider=financial_service_provider1,
-            delivery_mechanism_order=1,
-        )
         approval_process = ApprovalProcessFactory(
             payment_plan=self.payment_plan,
         )

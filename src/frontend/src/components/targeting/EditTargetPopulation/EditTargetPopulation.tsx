@@ -29,20 +29,49 @@ interface EditTargetPopulationProps {
   screenBeneficiary: boolean;
 }
 
+type TargetingCriteriaRuleNodeExtended = {
+  __typename: 'TargetingCriteriaRuleNode';
+  id: any;
+  householdIds: string;
+  individualIds: string;
+  individualsFiltersBlocks?: {
+    __typename: 'TargetingIndividualRuleFilterBlockNode';
+    individualBlockFilters?: {
+      // Define the properties of individualBlockFilters here
+    }[];
+  }[];
+  collectorsFiltersBlocks: {
+    // Define the properties of collectorsFiltersBlocks here
+  }[];
+  householdsFiltersBlocks?: {
+    // Define the properties of householdsFiltersBlocks here
+  }[];
+  deliveryMechanism?: string;
+  fsp?: string;
+};
+
 const EditTargetPopulation = ({
   paymentPlan,
   screenBeneficiary,
 }: EditTargetPopulationProps): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  //UPDATE PP MUTATION
+  const targetingCriteriaCopy: TargetingCriteriaRuleNodeExtended[] =
+    paymentPlan.targetingCriteria?.rules.map((rule) => ({ ...rule })) || [];
+
+  if (targetingCriteriaCopy.length > 0) {
+    targetingCriteriaCopy[0].deliveryMechanism =
+      paymentPlan.deliveryMechanism?.code;
+    targetingCriteriaCopy[0].fsp = paymentPlan.financialServiceProvider?.id;
+  }
+
   const initialValues = {
     id: paymentPlan.id,
     name: paymentPlan.name || '',
     program: paymentPlan.program?.id || '',
-    targetingCriteria: paymentPlan.targeting_criteria.rules || [],
-    excludedIds: paymentPlan.excluded_ids || '',
-    exclusionReason: paymentPlan.exclusion_reason || '',
+    targetingCriteria: targetingCriteriaCopy || [],
+    excludedIds: paymentPlan.excludedIds || '',
+    exclusionReason: paymentPlan.exclusionReason || '',
     flagExcludeIfActiveAdjudicationTicket:
       paymentPlan.targeting_criteria.flagExcludeIfActiveAdjudicationTicket ||
       false,
@@ -90,6 +119,8 @@ const EditTargetPopulation = ({
       await mutate({
         variables: {
           paymentPlanId: values.id,
+          fspId: values.targetingCriteria[0]?.fsp,
+          deliveryMechanismCode: values.targetingCriteria[0]?.deliveryMechanism,
           excludedIds: values.excludedIds,
           exclusionReason: values.exclusionReason,
           programCycleId: values.programCycleId.value,
@@ -174,6 +205,7 @@ const EditTargetPopulation = ({
                   screenBeneficiary={screenBeneficiary}
                   isStandardDctType={isStandardDctType}
                   isSocialDctType={isSocialDctType}
+                  targetPopulation={paymentPlan}
                   data-cy="add-filter-targeting-criteria-display"
                 />
               )}

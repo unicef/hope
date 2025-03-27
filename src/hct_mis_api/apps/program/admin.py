@@ -130,7 +130,7 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
         )
 
     @button(
-        permission="targeting.add_targetpopulation",
+        permission="payment.add_paymentplan",
     )
     def create_target_population_from_list(self, request: HttpRequest, pk: str) -> Optional[HttpResponse]:
         context = self.get_common_context(request, title="Create TargetPopulation")

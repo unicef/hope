@@ -35,7 +35,7 @@ class DjangoFastConnectionField(DjangoConnectionField):
             cache_key = f"count_{business_area}_{connection}_{hashed_args}"
             return save_data_in_cache(cache_key, lambda: iterable.count(), 60 * 5)
         except Exception as e:
-            logger.exception(e)
+            logger.warning(e)
             return iterable.count()
 
     @classmethod

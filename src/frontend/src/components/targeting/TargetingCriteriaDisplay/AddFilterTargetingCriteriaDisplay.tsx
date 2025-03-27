@@ -104,7 +104,7 @@ const AddFilterTargetingCriteriaDisplay = ({
     });
 
   const [isOpen, setOpen] = useState(false);
-  const [criteriaIndex, setIndex] = useState(null);
+  const [criteriaIndex, setIndex] = useState(0);
   const [criteriaObject, setCriteria] = useState({});
   const [allDataChoicesDict, setAllDataChoicesDict] = useState(null);
   const [allCollectorDataChoicesDict, setAllCollectorDataChoicesDict] =
@@ -157,6 +157,8 @@ const AddFilterTargetingCriteriaDisplay = ({
       collectorsFiltersBlocks: [...values.collectorsFiltersBlocks],
       householdIds: values.householdIds,
       individualIds: values.individualIds,
+      deliveryMechanism: values.deliveryMechanism,
+      fsp: values.fsp,
     };
     if (criteriaIndex !== null) {
       helpers.replace(criteriaIndex, criteria);
@@ -164,6 +166,12 @@ const AddFilterTargetingCriteriaDisplay = ({
       helpers.push(criteria);
     }
     return closeModal();
+  };
+
+  //function to open a first modal
+  const handleAddFilter = (): void => {
+    setIndex(0);
+    setOpen(true);
   };
 
   // const  collectorFiltersAvailable =
@@ -218,6 +226,7 @@ const AddFilterTargetingCriteriaDisplay = ({
           individualFiltersAvailable={individualFiltersAvailable}
           householdFiltersAvailable={householdFiltersAvailable}
           collectorsFiltersAvailable={true}
+          criteriaIndex={criteriaIndex}
         />
         <ContentWrapper>
           <Box display="flex" flexDirection="column">
@@ -227,6 +236,7 @@ const AddFilterTargetingCriteriaDisplay = ({
                     // eslint-disable-next-line
                     <Fragment key={criteria.id || index}>
                       <Criteria
+                        criteriaIndex={index}
                         isEdit={isEdit}
                         allDataFieldsChoicesDict={allDataChoicesDict}
                         allCollectorFieldsChoicesDict={
@@ -242,6 +252,8 @@ const AddFilterTargetingCriteriaDisplay = ({
                         }
                         householdIds={criteria.householdIds}
                         individualIds={criteria.individualIds}
+                        deliveryMechanism={targetPopulation?.deliveryMechanism}
+                        criteria={criteria}
                         editFunction={() => editCriteria(criteria, index)}
                         removeFunction={() => helpers.remove(index)}
                       />
@@ -258,7 +270,7 @@ const AddFilterTargetingCriteriaDisplay = ({
 
               {!rules.length && (
                 <AddCriteria
-                  onClick={() => setOpen(true)}
+                  onClick={handleAddFilter}
                   data-cy="button-target-population-add-criteria"
                 >
                   <AddCircleOutline />

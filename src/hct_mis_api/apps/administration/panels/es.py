@@ -60,7 +60,7 @@ class ElasticsearchPanel:
                     else:
                         raise ValueError(opt)
                 except Exception as exc:
-                    logger.exception(exc)
+                    logger.warning(exc)
                     messages.add_message(request, messages.ERROR, f"{exc.__class__.__name__}: {exc}")
         else:
             form = EsForm()

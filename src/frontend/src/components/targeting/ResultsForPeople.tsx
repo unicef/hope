@@ -1,15 +1,25 @@
-import { Grid2 as Grid, Typography } from '@mui/material';
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid2 as Grid,
+  List,
+  ListItem,
+  Typography,
+} from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { MiśTheme } from '../../theme';
 import { LabelizedField } from '@core/LabelizedField';
 import { PaperContainer } from './PaperContainer';
 import { FieldBorder } from '@core/FieldBorder';
-import { Pie } from 'react-chartjs-2';
-import { ReactElement } from 'react';
-import { PaymentPlanBuildStatus, PaymentPlanQuery } from '@generated/graphql';
+import { ReactElement, useState } from 'react';
+import { PaymentPlanBuildStatus } from '@generated/graphql';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { Pointer } from '@components/core/Pointer';
 
 const colors = {
   femaleChildren: '#5F02CF',
@@ -17,12 +27,6 @@ const colors = {
   femaleAdult: '#DFCCF5',
   maleAdult: '#B1E3E0',
 };
-
-const ChartContainer = styled.div`
-  width: 100px;
-  height: 100px;
-  margin: 0 auto;
-`;
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(2)};
@@ -54,9 +58,18 @@ interface ResultsProps {
 
 function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
   const { t } = useTranslation();
+  const [openDialog, setOpenDialog] = useState(false);
+  const handleOpen = () => {
+    if (targetPopulation?.failed_wallet_validation_collectors_ids?.length > 0) {
+      setOpenDialog(true);
+    }
+  };
+  const handleClose = () => setOpenDialog(false);
+
   if (targetPopulation.build_status !== PaymentPlanBuildStatus.Ok) {
     return null;
   }
+
   return (
     <div>
       <PaperContainer>
@@ -108,7 +121,47 @@ function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
                 justifyContent="flex-start"
                 alignItems="center"
               >
-                <Grid size={{ xs: 4 }}>
+                <Grid size={{ xs: 6 }}>
+                  <SummaryBorder>
+                    <>
+                      <LabelizedField
+                        label={t(
+                          'Collectors failed payment channel validation',
+                        )}
+                      >
+                        <SummaryValue
+                          onClick={() => handleOpen()}
+                          data-cy="total-collectors-failed-count"
+                        >
+                          <Pointer>
+                            {targetPopulation
+                              ?.failed_wallet_validation_collectors_ids
+                              ?.length || '-'}
+                          </Pointer>
+                        </SummaryValue>
+                      </LabelizedField>
+                      <Dialog open={openDialog} onClose={handleClose}>
+                        <DialogTitle>View IDs</DialogTitle>
+                        <DialogContent>
+                          <List>
+                            {targetPopulation?.failed_wallet_validation_collectors_ids?.map(
+                              (id, index) => (
+                                <ListItem key={index}>{id}</ListItem>
+                              ),
+                            )}
+                          </List>
+                        </DialogContent>
+                        <DialogActions>
+                          <Button onClick={handleClose} color="primary">
+                            Close
+                          </Button>
+                        </DialogActions>
+                      </Dialog>
+                    </>
+                  </SummaryBorder>
+                </Grid>
+
+                {/* <Grid item xs={4}>
                   <ChartContainer>
                     <Pie
                       width={100}
@@ -146,7 +199,7 @@ function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
                       }}
                     />
                   </ChartContainer>
-                </Grid>
+                </Grid> */}
               </Grid>
             </Grid>
             <Grid size={{ xs: 4 }}>
