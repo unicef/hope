@@ -1,4 +1,4 @@
-from typing import Callable, Dict
+from typing import Callable, Dict, Optional
 
 from django.db import transaction
 
@@ -25,13 +25,15 @@ class ModifiedPaymentFactory(PaymentFactory):
 
 @pytest.fixture()
 @pytest.mark.django_db(databases=["default", "read_only"])
-def populate_dashboard_cache() -> Callable[[BusinessAreaFactory], Household]:
+def populate_dashboard_cache() -> Callable[[BusinessAreaFactory, Optional[Dict]], Household]:
     """
     Fixture to populate the dashboard cache for a specific business area,
     verify creation in the default DB, and ensure readability in the read_only DB.
     """
 
-    def _populate_dashboard_cache(afghanistan: BusinessAreaFactory, household_extra_args: Dict = None) -> Household:
+    def _populate_dashboard_cache(
+        afghanistan: BusinessAreaFactory, household_extra_args: Optional[Dict] = None
+    ) -> Household:
         """
         Create household and related records
         """

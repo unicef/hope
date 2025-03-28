@@ -1,7 +1,8 @@
 import calendar
 import json
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Protocol, Set, Tuple
+from typing import Any, Dict, List, Optional, Protocol, Set, Tuple, TypedDict, cast
+from uuid import UUID
 
 from django.core.cache import cache
 from django.db import models
@@ -13,14 +14,38 @@ from hct_mis_api.apps.dashboard.serializers import DashboardBaseSerializer
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import Payment
 
-CACHE_TIMEOUT = 60 * 60 * 6  # 6 hours
+CACHE_TIMEOUT = 60 * 60 * 6
 GLOBAL_SLUG = "global"
 DEFAULT_ITERATOR_CHUNK_SIZE = 2000
-HOUSEHOLD_BATCH_SIZE = 1000
+HOUSEHOLD_BATCH_SIZE = 2000
+
+
+class CountrySummaryDict(TypedDict):
+    total_usd: float
+    total_quantity: float
+    total_payments: int
+    individuals: int
+    children_counts: int
+    pwd_counts: int
+    reconciled_count: int
+    finished_payment_plans: int
+    total_payment_plans: int
+    _seen_households: Set[UUID]
+
+
+class GlobalSummaryDict(TypedDict):
+    total_usd: float
+    total_payments: int
+    individuals: int
+    children_counts: int
+    pwd_counts: int
+    reconciled_count: int
+    finished_payment_plans: int
+    total_payment_plans: int
+    _seen_households: Set[UUID]
 
 
 def get_pwd_count_expression() -> models.Expression:
-    """Returns the Django ORM expression to calculate total PWD count per household."""
     fields_to_sum = [
         Coalesce(F(f"{field_name}"), 0)
         for field_name in [
@@ -40,21 +65,14 @@ def get_pwd_count_expression() -> models.Expression:
 
 
 class DashboardCacheBase(Protocol):
-    """
-    Base class providing shared utilities for dashboard caching.
-    Subclasses should implement the refresh_data method.
-    """
-
     CACHE_KEY_PREFIX = "dashboard_data_"
 
     @classmethod
     def get_cache_key(cls, identifier: str) -> str:
-        """Generates a cache key."""
         return f"{cls.CACHE_KEY_PREFIX}{identifier}"
 
     @classmethod
     def get_data(cls, identifier: str) -> Optional[List[Dict[str, Any]]]:
-        """Retrieves and parses cached dashboard data."""
         cache_key = cls.get_cache_key(identifier)
         data = cache.get(cache_key)
         try:
@@ -64,7 +82,6 @@ class DashboardCacheBase(Protocol):
 
     @classmethod
     def store_data(cls, identifier: str, data: List[Dict[str, Any]]) -> None:
-        """Serializes and stores dashboard data in the cache."""
         cache_key = cls.get_cache_key(identifier)
         try:
             cache.set(cache_key, json.dumps(data), CACHE_TIMEOUT)
@@ -73,10 +90,6 @@ class DashboardCacheBase(Protocol):
 
     @classmethod
     def _get_base_payment_queryset(cls, business_area: Optional[BusinessArea] = None) -> models.QuerySet:
-        """
-        Returns a base queryset for Payment objects with common filters.
-        Includes necessary select_related for subsequent annotations.
-        """
         qs = (
             Payment.objects.using("read_only")
             .select_related(
@@ -107,11 +120,7 @@ class DashboardCacheBase(Protocol):
 
     @classmethod
     def _get_payment_data(cls, base_queryset: models.QuerySet) -> models.QuerySet:
-        """
-        Annotates the base payment queryset with calculated fields needed for aggregation.
-        Does NOT perform grouping/summation here.
-        """
-        date_field = Coalesce("delivery_date", "entitlement_date", "status_date")  # Define reliable date source
+        date_field = Coalesce("delivery_date", "entitlement_date", "status_date")
 
         return base_queryset.annotate(
             payment_quantity_usd=Coalesce(
@@ -154,15 +163,11 @@ class DashboardCacheBase(Protocol):
         )
 
     @classmethod
-    def _get_household_data(cls, household_ids: Set[int]) -> Dict[int, Dict[str, Any]]:
-        """
-        Fetches unique household data for the given IDs.
-        Returns a dictionary keyed by household_id.
-        """
+    def _get_household_data(cls, household_ids: Set[UUID]) -> Dict[UUID, Dict[str, Any]]:
         if not household_ids:
             return {}
 
-        household_map = {}
+        household_map: Dict[UUID, Dict[str, Any]] = {}
         household_id_list = list(household_ids)
 
         for i in range(0, len(household_id_list), HOUSEHOLD_BATCH_SIZE):
@@ -203,9 +208,6 @@ class DashboardCacheBase(Protocol):
     def _get_payment_plan_counts(
         cls, base_queryset: models.QuerySet, group_by_annotated_names: List[str]
     ) -> Dict[str, Dict[Tuple, int]]:
-        """
-        Calculates total and finished distinct payment plan counts.
-        """
         potential_annotations = {
             "currency_code": Coalesce(F("currency"), Value("UNK")),
             "program_name": Coalesce(F("program__name"), F("household__program__name"), Value("Unknown Program")),
@@ -237,17 +239,14 @@ class DashboardCacheBase(Protocol):
 
         return {"total": dict(total_counts), "finished": dict(finished_counts)}
 
-    def refresh_data(self, identifier: str) -> List[Dict[str, Any]]:
-        """Placeholder: Subclasses must implement this."""
+    @classmethod
+    def refresh_data(cls, identifier: str) -> List[Dict[str, Any]]:
         raise NotImplementedError
 
 
 class DashboardDataCache(DashboardCacheBase):
-    """Handles caching for country-specific dashboards."""
-
     @classmethod
     def refresh_data(cls, business_area_slug: str) -> List[Dict[str, Any]]:
-        """Generates and caches data for a specific country."""
         try:
             business_area = BusinessArea.objects.using("read_only").get(slug=business_area_slug)
         except BusinessArea.DoesNotExist:
@@ -256,7 +255,9 @@ class DashboardDataCache(DashboardCacheBase):
 
         base_payments_qs = cls._get_base_payment_queryset(business_area=business_area)
 
-        household_ids = set(base_payments_qs.values_list("household_id", flat=True).distinct())
+        household_ids: Set[UUID] = set(
+            hh_id for hh_id in base_payments_qs.values_list("household_id", flat=True).distinct() if hh_id is not None
+        )
         if not household_ids:
             cls.store_data(business_area_slug, [])
             return []
@@ -268,7 +269,7 @@ class DashboardDataCache(DashboardCacheBase):
 
         payment_data_iter = cls._get_payment_data(base_payments_qs).iterator(chunk_size=DEFAULT_ITERATOR_CHUNK_SIZE)
 
-        summary = defaultdict(
+        summary: defaultdict[tuple, CountrySummaryDict] = defaultdict(
             lambda: {
                 "total_usd": 0.0,
                 "total_quantity": 0.0,
@@ -302,21 +303,27 @@ class DashboardDataCache(DashboardCacheBase):
             )
 
             plan_key = tuple(payment.get(field, None) for field in plan_group_fields)
-            summary[key]["finished_payment_plans"] = plan_counts["finished"].get(plan_key, 0)
-            summary[key]["total_payment_plans"] = plan_counts["total"].get(plan_key, 0)
+            current_summary = summary[key]
+            current_summary["finished_payment_plans"] = plan_counts["finished"].get(plan_key, 0)
+            current_summary["total_payment_plans"] = plan_counts["total"].get(plan_key, 0)
 
-            summary[key]["total_usd"] += float(payment.get("payment_quantity_usd") or 0)
-            summary[key]["total_quantity"] += float(payment.get("payment_quantity") or 0)
-            summary[key]["total_payments"] += 1
-            summary[key]["reconciled_count"] += payment.get("reconciled", 0)
+            current_summary["total_usd"] += float(payment.get("payment_quantity_usd") or 0.0)
+            current_summary["total_quantity"] += float(payment.get("payment_quantity") or 0.0)
+            current_summary["total_payments"] += 1
+            current_summary["reconciled_count"] += int(payment.get("reconciled", 0))
 
             household_id = payment.get("household_id_val")
-            if household_id and household_id not in summary[key]["_seen_households"]:
+            if (
+                household_id
+                and isinstance(household_id, UUID)
+                and household_id not in current_summary["_seen_households"]
+            ):
                 h_data = household_map.get(household_id, {})
-                summary[key]["individuals"] += h_data.get("size", 0)
-                summary[key]["children_counts"] += h_data.get("children_count", 0)
-                summary[key]["pwd_counts"] += h_data.get("pwd_count", 0)
-                summary[key]["_seen_households"].add(household_id)
+                current_summary["individuals"] += int(h_data.get("size", 0))
+                current_summary["children_counts"] += int(h_data.get("children_count", 0))
+                current_summary["pwd_counts"] += int(h_data.get("pwd_count", 0))
+                current_summary["_seen_households"].add(household_id)
+
         result_list = []
         for (year, month, admin1, program, sector, fsp, delivery_type, status, currency), totals in summary.items():
             month_name = "Unknown"
@@ -347,27 +354,22 @@ class DashboardDataCache(DashboardCacheBase):
                 }
             )
 
-        try:
-            serialized_data = DashboardBaseSerializer(result_list, many=True).data
-            cls.store_data(business_area_slug, serialized_data)
-            return serialized_data
-        except Exception:
-            cls.store_data(business_area_slug, result_list)
-            return result_list
+        serialized_data = cast(List[Dict[str, Any]], DashboardBaseSerializer(result_list, many=True).data)
+        cls.store_data(business_area_slug, serialized_data)
+        return serialized_data
 
 
 class DashboardGlobalDataCache(DashboardCacheBase):
-    """Handles caching for the global dashboard."""
-
     @classmethod
     def refresh_data(cls, identifier: str = GLOBAL_SLUG) -> List[Dict[str, Any]]:
-        """Generates and caches data for the global view."""
         if identifier != GLOBAL_SLUG:
             identifier = GLOBAL_SLUG
 
         base_payments_qs = cls._get_base_payment_queryset()
 
-        household_ids = set(base_payments_qs.values_list("household_id", flat=True).distinct())
+        household_ids: Set[UUID] = set(
+            hh_id for hh_id in base_payments_qs.values_list("household_id", flat=True).distinct() if hh_id is not None
+        )
         if not household_ids:
             cls.store_data(identifier, [])
             return []
@@ -379,7 +381,7 @@ class DashboardGlobalDataCache(DashboardCacheBase):
 
         payment_data_iter = cls._get_payment_data(base_payments_qs).iterator(chunk_size=DEFAULT_ITERATOR_CHUNK_SIZE)
 
-        summary = defaultdict(
+        summary: defaultdict[tuple, GlobalSummaryDict] = defaultdict(
             lambda: {
                 "total_usd": 0.0,
                 "total_payments": 0,
@@ -407,18 +409,25 @@ class DashboardGlobalDataCache(DashboardCacheBase):
             )
 
             plan_key = tuple(payment.get(field, None) for field in plan_group_fields)
-            summary[key]["finished_payment_plans"] = plan_counts["finished"].get(plan_key, 0)
-            summary[key]["total_payment_plans"] = plan_counts["total"].get(plan_key, 0)
-            summary[key]["total_usd"] += float(payment.get("payment_quantity_usd") or 0)
-            summary[key]["total_payments"] += 1
-            summary[key]["reconciled_count"] += payment.get("reconciled", 0)
+            current_summary = summary[key]
+            current_summary["finished_payment_plans"] = plan_counts["finished"].get(plan_key, 0)
+            current_summary["total_payment_plans"] = plan_counts["total"].get(plan_key, 0)
+            current_summary["total_usd"] += float(payment.get("payment_quantity_usd") or 0.0)
+            current_summary["total_payments"] += 1
+            current_summary["reconciled_count"] += int(payment.get("reconciled", 0))
+
             household_id = payment.get("household_id_val")
-            if household_id and household_id not in summary[key]["_seen_households"]:
+            if (
+                household_id
+                and isinstance(household_id, UUID)
+                and household_id not in current_summary["_seen_households"]
+            ):
                 h_data = household_map.get(household_id, {})
-                summary[key]["individuals"] += h_data.get("size", 0)
-                summary[key]["children_counts"] += h_data.get("children_count", 0)
-                summary[key]["pwd_counts"] += h_data.get("pwd_count", 0)
-                summary[key]["_seen_households"].add(household_id)
+                current_summary["individuals"] += int(h_data.get("size", 0))
+                current_summary["children_counts"] += int(h_data.get("children_count", 0))
+                current_summary["pwd_counts"] += int(h_data.get("pwd_count", 0))
+                current_summary["_seen_households"].add(household_id)
+
         result_list = []
         for (year, country, sector, delivery_type, status), totals in summary.items():
             result_list.append(
@@ -439,10 +448,7 @@ class DashboardGlobalDataCache(DashboardCacheBase):
                     "total_payment_plans": totals["total_payment_plans"],
                 }
             )
-        try:
-            serialized_data = DashboardBaseSerializer(result_list, many=True).data
-            cls.store_data(identifier, serialized_data)
-            return serialized_data
-        except Exception:
-            cls.store_data(identifier, result_list)
-            return result_list
+
+        serialized_data = cast(List[Dict[str, Any]], DashboardBaseSerializer(result_list, many=True).data)
+        cls.store_data(identifier, serialized_data)
+        return serialized_data
