@@ -32,6 +32,8 @@ from hct_mis_api.apps.payment.models.payment import (
     DeliveryMechanism,
     DeliveryMechanismPerPaymentPlan,
 )
+from hct_mis_api.apps.steficon.api.serializers import RuleSerializer
+from hct_mis_api.apps.targeting.api.serializers import TargetingCriteriaSerializer
 
 
 class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
@@ -331,6 +333,8 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     can_send_xlsx_password = serializers.SerializerMethodField()
     split_choices = serializers.SerializerMethodField()
     approval_process = ApprovalProcessSerializer(read_only=True, many=True)
+    steficon_rule = RuleSerializer(read_only=True)
+    source_payment_plan = FollowUpPaymentPlanSerializer(read_only=True)
 
     class Meta(PaymentPlanListSerializer.Meta):
         fields = PaymentPlanListSerializer.Meta.fields + (  # type: ignore
@@ -376,6 +380,9 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "female_children_count",
             "male_adults_count",
             "female_adults_count",
+            "steficon_rule",
+            "source_payment_plan",
+            "exchange_rate",
         )
 
     @staticmethod
@@ -545,8 +552,8 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
     background_action_status = serializers.CharField(source="get_background_action_status_display")
     program = serializers.CharField(source="program_cycle.program.name")
     program_cycle = serializers.CharField(source="program_cycle.title")
-    # TODO: add Steficon formula
-    # TODO: add Targeting Criteria
+    targeting_criteria = TargetingCriteriaSerializer(read_only=True)
+    steficon_rule_targeting = RuleSerializer(read_only=True)
 
     class Meta(PaymentPlanListSerializer.Meta):
         fields = PaymentPlanListSerializer.Meta.fields + (  # type: ignore
@@ -559,6 +566,8 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
             "female_children_count",
             "male_adults_count",
             "female_adults_count",
+            "targeting_criteria",
+            "steficon_rule_targeting",
         )
 
 
