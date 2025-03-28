@@ -15,6 +15,8 @@ from hct_mis_api.apps.payment.models import Payment
 
 CACHE_TIMEOUT = 60 * 60 * 6  # 6 hours
 GLOBAL_SLUG = "global"
+DEFAULT_ITERATOR_CHUNK_SIZE = 2000
+HOUSEHOLD_BATCH_SIZE = 1000
 
 
 def get_pwd_count_expression() -> models.Expression:
@@ -160,34 +162,41 @@ class DashboardCacheBase(Protocol):
         if not household_ids:
             return {}
 
-        households_qs = (
-            Household.objects.using("read_only")
-            .filter(id__in=household_ids)
-            .select_related("admin1", "admin_area", "business_area")
-            .annotate(
-                pwd_count_calc=get_pwd_count_expression(),
-                admin1_name_hh=Coalesce(F("admin1__name"), F("admin_area__name"), Value("Unknown Admin1")),
-                country_name_hh=Coalesce(F("business_area__name"), Value("Unknown Country")),
-            )
-            .values(
-                "id",
-                "size",
-                "children_count",
-                "pwd_count_calc",
-                "admin1_name_hh",
-                "country_name_hh",
-            )
-        )
-
         household_map = {}
-        for hh in households_qs:
-            household_map[hh["id"]] = {
-                "size": hh.get("size") or 0,
-                "children_count": hh.get("children_count") or 0,
-                "pwd_count": hh.get("pwd_count_calc") or 0,
-                "admin1": hh.get("admin1_name_hh", "Unknown Admin1"),
-                "country": hh.get("country_name_hh", "Unknown Country"),
-            }
+        household_id_list = list(household_ids)
+
+        for i in range(0, len(household_id_list), HOUSEHOLD_BATCH_SIZE):
+            batch_ids = household_id_list[i : i + HOUSEHOLD_BATCH_SIZE]
+            if not batch_ids:
+                continue
+
+            households_qs = (
+                Household.objects.using("read_only")
+                .filter(id__in=batch_ids)
+                .select_related("admin1", "admin_area", "business_area")
+                .annotate(
+                    pwd_count_calc=get_pwd_count_expression(),
+                    admin1_name_hh=Coalesce(F("admin1__name"), F("admin_area__name"), Value("Unknown Admin1")),
+                    country_name_hh=Coalesce(F("business_area__name"), Value("Unknown Country")),
+                )
+                .values(
+                    "id",
+                    "size",
+                    "children_count",
+                    "pwd_count_calc",
+                    "admin1_name_hh",
+                    "country_name_hh",
+                )
+            )
+
+            for hh in households_qs:
+                household_map[hh["id"]] = {
+                    "size": hh.get("size") or 0,
+                    "children_count": hh.get("children_count") or 0,
+                    "pwd_count": hh.get("pwd_count_calc") or 0,
+                    "admin1": hh.get("admin1_name_hh", "Unknown Admin1"),
+                    "country": hh.get("country_name_hh", "Unknown Country"),
+                }
         return household_map
 
     @classmethod
@@ -257,7 +266,7 @@ class DashboardDataCache(DashboardCacheBase):
         plan_group_fields = ["currency_code", "program_name", "sector_name"]
         plan_counts = cls._get_payment_plan_counts(base_payments_qs, plan_group_fields)
 
-        payment_data_iter = cls._get_payment_data(base_payments_qs).iterator()
+        payment_data_iter = cls._get_payment_data(base_payments_qs).iterator(chunk_size=DEFAULT_ITERATOR_CHUNK_SIZE)
 
         summary = defaultdict(
             lambda: {
@@ -368,7 +377,7 @@ class DashboardGlobalDataCache(DashboardCacheBase):
         plan_group_fields = ["sector_name"]
         plan_counts = cls._get_payment_plan_counts(base_payments_qs, plan_group_fields)
 
-        payment_data_iter = cls._get_payment_data(base_payments_qs).iterator()
+        payment_data_iter = cls._get_payment_data(base_payments_qs).iterator(chunk_size=DEFAULT_ITERATOR_CHUNK_SIZE)
 
         summary = defaultdict(
             lambda: {
