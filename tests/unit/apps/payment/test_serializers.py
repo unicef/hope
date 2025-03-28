@@ -15,17 +15,13 @@ from hct_mis_api.apps.payment.api.serializers import (
     PaymentPlanListSerializer,
     TPHouseholdListSerializer,
 )
-from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismPerPaymentPlanFactory,
-    PaymentFactory,
-    PaymentPlanFactory,
-)
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import (
-    FinancialServiceProvider,
     PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentPlanSplit,
 )
+from hct_mis_api.apps.payment.models.payment import DeliveryMechanismPerPaymentPlan
 
 
 class TPHouseholdListSerializerTest(TestCase):
@@ -165,7 +161,7 @@ class PaymentPlanDetailSerializerTest(TestCase):
     def test_serializer_all_data(self) -> None:
         self.pp.status = PaymentPlan.Status.ACCEPTED
         self.pp.save()
-        DeliveryMechanismPerPaymentPlanFactory(payment_plan=self.pp)
+        DeliveryMechanismPerPaymentPlan.objects.create(payment_plan=self.pp)
 
         serializer = PaymentPlanDetailSerializer(instance=self.pp, context={"request": Mock(user=self.user)})
         data = serializer.data

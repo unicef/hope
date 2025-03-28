@@ -161,3 +161,14 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
         if obj.enumerator_rec_id:
             return f"{obj.unicef_id} (Enumerator ID {obj.enumerator_rec_id})"
         return obj.unicef_id
+
+
+class HouseholdSmallSerializer(serializers.ModelSerializer):
+    id = Base64ModelField(model_name="Household")
+
+    class Meta:
+        model = Household
+        fields = (
+            "id",
+            "unicef_id",
+        )

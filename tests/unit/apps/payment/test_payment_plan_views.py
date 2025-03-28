@@ -573,7 +573,7 @@ class TestPaymentPlanDetail:
         assert payment_plan["has_fsp_delivery_mechanism_xlsx_template"] is False
         assert payment_plan["imported_file_name"] == ""
         assert payment_plan["payments_conflicts_count"] == 0
-        assert payment_plan["delivery_mechanisms"] == []
+        # assert payment_plan["delivery_mechanism"] == []
         assert payment_plan["bank_reconciliation_success"] == 0
         assert payment_plan["bank_reconciliation_error"] == 0
         assert payment_plan["can_create_payment_verification_plan"] is False

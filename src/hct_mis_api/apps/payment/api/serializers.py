@@ -1,6 +1,6 @@
 import base64
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 from django.db.models import Count, Q, Sum
 from django.db.models.functions import Coalesce
@@ -13,22 +13,25 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
 from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object
 from hct_mis_api.apps.household.api.serializers.household import (
-    HouseholdDetailSerializer,
+    HouseholdSmallSerializer,
+)
+from hct_mis_api.apps.household.api.serializers.individual import (
+    IndividualSmallSerializer,
 )
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.payment.models import (
     Approval,
     ApprovalProcess,
-    DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     Payment,
     PaymentPlan,
     PaymentPlanSplit,
     PaymentPlanSupportingDocument,
 )
-
-if TYPE_CHECKING:
-    from django.db.models.query import QuerySet
+from hct_mis_api.apps.payment.models.payment import (
+    DeliveryMechanism,
+    DeliveryMechanismPerPaymentPlan,
+)
 
 
 class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
@@ -261,6 +264,19 @@ def _calculate_volume(
     return payments.aggregate(entitlement_sum=Coalesce(Sum(field), Decimal(0.0)))["entitlement_sum"]
 
 
+class DeliveryMechanismSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DeliveryMechanism
+        fields = (
+            "id",
+            "name",
+            "code",
+            "is_active",
+            "transfer_type",
+            "account_type",
+        )
+
+
 class VolumeByDeliveryMechanismSerializer(serializers.ModelSerializer):
     delivery_mechanism = DeliveryMechanismPerPaymentPlanSerializer(read_only=True)
     volume = serializers.FloatField()
@@ -293,7 +309,8 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     imported_file_name = serializers.CharField()
     payments_conflicts_count = serializers.SerializerMethodField()
     volume_by_delivery_mechanism = serializers.SerializerMethodField()
-    delivery_mechanisms = serializers.SerializerMethodField()
+    delivery_mechanism = DeliveryMechanismSerializer(read_only=True)
+    delivery_mechanism_per_payment_plan = DeliveryMechanismPerPaymentPlanSerializer(many=True, read_only=True)
     bank_reconciliation_success = serializers.IntegerField()
     bank_reconciliation_error = serializers.IntegerField()
     can_create_payment_verification_plan = serializers.BooleanField()
@@ -326,7 +343,8 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "has_fsp_delivery_mechanism_xlsx_template",
             "imported_file_name",
             "payments_conflicts_count",
-            "delivery_mechanisms",
+            "delivery_mechanism",
+            "delivery_mechanism_per_payment_plan",
             "volume_by_delivery_mechanism",
             "split_choices",
             "exclusion_reason",
@@ -363,20 +381,12 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
 
     @staticmethod
     def _has_fsp_delivery_mechanism_xlsx_template(payment_plan: PaymentPlan) -> bool:
-        if (
-            not payment_plan.delivery_mechanisms.exists()
-            or payment_plan.delivery_mechanisms.filter(
-                Q(financial_service_provider__isnull=True) | Q(delivery_mechanism__isnull=True)
-            ).exists()
-        ):
+        delivery_mechanism = getattr(payment_plan, "delivery_mechanism", None)
+        if not delivery_mechanism:
             return False
-        else:
-            for dm_per_payment_plan in payment_plan.delivery_mechanisms.all():
-                if not dm_per_payment_plan.financial_service_provider.get_xlsx_template(
-                    dm_per_payment_plan.delivery_mechanism
-                ):
-                    return False
-            return True
+        if not payment_plan.financial_service_provider.get_xlsx_template(payment_plan.delivery_mechanism):
+            return False
+        return True
 
     def get_has_fsp_delivery_mechanism_xlsx_template(self, payment_plan: PaymentPlan) -> bool:
         return self._has_fsp_delivery_mechanism_xlsx_template(payment_plan)
@@ -390,9 +400,9 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         ).count()
 
     @staticmethod
-    def get_reconciliation_summary(parent: PaymentPlan) -> Dict[str, int]:
+    def get_reconciliation_summary(obj: PaymentPlan) -> Dict[str, int]:
         # ReconciliationSummarySerializer()
-        return parent.eligible_payments.aggregate(
+        return obj.eligible_payments.aggregate(
             delivered_fully=Count("id", filter=Q(status=Payment.STATUS_DISTRIBUTION_SUCCESS)),
             delivered_partially=Count("id", filter=Q(status=Payment.STATUS_DISTRIBUTION_PARTIAL)),
             not_delivered=Count("id", filter=Q(status=Payment.STATUS_NOT_DISTRIBUTED)),
@@ -406,22 +416,22 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
         )
 
     @staticmethod
-    def get_excluded_households(parent: PaymentPlan) -> "QuerySet [Household]":
+    def get_excluded_households(obj: PaymentPlan) -> Dict[str, Any]:
         qs = (
-            Household.objects.filter(unicef_id__in=parent.excluded_beneficiaries_ids)
-            if not parent.is_social_worker_program
+            Household.objects.filter(unicef_id__in=obj.excluded_beneficiaries_ids)
+            if not obj.is_social_worker_program
             else Household.objects.none()
         )
-        return []  # HouseholdSerializer(qs, read_only=True).data
+        return HouseholdSmallSerializer(qs, many=True).data
 
     @staticmethod
-    def get_excluded_individuals(parent: PaymentPlan) -> "QuerySet [Individual]":
+    def get_excluded_individuals(obj: PaymentPlan) -> Dict[str, Any]:
         qs = (
-            Individual.objects.filter(unicef_id__in=parent.excluded_beneficiaries_ids)
-            if parent.is_social_worker_program
+            Individual.objects.filter(unicef_id__in=obj.excluded_beneficiaries_ids)
+            if obj.is_social_worker_program
             else Individual.objects.none()
         )
-        return []  # IndividualSerializer(qs, read_only=True).data
+        return IndividualSmallSerializer(qs, many=True).data
 
     @staticmethod
     def get_can_create_follow_up(parent: PaymentPlan) -> bool:
@@ -518,13 +528,12 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
                 return obj.has_export_file
         return False
 
-    def get_split_choices(self, obj) -> List[Dict[str, Any]]:
+    def get_split_choices(self, obj: PaymentPlan) -> List[Dict[str, Any]]:
         return to_choice_object(PaymentPlanSplit.SplitType.choices)
 
-    def get_volume_by_delivery_mechanism(self, obj: PaymentPlan) -> "QuerySet[DeliveryMechanismPerPaymentPlan]":
+    def get_volume_by_delivery_mechanism(self, obj: PaymentPlan) -> Dict[str, Any]:
         qs = DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=obj).order_by("delivery_mechanism_order")
-        return []
-        # return VolumeByDeliveryMechanismSerializer(qs, many=True).data
+        return VolumeByDeliveryMechanismSerializer(qs, many=True).data
 
 
 class PaymentPlanBulkActionSerializer(serializers.Serializer):
