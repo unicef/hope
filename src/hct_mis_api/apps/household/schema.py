@@ -446,6 +446,7 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
     residence_status = graphene.String()
     program_registration_id = graphene.String()
     import_id = graphene.String()
+    geopoint = graphene.String()
 
     @staticmethod
     def resolve_sanction_list_possible_match(parent: Household, info: Any) -> bool:

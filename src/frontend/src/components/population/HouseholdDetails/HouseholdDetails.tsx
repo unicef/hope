@@ -85,7 +85,7 @@ export function HouseholdDetails({
                 {residenceChoicesDict[household?.residenceStatus]}
               </LabelizedField>
             </Grid>
-            <Grid size={{ xs:6 }}>
+            <Grid size={{ xs: 6 }}>
               <LabelizedField label={`Head of ${beneficiaryGroup?.groupLabel}`}>
                 <ContentLink
                   href={`/${baseUrl}/population/individuals/${household?.headOfHousehold?.id}`}
@@ -154,11 +154,9 @@ export function HouseholdDetails({
                 {household?.admin4?.name}
               </LabelizedField>
             </Grid>
-            <Grid size={{ xs:6 }}>
+            <Grid size={{ xs: 6 }}>
               <LabelizedField label={t('Geolocation')}>
-                {household?.geopoint
-                  ? `${household?.geopoint?.coordinates[0]}, ${household?.geopoint?.coordinates[1]}`
-                  : '-'}
+                {household?.geopoint || '-'}
               </LabelizedField>
             </Grid>
             <Grid size={{ xs: 3 }}>
@@ -223,7 +221,7 @@ export function HouseholdDetails({
               {household?.deliveredQuantities?.length ? (
                 <Box mb={2}>
                   <Grid container>
-                    <Grid size={{ xs:6 }}>
+                    <Grid size={{ xs: 6 }}>
                       <Box display="flex" flexDirection="column">
                         {household?.deliveredQuantities?.map((item) => (
                           <Box
