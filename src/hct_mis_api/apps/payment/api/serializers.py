@@ -372,6 +372,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     approval_process = ApprovalProcessSerializer(read_only=True, many=True)
     steficon_rule = RuleSerializer(read_only=True)
     source_payment_plan = FollowUpPaymentPlanSerializer(read_only=True)
+    eligible_payments_count = serializers.SerializerMethodField()
 
     class Meta(PaymentPlanListSerializer.Meta):
         fields = PaymentPlanListSerializer.Meta.fields + (  # type: ignore
@@ -422,7 +423,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "steficon_rule",
             "source_payment_plan",
             "exchange_rate",
-            "eligible_payments",
+            "eligible_payments_count",
         )
 
     @staticmethod
@@ -580,6 +581,9 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     def get_volume_by_delivery_mechanism(self, obj: PaymentPlan) -> Dict[str, Any]:
         qs = DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=obj).order_by("delivery_mechanism_order")
         return VolumeByDeliveryMechanismSerializer(qs, many=True).data
+
+    def get_eligible_payments_count(self, obj: PaymentPlan) -> int:
+        return obj.eligible_payments.count()
 
 
 class PaymentPlanBulkActionSerializer(serializers.Serializer):
