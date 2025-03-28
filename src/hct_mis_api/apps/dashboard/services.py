@@ -75,18 +75,12 @@ class DashboardCacheBase(Protocol):
     def get_data(cls, identifier: str) -> Optional[List[Dict[str, Any]]]:
         cache_key = cls.get_cache_key(identifier)
         data = cache.get(cache_key)
-        try:
-            return json.loads(data) if data else None
-        except json.JSONDecodeError:
-            return None
+        return json.loads(data) if data else None
 
     @classmethod
     def store_data(cls, identifier: str, data: List[Dict[str, Any]]) -> None:
         cache_key = cls.get_cache_key(identifier)
-        try:
-            cache.set(cache_key, json.dumps(data), CACHE_TIMEOUT)
-        except TypeError as e:
-            raise TypeError(f"Failed to serialize data for cache storage: {e}")
+        cache.set(cache_key, json.dumps(data), CACHE_TIMEOUT)
 
     @classmethod
     def _get_base_payment_queryset(cls, business_area: Optional[BusinessArea] = None) -> models.QuerySet:
@@ -287,9 +281,6 @@ class DashboardDataCache(DashboardCacheBase):
         for payment in payment_data_iter:
             year = payment.get("year")
             month = payment.get("month")
-            if year is None or month is None:
-                continue
-
             key = (
                 year,
                 month,
@@ -362,9 +353,6 @@ class DashboardDataCache(DashboardCacheBase):
 class DashboardGlobalDataCache(DashboardCacheBase):
     @classmethod
     def refresh_data(cls, identifier: str = GLOBAL_SLUG) -> List[Dict[str, Any]]:
-        if identifier != GLOBAL_SLUG:
-            identifier = GLOBAL_SLUG
-
         base_payments_qs = cls._get_base_payment_queryset()
 
         household_ids: Set[UUID] = set(
@@ -397,9 +385,6 @@ class DashboardGlobalDataCache(DashboardCacheBase):
 
         for payment in payment_data_iter:
             year = payment.get("year")
-            if year is None:
-                continue
-
             key = (
                 year,
                 payment.get("business_area_name", "Unknown Country"),
