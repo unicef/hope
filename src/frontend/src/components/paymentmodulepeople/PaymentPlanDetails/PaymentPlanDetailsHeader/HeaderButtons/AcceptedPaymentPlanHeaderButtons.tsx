@@ -194,7 +194,7 @@ export function AcceptedPaymentPlanHeaderButtons({
                 {t('Download XLSX')}
               </Button>
             </Box>
-            {paymentPlan.canSendXlsxPassword && (
+            {paymentPlan.can_send_xlsx_password && (
               <Box m={2}>
                 <LoadingButton
                   loading={loadingSend}

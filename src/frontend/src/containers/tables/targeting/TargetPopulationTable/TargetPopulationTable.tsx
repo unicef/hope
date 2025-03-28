@@ -1,18 +1,16 @@
-import { ReactElement } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import {
-  AllTargetPopulationsQueryVariables,
-  PaymentPlanNode,
-  useAllTargetPopulationsQuery,
-} from '@generated/graphql';
 import { TableWrapper } from '@components/core/TableWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { adjustHeadCells, dateToIsoString } from '@utils/utils';
-import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './TargetPopulationTableHeadCells';
 import { TargetPopulationTableRow } from './TargetPopulationTableRow';
 import { useProgramContext } from 'src/programContext';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface TargetPopulationProps {
   filter;
@@ -44,7 +42,7 @@ export function TargetPopulationTable({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiary_group;
   const { businessArea, programId } = useBaseUrl();
-  const initialVariables: AllTargetPopulationsQueryVariables = {
+  const initialQueryVariables = {
     name: filter.name,
     totalHouseholdsCountMin: filter.totalHouseholdsCountMin || null,
     totalHouseholdsCountMax: filter.totalHouseholdsCountMax || null,
@@ -56,6 +54,28 @@ export function TargetPopulationTable({
       max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
     }),
   };
+
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+
+  const {
+    data: targetPopulationsData,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: [
+      'businessAreasProgramsTargetPopulationsList',
+      businessArea,
+      programId,
+      queryVariables,
+    ],
+    queryFn: () => {
+      return RestService.restBusinessAreasProgramsTargetPopulationsList({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+      });
+    },
+  });
+
   const handleRadioChange = (id: string): void => {
     handleChange(id);
   };
@@ -73,18 +93,20 @@ export function TargetPopulationTable({
 
   const renderTable = (): ReactElement => (
     <TableWrapper>
-      <UniversalTable<PaymentPlanNode, AllTargetPopulationsQueryVariables>
+      <UniversalRestTable
         title={noTitle ? null : t('Target Populations')}
         headCells={
           enableRadioButton ? adjustedHeadCells : adjustedHeadCells.slice(1)
         }
         rowsPerPageOptions={[10, 15, 20]}
-        query={useAllTargetPopulationsQuery}
-        queriedObjectName="allPaymentPlans"
         defaultOrderBy="createdAt"
         defaultOrderDirection="desc"
-        initialVariables={initialVariables}
-        renderRow={(row) => (
+        queryVariables={queryVariables}
+        setQueryVariables={setQueryVariables}
+        data={targetPopulationsData}
+        isLoading={isLoading}
+        error={error}
+        renderRow={(row: PaymentPlanDetail) => (
           <TargetPopulationTableRow
             radioChangeHandler={enableRadioButton && handleRadioChange}
             selectedTargetPopulation={selectedTargetPopulation}

@@ -102,7 +102,7 @@ export function Entitlement({
   const { isActiveProgram } = useProgramContext();
 
   const [steficonRuleValue, setSteficonRuleValue] = useState<string>(
-    paymentPlan.steficon_rule?.rule.id || '',
+    paymentPlan.steficon_rule?.id || '',
   );
   const options = {
     refetchQueries: () => [
@@ -148,7 +148,7 @@ export function Entitlement({
   const shouldDisableExportXlsx =
     loadingExport ||
     paymentPlan.status !== PaymentPlanStatus.Locked ||
-    paymentPlan?.backgroundActionStatus ===
+    paymentPlan?.background_action_status ===
       PaymentPlanBackgroundActionStatus.XlsxExporting ||
     !isActiveProgram;
 

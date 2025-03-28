@@ -54,7 +54,7 @@ export const PaymentPlanDetails = ({
             <Grid container size={{ xs: 9 }} spacing={6}>
               <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Created By')}>
-                  {renderUserName(createdBy)}
+                  {renderUserName(created_by)}
                 </LabelizedField>
               </Grid>
               <Grid size={{ xs: 3 }}>

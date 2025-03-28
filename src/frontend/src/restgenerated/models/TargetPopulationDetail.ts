@@ -3,6 +3,8 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { FollowUpPaymentPlan } from './FollowUpPaymentPlan';
+import type { Rule } from './Rule';
+import type { TargetingCriteria } from './TargetingCriteria';
 export type TargetPopulationDetail = {
     id: string;
     unicef_id?: string | null;
@@ -23,7 +25,7 @@ export type TargetPopulationDetail = {
     /**
      * Targeting level exclusion IDs
      */
-    excluded_ids?: string;
+    excluded_ids?: string | null;
     /**
      * Total Entitled Quantity [sys]
      */
@@ -79,5 +81,7 @@ export type TargetPopulationDetail = {
      * Female Adults Count [sys]
      */
     female_adults_count?: number;
+    readonly targeting_criteria: TargetingCriteria;
+    readonly steficon_rule_targeting: Rule;
 };
 

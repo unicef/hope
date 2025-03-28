@@ -88,7 +88,7 @@ export function ExcludeSection({
     setIdsValue(event.target.value);
   };
   const initialValues = {
-    exclusionReason: paymentPlan.exclusionReason || '',
+    exclusionReason: paymentPlan.exclusion_reason || '',
   };
   const validationSchema = Yup.object().shape({
     exclusionReason: Yup.string().max(500, t('Too long')),
@@ -195,7 +195,7 @@ export function ExcludeSection({
       !hasExcludePermission ||
       !hasOpenOrLockedStatus ||
       excludedIds.length === 0 ||
-      Boolean(backgroundActionStatus);
+      Boolean(background_action_status);
 
     const editExclusionsDisabled =
       !hasExcludePermission || !hasOpenOrLockedStatus;
@@ -291,7 +291,7 @@ export function ExcludeSection({
     const applyDisabled =
       !hasExcludePermission ||
       !hasOpenOrLockedStatus ||
-      Boolean(backgroundActionStatus);
+      Boolean(background_action_status);
 
     if (isEdit || numberOfExcluded === 0) {
       return (

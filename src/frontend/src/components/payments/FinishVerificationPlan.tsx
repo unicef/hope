@@ -19,7 +19,7 @@ import { useProgramContext } from '../../programContext';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 export interface FinishVerificationPlanProps {
-  verificationPlan: PaymentPlanDetail['verificationPlans']['edges'][0]['node'];
+  verificationPlan: PaymentPlanDetail['verification_plans']['edges'][0]['node'];
 }
 
 export function FinishVerificationPlan({

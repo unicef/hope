@@ -2,8 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type Choice = {
-    name: string;
-    value: string;
-};
-
+/**
+ * * `EQUALS` - Equals
+ */
+export enum TargetingCollectorBlockRuleFilterComparisonMethodEnum {
+    EQUALS = 'EQUALS',
+}

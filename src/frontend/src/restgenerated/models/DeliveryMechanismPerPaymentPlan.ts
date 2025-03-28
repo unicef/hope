@@ -5,10 +5,9 @@
 import type { FinancialServiceProvider } from './FinancialServiceProvider';
 export type DeliveryMechanismPerPaymentPlan = {
     readonly id: string;
-    name: string;
-    code: string;
-    order: string;
-    chosen_configuration?: string | null;
+    readonly name: string;
+    readonly code: string;
+    readonly order: string;
     readonly fsp: FinancialServiceProvider;
 };
 
