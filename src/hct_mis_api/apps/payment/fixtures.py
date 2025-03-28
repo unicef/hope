@@ -727,6 +727,7 @@ def update_fsps() -> None:
 def generate_delivery_mechanisms() -> None:
     account_types_data = [
         {
+            "payment_gateway_id": "123",
             "key": "bank",
             "label": "Bank",
             "unique_fields": [
@@ -734,6 +735,7 @@ def generate_delivery_mechanisms() -> None:
             ],
         },
         {
+            "payment_gateway_id": "456",
             "key": "mobile",
             "label": "Mobile",
             "unique_fields": [
@@ -747,6 +749,7 @@ def generate_delivery_mechanisms() -> None:
             defaults={
                 "label": at["label"],
                 "unique_fields": at["unique_fields"],
+                "payment_gateway_id": at["payment_gateway_id"],
             },
         )
     account_types = {at.key: at for at in AccountType.objects.all()}
