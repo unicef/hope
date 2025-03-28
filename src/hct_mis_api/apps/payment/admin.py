@@ -22,6 +22,7 @@ from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.payment.models import (
+    AccountType,
     DeliveryMechanism,
     DeliveryMechanismData,
     FinancialServiceProvider,
@@ -590,3 +591,9 @@ class PaymentPlanSupportingDocumentAdmin(HOPEModelAdminBase):
         "payment_plan",
         "created_by",
     )
+
+
+@admin.register(AccountType)
+class AccountTypeAdmin(HOPEModelAdminBase):
+    list_display = ("key", "unique_fields", "payment_gateway_id")
+    search_fields = ("key", "payment_gateway_id")

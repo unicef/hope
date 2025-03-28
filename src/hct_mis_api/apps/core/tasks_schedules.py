@@ -37,6 +37,10 @@ TASKS_SCHEDULES = {
         "task": "hct_mis_api.apps.payment.celery_tasks.periodic_sync_payment_gateway_fsp",
         "schedule": crontab(minute="*/30"),
     },
+    "periodic_sync_payment_gateway_account_types": {
+        "task": "hct_mis_api.apps.payment.celery_tasks.periodic_sync_payment_gateway_account_types",
+        "schedule": crontab(minute="*/30"),
+    },
     "periodic_sync_payment_gateway_records": {
         "task": "hct_mis_api.apps.payment.celery_tasks.periodic_sync_payment_gateway_records",
         "schedule": crontab(minute="*/30"),
