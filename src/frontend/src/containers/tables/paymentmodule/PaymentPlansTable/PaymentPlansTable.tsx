@@ -10,7 +10,7 @@ import { UniversalRestTable } from '@components/rest/UniversalRestTable/Universa
 import { error } from 'console';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
-import { PaymentPlan } from '@restgenerated/models/PaymentPlan';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface PaymentPlansTableProps {
   filter;
@@ -77,7 +77,7 @@ function PaymentPlansTable({
       error={error}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
-      renderRow={(row: PaymentPlan) => (
+      renderRow={(row: PaymentPlanDetail) => (
         <PaymentPlanTableRow
           key={row.id}
           plan={row}

@@ -45,10 +45,9 @@ export function MarkAsReleasedPaymentPlan({
 
   const shouldShowLastReviewerMessage = (): boolean => {
     const financeReleaseNumberRequired =
-      paymentPlan.approval_process?.edges[0]?.node.financeReleaseNumberRequired;
+      paymentPlan.approval_process.finance_release_number_required;
     const financeReleasesCount =
-      paymentPlan.approval_process?.edges[0]?.node.actions.financeRelease
-        .length;
+      paymentPlan.approval_process.actions.financeRelease.length;
 
     return financeReleaseNumberRequired - 1 === financeReleasesCount;
   };

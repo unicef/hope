@@ -52,10 +52,10 @@ export function AuthorizePaymentPlan({
 
   const shouldShowLastAuthorizerMessage = (): boolean => {
     const authorizationNumberRequired =
-      paymentPlan.approval_process?.edges[0]?.node.authorizationNumberRequired;
+      paymentPlan.approval_process.authorization_number_required;
 
     const authorizationsCount =
-      paymentPlan.approval_process?.edges[0]?.node.actions.authorization.length;
+      paymentPlan.approval_process.actions.authorization.length;
 
     return authorizationNumberRequired - 1 === authorizationsCount;
   };

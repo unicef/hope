@@ -9,12 +9,12 @@ import {
   paymentPlanStatusToColor,
   targetPopulationStatusDisplayMap,
 } from '@utils/utils';
-import { PaymentPlanNode } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface TargetPopulationTableRowProps {
-  targetPopulation: PaymentPlanNode;
+  targetPopulation: PaymentPlanDetail;
   canViewDetails: boolean;
   selectedTargetPopulation?;
   radioChangeHandler?: (id: string) => void;
@@ -74,18 +74,15 @@ export function TargetPopulationTableRow({
         />
       </TableCell>
       <TableCell align="left">
-        {targetPopulation.totalHouseholdsCount || '0'}
+        {targetPopulation.total_households_count || '0'}
       </TableCell>
       <TableCell align="left">
-        <UniversalMoment>{targetPopulation.createdAt}</UniversalMoment>
+        <UniversalMoment>{targetPopulation.created_at}</UniversalMoment>
       </TableCell>
       <TableCell align="left">
-        <UniversalMoment>{targetPopulation.updatedAt}</UniversalMoment>
+        <UniversalMoment>{targetPopulation.updated_at}</UniversalMoment>
       </TableCell>
-      <TableCell align="left">
-        {targetPopulation.createdBy?.firstName}{' '}
-        {targetPopulation.createdBy?.lastName}
-      </TableCell>
+      <TableCell align="left">{targetPopulation.created_by}</TableCell>
     </ClickableTableRow>
   );
 }

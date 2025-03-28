@@ -39,7 +39,7 @@ export function FollowUpPaymentPlanDetails({
     dispersion_end_date,
     source_payment_plan: {
       id: sourcePaymentPlanId,
-      unicefId: sourcePaymentPlanUnicefId,
+      unicef_id: sourcePaymentPlanUnicefId,
     },
     exchange_rate,
   } = paymentPlan;

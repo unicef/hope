@@ -13,7 +13,7 @@ const StyledBox = styled(Box)`
 `;
 
 interface AcceptanceProcessRowProps {
-  acceptanceProcess: PaymentPlanDetail['approval_process']['edges'][0]['node'];
+  acceptanceProcess: PaymentPlanDetail['approval_process'][0];
   paymentPlan: PaymentPlanDetail;
 }
 
@@ -24,13 +24,13 @@ export function AcceptanceProcessRow({
   const { t } = useTranslation();
   const {
     actions,
-    sentForApprovalDate,
-    sentForApprovalBy,
-    sentForAuthorizationDate,
-    sentForAuthorizationBy,
-    sentForFinanceReleaseDate,
-    sentForFinanceReleaseBy,
-    rejectedOn,
+    sent_for_approval_date,
+    sent_for_approval_by,
+    sent_for_authorization_date,
+    sent_for_authorization_by,
+    sent_for_finance_release_date,
+    sent_for_finance_release_by,
+    rejected_on,
   } = acceptanceProcess;
 
   const { approvalProcess } = paymentPlan;
@@ -51,15 +51,15 @@ export function AcceptanceProcessRow({
 
   return (
     <StyledBox m={5}>
-      <AcceptanceProcessStepper acceptanceProcess={acceptanceProcess} />
+      <AcceptanceProcessStepper acceptance_process={acceptance_process} />
       <Grid container>
         <Grid size={{ xs: 4 }}>
           {actions?.approval?.length > 0 && (
             <GreyInfoCard
               topMessage={`Sent for approval by ${renderUserName(
-                sentForApprovalBy,
+                sent_for_approval_by,
               )}`}
-              topDate={sentForApprovalDate}
+              topDate={sent_for_approval_date}
               approvals={actions.approval}
             />
           )}
@@ -68,49 +68,49 @@ export function AcceptanceProcessRow({
           {actions.authorization.length > 0 && (
             <GreyInfoCard
               topMessage={`Sent for authorization by ${renderUserName(
-                sentForAuthorizationBy,
+                sent_for_authorization_by,
               )}`}
-              topDate={sentForAuthorizationDate}
+              topDate={sent_for_authorization_date}
               approvals={actions.authorization}
             />
           )}
         </Grid>
         <Grid size={{ xs: 4 }}>
-          {actions.financeRelease.length > 0 && (
+          {actions.finance_release.length > 0 && (
             <GreyInfoCard
               topMessage={`Sent for review by ${renderUserName(
-                sentForFinanceReleaseBy,
+                sent_for_finance_release_by,
               )}`}
-              topDate={sentForFinanceReleaseDate}
-              approvals={actions.financeRelease}
+              topDate={sent_for_finance_release_date}
+              approvals={actions.finance_release}
             />
           )}
         </Grid>
         {actions.reject.length > 0 && (
           <Grid container>
             <Grid size={{ xs: 4 }}>
-              {rejectedOn === 'IN_APPROVAL' && (
+              {rejected_on === 'IN_APPROVAL' && (
                 <GreyInfoCard
-                  topMessage={getRejectedOnString(rejectedOn)}
-                  topDate={actions.reject[0]?.createdAt}
+                  topMessage={getRejectedOnString(rejected_on)}
+                  topDate={actions.reject[0]?.created_at}
                   approvals={actions.reject}
                 />
               )}
             </Grid>
             <Grid size={{ xs: 4 }}>
-              {rejectedOn === 'IN_AUTHORIZATION' && (
+              {rejected_on === 'IN_AUTHORIZATION' && (
                 <GreyInfoCard
-                  topMessage={getRejectedOnString(rejectedOn)}
-                  topDate={actions.reject[0]?.createdAt}
+                  topMessage={getRejectedOnString(rejected_on)}
+                  topDate={actions.reject[0]?.created_at}
                   approvals={actions.reject}
                 />
               )}
             </Grid>
             <Grid size={{ xs: 4 }}>
-              {rejectedOn === 'IN_REVIEW' && (
+              {rejected_on === 'IN_REVIEW' && (
                 <GreyInfoCard
-                  topMessage={getRejectedOnString(rejectedOn)}
-                  topDate={actions.reject[0]?.createdAt}
+                  topMessage={getRejectedOnString(rejected_on)}
+                  topDate={actions.reject[0]?.created_at}
                   approvals={actions.reject}
                 />
               )}
@@ -118,7 +118,7 @@ export function AcceptanceProcessRow({
           </Grid>
         )}
       </Grid>
-      {approvalProcess.totalCount > 1 && <DividerLine />}
+      {approval_process.total_count > 1 && <DividerLine />}
     </StyledBox>
   );
 }

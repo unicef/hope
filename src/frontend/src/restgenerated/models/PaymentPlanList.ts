@@ -23,7 +23,7 @@ export type PaymentPlanList = {
     /**
      * Targeting level exclusion IDs
      */
-    excluded_ids?: string;
+    excluded_ids?: string | null;
     /**
      * Total Entitled Quantity [sys]
      */

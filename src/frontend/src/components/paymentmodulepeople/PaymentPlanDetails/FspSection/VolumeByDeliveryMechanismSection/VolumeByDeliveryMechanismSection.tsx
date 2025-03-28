@@ -76,14 +76,14 @@ export const VolumeByDeliveryMechanismSection: FC<
     ),
   );
 
-  const chartLabels = volumeByDeliveryMechanism.map(
+  const chartLabels = volume_by_delivery_mechanism.map(
     (el) => `${el.deliveryMechanism.name} (${el.deliveryMechanism.fsp?.name})`,
   );
 
-  const chartData = volumeByDeliveryMechanism.map((el) => el.volumeUsd);
+  const chartData = volume_by_delivery_mechanism.map((el) => el.volumeUsd);
 
   const chartColors = (): string[] => {
-    return volumeByDeliveryMechanism.map((el) =>
+    return volume_by_delivery_mechanism.map((el) =>
       getDeliveryMechanismColor(el.deliveryMechanism.name),
     );
   };

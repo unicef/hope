@@ -57,12 +57,12 @@ const EditTargetPopulation = ({
   const navigate = useNavigate();
   const { t } = useTranslation();
   const targetingCriteriaCopy: TargetingCriteriaRuleNodeExtended[] =
-    paymentPlan.targetingCriteria?.rules.map((rule) => ({ ...rule })) || [];
+    paymentPlan.targeting_criteria?.rules.map((rule) => ({ ...rule })) || [];
 
   if (targetingCriteriaCopy.length > 0) {
     targetingCriteriaCopy[0].deliveryMechanism =
-      paymentPlan.deliveryMechanism?.code;
-    targetingCriteriaCopy[0].fsp = paymentPlan.financialServiceProvider?.id;
+      paymentPlan.delivery_mechanism?.code;
+    targetingCriteriaCopy[0].fsp = paymentPlan.financial_service_provider?.id;
   }
 
   const initialValues = {

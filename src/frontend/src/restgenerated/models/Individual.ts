@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { Account } from './Account';
 import type { BiometricDeduplicationBatchStatusEnum } from './BiometricDeduplicationBatchStatusEnum';
 import type { BiometricDeduplicationGoldenRecordStatusEnum } from './BiometricDeduplicationGoldenRecordStatusEnum';
 import type { CommsDisabilityEnum } from './CommsDisabilityEnum';
@@ -28,6 +29,7 @@ export type Individual = {
     marital_status?: string;
     documents?: Array<Document>;
     birth_date: string;
+    delivery_mechanisms_data?: Array<Account>;
     rdi_merge_status?: RdiMergeStatusEnum;
     is_removed?: boolean;
     removed_date?: string | null;

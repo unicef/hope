@@ -136,10 +136,10 @@ export const PeoplePaymentPlanDetailsResults = ({
                       datasets: [
                         {
                           data: [
-                            femaleChildrenCount,
-                            femaleAdultsCount,
-                            maleChildrenCount,
-                            maleAdultsCount,
+                            female_children_count,
+                            female_adults_count,
+                            male_children_count,
+                            male_adults_count,
                           ],
                           backgroundColor: [
                             colors.femaleChildren,
