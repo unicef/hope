@@ -73,7 +73,7 @@ def test_store_data(cache_name: str, cache_class: Any, slug: str) -> None:
             "DashboardGlobalDataCache",
             DashboardGlobalDataCache,
             "global",
-            {"country", "currency"},
+            {"country"},
         ),
     ],
 )
