@@ -170,10 +170,14 @@ class FinancialServiceProviderSerializer(serializers.ModelSerializer):
 
 
 class ApprovalInfoSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Approval
-        fields = ("type", "info", "comment", "created_at",)
+        fields = (
+            "type",
+            "info",
+            "comment",
+            "created_at",
+        )
 
 
 class FilteredActionsListSerializer(serializers.Serializer):
@@ -418,6 +422,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "steficon_rule",
             "source_payment_plan",
             "exchange_rate",
+            "eligible_payments",
         )
 
     @staticmethod
