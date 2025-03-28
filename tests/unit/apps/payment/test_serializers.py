@@ -10,22 +10,30 @@ from hct_mis_api.apps.core.utils import encode_id_base64_required, to_choice_obj
 from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.payment.api.serializers import (
+    ApprovalProcessSerializer,
     PaymentListSerializer,
     PaymentPlanDetailSerializer,
     PaymentPlanListSerializer,
     TPHouseholdListSerializer,
+    VolumeByDeliveryMechanismSerializer,
 )
 from hct_mis_api.apps.payment.fixtures import (
+    ApprovalFactory,
+    ApprovalProcessFactory,
     DeliveryMechanismFactory,
     PaymentFactory,
     PaymentPlanFactory,
 )
 from hct_mis_api.apps.payment.models import (
+    Approval,
     PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentPlanSplit,
 )
-from hct_mis_api.apps.payment.models.payment import DeliveryMechanismPerPaymentPlan
+from hct_mis_api.apps.payment.models.payment import (
+    DeliveryMechanismPerPaymentPlan,
+    Payment,
+)
 
 
 class TPHouseholdListSerializerTest(TestCase):
@@ -189,3 +197,83 @@ class PaymentPlanDetailSerializerTest(TestCase):
         self.assertEqual(data["can_send_xlsx_password"], False)
         self.assertEqual(data["split_choices"], to_choice_object(PaymentPlanSplit.SplitType.choices))
         self.assertIsNotNone(data.get("volume_by_delivery_mechanism"))
+
+
+class ApprovalProcessSerializerTest(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        cls.business_area = create_afghanistan()
+        cls.user = UserFactory()
+        cls.pp = PaymentPlanFactory(
+            created_by=cls.user, business_area=cls.business_area, dispersion_start_date=None, dispersion_end_date=None
+        )
+        cls.approval_process = ApprovalProcessFactory(payment_plan=cls.pp)
+        ApprovalFactory(approval_process=cls.approval_process, type=Approval.APPROVAL, created_by=None)
+        ApprovalFactory(approval_process=cls.approval_process, type=Approval.REJECT, created_by=cls.user)
+
+    def test_all_fields(self) -> None:
+        user_name_str = f"{self.user.first_name} {self.user.last_name}"
+        data = ApprovalProcessSerializer(instance=self.approval_process).data
+
+        self.assertEqual(len(data["approvals"]), 2)
+        reject = data["approvals"][0]
+        approval = data["approvals"][1]
+        self.assertEqual(reject["type"], Approval.REJECT)
+        self.assertEqual(reject["created_by"], user_name_str)
+        self.assertEqual(approval["type"], Approval.APPROVAL)
+        self.assertEqual(approval["created_by"], "")
+        # add user data
+        self.approval_process.sent_for_approval_by = self.user
+        self.approval_process.sent_for_authorization_by = self.user
+        self.approval_process.sent_for_finance_release_by = self.user
+        self.approval_process.save()
+        data_with_users = ApprovalProcessSerializer(instance=self.approval_process).data
+        self.assertEqual(data_with_users["sent_for_approval_by"], user_name_str)
+        self.assertEqual(data_with_users["sent_for_authorization_by"], user_name_str)
+        self.assertEqual(data_with_users["sent_for_finance_release_by"], user_name_str)
+
+
+class VolumeByDeliveryMechanismSerializerTest(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        cls.business_area = create_afghanistan()
+        cls.user = UserFactory()
+        cls.pp = PaymentPlanFactory(
+            created_by=cls.user,
+            business_area=cls.business_area,
+            dispersion_start_date=None,
+            dispersion_end_date=None,
+            financial_service_provider=None,
+        )
+        cls.hoh = IndividualFactory(household=None)
+        cls.hh1 = HouseholdFactory(head_of_household=cls.hoh, size=2)
+        cls.payment = PaymentFactory(
+            parent=cls.pp,
+            household=cls.hh1,
+            status=Payment.STATUS_SUCCESS,
+            entitlement_quantity=222,
+            entitlement_quantity_usd=111,
+            financial_service_provider__name="FSP_TEST_1",
+        )
+        cls.fsp = cls.payment.financial_service_provider
+        cls.dm_per_pp = DeliveryMechanismPerPaymentPlan.objects.create(
+            payment_plan=cls.pp,
+            delivery_mechanism_order=1,
+            financial_service_provider=cls.fsp,
+            delivery_mechanism=DeliveryMechanismFactory(),
+        )
+
+    def test_get_volume_fields(self) -> None:
+        data = VolumeByDeliveryMechanismSerializer(instance=self.dm_per_pp).data
+
+        self.assertEqual(data["volume"], None)
+        self.assertEqual(data["volume_usd"], None)
+
+        self.pp.financial_service_provider = self.fsp
+        self.pp.save()
+        data = VolumeByDeliveryMechanismSerializer(instance=self.dm_per_pp).data
+
+        self.assertEqual(data["volume"], 222)
+        self.assertEqual(data["volume_usd"], 111)

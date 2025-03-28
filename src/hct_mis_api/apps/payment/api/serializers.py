@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 
 from rest_framework import serializers
 
+from hct_mis_api.api.utils import EncodedIdSerializerMixin
 from hct_mis_api.apps.account.api.fields import Base64ModelField
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
@@ -177,6 +178,8 @@ class ApprovalSerializer(serializers.ModelSerializer):
             "type",
             "comment",
             "created_by",
+            "info",
+            "created_at",
         )
 
     def get_created_by(self, obj: PaymentPlan) -> str:
@@ -202,6 +205,7 @@ class ApprovalProcessSerializer(serializers.ModelSerializer):
             "approval_number_required",
             "authorization_number_required",
             "finance_release_number_required",
+            "created_at",
         )
 
     def get_sent_for_approval_by(self, obj: PaymentPlan) -> str:
@@ -254,18 +258,15 @@ class ReconciliationSummarySerializer(serializers.Serializer):
     reconciled = serializers.IntegerField()
 
 
-def _calculate_volume(
-    delivery_mechanism_per_payment_plan: "DeliveryMechanismPerPaymentPlan", field: str
-) -> Optional[Decimal]:
-    if not delivery_mechanism_per_payment_plan.financial_service_provider:
+def _calculate_volume(payment_plan: "PaymentPlan", field: str) -> Optional[Decimal]:
+    if not payment_plan.financial_service_provider:
         return None
-    payments = delivery_mechanism_per_payment_plan.payment_plan.eligible_payments.filter(
-        financial_service_provider=delivery_mechanism_per_payment_plan.financial_service_provider,
-    )
-    return payments.aggregate(entitlement_sum=Coalesce(Sum(field), Decimal(0.0)))["entitlement_sum"]
+    return payment_plan.eligible_payments.aggregate(entitlement_sum=Coalesce(Sum(field), Decimal(0.0)))[
+        "entitlement_sum"
+    ]
 
 
-class DeliveryMechanismSerializer(serializers.ModelSerializer):
+class DeliveryMechanismSerializer(EncodedIdSerializerMixin):
     class Meta:
         model = DeliveryMechanism
         fields = (
@@ -278,19 +279,16 @@ class DeliveryMechanismSerializer(serializers.ModelSerializer):
         )
 
 
-class VolumeByDeliveryMechanismSerializer(serializers.ModelSerializer):
-    delivery_mechanism = DeliveryMechanismPerPaymentPlanSerializer(read_only=True)
-    volume = serializers.FloatField(read_only=True)
-    volume_usd = serializers.FloatField(read_only=True)
+class VolumeByDeliveryMechanismSerializer(EncodedIdSerializerMixin):
+    delivery_mechanism = DeliveryMechanismSerializer(read_only=True)
+    volume = serializers.SerializerMethodField()
+    volume_usd = serializers.SerializerMethodField()
 
-    def get_delivery_mechanism(self, info: Any) -> "VolumeByDeliveryMechanismSerializer":
-        return self
+    def get_volume(self, obj: DeliveryMechanismPerPaymentPlan) -> Optional[Decimal]:  # non-usd
+        return _calculate_volume(obj.payment_plan, "entitlement_quantity")
 
-    def get_volume(self, info: Any) -> Optional[Decimal]:  # non-usd
-        return _calculate_volume(self, "entitlement_quantity")  # type: ignore
-
-    def get_volume_usd(self, info: Any) -> Optional[Decimal]:
-        return _calculate_volume(self, "entitlement_quantity_usd")  # type: ignore
+    def get_volume_usd(self, obj: DeliveryMechanismPerPaymentPlan) -> Optional[Decimal]:
+        return _calculate_volume(obj.payment_plan, "entitlement_quantity_usd")
 
     class Meta:
         model = DeliveryMechanismPerPaymentPlan
@@ -311,6 +309,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     payments_conflicts_count = serializers.SerializerMethodField()
     volume_by_delivery_mechanism = serializers.SerializerMethodField()
     delivery_mechanism = DeliveryMechanismSerializer(read_only=True)
+    financial_service_provider = FinancialServiceProviderSerializer(read_only=True)
     delivery_mechanism_per_payment_plan = DeliveryMechanismPerPaymentPlanSerializer(read_only=True)
     bank_reconciliation_success = serializers.IntegerField()
     bank_reconciliation_error = serializers.IntegerField()
@@ -368,6 +367,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "total_households_count_with_valid_phone_no",
             "can_create_xlsx_with_fsp_auth_code",
             "fsp_communication_channel",
+            "financial_service_provider",
             "can_export_xlsx",
             "can_download_xlsx",
             "can_send_xlsx_password",
