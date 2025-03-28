@@ -7,7 +7,7 @@ import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { PaymentPlanQuery, useSplitPpMutation } from '@generated/graphql';
+import { useSplitPpMutation } from '@generated/graphql';
 import { LoadingButton } from '@core/LoadingButton';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import {
@@ -46,10 +46,10 @@ export const SplitIntoPaymentLists = ({
   const { showMessage } = useSnackbar();
 
   let minPaymentsNoMessage = 'Payments Number must be greater than 10';
-  let maxPaymentsNoMessage = `Payments Number must be less than ${paymentPlan.payment_items_total_count}`;
+  let maxPaymentsNoMessage = `Payments Number must be less than ${paymentPlan.eligible_payments_count}`;
 
-  if (paymentPlan.payment_items_total_count <= 10) {
-    const msg = `There are too few payments (${paymentPlan.payment_items_total_count}) to split`;
+  if (paymentPlan.eligible_payments_count <= 10) {
+    const msg = `There are too few payments (${paymentPlan.eligible_payments_count}) to split`;
     minPaymentsNoMessage = msg;
     maxPaymentsNoMessage = msg;
   }
@@ -62,7 +62,7 @@ export const SplitIntoPaymentLists = ({
         schema
           .required('Payments Number is required')
           .min(10, minPaymentsNoMessage)
-          .max(paymentPlan.payment_items_total_count, maxPaymentsNoMessage),
+          .max(paymentPlan.eligible_payments_count, maxPaymentsNoMessage),
     }),
   });
 

@@ -58,6 +58,10 @@ export type PaymentPlanDetail = {
     readonly created_by: string;
     readonly created_at: string;
     readonly updated_at: string;
+    /**
+     * record revision number
+     */
+    version?: number;
     background_action_status: string;
     /**
      * Payment Plan start date
@@ -143,5 +147,6 @@ export type PaymentPlanDetail = {
      * Exchange Rate [sys]
      */
     exchange_rate?: string | null;
+    readonly eligible_payments_count: number;
 };
 
