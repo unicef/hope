@@ -5,7 +5,6 @@ import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
-  PaymentPlanQuery,
   PaymentPlanStatus,
   useExportPdfPpSummaryMutation,
 } from '@generated/graphql';
@@ -17,13 +16,14 @@ import { LoadingButton } from '@core/LoadingButton';
 import { Title } from '@core/Title';
 import { useProgramContext } from '../../../../programContext';
 import { AcceptanceProcessRow } from './AcceptanceProcessRow';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const ButtonContainer = styled(Box)`
   width: 200px;
 `;
 
 interface AcceptanceProcessProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export function AcceptanceProcess({
@@ -34,14 +34,14 @@ export function AcceptanceProcess({
   const permissions = usePermissions();
   const { isActiveProgram } = useProgramContext();
 
-  const { edges } = paymentPlan.approvalProcess;
+  const { edges } = paymentPlan.approval_process;
   const [showAll, setShowAll] = useState(false);
   const [mutate, { loading: exportPdfLoading }] =
     useExportPdfPpSummaryMutation();
 
   const matchDataSize = (
-    data: PaymentPlanQuery['paymentPlan']['approvalProcess']['edges'],
-  ): PaymentPlanQuery['paymentPlan']['approvalProcess']['edges'] =>
+    data: PaymentPlanDetail['approval_process']['edges'],
+  ): PaymentPlanDetail['approval_process']['edges'] =>
     showAll ? data : [data[0]];
 
   if (!edges.length) {

@@ -24,19 +24,33 @@ from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.core.api.mixins import (
     BaseViewSet,
     BusinessAreaProgramsAccessMixin,
+    CountActionMixin,
+    DecodeIdForDetailMixin,
     ProgramMixin,
     SerializerActionMixin,
 )
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.payment.api.caches import PaymentPlanKeyConstructor
-from hct_mis_api.apps.payment.api.filters import PaymentPlanFilter
+from hct_mis_api.apps.payment.api.filters import (
+    PaymentPlanFilter,
+    TargetPopulationFilter,
+)
 from hct_mis_api.apps.payment.api.serializers import (
+    PaymentListSerializer,
     PaymentPlanBulkActionSerializer,
+    PaymentPlanDetailSerializer,
+    PaymentPlanListSerializer,
     PaymentPlanSerializer,
     PaymentPlanSupportingDocumentSerializer,
+    TargetPopulationDetailSerializer,
+    TPHouseholdListSerializer,
 )
-from hct_mis_api.apps.payment.models import PaymentPlan, PaymentPlanSupportingDocument
+from hct_mis_api.apps.payment.models import (
+    Payment,
+    PaymentPlan,
+    PaymentPlanSupportingDocument,
+)
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 
 logger = logging.getLogger(__name__)
@@ -57,10 +71,61 @@ class PaymentPlanMixin:
     )
 
 
-class PaymentPlanViewSet(ProgramMixin, PaymentPlanMixin, mixins.ListModelMixin, BaseViewSet):
+class PaymentPlanViewSet(
+    CountActionMixin,
+    ProgramMixin,
+    SerializerActionMixin,
+    PaymentPlanMixin,
+    DecodeIdForDetailMixin,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    BaseViewSet,
+):
+    # lookup_field = "payment_plan_id"
     program_model_field = "program_cycle__program"
-    queryset = PaymentPlan.objects.all()
+    queryset = PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).order_by("unicef_id")
     PERMISSIONS = [Permissions.PM_VIEW_LIST]
+    serializer_classes_by_action = {
+        "list": PaymentPlanListSerializer,
+        "retrieve": PaymentPlanDetailSerializer,
+    }
+    permissions_by_action = {
+        "list": [
+            Permissions.PM_VIEW_LIST,
+        ],
+        "retrieve": [
+            Permissions.PM_VIEW_DETAILS,
+        ],
+    }
+
+    @etag_decorator(PaymentPlanKeyConstructor)
+    @cache_response(timeout=config.REST_API_TTL, key_func=PaymentPlanKeyConstructor())
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().list(request, *args, **kwargs)
+
+
+class TargetPopulationViewSet(PaymentPlanViewSet):
+    # lookup_field = "target_population_id"
+    queryset = PaymentPlan.objects.all().order_by("created_at")
+    PERMISSIONS = [Permissions.TARGETING_VIEW_LIST]
+    serializer_classes_by_action = {
+        "list": PaymentPlanListSerializer,
+        "retrieve": TargetPopulationDetailSerializer,
+    }
+    permissions_by_action = {
+        "list": [
+            Permissions.TARGETING_VIEW_LIST,
+        ],
+        "retrieve": [
+            Permissions.TARGETING_VIEW_DETAILS,
+        ],
+    }
+    filterset_class = TargetPopulationFilter
+
+    @etag_decorator(PaymentPlanKeyConstructor)
+    @cache_response(timeout=config.REST_API_TTL, key_func=PaymentPlanKeyConstructor())
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().list(request, *args, **kwargs)
 
 
 class PaymentPlanManagerialViewSet(
@@ -206,3 +271,53 @@ class PaymentPlanSupportingDocumentViewSet(
         )
         response["Content-Disposition"] = f"attachment; filename={file.name.split('/')[-1]}"
         return response
+
+
+class PaymentViewSet(
+    CountActionMixin,
+    SerializerActionMixin,
+    DecodeIdForDetailMixin,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    BaseViewSet,
+):
+    queryset = Payment.objects.all()
+    PERMISSIONS = [Permissions.PM_VIEW_DETAILS, Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS]
+    serializer_classes_by_action = {
+        "list": PaymentListSerializer,
+        "retrieve": PaymentListSerializer,
+    }
+    permissions_by_action = {
+        "list": [
+            Permissions.PM_VIEW_DETAILS,
+        ],
+        "retrieve": [
+            Permissions.PM_VIEW_DETAILS,
+        ],
+    }
+    # lookup_field = "payment_id"
+
+
+class TPHouseholdViewSet(
+    CountActionMixin,
+    SerializerActionMixin,
+    DecodeIdForDetailMixin,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    BaseViewSet,
+):
+    queryset = Payment.objects.all()
+    PERMISSIONS = [Permissions.PM_VIEW_DETAILS]
+    serializer_classes_by_action = {
+        "list": TPHouseholdListSerializer,
+        "retrieve": TPHouseholdListSerializer,
+    }
+    permissions_by_action = {
+        "list": [
+            Permissions.PM_VIEW_DETAILS,
+        ],
+        "retrieve": [
+            Permissions.PM_VIEW_DETAILS,
+        ],
+    }
+    # lookup_field = "household_id"

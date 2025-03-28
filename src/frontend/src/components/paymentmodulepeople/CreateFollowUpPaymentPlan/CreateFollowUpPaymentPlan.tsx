@@ -15,10 +15,7 @@ import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { useNavigate } from 'react-router-dom';
-import {
-  PaymentPlanQuery,
-  useCreateFollowUpPpMutation,
-} from '@generated/graphql';
+import { useCreateFollowUpPpMutation } from '@generated/graphql';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
@@ -34,9 +31,10 @@ import { GreyText } from '@core/GreyText';
 import { LabelizedField } from '@core/LabelizedField';
 import { LoadingButton } from '@core/LoadingButton';
 import { useProgramContext } from '../../../programContext';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 export interface CreateFollowUpPaymentPlanProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export function CreateFollowUpPaymentPlan({
@@ -52,7 +50,7 @@ export function CreateFollowUpPaymentPlan({
   const { showMessage } = useSnackbar();
   const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
-  const { id, totalWithdrawnHouseholdsCount, unsuccessfulPaymentsCount } =
+  const { id, total_withdrawn_households_count, unsuccessful_payments_count } =
     paymentPlan;
 
   if (permissions === null) return null;
@@ -139,7 +137,7 @@ export function CreateFollowUpPaymentPlan({
               <DialogContainer>
                 <Box p={5}>
                   <Box display="flex" flexDirection="column">
-                    {unsuccessfulPaymentsCount === 0 && (
+                    {unsuccessful_payments_count === 0 && (
                       <Box mb={2}>
                         <FieldBorder color="#FF0200">
                           <GreyText>
@@ -150,7 +148,7 @@ export function CreateFollowUpPaymentPlan({
                         </FieldBorder>
                       </Box>
                     )}
-                    {totalWithdrawnHouseholdsCount > 0 && (
+                    {total_withdrawn_households_count > 0 && (
                       <Box mb={4}>
                         <FieldBorder color="#FF0200">
                           <GreyText>
@@ -179,7 +177,7 @@ export function CreateFollowUpPaymentPlan({
                     </Grid> */}
                     <Grid size={{ xs: 6 }}>
                       <LabelizedField label={t('Unsuccessful payments')}>
-                        {unsuccessfulPaymentsCount}
+                        {unsuccessful_payments_count}
                       </LabelizedField>
                     </Grid>
                     {/* <Grid size={{xs:6}}>
@@ -196,7 +194,7 @@ export function CreateFollowUpPaymentPlan({
                         )}
                       >
                         {' '}
-                        {totalWithdrawnHouseholdsCount}
+                        {total_withdrawn_households_count}
                       </LabelizedField>
                     </Grid>
                   </Grid>

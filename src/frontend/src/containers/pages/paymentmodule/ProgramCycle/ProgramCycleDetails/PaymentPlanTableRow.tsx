@@ -33,11 +33,11 @@ export const PaymentPlanTableRow = ({
   return (
     <ClickableTableRow key={paymentPlan.id}>
       <TableCell align="left">
-        {paymentPlan.isFollowUp ? 'Follow-up: ' : ''}
+        {paymentPlan.is_follow_up ? 'Follow-up: ' : ''}
         {canViewDetails ? (
-          <BlackLink to={paymentPlanPath}>{paymentPlan.unicefId}</BlackLink>
+          <BlackLink to={paymentPlanPath}>{paymentPlan.unicef_id}</BlackLink>
         ) : (
-          paymentPlan.unicefId
+          paymentPlan.unicef_id
         )}
       </TableCell>
       <TableCell align="left">

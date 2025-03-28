@@ -12,7 +12,6 @@ import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import {
   PaymentPlanDocument,
-  PaymentPlanQuery,
   PaymentPlanStatus,
   useExcludeHouseholdsPpMutation,
 } from '@generated/graphql';
@@ -27,10 +26,11 @@ import { PaperContainer } from '../../../targeting/PaperContainer';
 import { useProgramContext } from '../../../../programContext';
 import { ExcludedItem } from './ExcludedItem';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface ExcludeSectionProps {
   initialOpen?: boolean;
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 function ExcludeSection({
@@ -39,15 +39,15 @@ function ExcludeSection({
 }: ExcludeSectionProps): ReactElement {
   const {
     status,
-    backgroundActionStatus,
-    exclusionReason,
-    excludeHouseholdError,
+    background_action_status,
+    exclusion_reason,
+    exclude_household_error,
   } = paymentPlan;
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
-  const initialExcludedIds = paymentPlan?.excludedHouseholds?.map(
-    (el) => el.unicefId,
+  const initialExcludedIds = paymentPlan?.excluded_households?.map(
+    (el) => el.unicef_id,
   );
   const [isExclusionsOpen, setExclusionsOpen] = useState(initialOpen);
   const [idsValue, setIdsValue] = useState('');
@@ -89,7 +89,7 @@ function ExcludeSection({
     setIdsValue(event.target.value);
   };
   const initialValues = {
-    exclusionReason: paymentPlan.exclusionReason || '',
+    exclusionReason: paymentPlan.exclusion_reason || '',
   };
   const validationSchema = Yup.object().shape({
     exclusionReason: Yup.string().max(500, t('Too long')),
@@ -198,7 +198,7 @@ function ExcludeSection({
       !hasExcludePermission ||
       !hasOpenOrLockedStatus ||
       excludedIds.length === 0 ||
-      Boolean(backgroundActionStatus);
+      Boolean(background_action_status);
 
     const editExclusionsDisabled =
       !hasExcludePermission || !hasOpenOrLockedStatus;
@@ -294,7 +294,7 @@ function ExcludeSection({
     const applyDisabled =
       !hasExcludePermission ||
       !hasOpenOrLockedStatus ||
-      Boolean(backgroundActionStatus);
+      Boolean(background_action_status);
 
     if (isEdit || numberOfExcluded === 0) {
       return (
@@ -380,14 +380,14 @@ function ExcludeSection({
             ) : null}
             <Collapse in={isExclusionsOpen}>
               <Box display="flex" flexDirection="column">
-                {isExclusionsOpen && exclusionReason && !isEdit ? (
+                {isExclusionsOpen && exclusion_reason && !isEdit ? (
                   <Grid container>
                     <Grid size={{ xs: 8 }}>
                       <Box display="flex" flexDirection="column">
                         <Box
                           display="flex"
                           alignItems={
-                            exclusionReason.length > 100
+                            exclusion_reason.length > 100
                               ? 'flex-start'
                               : 'center'
                           }
@@ -397,11 +397,11 @@ function ExcludeSection({
                           <Box mr={2}>
                             <GreyText>{t('Reason')}:</GreyText>
                           </Box>
-                          <Typography>{exclusionReason}</Typography>
+                          <Typography>{exclusion_reason}</Typography>
                         </Box>
-                        {excludeHouseholdError && (
+                        {exclude_household_error && (
                           <Box display="flex" flexDirection="column" mt={2}>
-                            {formatErrorToArray(excludeHouseholdError).map(
+                            {formatErrorToArray(exclude_household_error).map(
                               (el) => (
                                 <FormHelperText key={el} error>
                                   {el}

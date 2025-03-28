@@ -49,7 +49,7 @@ export const PaymentPlanParameters = ({
               required
               minDate={data?.paymentPlan?.program?.startDate}
               maxDate={values.endDate || data?.paymentPlan?.program?.endDate}
-              disabled={!data || loading || Boolean(paymentPlan?.isFollowUp)}
+              disabled={!data || loading || Boolean(paymentPlan?.is_follow_up)}
               fullWidth
               decoratorEnd={<CalendarTodayRounded color="disabled" />}
               dataCy="input-start-date"
@@ -66,7 +66,7 @@ export const PaymentPlanParameters = ({
               required
               minDate={values.startDate}
               maxDate={data?.paymentPlan?.program?.endDate}
-              disabled={!values.startDate || Boolean(paymentPlan?.isFollowUp)}
+              disabled={!values.startDate || Boolean(paymentPlan?.is_follow_up)}
               initialFocusedDate={values.startDate}
               fullWidth
               decoratorEnd={<CalendarTodayRounded color="disabled" />}
@@ -81,7 +81,7 @@ export const PaymentPlanParameters = ({
               name="currency"
               component={FormikCurrencyAutocomplete}
               required
-              disabled={Boolean(paymentPlan?.isFollowUp)}
+              disabled={Boolean(paymentPlan?.is_follow_up)}
             />
           </Grid>
           <Grid size={{ xs: 4 }}>

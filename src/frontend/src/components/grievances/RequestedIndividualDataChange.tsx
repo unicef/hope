@@ -299,6 +299,7 @@ export function RequestedIndividualDataChange({
           values.selectedPaymentChannelsToRemove;
         const approvedPaymentChannelsToEdit =
           values.selectedPaymentChannelsToEdit;
+
         const flexFieldsApproveData = values.selectedFlexFields.reduce(
           (prev, curr) => {
             // eslint-disable-next-line no-param-reassign

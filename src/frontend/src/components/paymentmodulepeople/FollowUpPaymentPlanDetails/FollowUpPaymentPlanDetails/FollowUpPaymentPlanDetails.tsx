@@ -1,6 +1,11 @@
-import { Box, Grid2 as Grid, IconButton, Tooltip, Typography } from '@mui/material';
+import {
+  Box,
+  Grid2 as Grid,
+  IconButton,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { PaymentPlanQuery } from '@generated/graphql';
 import { renderUserName } from '@utils/utils';
 import { BlackLink } from '@core/BlackLink';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
@@ -10,10 +15,11 @@ import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { Info } from '@mui/icons-material';
 import { ReactElement } from 'react';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface FollowUpPaymentPlanDetailsProps {
   baseUrl: string;
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export function FollowUpPaymentPlanDetails({
@@ -24,18 +30,18 @@ export function FollowUpPaymentPlanDetails({
   const {
     id,
     name,
-    createdBy,
+    created_by,
     program,
     currency,
-    startDate,
-    endDate,
-    dispersionStartDate,
-    dispersionEndDate,
-    sourcePaymentPlan: {
+    start_date,
+    end_date,
+    dispersion_start_date,
+    dispersion_end_date,
+    source_payment_plan: {
       id: sourcePaymentPlanId,
-      unicefId: sourcePaymentPlanUnicefId,
+      unicef_id: sourcePaymentPlanUnicefId,
     },
-    exchangeRate,
+    exchange_rate,
   } = paymentPlan;
 
   return (
@@ -57,7 +63,7 @@ export function FollowUpPaymentPlanDetails({
             </Grid>
             <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Created By')}>
-                {renderUserName(createdBy)}
+                {renderUserName(created_by)}
               </LabelizedField>
             </Grid>
             <Grid size={{ xs: 3 }}>
@@ -79,17 +85,17 @@ export function FollowUpPaymentPlanDetails({
             </Grid>
             <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Start Date')}>
-                <UniversalMoment>{startDate}</UniversalMoment>
+                <UniversalMoment>{start_date}</UniversalMoment>
               </LabelizedField>
             </Grid>
             <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('End Date')}>
-                <UniversalMoment>{endDate}</UniversalMoment>
+                <UniversalMoment>{end_date}</UniversalMoment>
               </LabelizedField>
             </Grid>
             <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Dispersion Start Date')}>
-                <UniversalMoment>{dispersionStartDate}</UniversalMoment>
+                <UniversalMoment>{dispersion_start_date}</UniversalMoment>
               </LabelizedField>
             </Grid>
             <Grid size={{ xs: 3 }}>

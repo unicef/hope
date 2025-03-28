@@ -2,12 +2,10 @@ import { Box, Button } from '@mui/material';
 import { FileCopy } from '@mui/icons-material';
 import { ReactElement, useState } from 'react';
 import styled from 'styled-components';
-import {
-  PaymentPlanQuery,
-  useCashAssistUrlPrefixQuery,
-} from '@generated/graphql';
+import { useCashAssistUrlPrefixQuery } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const IconContainer = styled.span`
   button {
@@ -21,7 +19,7 @@ const IconContainer = styled.span`
 `;
 
 export interface FinalizedTargetPopulationHeaderButtonsPropTypes {
-  targetPopulation: PaymentPlanQuery['paymentPlan'];
+  targetPopulation: PaymentPlanDetail;
   canDuplicate: boolean;
 }
 

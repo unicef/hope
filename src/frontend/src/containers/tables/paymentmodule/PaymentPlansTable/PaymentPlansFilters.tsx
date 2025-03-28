@@ -1,9 +1,14 @@
-import { Box, Checkbox, FormControlLabel, Grid2 as Grid, MenuItem } from '@mui/material';
+import {
+  Box,
+  Checkbox,
+  FormControlLabel,
+  Grid2 as Grid,
+  MenuItem,
+} from '@mui/material';
 import moment from 'moment';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
-  AllPaymentPlansForTableQueryVariables,
   PaymentPlanStatus,
   usePaymentPlanStatusChoicesQueryQuery,
 } from '@generated/graphql';
@@ -14,17 +19,9 @@ import { SearchTextField } from '@components/core/SearchTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { ReactElement } from 'react';
+import { PaymentPlan } from '@restgenerated/models/PaymentPlan';
 
-export type FilterProps = Pick<
-  AllPaymentPlansForTableQueryVariables,
-  | 'search'
-  | 'status'
-  | 'totalEntitledQuantityFrom'
-  | 'totalEntitledQuantityTo'
-  | 'dispersionStartDate'
-  | 'dispersionEndDate'
-  | 'isFollowUp'
->;
+export type FilterProps = Partial<PaymentPlan>;
 
 interface PaymentPlansFiltersProps {
   filter;
@@ -195,14 +192,14 @@ export function PaymentPlansFilters({
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={Boolean(filter.isFollowUp)}
-                  value={filter.isFollowUp}
+                  checked={Boolean(filter.is_follow_up)}
+                  value={filter.is_follow_up}
                   color="primary"
                   onChange={(e) => {
                     if (e.target.checked) {
-                      handleFilterChange('isFollowUp', true);
+                      handleFilterChange('is_follow_up', true);
                     } else {
-                      handleFilterChange('isFollowUp', false);
+                      handleFilterChange('is_follow_up', false);
                     }
                   }}
                 />

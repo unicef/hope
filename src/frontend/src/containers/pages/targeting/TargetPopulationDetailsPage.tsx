@@ -57,7 +57,7 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
 
   const canDuplicate =
     hasPermissions(PERMISSIONS.TARGETING_DUPLICATE, permissions) &&
-    Boolean(paymentPlan.targetingCriteria);
+    Boolean(paymentPlan.targeting_criteria);
 
   return (
     <>

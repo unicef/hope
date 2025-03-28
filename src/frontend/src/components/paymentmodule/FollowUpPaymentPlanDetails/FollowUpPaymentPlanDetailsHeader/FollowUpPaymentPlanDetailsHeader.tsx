@@ -16,8 +16,8 @@ import { InReviewPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/Payme
 import { LockedFspPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/LockedFspPaymentPlanHeaderButtons';
 import { LockedPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/LockedPaymentPlanHeaderButtons';
 import { OpenPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/OpenPaymentPlanHeaderButtons';
-import { PaymentPlanQuery } from '@generated/graphql';
 import { ReactElement } from 'react';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const StatusWrapper = styled.div`
   margin-left: 30px;
@@ -26,7 +26,7 @@ const StatusWrapper = styled.div`
 interface FollowUpPaymentPlanDetailsHeaderProps {
   baseUrl: string;
   permissions: string[];
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export function FollowUpPaymentPlanDetailsHeader({
@@ -65,9 +65,9 @@ export function FollowUpPaymentPlanDetailsHeader({
 
   const canSendToPaymentGateway =
     hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
-    paymentPlan.canSendToPaymentGateway;
+    paymentPlan.can_send_to_payment_gateway;
   const canSplit =
-    hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
+    hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.can_split;
 
   let buttons: ReactElement | null = null;
   switch (paymentPlan.status) {
@@ -155,7 +155,7 @@ export function FollowUpPaymentPlanDetailsHeader({
         <Box display="flex" alignItems="center">
           {t('Follow-up Payment Plan')} ID:{' '}
           <Box ml={1}>
-            <span data-cy="pp-unicef-id">{paymentPlan.unicefId}</span>
+            <span data-cy="pp-unicef-id">{paymentPlan.unicef_id}</span>
           </Box>
           <StatusWrapper>
             <StatusBox
@@ -163,10 +163,10 @@ export function FollowUpPaymentPlanDetailsHeader({
               statusToColor={paymentPlanStatusToColor}
             />
           </StatusWrapper>
-          {paymentPlan.backgroundActionStatus && (
+          {paymentPlan.background_action_status && (
             <StatusWrapper>
               <StatusBox
-                status={paymentPlan.backgroundActionStatus}
+                status={paymentPlan.background_action_status}
                 statusToColor={paymentPlanBackgroundActionStatusToColor}
               />
             </StatusWrapper>

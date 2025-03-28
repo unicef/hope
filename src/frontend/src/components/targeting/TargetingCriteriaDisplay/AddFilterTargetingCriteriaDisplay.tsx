@@ -1,7 +1,6 @@
 import { TargetingCriteriaForm } from '@containers/forms/TargetingCriteriaForm';
 import {
   DataCollectingTypeType,
-  PaymentPlanQuery,
   useAllCollectorFieldsAttributesQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -20,6 +19,7 @@ import TargetingCriteriaDisplayDisabled, {
 import { VulnerabilityScoreComponent } from './VulnerabilityScoreComponent';
 import { useCachedIndividualFieldsQuery } from '@hooks/useCachedIndividualFields';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const Title = styled.div`
   padding: ${({ theme }) => theme.spacing(3)} ${({ theme }) => theme.spacing(4)};
@@ -75,7 +75,7 @@ const AddCriteria = styled.div`
 interface AddFilterTargetingCriteriaDisplayProps {
   rules?;
   helpers?;
-  targetPopulation?: PaymentPlanQuery['paymentPlan'];
+  targetPopulation?: PaymentPlanDetail;
   isEdit?: boolean;
   screenBeneficiary: boolean;
   isSocialDctType: boolean;
@@ -252,7 +252,7 @@ const AddFilterTargetingCriteriaDisplay = ({
                         }
                         householdIds={criteria.householdIds}
                         individualIds={criteria.individualIds}
-                        deliveryMechanism={targetPopulation?.deliveryMechanism}
+                        deliveryMechanism={targetPopulation?.delivery_mechanism}
                         criteria={criteria}
                         editFunction={() => editCriteria(criteria, index)}
                         removeFunction={() => helpers.remove(index)}

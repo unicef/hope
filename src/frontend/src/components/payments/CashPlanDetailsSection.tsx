@@ -3,13 +3,13 @@ import { Doughnut } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { countPercentage } from '@utils/utils';
-import { PaymentPlanQuery } from '@generated/graphql';
 import { BlackLink } from '@core/BlackLink';
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const ChartContainer = styled.div`
   width: 100%;
@@ -23,7 +23,7 @@ const BorderLeftBox = styled.div`
 `;
 
 interface CashPlanDetailsSectionProps {
-  planNode: PaymentPlanQuery['paymentPlan'];
+  planNode: PaymentPlanDetail;
 }
 
 export function CashPlanDetailsSection({
@@ -33,18 +33,18 @@ export function CashPlanDetailsSection({
   const { baseUrl } = useBaseUrl();
 
   const bankReconciliationSuccessPercentage = countPercentage(
-    planNode.bankReconciliationSuccess,
-    planNode.paymentItems.totalCount,
+    planNode.bank_reconciliation_success,
+    planNode.eligible_payments_count,
   );
 
   const bankReconciliationErrorPercentage = countPercentage(
-    planNode.bankReconciliationError,
-    planNode.paymentItems.totalCount,
+    planNode.bank_reconciliation_error,
+    planNode.eligible_payments_count,
   );
 
   return (
     <Grid container>
-      <Grid size={{ xs:7 }}>
+      <Grid size={{ xs: 7 }}>
         <Title data-cy="div-payment-plan-details">
           <Typography variant="h6">{t('Payment Plan Details')}</Typography>
         </Title>
@@ -61,18 +61,18 @@ export function CashPlanDetailsSection({
               },
               {
                 label: t('PAYMENT RECORDS'),
-                value: planNode.availablePaymentRecordsCount,
+                value: planNode.available_payment_records_count,
               },
               {
                 label: t('START DATE'),
-                value: <UniversalMoment>{planNode.startDate}</UniversalMoment>,
+                value: <UniversalMoment>{planNode.start_date}</UniversalMoment>,
               },
               {
                 label: t('END DATE'),
-                value: <UniversalMoment>{planNode.endDate}</UniversalMoment>,
+                value: <UniversalMoment>{planNode.end_date}</UniversalMoment>,
               },
             ].map((el) => (
-              <Grid size={{ xs:3 }} key={el.label}>
+              <Grid size={{ xs: 3 }} key={el.label}>
                 <LabelizedField label={el.label}>{el.value}</LabelizedField>
               </Grid>
             ))}
@@ -97,7 +97,7 @@ export function CashPlanDetailsSection({
                 </LabelizedField>
               </Grid>
             </Grid>
-            <Grid size={{ xs:9 }}>
+            <Grid size={{ xs: 9 }}>
               <ChartContainer>
                 <Doughnut
                   options={

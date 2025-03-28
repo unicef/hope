@@ -16,8 +16,9 @@ import { LabelizedField } from '@core/LabelizedField';
 import { PaperContainer } from './PaperContainer';
 import { FieldBorder } from '@core/FieldBorder';
 import { ReactElement, useState } from 'react';
-import { PaymentPlanBuildStatus, PaymentPlanQuery } from '@generated/graphql';
+import { PaymentPlanBuildStatus } from '@generated/graphql';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { Pointer } from '@components/core/Pointer';
 
 const colors = {
@@ -52,20 +53,20 @@ const SummaryValue = styled.div`
 `;
 
 interface ResultsProps {
-  targetPopulation: PaymentPlanQuery['paymentPlan'];
+  targetPopulation: PaymentPlanDetail;
 }
 
 function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
   const { t } = useTranslation();
   const [openDialog, setOpenDialog] = useState(false);
   const handleOpen = () => {
-    if (targetPopulation?.failedWalletValidationCollectorsIds?.length > 0) {
+    if (targetPopulation?.failed_wallet_validation_collectors_ids?.length > 0) {
       setOpenDialog(true);
     }
   };
   const handleClose = () => setOpenDialog(false);
 
-  if (targetPopulation.buildStatus !== PaymentPlanBuildStatus.Ok) {
+  if (targetPopulation.build_status !== PaymentPlanBuildStatus.Ok) {
     return null;
   }
 
@@ -83,7 +84,7 @@ function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
                   <FieldBorder color={colors.femaleChildren}>
                     <LabelizedField
                       label={t('Female Children')}
-                      value={targetPopulation.femaleChildrenCount}
+                      value={targetPopulation.female_children_count}
                     />
                   </FieldBorder>
                 </Grid>
@@ -91,7 +92,7 @@ function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
                   <FieldBorder color={colors.femaleAdult}>
                     <LabelizedField
                       label={t('Female Adults')}
-                      value={targetPopulation.femaleAdultsCount}
+                      value={targetPopulation.female_adults_count}
                     />
                   </FieldBorder>
                 </Grid>
@@ -99,7 +100,7 @@ function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
                   <FieldBorder color={colors.maleChildren}>
                     <LabelizedField
                       label={t('Male Children')}
-                      value={targetPopulation.maleChildrenCount}
+                      value={targetPopulation.male_children_count}
                     />
                   </FieldBorder>
                 </Grid>
@@ -107,7 +108,7 @@ function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
                   <FieldBorder color={colors.maleAdult}>
                     <LabelizedField
                       label={t('Male Adults')}
-                      value={targetPopulation.maleAdultsCount}
+                      value={targetPopulation.male_adults_count}
                     />
                   </FieldBorder>
                 </Grid>
@@ -134,8 +135,8 @@ function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
                         >
                           <Pointer>
                             {targetPopulation
-                              ?.failedWalletValidationCollectorsIds?.length ||
-                              '-'}
+                              ?.failed_wallet_validation_collectors_ids
+                              ?.length || '-'}
                           </Pointer>
                         </SummaryValue>
                       </LabelizedField>
@@ -143,7 +144,7 @@ function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
                         <DialogTitle>View IDs</DialogTitle>
                         <DialogContent>
                           <List>
-                            {targetPopulation?.failedWalletValidationCollectorsIds?.map(
+                            {targetPopulation?.failed_wallet_validation_collectors_ids?.map(
                               (id, index) => (
                                 <ListItem key={index}>{id}</ListItem>
                               ),
@@ -182,10 +183,10 @@ function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
                         datasets: [
                           {
                             data: [
-                              targetPopulation.femaleChildrenCount,
-                              targetPopulation.femaleAdultsCount,
-                              targetPopulation.maleChildrenCount,
-                              targetPopulation.maleAdultsCount,
+                              targetPopulation.female_children_count,
+                              targetPopulation.female_adults_count,
+                              targetPopulation.male_children_count,
+                              targetPopulation.male_adults_count,
                             ],
                             backgroundColor: [
                               colors.femaleChildren,
@@ -207,7 +208,7 @@ function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
                   <SummaryBorder>
                     <LabelizedField label={t('Total Number of People')}>
                       <SummaryValue>
-                        {targetPopulation.totalHouseholdsCount || '0'}
+                        {targetPopulation.total_households_count || '0'}
                       </SummaryValue>
                     </LabelizedField>
                   </SummaryBorder>

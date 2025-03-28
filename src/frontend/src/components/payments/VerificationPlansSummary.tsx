@@ -1,15 +1,15 @@
 import { Box, Grid2 as Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { paymentVerificationStatusToColor } from '@utils/utils';
-import { PaymentPlanQuery } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { ReactElement } from 'react';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface VerificationPlansSummaryProps {
-  planNode: PaymentPlanQuery['paymentPlan'];
+  planNode: PaymentPlanDetail;
 }
 
 export function VerificationPlansSummary({
@@ -30,7 +30,7 @@ export function VerificationPlansSummary({
               <LabelizedField label={t('Status')}>
                 <StatusBox
                   dataCy="verification-plans-summary-status"
-                  status={planNode.paymentVerificationSummary?.status}
+                  status={planNode.payment_verification_summary?.status}
                   statusToColor={paymentVerificationStatusToColor}
                 />
               </LabelizedField>

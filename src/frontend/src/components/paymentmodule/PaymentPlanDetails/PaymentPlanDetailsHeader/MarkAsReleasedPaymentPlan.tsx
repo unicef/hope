@@ -16,14 +16,15 @@ import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { FormikTextField } from '@shared/Formik/FormikTextField/FormikTextField';
-import { Action, PaymentPlanQuery } from '@generated/graphql';
+import { Action } from '@generated/graphql';
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { GreyText } from '@core/GreyText';
 import { LoadingButton } from '@core/LoadingButton';
 import { useProgramContext } from '../../../../programContext';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 export interface MarkAsReleasedPaymentPlanProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export function MarkAsReleasedPaymentPlan({
@@ -44,9 +45,9 @@ export function MarkAsReleasedPaymentPlan({
 
   const shouldShowLastReviewerMessage = (): boolean => {
     const financeReleaseNumberRequired =
-      paymentPlan.approvalProcess?.edges[0]?.node.financeReleaseNumberRequired;
+      paymentPlan.approval_process.finance_release_number_required;
     const financeReleasesCount =
-      paymentPlan.approvalProcess?.edges[0]?.node.actions.financeRelease.length;
+      paymentPlan.approval_process.actions.financeRelease.length;
 
     return financeReleaseNumberRequired - 1 === financeReleasesCount;
   };

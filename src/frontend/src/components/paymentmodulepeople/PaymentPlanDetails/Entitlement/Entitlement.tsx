@@ -18,7 +18,6 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import {
   PaymentPlanBackgroundActionStatus,
   PaymentPlanDocument,
-  PaymentPlanQuery,
   PaymentPlanStatus,
   useAllSteficonRulesQuery,
   useExportXlsxPpListMutation,
@@ -33,6 +32,7 @@ import { UniversalMoment } from '@core/UniversalMoment';
 import { BigValue } from '../../../rdi/details/RegistrationDetails/RegistrationDetails';
 import { ImportXlsxPaymentPlanPaymentList } from '../ImportXlsxPaymentPlanPaymentList/ImportXlsxPaymentPlanPaymentList';
 import { useProgramContext } from '../../../../programContext';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const GreyText = styled.p`
   color: #9e9e9e;
@@ -89,7 +89,7 @@ const BoxWithBorderRight = styled(Box)`
 `;
 
 interface EntitlementProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
   permissions: string[];
 }
 
@@ -102,7 +102,7 @@ export function Entitlement({
   const { isActiveProgram } = useProgramContext();
 
   const [steficonRuleValue, setSteficonRuleValue] = useState<string>(
-    paymentPlan.steficonRule?.rule.id || '',
+    paymentPlan.steficon_rule?.id || '',
   );
   const options = {
     refetchQueries: () => [
@@ -148,7 +148,7 @@ export function Entitlement({
   const shouldDisableExportXlsx =
     loadingExport ||
     paymentPlan.status !== PaymentPlanStatus.Locked ||
-    paymentPlan?.backgroundActionStatus ===
+    paymentPlan?.background_action_status ===
       PaymentPlanBackgroundActionStatus.XlsxExporting ||
     !isActiveProgram;
 
@@ -161,7 +161,7 @@ export function Entitlement({
           </Title>
           <GreyText>{t('Select Entitlement Formula')}</GreyText>
           <Grid alignItems="center" container>
-            <Grid size={{ xs:11 }}>
+            <Grid size={{ xs: 11 }}>
               <FormControl size="small" variant="outlined" fullWidth>
                 <Box mb={1}>
                   <InputLabel>{t('Entitlement Formula')}</InputLabel>
@@ -204,7 +204,7 @@ export function Entitlement({
                     loadingSetSteficonRule ||
                     !steficonRuleValue ||
                     paymentPlan.status !== PaymentPlanStatus.Locked ||
-                    paymentPlan.backgroundActionStatus ===
+                    paymentPlan.background_action_status ===
                       PaymentPlanBackgroundActionStatus.RuleEngineRun ||
                     !isActiveProgram
                   }

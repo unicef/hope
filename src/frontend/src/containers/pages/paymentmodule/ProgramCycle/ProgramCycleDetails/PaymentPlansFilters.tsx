@@ -27,7 +27,7 @@ export type FilterProps = Pick<
   | 'totalEntitledQuantityTo'
   | 'dispersionStartDate'
   | 'dispersionEndDate'
-  | 'isFollowUp'
+  | 'is_follow_up'
 >;
 
 interface PaymentPlansFilterProps {
