@@ -156,9 +156,7 @@ export function HouseholdDetails({
             </Grid>
             <Grid size={{ xs:6 }}>
               <LabelizedField label={t('Geolocation')}>
-                {household?.geopoint
-                  ? `${household?.geopoint?.coordinates[0]}, ${household?.geopoint?.coordinates[1]}`
-                  : '-'}
+                {household?.geopoint}
               </LabelizedField>
             </Grid>
             <Grid size={{ xs: 3 }}>
