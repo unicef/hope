@@ -2064,6 +2064,7 @@ class AccountType(models.Model):
     key = models.CharField(max_length=255, unique=True)
     label = models.CharField(max_length=255)
     unique_fields = ArrayField(default=list, base_field=models.CharField(max_length=255))
+    payment_gateway_id = models.CharField(max_length=255, blank=True, null=True)
 
     @classmethod
     def get_targeting_field_names(cls) -> List[str]:
