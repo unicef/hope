@@ -52,8 +52,8 @@ class TestPeriodicFieldViews:
         self.url_list = reverse(
             "api:periodic-data-update:periodic-fields-list",
             kwargs={
-                "business_area": self.afghanistan.slug,
-                "program_id": id_to_base64(self.program1.id, "Program"),
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program1.slug,
             },
         )
 
@@ -137,7 +137,7 @@ class TestPeriodicFieldViews:
 
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 6
+            assert len(ctx.captured_queries) == 5
 
         # Test that reoccurring requests use cached data
         with CaptureQueriesContext(connection) as ctx:
@@ -146,7 +146,7 @@ class TestPeriodicFieldViews:
 
             etag_second_call = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 0
+            assert len(ctx.captured_queries) == 1
 
             assert etag_second_call == etag
 
@@ -159,7 +159,7 @@ class TestPeriodicFieldViews:
 
             etag_call_after_update = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 6
+            assert len(ctx.captured_queries) == 5
 
             assert etag_call_after_update != etag
 
@@ -170,7 +170,7 @@ class TestPeriodicFieldViews:
 
             etag_call_after_update_second_call = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 0
+            assert len(ctx.captured_queries) == 1
 
             assert etag_call_after_update_second_call == etag_call_after_update
 
@@ -183,6 +183,6 @@ class TestPeriodicFieldViews:
 
             etag_call_after_update_2 = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 6
+            assert len(ctx.captured_queries) == 5
 
             assert etag_call_after_update_2 != etag_call_after_update_second_call

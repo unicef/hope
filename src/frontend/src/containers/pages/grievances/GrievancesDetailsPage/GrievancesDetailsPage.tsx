@@ -3,7 +3,6 @@ import { useParams } from 'react-router-dom';
 import {
   useGrievancesChoiceDataQuery,
   useGrievanceTicketQuery,
-  useMeQuery,
 } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
@@ -20,12 +19,25 @@ import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import GrievancesApproveSection from '@components/grievances/GrievancesApproveSection/GrievancesApproveSection';
 import GrievancesDetails from '@components/grievances/GrievancesDetails/GrievancesDetails';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 
 const GrievancesDetailsPage = (): ReactElement => {
   const { id } = useParams();
+  const { businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
-  const { data: currentUserData, loading: currentUserDataLoading } =
-    useMeQuery();
+  const { data: currentUserData, isLoading: currentUserDataLoading } = useQuery(
+    {
+      queryKey: ['profile', businessArea, programId],
+      queryFn: () => {
+        return RestService.restUsersProfileRetrieve({
+          businessAreaSlug: businessArea,
+          programSlug: programId === 'all' ? undefined : programId,
+        });
+      },
+    },
+  );
+
   const { data, loading, error } = useGrievanceTicketQuery({
     variables: { id },
     fetchPolicy: 'network-only',
@@ -48,7 +60,7 @@ const GrievancesDetailsPage = (): ReactElement => {
     return null;
 
   const ticket = data?.grievanceTicket;
-  const currentUserId = currentUserData?.me?.id;
+  const currentUserId = currentUserData?.id;
   const isCreator = currentUserId === ticket?.createdBy?.id;
   const isOwner = currentUserId === ticket?.assignedTo?.id;
 

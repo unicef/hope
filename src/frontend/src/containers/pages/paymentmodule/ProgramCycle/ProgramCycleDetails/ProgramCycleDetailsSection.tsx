@@ -8,11 +8,11 @@ import { StatusBox } from '@core/StatusBox';
 import { programCycleStatusToColor } from '@utils/utils';
 import { LabelizedField } from '@core/LabelizedField';
 import { UniversalMoment } from '@core/UniversalMoment';
-import { ProgramCycle } from '@api/programCycleApi';
+import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { useTranslation } from 'react-i18next';
 
 interface ProgramCycleDetailsSectionProps {
-  programCycle: ProgramCycle;
+  programCycle: ProgramCycleList;
 }
 
 export const ProgramCycleDetailsSection = ({

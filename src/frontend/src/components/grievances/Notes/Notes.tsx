@@ -10,7 +10,6 @@ import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
   useCreateGrievanceTicketNoteMutation,
-  useMeQuery,
 } from '@generated/graphql';
 import { LoadingButton } from '@core/LoadingButton';
 import { OverviewContainerColumn } from '@core/OverviewContainerColumn';
@@ -18,6 +17,9 @@ import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useProgramContext } from '../../../programContext';
 import { ReactElement } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const Name = styled.span`
   font-size: 16px;
@@ -44,8 +46,16 @@ export function Notes({
   canAddNote: boolean;
 }): ReactElement {
   const { t } = useTranslation();
-  const { data: meData, loading: meLoading } = useMeQuery({
-    fetchPolicy: 'cache-and-network',
+  const { businessArea, programId } = useBaseUrl();
+
+  const { data: meData, isLoading: meLoading } = useQuery({
+    queryKey: ['profile', businessArea, programId],
+    queryFn: () => {
+      return RestService.restUsersProfileRetrieve({
+        businessAreaSlug: businessArea,
+        programSlug: programId === 'all' ? undefined : programId,
+      });
+    },
   });
 
   const { id } = useParams();
@@ -63,10 +73,10 @@ export function Notes({
     noteId: string,
   ): ReactElement => (
     <Grid container key={noteId} data-cy="note-row">
-      <Grid size={{ xs:2 }}>
+      <Grid size={{ xs: 2 }}>
         <Avatar alt={`${name} picture`} src="/static/images/avatar/1.jpg" />
       </Grid>
-      <Grid size={{ xs:10 }}>
+      <Grid size={{ xs: 10 }}>
         <Grid size={{ xs: 12 }}>
           <Box
             display="flex"
@@ -105,10 +115,10 @@ export function Notes({
     newNote: Yup.string().required(t('Note cannot be empty')),
   });
 
-  const myName = `${meData.me.firstName || meData.me.email}`;
+  const myName = `${meData.first_name || meData.email}`;
 
   return (
-    <Grid size={{ xs:8 }}>
+    <Grid size={{ xs: 8 }}>
       <Box p={3}>
         <Formik
           initialValues={initialValues}
@@ -134,13 +144,13 @@ export function Notes({
                 {mappedNotes}
                 {canAddNote && (
                   <Grid container>
-                    <Grid size={{ xs:2 }}>
+                    <Grid size={{ xs: 2 }}>
                       <Avatar src={myName} alt={myName} />
                     </Grid>
-                    <Grid size={{ xs:10 }}>
+                    <Grid size={{ xs: 10 }}>
                       <Grid size={{ xs: 12 }}>
                         <Box display="flex" justifyContent="space-between">
-                          <Name>{renderUserName(meData.me)}</Name>
+                          <Name>{renderUserName(meData)}</Name>
                         </Box>
                       </Grid>
                       <Grid size={{ xs: 12 }}>

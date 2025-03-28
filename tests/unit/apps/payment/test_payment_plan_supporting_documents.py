@@ -11,7 +11,7 @@ from rest_framework import status
 from rest_framework.test import APIClient, APIRequestFactory
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.account.models import Role, UserRole
+from hct_mis_api.apps.account.models import Role, RoleAssignment
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.payment.api.serializers import (
@@ -112,18 +112,17 @@ class PaymentPlanSupportingDocumentUploadViewTests(TestCase):
         role, created = Role.objects.update_or_create(
             name="TestName", defaults={"permissions": [Permissions.PM_UPLOAD_SUPPORTING_DOCUMENT.value]}
         )
-        user_role, _ = UserRole.objects.get_or_create(user=cls.user, role=role, business_area=cls.business_area)
+        user_role, _ = RoleAssignment.objects.get_or_create(user=cls.user, role=role, business_area=cls.business_area)
         cls.payment_plan = PaymentPlanFactory(
             status=PaymentPlan.Status.OPEN,
         )
-        program_id_base64 = base64.b64encode(f"ProgramNode:{str(cls.payment_plan.program.id)}".encode()).decode()
         payment_plan_id_base64 = base64.b64encode(f"PaymentPlanNode:{str(cls.payment_plan.id)}".encode()).decode()
 
         cls.url = reverse(
-            "api:payment-plan:supporting_documents-list",
+            "api:payments:supporting-documents-list",
             kwargs={
-                "business_area": "afghanistan",
-                "program_id": program_id_base64,
+                "business_area_slug": "afghanistan",
+                "program_slug": cls.payment_plan.program.slug,
                 "payment_plan_id": payment_plan_id_base64,
             },
         )
@@ -172,24 +171,23 @@ class PaymentPlanSupportingDocumentViewTests(TestCase):
                 ]
             },
         )
-        user_role, _ = UserRole.objects.get_or_create(user=cls.user, role=role, business_area=cls.business_area)
+        user_role, _ = RoleAssignment.objects.get_or_create(user=cls.user, role=role, business_area=cls.business_area)
         cls.payment_plan = PaymentPlanFactory(
             status=PaymentPlan.Status.OPEN,
         )
         cls.document = PaymentPlanSupportingDocument.objects.create(
             payment_plan=cls.payment_plan, title="Test Document333", file=SimpleUploadedFile("test.pdf", b"aaa")
         )
-        cls.program_id_base64 = base64.b64encode(f"ProgramNode:{str(cls.payment_plan.program.id)}".encode()).decode()
         cls.payment_plan_id_base64 = base64.b64encode(f"PaymentPlanNode:{str(cls.payment_plan.id)}".encode()).decode()
         cls.supporting_document_id_base64 = base64.b64encode(
             f"PaymentPlanSupportingDocumentNode:{str(cls.document.id)}".encode()
         ).decode()
 
         cls.url = reverse(
-            "api:payment-plan:supporting_documents-detail",
+            "api:payments:supporting-documents-detail",
             kwargs={
-                "business_area": "afghanistan",
-                "program_id": cls.program_id_base64,
+                "business_area_slug": "afghanistan",
+                "program_slug": cls.payment_plan.program.slug,
                 "payment_plan_id": cls.payment_plan_id_base64,
                 "file_id": cls.supporting_document_id_base64,
             },
@@ -202,10 +200,10 @@ class PaymentPlanSupportingDocumentViewTests(TestCase):
 
     def test_get_document_success(self) -> None:
         url = reverse(
-            "api:payment-plan:supporting_documents-download",
+            "api:payments:supporting-documents-download",
             kwargs={
-                "business_area": "afghanistan",
-                "program_id": self.program_id_base64,
+                "business_area_slug": "afghanistan",
+                "program_slug": self.payment_plan.program.slug,
                 "payment_plan_id": self.payment_plan_id_base64,
                 "file_id": self.supporting_document_id_base64,
             },

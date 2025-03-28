@@ -5,10 +5,11 @@ import { useTranslation } from 'react-i18next';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { ContentLink } from '@core/ContentLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { AllHouseholdsQuery, useHouseholdLazyQuery } from '@generated/graphql';
+import { useHouseholdLazyQuery } from '@generated/graphql';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { useProgramContext } from 'src/programContext';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 interface HouseholdQuestionnaireProps {
   values;
@@ -20,9 +21,8 @@ function HouseholdQuestionnaire({
   const { baseUrl } = useBaseUrl();
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-  const household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'] =
-    values.selectedHousehold;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const household: HouseholdDetail = values.selectedHousehold;
   const [getHousehold, { data: fullHousehold, loading: fullHouseholdLoading }] =
     useHouseholdLazyQuery({ variables: { id: household?.id } });
 
@@ -43,7 +43,7 @@ function HouseholdQuestionnaire({
       {[
         {
           name: 'questionnaire_size',
-          label: t(`${beneficiaryGroup?.groupLabel} Size`),
+          label: t(`${beneficiaryGroup?.group_label} Size`),
           value: selectedHouseholdData.size,
           size: 3,
         },
@@ -67,7 +67,7 @@ function HouseholdQuestionnaire({
         },
         {
           name: 'questionnaire_headOfHousehold',
-          label: t(`Head of ${beneficiaryGroup?.groupLabel}`),
+          label: t(`Head of ${beneficiaryGroup?.group_label}`),
           value: (
             <ContentLink
               href={`/${baseUrl}/population/individuals/${selectedHouseholdData.headOfHousehold.id}`}

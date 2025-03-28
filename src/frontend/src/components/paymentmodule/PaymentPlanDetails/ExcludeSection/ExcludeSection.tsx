@@ -44,7 +44,7 @@ function ExcludeSection({
     excludeHouseholdError,
   } = paymentPlan;
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const initialExcludedIds = paymentPlan?.excludedHouseholds?.map(
     (el) => el.unicefId,
@@ -68,7 +68,7 @@ function ExcludeSection({
 
   const getTooltipText = (): string => {
     if (!hasOpenOrLockedStatus) {
-      return `${beneficiaryGroup?.groupLabelPlural} can only be excluded from a Payment Plan in status open or locked`;
+      return `${beneficiaryGroup?.group_label_plural} can only be excluded from a Payment Plan in status open or locked`;
     }
     if (!hasExcludePermission) {
       return t('Permission denied');
@@ -115,7 +115,9 @@ function ExcludeSection({
         awaitRefetchQueries: true,
       });
       if (!error) {
-        showMessage(`${beneficiaryGroup?.groupLabelPlural} exclusion started`);
+        showMessage(
+          `${beneficiaryGroup?.group_label_plural} exclusion started`,
+        );
         setExclusionsOpen(false);
       }
     } catch (e) {
@@ -311,7 +313,7 @@ function ExcludeSection({
             <Grid size={{ xs: 6 }}>
               <Box mr={2}>
                 <StyledTextField
-                  label={`${beneficiaryGroup?.groupLabelPlural} Ids`}
+                  label={`${beneficiaryGroup?.group_label_plural} Ids`}
                   data-cy="input-households-ids"
                   value={idsValue}
                   onChange={handleIdsChange}
@@ -370,8 +372,8 @@ function ExcludeSection({
                 <GreyText>
                   {`${numberOfExcluded} ${
                     numberOfExcluded === 1
-                      ? `${beneficiaryGroup?.groupLabel}`
-                      : `${beneficiaryGroup?.groupLabelPlural}`
+                      ? `${beneficiaryGroup?.group_label}`
+                      : `${beneficiaryGroup?.group_label_plural}`
                   } excluded`}
                 </GreyText>
               </Box>

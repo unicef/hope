@@ -3,26 +3,26 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { TableWrapper } from '@components/core/TableWrapper';
 import { Title } from '@components/core/Title';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import RegistrationDataImportDetailsPageHeader from '@components/rdi/details/RegistrationDataImportDetailsPageHeader';
+import RegistrationDetails from '@components/rdi/details/RegistrationDetails/RegistrationDetails';
+import { ImportedPeopleTable } from '@containers/tables/rdi/ImportedPeopleTable';
 import { Tab, Tabs } from '@core/Tabs';
 import {
   RegistrationDataImportStatus,
   useHouseholdChoiceDataQuery,
-  useProgramQuery,
   useRegistrationDataImportQuery,
 } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
 import { Typography } from '@mui/material';
+import { isPermissionDeniedError } from '@utils/utils';
 import { ReactElement, ReactNode, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import styled from 'styled-components';
-import withErrorBoundary from '@components/core/withErrorBoundary';
-import { ImportedPeopleTable } from '@containers/tables/rdi/ImportedPeopleTable';
-import { usePermissions } from '@hooks/usePermissions';
-import { isPermissionDeniedError } from '@utils/utils';
-import RegistrationDataImportDetailsPageHeader from '@components/rdi/details/RegistrationDataImportDetailsPageHeader';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
-import RegistrationDetails from '@components/rdi/details/RegistrationDetails/RegistrationDetails';
+import { useProgramContext } from 'src/programContext';
+import styled from 'styled-components';
 
 const Container = styled.div`
   && {
@@ -58,10 +58,9 @@ export const PeopleRegistrationDataImportDetailsPage = (): ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
-  const { businessArea, programId } = useBaseUrl();
-  const { data: programData } = useProgramQuery({
-    variables: { id: programId },
-  });
+  const { businessArea } = useBaseUrl();
+  const { isSocialDctType } = useProgramContext();
+
   const { data, loading, error, stopPolling, startPolling } =
     useRegistrationDataImportQuery({
       variables: { id },
@@ -111,7 +110,7 @@ export const PeopleRegistrationDataImportDetailsPage = (): ReactElement => {
       <Container>
         <RegistrationDetails
           registration={data.registrationDataImport}
-          isSocialWorkerProgram={programData.program.isSocialWorkerProgram}
+          isSocialWorkerProgram={isSocialDctType}
         />
         {isErased ? null : (
           <TableWrapper>

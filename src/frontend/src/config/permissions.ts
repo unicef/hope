@@ -239,7 +239,7 @@ export function hasPermissions(
   allowedPermissions: string[],
 ): boolean {
   // checks to see if has one permission or at least one from the array
-
+  if (!allowedPermissions) return false;
   if (Array.isArray(permission)) {
     return allowedPermissions.some((perm) => permission.includes(perm));
   }
@@ -250,6 +250,7 @@ export function hasPermissionInModule(
   module: string,
   allowedPermissions: string[],
 ): boolean {
+  if (!allowedPermissions) return false;
   return allowedPermissions.some((perm) => perm.includes(module));
 }
 

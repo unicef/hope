@@ -1,15 +1,18 @@
-from hct_mis_api.api.caches import BusinessAreaAndProgramKeyBit, KeyConstructorMixin
+from hct_mis_api.api.caches import (
+    BusinessAreaAndProgramKeyBitMixin,
+    KeyConstructorMixin,
+)
 
 
-class PDUTemplateListVersionsKeyBit(BusinessAreaAndProgramKeyBit):
+class PDUTemplateListVersionsKeyBit(BusinessAreaAndProgramKeyBitMixin):
     specific_view_cache_key = "periodic_data_update_template_list"
 
 
-class PDUUploadListVersionsKeyBit(BusinessAreaAndProgramKeyBit):
+class PDUUploadListVersionsKeyBit(BusinessAreaAndProgramKeyBitMixin):
     specific_view_cache_key = "periodic_data_update_upload_list"
 
 
-class PeriodicFieldListVersionsKeyBit(BusinessAreaAndProgramKeyBit):
+class PeriodicFieldListVersionsKeyBit(BusinessAreaAndProgramKeyBitMixin):
     specific_view_cache_key = "periodic_field_list"
 
 

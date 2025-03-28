@@ -1,3 +1,4 @@
+import { Title } from '@components/core/Title';
 import {
   Box,
   Paper,
@@ -8,13 +9,11 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import { Title } from '@components/core/Title';
-import { HouseholdNode } from '@generated/graphql';
 import { useProgramContext } from 'src/programContext';
-import { LabelizedField } from '@components/core/LabelizedField';
+import styled from 'styled-components';
 
 const GreyTableCell = styled(TableCell)`
   background-color: #eeeeee;
@@ -24,7 +23,7 @@ const OverviewPaper = styled(Paper)`
   padding: 20px ${({ theme }) => theme.spacing(11)};
 `;
 export interface HouseholdCompositionTableProps {
-  household: HouseholdNode;
+  household: HouseholdDetail;
 }
 
 export function HouseholdCompositionTable({
@@ -32,11 +31,11 @@ export function HouseholdCompositionTable({
 }: HouseholdCompositionTableProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
   return (
     <OverviewPaper>
       <Title>
-        <Typography variant="h6">{`${beneficiaryGroup?.groupLabel} Composition`}</Typography>
+        <Typography variant="h6">{`${beneficiaryGroup?.group_label} Composition`}</Typography>
       </Title>
       <Table>
         <TableHead>
@@ -54,104 +53,105 @@ export function HouseholdCompositionTable({
           <TableRow data-cy="row05">
             <TableCell align="left">0 - 5</TableCell>
             <GreyTableCell align="left">
-              {household?.femaleAgeGroup05Count}
+              {household?.female_age_group_0_5_count}
             </GreyTableCell>
             <GreyTableCell align="left">
-              {household?.femaleAgeGroup05DisabledCount}
+              {household?.female_age_group_0_5_disabled_count}
             </GreyTableCell>
             <GreyTableCell align="left">-</GreyTableCell>
             <TableCell align="left" />
             <GreyTableCell align="left">
-              {household?.maleAgeGroup05Count}
+              {household?.male_age_group_0_5_count}
             </GreyTableCell>
             <GreyTableCell align="left">
-              {household?.maleAgeGroup05DisabledCount}
+              {household?.male_age_group_0_5_disabled_count}
             </GreyTableCell>
           </TableRow>
           <TableRow>
             <TableCell align="left">6 - 11</TableCell>
             <GreyTableCell align="left">
-              {household?.femaleAgeGroup611Count}
+              {household?.female_age_group_6_11_count}
             </GreyTableCell>
             <GreyTableCell align="left">
-              {household?.femaleAgeGroup611DisabledCount}
+              {household?.female_age_group_6_11_disabled_count}
             </GreyTableCell>
             <GreyTableCell align="left">-</GreyTableCell>
             <TableCell align="left" />
             <GreyTableCell align="left">
-              {household?.maleAgeGroup611Count}
+              {household?.male_age_group_6_11_count}
             </GreyTableCell>
             <GreyTableCell align="left">
-              {household?.maleAgeGroup611DisabledCount}
+              {household?.male_age_group_6_11_disabled_count}
             </GreyTableCell>
           </TableRow>
           <TableRow>
             <TableCell align="left">12 - 17</TableCell>
             <GreyTableCell align="left">
-              {household?.femaleAgeGroup1217Count}
+              {household?.female_age_group_12_17_count}
             </GreyTableCell>
             <GreyTableCell align="left">
-              {household?.femaleAgeGroup1217DisabledCount}
+              {household?.female_age_group_12_17_disabled_count}
             </GreyTableCell>
             <GreyTableCell align="left">-</GreyTableCell>
             <TableCell align="left" />
             <GreyTableCell align="left">
-              {household?.maleAgeGroup1217Count}
+              {household?.male_age_group_12_17_count}
             </GreyTableCell>
             <GreyTableCell align="left">
-              {household?.maleAgeGroup1217DisabledCount}
+              {household?.male_age_group_12_17_disabled_count}
             </GreyTableCell>
           </TableRow>
           <TableRow>
             <TableCell align="left">18 - 59</TableCell>
             <GreyTableCell align="left">
-              {household?.femaleAgeGroup1859Count}
+              {household?.female_age_group_18_59_count}
             </GreyTableCell>
             <GreyTableCell align="left">
-              {household?.femaleAgeGroup1859DisabledCount}
+              {household?.female_age_group_18_59_disabled_count}
             </GreyTableCell>
             <GreyTableCell align="left">
-              {household?.pregnantCount}
+              {household?.pregnant_count}
             </GreyTableCell>
             <TableCell align="left" />
             <GreyTableCell align="left">
-              {household?.maleAgeGroup1859Count}
+              {household?.male_age_group_18_59_count}
             </GreyTableCell>
             <GreyTableCell align="left">
-              {household?.maleAgeGroup1859DisabledCount}
+              {household?.male_age_group_18_59_disabled_count}
             </GreyTableCell>
           </TableRow>
           <TableRow>
             <TableCell align="left">60 +</TableCell>
             <GreyTableCell align="left">
-              {household?.femaleAgeGroup60Count}
+              {household?.female_age_group_60_count}
             </GreyTableCell>
             <GreyTableCell align="left">
-              {household?.femaleAgeGroup60DisabledCount}
+              {household?.female_age_group_60_disabled_count}
             </GreyTableCell>
             <GreyTableCell align="left">-</GreyTableCell>
             <TableCell align="left" />
             <GreyTableCell align="left">
-              {household?.maleAgeGroup60Count}
+              {household?.male_age_group_60_count}
             </GreyTableCell>
             <GreyTableCell align="left">
-              {household?.maleAgeGroup60DisabledCount}
+              {household?.male_age_group_60_disabled_count}
             </GreyTableCell>
           </TableRow>
         </TableBody>
       </Table>
       <Box display="flex" mt={2}>
+        {/* TODO: Add the following fields */}
         <Box mr={2}>
-          <LabelizedField
+          {/* <LabelizedField
             label={t('Unknown')}
-            value={household?.unknownSexGroupCount}
-          />
+            value={household?.count}
+          /> */}
         </Box>
         <Box>
-          <LabelizedField
+          {/* <LabelizedField
             label={t('Other')}
             value={household?.otherSexGroupCount}
-          />
+          /> */}
         </Box>
       </Box>
     </OverviewPaper>

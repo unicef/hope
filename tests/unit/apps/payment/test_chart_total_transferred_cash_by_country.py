@@ -74,7 +74,9 @@ class TestChartTotalTransferredCashByCountry(APITestCase):
         ]
     )
     def test_resolving_chart(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, BusinessArea.objects.get(slug="global"))
+        self.create_user_role_with_permissions(
+            self.user, permissions, BusinessArea.objects.get(slug="global"), whole_business_area_access=True
+        )
 
         self.snapshot_graphql_request(
             request_string=self.CHART_TOTAL_TRANSFERRED_CASH_BY_COUNTRY_QUERY,

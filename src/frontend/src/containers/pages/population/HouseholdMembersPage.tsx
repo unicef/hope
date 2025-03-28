@@ -24,7 +24,7 @@ export const HouseholdMembersPage = (): ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
   const { programHasPdu, selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const { businessArea } = useBaseUrl();
   const isNewTemplateJustCreated =
@@ -84,7 +84,7 @@ export const HouseholdMembersPage = (): ReactElement => {
   return (
     <>
       <PageHeader
-        title={beneficiaryGroup?.memberLabelPlural}
+        title={beneficiaryGroup?.member_label_plural}
         tabs={
           <Tabs
             value={currentTab}
@@ -94,7 +94,7 @@ export const HouseholdMembersPage = (): ReactElement => {
           >
             <Tab
               data-cy="tab-individuals"
-              label={beneficiaryGroup?.memberLabelPlural}
+              label={beneficiaryGroup?.member_label_plural}
             />
             {programHasPdu ? (
               canViewPDUListAndDetails ? (

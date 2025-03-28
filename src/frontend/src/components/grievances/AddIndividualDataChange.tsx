@@ -125,7 +125,7 @@ function AddIndividualDataChange({
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const { data, loading } = useAllAddIndividualFieldsQuery();
   if (loading) {
@@ -143,7 +143,7 @@ function AddIndividualDataChange({
       <>
         <Title>
           <Typography variant="h6">
-            {t(`${beneficiaryGroup?.memberLabel} Data`)}
+            {t(`${beneficiaryGroup?.member_label} Data`)}
           </Typography>
         </Title>
         <Grid container spacing={3}>

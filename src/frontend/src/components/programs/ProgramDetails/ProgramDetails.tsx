@@ -1,18 +1,23 @@
-import { PartnerAccess } from '@components/programs/constants';
+import { StatusBox } from '@components/core/StatusBox';
+import { UniversalMoment } from '@components/core/UniversalMoment';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { DividerLine } from '@core/DividerLine';
 import { LabelizedField } from '@core/LabelizedField';
 import { OverviewContainer } from '@core/OverviewContainer';
-import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
-import { UniversalMoment } from '@core/UniversalMoment';
-import { ProgrammeChoiceDataQuery, ProgramQuery } from '@generated/graphql';
+import { ProgrammeChoiceDataQuery } from '@generated/graphql';
 import { Box, Grid2 as Grid, Typography } from '@mui/material';
-import { choicesToDict, programStatusToColor } from '@utils/utils';
-import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import { MiśTheme } from '../../../theme';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import {
+  choicesToDict,
+  isPartnerVisible,
+  programStatusToColor,
+} from '@utils/utils';
 import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { MiśTheme } from 'src/theme';
+import styled from 'styled-components';
+import { PartnerAccess } from '../constants';
 
 const NumberOfHouseHolds = styled.div`
   padding: ${({ theme }) => theme.spacing(8)};
@@ -34,7 +39,7 @@ const StyledBox = styled(Box)`
 `;
 
 interface ProgramDetailsProps {
-  program: ProgramQuery['program'];
+  program: ProgramDetail;
   choices: ProgrammeChoiceDataQuery;
 }
 
@@ -43,13 +48,16 @@ export const ProgramDetails = ({
   choices,
 }: ProgramDetailsProps): ReactElement => {
   const { t } = useTranslation();
+  //TODO: remove console.log
+  //TODO: uncomment all fields
+  console.log(program, choices);
   const { programFrequencyOfPaymentsChoices, programSectorChoices } = choices;
   const programFrequencyOfPaymentsChoicesDict = choicesToDict(
     programFrequencyOfPaymentsChoices,
   );
   const programSectorChoicesDict = choicesToDict(programSectorChoices);
   const renderAdminAreasCount = (
-    partner: ProgramQuery['program']['partners'][0],
+    partner: ProgramDetail['partners'][0],
   ): ReactElement => {
     const counts = {
       1: 0,
@@ -78,8 +86,9 @@ export const ProgramDetails = ({
     );
   };
 
-  const partners = program.partners.filter(
-    (partner) => partner.name !== 'UNICEF',
+  let partners = [];
+  partners = program.partners.filter((partner) =>
+    isPartnerVisible(partner.name),
   );
 
   const showPartners = partners.length > 0;
@@ -101,19 +110,19 @@ export const ProgramDetails = ({
           <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('START DATE')}
-              value={<UniversalMoment>{program.startDate}</UniversalMoment>}
+              value={<UniversalMoment>{program.start_date}</UniversalMoment>}
             />
           </Grid>
           <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('END DATE')}
-              value={<UniversalMoment>{program.endDate}</UniversalMoment>}
+              value={<UniversalMoment>{program.end_date}</UniversalMoment>}
             />
           </Grid>
           <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('Programme Code')}
-              value={program.programmeCode}
+              value={program.programme_code}
             />
           </Grid>
           <Grid size={{ xs: 4 }}>
@@ -125,13 +134,13 @@ export const ProgramDetails = ({
           <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('Data Collecting Type')}
-              value={program?.dataCollectingType?.label}
+              value={program?.data_collecting_type?.label}
             />
           </Grid>
           <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('Beneficiary Group')}
-              value={program?.beneficiaryGroup?.name}
+              value={program?.beneficiary_group?.name}
             />
           </Grid>
           <Grid size={{ xs: 4 }}>
@@ -139,16 +148,15 @@ export const ProgramDetails = ({
               label={t('Frequency of Payment')}
               value={
                 programFrequencyOfPaymentsChoicesDict[
-                  program.frequencyOfPayments
+                  program.frequency_of_payments
                 ]
               }
             />
           </Grid>
-
           <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('Administrative Areas of implementation')}
-              value={program.administrativeAreasOfImplementation}
+              value={program.administrative_areas_of_implementation}
             />
           </Grid>
           <Grid size={{ xs: 4 }}>
@@ -160,20 +168,20 @@ export const ProgramDetails = ({
           <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('CASH+')}
-              value={program.cashPlus ? t('Yes') : t('No')}
+              value={program.cash_plus ? t('Yes') : t('No')}
             />
           </Grid>
           <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('Partner Access')}
-              value={PartnerAccess[program.partnerAccess]}
+              value={PartnerAccess[program.partner_access]}
             />
           </Grid>
         </Grid>
         <NumberOfHouseHolds>
           <LabelizedField label={t('Programme size')}>
             <NumberOfHouseHoldsValue>
-              {program.totalNumberOfHouseholds}
+              {program.household_count}
             </NumberOfHouseHoldsValue>
           </LabelizedField>
         </NumberOfHouseHolds>

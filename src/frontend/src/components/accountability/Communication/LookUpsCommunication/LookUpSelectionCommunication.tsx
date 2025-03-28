@@ -37,9 +37,9 @@ export function LookUpSelectionCommunication({
 }): ReactElement {
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
   const communicationTabs = [
-    `${beneficiaryGroup?.groupLabel}`,
+    `${beneficiaryGroup?.group_label}`,
     'Target Population',
     'RDI',
   ];

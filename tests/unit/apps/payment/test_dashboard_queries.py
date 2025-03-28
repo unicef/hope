@@ -156,7 +156,9 @@ class TestDashboardQueries(APITestCase):
             )
 
             business_area = BusinessArea.objects.get(slug=business_area_slug)
-            cls.create_user_role_with_permissions(cls.user, [Permissions.DASHBOARD_VIEW_COUNTRY], business_area)
+            cls.create_user_role_with_permissions(
+                cls.user, [Permissions.DASHBOARD_VIEW_COUNTRY], business_area, whole_business_area_access=True
+            )
 
             program1 = ProgramFactory(
                 cash_plus=True,
@@ -360,7 +362,9 @@ class TestDashboardQueries(APITestCase):
     @unittest.skip("to refactor")
     def test_chart_total_transferred_by_country(self) -> None:
         business_area = BusinessArea.objects.get(slug="global")
-        self.create_user_role_with_permissions(self.user, [Permissions.DASHBOARD_VIEW_COUNTRY], business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.DASHBOARD_VIEW_COUNTRY], business_area, whole_business_area_access=True
+        )
         response = self.graphql_request(
             request_string=self.QUERY_CHART_TOTAL_TRANSFERRED_BY_COUNTRY,
             variables={"businessAreaSlug": "global", "year": 2021},

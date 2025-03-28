@@ -21,7 +21,8 @@ import {
   SCOPE_ALL_PROGRAMS,
   SCOPE_PROGRAM,
 } from './menuItems';
-import { ProgramInterface, useProgramContext } from 'src/programContext';
+import { useProgramContext } from 'src/programContext';
+import { BeneficiaryGroup } from '@restgenerated/models/BeneficiaryGroup';
 
 const Text = styled(ListItemText)`
   .MuiTypography-body1 {
@@ -124,7 +125,7 @@ export const DrawerItems = ({
 
   const beneficiaryGroupTransformator = (
     array: MenuItem[],
-    _beneficiaryGroup: ProgramInterface['beneficiaryGroup'],
+    _beneficiaryGroup: BeneficiaryGroup,
   ): MenuItem[] => {
     if (!_beneficiaryGroup) {
       return array;
@@ -137,9 +138,9 @@ export const DrawerItems = ({
           item.secondaryActions = item.secondaryActions.map(
             (action, actionIndex) => {
               if (actionIndex === 0) {
-                action.name = _beneficiaryGroup.groupLabelPlural;
+                action.name = _beneficiaryGroup.group_label_plural;
               } else if (actionIndex === 1) {
-                action.name = _beneficiaryGroup.memberLabelPlural;
+                action.name = _beneficiaryGroup.member_label_plural;
               }
               return action;
             },
@@ -152,7 +153,7 @@ export const DrawerItems = ({
 
   const preparedMenuItems = beneficiaryGroupTransformator(
     prepareMenuItems(menuItems),
-    selectedProgram?.beneficiaryGroup,
+    selectedProgram?.beneficiary_group,
   );
 
   const { isAccountabilityApplicable } = businessAreaData.businessArea;

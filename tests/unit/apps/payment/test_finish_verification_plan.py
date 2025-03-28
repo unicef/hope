@@ -1,12 +1,16 @@
 from typing import Any
 from unittest import mock
 
-from django.conf import settings
+from django.core.management import call_command
 from django.test import TestCase, override_settings
 
 from constance.test import override_config
 
-from hct_mis_api.apps.account.fixtures import RoleFactory, UserFactory, UserRoleFactory
+from hct_mis_api.apps.account.fixtures import (
+    RoleAssignmentFactory,
+    RoleFactory,
+    UserFactory,
+)
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import GrievanceTicket
@@ -28,16 +32,15 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 
 
 class TestFinishVerificationPlan(TestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         business_area = create_afghanistan()
         payment_record_amount = 10
         user = UserFactory()
         role = RoleFactory(name="Releaser")
-        UserRoleFactory(user=user, role=role, business_area=business_area)
+        RoleAssignmentFactory(user=user, role=role, business_area=business_area)
 
         afghanistan_areas_qs = Area.objects.filter(area_type__area_level=2, area_type__country__iso_code3="AFG")
 

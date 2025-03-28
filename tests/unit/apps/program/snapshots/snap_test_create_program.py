@@ -41,7 +41,19 @@ snapshots['TestCreateProgram::test_create_program_authenticated_0_with_permissio
                                 'name': 'Area in AFG 2'
                             }
                         ],
-                        'name': 'UNICEF'
+                        'name': 'UNICEF HQ'
+                    },
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF Partner for afghanistan'
                     }
                 ],
                 'pduFields': [
@@ -248,7 +260,19 @@ snapshots['TestCreateProgram::test_create_program_with_partners_0_valid 1'] = {
                                 'name': 'Area in AFG 2'
                             }
                         ],
-                        'name': 'UNICEF'
+                        'name': 'UNICEF HQ'
+                    },
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF Partner for afghanistan'
                     },
                     {
                         'areaAccess': 'ADMIN_AREA',
@@ -361,7 +385,31 @@ snapshots['TestCreateProgram::test_create_program_with_partners_all_partners_acc
                                 'name': 'Area in AFG 2'
                             }
                         ],
-                        'name': 'UNICEF'
+                        'name': 'UNICEF HQ'
+                    },
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF Partner for afghanistan'
+                    },
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'WFP'
                     }
                 ],
                 'pduFields': [
@@ -410,7 +458,19 @@ snapshots['TestCreateProgram::test_create_program_with_partners_none_partners_ac
                                 'name': 'Area in AFG 2'
                             }
                         ],
-                        'name': 'UNICEF'
+                        'name': 'UNICEF HQ'
+                    },
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF Partner for afghanistan'
                     }
                 ],
                 'pduFields': [
@@ -459,7 +519,19 @@ snapshots['TestCreateProgram::test_create_program_with_pdu_fields 1'] = {
                                 'name': 'Area in AFG 2'
                             }
                         ],
-                        'name': 'UNICEF'
+                        'name': 'UNICEF HQ'
+                    },
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF Partner for afghanistan'
                     }
                 ],
                 'pduFields': [
@@ -578,7 +650,19 @@ snapshots['TestCreateProgram::test_create_program_with_pdu_fields_existing_field
                                 'name': 'Area in AFG 2'
                             }
                         ],
-                        'name': 'UNICEF'
+                        'name': 'UNICEF HQ'
+                    },
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF Partner for afghanistan'
                     }
                 ],
                 'pduFields': [
@@ -638,7 +722,7 @@ snapshots['TestCreateProgram::test_create_program_with_programme_code_greater_th
                     'line': 3
                 }
             ],
-            'message': 'Programme code should be exactly 4 characters long and may only contain letters, digits and characters: - . /',
+            'message': 'Programme code should be exactly 4 characters long and may only contain letters, digits and character: -',
             'path': [
                 'createProgram'
             ]
@@ -658,7 +742,7 @@ snapshots['TestCreateProgram::test_create_program_with_programme_code_less_than_
                     'line': 3
                 }
             ],
-            'message': 'Programme code should be exactly 4 characters long and may only contain letters, digits and characters: - . /',
+            'message': 'Programme code should be exactly 4 characters long and may only contain letters, digits and character: -',
             'path': [
                 'createProgram'
             ]
@@ -678,7 +762,7 @@ snapshots['TestCreateProgram::test_create_program_with_programme_code_not_within
                     'line': 3
                 }
             ],
-            'message': 'Programme code should be exactly 4 characters long and may only contain letters, digits and characters: - . /',
+            'message': 'Programme code should be exactly 4 characters long and may only contain letters, digits and character: -',
             'path': [
                 'createProgram'
             ]

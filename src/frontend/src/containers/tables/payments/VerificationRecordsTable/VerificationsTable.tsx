@@ -33,13 +33,13 @@ export function VerificationsTable({
   };
 
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const replacements = {
     payment_record__head_of_household__family_name: (_beneficiaryGroup) =>
-      `Head of ${_beneficiaryGroup?.groupLabel}`,
+      `Head of ${_beneficiaryGroup?.group_label}`,
     payment_record__household__unicef_id: (_beneficiaryGroup) =>
-      `${_beneficiaryGroup?.groupLabel} ID`,
+      `${_beneficiaryGroup?.group_label} ID`,
   };
 
   const adjustedHeadCells = adjustHeadCells(

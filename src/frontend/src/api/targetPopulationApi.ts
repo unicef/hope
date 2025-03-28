@@ -1,4 +1,4 @@
-import { api } from './api';
+import { api, handleApiResponse } from './api';
 import { TargetPopulationList } from '@restgenerated/models/TargetPopulationList';
 
 export const fetchTargetPopulations = async (
@@ -6,9 +6,10 @@ export const fetchTargetPopulations = async (
   programId: string,
   params = {},
 ): Promise<TargetPopulationList> => {
-  const response = await api.get(
-    `${businessAreaSlug}/programs/${programId}/targeting/target-populations/`,
-    params,
+  return handleApiResponse(
+    api.get(
+      `${businessAreaSlug}/programs/${programId}/targeting/target-populations/`,
+      params,
+    ),
   );
-  return response;
 };

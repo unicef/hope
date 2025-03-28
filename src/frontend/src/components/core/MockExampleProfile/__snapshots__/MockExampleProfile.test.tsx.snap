@@ -1,0 +1,16 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`MockExampleProfile renders correctly after data is fetched 1`] = `
+<DocumentFragment>
+  <div
+    style="border: 3px solid black; padding: 10px; width: 200px;"
+  >
+    <div>
+      <h4>
+        Profile Details
+      </h4>
+      Root Rootkowski
+    </div>
+  </div>
+</DocumentFragment>
+`;

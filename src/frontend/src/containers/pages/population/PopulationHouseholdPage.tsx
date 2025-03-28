@@ -3,7 +3,6 @@ import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { HouseholdFilters } from '@components/population/HouseholdFilter';
 import { useHouseholdChoiceDataQuery } from '@generated/graphql';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
 import { getFilterFromQueryParams } from '@utils/utils';
@@ -11,13 +10,13 @@ import { ReactElement, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { HouseholdTable } from '../../tables/population/HouseholdTable';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { HouseholdTable } from '@containers/tables/population/HouseholdTable/HouseholdTable';
 
 function PopulationHouseholdPage(): ReactElement {
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
   const { data: choicesData, loading: choicesLoading } =
     useHouseholdChoiceDataQuery({
       fetchPolicy: 'cache-first',
@@ -42,7 +41,6 @@ function PopulationHouseholdPage(): ReactElement {
     getFilterFromQueryParams(location, initialFilter),
   );
 
-  const { businessArea } = useBaseUrl();
   const permissions = usePermissions();
 
   if (choicesLoading) return <LoadingComponent />;
@@ -55,7 +53,7 @@ function PopulationHouseholdPage(): ReactElement {
 
   return (
     <>
-      <PageHeader title={beneficiaryGroup?.groupLabelPlural} />
+      <PageHeader title={beneficiaryGroup?.group_label_plural} />
       <HouseholdFilters
         filter={filter}
         choicesData={choicesData}
@@ -71,8 +69,6 @@ function PopulationHouseholdPage(): ReactElement {
       >
         <HouseholdTable
           filter={appliedFilter}
-          businessArea={businessArea}
-          choicesData={choicesData}
           canViewDetails={hasPermissions(
             PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
             permissions,
