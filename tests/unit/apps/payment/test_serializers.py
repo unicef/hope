@@ -15,7 +15,11 @@ from hct_mis_api.apps.payment.api.serializers import (
     PaymentPlanListSerializer,
     TPHouseholdListSerializer,
 )
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from hct_mis_api.apps.payment.fixtures import (
+    DeliveryMechanismFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+)
 from hct_mis_api.apps.payment.models import (
     PaymentHouseholdSnapshot,
     PaymentPlan,
@@ -157,15 +161,20 @@ class PaymentPlanDetailSerializerTest(TestCase):
             delivered_quantity=155,
             financial_service_provider__name="FSP ABC",
         )
+        cls.fsp = cls.payment.financial_service_provider
 
     def test_serializer_all_data(self) -> None:
         self.pp.status = PaymentPlan.Status.ACCEPTED
         self.pp.save()
-        DeliveryMechanismPerPaymentPlan.objects.create(payment_plan=self.pp)
+        DeliveryMechanismPerPaymentPlan.objects.create(
+            payment_plan=self.pp,
+            delivery_mechanism_order=1,
+            financial_service_provider=self.fsp,
+            delivery_mechanism=DeliveryMechanismFactory(),
+        )
 
         serializer = PaymentPlanDetailSerializer(instance=self.pp, context={"request": Mock(user=self.user)})
         data = serializer.data
-        # print("Data PP ", data)
 
         self.assertEqual(data["id"], encode_id_base64_required(str(self.pp.id), "PaymentPlan"))
         self.assertEqual(data["reconciliation_summary"]["pending"], 1)
@@ -179,4 +188,4 @@ class PaymentPlanDetailSerializerTest(TestCase):
         self.assertEqual(data["can_download_xlsx"], False)
         self.assertEqual(data["can_send_xlsx_password"], False)
         self.assertEqual(data["split_choices"], to_choice_object(PaymentPlanSplit.SplitType.choices))
-        # self.assertEqual(data["volume_by_delivery_mechanism"], "")
+        self.assertIsNotNone(data.get("volume_by_delivery_mechanism"))

@@ -225,9 +225,9 @@ class ApprovalProcessSerializer(serializers.ModelSerializer):
 
 
 class DeliveryMechanismPerPaymentPlanSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(source="delivery_mechanism.name")
-    code = serializers.CharField(source="delivery_mechanism.code")
-    order = serializers.CharField(source="delivery_mechanism_order")
+    name = serializers.CharField(source="delivery_mechanism.name", read_only=True)
+    code = serializers.CharField(source="delivery_mechanism.code", read_only=True)
+    order = serializers.CharField(source="delivery_mechanism_order", read_only=True)
     fsp = FinancialServiceProviderSerializer(read_only=True)
 
     class Meta:
@@ -237,7 +237,6 @@ class DeliveryMechanismPerPaymentPlanSerializer(serializers.ModelSerializer):
             "name",
             "code",
             "order",
-            "chosen_configuration",
             "fsp",
         )
 
@@ -279,8 +278,8 @@ class DeliveryMechanismSerializer(serializers.ModelSerializer):
 
 class VolumeByDeliveryMechanismSerializer(serializers.ModelSerializer):
     delivery_mechanism = DeliveryMechanismPerPaymentPlanSerializer(read_only=True)
-    volume = serializers.FloatField()
-    volume_usd = serializers.FloatField()
+    volume = serializers.FloatField(read_only=True)
+    volume_usd = serializers.FloatField(read_only=True)
 
     def get_delivery_mechanism(self, info: Any) -> "VolumeByDeliveryMechanismSerializer":
         return self
@@ -310,7 +309,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     payments_conflicts_count = serializers.SerializerMethodField()
     volume_by_delivery_mechanism = serializers.SerializerMethodField()
     delivery_mechanism = DeliveryMechanismSerializer(read_only=True)
-    delivery_mechanism_per_payment_plan = DeliveryMechanismPerPaymentPlanSerializer(many=True, read_only=True)
+    delivery_mechanism_per_payment_plan = DeliveryMechanismPerPaymentPlanSerializer(read_only=True)
     bank_reconciliation_success = serializers.IntegerField()
     bank_reconciliation_error = serializers.IntegerField()
     can_create_payment_verification_plan = serializers.BooleanField()
