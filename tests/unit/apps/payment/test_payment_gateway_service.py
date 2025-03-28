@@ -655,8 +655,8 @@ class TestPaymentGatewayService(APITestCase):
         dm_cash.save()
 
         get_delivery_mechanisms_mock.return_value = [
-            DeliveryMechanismData(id=33, code="new_dm", name="New DM", transfer_type="CASH", account_type="bank"),
-            DeliveryMechanismData(id=2, code="cash", name="Cash", transfer_type="CASH", account_type="bank"),
+            DeliveryMechanismData(id=33, code="new_dm", name="New DM", transfer_type="CASH", account_type="123"),
+            DeliveryMechanismData(id=2, code="cash", name="Cash", transfer_type="CASH", account_type="123"),
         ]
 
         pg_service = PaymentGatewayService()
