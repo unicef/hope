@@ -215,14 +215,13 @@ class ApprovalProcessSerializerTest(TestCase):
     def test_all_fields(self) -> None:
         user_name_str = f"{self.user.first_name} {self.user.last_name}"
         data = ApprovalProcessSerializer(instance=self.approval_process).data
-
-        self.assertEqual(len(data["approvals"]), 2)
-        reject = data["approvals"][0]
-        approval = data["approvals"][1]
+        self.assertEqual(len(data["actions"]), 4)
+        reject = data["actions"]["reject"][0]
+        approval = data["actions"]["approval"][0]
         self.assertEqual(reject["type"], Approval.REJECT)
-        self.assertEqual(reject["created_by"], user_name_str)
+        self.assertEqual(reject["info"], f"Rejected by {user_name_str}")
         self.assertEqual(approval["type"], Approval.APPROVAL)
-        self.assertEqual(approval["created_by"], "")
+        self.assertEqual(approval["info"], "Approved")
         # add user data
         self.approval_process.sent_for_approval_by = self.user
         self.approval_process.sent_for_authorization_by = self.user

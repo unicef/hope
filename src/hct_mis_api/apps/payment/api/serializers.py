@@ -169,6 +169,20 @@ class FinancialServiceProviderSerializer(serializers.ModelSerializer):
         )
 
 
+class ApprovalInfoSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Approval
+        fields = ("type", "info", "comment", "created_at",)
+
+
+class FilteredActionsListSerializer(serializers.Serializer):
+    approval = ApprovalInfoSerializer(read_only=True, many=True)
+    authorization = ApprovalInfoSerializer(read_only=True, many=True)
+    finance_release = ApprovalInfoSerializer(read_only=True, many=True)
+    reject = ApprovalInfoSerializer(read_only=True, many=True)
+
+
 class ApprovalSerializer(serializers.ModelSerializer):
     created_by = serializers.SerializerMethodField()
 
@@ -178,7 +192,6 @@ class ApprovalSerializer(serializers.ModelSerializer):
             "type",
             "comment",
             "created_by",
-            "info",
             "created_at",
         )
 
@@ -187,15 +200,15 @@ class ApprovalSerializer(serializers.ModelSerializer):
 
 
 class ApprovalProcessSerializer(serializers.ModelSerializer):
-    approvals = ApprovalSerializer(many=True, read_only=True)
     sent_for_approval_by = serializers.SerializerMethodField()
     sent_for_finance_release_by = serializers.SerializerMethodField()
     sent_for_authorization_by = serializers.SerializerMethodField()
+    rejected_on = serializers.SerializerMethodField()
+    actions = serializers.SerializerMethodField()
 
     class Meta:
         model = ApprovalProcess
         fields = (
-            "approvals",
             "sent_for_approval_by",
             "sent_for_authorization_by",
             "sent_for_finance_release_by",
@@ -205,7 +218,8 @@ class ApprovalProcessSerializer(serializers.ModelSerializer):
             "approval_number_required",
             "authorization_number_required",
             "finance_release_number_required",
-            "created_at",
+            "rejected_on",
+            "actions",
         )
 
     def get_sent_for_approval_by(self, obj: PaymentPlan) -> str:
@@ -228,6 +242,26 @@ class ApprovalProcessSerializer(serializers.ModelSerializer):
             if obj.sent_for_finance_release_by
             else ""
         )
+
+    def get_rejected_on(self, obj: ApprovalProcess) -> Optional[str]:
+        if obj.approvals.filter(type=Approval.REJECT).exists():
+            if obj.sent_for_finance_release_date:
+                return "IN_REVIEW"
+            if obj.sent_for_authorization_date:
+                return "IN_AUTHORIZATION"
+            if obj.sent_for_approval_date:
+                return "IN_APPROVAL"
+        return None
+
+    def get_actions(self, obj: ApprovalProcess) -> Dict[str, Any]:
+        actions_data = {
+            "approval": obj.approvals.filter(type=Approval.APPROVAL),
+            "authorization": obj.approvals.filter(type=Approval.AUTHORIZATION),
+            "finance_release": obj.approvals.filter(type=Approval.FINANCE_RELEASE),
+            "reject": obj.approvals.filter(type=Approval.REJECT),
+        }
+
+        return FilteredActionsListSerializer(actions_data).data
 
 
 class DeliveryMechanismPerPaymentPlanSerializer(serializers.ModelSerializer):
@@ -337,6 +371,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
 
     class Meta(PaymentPlanListSerializer.Meta):
         fields = PaymentPlanListSerializer.Meta.fields + (  # type: ignore
+            "version",
             "background_action_status",
             "start_date",
             "end_date",
