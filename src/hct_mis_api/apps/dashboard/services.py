@@ -125,8 +125,8 @@ class DashboardCacheBase(Protocol):
             admin1_name=Coalesce(
                 F("household__admin1__name"), F("household__admin_area__name"), Value("Unknown Admin1")
             ),
-            program_name=Coalesce(F("household__program__name"), Value("Unknown Program")),
-            sector_name=Coalesce(F("household__program__sector"), Value("Unknown Sector")),
+            program_name=Coalesce(F("program__name"), F("household__program__name"), Value("Unknown Program")),
+            sector_name=Coalesce(F("program__sector"), F("household__program__sector"), Value("Unknown Sector")),
             fsp_name=Coalesce(F("financial_service_provider__name"), Value("Unknown FSP")),
             delivery_type_name=Coalesce(F("delivery_type__name"), Value("Unknown Delivery Type")),
             payment_status=Coalesce(F("status"), Value("Unknown Status")),
@@ -192,12 +192,23 @@ class DashboardCacheBase(Protocol):
 
     @classmethod
     def _get_payment_plan_counts(
-        cls, base_queryset: models.QuerySet, group_by_fields: List[str]
+        cls, base_queryset: models.QuerySet, group_by_annotated_names: List[str]
     ) -> Dict[str, Dict[Tuple, int]]:
         """
         Calculates total and finished distinct payment plan counts.
         """
-        plans_base = base_queryset.filter(parent_id__isnull=False).values_list("parent_id", *group_by_fields).distinct()
+        potential_annotations = {
+            "currency_code": Coalesce(F("currency"), Value("UNK")),
+            "program_name": Coalesce(F("program__name"), F("household__program__name"), Value("Unknown Program")),
+            "sector_name": Coalesce(F("program__sector"), F("household__program__sector"), Value("Unknown Sector")),
+            "payment_status": Coalesce(F("status"), Value("Unknown Status")),
+        }
+
+        relevant_annotations = {
+            name: expr for name, expr in potential_annotations.items() if name in group_by_annotated_names
+        }
+        annotated_plans_qs = base_queryset.filter(parent_id__isnull=False).annotate(**relevant_annotations)
+        plans_base = annotated_plans_qs.values_list("parent_id", *group_by_annotated_names).distinct()
 
         total_counts = defaultdict(int)
         for plan_data in plans_base:
@@ -205,8 +216,8 @@ class DashboardCacheBase(Protocol):
             total_counts[key] += 1
 
         finished_plans_base = (
-            base_queryset.filter(parent_id__isnull=False, parent__payment_verification_plans__status="FINISHED")
-            .values_list("parent_id", *group_by_fields)
+            annotated_plans_qs.filter(parent__payment_verification_plans__status="FINISHED")
+            .values_list("parent_id", *group_by_annotated_names)
             .distinct()
         )
 
@@ -243,7 +254,7 @@ class DashboardDataCache(DashboardCacheBase):
 
         household_map = cls._get_household_data(household_ids)
 
-        plan_group_fields = ["currency", "household__program__name", "household__program__sector"]
+        plan_group_fields = ["currency_code", "program_name", "sector_name"]
         plan_counts = cls._get_payment_plan_counts(base_payments_qs, plan_group_fields)
 
         payment_data_iter = cls._get_payment_data(base_payments_qs).iterator()
@@ -331,7 +342,7 @@ class DashboardDataCache(DashboardCacheBase):
             serialized_data = DashboardBaseSerializer(result_list, many=True).data
             cls.store_data(business_area_slug, serialized_data)
             return serialized_data
-        except Exception as e:
+        except Exception:
             cls.store_data(business_area_slug, result_list)
             return result_list
 
@@ -354,7 +365,7 @@ class DashboardGlobalDataCache(DashboardCacheBase):
 
         household_map = cls._get_household_data(household_ids)
 
-        plan_group_fields = ["household__program__sector"]
+        plan_group_fields = ["sector_name"]
         plan_counts = cls._get_payment_plan_counts(base_payments_qs, plan_group_fields)
 
         payment_data_iter = cls._get_payment_data(base_payments_qs).iterator()
@@ -423,6 +434,6 @@ class DashboardGlobalDataCache(DashboardCacheBase):
             serialized_data = DashboardBaseSerializer(result_list, many=True).data
             cls.store_data(identifier, serialized_data)
             return serialized_data
-        except Exception as e:
+        except Exception:
             cls.store_data(identifier, result_list)
             return result_list
