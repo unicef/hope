@@ -10,6 +10,10 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RemoveField(
+            model_name='deliverymechanismdata',
+            name='delivery_mechanism',
+        ),
         migrations.AlterField(
             model_name='paymentplan',
             name='exclude_household_error',

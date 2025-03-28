@@ -234,6 +234,7 @@ class FspData(FlexibleArgumentsDataclassMixin):
 
 @dataclasses.dataclass()
 class AccountTypeData(FlexibleArgumentsDataclassMixin):
+    id: str
     key: str
     label: str
     unique_fields: List[str]
@@ -446,6 +447,7 @@ class PaymentGatewayService:
             AccountType.objects.update_or_create(
                 key=account_type_data.key,
                 defaults={
+                    "payment_gateway_id": account_type_data.id,
                     "label": account_type_data.label,
                     "unique_fields": account_type_data.unique_fields or [],
                 },
@@ -542,6 +544,6 @@ class PaymentGatewayService:
                     "name": dm.name,
                     "transfer_type": dm.transfer_type,
                     "is_active": True,
-                    "account_type": AccountType.objects.get(key=dm.account_type),
+                    "account_type": AccountType.objects.get(payment_gateway_id=dm.account_type),
                 },
             )
