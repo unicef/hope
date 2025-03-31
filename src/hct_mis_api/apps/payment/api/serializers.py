@@ -33,6 +33,7 @@ from hct_mis_api.apps.payment.models.payment import (
     DeliveryMechanism,
     DeliveryMechanismPerPaymentPlan,
 )
+from hct_mis_api.apps.program.api.serializers import ProgramSmallSerializer
 from hct_mis_api.apps.steficon.api.serializers import RuleSerializer
 from hct_mis_api.apps.targeting.api.serializers import TargetingCriteriaSerializer
 
@@ -340,7 +341,7 @@ class VolumeByDeliveryMechanismSerializer(EncodedIdSerializerMixin):
 
 class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerializer):
     background_action_status = serializers.CharField(source="get_background_action_status_display")
-    program = serializers.CharField(source="program_cycle.program.name")
+    program = ProgramSmallSerializer(read_only=True, source="program_cycle.program")
     has_payment_list_export_file = serializers.BooleanField(source="has_export_file")
     has_fsp_delivery_mechanism_xlsx_template = serializers.SerializerMethodField()
     imported_file_name = serializers.CharField()

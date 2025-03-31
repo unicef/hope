@@ -568,12 +568,12 @@ class TestPaymentPlanDetail:
         assert payment_plan["created_by"] == f"{self.user.first_name} {self.user.last_name}"
         assert payment_plan["background_action_status"] is None
         assert payment_plan["start_date"] is None
-        assert payment_plan["program"] == self.program_active.name
+        assert payment_plan["program"]["name"] == self.program_active.name
         assert payment_plan["has_payment_list_export_file"] is False
         assert payment_plan["has_fsp_delivery_mechanism_xlsx_template"] is False
         assert payment_plan["imported_file_name"] == ""
         assert payment_plan["payments_conflicts_count"] == 0
-        # assert payment_plan["delivery_mechanism"] == []
+        assert payment_plan["delivery_mechanism"] is None
         assert payment_plan["bank_reconciliation_success"] == 0
         assert payment_plan["bank_reconciliation_error"] == 0
         assert payment_plan["can_create_payment_verification_plan"] is False
