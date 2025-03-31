@@ -72,7 +72,7 @@ class HouseholdViewSet(
         if self.program.status == Program.DRAFT:
             return Household.objects.none()
 
-        return super().get_queryset().select_related("head_of_household", "program", "admin1", "admin2")
+        return super().get_queryset().select_related("head_of_household", "program", "admin1", "admin2").order_by("created_at")
 
     @etag_decorator(HouseholdListKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=HouseholdListKeyConstructor())
@@ -168,7 +168,7 @@ class IndividualViewSet(
         if self.program.status == Program.DRAFT:
             return Individual.objects.none()
 
-        return super().get_queryset().select_related("household", "household__admin2")
+        return super().get_queryset().select_related("household", "household__admin2").order_by("created_at")
 
     @etag_decorator(IndividualListKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=IndividualListKeyConstructor())
@@ -193,4 +193,5 @@ class IndividualGlobalViewSet(
     admin_area_model_fields = ["household__admin1", "household__admin2", "household__admin3"]
 
     def get_queryset(self) -> QuerySet:
-        return super().get_queryset().select_related("household", "household__admin2")
+        return super().get_queryset().select_related("household", "household__admin2").order_by("created_at")
+
