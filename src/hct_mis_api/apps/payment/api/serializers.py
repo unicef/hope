@@ -385,6 +385,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "has_payment_list_export_file",
             "has_fsp_delivery_mechanism_xlsx_template",
             "imported_file_name",
+            "imported_file_date",
             "payments_conflicts_count",
             "delivery_mechanism",
             "delivery_mechanism_per_payment_plan",
