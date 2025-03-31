@@ -34,17 +34,16 @@ export function AcceptanceProcess({
   const permissions = usePermissions();
   const { isActiveProgram } = useProgramContext();
 
-  const { edges } = paymentPlan.approval_process;
+  const { approval_process } = paymentPlan;
   const [showAll, setShowAll] = useState(false);
   const [mutate, { loading: exportPdfLoading }] =
     useExportPdfPpSummaryMutation();
 
   const matchDataSize = (
-    data: PaymentPlanDetail['approval_process']['edges'],
-  ): PaymentPlanDetail['approval_process']['edges'] =>
-    showAll ? data : [data[0]];
+    data: PaymentPlanDetail['approval_process'],
+  ): PaymentPlanDetail['approval_process'] => (showAll ? data : [data[0]]);
 
-  if (!edges.length) {
+  if (!approval_process.length) {
     return null;
   }
   const handleExportPdf = async (): Promise<void> => {
@@ -85,14 +84,14 @@ export function AcceptanceProcess({
             </LoadingButton>
           )}
         </Box>
-        {matchDataSize(edges).map((edge) => (
+        {matchDataSize(approval_process).map((process, index) => (
           <AcceptanceProcessRow
-            key={edge.node.id}
-            acceptanceProcess={edge.node}
+            key={index}
+            acceptanceProcess={process}
             paymentPlan={paymentPlan}
           />
         ))}
-        {edges.length > 1 && (
+        {approval_process.length > 1 && (
           <ButtonContainer>
             <Button
               variant="outlined"

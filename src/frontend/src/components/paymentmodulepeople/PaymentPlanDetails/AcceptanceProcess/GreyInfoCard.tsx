@@ -27,7 +27,11 @@ const GreyBox = styled(Box)`
 interface GreyInfoCardProps {
   topMessage: string;
   topDate: string;
-  approvals: PaymentPlanDetail['approval_process'][number];
+  approvals: PaymentPlanDetail['approval_process'][number]['actions'][
+    | 'approval'
+    | 'authorization'
+    | 'finance_release'
+    | 'reject'];
 }
 
 export function GreyInfoCard({

@@ -6,7 +6,7 @@ import { ReactElement } from 'react';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface AcceptanceProcessStepperProps {
-  acceptanceProcess: PaymentPlanDetail['approval_process'][0];
+  acceptanceProcess: PaymentPlanDetail['approval_process'][number];
 }
 
 export function AcceptanceProcessStepper({

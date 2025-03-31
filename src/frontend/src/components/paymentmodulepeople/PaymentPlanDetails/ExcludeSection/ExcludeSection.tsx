@@ -375,14 +375,14 @@ export function ExcludeSection({
             ) : null}
             <Collapse in={isExclusionsOpen}>
               <Box display="flex" flexDirection="column">
-                {isExclusionsOpen && exclusionReason && !isEdit ? (
+                {isExclusionsOpen && exclusion_reason && !isEdit ? (
                   <Grid container>
                     <Grid size={{ xs: 8 }}>
                       <Box display="flex" flexDirection="column">
                         <Box
                           display="flex"
                           alignItems={
-                            exclusionReason.length > 100
+                            exclusion_reason.length > 100
                               ? 'flex-start'
                               : 'center'
                           }
@@ -392,11 +392,11 @@ export function ExcludeSection({
                           <Box mr={2}>
                             <GreyText>{t('Reason')}:</GreyText>
                           </Box>
-                          <Typography>{exclusionReason}</Typography>
+                          <Typography>{exclusion_reason}</Typography>
                         </Box>
-                        {excludeHouseholdError && (
+                        {exclude_household_error && (
                           <Box display="flex" flexDirection="column" mt={2}>
-                            {formatErrorToArray(excludeHouseholdError).map(
+                            {formatErrorToArray(exclude_household_error).map(
                               (el) => (
                                 <FormHelperText key={el} error>
                                   {el}

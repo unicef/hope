@@ -121,6 +121,7 @@ class PaymentPlanSerializer(serializers.ModelSerializer):
             "program_cycle_id",
             "last_approval_process_date",
             "last_approval_process_by",
+            "admin_url",
         )
 
     def get_last_approval_process_by(self, obj: PaymentPlan) -> Optional[str]:

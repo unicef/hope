@@ -8,10 +8,7 @@ import {
 import moment from 'moment';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import {
-  AllPaymentPlansForTableQueryVariables,
-  usePaymentPlanStatusChoicesQueryQuery,
-} from '@generated/graphql';
+import { usePaymentPlanStatusChoicesQueryQuery } from '@generated/graphql';
 import { DatePickerFilter } from '@components/core/DatePickerFilter';
 import { FiltersSection } from '@components/core/FiltersSection';
 import { NumberTextField } from '@components/core/NumberTextField';
@@ -19,17 +16,6 @@ import { SearchTextField } from '@components/core/SearchTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { ReactElement } from 'react';
-
-export type FilterProps = Pick<
-  AllPaymentPlansForTableQueryVariables,
-  | 'search'
-  | 'status'
-  | 'totalEntitledQuantityFrom'
-  | 'totalEntitledQuantityTo'
-  | 'dispersionStartDate'
-  | 'dispersionEndDate'
-  | 'is_follow_up'
->;
 
 interface PeoplePaymentPlansFiltersProps {
   filter;

@@ -74,8 +74,6 @@ const PaymentPlanDetailsPage = (): ReactElement => {
     status === PaymentPlanStatus.Accepted ||
     status === PaymentPlanStatus.Finished;
 
-  if (!paymentPlan) return null;
-
   return (
     <Box display="flex" flexDirection="column">
       <PaymentPlanDetailsHeader
@@ -89,9 +87,7 @@ const PaymentPlanDetailsPage = (): ReactElement => {
           {shouldDisplayEntitlement && (
             <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
           )}
-          {shouldDisplayFsp && (
-            <FspSection paymentPlan={paymentPlan} />
-          )}
+          {shouldDisplayFsp && <FspSection paymentPlan={paymentPlan} />}
           <ExcludeSection paymentPlan={paymentPlan} />
           <SupportingDocumentsSection paymentPlan={paymentPlan} />
           <PaymentPlanDetailsResults paymentPlan={paymentPlan} />

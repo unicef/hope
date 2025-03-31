@@ -13,7 +13,7 @@ const StyledBox = styled(Box)`
 `;
 
 interface AcceptanceProcessRowProps {
-  acceptanceProcess: PaymentPlanDetail['approval_process']['edges'][0]['node'];
+  acceptanceProcess: PaymentPlanDetail['approval_process'][number];
   paymentPlan: PaymentPlanDetail;
 }
 
@@ -24,16 +24,16 @@ export function AcceptanceProcessRow({
   const { t } = useTranslation();
   const {
     actions,
-    sentForApprovalDate,
-    sentForApprovalBy,
-    sentForAuthorizationDate,
-    sentForAuthorizationBy,
-    sentForFinanceReleaseDate,
-    sentForFinanceReleaseBy,
-    rejectedOn,
+    sent_for_approval_date,
+    sent_for_approval_by,
+    sent_for_authorization_date,
+    sent_for_authorization_by,
+    sent_for_finance_release_date,
+    sent_for_finance_release_by,
+    rejected_on,
   } = acceptanceProcess;
 
-  const { approvalProcess } = paymentPlan;
+  const { approval_process } = paymentPlan;
 
   const getRejectedOnString = (stage: string): string => {
     switch (stage) {
@@ -57,9 +57,9 @@ export function AcceptanceProcessRow({
           {actions?.approval?.length > 0 && (
             <GreyInfoCard
               topMessage={`Sent for approval by ${renderUserName(
-                sentForApprovalBy,
+                sent_for_approval_by,
               )}`}
-              topDate={sentForApprovalDate}
+              topDate={sent_for_approval_date}
               approvals={actions.approval}
             />
           )}
@@ -68,9 +68,9 @@ export function AcceptanceProcessRow({
           {actions.authorization.length > 0 && (
             <GreyInfoCard
               topMessage={`Sent for authorization by ${renderUserName(
-                sentForAuthorizationBy,
+                sent_for_authorization_by,
               )}`}
-              topDate={sentForAuthorizationDate}
+              topDate={sent_for_authorization_date}
               approvals={actions.authorization}
             />
           )}
@@ -79,9 +79,9 @@ export function AcceptanceProcessRow({
           {actions.financeRelease.length > 0 && (
             <GreyInfoCard
               topMessage={`Sent for review by ${renderUserName(
-                sentForFinanceReleaseBy,
+                sent_for_finance_release_by,
               )}`}
-              topDate={sentForFinanceReleaseDate}
+              topDate={sent_for_finance_release_date}
               approvals={actions.financeRelease}
             />
           )}
@@ -89,27 +89,27 @@ export function AcceptanceProcessRow({
         {actions.reject.length > 0 && (
           <Grid container>
             <Grid size={{ xs: 4 }}>
-              {rejectedOn === 'IN_APPROVAL' && (
+              {rejected_on === 'IN_APPROVAL' && (
                 <GreyInfoCard
-                  topMessage={getRejectedOnString(rejectedOn)}
+                  topMessage={getRejectedOnString(rejected_on)}
                   topDate={actions.reject[0]?.createdAt}
                   approvals={actions.reject}
                 />
               )}
             </Grid>
             <Grid size={{ xs: 4 }}>
-              {rejectedOn === 'IN_AUTHORIZATION' && (
+              {rejected_on === 'IN_AUTHORIZATION' && (
                 <GreyInfoCard
-                  topMessage={getRejectedOnString(rejectedOn)}
+                  topMessage={getRejectedOnString(rejected_on)}
                   topDate={actions.reject[0]?.createdAt}
                   approvals={actions.reject}
                 />
               )}
             </Grid>
             <Grid size={{ xs: 4 }}>
-              {rejectedOn === 'IN_REVIEW' && (
+              {rejected_on === 'IN_REVIEW' && (
                 <GreyInfoCard
-                  topMessage={getRejectedOnString(rejectedOn)}
+                  topMessage={getRejectedOnString(rejected_on)}
                   topDate={actions.reject[0]?.createdAt}
                   approvals={actions.reject}
                 />
@@ -118,7 +118,7 @@ export function AcceptanceProcessRow({
           </Grid>
         )}
       </Grid>
-      {approvalProcess.totalCount > 1 && <DividerLine />}
+      {approval_process.length > 1 && <DividerLine />}
     </StyledBox>
   );
 }

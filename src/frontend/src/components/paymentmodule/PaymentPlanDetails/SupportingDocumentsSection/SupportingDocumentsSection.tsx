@@ -10,7 +10,7 @@ import { LoadingButton } from '@components/core/LoadingButton';
 import { BlueText } from '@components/grievances/LookUps/LookUpStyles';
 import { PaperContainer } from '@components/targeting/PaperContainer';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { PaymentPlanQuery, PaymentPlanStatus } from '@generated/graphql';
+import { PaymentPlanStatus } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -125,7 +125,7 @@ export const SupportingDocumentsSection = ({
         setOpenImport(false);
         setDocuments([
           ...documents,
-          { id: doc.id, title: doc.title, file: doc.file },
+          { id: doc.id, title: doc.title, file: doc.file, uploaded_at: null },
         ]);
       },
       onError: (err: Error) => {

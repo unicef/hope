@@ -120,7 +120,7 @@ export const SplitIntoPaymentLists = ({
                     <Field
                       name="splitType"
                       label="Split Type"
-                      choices={paymentPlan.splitChoices}
+                      choices={paymentPlan.split_choices}
                       component={FormikSelectField}
                     />
                   </Grid>

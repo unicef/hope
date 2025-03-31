@@ -63,7 +63,10 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
     hasPermissions(
       PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION,
       permissions,
-    ) && allowedState.includes(paymentPlan.background_action_status);
+    ) &&
+    allowedState.includes(
+      paymentPlan.background_action_status as PaymentPlanBackgroundActionStatus,
+    );
 
   const handleImport = async (): Promise<void> => {
     if (fileToImport) {
@@ -97,7 +100,7 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
 
   return (
     <>
-      {canUploadReconciliation && paymentPlan.canSendToPaymentGateway && (
+      {canUploadReconciliation && paymentPlan.can_send_to_payment_gateway && (
         <Box key="import">
           <Button
             startIcon={

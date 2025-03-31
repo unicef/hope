@@ -78,28 +78,28 @@ export const PaymentPlanDetails = ({
               </Grid>
               <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Start Date')}>
-                  <UniversalMoment>{startDate}</UniversalMoment>
+                  <UniversalMoment>{start_date}</UniversalMoment>
                 </LabelizedField>
               </Grid>
               <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('End Date')}>
-                  <UniversalMoment>{endDate}</UniversalMoment>
+                  <UniversalMoment>{end_date}</UniversalMoment>
                 </LabelizedField>
               </Grid>
               <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Dispersion Start Date')}>
-                  <UniversalMoment>{dispersionStartDate}</UniversalMoment>
+                  <UniversalMoment>{dispersion_start_date}</UniversalMoment>
                 </LabelizedField>
               </Grid>
               <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Dispersion End Date')}>
-                  <UniversalMoment>{dispersionEndDate}</UniversalMoment>
+                  <UniversalMoment>{dispersion_end_date}</UniversalMoment>
                 </LabelizedField>
               </Grid>
               <Grid size={{ xs: 3 }}>
                 <Box mr={1}>
                   <LabelizedField label={t('FX Rate Applied')}>
-                    {exchangeRate}
+                    {exchange_rate}
                   </LabelizedField>
                 </Box>
                 <Tooltip
@@ -121,7 +121,7 @@ export const PaymentPlanDetails = ({
               <Grid size={{ xs: 12 }}>
                 <FieldBorder color="#84A1CA">
                   <RelatedFollowUpPaymentPlans
-                    followUps={followUps}
+                    followUps={follow_ups}
                     baseUrl={baseUrl}
                   />
                 </FieldBorder>

@@ -100,14 +100,14 @@ export function FollowUpPaymentPlanDetails({
             </Grid>
             <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Dispersion End Date')}>
-                <UniversalMoment>{dispersionEndDate}</UniversalMoment>
+                <UniversalMoment>{dispersion_end_date}</UniversalMoment>
               </LabelizedField>
             </Grid>
             <Grid size={{ xs: 3 }}>
               <Box display="flex" alignItems="center">
                 <Box mr={1}>
                   <LabelizedField label={t('FX Rate Applied')}>
-                    {exchangeRate}
+                    {exchange_rate}
                   </LabelizedField>
                 </Box>
                 <Tooltip
