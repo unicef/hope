@@ -100,8 +100,6 @@ export const HouseholdTable = ({
     enabled: !!businessArea && !!programId,
   });
 
-  console.log(countData);
-
   const replacements = {
     unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.group_label} ID`,
     head_of_household__full_name: (_beneficiaryGroup) =>

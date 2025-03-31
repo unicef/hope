@@ -3,24 +3,24 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * * `AF31` - Andersonbury
- * * `HR30` - East Alexanderfurt
- * * `UA53` - East Christina
- * * `AF37` - Mitchellport
- * * `HR56` - North Maria
- * * `UA35` - South Jonathanland
- * * `HR59` - Westburgh
- * * `UA73` - Wilkinsonview
- * * `AF27` - Wilsonport
+ * * `AF94` - Carrollland
+ * * `HR87` - Christianstad
+ * * `HR53` - East Jennifermouth
+ * * `UA70` - Lake Timothyshire
+ * * `HR85` - Loritown
+ * * `UA17` - Michelleside
+ * * `UA49` - New Fernandoburgh
+ * * `AF83` - South Lisa
+ * * `AF44` - Wilsonville
  */
 export enum Admin1Enum {
-    AF31 = 'AF31',
-    HR30 = 'HR30',
-    UA53 = 'UA53',
-    AF37 = 'AF37',
-    HR56 = 'HR56',
-    UA35 = 'UA35',
-    HR59 = 'HR59',
-    UA73 = 'UA73',
-    AF27 = 'AF27',
+    AF94 = 'AF94',
+    HR87 = 'HR87',
+    HR53 = 'HR53',
+    UA70 = 'UA70',
+    HR85 = 'HR85',
+    UA17 = 'UA17',
+    UA49 = 'UA49',
+    AF83 = 'AF83',
+    AF44 = 'AF44',
 }
