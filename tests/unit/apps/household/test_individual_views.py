@@ -1,6 +1,7 @@
 import json
 from typing import Any, Dict, Optional, Tuple
 
+import freezegun
 from constance.test import override_config
 from django.db import connection
 from django.core.cache import cache
@@ -1128,6 +1129,79 @@ class TestIndividualFilter:
             individuals_data=[individual2_data],
         )
         return individual1, individual2
+
+    def _test_filter_individuals_in_list(
+        self,
+        filters: dict,
+        individual1_data: Optional[dict] = None,
+        individual2_data: Optional[dict] = None,
+        household1_data: Optional[dict] = None,
+        household2_data: Optional[dict] = None,
+    ) -> None:
+        individual1, individual2 = self._create_test_individuals(
+            individual1_data=individual1_data,
+            individual2_data=individual2_data,
+            household1_data=household1_data,
+            household2_data=household2_data,
+        )
+        response = self.api_client.get(self.list_url, filters)
+        assert response.status_code == status.HTTP_200_OK, response.json()
+        response_data = response.json()["results"]
+        assert len(response_data) == 1
+        assert response_data[0]["id"] == get_encoded_individual_id(individual2)
+        return response_data
+
+    def test_filter_by_rdi_id(self) -> None:
+        registration_data_import_1 = RegistrationDataImportFactory(
+            imported_by=self.user, business_area=self.afghanistan, program=self.program
+        )
+        registration_data_import_2 = RegistrationDataImportFactory(
+            imported_by=self.user, business_area=self.afghanistan, program=self.program
+        )
+        self._test_filter_individuals_in_list(
+            filters={
+                "rdi_id": encode_id_base64_required(registration_data_import_2.id, "RegistrationDataImport")
+            },
+            individual1_data={
+                "registration_data_import": registration_data_import_1,
+            },
+            individual2_data={
+                "registration_data_import": registration_data_import_2,
+            },
+        )
+
+    def test_filter_by_withdrawn(self) -> None:
+        self._test_filter_individuals_in_list(
+            filters={"withdrawn": True},
+            individual1_data={"withdrawn": False},
+            individual2_data={"withdrawn": True},
+        )
+
+    @pytest.mark.parametrize(
+        "program_status,filter_value,expected_results",
+        [
+            (Program.ACTIVE, True, 2),
+            (Program.FINISHED, True, 0),
+            (Program.ACTIVE, False, 0),
+            (Program.FINISHED, False, 2),
+        ],
+    )
+    def test_filter_by_is_active_program(self, program_status: str, filter_value: bool, expected_results: int) -> None:
+        self.program.status = program_status
+        self.program.save()
+
+        self._create_test_individuals()
+        response = self.api_client.get(self.list_url, {"is_active_program": filter_value})
+        assert response.status_code == status.HTTP_200_OK
+        response_data = response.json()["results"]
+        assert len(response_data) == expected_results
+
+    def test_filter_by_rdi_merge_status(self) -> None:
+        self._test_filter_individuals_in_list(
+            filters={"rdi_merge_status": MergeStatusModel.PENDING},
+            individual1_data={"rdi_merge_status": MergeStatusModel.MERGED},
+            individual2_data={"rdi_merge_status": MergeStatusModel.PENDING},
+        )
 
     @override_config(USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH=True)
     @pytest.mark.parametrize(
