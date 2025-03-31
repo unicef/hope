@@ -973,7 +973,7 @@ class TestPaymentPlanServices(APITestCase):
             PaymentPlanService(payment_plan).lock_fsp()
         self.assertEqual(
             e.exception.message,
-            "All Payments must have assigned FSP",
+            "Payment Plan doesn't have FSP / DeliveryMechanism assigned.",
         )
 
     def test_unlock_fsp(self) -> None:
