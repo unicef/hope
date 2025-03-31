@@ -278,16 +278,14 @@ class HouseholdFilter(FilterSet):
 
 
 class IndividualFilter(FilterSet):
-    business_area = BusinessAreaSlugFilter()
     age = AgeRangeFilter(field_name="birth_date")
     sex = MultipleChoiceFilter(field_name="sex", choices=SEX_CHOICE)
-    programs = ModelMultipleChoiceFilter(field_name="household__programs", queryset=Program.objects.all())
     search = CharFilter(method="search_filter")
     document_type = CharFilter(method="document_type_filter")
     document_number = CharFilter(method="document_number_filter")
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
-    admin1 = GlobalIDMultipleChoiceFilter(field_name="household__admin1")
-    admin2 = GlobalIDMultipleChoiceFilter(field_name="household__admin2")
+    admin1 = CharFilter(method="admin_field_filter", field_name="household__admin1")
+    admin2 = CharFilter(method="admin_field_filter", field_name="household__admin2")
     status = MultipleChoiceFilter(choices=INDIVIDUAL_STATUS_CHOICES, method="status_filter")
     excluded_id = CharFilter(method="filter_excluded_id")
     withdrawn = BooleanFilter(field_name="withdrawn")
@@ -301,7 +299,6 @@ class IndividualFilter(FilterSet):
         model = Individual
         fields = {
             "household__id": ["exact"],
-            "business_area": ["exact"],
             "full_name": ["exact", "startswith", "endswith"],
             "sex": ["exact"],
             "household__admin_area": ["exact"],
@@ -345,7 +342,7 @@ class IndividualFilter(FilterSet):
         return qs.filter(q_obj)
 
     def _search_es(self, qs: QuerySet[Individual], value: str) -> QuerySet[Individual]:
-        business_area = self.data["business_area"]
+        business_area = self.request.parser_context["kwargs"]["business_area_slug"]
         search = value.strip()
         query_dict = self._get_elasticsearch_query_for_individuals(search)
         es_response = (
@@ -360,7 +357,7 @@ class IndividualFilter(FilterSet):
         return qs.filter(Q(id__in=es_ids)).distinct()
 
     def _get_elasticsearch_query_for_individuals(self, search: str) -> Dict:
-        business_area = self.data["business_area"]
+        business_area = self.request.parser_context["kwargs"]["business_area_slug"]
         return {
             "size": "100",
             "_source": False,
@@ -456,6 +453,10 @@ class IndividualFilter(FilterSet):
                 | Q(biometric_deduplication_golden_record_status=DUPLICATE)
             )
         return queryset
+
+    def admin_field_filter(self, qs: QuerySet, field_name: str, value: str) -> QuerySet:
+        encoded_value = decode_id_string(value)
+        return qs.filter(**{field_name: encoded_value})
 
 
 class MergedHouseholdFilter(FilterSet):
