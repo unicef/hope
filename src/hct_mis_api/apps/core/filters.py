@@ -121,7 +121,7 @@ def filter_age(field_name: str, qs: QuerySet, min_age: Optional[int], max_age: O
 class AgeRangeFilter(Filter):
     field_class = IntegerRangeField
 
-    def filter(self, qs: QuerySet, values: Union[date, Tuple[date, date]]) -> QuerySet:
+    def filter(self, qs: QuerySet, values: Dict) -> QuerySet:
         if values:
             min_value = values.get("min")  # 20
             max_value = values.get("max")  # 21
