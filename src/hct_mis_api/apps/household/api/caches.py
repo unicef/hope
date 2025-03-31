@@ -8,7 +8,7 @@ from hct_mis_api.api.caches import (
     BusinessAreaAndProgramLastUpdatedKeyBit,
     KeyConstructorMixin,
 )
-from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.household.models import Household, Individual
 
 
 class HouseholdListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
@@ -16,6 +16,16 @@ class HouseholdListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
 
     def _get_queryset(self, business_area_slug: Optional[Any], program_slug: Optional[Any]) -> QuerySet:
         return Household.objects.filter(
+            program__slug=program_slug,
+            business_area__slug=business_area_slug,
+        )
+
+
+class IndividualListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
+    specific_view_cache_key = "individual_list"
+
+    def _get_queryset(self, business_area_slug: Optional[Any], program_slug: Optional[Any]) -> QuerySet:
+        return Individual.objects.filter(
             program__slug=program_slug,
             business_area__slug=business_area_slug,
         )
@@ -38,4 +48,9 @@ class AreaLimitKeyBit(KeyBitBase):
 
 class HouseholdListKeyConstructor(KeyConstructorMixin):
     household_list = HouseholdListKeyBit()
+    area_limits = AreaLimitKeyBit()
+
+
+class IndividualListKeyConstructor(KeyConstructorMixin):
+    individual_list = IndividualListKeyBit()
     area_limits = AreaLimitKeyBit()
