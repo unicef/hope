@@ -78,12 +78,14 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 
-class FollowUpPaymentPlanSerializer(serializers.ModelSerializer):
+class FollowUpPaymentPlanSerializer(EncodedIdSerializerMixin):
     class Meta:
         model = PaymentPlan
         fields = (
             "id",
             "unicef_id",
+            "dispersion_start_date",
+            "dispersion_end_date",
         )
 
 
