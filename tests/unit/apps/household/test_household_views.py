@@ -669,6 +669,14 @@ class TestHouseholdMembers:
                 "full_name": self.individual1_1.full_name,
                 "role": "PRIMARY",
                 "relationship": self.individual1_1.relationship,
+                "status": self.individual1_1.status,
+                "birth_date": f"{self.individual1_1.birth_date:%Y-%m-%d}",
+                "sex": self.individual1_1.sex,
+                "household": {
+                    "id": get_encoded_household_id(self.household1),
+                    "unicef_id": self.household1.unicef_id,
+                    "admin2": "",
+                },
             },
             {
                 "id": get_encoded_individual_id(self.individual1_2),
@@ -676,6 +684,14 @@ class TestHouseholdMembers:
                 "full_name": self.individual1_2.full_name,
                 "role": "NO_ROLE",
                 "relationship": self.individual1_2.relationship,
+                "status": self.individual1_2.status,
+                "birth_date": f"{self.individual1_2.birth_date:%Y-%m-%d}",
+                "sex": self.individual1_2.sex,
+                "household": {
+                    "id": get_encoded_household_id(self.household1),
+                    "unicef_id": self.household1.unicef_id,
+                    "admin2": "",
+                },
             },
             {
                 "id": get_encoded_individual_id(self.individual2_1),
@@ -683,6 +699,14 @@ class TestHouseholdMembers:
                 "full_name": self.individual2_1.full_name,
                 "role": "ALTERNATE",
                 "relationship": self.individual2_1.relationship,
+                "status": self.individual2_1.status,
+                "birth_date":  f"{self.individual2_1.birth_date:%Y-%m-%d}",
+                "sex": self.individual2_1.sex,
+                "household": {
+                    "id": get_encoded_household_id(self.household2),
+                    "unicef_id": self.household2.unicef_id,
+                    "admin2":  "",
+                },
             },
         ]
 
