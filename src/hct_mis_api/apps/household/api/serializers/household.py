@@ -6,7 +6,8 @@ from hct_mis_api.apps.account.api.fields import Base64ModelField
 from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
 from hct_mis_api.apps.core.utils import resolve_flex_fields_choices_to_string
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.api.serializers.individual import LinkedGrievanceTicketSerializer
+from hct_mis_api.apps.household.api.serializers.individual import LinkedGrievanceTicketSerializer, \
+    HouseholdSimpleSerializer
 from hct_mis_api.apps.household.api.serializers.registration_data_import import (
     RegistrationDataImportSerializer,
 )
@@ -54,6 +55,7 @@ class HeadOfHouseholdSerializer(serializers.ModelSerializer):
 class HouseholdMemberSerializer(serializers.ModelSerializer):
     id = Base64ModelField(model_name="Individual")
     role = serializers.SerializerMethodField()
+    household = HouseholdSimpleSerializer()
 
     class Meta:
         model = Individual
@@ -63,6 +65,10 @@ class HouseholdMemberSerializer(serializers.ModelSerializer):
             "full_name",
             "role",
             "relationship",
+            "status",
+            "birth_date",
+            "sex",
+            "household",
         )
 
     def get_role(self, obj: Individual) -> str:
