@@ -5,6 +5,7 @@ import freezegun
 from constance.test import override_config
 from django.db import connection
 from django.core.cache import cache
+from django.utils import timezone
 
 import pytest
 from django.test.utils import CaptureQueriesContext
@@ -1203,6 +1204,44 @@ class TestIndividualFilter:
             individual2_data={"rdi_merge_status": MergeStatusModel.PENDING},
         )
 
+    @pytest.mark.parametrize(
+        "filter_by_field",
+        [
+            "admin1",
+            "admin2",
+        ],
+    )
+    def test_filter_by_area(self, filter_by_field: str) -> None:
+        country = CountryFactory()
+        admin_type_1 = AreaTypeFactory(country=country, area_level=1)
+        admin_type_2 = AreaTypeFactory(country=country, area_level=2, parent=admin_type_1)
+        area1 = AreaFactory(parent=None, p_code="AF01", area_type=admin_type_1)
+        area2 = AreaFactory(parent=area1, p_code="AF0101", area_type=admin_type_2)
+        encoded_id = encode_id_base64_required(area2.id, "Area")
+        self._test_filter_individuals_in_list(
+            filters={filter_by_field: encoded_id},
+            household1_data={filter_by_field: area1},
+            household2_data={filter_by_field: area2},
+        )
+
+    def test_filter_by_last_registration_date(self) -> None:
+        individual1, individual2 = self._create_test_individuals(
+            individual1_data={"last_registration_date": timezone.make_aware(timezone.datetime(2021, 1, 1))},
+            individual2_data={"last_registration_date": timezone.make_aware(timezone.datetime(2023, 1, 1))},
+        )
+        response_after = self.api_client.get(self.list_url, {"last_registration_date_after": "2022-12-31"})
+        assert response_after.status_code == status.HTTP_200_OK
+        response_data_after = response_after.json()["results"]
+        assert len(response_data_after) == 1
+        assert response_data_after[0]["id"] == get_encoded_individual_id(individual2)
+
+        response_before = self.api_client.get(self.list_url, {"last_registration_date_before": "2022-12-31"})
+        assert response_before.status_code == status.HTTP_200_OK
+        response_data_before = response_after.json()["results"]
+        assert len(response_data_before) == 1
+        assert response_data_before[0]["id"] == get_encoded_individual_id(individual2)
+        return response_data_before
+
     @override_config(USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH=True)
     @pytest.mark.parametrize(
         "filters,individual1_data,individual2_data,household1_data,household2_data",
@@ -1258,3 +1297,4 @@ class TestIndividualFilter:
         assert len(response_data) == 1
         assert response_data[0]["id"] == get_encoded_individual_id(individual2)
         return response_data
+
