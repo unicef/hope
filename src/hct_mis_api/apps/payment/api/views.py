@@ -43,6 +43,7 @@ from hct_mis_api.apps.payment.api.serializers import (
     PaymentPlanListSerializer,
     PaymentPlanSerializer,
     PaymentPlanSupportingDocumentSerializer,
+    TargetPopulationCreateSerializer,
     TargetPopulationDetailSerializer,
     TPHouseholdListSerializer,
 )
@@ -104,21 +105,22 @@ class PaymentPlanViewSet(
         return super().list(request, *args, **kwargs)
 
 
-class TargetPopulationViewSet(PaymentPlanViewSet):
-    # lookup_field = "target_population_id"
+class TargetPopulationViewSet(PaymentPlanViewSet, mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
     queryset = PaymentPlan.objects.all().order_by("created_at")
     PERMISSIONS = [Permissions.TARGETING_VIEW_LIST]
+    http_method_names = ["get", "post", "patch", "delete"]
     serializer_classes_by_action = {
         "list": PaymentPlanListSerializer,
         "retrieve": TargetPopulationDetailSerializer,
+        "create": TargetPopulationCreateSerializer,
+        "partial_update": TargetPopulationCreateSerializer,
     }
     permissions_by_action = {
-        "list": [
-            Permissions.TARGETING_VIEW_LIST,
-        ],
-        "retrieve": [
-            Permissions.TARGETING_VIEW_DETAILS,
-        ],
+        "list": [Permissions.TARGETING_VIEW_LIST],
+        "retrieve": [Permissions.TARGETING_VIEW_DETAILS],
+        "create": [Permissions.TARGETING_CREATE],
+        "partial_update": [Permissions.TARGETING_UPDATE],
+        "destroy": [Permissions.TARGETING_REMOVE],
     }
     filterset_class = TargetPopulationFilter
 
@@ -126,6 +128,20 @@ class TargetPopulationViewSet(PaymentPlanViewSet):
     @cache_response(timeout=config.REST_API_TTL, key_func=PaymentPlanKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
+
+    def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan = self.get_object()
+        old_payment_plan = copy_model_object(payment_plan)
+        payment_plan = PaymentPlanService(payment_plan=payment_plan).delete()
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=request.user,
+            programs=payment_plan.program.pk,
+            old_object=old_payment_plan,
+            new_object=payment_plan,
+        )
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class PaymentPlanManagerialViewSet(
@@ -295,7 +311,6 @@ class PaymentViewSet(
             Permissions.PM_VIEW_DETAILS,
         ],
     }
-    # lookup_field = "payment_id"
 
 
 class TPHouseholdViewSet(
@@ -320,4 +335,3 @@ class TPHouseholdViewSet(
             Permissions.PM_VIEW_DETAILS,
         ],
     }
-    # lookup_field = "household_id"

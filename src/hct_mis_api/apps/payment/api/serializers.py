@@ -8,11 +8,13 @@ from django.shortcuts import get_object_or_404
 
 from rest_framework import serializers
 
+from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.api.utils import EncodedIdSerializerMixin
 from hct_mis_api.apps.account.api.fields import Base64ModelField
 from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
-from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object
+from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object, check_concurrency_version_in_mutation
 from hct_mis_api.apps.household.api.serializers.household import (
     HouseholdSmallSerializer,
 )
@@ -33,7 +35,9 @@ from hct_mis_api.apps.payment.models.payment import (
     DeliveryMechanism,
     DeliveryMechanismPerPaymentPlan,
 )
+from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.program.api.serializers import ProgramSmallSerializer
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.steficon.api.serializers import RuleSerializer
 from hct_mis_api.apps.targeting.api.serializers import TargetingCriteriaSerializer
 
@@ -690,3 +694,74 @@ class TPHouseholdListSerializer(serializers.ModelSerializer):
 
     def get_hoh_full_name(self, obj: Payment) -> str:
         return obj.head_of_household.full_name if obj.head_of_household else ""
+
+
+class TargetPopulationCreateSerializer(EncodedIdSerializerMixin):
+    name = serializers.CharField(required=True)
+    program_cycle_id = Base64ModelField(model_name="ProgramCycle", required=True)
+    targeting_criteria = TargetingCriteriaSerializer(required=True)
+    excluded_ids = serializers.CharField()
+    exclusion_reason = serializers.CharField()
+    fsp_id = Base64ModelField(model_name="FinancialServiceProvider", required=False)
+    delivery_mechanism_code = serializers.CharField(required=False)
+    vulnerability_score_min = serializers.DecimalField(required=False, max_digits=6, decimal_places=3)
+    vulnerability_score_max = serializers.DecimalField(required=False, max_digits=6, decimal_places=3)
+    version = serializers.IntegerField(required=False, read_only=True)
+
+    class Meta:
+        model = PaymentPlan
+        fields = (
+            "id",
+            "version",
+            "name",
+            "program_cycle_id",
+            "targeting_criteria",
+            "excluded_ids",
+            "exclusion_reason",
+            "fsp_id",
+            "delivery_mechanism_code",
+            "vulnerability_score_min",
+            "vulnerability_score_max",
+        )
+
+    def get_program(self) -> Program:
+        request = self.context["request"]
+        business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
+        program_slug = request.parser_context["kwargs"]["program_slug"]
+        program = get_object_or_404(Program, business_area__slug=business_area_slug, slug=program_slug)
+        return program
+
+    def create(self, data: Dict) -> PaymentPlan:
+        request = self.context["request"]
+        program = self.get_program()
+        data["program"] = program
+        data["created_by"] = request.user
+        business_area = program.business_area
+
+        payment_plan = PaymentPlanService.create(
+            input_data=data, user=request.user, business_area_slug=business_area.slug
+        )
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=request.user,
+            programs=str(program.pk),
+            new_object=payment_plan,
+        )
+        return payment_plan
+
+    def update(self, payment_plan: PaymentPlan, validated_data: Dict) -> PaymentPlan:
+        request = self.context["request"]
+        check_concurrency_version_in_mutation(validated_data.get("version"), payment_plan)
+        old_payment_plan = copy_model_object(payment_plan)
+
+        payment_plan = PaymentPlanService(payment_plan=payment_plan).update(input_data=validated_data)
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=request.user,
+            programs=payment_plan.program.pk,
+            old_object=old_payment_plan,
+            new_object=payment_plan,
+        )
+        return payment_plan
