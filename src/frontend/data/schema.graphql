@@ -235,6 +235,10 @@ type AreaTypeNodeEdge {
 
 scalar Arg
 
+type AssignFundsCommitmentsMutation {
+  paymentPlan: PaymentPlanNode
+}
+
 type BankAccountInfoNode implements Node {
   id: ID!
   rdiMergeStatus: BankAccountInfoRdiMergeStatus!
@@ -364,6 +368,7 @@ type BusinessAreaNode implements Node {
   messageSet(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   feedbackSet(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
   surveySet(offset: Int, before: String, after: String, first: Int, last: Int): SurveyNodeConnection!
+  fundscommitmentitemSet(offset: Int, before: String, after: String, first: Int, last: Int): FundsCommitmentItemNodeConnection!
 }
 
 type BusinessAreaNodeConnection {
@@ -868,8 +873,8 @@ type DeliveryMechanismPerPaymentPlanNode implements Node {
   currency: PaymentPlanCurrency
   dispersionStartDate: Date
   dispersionEndDate: Date
-  excludedIds: String!
-  exclusionReason: String!
+  excludedIds: String
+  exclusionReason: String
   vulnerabilityScoreMin: Float
   vulnerabilityScoreMax: Float
   status: PaymentPlanStatus!
@@ -895,7 +900,7 @@ type DeliveryMechanismPerPaymentPlanNode implements Node {
   steficonTargetingAppliedDate: DateTime
   steficonAppliedDate: DateTime
   isFollowUp: Boolean!
-  excludeHouseholdError: String!
+  excludeHouseholdError: String
   statusDate: DateTime!
   isCashAssist: Boolean!
   deliveryMechanism: DeliveryMechanismNode
@@ -908,6 +913,7 @@ type DeliveryMechanismPerPaymentPlanNode implements Node {
   paymentVerificationSummary: PaymentVerificationSummaryNode
   messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   surveys(offset: Int, before: String, after: String, first: Int, last: Int): SurveyNodeConnection!
+  fundsCommitments(offset: Int, before: String, after: String, first: Int, last: Int): FundsCommitmentItemNodeConnection!
   code: String
   fsp: FinancialServiceProviderNode
 }
@@ -1231,6 +1237,56 @@ type FspChoices {
 
 input FullListArguments {
   excludedAdminAreas: [String]
+}
+
+type FundsCommitmentItemNode implements Node {
+  paymentPlan: PaymentPlanNode
+  fundsCommitmentItem: String!
+  recSerialNumber: Int!
+  vendorId: String
+  businessArea: String
+  postingDate: Date
+  visionApproval: String
+  documentReference: String
+  fcStatus: String
+  wbsElement: String
+  grantNumber: String
+  documentType: String
+  documentText: String
+  currencyCode: String
+  glAccount: String
+  commitmentAmountLocal: Float
+  commitmentAmountUsd: Float
+  totalOpenAmountLocal: Float
+  totalOpenAmountUsd: Float
+  sponsor: String
+  sponsorName: String
+  fund: String
+  fundsCenter: String
+  percentage: Float
+  createDate: DateTime
+  createdBy: String
+  updateDate: DateTime
+  updatedBy: String
+  office: UserBusinessAreaNode
+  id: ID!
+}
+
+type FundsCommitmentItemNodeConnection {
+  pageInfo: PageInfo!
+  edges: [FundsCommitmentItemNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type FundsCommitmentItemNodeEdge {
+  node: FundsCommitmentItemNode
+  cursor: String!
+}
+
+type FundsCommitmentNode {
+  fundsCommitmentNumber: String
+  fundsCommitmentItems: [FundsCommitmentItemNode]
 }
 
 type GenericPaymentNode {
@@ -2227,6 +2283,7 @@ type Mutations {
   excludeHouseholds(excludedHouseholdsIds: [String]!, exclusionReason: String, paymentPlanId: ID!): ExcludeHouseholdsMutation
   setSteficonRuleOnPaymentPlanPaymentList(paymentPlanId: ID!, steficonRuleId: ID!, version: BigInt): SetSteficonRuleOnPaymentPlanPaymentListMutation
   copyTargetingCriteria(name: String!, paymentPlanId: ID!, programCycleId: ID!): CopyTargetingCriteriaMutation
+  assignFundsCommitments(fundCommitmentItemsIds: [String]!, paymentPlanId: ID!): AssignFundsCommitmentsMutation
   exportXlsxPaymentPlanPaymentList(fspXlsxTemplateId: ID, paymentPlanId: ID!): ExportXLSXPaymentPlanPaymentListMutation
   exportXlsxPaymentPlanPaymentListPerFsp(fspXlsxTemplateId: ID, paymentPlanId: ID!): ExportXLSXPaymentPlanPaymentListPerFSPMutation
   importXlsxPaymentPlanPaymentList(file: Upload!, paymentPlanId: ID!): ImportXLSXPaymentPlanPaymentListMutation
@@ -2648,8 +2705,8 @@ type PaymentPlanNode implements Node {
   currency: String
   dispersionStartDate: Date
   dispersionEndDate: Date
-  excludedIds: String!
-  exclusionReason: String!
+  excludedIds: String
+  exclusionReason: String
   vulnerabilityScoreMin: Float
   vulnerabilityScoreMax: Float
   status: PaymentPlanStatus!
@@ -2675,7 +2732,7 @@ type PaymentPlanNode implements Node {
   steficonTargetingAppliedDate: DateTime
   steficonAppliedDate: DateTime
   isFollowUp: Boolean!
-  excludeHouseholdError: String!
+  excludeHouseholdError: String
   statusDate: DateTime!
   isCashAssist: Boolean!
   deliveryMechanism: DeliveryMechanismNode
@@ -2688,6 +2745,7 @@ type PaymentPlanNode implements Node {
   paymentVerificationSummary: PaymentVerificationSummaryNode
   messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   surveys(offset: Int, before: String, after: String, first: Int, last: Int): SurveyNodeConnection!
+  fundsCommitments(offset: Int, before: String, after: String, first: Int, last: Int): FundsCommitmentItemNodeConnection!
   adminUrl: String
   currencyName: String
   hasPaymentListExportFile: Boolean
@@ -2718,6 +2776,7 @@ type PaymentPlanNode implements Node {
   canDownloadXlsx: Boolean
   canSendXlsxPassword: Boolean
   failedWalletValidationCollectorsIds: [String]
+  availableFundsCommitments: [FundsCommitmentNode]
 }
 
 type PaymentPlanNodeConnection {
@@ -4568,6 +4627,7 @@ type UserBusinessAreaNode implements Node {
   messageSet(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   feedbackSet(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
   surveySet(offset: Int, before: String, after: String, first: Int, last: Int): SurveyNodeConnection!
+  fundscommitmentitemSet(offset: Int, before: String, after: String, first: Int, last: Int): FundsCommitmentItemNodeConnection!
   permissions: [String]
 }
 

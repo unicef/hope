@@ -349,6 +349,11 @@ export type AreaTypeNodeEdge = {
   node?: Maybe<AreaTypeNode>;
 };
 
+export type AssignFundsCommitmentsMutation = {
+  __typename?: 'AssignFundsCommitmentsMutation';
+  paymentPlan?: Maybe<PaymentPlanNode>;
+};
+
 export type BankAccountInfoNode = Node & {
   __typename?: 'BankAccountInfoNode';
   accountHolderName: Scalars['String']['output'];
@@ -469,6 +474,7 @@ export type BusinessAreaNode = Node & {
   enableEmailNotification: Scalars['Boolean']['output'];
   feedbackSet: FeedbackNodeConnection;
   financialserviceproviderSet: FinancialServiceProviderNodeConnection;
+  fundscommitmentitemSet: FundsCommitmentItemNodeConnection;
   hasDataSharingAgreement: Scalars['Boolean']['output'];
   householdSet: HouseholdNodeConnection;
   id: Scalars['ID']['output'];
@@ -536,6 +542,15 @@ export type BusinessAreaNodeFeedbackSetArgs = {
 
 
 export type BusinessAreaNodeFinancialserviceproviderSetArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type BusinessAreaNodeFundscommitmentitemSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -1266,14 +1281,15 @@ export type DeliveryMechanismPerPaymentPlanNode = Node & {
   documents: PaymentPlanSupportingDocumentNodeConnection;
   endDate?: Maybe<Scalars['DateTime']['output']>;
   exchangeRate?: Maybe<Scalars['Float']['output']>;
-  excludeHouseholdError: Scalars['String']['output'];
-  excludedIds: Scalars['String']['output'];
-  exclusionReason: Scalars['String']['output'];
+  excludeHouseholdError?: Maybe<Scalars['String']['output']>;
+  excludedIds?: Maybe<Scalars['String']['output']>;
+  exclusionReason?: Maybe<Scalars['String']['output']>;
   femaleAdultsCount: Scalars['Int']['output'];
   femaleChildrenCount: Scalars['Int']['output'];
   financialServiceProvider?: Maybe<FinancialServiceProviderNode>;
   followUps: PaymentPlanNodeConnection;
   fsp?: Maybe<FinancialServiceProviderNode>;
+  fundsCommitments: FundsCommitmentItemNodeConnection;
   id: Scalars['ID']['output'];
   importedFileDate?: Maybe<Scalars['DateTime']['output']>;
   internalData: Scalars['JSONString']['output'];
@@ -1335,6 +1351,15 @@ export type DeliveryMechanismPerPaymentPlanNodeDocumentsArgs = {
 
 
 export type DeliveryMechanismPerPaymentPlanNodeFollowUpsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type DeliveryMechanismPerPaymentPlanNodeFundsCommitmentsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -1808,6 +1833,60 @@ export type FspChoices = {
 
 export type FullListArguments = {
   excludedAdminAreas?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+};
+
+export type FundsCommitmentItemNode = Node & {
+  __typename?: 'FundsCommitmentItemNode';
+  businessArea?: Maybe<Scalars['String']['output']>;
+  commitmentAmountLocal?: Maybe<Scalars['Float']['output']>;
+  commitmentAmountUsd?: Maybe<Scalars['Float']['output']>;
+  createDate?: Maybe<Scalars['DateTime']['output']>;
+  createdBy?: Maybe<Scalars['String']['output']>;
+  currencyCode?: Maybe<Scalars['String']['output']>;
+  documentReference?: Maybe<Scalars['String']['output']>;
+  documentText?: Maybe<Scalars['String']['output']>;
+  documentType?: Maybe<Scalars['String']['output']>;
+  fcStatus?: Maybe<Scalars['String']['output']>;
+  fund?: Maybe<Scalars['String']['output']>;
+  fundsCenter?: Maybe<Scalars['String']['output']>;
+  fundsCommitmentItem: Scalars['String']['output'];
+  glAccount?: Maybe<Scalars['String']['output']>;
+  grantNumber?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  office?: Maybe<UserBusinessAreaNode>;
+  paymentPlan?: Maybe<PaymentPlanNode>;
+  percentage?: Maybe<Scalars['Float']['output']>;
+  postingDate?: Maybe<Scalars['Date']['output']>;
+  recSerialNumber: Scalars['Int']['output'];
+  sponsor?: Maybe<Scalars['String']['output']>;
+  sponsorName?: Maybe<Scalars['String']['output']>;
+  totalOpenAmountLocal?: Maybe<Scalars['Float']['output']>;
+  totalOpenAmountUsd?: Maybe<Scalars['Float']['output']>;
+  updateDate?: Maybe<Scalars['DateTime']['output']>;
+  updatedBy?: Maybe<Scalars['String']['output']>;
+  vendorId?: Maybe<Scalars['String']['output']>;
+  visionApproval?: Maybe<Scalars['String']['output']>;
+  wbsElement?: Maybe<Scalars['String']['output']>;
+};
+
+export type FundsCommitmentItemNodeConnection = {
+  __typename?: 'FundsCommitmentItemNodeConnection';
+  edgeCount?: Maybe<Scalars['Int']['output']>;
+  edges: Array<Maybe<FundsCommitmentItemNodeEdge>>;
+  pageInfo: PageInfo;
+  totalCount?: Maybe<Scalars['Int']['output']>;
+};
+
+export type FundsCommitmentItemNodeEdge = {
+  __typename?: 'FundsCommitmentItemNodeEdge';
+  cursor: Scalars['String']['output'];
+  node?: Maybe<FundsCommitmentItemNode>;
+};
+
+export type FundsCommitmentNode = {
+  __typename?: 'FundsCommitmentNode';
+  fundsCommitmentItems?: Maybe<Array<Maybe<FundsCommitmentItemNode>>>;
+  fundsCommitmentNumber?: Maybe<Scalars['String']['output']>;
 };
 
 export type GenericPaymentNode = {
@@ -3209,6 +3288,7 @@ export type Mutations = {
   approveNeedsAdjudication?: Maybe<NeedsAdjudicationApproveMutation>;
   approvePaymentDetails?: Maybe<PaymentDetailsApproveMutation>;
   approveSystemFlagging?: Maybe<SimpleApproveMutation>;
+  assignFundsCommitments?: Maybe<AssignFundsCommitmentsMutation>;
   bulkGrievanceAddNote?: Maybe<BulkGrievanceAddNoteMutation>;
   bulkUpdateGrievanceAssignee?: Maybe<BulkUpdateGrievanceTicketsAssigneesMutation>;
   bulkUpdateGrievancePriority?: Maybe<BulkUpdateGrievanceTicketsPriorityMutation>;
@@ -3351,6 +3431,12 @@ export type MutationsApproveSystemFlaggingArgs = {
   approveStatus: Scalars['Boolean']['input'];
   grievanceTicketId: Scalars['ID']['input'];
   version?: InputMaybe<Scalars['BigInt']['input']>;
+};
+
+
+export type MutationsAssignFundsCommitmentsArgs = {
+  fundCommitmentItemsIds: Array<InputMaybe<Scalars['String']['input']>>;
+  paymentPlanId: Scalars['ID']['input'];
 };
 
 
@@ -4253,6 +4339,7 @@ export type PaymentPlanNode = Node & {
   __typename?: 'PaymentPlanNode';
   adminUrl?: Maybe<Scalars['String']['output']>;
   approvalProcess: ApprovalProcessNodeConnection;
+  availableFundsCommitments?: Maybe<Array<Maybe<FundsCommitmentNode>>>;
   availablePaymentRecordsCount?: Maybe<Scalars['Int']['output']>;
   backgroundActionStatus?: Maybe<PaymentPlanBackgroundActionStatus>;
   bankReconciliationError?: Maybe<Scalars['Int']['output']>;
@@ -4278,17 +4365,18 @@ export type PaymentPlanNode = Node & {
   documents: PaymentPlanSupportingDocumentNodeConnection;
   endDate?: Maybe<Scalars['Date']['output']>;
   exchangeRate?: Maybe<Scalars['Float']['output']>;
-  excludeHouseholdError: Scalars['String']['output'];
+  excludeHouseholdError?: Maybe<Scalars['String']['output']>;
   excludedHouseholds?: Maybe<Array<Maybe<HouseholdNode>>>;
-  excludedIds: Scalars['String']['output'];
+  excludedIds?: Maybe<Scalars['String']['output']>;
   excludedIndividuals?: Maybe<Array<Maybe<IndividualNode>>>;
-  exclusionReason: Scalars['String']['output'];
+  exclusionReason?: Maybe<Scalars['String']['output']>;
   failedWalletValidationCollectorsIds?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   femaleAdultsCount: Scalars['Int']['output'];
   femaleChildrenCount: Scalars['Int']['output'];
   financialServiceProvider?: Maybe<FinancialServiceProviderNode>;
   followUps: PaymentPlanNodeConnection;
   fspCommunicationChannel?: Maybe<Scalars['String']['output']>;
+  fundsCommitments: FundsCommitmentItemNodeConnection;
   hasFspDeliveryMechanismXlsxTemplate?: Maybe<Scalars['Boolean']['output']>;
   hasPaymentListExportFile?: Maybe<Scalars['Boolean']['output']>;
   id: Scalars['ID']['output'];
@@ -4363,6 +4451,15 @@ export type PaymentPlanNodeDocumentsArgs = {
 
 
 export type PaymentPlanNodeFollowUpsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type PaymentPlanNodeFundsCommitmentsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -7617,6 +7714,7 @@ export type UserBusinessAreaNode = Node & {
   enableEmailNotification: Scalars['Boolean']['output'];
   feedbackSet: FeedbackNodeConnection;
   financialserviceproviderSet: FinancialServiceProviderNodeConnection;
+  fundscommitmentitemSet: FundsCommitmentItemNodeConnection;
   hasDataSharingAgreement: Scalars['Boolean']['output'];
   householdSet: HouseholdNodeConnection;
   id: Scalars['ID']['output'];
@@ -7685,6 +7783,15 @@ export type UserBusinessAreaNodeFeedbackSetArgs = {
 
 
 export type UserBusinessAreaNodeFinancialserviceproviderSetArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type UserBusinessAreaNodeFundscommitmentitemSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -8352,7 +8459,7 @@ export type ExcludeHouseholdsPpMutationVariables = Exact<{
 }>;
 
 
-export type ExcludeHouseholdsPpMutation = { __typename?: 'Mutations', excludeHouseholds?: { __typename?: 'ExcludeHouseholdsMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, status: PaymentPlanStatus, backgroundActionStatus?: PaymentPlanBackgroundActionStatus | null, excludeHouseholdError: string, exclusionReason: string, excludedHouseholds?: Array<{ __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null> | null, excludedIndividuals?: Array<{ __typename?: 'IndividualNode', id: string, unicefId?: string | null } | null> | null } | null } | null };
+export type ExcludeHouseholdsPpMutation = { __typename?: 'Mutations', excludeHouseholds?: { __typename?: 'ExcludeHouseholdsMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, status: PaymentPlanStatus, backgroundActionStatus?: PaymentPlanBackgroundActionStatus | null, excludeHouseholdError?: string | null, exclusionReason?: string | null, excludedHouseholds?: Array<{ __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null> | null, excludedIndividuals?: Array<{ __typename?: 'IndividualNode', id: string, unicefId?: string | null } | null> | null } | null } | null };
 
 export type ExportPdfPpSummaryMutationVariables = Exact<{
   paymentPlanId: Scalars['ID']['input'];
@@ -9095,7 +9202,7 @@ export type PaymentPlanQueryVariables = Exact<{
 }>;
 
 
-export type PaymentPlanQuery = { __typename?: 'Query', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, name?: string | null, version: any, unicefId?: string | null, status: PaymentPlanStatus, buildStatus?: PaymentPlanBuildStatus | null, canCreateFollowUp?: boolean | null, failedWalletValidationCollectorsIds?: Array<string | null> | null, backgroundActionStatus?: PaymentPlanBackgroundActionStatus | null, canCreatePaymentVerificationPlan?: boolean | null, availablePaymentRecordsCount?: number | null, bankReconciliationSuccess?: number | null, bankReconciliationError?: number | null, exchangeRate?: number | null, fspCommunicationChannel?: string | null, canExportXlsx?: boolean | null, canDownloadXlsx?: boolean | null, canSendXlsxPassword?: boolean | null, excludedIds: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, adminUrl?: string | null, currency?: string | null, currencyName?: string | null, startDate?: any | null, endDate?: any | null, dispersionStartDate?: any | null, dispersionEndDate?: any | null, femaleChildrenCount: number, femaleAdultsCount: number, maleChildrenCount: number, maleAdultsCount: number, totalHouseholdsCount: number, totalIndividualsCount: number, totalEntitledQuantity?: number | null, totalDeliveredQuantity?: number | null, totalUndeliveredQuantity?: number | null, totalWithdrawnHouseholdsCount?: number | null, hasPaymentListExportFile?: boolean | null, hasFspDeliveryMechanismXlsxTemplate?: boolean | null, canCreateXlsxWithFspAuthCode?: boolean | null, importedFileDate?: any | null, importedFileName?: string | null, totalEntitledQuantityUsd?: number | null, paymentsConflictsCount?: number | null, canSendToPaymentGateway?: boolean | null, canSplit?: boolean | null, exclusionReason: string, excludeHouseholdError: string, isFollowUp: boolean, unsuccessfulPaymentsCount?: number | null, volumeByDeliveryMechanism?: Array<{ __typename?: 'VolumeByDeliveryMechanismNode', volume?: number | null, volumeUsd?: number | null, deliveryMechanism?: { __typename?: 'DeliveryMechanismPerPaymentPlanNode', id: string, name?: string | null, fsp?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string } | null } | null } | null> | null, deliveryMechanism?: { __typename?: 'DeliveryMechanismNode', id: string, name?: string | null, code?: string | null } | null, financialServiceProvider?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string } | null, programCycle: { __typename?: 'ProgramCycleNode', id: string, title?: string | null }, createdBy: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string }, program?: { __typename?: 'ProgramNode', id: string, name: string, status: ProgramStatus, isSocialWorkerProgram?: boolean | null } | null, approvalProcess: { __typename?: 'ApprovalProcessNodeConnection', totalCount?: number | null, edgeCount?: number | null, edges: Array<{ __typename?: 'ApprovalProcessNodeEdge', node?: { __typename?: 'ApprovalProcessNode', id: string, sentForApprovalDate?: any | null, sentForAuthorizationDate?: any | null, sentForFinanceReleaseDate?: any | null, approvalNumberRequired: number, authorizationNumberRequired: number, financeReleaseNumberRequired: number, rejectedOn?: string | null, sentForApprovalBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, sentForAuthorizationBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, sentForFinanceReleaseBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, actions?: { __typename?: 'FilteredActionsListNode', approval?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null, authorization?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null, financeRelease?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null, reject?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null } | null } | null } | null> }, steficonRule?: { __typename?: 'RuleCommitNode', id: string, rule?: { __typename?: 'SteficonRuleNode', id: string, name: string } | null } | null, steficonRuleTargeting?: { __typename?: 'RuleCommitNode', id: string, rule?: { __typename?: 'SteficonRuleNode', id: string, name: string } | null } | null, splitChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, verificationPlans?: { __typename?: 'PaymentVerificationPlanNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'PaymentVerificationPlanNodeEdge', node?: { __typename?: 'PaymentVerificationPlanNode', id: string, unicefId?: string | null, adminUrl?: string | null, status: PaymentVerificationPlanStatus, sampleSize?: number | null, receivedCount?: number | null, notReceivedCount?: number | null, respondedCount?: number | null, verificationChannel: PaymentVerificationPlanVerificationChannel, sampling: PaymentVerificationPlanSampling, receivedWithProblemsCount?: number | null, rapidProFlowId: string, confidenceInterval?: number | null, marginOfError?: number | null, activationDate?: any | null, completionDate?: any | null, excludedAdminAreasFilter?: Array<string | null> | null, sexFilter?: string | null, xlsxFileExporting: boolean, hasXlsxFile?: boolean | null, xlsxFileWasDownloaded?: boolean | null, xlsxFileImported: boolean, ageFilter?: { __typename?: 'AgeFilterObject', min?: number | null, max?: number | null } | null } | null } | null> } | null, paymentVerificationSummary?: { __typename?: 'PaymentVerificationSummaryNode', id: string, createdAt: any, updatedAt: any, status: PaymentVerificationSummaryStatus, activationDate?: any | null, completionDate?: any | null } | null, paymentItems: { __typename?: 'PaymentNodeConnection', totalCount?: number | null, edgeCount?: number | null, edges: Array<{ __typename?: 'PaymentNodeEdge', node?: { __typename?: 'PaymentNode', id: string, status: PaymentStatus } | null } | null> }, reconciliationSummary?: { __typename?: 'ReconciliationSummaryNode', deliveredFully?: number | null, deliveredPartially?: number | null, notDelivered?: number | null, unsuccessful?: number | null, pending?: number | null, numberOfPayments?: number | null, reconciled?: number | null } | null, excludedHouseholds?: Array<{ __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null> | null, excludedIndividuals?: Array<{ __typename?: 'IndividualNode', id: string, unicefId?: string | null } | null> | null, followUps: { __typename?: 'PaymentPlanNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'PaymentPlanNodeEdge', node?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null, createdAt: any, paymentItems: { __typename?: 'PaymentNodeConnection', totalCount?: number | null } } | null } | null> }, sourcePaymentPlan?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null } | null, supportingDocuments?: Array<{ __typename?: 'PaymentPlanSupportingDocumentNode', id: string, title: string, file: string } | null> | null, targetingCriteria: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds?: string | null, individualIds?: string | null, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, householdIds: string, individualIds: string, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null, collectorsFiltersBlocks: Array<{ __typename: 'TargetingCollectorRuleFilterBlockNode', id: any, createdAt: any, updatedAt: any, collectorBlockFilters?: Array<{ __typename: 'TargetingCollectorBlockRuleFilterNode', id: any, createdAt: any, updatedAt: any, fieldName: string, comparisonMethod?: string | null, flexFieldClassification: TargetingCollectorBlockRuleFilterFlexFieldClassification, arguments?: Array<any | null> | null, labelEn?: string | null } | null> | null }>, householdsFiltersBlocks?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null } } | null };
+export type PaymentPlanQuery = { __typename?: 'Query', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, name?: string | null, version: any, unicefId?: string | null, status: PaymentPlanStatus, buildStatus?: PaymentPlanBuildStatus | null, canCreateFollowUp?: boolean | null, failedWalletValidationCollectorsIds?: Array<string | null> | null, backgroundActionStatus?: PaymentPlanBackgroundActionStatus | null, canCreatePaymentVerificationPlan?: boolean | null, availablePaymentRecordsCount?: number | null, bankReconciliationSuccess?: number | null, bankReconciliationError?: number | null, exchangeRate?: number | null, fspCommunicationChannel?: string | null, canExportXlsx?: boolean | null, canDownloadXlsx?: boolean | null, canSendXlsxPassword?: boolean | null, excludedIds?: string | null, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, adminUrl?: string | null, currency?: string | null, currencyName?: string | null, startDate?: any | null, endDate?: any | null, dispersionStartDate?: any | null, dispersionEndDate?: any | null, femaleChildrenCount: number, femaleAdultsCount: number, maleChildrenCount: number, maleAdultsCount: number, totalHouseholdsCount: number, totalIndividualsCount: number, totalEntitledQuantity?: number | null, totalDeliveredQuantity?: number | null, totalUndeliveredQuantity?: number | null, totalWithdrawnHouseholdsCount?: number | null, hasPaymentListExportFile?: boolean | null, hasFspDeliveryMechanismXlsxTemplate?: boolean | null, canCreateXlsxWithFspAuthCode?: boolean | null, importedFileDate?: any | null, importedFileName?: string | null, totalEntitledQuantityUsd?: number | null, paymentsConflictsCount?: number | null, canSendToPaymentGateway?: boolean | null, canSplit?: boolean | null, exclusionReason?: string | null, excludeHouseholdError?: string | null, isFollowUp: boolean, unsuccessfulPaymentsCount?: number | null, volumeByDeliveryMechanism?: Array<{ __typename?: 'VolumeByDeliveryMechanismNode', volume?: number | null, volumeUsd?: number | null, deliveryMechanism?: { __typename?: 'DeliveryMechanismPerPaymentPlanNode', id: string, name?: string | null, fsp?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string } | null } | null } | null> | null, deliveryMechanism?: { __typename?: 'DeliveryMechanismNode', id: string, name?: string | null, code?: string | null } | null, financialServiceProvider?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string } | null, programCycle: { __typename?: 'ProgramCycleNode', id: string, title?: string | null }, createdBy: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string }, program?: { __typename?: 'ProgramNode', id: string, name: string, status: ProgramStatus, isSocialWorkerProgram?: boolean | null } | null, approvalProcess: { __typename?: 'ApprovalProcessNodeConnection', totalCount?: number | null, edgeCount?: number | null, edges: Array<{ __typename?: 'ApprovalProcessNodeEdge', node?: { __typename?: 'ApprovalProcessNode', id: string, sentForApprovalDate?: any | null, sentForAuthorizationDate?: any | null, sentForFinanceReleaseDate?: any | null, approvalNumberRequired: number, authorizationNumberRequired: number, financeReleaseNumberRequired: number, rejectedOn?: string | null, sentForApprovalBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, sentForAuthorizationBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, sentForFinanceReleaseBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, actions?: { __typename?: 'FilteredActionsListNode', approval?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null, authorization?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null, financeRelease?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null, reject?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null } | null } | null } | null> }, steficonRule?: { __typename?: 'RuleCommitNode', id: string, rule?: { __typename?: 'SteficonRuleNode', id: string, name: string } | null } | null, steficonRuleTargeting?: { __typename?: 'RuleCommitNode', id: string, rule?: { __typename?: 'SteficonRuleNode', id: string, name: string } | null } | null, splitChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, verificationPlans?: { __typename?: 'PaymentVerificationPlanNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'PaymentVerificationPlanNodeEdge', node?: { __typename?: 'PaymentVerificationPlanNode', id: string, unicefId?: string | null, adminUrl?: string | null, status: PaymentVerificationPlanStatus, sampleSize?: number | null, receivedCount?: number | null, notReceivedCount?: number | null, respondedCount?: number | null, verificationChannel: PaymentVerificationPlanVerificationChannel, sampling: PaymentVerificationPlanSampling, receivedWithProblemsCount?: number | null, rapidProFlowId: string, confidenceInterval?: number | null, marginOfError?: number | null, activationDate?: any | null, completionDate?: any | null, excludedAdminAreasFilter?: Array<string | null> | null, sexFilter?: string | null, xlsxFileExporting: boolean, hasXlsxFile?: boolean | null, xlsxFileWasDownloaded?: boolean | null, xlsxFileImported: boolean, ageFilter?: { __typename?: 'AgeFilterObject', min?: number | null, max?: number | null } | null } | null } | null> } | null, paymentVerificationSummary?: { __typename?: 'PaymentVerificationSummaryNode', id: string, createdAt: any, updatedAt: any, status: PaymentVerificationSummaryStatus, activationDate?: any | null, completionDate?: any | null } | null, paymentItems: { __typename?: 'PaymentNodeConnection', totalCount?: number | null, edgeCount?: number | null, edges: Array<{ __typename?: 'PaymentNodeEdge', node?: { __typename?: 'PaymentNode', id: string, status: PaymentStatus } | null } | null> }, reconciliationSummary?: { __typename?: 'ReconciliationSummaryNode', deliveredFully?: number | null, deliveredPartially?: number | null, notDelivered?: number | null, unsuccessful?: number | null, pending?: number | null, numberOfPayments?: number | null, reconciled?: number | null } | null, excludedHouseholds?: Array<{ __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null> | null, excludedIndividuals?: Array<{ __typename?: 'IndividualNode', id: string, unicefId?: string | null } | null> | null, followUps: { __typename?: 'PaymentPlanNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'PaymentPlanNodeEdge', node?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null, createdAt: any, paymentItems: { __typename?: 'PaymentNodeConnection', totalCount?: number | null } } | null } | null> }, sourcePaymentPlan?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null } | null, supportingDocuments?: Array<{ __typename?: 'PaymentPlanSupportingDocumentNode', id: string, title: string, file: string } | null> | null, targetingCriteria: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds?: string | null, individualIds?: string | null, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, householdIds: string, individualIds: string, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null, collectorsFiltersBlocks: Array<{ __typename: 'TargetingCollectorRuleFilterBlockNode', id: any, createdAt: any, updatedAt: any, collectorBlockFilters?: Array<{ __typename: 'TargetingCollectorBlockRuleFilterNode', id: any, createdAt: any, updatedAt: any, fieldName: string, comparisonMethod?: string | null, flexFieldClassification: TargetingCollectorBlockRuleFilterFlexFieldClassification, arguments?: Array<any | null> | null, labelEn?: string | null } | null> | null }>, householdsFiltersBlocks?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null } } | null };
 
 export type AllPaymentsForTableQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
@@ -9708,7 +9815,7 @@ export type TargetPopulationQueryVariables = Exact<{
 }>;
 
 
-export type TargetPopulationQuery = { __typename?: 'Query', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, version: any, name?: string | null, status: PaymentPlanStatus, buildStatus?: PaymentPlanBuildStatus | null, adminUrl?: string | null, failedWalletValidationCollectorsIds?: Array<string | null> | null, totalHouseholdsCount: number, totalIndividualsCount: number, femaleChildrenCount: number, femaleAdultsCount: number, maleChildrenCount: number, maleAdultsCount: number, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, deliveryMechanism?: { __typename?: 'DeliveryMechanismNode', id: string, name?: string | null, code?: string | null } | null, financialServiceProvider?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string } | null, steficonRuleTargeting?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, program?: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate?: any | null, isSocialWorkerProgram?: boolean | null } | null, programCycle: { __typename: 'ProgramCycleNode', id: string, title?: string | null }, createdBy: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string }, targetingCriteria: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds?: string | null, individualIds?: string | null, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, householdIds: string, individualIds: string, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null, collectorsFiltersBlocks: Array<{ __typename: 'TargetingCollectorRuleFilterBlockNode', id: any, createdAt: any, updatedAt: any, collectorBlockFilters?: Array<{ __typename: 'TargetingCollectorBlockRuleFilterNode', id: any, createdAt: any, updatedAt: any, fieldName: string, comparisonMethod?: string | null, flexFieldClassification: TargetingCollectorBlockRuleFilterFlexFieldClassification, arguments?: Array<any | null> | null, labelEn?: string | null } | null> | null }>, householdsFiltersBlocks?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null } } | null };
+export type TargetPopulationQuery = { __typename?: 'Query', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, version: any, name?: string | null, status: PaymentPlanStatus, buildStatus?: PaymentPlanBuildStatus | null, adminUrl?: string | null, failedWalletValidationCollectorsIds?: Array<string | null> | null, totalHouseholdsCount: number, totalIndividualsCount: number, femaleChildrenCount: number, femaleAdultsCount: number, maleChildrenCount: number, maleAdultsCount: number, excludedIds?: string | null, exclusionReason?: string | null, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, deliveryMechanism?: { __typename?: 'DeliveryMechanismNode', id: string, name?: string | null, code?: string | null } | null, financialServiceProvider?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string } | null, steficonRuleTargeting?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, program?: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate?: any | null, isSocialWorkerProgram?: boolean | null } | null, programCycle: { __typename: 'ProgramCycleNode', id: string, title?: string | null }, createdBy: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string }, targetingCriteria: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds?: string | null, individualIds?: string | null, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, householdIds: string, individualIds: string, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null, collectorsFiltersBlocks: Array<{ __typename: 'TargetingCollectorRuleFilterBlockNode', id: any, createdAt: any, updatedAt: any, collectorBlockFilters?: Array<{ __typename: 'TargetingCollectorBlockRuleFilterNode', id: any, createdAt: any, updatedAt: any, fieldName: string, comparisonMethod?: string | null, flexFieldClassification: TargetingCollectorBlockRuleFilterFlexFieldClassification, arguments?: Array<any | null> | null, labelEn?: string | null } | null> | null }>, householdsFiltersBlocks?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null } } | null };
 
 export const IndividualMinimalFragmentDoc = gql`
     fragment individualMinimal on IndividualNode {
@@ -21250,7 +21357,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping of interface types */
 export type ResolversInterfaceTypes<_RefType extends Record<string, unknown>> = {
-  Node: ( ApprovalProcessNode ) | ( AreaNode ) | ( AreaTypeNode ) | ( BankAccountInfoNode ) | ( BeneficiaryGroupNode ) | ( BusinessAreaNode ) | ( CommunicationMessageNode ) | ( CommunicationMessageRecipientMapNode ) | ( DataCollectingTypeNode ) | ( DeliveryMechanismDataNode ) | ( DeliveryMechanismNode ) | ( DeliveryMechanismPerPaymentPlanNode ) | ( DocumentNode ) | ( FeedbackMessageNode ) | ( FeedbackNode ) | ( FinancialServiceProviderNode ) | ( FinancialServiceProviderXlsxTemplateNode ) | ( GrievanceDocumentNode ) | ( GrievanceTicketNode ) | ( HouseholdNode ) | ( ImportDataNode ) | ( IndividualIdentityNode ) | ( IndividualNode ) | ( KoboImportDataNode ) | ( LogEntryNode ) | ( PaymentHouseholdSnapshotNode ) | ( PaymentNode ) | ( PaymentPlanNode ) | ( PaymentPlanSupportingDocumentNode ) | ( PaymentVerificationLogEntryNode ) | ( PaymentVerificationNode ) | ( PaymentVerificationPlanNode ) | ( PaymentVerificationSummaryNode ) | ( PeriodicFieldNode ) | ( ProgramCycleNode ) | ( ProgramNode ) | ( RecipientNode ) | ( RegistrationDataImportDatahubNode ) | ( RegistrationDataImportNode ) | ( ReportNode ) | ( RuleCommitNode ) | ( SanctionListIndividualAliasNameNode ) | ( SanctionListIndividualCountriesNode ) | ( SanctionListIndividualDateOfBirthNode ) | ( SanctionListIndividualDocumentNode ) | ( SanctionListIndividualNationalitiesNode ) | ( SanctionListIndividualNode ) | ( SteficonRuleNode ) | ( SurveyNode ) | ( TicketAddIndividualDetailsNode ) | ( TicketComplaintDetailsNode ) | ( TicketDeleteHouseholdDetailsNode ) | ( TicketDeleteIndividualDetailsNode ) | ( TicketHouseholdDataUpdateDetailsNode ) | ( TicketIndividualDataUpdateDetailsNode ) | ( TicketNeedsAdjudicationDetailsNode ) | ( TicketNegativeFeedbackDetailsNode ) | ( TicketNoteNode ) | ( TicketPaymentVerificationDetailsNode ) | ( TicketPositiveFeedbackDetailsNode ) | ( TicketReferralDetailsNode ) | ( TicketSensitiveDetailsNode ) | ( TicketSystemFlaggingDetailsNode ) | ( UserBusinessAreaNode ) | ( UserNode );
+  Node: ( ApprovalProcessNode ) | ( AreaNode ) | ( AreaTypeNode ) | ( BankAccountInfoNode ) | ( BeneficiaryGroupNode ) | ( BusinessAreaNode ) | ( CommunicationMessageNode ) | ( CommunicationMessageRecipientMapNode ) | ( DataCollectingTypeNode ) | ( DeliveryMechanismDataNode ) | ( DeliveryMechanismNode ) | ( DeliveryMechanismPerPaymentPlanNode ) | ( DocumentNode ) | ( FeedbackMessageNode ) | ( FeedbackNode ) | ( FinancialServiceProviderNode ) | ( FinancialServiceProviderXlsxTemplateNode ) | ( FundsCommitmentItemNode ) | ( GrievanceDocumentNode ) | ( GrievanceTicketNode ) | ( HouseholdNode ) | ( ImportDataNode ) | ( IndividualIdentityNode ) | ( IndividualNode ) | ( KoboImportDataNode ) | ( LogEntryNode ) | ( PaymentHouseholdSnapshotNode ) | ( PaymentNode ) | ( PaymentPlanNode ) | ( PaymentPlanSupportingDocumentNode ) | ( PaymentVerificationLogEntryNode ) | ( PaymentVerificationNode ) | ( PaymentVerificationPlanNode ) | ( PaymentVerificationSummaryNode ) | ( PeriodicFieldNode ) | ( ProgramCycleNode ) | ( ProgramNode ) | ( RecipientNode ) | ( RegistrationDataImportDatahubNode ) | ( RegistrationDataImportNode ) | ( ReportNode ) | ( RuleCommitNode ) | ( SanctionListIndividualAliasNameNode ) | ( SanctionListIndividualCountriesNode ) | ( SanctionListIndividualDateOfBirthNode ) | ( SanctionListIndividualDocumentNode ) | ( SanctionListIndividualNationalitiesNode ) | ( SanctionListIndividualNode ) | ( SteficonRuleNode ) | ( SurveyNode ) | ( TicketAddIndividualDetailsNode ) | ( TicketComplaintDetailsNode ) | ( TicketDeleteHouseholdDetailsNode ) | ( TicketDeleteIndividualDetailsNode ) | ( TicketHouseholdDataUpdateDetailsNode ) | ( TicketIndividualDataUpdateDetailsNode ) | ( TicketNeedsAdjudicationDetailsNode ) | ( TicketNegativeFeedbackDetailsNode ) | ( TicketNoteNode ) | ( TicketPaymentVerificationDetailsNode ) | ( TicketPositiveFeedbackDetailsNode ) | ( TicketReferralDetailsNode ) | ( TicketSensitiveDetailsNode ) | ( TicketSystemFlaggingDetailsNode ) | ( UserBusinessAreaNode ) | ( UserNode );
 };
 
 /** Mapping between all available schema types and the resolvers types */
@@ -21280,6 +21387,7 @@ export type ResolversTypes = {
   AreaTypeNodeConnection: ResolverTypeWrapper<AreaTypeNodeConnection>;
   AreaTypeNodeEdge: ResolverTypeWrapper<AreaTypeNodeEdge>;
   Arg: ResolverTypeWrapper<Scalars['Arg']['output']>;
+  AssignFundsCommitmentsMutation: ResolverTypeWrapper<AssignFundsCommitmentsMutation>;
   BankAccountInfoNode: ResolverTypeWrapper<BankAccountInfoNode>;
   BankAccountInfoNodeConnection: ResolverTypeWrapper<BankAccountInfoNodeConnection>;
   BankAccountInfoNodeEdge: ResolverTypeWrapper<BankAccountInfoNodeEdge>;
@@ -21405,6 +21513,10 @@ export type ResolversTypes = {
   FspChoice: ResolverTypeWrapper<FspChoice>;
   FspChoices: ResolverTypeWrapper<FspChoices>;
   FullListArguments: FullListArguments;
+  FundsCommitmentItemNode: ResolverTypeWrapper<FundsCommitmentItemNode>;
+  FundsCommitmentItemNodeConnection: ResolverTypeWrapper<FundsCommitmentItemNodeConnection>;
+  FundsCommitmentItemNodeEdge: ResolverTypeWrapper<FundsCommitmentItemNodeEdge>;
+  FundsCommitmentNode: ResolverTypeWrapper<FundsCommitmentNode>;
   GenericPaymentNode: ResolverTypeWrapper<GenericPaymentNode>;
   GenericPaymentPlanNode: ResolverTypeWrapper<GenericPaymentPlanNode>;
   GeoJSON: ResolverTypeWrapper<Scalars['GeoJSON']['output']>;
@@ -21758,6 +21870,7 @@ export type ResolversParentTypes = {
   AreaTypeNodeConnection: AreaTypeNodeConnection;
   AreaTypeNodeEdge: AreaTypeNodeEdge;
   Arg: Scalars['Arg']['output'];
+  AssignFundsCommitmentsMutation: AssignFundsCommitmentsMutation;
   BankAccountInfoNode: BankAccountInfoNode;
   BankAccountInfoNodeConnection: BankAccountInfoNodeConnection;
   BankAccountInfoNodeEdge: BankAccountInfoNodeEdge;
@@ -21874,6 +21987,10 @@ export type ResolversParentTypes = {
   FspChoice: FspChoice;
   FspChoices: FspChoices;
   FullListArguments: FullListArguments;
+  FundsCommitmentItemNode: FundsCommitmentItemNode;
+  FundsCommitmentItemNodeConnection: FundsCommitmentItemNodeConnection;
+  FundsCommitmentItemNodeEdge: FundsCommitmentItemNodeEdge;
+  FundsCommitmentNode: FundsCommitmentNode;
   GenericPaymentNode: GenericPaymentNode;
   GenericPaymentPlanNode: GenericPaymentPlanNode;
   GeoJSON: Scalars['GeoJSON']['output'];
@@ -22293,6 +22410,11 @@ export interface ArgScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes[
   name: 'Arg';
 }
 
+export type AssignFundsCommitmentsMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['AssignFundsCommitmentsMutation'] = ResolversParentTypes['AssignFundsCommitmentsMutation']> = {
+  paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type BankAccountInfoNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['BankAccountInfoNode'] = ResolversParentTypes['BankAccountInfoNode']> = {
   accountHolderName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   bankAccountNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -22384,6 +22506,7 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   enableEmailNotification?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   feedbackSet?: Resolver<ResolversTypes['FeedbackNodeConnection'], ParentType, ContextType, Partial<BusinessAreaNodeFeedbackSetArgs>>;
   financialserviceproviderSet?: Resolver<ResolversTypes['FinancialServiceProviderNodeConnection'], ParentType, ContextType, Partial<BusinessAreaNodeFinancialserviceproviderSetArgs>>;
+  fundscommitmentitemSet?: Resolver<ResolversTypes['FundsCommitmentItemNodeConnection'], ParentType, ContextType, Partial<BusinessAreaNodeFundscommitmentitemSetArgs>>;
   hasDataSharingAgreement?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   householdSet?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, Partial<BusinessAreaNodeHouseholdSetArgs>>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -22814,14 +22937,15 @@ export type DeliveryMechanismPerPaymentPlanNodeResolvers<ContextType = any, Pare
   documents?: Resolver<ResolversTypes['PaymentPlanSupportingDocumentNodeConnection'], ParentType, ContextType, Partial<DeliveryMechanismPerPaymentPlanNodeDocumentsArgs>>;
   endDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   exchangeRate?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
-  excludeHouseholdError?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  excludedIds?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  exclusionReason?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  excludeHouseholdError?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  excludedIds?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  exclusionReason?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   femaleAdultsCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   femaleChildrenCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   financialServiceProvider?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>;
   followUps?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, Partial<DeliveryMechanismPerPaymentPlanNodeFollowUpsArgs>>;
   fsp?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>;
+  fundsCommitments?: Resolver<ResolversTypes['FundsCommitmentItemNodeConnection'], ParentType, ContextType, Partial<DeliveryMechanismPerPaymentPlanNodeFundsCommitmentsArgs>>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   importedFileDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   internalData?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>;
@@ -23141,6 +23265,60 @@ export type FspChoiceResolvers<ContextType = any, ParentType extends ResolversPa
 export type FspChoicesResolvers<ContextType = any, ParentType extends ResolversParentTypes['FspChoices'] = ResolversParentTypes['FspChoices']> = {
   deliveryMechanism?: Resolver<Maybe<ResolversTypes['DeliveryMechanismChoice']>, ParentType, ContextType>;
   fsps?: Resolver<Maybe<Array<Maybe<ResolversTypes['FspChoice']>>>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type FundsCommitmentItemNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FundsCommitmentItemNode'] = ResolversParentTypes['FundsCommitmentItemNode']> = {
+  businessArea?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  commitmentAmountLocal?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  commitmentAmountUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  createDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+  createdBy?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  currencyCode?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  documentReference?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  documentText?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  documentType?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  fcStatus?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  fund?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  fundsCenter?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  fundsCommitmentItem?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  glAccount?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  grantNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  office?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>;
+  paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>;
+  percentage?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  postingDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
+  recSerialNumber?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  sponsor?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  sponsorName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  totalOpenAmountLocal?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  totalOpenAmountUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  updateDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+  updatedBy?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  vendorId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  visionApproval?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  wbsElement?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type FundsCommitmentItemNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['FundsCommitmentItemNodeConnection'] = ResolversParentTypes['FundsCommitmentItemNodeConnection']> = {
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edges?: Resolver<Array<Maybe<ResolversTypes['FundsCommitmentItemNodeEdge']>>, ParentType, ContextType>;
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type FundsCommitmentItemNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FundsCommitmentItemNodeEdge'] = ResolversParentTypes['FundsCommitmentItemNodeEdge']> = {
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  node?: Resolver<Maybe<ResolversTypes['FundsCommitmentItemNode']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type FundsCommitmentNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FundsCommitmentNode'] = ResolversParentTypes['FundsCommitmentNode']> = {
+  fundsCommitmentItems?: Resolver<Maybe<Array<Maybe<ResolversTypes['FundsCommitmentItemNode']>>>, ParentType, ContextType>;
+  fundsCommitmentNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -23826,6 +24004,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   approveNeedsAdjudication?: Resolver<Maybe<ResolversTypes['NeedsAdjudicationApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveNeedsAdjudicationArgs, 'grievanceTicketId'>>;
   approvePaymentDetails?: Resolver<Maybe<ResolversTypes['PaymentDetailsApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApprovePaymentDetailsArgs, 'approveStatus' | 'grievanceTicketId'>>;
   approveSystemFlagging?: Resolver<Maybe<ResolversTypes['SimpleApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveSystemFlaggingArgs, 'approveStatus' | 'grievanceTicketId'>>;
+  assignFundsCommitments?: Resolver<Maybe<ResolversTypes['AssignFundsCommitmentsMutation']>, ParentType, ContextType, RequireFields<MutationsAssignFundsCommitmentsArgs, 'fundCommitmentItemsIds' | 'paymentPlanId'>>;
   bulkGrievanceAddNote?: Resolver<Maybe<ResolversTypes['BulkGrievanceAddNoteMutation']>, ParentType, ContextType, RequireFields<MutationsBulkGrievanceAddNoteArgs, 'businessAreaSlug' | 'grievanceTicketIds' | 'note'>>;
   bulkUpdateGrievanceAssignee?: Resolver<Maybe<ResolversTypes['BulkUpdateGrievanceTicketsAssigneesMutation']>, ParentType, ContextType, RequireFields<MutationsBulkUpdateGrievanceAssigneeArgs, 'assignedTo' | 'businessAreaSlug' | 'grievanceTicketIds'>>;
   bulkUpdateGrievancePriority?: Resolver<Maybe<ResolversTypes['BulkUpdateGrievanceTicketsPriorityMutation']>, ParentType, ContextType, RequireFields<MutationsBulkUpdateGrievancePriorityArgs, 'businessAreaSlug' | 'grievanceTicketIds' | 'priority'>>;
@@ -23893,7 +24072,7 @@ export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentT
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'ApprovalProcessNode' | 'AreaNode' | 'AreaTypeNode' | 'BankAccountInfoNode' | 'BeneficiaryGroupNode' | 'BusinessAreaNode' | 'CommunicationMessageNode' | 'CommunicationMessageRecipientMapNode' | 'DataCollectingTypeNode' | 'DeliveryMechanismDataNode' | 'DeliveryMechanismNode' | 'DeliveryMechanismPerPaymentPlanNode' | 'DocumentNode' | 'FeedbackMessageNode' | 'FeedbackNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'GrievanceDocumentNode' | 'GrievanceTicketNode' | 'HouseholdNode' | 'ImportDataNode' | 'IndividualIdentityNode' | 'IndividualNode' | 'KoboImportDataNode' | 'LogEntryNode' | 'PaymentHouseholdSnapshotNode' | 'PaymentNode' | 'PaymentPlanNode' | 'PaymentPlanSupportingDocumentNode' | 'PaymentVerificationLogEntryNode' | 'PaymentVerificationNode' | 'PaymentVerificationPlanNode' | 'PaymentVerificationSummaryNode' | 'PeriodicFieldNode' | 'ProgramCycleNode' | 'ProgramNode' | 'RecipientNode' | 'RegistrationDataImportDatahubNode' | 'RegistrationDataImportNode' | 'ReportNode' | 'RuleCommitNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualDateOfBirthNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualNode' | 'SteficonRuleNode' | 'SurveyNode' | 'TicketAddIndividualDetailsNode' | 'TicketComplaintDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketNoteNode' | 'TicketPaymentVerificationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'UserBusinessAreaNode' | 'UserNode', ParentType, ContextType>;
+  __resolveType: TypeResolveFn<'ApprovalProcessNode' | 'AreaNode' | 'AreaTypeNode' | 'BankAccountInfoNode' | 'BeneficiaryGroupNode' | 'BusinessAreaNode' | 'CommunicationMessageNode' | 'CommunicationMessageRecipientMapNode' | 'DataCollectingTypeNode' | 'DeliveryMechanismDataNode' | 'DeliveryMechanismNode' | 'DeliveryMechanismPerPaymentPlanNode' | 'DocumentNode' | 'FeedbackMessageNode' | 'FeedbackNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'FundsCommitmentItemNode' | 'GrievanceDocumentNode' | 'GrievanceTicketNode' | 'HouseholdNode' | 'ImportDataNode' | 'IndividualIdentityNode' | 'IndividualNode' | 'KoboImportDataNode' | 'LogEntryNode' | 'PaymentHouseholdSnapshotNode' | 'PaymentNode' | 'PaymentPlanNode' | 'PaymentPlanSupportingDocumentNode' | 'PaymentVerificationLogEntryNode' | 'PaymentVerificationNode' | 'PaymentVerificationPlanNode' | 'PaymentVerificationSummaryNode' | 'PeriodicFieldNode' | 'ProgramCycleNode' | 'ProgramNode' | 'RecipientNode' | 'RegistrationDataImportDatahubNode' | 'RegistrationDataImportNode' | 'ReportNode' | 'RuleCommitNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualDateOfBirthNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualNode' | 'SteficonRuleNode' | 'SurveyNode' | 'TicketAddIndividualDetailsNode' | 'TicketComplaintDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketNoteNode' | 'TicketPaymentVerificationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'UserBusinessAreaNode' | 'UserNode', ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
 };
 
@@ -24076,6 +24255,7 @@ export type PaymentNodeEdgeResolvers<ContextType = any, ParentType extends Resol
 export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentPlanNode'] = ResolversParentTypes['PaymentPlanNode']> = {
   adminUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   approvalProcess?: Resolver<ResolversTypes['ApprovalProcessNodeConnection'], ParentType, ContextType, Partial<PaymentPlanNodeApprovalProcessArgs>>;
+  availableFundsCommitments?: Resolver<Maybe<Array<Maybe<ResolversTypes['FundsCommitmentNode']>>>, ParentType, ContextType>;
   availablePaymentRecordsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   backgroundActionStatus?: Resolver<Maybe<ResolversTypes['PaymentPlanBackgroundActionStatus']>, ParentType, ContextType>;
   bankReconciliationError?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
@@ -24101,17 +24281,18 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   documents?: Resolver<ResolversTypes['PaymentPlanSupportingDocumentNodeConnection'], ParentType, ContextType, Partial<PaymentPlanNodeDocumentsArgs>>;
   endDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   exchangeRate?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
-  excludeHouseholdError?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  excludeHouseholdError?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   excludedHouseholds?: Resolver<Maybe<Array<Maybe<ResolversTypes['HouseholdNode']>>>, ParentType, ContextType>;
-  excludedIds?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  excludedIds?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   excludedIndividuals?: Resolver<Maybe<Array<Maybe<ResolversTypes['IndividualNode']>>>, ParentType, ContextType>;
-  exclusionReason?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  exclusionReason?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   failedWalletValidationCollectorsIds?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
   femaleAdultsCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   femaleChildrenCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   financialServiceProvider?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>;
   followUps?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, Partial<PaymentPlanNodeFollowUpsArgs>>;
   fspCommunicationChannel?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  fundsCommitments?: Resolver<ResolversTypes['FundsCommitmentItemNodeConnection'], ParentType, ContextType, Partial<PaymentPlanNodeFundsCommitmentsArgs>>;
   hasFspDeliveryMechanismXlsxTemplate?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   hasPaymentListExportFile?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -25668,6 +25849,7 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   enableEmailNotification?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   feedbackSet?: Resolver<ResolversTypes['FeedbackNodeConnection'], ParentType, ContextType, Partial<UserBusinessAreaNodeFeedbackSetArgs>>;
   financialserviceproviderSet?: Resolver<ResolversTypes['FinancialServiceProviderNodeConnection'], ParentType, ContextType, Partial<UserBusinessAreaNodeFinancialserviceproviderSetArgs>>;
+  fundscommitmentitemSet?: Resolver<ResolversTypes['FundsCommitmentItemNodeConnection'], ParentType, ContextType, Partial<UserBusinessAreaNodeFundscommitmentitemSetArgs>>;
   hasDataSharingAgreement?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   householdSet?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, Partial<UserBusinessAreaNodeHouseholdSetArgs>>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -25847,6 +26029,7 @@ export type Resolvers<ContextType = any> = {
   AreaTypeNodeConnection?: AreaTypeNodeConnectionResolvers<ContextType>;
   AreaTypeNodeEdge?: AreaTypeNodeEdgeResolvers<ContextType>;
   Arg?: GraphQLScalarType;
+  AssignFundsCommitmentsMutation?: AssignFundsCommitmentsMutationResolvers<ContextType>;
   BankAccountInfoNode?: BankAccountInfoNodeResolvers<ContextType>;
   BankAccountInfoNodeConnection?: BankAccountInfoNodeConnectionResolvers<ContextType>;
   BankAccountInfoNodeEdge?: BankAccountInfoNodeEdgeResolvers<ContextType>;
@@ -25942,6 +26125,10 @@ export type Resolvers<ContextType = any> = {
   FlexFieldsScalar?: GraphQLScalarType;
   FspChoice?: FspChoiceResolvers<ContextType>;
   FspChoices?: FspChoicesResolvers<ContextType>;
+  FundsCommitmentItemNode?: FundsCommitmentItemNodeResolvers<ContextType>;
+  FundsCommitmentItemNodeConnection?: FundsCommitmentItemNodeConnectionResolvers<ContextType>;
+  FundsCommitmentItemNodeEdge?: FundsCommitmentItemNodeEdgeResolvers<ContextType>;
+  FundsCommitmentNode?: FundsCommitmentNodeResolvers<ContextType>;
   GenericPaymentNode?: GenericPaymentNodeResolvers<ContextType>;
   GenericPaymentPlanNode?: GenericPaymentPlanNodeResolvers<ContextType>;
   GeoJSON?: GraphQLScalarType;
