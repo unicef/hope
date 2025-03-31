@@ -1,6 +1,6 @@
 from typing import Any
 
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Prefetch
 
 from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
@@ -20,14 +20,17 @@ from hct_mis_api.apps.core.api.mixins import (
     DecodeIdForDetailMixin,
     ProgramVisibilityMixin,
     SerializerActionMixin,
+    ProgramMixin,
 )
-from hct_mis_api.apps.household.api.caches import HouseholdListKeyConstructor
+from hct_mis_api.apps.household.api.caches import HouseholdListKeyConstructor, IndividualListKeyConstructor
 from hct_mis_api.apps.household.api.serializers.household import (
     HouseholdDetailSerializer,
     HouseholdListSerializer,
+    HouseholdMemberSerializer,
 )
-from hct_mis_api.apps.household.filters import HouseholdFilter
-from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.household.api.serializers.individual import IndividualListSerializer, IndividualDetailSerializer
+from hct_mis_api.apps.household.filters import HouseholdFilter, IndividualFilter
+from hct_mis_api.apps.household.models import Household, Individual, IndividualRoleInHousehold
 from hct_mis_api.apps.program.models import Program
 
 
@@ -45,6 +48,7 @@ class HouseholdViewSet(
     serializer_classes_by_action = {
         "list": HouseholdListSerializer,
         "retrieve": HouseholdDetailSerializer,
+        "members": HouseholdMemberSerializer,
     }
     permissions_by_action = {
         "list": [
@@ -52,6 +56,10 @@ class HouseholdViewSet(
             Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST,
         ],
         "retrieve": [
+            Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
+            Permissions.RDI_VIEW_DETAILS,
+        ],
+        "members": [
             Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
             Permissions.RDI_VIEW_DETAILS,
         ],
@@ -70,6 +78,27 @@ class HouseholdViewSet(
     @cache_response(timeout=config.REST_API_TTL, key_func=HouseholdListKeyConstructor())
     def list(self, request: Any, *args: Any, **kwargs: Any) -> Any:
         return super().list(request, *args, **kwargs)
+
+    @action(detail=True, methods=["get"])
+    def members(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+        instance = self.get_object()
+        individuals_ids = list(instance.individuals(manager="all_merge_status_objects").values_list("id", flat=True))
+        collectors_ids = list(instance.representatives(manager="all_merge_status_objects").values_list("id", flat=True))
+        ids = set(individuals_ids + collectors_ids)
+        members = Individual.all_merge_status_objects.filter(id__in=ids).prefetch_related(
+            Prefetch(
+                "households_and_roles",
+                queryset=IndividualRoleInHousehold.all_merge_status_objects.filter(household=instance.id),
+            )
+        )
+
+        page = self.paginate_queryset(members)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(members, many=True)
+        return Response(serializer.data)
 
     @action(
         detail=True,
@@ -104,3 +133,64 @@ class HouseholdGlobalViewSet(
             .select_related("head_of_household", "program", "admin1", "admin2")
             .order_by("created_at")
         )
+
+
+class IndividualViewSet(
+    ProgramVisibilityMixin,
+    SerializerActionMixin,
+    DecodeIdForDetailMixin,
+    CountActionMixin,
+    RetrieveModelMixin,
+    ListModelMixin,
+    BaseViewSet,
+):
+    queryset = Individual.all_merge_status_objects.order_by("created_at")
+    serializer_class = IndividualListSerializer
+    serializer_classes_by_action = {
+        "list": IndividualListSerializer,
+        "retrieve": IndividualDetailSerializer,
+    }
+    permissions_by_action = {
+        "list": [
+            Permissions.RDI_VIEW_DETAILS,
+            Permissions.POPULATION_VIEW_INDIVIDUALS_LIST,
+        ],
+        "retrieve": [
+            Permissions.RDI_VIEW_DETAILS,
+            Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS,
+        ],
+    }
+    filter_backends = (OrderingFilter, DjangoFilterBackend)
+    filterset_class = IndividualFilter
+    admin_area_model_fields = ["household__admin1", "household__admin2", "household__admin3"]
+
+    def get_queryset(self) -> QuerySet:
+        if self.program.status == Program.DRAFT:
+            return Individual.objects.none()
+
+        return super().get_queryset().select_related("household", "household__admin2")
+
+    @etag_decorator(IndividualListKeyConstructor)
+    @cache_response(timeout=config.REST_API_TTL, key_func=IndividualListKeyConstructor())
+    def list(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+        return super().list(request, *args, **kwargs)
+
+
+class IndividualGlobalViewSet(
+    BusinessAreaVisibilityMixin,
+    CountActionMixin,
+    ListModelMixin,
+    BaseViewSet,
+):
+    queryset = Individual.all_merge_status_objects.all()
+    serializer_class = IndividualListSerializer
+    PERMISSIONS = [
+        Permissions.RDI_VIEW_DETAILS,
+        Permissions.POPULATION_VIEW_INDIVIDUALS_LIST,
+    ]
+    filter_backends = (OrderingFilter, DjangoFilterBackend)
+    filterset_class = IndividualFilter
+    admin_area_model_fields = ["household__admin1", "household__admin2", "household__admin3"]
+
+    def get_queryset(self) -> QuerySet:
+        return super().get_queryset().select_related("household", "household__admin2")
