@@ -54,7 +54,7 @@ class Migration(migrations.Migration):
                 ('office',
                  models.ForeignKey(blank=True, help_text='This can be a business office or a business area', null=True,
                                    on_delete=django.db.models.deletion.SET_NULL, to='core.businessarea')),
-                ('fundscommitmentitem',
+                ('payment_plan',
                  models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL,
                                             related_name='funds_commitments', to='payment.paymentplan'))
 
