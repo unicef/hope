@@ -1,4 +1,4 @@
-from django.db.models import QuerySet
+from typing import Dict
 
 from rest_framework import serializers
 
@@ -106,7 +106,7 @@ class TargetingCriteriaRuleSerializer(serializers.ModelSerializer):
             "collectors_filters_blocks",
         )
 
-    def to_representation(self, instance):
+    def to_representation(self, instance: TargetingCriteriaRule) -> Dict:
         data = super().to_representation(instance)
         filters_data = instance.filters
         if filters_data:

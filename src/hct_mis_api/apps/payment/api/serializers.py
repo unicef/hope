@@ -8,13 +8,17 @@ from django.shortcuts import get_object_or_404
 
 from rest_framework import serializers
 
-from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.api.utils import EncodedIdSerializerMixin
 from hct_mis_api.apps.account.api.fields import Base64ModelField
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.activity_log.models import log_create
+from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
-from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object, check_concurrency_version_in_mutation
+from hct_mis_api.apps.core.utils import (
+    check_concurrency_version_in_mutation,
+    decode_id_string,
+    to_choice_object,
+)
 from hct_mis_api.apps.household.api.serializers.household import (
     HouseholdSmallSerializer,
 )

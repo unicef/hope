@@ -16,7 +16,7 @@ from rest_framework.exceptions import ValidationError
 
 from hct_mis_api.apps.core.currencies import USDC
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp
-from hct_mis_api.apps.core.utils import chunks, decode_id_string
+from hct_mis_api.apps.core.utils import chunks
 from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
 from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx,

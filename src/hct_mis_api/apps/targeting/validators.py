@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List
+from typing import Dict, List
 
 from django.core.exceptions import ValidationError
 
@@ -24,35 +24,35 @@ class TargetingCriteriaRuleFilterInputValidator:
             attribute = attributes.get(rule_filter["field_name"])
             if attribute is None:
                 logger.warning(
-                    f"Can't find any core field attribute associated with {rule_filter["field_name"]} field name"
+                    f"Can't find any core field attribute associated with {rule_filter['field_name']} field name"
                 )
                 raise ValidationError(
-                    f"Can't find any core field attribute associated with {rule_filter["field_name"]} field name"
+                    f"Can't find any core field attribute associated with {rule_filter['field_name']} field name"
                 )
         elif flex_field_classification == FlexFieldClassification.FLEX_FIELD_BASIC:
             try:
                 attribute = FlexibleAttribute.objects.get(name=rule_filter["field_name"], program=None)
             except FlexibleAttribute.DoesNotExist:
                 logger.warning(
-                    f"Can't find any flex field attribute associated with {rule_filter["field_name"]} field name",
+                    f"Can't find any flex field attribute associated with {rule_filter['field_name']} field name",
                 )
                 raise ValidationError(
-                    f"Can't find any flex field attribute associated with {rule_filter["field_name"]} field name"
+                    f"Can't find any flex field attribute associated with {rule_filter['field_name']} field name"
                 )
         else:
             try:
                 attribute = FlexibleAttribute.objects.get(name=rule_filter["field_name"], program=program)
             except FlexibleAttribute.DoesNotExist:  # pragma: no cover
                 logger.warning(
-                    f"Can't find PDU flex field attribute associated with {rule_filter["field_name"]} field name in program {program.name}",
+                    f"Can't find PDU flex field attribute associated with {rule_filter['field_name']} field name in program {program.name}",
                 )
                 raise ValidationError(
-                    f"Can't find PDU flex field attribute associated with {rule_filter["field_name"]} field name in program {program.name}",
+                    f"Can't find PDU flex field attribute associated with {rule_filter['field_name']} field name in program {program.name}",
                 )
         comparison_attribute = TargetingCriteriaRuleFilter.COMPARISON_ATTRIBUTES.get(rule_filter["comparison_method"])
         if comparison_attribute is None:
-            logger.warning(f"Unknown comparison method - {rule_filter["comparison_method"]}")
-            raise ValidationError(f"Unknown comparison method - {rule_filter["comparison_method"]}")
+            logger.warning(f"Unknown comparison method - {rule_filter['comparison_method']}")
+            raise ValidationError(f"Unknown comparison method - {rule_filter['comparison_method']}")
         args_count = comparison_attribute.get("arguments")
         given_args_count = len(rule_filter.get("arguments", []))
         select_many = get_attr_value("type", attribute) == "SELECT_MANY"
@@ -61,7 +61,7 @@ class TargetingCriteriaRuleFilterInputValidator:
                 raise ValidationError("SELECT_MANY expects at least 1 argument")
         elif given_args_count != args_count:
             raise ValidationError(
-                f"Comparison method '{rule_filter["comparison_method"]}' "
+                f"Comparison method '{rule_filter['comparison_method']}' "
                 f"expected {args_count} arguments, {given_args_count} given"
             )
         type = get_attr_value("type", attribute, None)
@@ -70,7 +70,7 @@ class TargetingCriteriaRuleFilterInputValidator:
         if type not in comparison_attribute.get("supported_types"):
             raise ValidationError(
                 f"{rule_filter['field_name']} is '{get_attr_value('type', attribute)}' type filter "
-                f"and does not accept '{rule_filter["comparison_method"]}' comparison method"
+                f"and does not accept '{rule_filter['comparison_method']}' comparison method"
             )
 
 

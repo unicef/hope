@@ -53,6 +53,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlanSupportingDocument,
 )
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
+from hct_mis_api.apps.targeting.api.serializers import TargetPopulationListSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -105,12 +106,24 @@ class PaymentPlanViewSet(
         return super().list(request, *args, **kwargs)
 
 
-class TargetPopulationViewSet(PaymentPlanViewSet, mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
+class TargetPopulationViewSet(
+    CountActionMixin,
+    ProgramMixin,
+    SerializerActionMixin,
+    PaymentPlanMixin,
+    DecodeIdForDetailMixin,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    BaseViewSet,
+):
     queryset = PaymentPlan.objects.all().order_by("created_at")
     PERMISSIONS = [Permissions.TARGETING_VIEW_LIST]
     http_method_names = ["get", "post", "patch", "delete"]
     serializer_classes_by_action = {
-        "list": PaymentPlanListSerializer,
+        "list": TargetPopulationListSerializer,
         "retrieve": TargetPopulationDetailSerializer,
         "create": TargetPopulationCreateSerializer,
         "partial_update": TargetPopulationCreateSerializer,
