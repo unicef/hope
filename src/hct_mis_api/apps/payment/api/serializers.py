@@ -96,6 +96,7 @@ class PaymentPlanSerializer(serializers.ModelSerializer):
     follow_ups = FollowUpPaymentPlanSerializer(many=True, read_only=True)
     program = serializers.CharField(source="program_cycle.program.name")
     program_id = Base64ModelField(model_name="Program", source="program_cycle.program.id")
+    program_cycle_id = Base64ModelField(model_name="ProgramCycle", source="program_cycle_id")
     last_approval_process_by = serializers.SerializerMethodField()
 
     class Meta:
@@ -117,6 +118,7 @@ class PaymentPlanSerializer(serializers.ModelSerializer):
             "follow_ups",
             "program",
             "program_id",
+            "program_cycle_id",
             "last_approval_process_date",
             "last_approval_process_by",
         )
