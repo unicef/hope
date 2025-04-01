@@ -23,8 +23,8 @@ export function DocumentationField({
   const { t } = useTranslation();
 
   return (
-    <Grid container spacing={3} alignItems="center">
-      <Grid size={{ xs: 3 }}>
+    <>
+      <Grid size={{ xs: 4 }}>
         <Field
           name={`${baseName}[${index}].name`}
           fullWidth
@@ -35,7 +35,7 @@ export function DocumentationField({
           maxLength={100}
         />
       </Grid>
-      <Grid size={{ xs: 3 }}>
+      <Grid size={{ xs: 4 }}>
         <Box style={{ height: '100%' }} display="flex" alignItems="center">
           <input
             type="file"
@@ -50,12 +50,12 @@ export function DocumentationField({
         </Box>
       </Grid>
       {!isEdited ? (
-        <Grid size={{ xs:6 }}>
+        <Grid size={{ xs: 4 }}>
           <IconButton onClick={onDelete}>
             <Delete />
           </IconButton>
         </Grid>
       ) : null}
-    </Grid>
+    </>
   );
 }
