@@ -1,5 +1,5 @@
 import json
-from typing import Any, Callable
+from typing import Any, Callable, List
 
 from django.core.cache import cache
 from django.db import connection
@@ -1108,3 +1108,121 @@ class TestTargetPopulationFilter:
         response_data = response.json()["results"]
         assert len(response_data) == 1
         assert response_data[0]["name"] == "TP_Uuuuu_Aaaaa"
+
+
+class TestTargetPopulationActions:
+    @pytest.fixture(autouse=True)
+    def setup(self, api_client: Any) -> None:
+        self.afghanistan = create_afghanistan()
+        self.partner = PartnerFactory(name="unittest")
+        self.user = UserFactory(partner=self.partner)
+        self.program_active = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
+        self.cycle = self.program_active.cycles.first()
+        self.client = api_client(self.user)
+        self.target_population = PaymentPlanFactory(
+            name="TP_OPEN",
+            business_area=self.afghanistan,
+            program_cycle=self.cycle,
+            status=PaymentPlan.Status.TP_OPEN,
+            created_by=self.user,
+            created_at="2022-02-24",
+        )
+        tp_id = encode_id_base64_required(self.target_population.pk, "PaymentPlan")
+        url_kwargs = {
+            "business_area_slug": self.afghanistan.slug,
+            "program_slug": self.program_active.slug,
+            "pk": tp_id,
+        }
+
+        self.url_lock = reverse("api:payments:target-populations-lock", kwargs=url_kwargs)
+        self.url_unlock = reverse("api:payments:target-populations-unlock", kwargs=url_kwargs)
+        self.url_rebuild = reverse("api:payments:target-populations-rebuild", kwargs=url_kwargs)
+        self.url_mark_ready = reverse("api:payments:target-populations-mark-ready", kwargs=url_kwargs)
+        self.url_copy = reverse("api:payments:target-populations-copy", kwargs=url_kwargs)
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.TARGETING_LOCK], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_lock(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+
+        response = self.client.get(self.url_lock)
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.json() == {"message": "Target Population locked"}
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.TARGETING_UNLOCK], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_unlock(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        self.target_population.status = PaymentPlan.Status.TP_LOCKED
+        self.target_population.save()
+
+        response = self.client.get(self.url_unlock)
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.json() == {"message": "Target Population unlocked"}
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.TARGETING_LOCK], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_rebuild(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+
+        response = self.client.get(self.url_rebuild)
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.json() == {"message": "Target Population rebuilding"}
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.TARGETING_CREATE, Permissions.TARGETING_SEND], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_mark_ready(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+
+        response = self.client.get(self.url_mark_ready)
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.json() == {"message": "Target Population ready for Payment Plan"}
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.TARGETING_DUPLICATE], status.HTTP_201_CREATED),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_copy_tp(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        data = {
+            "name": "Copied TP test 123",
+            "program_cycle_id": encode_id_base64_required(self.cycle.pk, "ProgramCycle"),
+        }
+        response = self.client.post(self.url_copy, data, format="json")
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_201_CREATED:
+            assert response.status_code == status.HTTP_201_CREATED
+            assert "id" in response.json()
+            assert PaymentPlan.objects.filter(name="Copied TP test 123").count() == 1
+            assert PaymentPlan.objects.all().count() == 2
