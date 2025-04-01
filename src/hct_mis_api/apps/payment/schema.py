@@ -802,7 +802,9 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
 
     @staticmethod
     def resolve_available_funds_commitments(parent: PaymentPlan, info: Any) -> List[FundsCommitmentNode]:
-        available_items_qs = FundsCommitmentItem.objects.filter(payment_plan__isnull=True, office=parent.business_area)
+        available_items_qs = FundsCommitmentItem.objects.filter(
+            Q(payment_plan__isnull=True) | Q(payment_plan=parent), office=parent.business_area
+        )
 
         # Prefetch related items grouped by `funds_commitment_group`
         groups = (
