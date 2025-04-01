@@ -25,17 +25,17 @@ from hct_mis_api.apps.household.fixtures import (
     BankAccountInfoFactory,
     DocumentFactory,
     DocumentTypeFactory,
-    create_household_and_individuals,
     IndividualRoleInHouseholdFactory,
+    create_household_and_individuals,
 )
 from hct_mis_api.apps.household.models import (
     DUPLICATE,
     HOST,
     REFUGEE,
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
     Household,
     Individual,
-    ROLE_PRIMARY,
-    ROLE_ALTERNATE,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
@@ -700,12 +700,12 @@ class TestHouseholdMembers:
                 "role": "ALTERNATE",
                 "relationship": self.individual2_1.relationship,
                 "status": self.individual2_1.status,
-                "birth_date":  f"{self.individual2_1.birth_date:%Y-%m-%d}",
+                "birth_date": f"{self.individual2_1.birth_date:%Y-%m-%d}",
                 "sex": self.individual2_1.sex,
                 "household": {
                     "id": get_encoded_household_id(self.household2),
                     "unicef_id": self.household2.unicef_id,
-                    "admin2":  "",
+                    "admin2": "",
                 },
             },
         ]

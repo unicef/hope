@@ -6,12 +6,19 @@ from hct_mis_api.apps.account.api.fields import Base64ModelField
 from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
 from hct_mis_api.apps.core.utils import resolve_flex_fields_choices_to_string
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.api.serializers.individual import LinkedGrievanceTicketSerializer, \
-    HouseholdSimpleSerializer
+from hct_mis_api.apps.household.api.serializers.individual import (
+    HouseholdSimpleSerializer,
+    LinkedGrievanceTicketSerializer,
+)
 from hct_mis_api.apps.household.api.serializers.registration_data_import import (
     RegistrationDataImportSerializer,
 )
-from hct_mis_api.apps.household.models import DUPLICATE, Household, Individual, IndividualRoleInHousehold, ROLE_NO_ROLE
+from hct_mis_api.apps.household.models import (
+    DUPLICATE,
+    ROLE_NO_ROLE,
+    Household,
+    Individual,
+)
 
 
 class HouseholdListSerializer(serializers.ModelSerializer):

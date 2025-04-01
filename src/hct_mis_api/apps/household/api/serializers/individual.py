@@ -4,20 +4,21 @@ from rest_framework import serializers
 
 from hct_mis_api.apps.account.api.fields import Base64ModelField
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.utils import resolve_flex_fields_choices_to_string, IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hct_mis_api.apps.core.utils import resolve_flex_fields_choices_to_string
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.api.serializers.registration_data_import import RegistrationDataImportSerializer
+from hct_mis_api.apps.household.api.serializers.registration_data_import import (
+    RegistrationDataImportSerializer,
+)
 from hct_mis_api.apps.household.models import (
-    Individual,
     ROLE_NO_ROLE,
-    IDENTIFICATION_TYPE_CHOICE,
-    Document,
-    IndividualIdentity,
     BankAccountInfo,
-    IndividualRoleInHousehold,
-    Household,
+    Document,
     DocumentType,
+    Household,
+    Individual,
+    IndividualIdentity,
+    IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.payment.models import DeliveryMechanismData
 
