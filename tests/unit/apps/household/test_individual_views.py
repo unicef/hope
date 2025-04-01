@@ -56,7 +56,7 @@ from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismDataFactory,
     generate_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanism
+from hct_mis_api.apps.payment.models import AccountType
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
@@ -545,27 +545,25 @@ class TestIndividualDetail:
 
         # delivery mechanisms data
         generate_delivery_mechanisms()
-        self.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
-        self.dm_mobile_money = DeliveryMechanism.objects.get(code="mobile_money")
+        self.account_type_bank = AccountType.objects.get(key="bank")
         self.dm_atm_card_data = DeliveryMechanismDataFactory(
             individual=self.individual1,
-            delivery_mechanism=self.dm_atm_card,
+            account_type=self.account_type_bank,
             data={
-                "card_number__atm_card": "123",
-                "card_expiry_date__atm_card": "2022-01-01",
-                "name_of_cardholder__atm_card": "Marek",
+                "card_number": "123",
+                "card_expiry_date": "2022-01-01",
+                "name_of_cardholder": "Marek",
             },
-            is_valid=True,
         )
+        self.account_type_mobile = AccountType.objects.get(key="bank")
         self.dm_mobile_money_data = DeliveryMechanismDataFactory(
             individual=self.individual1,
-            delivery_mechanism=self.dm_mobile_money,
+            account_type=self.account_type_mobile,
             data={
-                "service_provider_code__mobile_money": "ABC",
-                "delivery_phone_number__mobile_money": "123456789",
-                "provider__mobile_money": "Provider",
+                "service_provider_code": "ABC",
+                "delivery_phone_number": "123456789",
+                "provider": "Provider",
             },
-            is_valid=False,
         )
 
     @pytest.mark.parametrize(
@@ -822,23 +820,21 @@ class TestIndividualDetail:
         assert data["delivery_mechanisms_data"] == [
             {
                 "id": encode_id_base64_required(self.dm_atm_card_data.id, "DeliveryMechanismData"),
-                "name": self.dm_atm_card.name,
+                "name": self.account_type_bank.label,
                 "individual_tab_data": {
-                    "card_number__atm_card": "123",
-                    "card_expiry_date__atm_card": "2022-01-01",
-                    "name_of_cardholder__atm_card": "Marek",
+                    "card_number": "123",
+                    "card_expiry_date": "2022-01-01",
+                    "name_of_cardholder": "Marek",
                 },
-                "is_valid": True,
             },
             {
                 "id": encode_id_base64_required(self.dm_mobile_money_data.id, "DeliveryMechanismData"),
-                "name": self.dm_mobile_money.name,
+                "name": self.account_type_mobile.label,
                 "individual_tab_data": {
-                    "service_provider_code__mobile_money": "ABC",
-                    "delivery_phone_number__mobile_money": "123456789",
-                    "provider__mobile_money": "Provider",
+                    "service_provider_code": "ABC",
+                    "delivery_phone_number": "123456789",
+                    "provider": "Provider",
                 },
-                "is_valid": False,
             },
         ]
 
