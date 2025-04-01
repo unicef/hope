@@ -8,6 +8,8 @@ import type { DeliveryMechanismPerPaymentPlan } from './DeliveryMechanismPerPaym
 import type { FinancialServiceProvider } from './FinancialServiceProvider';
 import type { FollowUpPaymentPlan } from './FollowUpPaymentPlan';
 import type { PaymentPlanSupportingDocument } from './PaymentPlanSupportingDocument';
+import type { PaymentVerificationPlan } from './PaymentVerificationPlan';
+import type { PaymentVerificationSummary } from './PaymentVerificationSummary';
 import type { ProgramSmall } from './ProgramSmall';
 import type { Rule } from './Rule';
 export type PaymentPlanDetail = {
@@ -153,6 +155,8 @@ export type PaymentPlanDetail = {
      */
     exchange_rate?: string | null;
     readonly eligible_payments_count: number;
+    readonly payment_verification_summary: PaymentVerificationSummary;
+    readonly payment_verification_plans: Array<PaymentVerificationPlan>;
     readonly admin_url: string;
 };
 

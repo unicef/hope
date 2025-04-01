@@ -30,7 +30,7 @@ import type { PaginatedRegistrationList } from '../models/PaginatedRegistrationL
 import type { PaginatedTPHouseholdListList } from '../models/PaginatedTPHouseholdListList';
 import type { PatchedProgramCycleUpdate } from '../models/PatchedProgramCycleUpdate';
 import type { PatchedRDI } from '../models/PatchedRDI';
-import type { PaymentList } from '../models/PaymentList';
+import type { PaymentDetail } from '../models/PaymentDetail';
 import type { PaymentPlanBulkAction } from '../models/PaymentPlanBulkAction';
 import type { PaymentPlanDetail } from '../models/PaymentPlanDetail';
 import type { PaymentPlanSupportingDocument } from '../models/PaymentPlanSupportingDocument';
@@ -1686,7 +1686,7 @@ export class RestService {
     }
     /**
      * Adds a count action to the viewset that returns the count of the queryset.
-     * @returns PaymentList
+     * @returns PaymentDetail
      * @throws ApiError
      */
     public static restBusinessAreasProgramsPaymentPlansPaymentsRetrieve({
@@ -1702,7 +1702,7 @@ export class RestService {
         id: string,
         paymentPlanId: string,
         programSlug: string,
-    }): CancelablePromise<PaymentList> {
+    }): CancelablePromise<PaymentDetail> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_id}/payments/{id}/',

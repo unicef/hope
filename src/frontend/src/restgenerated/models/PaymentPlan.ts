@@ -47,7 +47,9 @@ export type PaymentPlan = {
     readonly follow_ups: Array<FollowUpPaymentPlan>;
     program: string;
     program_id: string;
+    program_cycle_id: string;
     readonly last_approval_process_date: string | null;
     readonly last_approval_process_by: string | null;
+    readonly admin_url: string;
 };
 

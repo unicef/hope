@@ -485,6 +485,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "eligible_payments_count",
             "payment_verification_summary",
             "payment_verification_plans",
+            "admin_url",
         )
 
     @staticmethod
