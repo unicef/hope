@@ -67,8 +67,6 @@ snapshots['TestSplitPaymentPlan::test_split_payment_plan_mutation 3'] = {
     ]
 }
 
-
-
 snapshots['TestSplitPaymentPlan::test_split_payment_plan_mutation 4'] = {
     'data': {
         'splitPaymentPlan': None
@@ -81,7 +79,7 @@ snapshots['TestSplitPaymentPlan::test_split_payment_plan_mutation 4'] = {
                     'line': 3
                 }
             ],
-            'message': 'No payments to split',
+            'message': "['No payments to split']",
             'path': [
                 'splitPaymentPlan'
             ]
@@ -108,7 +106,6 @@ snapshots['TestSplitPaymentPlan::test_split_payment_plan_mutation 5'] = {
         }
     ]
 }
-
 
 snapshots['TestSplitPaymentPlan::test_split_payment_plan_mutation 6'] = {
     'data': {
