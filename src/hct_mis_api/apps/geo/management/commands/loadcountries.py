@@ -50,6 +50,6 @@ def initialize_countries() -> Dict:
                 country = Country(iso_code2=c.get("iso_code2"), **data)
             country.save()
     except Exception as e:
-        logger.exception(e)
+        logger.warning(e)
         results["errors"].append(e)
     return results

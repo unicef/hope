@@ -62,7 +62,7 @@ def email(self: Any, request: HttpRequest, extra_context: Optional[Dict] = None)
                     if return_value == 1:
                         messages.add_message(request, messages.SUCCESS, f"Email sent to {request.user.email}")
         except Exception as e:
-            logger.exception(e)
+            logger.warning(e)
             messages.add_message(request, messages.ERROR, f"{e.__class__.__name__}: {e}")
     context["logs"] = logs
     context["results"] = results
