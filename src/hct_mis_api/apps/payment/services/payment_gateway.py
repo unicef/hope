@@ -122,6 +122,8 @@ class PaymentSerializer(ReadOnlyModelSerializer):
             "amount": obj.entitlement_quantity,
             "destination_currency": obj.currency,
             "origination_currency": obj.currency,
+            "delivery_mechanism": obj.delivery_type.name,
+            "account_type": obj.delivery_type.account_type.key,
             "phone_no": collector_data.get("phone_no", ""),
             "last_name": collector_data.get("family_name", ""),
             "first_name": collector_data.get("given_name", ""),
