@@ -39,7 +39,7 @@ export function DocumentationField({
         <Box style={{ height: '100%' }} display="flex" alignItems="center">
           <input
             type="file"
-            accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.pdf,image/*"
+            accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.pdf,image/*,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             onChange={(event) => {
               setFieldValue(
                 `${baseName}[${index}].file`,
