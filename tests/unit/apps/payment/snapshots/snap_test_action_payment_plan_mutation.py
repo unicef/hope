@@ -39,7 +39,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_1_not_
                     'line': 3
                 }
             ],
-            'message': 'Not possible to create REJECT for Payment Plan within status OPEN',
+            'message': "['Not possible to create REJECT for Payment Plan within status OPEN']",
             'path': [
                 'actionPaymentPlanMutation'
             ]
@@ -165,7 +165,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_2_lock
                     'line': 3
                 }
             ],
-            'message': 'Not possible to create AUTHORIZE for Payment Plan within status IN_APPROVAL',
+            'message': "['Not possible to create AUTHORIZE for Payment Plan within status IN_APPROVAL']",
             'path': [
                 'actionPaymentPlanMutation'
             ]
@@ -659,7 +659,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_4_reje
                     'line': 3
                 }
             ],
-            'message': 'Not possible to create REJECT for Payment Plan within status ACCEPTED',
+            'message': "['Not possible to create REJECT for Payment Plan within status ACCEPTED']",
             'path': [
                 'actionPaymentPlanMutation'
             ]

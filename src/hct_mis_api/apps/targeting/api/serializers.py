@@ -2,7 +2,7 @@ from typing import Dict
 
 from rest_framework import serializers
 
-from hct_mis_api.api.utils import EncodedIdSerializerMixin
+from hct_mis_api.apps.account.api.fields import Base64ModelField
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.targeting.models import (
     TargetingCollectorBlockRuleFilter,
@@ -15,7 +15,8 @@ from hct_mis_api.apps.targeting.models import (
 )
 
 
-class TargetPopulationListSerializer(EncodedIdSerializerMixin):
+class TargetPopulationListSerializer(serializers.ModelSerializer):
+    id = Base64ModelField(model_name="PaymentPlan")
     status = serializers.SerializerMethodField(method_name="get_status")
     created_by = serializers.CharField(source="created_by.get_full_name", default="")
 
@@ -27,6 +28,9 @@ class TargetPopulationListSerializer(EncodedIdSerializerMixin):
             "status",
             "created_by",
             "created_at",
+            "total_households_count",
+            "total_individuals_count",
+            "updated_at",
         )
 
     @staticmethod

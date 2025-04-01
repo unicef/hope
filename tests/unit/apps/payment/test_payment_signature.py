@@ -162,7 +162,7 @@ class TestPaymentSignature(APITestCase):
             program_cycle_id=program_cycle_id,
             targeting_criteria=targeting_criteria,
             excluded_ids="TEST_INVALID_ID_01, TEST_INVALID_ID_02",
-            fsp_id=encode_id_base64(fsp.id, "FinancialServiceProvider"),
+            fsp_id=fsp.id,
             delivery_mechanism_code=dm_cash.code,
         )
 

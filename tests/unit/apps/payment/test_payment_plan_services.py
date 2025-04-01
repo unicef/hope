@@ -186,14 +186,14 @@ class TestPaymentPlanServices(APITestCase):
         )
 
         with self.assertRaisesMessage(
-            ValidationError, f"Payment Plan with name: TEST_123 and program: {program.name} already exists."
+            ValidationError, f"Target Population with name: TEST_123 and program: {program.name} already exists."
         ):
             PaymentPlanFactory(program_cycle=program_cycle, name="TEST_123", created_by=self.user)
             PaymentPlanService.create(
                 input_data=create_input_data, user=self.user, business_area_slug=self.business_area.slug
             )
         with self.assertRaisesMessage(
-            ValidationError, "Impossible to create Payment Plan for Programme within not Active status"
+            ValidationError, "Impossible to create Target Population for Programme within not Active status"
         ):
             program.status = Program.FINISHED
             program.save()
@@ -290,7 +290,7 @@ class TestPaymentPlanServices(APITestCase):
                     }
                 ],
             },
-            fsp_id=encode_id_base64(self.fsp.id, "FinancialServiceProvider"),
+            fsp_id=self.fsp.id,
             delivery_mechanism_code=self.dm_transfer_to_account.code,
         )
 
@@ -679,7 +679,7 @@ class TestPaymentPlanServices(APITestCase):
 
         with self.assertRaisesMessage(
             ValidationError,
-            "Impossible to create Payment Plan for Programme Cycle within Finished status",
+            "Impossible to create Target Population for Programme Cycle within Finished status",
         ):
             cycle.status = ProgramCycle.FINISHED
             cycle.save()
@@ -714,7 +714,7 @@ class TestPaymentPlanServices(APITestCase):
         input_data = dict(
             business_area_slug="afghanistan",
             name="paymentPlanName",
-            program_cycle_id=self.id_to_base64(program_cycle.id, "ProgramCycleNode"),
+            program_cycle_id=program_cycle.id,
             targeting_criteria={
                 "flag_exclude_if_active_adjudication_ticket": False,
                 "flag_exclude_if_on_sanction_list": False,
@@ -991,9 +991,8 @@ class TestPaymentPlanServices(APITestCase):
 
     def test_update_pp_program_cycle(self) -> None:
         new_cycle = ProgramCycleFactory(program=self.program, title="New Cycle ABC")
-        program_cycle_id = self.id_to_base64(new_cycle.id, "ProgramCycleNode")
 
-        PaymentPlanService(self.payment_plan).update({"program_cycle_id": program_cycle_id})
+        PaymentPlanService(self.payment_plan).update({"program_cycle_id": new_cycle.id})
 
         self.payment_plan.refresh_from_db()
         self.assertEqual(self.payment_plan.program_cycle.title, "New Cycle ABC")
