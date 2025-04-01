@@ -1,6 +1,6 @@
 from typing import Any
 
-from django.db.models import QuerySet, Prefetch
+from django.db.models import Prefetch, QuerySet
 
 from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
@@ -20,17 +20,26 @@ from hct_mis_api.apps.core.api.mixins import (
     DecodeIdForDetailMixin,
     ProgramVisibilityMixin,
     SerializerActionMixin,
-    ProgramMixin,
 )
-from hct_mis_api.apps.household.api.caches import HouseholdListKeyConstructor, IndividualListKeyConstructor
+from hct_mis_api.apps.household.api.caches import (
+    HouseholdListKeyConstructor,
+    IndividualListKeyConstructor,
+)
 from hct_mis_api.apps.household.api.serializers.household import (
     HouseholdDetailSerializer,
     HouseholdListSerializer,
     HouseholdMemberSerializer,
 )
-from hct_mis_api.apps.household.api.serializers.individual import IndividualListSerializer, IndividualDetailSerializer
+from hct_mis_api.apps.household.api.serializers.individual import (
+    IndividualDetailSerializer,
+    IndividualListSerializer,
+)
 from hct_mis_api.apps.household.filters import HouseholdFilter, IndividualFilter
-from hct_mis_api.apps.household.models import Household, Individual, IndividualRoleInHousehold
+from hct_mis_api.apps.household.models import (
+    Household,
+    Individual,
+    IndividualRoleInHousehold,
+)
 from hct_mis_api.apps.program.models import Program
 
 
@@ -72,7 +81,12 @@ class HouseholdViewSet(
         if self.program.status == Program.DRAFT:
             return Household.objects.none()
 
-        return super().get_queryset().select_related("head_of_household", "program", "admin1", "admin2").order_by("created_at")
+        return (
+            super()
+            .get_queryset()
+            .select_related("head_of_household", "program", "admin1", "admin2")
+            .order_by("created_at")
+        )
 
     @etag_decorator(HouseholdListKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=HouseholdListKeyConstructor())
@@ -194,4 +208,3 @@ class IndividualGlobalViewSet(
 
     def get_queryset(self) -> QuerySet:
         return super().get_queryset().select_related("household", "household__admin2").order_by("created_at")
-

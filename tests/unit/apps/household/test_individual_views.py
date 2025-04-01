@@ -1,57 +1,67 @@
 import json
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
-import freezegun
-from constance.test import override_config
-from django.db import connection
 from django.core.cache import cache
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
+import freezegun
 import pytest
-from django.test.utils import CaptureQueriesContext
+from constance.test import override_config
 from rest_framework import status
 from rest_framework.reverse import reverse
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import (
+    FlexibleAttributeForPDUFactory,
+    PeriodicFieldDataFactory,
     create_afghanistan,
     create_ukraine,
-    PeriodicFieldDataFactory,
-    FlexibleAttributeForPDUFactory,
 )
 from hct_mis_api.apps.core.models import PeriodicFieldData
 from hct_mis_api.apps.core.utils import encode_id_base64_required
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
 from hct_mis_api.apps.household.fixtures import (
-    create_household_and_individuals,
-    IndividualRoleInHouseholdFactory,
-    DocumentTypeFactory,
-    DocumentFactory,
     BankAccountInfoFactory,
+    DocumentFactory,
+    DocumentTypeFactory,
     IndividualIdentityFactory,
+    IndividualRoleInHouseholdFactory,
+    create_household_and_individuals,
 )
 from hct_mis_api.apps.household.models import (
-    Individual,
-    Household,
-    DUPLICATE,
-    ROLE_PRIMARY,
-    ROLE_ALTERNATE,
-    SEEING,
-    HEARING,
-    LOT_DIFFICULTY,
     CANNOT_DO,
     DISABLED,
-    DocumentType, FEMALE, MALE, OTHER, NOT_COLLECTED, STATUS_ACTIVE, STATUS_DUPLICATE, NEEDS_ADJUDICATION, UNIQUE,
+    DUPLICATE,
+    FEMALE,
+    HEARING,
+    LOT_DIFFICULTY,
+    MALE,
+    NEEDS_ADJUDICATION,
+    NOT_COLLECTED,
+    OTHER,
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+    SEEING,
+    STATUS_ACTIVE,
+    UNIQUE,
+    DocumentType,
+    Household,
+    Individual,
 )
-from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms, DeliveryMechanismDataFactory
+from hct_mis_api.apps.payment.fixtures import (
+    DeliveryMechanismDataFactory,
+    generate_delivery_mechanisms,
+)
 from hct_mis_api.apps.payment.models import DeliveryMechanism
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index, populate_all_indexes
+from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 pytestmark = pytest.mark.django_db
@@ -99,7 +109,7 @@ class TestIndividualList:
             self.individual_from_different_program_2,
         ) = self._create_household(different_program)
 
-    def _create_household(self, program: Program) -> tuple[Household, tuple[Individual, Individual]]:
+    def _create_household(self, program: Program) -> tuple[Household, List[Individual]]:
         household, individuals = create_household_and_individuals(
             household_data={
                 "admin1": self.area1,
@@ -1113,7 +1123,7 @@ class TestIndividualFilter:
             household1_data = {}
         if household2_data is None:
             household2_data = {}
-        _, (individual1, ) = create_household_and_individuals(
+        _, (individual1,) = create_household_and_individuals(
             household_data={
                 "program": self.program,
                 "business_area": self.afghanistan,
@@ -1121,7 +1131,7 @@ class TestIndividualFilter:
             },
             individuals_data=[individual1_data],
         )
-        _, (individual2, ) = create_household_and_individuals(
+        _, (individual2,) = create_household_and_individuals(
             household_data={
                 "program": self.program,
                 "business_area": self.afghanistan,
@@ -1160,9 +1170,7 @@ class TestIndividualFilter:
             imported_by=self.user, business_area=self.afghanistan, program=self.program
         )
         self._test_filter_individuals_in_list(
-            filters={
-                "rdi_id": encode_id_base64_required(registration_data_import_2.id, "RegistrationDataImport")
-            },
+            filters={"rdi_id": encode_id_base64_required(registration_data_import_2.id, "RegistrationDataImport")},
             individual1_data={
                 "registration_data_import": registration_data_import_1,
             },
@@ -1331,7 +1339,12 @@ class TestIndividualFilter:
         ],
     )
     def test_search(
-        self, filters: Dict, individual1_data: Dict, individual2_data: Dict, household1_data: Dict, household2_data: Dict
+        self,
+        filters: Dict,
+        individual1_data: Dict,
+        individual2_data: Dict,
+        household1_data: Dict,
+        household2_data: Dict,
     ) -> None:
         individual1, individual2 = self._create_test_individuals(
             individual1_data=individual1_data,
@@ -1380,11 +1393,10 @@ class TestIndividualFilter:
             individual2_data={"birth_date": "2009-10-10"},
         )
         individual_age_15, individual_age_20 = self._create_test_individuals(
-        individual1_data = {"birth_date": "2004-10-10"},
-        individual2_data = {"birth_date": "1999-10-10"},
+            individual1_data={"birth_date": "2004-10-10"},
+            individual2_data={"birth_date": "1999-10-10"},
         )
         with freezegun.freeze_time("2019-11-10"):
-
             response_min = self.api_client.get(self.list_url, {"age_min": 8})
             assert response_min.status_code == status.HTTP_200_OK
             response_data_min = response_min.json()["results"]
@@ -1394,7 +1406,6 @@ class TestIndividualFilter:
             assert get_encoded_individual_id(individual_age_15) in individuals_ids_min
             assert get_encoded_individual_id(individual_age_20) in individuals_ids_min
             assert get_encoded_individual_id(individual_age_5) not in individuals_ids_min
-
 
             response_max = self.api_client.get(self.list_url, {"age_max": 12})
             assert response_max.status_code == status.HTTP_200_OK
