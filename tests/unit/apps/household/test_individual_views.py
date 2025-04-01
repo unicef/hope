@@ -1373,3 +1373,48 @@ class TestIndividualFilter:
         assert len(response_data) == 1
         assert response_data[0]["id"] == get_encoded_individual_id(individual2)
         return response_data
+
+    def test_filter_by_age(self) -> None:
+        individual_age_5, individual_age_10 = self._create_test_individuals(
+            individual1_data={"birth_date": "2014-10-10"},
+            individual2_data={"birth_date": "2009-10-10"},
+        )
+        individual_age_15, individual_age_20 = self._create_test_individuals(
+        individual1_data = {"birth_date": "2004-10-10"},
+        individual2_data = {"birth_date": "1999-10-10"},
+        )
+        with freezegun.freeze_time("2019-11-10"):
+
+            response_min = self.api_client.get(self.list_url, {"age_min": 8})
+            assert response_min.status_code == status.HTTP_200_OK
+            response_data_min = response_min.json()["results"]
+            assert len(response_data_min) == 3
+            individuals_ids_min = [individual["id"] for individual in response_data_min]
+            assert get_encoded_individual_id(individual_age_10) in individuals_ids_min
+            assert get_encoded_individual_id(individual_age_15) in individuals_ids_min
+            assert get_encoded_individual_id(individual_age_20) in individuals_ids_min
+            assert get_encoded_individual_id(individual_age_5) not in individuals_ids_min
+
+
+            response_max = self.api_client.get(self.list_url, {"age_max": 12})
+            assert response_max.status_code == status.HTTP_200_OK
+            response_data_max = response_max.json()["results"]
+            assert len(response_data_max) == 2
+            individuals_ids_max = [individual["id"] for individual in response_data_max]
+            assert get_encoded_individual_id(individual_age_5) in individuals_ids_max
+            assert get_encoded_individual_id(individual_age_10) in individuals_ids_max
+            assert get_encoded_individual_id(individual_age_15) not in individuals_ids_max
+            assert get_encoded_individual_id(individual_age_20) not in individuals_ids_max
+
+            response_min_max = self.api_client.get(
+                self.list_url,
+                {"age_min": 8, "age_max": 12},
+            )
+            assert response_min_max.status_code == status.HTTP_200_OK
+            response_data_min_max = response_min_max.json()["results"]
+            assert len(response_data_min_max) == 1
+            individuals_ids_min_max = [individual["id"] for individual in response_data_min_max]
+            assert get_encoded_individual_id(individual_age_10) in individuals_ids_min_max
+            assert get_encoded_individual_id(individual_age_5) not in individuals_ids_min_max
+            assert get_encoded_individual_id(individual_age_15) not in individuals_ids_min_max
+            assert get_encoded_individual_id(individual_age_20) not in individuals_ids_min_max
