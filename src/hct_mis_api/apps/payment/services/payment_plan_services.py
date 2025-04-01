@@ -5,6 +5,7 @@ from itertools import groupby
 from typing import IO, TYPE_CHECKING, Callable, Dict, Optional, Union
 
 from django.contrib.admin.options import get_content_type_for_model
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import OuterRef
 from django.shortcuts import get_object_or_404
@@ -12,7 +13,6 @@ from django.utils import timezone
 
 from constance import config
 from psycopg2._psycopg import IntegrityError
-from rest_framework.exceptions import ValidationError
 
 from hct_mis_api.apps.core.currencies import USDC
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp

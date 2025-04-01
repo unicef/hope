@@ -4,6 +4,7 @@ from typing import Any
 from unittest import mock
 from unittest.mock import patch
 
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 
@@ -11,7 +12,6 @@ from aniso8601 import parse_date
 from django_fsm import TransitionNotAllowed
 from flaky import flaky
 from freezegun import freeze_time
-from graphql import GraphQLError
 from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -109,7 +109,7 @@ class TestPaymentPlanServices(APITestCase):
     def test_delete_locked(self) -> None:
         pp = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED, created_by=self.user)
 
-        with self.assertRaises(GraphQLError) as e:
+        with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan=pp).delete()
         self.assertEqual(
             e.exception.message,
@@ -168,7 +168,7 @@ class TestPaymentPlanServices(APITestCase):
             individuals_data=[{}],
         )
         create_input_data = dict(
-            program_cycle_id=self.id_to_base64(str(program_cycle.id), "ProgramCycle"),
+            program_cycle_id=str(program_cycle.id),
             name="TEST_123",
             targeting_criteria={
                 "flag_exclude_if_active_adjudication_ticket": False,
@@ -186,14 +186,14 @@ class TestPaymentPlanServices(APITestCase):
         )
 
         with self.assertRaisesMessage(
-            GraphQLError, f"Payment Plan with name: TEST_123 and program: {program.name} already exists."
+            ValidationError, f"Payment Plan with name: TEST_123 and program: {program.name} already exists."
         ):
             PaymentPlanFactory(program_cycle=program_cycle, name="TEST_123", created_by=self.user)
             PaymentPlanService.create(
                 input_data=create_input_data, user=self.user, business_area_slug=self.business_area.slug
             )
         with self.assertRaisesMessage(
-            GraphQLError, "Impossible to create Payment Plan for Programme within not Active status"
+            ValidationError, "Impossible to create Payment Plan for Programme within not Active status"
         ):
             program.status = Program.FINISHED
             program.save()
@@ -202,7 +202,7 @@ class TestPaymentPlanServices(APITestCase):
                 input_data=create_input_data, user=self.user, business_area_slug=self.business_area.slug
             )
         with self.assertRaisesMessage(
-            GraphQLError, "Impossible to create Payment Plan for Programme Cycle within Finished status"
+            ValidationError, "Impossible to create Target Population for Programme Cycle within Finished status"
         ):
             program_cycle.status = ProgramCycle.FINISHED
             program_cycle.save()
@@ -237,7 +237,7 @@ class TestPaymentPlanServices(APITestCase):
         pp.status = PaymentPlan.Status.DRAFT
         pp.save()
         with self.assertRaisesMessage(
-            GraphQLError, f"Dispersion End Date [{open_input_data['dispersion_end_date']}] cannot be a past date"
+            ValidationError, f"Dispersion End Date [{open_input_data['dispersion_end_date']}] cannot be a past date"
         ):
             PaymentPlanService(payment_plan=pp).open(input_data=open_input_data)
         open_input_data["dispersion_end_date"] = parse_date("2020-11-11")
@@ -276,7 +276,7 @@ class TestPaymentPlanServices(APITestCase):
         input_data = dict(
             business_area_slug="afghanistan",
             name="paymentPlanName",
-            program_cycle_id=self.id_to_base64(program_cycle.id, "ProgramCycleNode"),
+            program_cycle_id=program_cycle.id,
             targeting_criteria={
                 "flag_exclude_if_active_adjudication_ticket": False,
                 "flag_exclude_if_on_sanction_list": False,
@@ -335,13 +335,13 @@ class TestPaymentPlanServices(APITestCase):
             currency="USD",
         )
 
-        with self.assertRaisesMessage(GraphQLError, "Not Allow edit Payment Plan within status LOCKED"):
+        with self.assertRaisesMessage(ValidationError, "Not Allow edit Payment Plan within status LOCKED"):
             pp = PaymentPlanService(payment_plan=pp).update(input_data=input_data)
         pp.status = PaymentPlan.Status.OPEN
         pp.save()
 
         with self.assertRaisesMessage(
-            GraphQLError, f"Dispersion End Date [{input_data['dispersion_end_date']}] cannot be a past date"
+            ValidationError, f"Dispersion End Date [{input_data['dispersion_end_date']}] cannot be a past date"
         ):
             PaymentPlanService(payment_plan=pp).update(input_data=input_data)
 
@@ -370,7 +370,7 @@ class TestPaymentPlanServices(APITestCase):
         dispersion_end_date = (pp.dispersion_end_date + timedelta(days=1)).date()
 
         with self.assertRaisesMessage(
-            GraphQLError, "Cannot create a follow-up for a payment plan with no unsuccessful payments"
+            ValidationError, "Cannot create a follow-up for a payment plan with no unsuccessful payments"
         ):
             PaymentPlanService(pp).create_follow_up(self.user, dispersion_start_date, dispersion_end_date)
 
@@ -463,7 +463,7 @@ class TestPaymentPlanServices(APITestCase):
         )
         dispersion_start_date = (payment_plan.dispersion_start_date + timedelta(days=1)).date()
         dispersion_end_date = (payment_plan.dispersion_end_date + timedelta(days=1)).date()
-        with self.assertRaises(GraphQLError) as e:
+        with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan).create_follow_up(self.user, dispersion_start_date, dispersion_end_date)
         self.assertEqual(
             e.exception.message,
@@ -500,7 +500,7 @@ class TestPaymentPlanServices(APITestCase):
 
         pp = PaymentPlanFactory(created_by=self.user)
 
-        with self.assertRaisesMessage(GraphQLError, "No payments to split"):
+        with self.assertRaisesMessage(ValidationError, "No payments to split"):
             PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_COLLECTOR)
 
         payments = []
@@ -544,11 +544,11 @@ class TestPaymentPlanServices(APITestCase):
             )
             payments.append(payment)
 
-        with self.assertRaisesMessage(GraphQLError, "Payments Number is required for split by records"):
+        with self.assertRaisesMessage(ValidationError, "Payments Number is required for split by records"):
             PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_RECORDS, chunks_no=None)
 
         with self.assertRaisesMessage(
-            GraphQLError, "Payment Parts number should be between 2 and total number of payments"
+            ValidationError, "Payment Parts number should be between 2 and total number of payments"
         ):
             PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_RECORDS, chunks_no=669)
 
@@ -556,7 +556,7 @@ class TestPaymentPlanServices(APITestCase):
             "hct_mis_api.apps.payment.services.payment_plan_services.PaymentPlanSplit.MAX_CHUNKS"
         ) as max_chunks_patch:
             max_chunks_patch.__get__ = mock.Mock(return_value=2)
-            with self.assertRaisesMessage(GraphQLError, "Too many Payment Parts to split: 6, maximum is 2"):
+            with self.assertRaisesMessage(ValidationError, "Too many Payment Parts to split: 6, maximum is 2"):
                 PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_RECORDS, chunks_no=2)
 
         # split by collector
@@ -617,7 +617,7 @@ class TestPaymentPlanServices(APITestCase):
         )
         pp.background_action_status_send_to_payment_gateway()
         pp.save()
-        with self.assertRaisesMessage(GraphQLError, "Sending in progress"):
+        with self.assertRaisesMessage(ValidationError, "Sending in progress"):
             PaymentPlanService(pp).send_to_payment_gateway()
 
         pp.background_action_status_none()
@@ -625,7 +625,7 @@ class TestPaymentPlanServices(APITestCase):
 
         split = PaymentPlanSplitFactory(payment_plan=pp, sent_to_payment_gateway=True)
 
-        with self.assertRaisesMessage(GraphQLError, "Already sent to Payment Gateway"):
+        with self.assertRaisesMessage(ValidationError, "Already sent to Payment Gateway"):
             PaymentPlanService(pp).send_to_payment_gateway()
 
         split.sent_to_payment_gateway = False
@@ -654,7 +654,7 @@ class TestPaymentPlanServices(APITestCase):
             dispersion_end_date=parse_date("2020-11-20"),
             currency="USD",
             name="TestName123",
-            program_cycle_id=self.id_to_base64(cycle.id, "ProgramCycleNode"),
+            program_cycle_id=str(cycle.id),
             targeting_criteria={
                 "flag_exclude_if_active_adjudication_ticket": False,
                 "flag_exclude_if_on_sanction_list": False,
@@ -678,7 +678,7 @@ class TestPaymentPlanServices(APITestCase):
         )
 
         with self.assertRaisesMessage(
-            GraphQLError,
+            ValidationError,
             "Impossible to create Payment Plan for Programme Cycle within Finished status",
         ):
             cycle.status = ProgramCycle.FINISHED
@@ -775,7 +775,7 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(str(error.exception), "Action cannot be None")
 
     def test_validate_action_not_implemented(self) -> None:
-        with self.assertRaises(GraphQLError) as e:
+        with self.assertRaises(ValidationError) as e:
             PaymentPlanService(self.payment_plan).execute_update_status_action(
                 input_data={"action": "INVALID_ACTION"}, user=self.user
             )
@@ -837,7 +837,7 @@ class TestPaymentPlanServices(APITestCase):
             status=PaymentPlan.Status.DRAFT,
             build_status=PaymentPlan.BuildStatus.BUILD_STATUS_FAILED,
         )
-        with self.assertRaises(GraphQLError) as e:
+        with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan).tp_rebuild()
         self.assertEqual(
             e.exception.message,
@@ -870,7 +870,7 @@ class TestPaymentPlanServices(APITestCase):
             created_by=self.user,
             status=PaymentPlan.Status.OPEN,
         )
-        with self.assertRaises(GraphQLError) as e:
+        with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan).lock()
         self.assertEqual(
             e.exception.message,
@@ -883,28 +883,28 @@ class TestPaymentPlanServices(APITestCase):
             created_by=self.user,
             status=PaymentPlan.Status.LOCKED,
         )
-        with self.assertRaises(GraphQLError) as e:
+        with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan).update({"exclusion_reason": "ABC"})
         self.assertEqual(
             e.exception.message,
             f"Not Allow edit targeting criteria within status {payment_plan.status}",
         )
 
-        with self.assertRaises(GraphQLError) as e:
+        with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan).update({"vulnerability_score_min": "test_data"})
         self.assertEqual(
             e.exception.message,
             "You can only set vulnerability_score_min and vulnerability_score_max on Locked Population status",
         )
 
-        with self.assertRaises(GraphQLError) as e:
+        with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan).update({"currency": "test_data"})
         self.assertEqual(
             e.exception.message,
             f"Not Allow edit Payment Plan within status {payment_plan.status}",
         )
 
-        with self.assertRaises(GraphQLError) as e:
+        with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan).update({"name": "test_data"})
         self.assertEqual(
             e.exception.message,
@@ -919,7 +919,7 @@ class TestPaymentPlanServices(APITestCase):
             created_by=self.user,
             status=PaymentPlan.Status.DRAFT,
         )
-        with self.assertRaises(GraphQLError) as e:
+        with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan).update({"name": "test_data"})
         self.assertEqual(
             e.exception.message,
@@ -928,9 +928,8 @@ class TestPaymentPlanServices(APITestCase):
 
         self.cycle.status = ProgramCycle.FINISHED
         self.cycle.save()
-        program_cycle_id = self.id_to_base64(self.cycle.id, "ProgramCycleNode")
-        with self.assertRaises(GraphQLError) as e:
-            PaymentPlanService(payment_plan).update({"program_cycle_id": program_cycle_id})
+        with self.assertRaises(ValidationError) as e:
+            PaymentPlanService(payment_plan).update({"program_cycle_id": str(self.cycle.id)})
         self.assertEqual(
             e.exception.message,
             "Not possible to assign Finished Program Cycle",
@@ -971,7 +970,7 @@ class TestPaymentPlanServices(APITestCase):
             financial_service_provider=None,
         )
 
-        with self.assertRaises(GraphQLError) as e:
+        with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan).lock_fsp()
         self.assertEqual(
             e.exception.message,
@@ -1041,7 +1040,7 @@ class TestPaymentPlanServices(APITestCase):
             financial_service_provider=self.fsp,
         )
         with self.assertRaisesMessage(
-            GraphQLError, "For delivery mechanism Transfer to Digital Wallet only currency USDC can be assigned."
+            ValidationError, "For delivery mechanism Transfer to Digital Wallet only currency USDC can be assigned."
         ):
             PaymentPlanService(payment_plan).update({"currency": "PLN"})
 
@@ -1067,7 +1066,7 @@ class TestPaymentPlanServices(APITestCase):
         )
         PaymentPlanService(payment_plan).update(
             {
-                "fsp_id": encode_id_base64(self.fsp.id, "FinancialServiceProvider"),
+                "fsp_id": str(self.fsp.id),
                 "delivery_mechanism_code": self.dm_transfer_to_account.code,
             }
         )
@@ -1129,7 +1128,7 @@ class TestPaymentPlanServices(APITestCase):
         with transaction.atomic():
             IndividualRoleInHousehold.objects.filter(household=household, role=ROLE_PRIMARY).delete()
 
-            with self.assertRaises(GraphQLError) as error:
+            with self.assertRaises(ValidationError) as error:
                 PaymentPlanService.create_payments(payment_plan)
 
             self.assertIn(f"Couldn't find a primary collector in {household.unicef_id}", str(error.exception))
