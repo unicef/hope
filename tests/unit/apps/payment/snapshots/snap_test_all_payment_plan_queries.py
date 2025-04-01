@@ -733,7 +733,7 @@ snapshots['TestPaymentPlanQueries::test_payment_plan_available_funds_commitments
                         {
                             'fundsCommitmentItem': '001',
                             'paymentPlan': {
-                                'unicefId': 'PP-0060-20-00000003'
+                                'name': 'FC TEST'
                             }
                         }
                     ],
@@ -767,13 +767,13 @@ snapshots['TestPaymentPlanQueries::test_payment_plan_available_funds_commitments
                         {
                             'fundsCommitmentItem': '001',
                             'paymentPlan': {
-                                'unicefId': 'PP-0060-20-00000003'
+                                'name': 'FC TEST'
                             }
                         },
                         {
                             'fundsCommitmentItem': '002',
                             'paymentPlan': {
-                                'unicefId': 'PP-0060-20-00000003'
+                                'name': 'FC TEST'
                             }
                         }
                     ],
@@ -807,13 +807,13 @@ snapshots['TestPaymentPlanQueries::test_payment_plan_available_funds_commitments
                         {
                             'fundsCommitmentItem': '001',
                             'paymentPlan': {
-                                'unicefId': 'PP-0060-20-00000003'
+                                'name': 'FC TEST'
                             }
                         },
                         {
                             'fundsCommitmentItem': '002',
                             'paymentPlan': {
-                                'unicefId': 'PP-0060-20-00000003'
+                                'name': 'FC TEST'
                             }
                         }
                     ],
@@ -843,13 +843,13 @@ snapshots['TestPaymentPlanQueries::test_payment_plan_available_funds_commitments
                         {
                             'fundsCommitmentItem': '001',
                             'paymentPlan': {
-                                'unicefId': 'PP-0060-20-00000003'
+                                'name': 'FC TEST'
                             }
                         },
                         {
                             'fundsCommitmentItem': '002',
                             'paymentPlan': {
-                                'unicefId': 'PP-0060-20-00000003'
+                                'name': 'FC TEST'
                             }
                         }
                     ],

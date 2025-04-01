@@ -297,7 +297,7 @@ class TestPaymentPlanQueries(APITestCase):
               fundsCommitmentNumber
               fundsCommitmentItems {
                   paymentPlan {
-                      unicefId
+                      name
                   }
                   fundsCommitmentItem
               }
@@ -1071,6 +1071,7 @@ class TestPaymentPlanQueries(APITestCase):
     @freeze_time("2020-10-10")
     def test_payment_plan_available_funds_commitments(self) -> None:
         payment_plan = PaymentPlanFactory(
+            name="FC TEST",
             status=PaymentPlan.Status.IN_REVIEW,
             program_cycle=self.program_cycle,
             dispersion_start_date=datetime(2020, 8, 10),
