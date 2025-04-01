@@ -5,12 +5,13 @@ from typing import Any, Optional
 from django.db import transaction
 from django.db.models import QuerySet
 from django.http import FileResponse
+from django.utils import timezone
 
 from constance import config
 from django_filters import rest_framework as filters
 from rest_framework import mixins, status
 from rest_framework.decorators import action
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.generics import get_object_or_404
 from rest_framework.request import Request
@@ -30,7 +31,7 @@ from hct_mis_api.apps.core.api.mixins import (
     SerializerActionMixin,
 )
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import decode_id_string
+from hct_mis_api.apps.core.utils import decode_id_string, decode_id_string_required
 from hct_mis_api.apps.payment.api.caches import PaymentPlanKeyConstructor
 from hct_mis_api.apps.payment.api.filters import (
     PaymentPlanFilter,
@@ -44,16 +45,19 @@ from hct_mis_api.apps.payment.api.serializers import (
     PaymentPlanListSerializer,
     PaymentPlanSerializer,
     PaymentPlanSupportingDocumentSerializer,
+    TargetPopulationCopySerializer,
     TargetPopulationCreateSerializer,
     TargetPopulationDetailSerializer,
     TPHouseholdListSerializer,
 )
+from hct_mis_api.apps.payment.celery_tasks import payment_plan_full_rebuild
 from hct_mis_api.apps.payment.models import (
     Payment,
     PaymentPlan,
     PaymentPlanSupportingDocument,
 )
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
+from hct_mis_api.apps.program.models import ProgramCycle
 from hct_mis_api.apps.targeting.api.serializers import TargetPopulationListSerializer
 
 logger = logging.getLogger(__name__)
@@ -119,6 +123,7 @@ class TargetPopulationViewSet(
     mixins.DestroyModelMixin,
     BaseViewSet,
 ):
+    program_model_field = "program_cycle__program"
     queryset = PaymentPlan.objects.all().order_by("created_at")
     PERMISSIONS = [Permissions.TARGETING_VIEW_LIST]
     http_method_names = ["get", "post", "patch", "delete"]
@@ -127,6 +132,7 @@ class TargetPopulationViewSet(
         "retrieve": TargetPopulationDetailSerializer,
         "create": TargetPopulationCreateSerializer,
         "partial_update": TargetPopulationCreateSerializer,
+        "copy": TargetPopulationCopySerializer,
     }
     permissions_by_action = {
         "list": [Permissions.TARGETING_VIEW_LIST],
@@ -134,8 +140,12 @@ class TargetPopulationViewSet(
         "create": [Permissions.TARGETING_CREATE],
         "partial_update": [Permissions.TARGETING_UPDATE],
         "destroy": [Permissions.TARGETING_REMOVE],
+        "copy": [Permissions.TARGETING_DUPLICATE],
     }
     filterset_class = TargetPopulationFilter
+
+    def get_object(self) -> PaymentPlan:
+        return get_object_or_404(PaymentPlan, id=decode_id_string(self.kwargs.get("pk")))
 
     @etag_decorator(PaymentPlanKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=PaymentPlanKeyConstructor())
@@ -155,6 +165,144 @@ class TargetPopulationViewSet(
             new_object=payment_plan,
         )
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=["get"], PERMISSIONS=[Permissions.TARGETING_LOCK])
+    def lock(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        tp = self.get_object()
+        old_tp = copy_model_object(tp)
+        payment_plan = PaymentPlanService(tp).execute_update_status_action(
+            input_data={"action": PaymentPlan.Action.TP_LOCK}, user=request.user
+        )
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=request.user,
+            programs=payment_plan.program.pk,
+            old_object=old_tp,
+            new_object=tp,
+        )
+        return Response(status=status.HTTP_200_OK, data={"message": "Target Population locked"})
+
+    @action(detail=True, methods=["get"], PERMISSIONS=[Permissions.TARGETING_UNLOCK])
+    def unlock(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        tp = self.get_object()
+        old_tp = copy_model_object(tp)
+
+        payment_plan = PaymentPlanService(tp).execute_update_status_action(
+            input_data={"action": PaymentPlan.Action.TP_UNLOCK}, user=request.user
+        )
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=request.user,
+            programs=payment_plan.program.pk,
+            old_object=old_tp,
+            new_object=tp,
+        )
+        return Response(status=status.HTTP_200_OK, data={"message": "Target Population unlocked"})
+
+    @action(detail=True, methods=["get"], PERMISSIONS=[Permissions.TARGETING_LOCK])
+    def rebuild(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        tp = self.get_object()
+        old_tp = copy_model_object(tp)
+
+        payment_plan = PaymentPlanService(tp).execute_update_status_action(
+            input_data={"action": PaymentPlan.Action.TP_REBUILD}, user=request.user
+        )
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=request.user,
+            programs=payment_plan.program.pk,
+            old_object=old_tp,
+            new_object=tp,
+        )
+        return Response(status=status.HTTP_200_OK, data={"message": "Target Population rebuilding"})
+
+    @action(detail=True, methods=["get"], PERMISSIONS=[Permissions.TARGETING_CREATE, Permissions.TARGETING_SEND])
+    def mark_ready(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        tp = self.get_object()
+        old_tp = copy_model_object(tp)
+
+        payment_plan = PaymentPlanService(tp).execute_update_status_action(
+            input_data={"action": PaymentPlan.Action.TP_REBUILD}, user=request.user
+        )
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=request.user,
+            programs=payment_plan.program.pk,
+            old_object=old_tp,
+            new_object=tp,
+        )
+        return Response(status=status.HTTP_200_OK, data={"message": "Target Population ready for Payment Plan"})
+
+    @action(detail=True, methods=["post"])
+    def copy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        user = request.user
+        request.data["target_population_id"] = kwargs.get("pk")
+
+        serializer = self.get_serializer(
+            data=request.data,
+        )
+        if serializer.is_valid():
+            name = serializer.validated_data["name"].strip()
+            payment_plan_id = decode_id_string_required(serializer.validated_data["target_population_id"])
+            program_cycle_id = decode_id_string_required(serializer.validated_data["program_cycle_id"])
+            payment_plan = get_object_or_404(PaymentPlan, pk=payment_plan_id)
+            program_cycle = get_object_or_404(ProgramCycle, pk=program_cycle_id)
+            program = program_cycle.program
+
+            if program_cycle.status == ProgramCycle.FINISHED:
+                raise ValidationError("Not possible to assign Finished Program Cycle to Targeting")
+            if PaymentPlan.objects.filter(name=name, program_cycle=program_cycle, is_removed=False).exists():
+                raise ValidationError(
+                    f"Target Population with name: {name} and program cycle: {program_cycle.title} already exists."
+                )
+
+            payment_plan_copy = PaymentPlan(
+                name=name,
+                created_by=user,
+                business_area=payment_plan.business_area,
+                status=PaymentPlan.Status.TP_OPEN,
+                status_date=timezone.now(),
+                start_date=program_cycle.start_date,
+                end_date=program_cycle.end_date,
+                build_status=PaymentPlan.BuildStatus.BUILD_STATUS_PENDING,
+                built_at=timezone.now(),
+                male_children_count=payment_plan.male_children_count,
+                female_children_count=payment_plan.female_children_count,
+                male_adults_count=payment_plan.male_adults_count,
+                female_adults_count=payment_plan.female_adults_count,
+                total_households_count=payment_plan.total_households_count,
+                total_individuals_count=payment_plan.total_individuals_count,
+                steficon_rule_targeting=payment_plan.steficon_rule_targeting,
+                steficon_targeting_applied_date=payment_plan.steficon_targeting_applied_date,
+                program_cycle=program_cycle,
+            )
+            if payment_plan.targeting_criteria:
+                payment_plan_copy.targeting_criteria = PaymentPlanService.copy_target_criteria(
+                    payment_plan.targeting_criteria
+                )
+            payment_plan_copy.save()
+            payment_plan_copy.refresh_from_db()
+
+            transaction.on_commit(lambda: payment_plan_full_rebuild.delay(payment_plan_copy.id))
+            log_create(
+                PaymentPlan.ACTIVITY_LOG_MAPPING,
+                "business_area",
+                user,
+                getattr(program, "pk", None),
+                None,
+                payment_plan_copy,
+            )
+            response_serializer = TargetPopulationDetailSerializer(payment_plan_copy, context={"request": request})
+            return Response(
+                data=response_serializer.data,
+                status=status.HTTP_201_CREATED,
+            )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PaymentPlanManagerialViewSet(
@@ -238,7 +386,7 @@ class PaymentPlanManagerialViewSet(
             old_payment_plan.export_file_per_fsp = copy_model_object(payment_plan.export_file_per_fsp)
 
         payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
-            input_data=input_data, user=request.user  # type: ignore
+            input_data=input_data, user=request.user
         )
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
@@ -335,16 +483,16 @@ class TPHouseholdViewSet(
     BaseViewSet,
 ):
     queryset = Payment.objects.all()
-    PERMISSIONS = [Permissions.PM_VIEW_DETAILS]
+    PERMISSIONS = [Permissions.TARGETING_VIEW_LIST]
     serializer_classes_by_action = {
         "list": TPHouseholdListSerializer,
         "retrieve": TPHouseholdListSerializer,
     }
     permissions_by_action = {
         "list": [
-            Permissions.PM_VIEW_DETAILS,
+            Permissions.TARGETING_VIEW_LIST,
         ],
         "retrieve": [
-            Permissions.PM_VIEW_DETAILS,
+            Permissions.TARGETING_VIEW_DETAILS,
         ],
     }

@@ -681,6 +681,7 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
             "female_adults_count",
             "targeting_criteria",
             "steficon_rule_targeting",
+            "admin_url",
         )
 
 
@@ -747,6 +748,7 @@ class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
         fields = PaymentListSerializer.Meta.fields + (  # type: ignore
             "parent",
             "payment_verifications",
+            "admin_url",
         )
 
 
@@ -840,3 +842,9 @@ class TargetPopulationCreateSerializer(EncodedIdSerializerMixin):
             new_object=payment_plan,
         )
         return payment_plan
+
+
+class TargetPopulationCopySerializer(serializers.Serializer):
+    name = serializers.CharField(required=True)
+    target_population_id = serializers.CharField(required=True)
+    program_cycle_id = serializers.CharField(required=True)

@@ -2,7 +2,7 @@ import datetime
 import logging
 from functools import partial
 from itertools import groupby
-from typing import IO, TYPE_CHECKING, Callable, Dict, Optional
+from typing import IO, TYPE_CHECKING, Callable, Dict, Optional, Union
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.db import transaction
@@ -56,7 +56,7 @@ from hct_mis_api.apps.targeting.validators import TargetingCriteriaInputValidato
 if TYPE_CHECKING:  # pragma: no cover
     from uuid import UUID
 
-    from hct_mis_api.apps.account.models import User
+    from hct_mis_api.apps.account.models import AbstractUser, User
 
 
 class PaymentPlanService:
@@ -111,7 +111,7 @@ class PaymentPlanService:
         }
         return actions_to_approval_type_map[self.action]
 
-    def execute_update_status_action(self, input_data: Dict, user: "User") -> PaymentPlan:
+    def execute_update_status_action(self, input_data: Dict, user: Union["AbstractUser", "User"]) -> PaymentPlan:
         """Get function from get_action_function and execute it
         return PaymentPlan object
         """
