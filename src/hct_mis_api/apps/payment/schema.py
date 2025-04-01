@@ -66,15 +66,11 @@ from hct_mis_api.apps.payment.filters import (
     PaymentVerificationLogEntryFilter,
     PaymentVerificationPlanFilter,
 )
-from hct_mis_api.apps.payment.inputs import (
-    AvailableFspsForDeliveryMechanismsInput,
-    GetCashplanVerificationSampleSizeInput,
-)
+from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
 from hct_mis_api.apps.payment.models import (
     Approval,
     ApprovalProcess,
     DeliveryMechanism,
-    DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     Payment,
@@ -440,38 +436,29 @@ class PaymentNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
 class DeliveryMechanismPerPaymentPlanNode(DjangoObjectType):
     name = graphene.String()
     code = graphene.String()
-    order = graphene.Int()
     fsp = graphene.Field(FinancialServiceProviderNode)
-    chosen_configuration = graphene.String()
 
     def resolve_name(self, info: Any) -> graphene.String:
-        return self.delivery_mechanism.name
+        return str(self.delivery_mechanism.name) if self.delivery_mechanism else ""  # type: ignore
 
     def resolve_code(self, info: Any) -> graphene.String:
-        return self.delivery_mechanism.code
-
-    def resolve_order(self, info: Any) -> graphene.Int:
-        return self.delivery_mechanism_order
+        return str(self.delivery_mechanism.code) if self.delivery_mechanism else ""  # type: ignore
 
     def resolve_fsp(self, info: Any) -> graphene.Field:
         return self.financial_service_provider
 
     class Meta:
-        model = DeliveryMechanismPerPaymentPlan
+        model = PaymentPlan
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
 
-def _calculate_volume(
-    delivery_mechanism_per_payment_plan: "DeliveryMechanismPerPaymentPlan", field: str
-) -> Optional[Decimal]:
-    if not delivery_mechanism_per_payment_plan.financial_service_provider:
+def _calculate_volume(payment_plan: "PaymentPlan", field: str) -> Optional[Decimal]:
+    if not payment_plan.financial_service_provider:
         return None
-    # TODO simple volume calculation
-    payments = delivery_mechanism_per_payment_plan.payment_plan.eligible_payments.filter(
-        financial_service_provider=delivery_mechanism_per_payment_plan.financial_service_provider,
-    )
-    return payments.aggregate(entitlement_sum=Coalesce(Sum(field), Decimal(0.0)))["entitlement_sum"]
+    return payment_plan.eligible_payments.aggregate(entitlement_sum=Coalesce(Sum(field), Decimal(0.0)))[
+        "entitlement_sum"
+    ]
 
 
 class VolumeByDeliveryMechanismNode(graphene.ObjectType):
@@ -488,11 +475,6 @@ class VolumeByDeliveryMechanismNode(graphene.ObjectType):
     def resolve_volume_usd(self, info: Any) -> Optional[_decimal.Decimal]:
         return _calculate_volume(self, "entitlement_quantity_usd")  # type: ignore
 
-    class Meta:
-        model = DeliveryMechanismPerPaymentPlan
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
-
 
 class FspConfiguration(graphene.ObjectType):
     id = graphene.String()
@@ -503,14 +485,18 @@ class FspConfiguration(graphene.ObjectType):
 class FspChoice(graphene.ObjectType):
     id = graphene.String()
     name = graphene.String()
-    configurations = graphene.List(FspConfiguration)
 
     def resolve_id(self, info: Any) -> Optional[str]:
         return encode_id_base64(self["id"], "FinancialServiceProvider")  # type: ignore
 
 
+class DeliveryMechanismChoice(graphene.ObjectType):
+    name = graphene.String()
+    code = graphene.String()
+
+
 class FspChoices(graphene.ObjectType):
-    delivery_mechanism = graphene.String()
+    delivery_mechanism = graphene.Field(DeliveryMechanismChoice)
     fsps = graphene.List(FspChoice)
 
 
@@ -543,7 +529,8 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
     has_fsp_delivery_mechanism_xlsx_template = graphene.Boolean()
     imported_file_name = graphene.String()
     payments_conflicts_count = graphene.Int()
-    delivery_mechanisms = graphene.List(DeliveryMechanismPerPaymentPlanNode)
+    delivery_mechanism = graphene.Field(DeliveryMechanismNode)
+    financial_service_provider = graphene.Field(FinancialServiceProviderNode)
     volume_by_delivery_mechanism = graphene.List(VolumeByDeliveryMechanismNode)
     split_choices = graphene.List(ChoiceObject)
     verification_plans = DjangoPermissionFilterConnectionField(
@@ -574,6 +561,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
     can_export_xlsx = graphene.Boolean()
     can_download_xlsx = graphene.Boolean()
     can_send_xlsx_password = graphene.Boolean()
+    failed_wallet_validation_collectors_ids = graphene.List(graphene.String)
 
     class Meta:
         model = PaymentPlan
@@ -602,10 +590,6 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
         return parent.get_currency_display()
 
     @staticmethod
-    def resolve_delivery_mechanisms(parent: PaymentPlan, info: Any) -> graphene.List:
-        return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=parent).order_by("delivery_mechanism_order")
-
-    @staticmethod
     def resolve_has_payment_list_export_file(parent: PaymentPlan, info: Any) -> bool:
         return parent.has_export_file
 
@@ -614,8 +598,10 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
         return parent.imported_file_name
 
     @staticmethod
-    def resolve_volume_by_delivery_mechanism(parent: PaymentPlan, info: Any) -> graphene.List:
-        return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=parent).order_by("delivery_mechanism_order")
+    def resolve_volume_by_delivery_mechanism(
+        parent: PaymentPlan, info: Any
+    ) -> List[Optional[VolumeByDeliveryMechanismNode]]:
+        return [parent]
 
     @staticmethod
     def resolve_available_payment_records_count(parent: PaymentPlan, info: Any, **kwargs: Any) -> graphene.Int:
@@ -625,20 +611,12 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
 
     @staticmethod
     def _has_fsp_delivery_mechanism_xlsx_template(payment_plan: PaymentPlan) -> bool:
-        if (
-            not payment_plan.delivery_mechanisms.exists()
-            or payment_plan.delivery_mechanisms.filter(
-                Q(financial_service_provider__isnull=True) | Q(delivery_mechanism__isnull=True)
-            ).exists()
-        ):
+        delivery_mechanism = getattr(payment_plan, "delivery_mechanism", None)
+        if not delivery_mechanism:
             return False
-        else:
-            for dm_per_payment_plan in payment_plan.delivery_mechanisms.all():
-                if not dm_per_payment_plan.financial_service_provider.get_xlsx_template(
-                    dm_per_payment_plan.delivery_mechanism
-                ):
-                    return False
-            return True
+        if not payment_plan.financial_service_provider.get_xlsx_template(payment_plan.delivery_mechanism):
+            return False
+        return True
 
     @classmethod
     def resolve_has_fsp_delivery_mechanism_xlsx_template(cls, parent: PaymentPlan, info: Any) -> bool:
@@ -785,6 +763,20 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
                     return False
                 return parent.has_export_file
         return False
+
+    @staticmethod
+    def resolve_failed_wallet_validation_collectors_ids(parent: PaymentPlan, info: Any) -> List[str]:
+        fsp = getattr(parent, "financial_service_provider", None)
+        dm = getattr(parent, "delivery_mechanism", None)
+        if not fsp or not dm:
+            return []
+        return list(
+            parent.payment_items.select_related("collector")
+            .filter(
+                has_valid_wallet=False,
+            )
+            .values_list("collector__unicef_id", flat=True)
+        )
 
 
 class PaymentVerificationNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
@@ -999,45 +991,30 @@ class Query(graphene.ObjectType):
     )
     payment_plan_status_choices = graphene.List(ChoiceObject)
     currency_choices = graphene.List(ChoiceObject)
-    all_delivery_mechanisms = graphene.List(ChoiceObject)
     payment_plan_background_action_status_choices = graphene.List(ChoiceObject)
-    available_fsps_for_delivery_mechanisms = graphene.List(
-        FspChoices,
-        input=AvailableFspsForDeliveryMechanismsInput(),
-    )
+    available_fsps_for_delivery_mechanisms = graphene.List(FspChoices)
 
-    def resolve_available_fsps_for_delivery_mechanisms(self, info: Any, input: Dict, **kwargs: Any) -> List:
+    def resolve_available_fsps_for_delivery_mechanisms(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         business_area_slug = info.context.headers.get("Business-Area")
-        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(input["payment_plan_id"]))
-        delivery_mechanisms = (
-            DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=payment_plan)
-            .values_list("delivery_mechanism__name", flat=True)
-            .order_by("delivery_mechanism_order")
-        )
+        delivery_mechanisms = DeliveryMechanism.get_choices()
 
-        def get_fsps_for_delivery_mechanism(mechanism_name: str) -> List:
-            fsps = FinancialServiceProvider.objects.filter(
+        def get_fsps(mechanism_name: str) -> List[Dict[str, Any]]:
+            fsps_qs = FinancialServiceProvider.objects.filter(
                 Q(fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism__name=mechanism_name)
                 | Q(fsp_xlsx_template_per_delivery_mechanisms__isnull=True),
                 delivery_mechanisms__name=mechanism_name,
                 allowed_business_areas__slug=business_area_slug,
             ).distinct()
 
-            return (
-                [
-                    # This basically checks if FSP can accept ANY additional volume,
-                    # more strict validation is performed in AssignFspToDeliveryMechanismMutation
-                    {"id": fsp.id, "name": fsp.name, "configurations": fsp.configurations}
-                    for fsp in fsps
-                    if fsp.can_accept_any_volume()
-                ]
-                if fsps
-                else []
-            )
+            fsps = list(fsps_qs.values("id", "name"))
+            return fsps
 
         return [
-            {"delivery_mechanism": mechanism, "fsps": get_fsps_for_delivery_mechanism(mechanism)}
-            for mechanism in delivery_mechanisms
+            {
+                "delivery_mechanism": {"code": delivery_mechanism[0], "name": delivery_mechanism[1]},
+                "fsps": get_fsps(delivery_mechanism[1]),
+            }
+            for delivery_mechanism in delivery_mechanisms
         ]
 
     def resolve_all_payment_verifications(self, info: Any, **kwargs: Any) -> QuerySet:
@@ -1120,9 +1097,6 @@ class Query(graphene.ObjectType):
 
     def resolve_payment_verification_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(PaymentVerification.STATUS_CHOICES)
-
-    def resolve_all_delivery_mechanisms(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
-        return to_choice_object(DeliveryMechanism.get_choices())
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     @cached_in_django_cache(24)

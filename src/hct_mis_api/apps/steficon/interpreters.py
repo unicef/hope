@@ -30,7 +30,7 @@ class Interpreter:
             self.execute()
             return True
         except Exception as e:
-            logger.exception(e)
+            logger.warning(e)
             raise ValidationError(str(e))
 
     def get_result(self) -> Any:
@@ -135,7 +135,7 @@ class PythonExec(Interpreter):
             compile(self.init_string, "<code>", mode="exec")
             return True
         except Exception as e:
-            logger.exception(e)
+            logger.warning(e)
             tb = traceback.format_exc(limit=-1)
             msg = tb.split('<code>", ')[-1]
             raise ValidationError(mark_safe(msg))

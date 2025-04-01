@@ -29,11 +29,12 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.household.models import MALE, ROLE_PRIMARY, Household, Individual
 from hct_mis_api.apps.payment.models import (
+    AccountType,
     Approval,
     ApprovalProcess,
     DeliveryMechanism,
+    DeliveryMechanismConfig,
     DeliveryMechanismData,
-    DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FspXlsxTemplatePerDeliveryMechanism,
@@ -334,6 +335,7 @@ class PaymentFactory(DjangoModelFactory):
     financial_service_provider = factory.SubFactory(FinancialServiceProviderFactory)
     excluded = False
     conflicted = False
+    has_valid_wallet = True
 
     @classmethod
     def _create(cls, model_class: Any, *args: Any, **kwargs: Any) -> "Payment":
@@ -354,27 +356,17 @@ class ApprovalFactory(DjangoModelFactory):
         model = Approval
 
 
-class DeliveryMechanismPerPaymentPlanFactory(DjangoModelFactory):
-    class Meta:
-        model = DeliveryMechanismPerPaymentPlan
+class AccountTypeFactory(DjangoModelFactory):
+    key = factory.Faker("uuid4")
+    label = factory.Faker("name")
 
-    payment_plan = factory.SubFactory(PaymentPlanFactory)
-    financial_service_provider = factory.SubFactory(FinancialServiceProviderFactory)
-    created_by = factory.SubFactory(UserFactory)
-    sent_by = factory.SubFactory(UserFactory)
-    sent_date = factory.Faker(
-        "date_time_this_decade",
-        before_now=True,
-        after_now=False,
-        tzinfo=utc,
-    )
-    delivery_mechanism = factory.SubFactory(DeliveryMechanismFactory)
-    delivery_mechanism_order = factory.fuzzy.FuzzyInteger(1, 4)
+    class Meta:
+        model = AccountType
 
 
 class DeliveryMechanismDataFactory(DjangoModelFactory):
     individual = factory.SubFactory(IndividualFactory)
-    delivery_mechanism = factory.SubFactory(DeliveryMechanismFactory)
+    account_type = factory.SubFactory(AccountTypeFactory)
     rdi_merge_status = MergeStatusModel.MERGED
 
     class Meta:
@@ -460,7 +452,10 @@ def generate_reconciled_payment_plan() -> None:
     now = timezone.now()
     targeting_criteria: TargetingCriteria = TargetingCriteriaFactory()
     program = Program.objects.filter(business_area=afghanistan, name="Test Program").first()
-
+    dm_cash = DeliveryMechanism.objects.get(code="cash")
+    fsp_1 = FinancialServiceProviderFactory()
+    fsp_1.delivery_mechanisms.set([dm_cash])
+    FspXlsxTemplatePerDeliveryMechanismFactory(financial_service_provider=fsp_1)
     payment_plan = PaymentPlan.objects.update_or_create(
         name="Reconciled Payment Plan",
         unicef_id="PP-0060-22-11223344",
@@ -477,20 +472,12 @@ def generate_reconciled_payment_plan() -> None:
         total_entitled_quantity=2999,
         is_follow_up=False,
         exchange_rate=234.6742,
+        financial_service_provider=fsp_1,
+        delivery_mechanism=dm_cash,
     )[0]
     # update status
     payment_plan.status_finished()
     payment_plan.save()
-
-    dm_cash = DeliveryMechanism.objects.get(code="cash")
-    fsp_1 = FinancialServiceProviderFactory()
-    fsp_1.delivery_mechanisms.set([dm_cash])
-    FspXlsxTemplatePerDeliveryMechanismFactory(financial_service_provider=fsp_1)
-    DeliveryMechanismPerPaymentPlanFactory(
-        payment_plan=payment_plan,
-        financial_service_provider=fsp_1,
-        delivery_mechanism=dm_cash,
-    )
 
     create_payment_verification_plan_with_status(
         payment_plan,
@@ -632,30 +619,6 @@ def generate_payment_plan() -> None:
         field_name="registration_data_import",
         arguments=["4d100000-0000-0000-0000-000000000000"],
     )
-
-    payment_plan_pk = UUID("00000000-feed-beef-0000-00000badf00d")
-    payment_plan = PaymentPlan.objects.update_or_create(
-        name="Test Payment Plan",
-        pk=payment_plan_pk,
-        business_area=afghanistan,
-        targeting_criteria=targeting_criteria,
-        currency="USD",
-        dispersion_start_date=now,
-        dispersion_end_date=now + timedelta(days=14),
-        status_date=now,
-        created_by=root,
-        program_cycle=program_cycle,
-    )[0]
-    tc2 = TargetingCriteriaFactory()
-    tcr2 = TargetingCriteriaRuleFactory(
-        targeting_criteria=tc2,
-    )
-    TargetingCriteriaRuleFilterFactory(
-        targeting_criteria_rule=tcr2,
-        comparison_method="RANGE",
-        field_name="size",
-        arguments=[1, 11],
-    )
     delivery_mechanism_cash = DeliveryMechanism.objects.get(code="cash")
 
     fsp_1_pk = UUID("00000000-0000-0000-0000-f00000000001")
@@ -671,7 +634,6 @@ def generate_payment_plan() -> None:
         name="Test FSP API",
         communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
         vision_vendor_number=554433,
-        payment_gateway_id="test_pg_id",
     )[0]
     fsp_api.delivery_mechanisms.add(delivery_mechanism_cash)
 
@@ -679,11 +641,32 @@ def generate_payment_plan() -> None:
         financial_service_provider=fsp_1, delivery_mechanism=delivery_mechanism_cash
     )
 
-    DeliveryMechanismPerPaymentPlanFactory(
-        payment_plan=payment_plan,
+    payment_plan_pk = UUID("00000000-feed-beef-0000-00000badf00d")
+    payment_plan = PaymentPlan.objects.update_or_create(
+        name="Test Payment Plan",
+        pk=payment_plan_pk,
+        business_area=afghanistan,
+        targeting_criteria=targeting_criteria,
+        currency="USD",
+        dispersion_start_date=now,
+        dispersion_end_date=now + timedelta(days=14),
+        status_date=now,
+        created_by=root,
+        program_cycle=program_cycle,
         financial_service_provider=fsp_1,
         delivery_mechanism=delivery_mechanism_cash,
+    )[0]
+    tc2 = TargetingCriteriaFactory()
+    tcr2 = TargetingCriteriaRuleFactory(
+        targeting_criteria=tc2,
     )
+    TargetingCriteriaRuleFilterFactory(
+        targeting_criteria_rule=tcr2,
+        comparison_method="RANGE",
+        field_name="size",
+        arguments=[1, 11],
+    )
+
     # create primary collector role
     IndividualRoleInHouseholdFactory(household=household_1, individual=individual_1, role=ROLE_PRIMARY)
     IndividualRoleInHouseholdFactory(household=household_2, individual=individual_2, role=ROLE_PRIMARY)
@@ -729,6 +712,8 @@ def generate_payment_plan() -> None:
         status_date=now,
         created_by=root,
         program_cycle=program_cycle,
+        financial_service_provider=fsp_1,
+        delivery_mechanism=delivery_mechanism_cash,
     )[0]
     PaymentPlanService(payment_plan=pp2).full_rebuild()
 
@@ -740,212 +725,112 @@ def update_fsps() -> None:
 
 
 def generate_delivery_mechanisms() -> None:
-    data = [
+    account_types_data = [
+        {
+            "payment_gateway_id": "123",
+            "key": "bank",
+            "label": "Bank",
+            "unique_fields": [
+                "number",
+            ],
+        },
+        {
+            "payment_gateway_id": "456",
+            "key": "mobile",
+            "label": "Mobile",
+            "unique_fields": [
+                "number",
+            ],
+        },
+    ]
+    for at in account_types_data:
+        AccountType.objects.update_or_create(
+            key=at["key"],
+            defaults={
+                "label": at["label"],
+                "unique_fields": at["unique_fields"],
+                "payment_gateway_id": at["payment_gateway_id"],
+            },
+        )
+    account_types = {at.key: at for at in AccountType.objects.all()}
+    delivery_mechanisms_data = [
         {
             "code": "cardless_cash_withdrawal",
             "name": "Cardless cash withdrawal",
-            "requirements": {
-                "required_fields": [],
-                "optional_fields": [
-                    "full_name",
-                ],
-                "unique_fields": [],
-            },
             "transfer_type": "CASH",
+            "account_type": account_types["bank"],
         },
-        {
-            "code": "cash",
-            "name": "Cash",
-            "requirements": {
-                "required_fields": [],
-                "optional_fields": [
-                    "full_name",
-                ],
-                "unique_fields": [],
-            },
-            "transfer_type": "CASH",
-        },
-        {
-            "code": "cash_by_fsp",
-            "name": "Cash by FSP",
-            "requirements": {
-                "required_fields": [],
-                "optional_fields": [
-                    "full_name",
-                ],
-                "unique_fields": [],
-            },
-            "transfer_type": "CASH",
-        },
-        {
-            "code": "cheque",
-            "name": "Cheque",
-            "requirements": {
-                "required_fields": [],
-                "optional_fields": [
-                    "full_name",
-                ],
-                "unique_fields": [],
-            },
-            "transfer_type": "CASH",
-        },
+        {"code": "cash", "name": "Cash", "transfer_type": "CASH", "account_type": account_types["bank"]},
+        {"code": "cash_by_fsp", "name": "Cash by FSP", "transfer_type": "CASH", "account_type": account_types["bank"]},
+        {"code": "cheque", "name": "Cheque", "transfer_type": "CASH", "account_type": account_types["bank"]},
         {
             "code": "deposit_to_card",
             "name": "Deposit to Card",
-            "requirements": {
-                "required_fields": [
-                    "card_number__deposit_to_card",
-                ],
-                "optional_fields": [
-                    "full_name",
-                ],
-                "unique_fields": [
-                    "card_number__deposit_to_card",
-                ],
-            },
             "transfer_type": "CASH",
+            "account_type": account_types["bank"],
         },
         {
             "code": "mobile_money",
             "name": "Mobile Money",
-            "requirements": {
-                "required_fields": [
-                    "delivery_phone_number__mobile_money",
-                    "provider__mobile_money",
-                    "service_provider_code__mobile_money",
-                ],
-                "optional_fields": ["full_name"],
-                "unique_fields": ["delivery_phone_number__mobile_money", "provider__mobile_money"],
-            },
             "transfer_type": "CASH",
+            "account_type": account_types["mobile"],
+            "required_fields": [
+                "number",
+                "provider",
+                "service_provider_code",
+            ],
         },
         {
             "code": "pre-paid_card",
             "name": "Pre-paid card",
-            "requirements": {
-                "required_fields": [],
-                "optional_fields": [
-                    "full_name",
-                ],
-                "unique_fields": [],
-            },
             "transfer_type": "CASH",
+            "account_type": account_types["bank"],
         },
-        {
-            "code": "referral",
-            "name": "Referral",
-            "requirements": {
-                "required_fields": [],
-                "optional_fields": [
-                    "full_name",
-                ],
-                "unique_fields": [],
-            },
-            "transfer_type": "CASH",
-        },
-        {
-            "code": "transfer",
-            "name": "Transfer",
-            "requirements": {
-                "required_fields": [],
-                "optional_fields": [
-                    "full_name",
-                ],
-                "unique_fields": [],
-            },
-            "transfer_type": "CASH",
-        },
+        {"code": "referral", "name": "Referral", "transfer_type": "CASH", "account_type": account_types["bank"]},
+        {"code": "transfer", "name": "Transfer", "transfer_type": "CASH", "account_type": account_types["bank"]},
         {
             "code": "transfer_to_account",
             "name": "Transfer to Account",
-            "requirements": {
-                "required_fields": [
-                    "bank_name__transfer_to_account",
-                    "bank_account_number__transfer_to_account",
-                    "bank_code__transfer_to_account",
-                    "account_holder_name__transfer_to_account",
-                ],
-                "optional_fields": [
-                    "full_name",
-                ],
-                "unique_fields": [
-                    "bank_account_number__transfer_to_account",
-                ],
-            },
             "transfer_type": "CASH",
+            "account_type": account_types["bank"],
+            "required_fields": ["name", "number"],
         },
-        {
-            "code": "voucher",
-            "name": "Voucher",
-            "requirements": {
-                "required_fields": [],
-                "optional_fields": [
-                    "full_name",
-                ],
-                "unique_fields": [],
-            },
-            "transfer_type": "VOUCHER",
-        },
+        {"code": "voucher", "name": "Voucher", "transfer_type": "VOUCHER", "account_type": account_types["bank"]},
         {
             "code": "cash_over_the_counter",
             "name": "Cash over the counter",
-            "requirements": {
-                "required_fields": [
-                    "mobile_phone_number__cash_over_the_counter",
-                ],
-                "optional_fields": [
-                    "full_name",
-                ],
-                "unique_fields": [],
-            },
             "transfer_type": "CASH",
+            "account_type": account_types["bank"],
         },
         {
             "code": "atm_card",
             "name": "ATM Card",
-            "requirements": {
-                "required_fields": [
-                    "card_number__atm_card",
-                    "card_expiry_date__atm_card",
-                    "name_of_cardholder__atm_card",
-                ],
-                "optional_fields": [
-                    "full_name",
-                ],
-                "unique_fields": [
-                    "card_number__atm_card",
-                    "card_expiry_date__atm_card",
-                    "name_of_cardholder__atm_card",
-                ],
-            },
             "transfer_type": "CASH",
+            "account_type": account_types["bank"],
+            "required_fields": [
+                "number",
+                "expiry_date",
+                "name_of_cardholder",
+            ],
         },
         {
             "code": "transfer_to_digital_wallet",
             "name": "Transfer to Digital Wallet",
-            "requirements": {
-                "required_fields": [
-                    "blockchain_name__transfer_to_digital_wallet",
-                    "wallet_address__transfer_to_digital_wallet",
-                ],
-                "optional_fields": ["full_name", "wallet_name__transfer_to_digital_wallet"],
-                "unique_fields": [
-                    "blockchain_name__transfer_to_digital_wallet",
-                    "wallet_address__transfer_to_digital_wallet",
-                ],
-            },
             "transfer_type": "DIGITAL",
+            "account_type": account_types["bank"],
         },
     ]
-    for dm in data:
-        DeliveryMechanism.objects.update_or_create(
+    for dm in delivery_mechanisms_data:
+        delivery_mechanism, _ = DeliveryMechanism.objects.update_or_create(
             code=dm["code"],
             defaults={
                 "name": dm["name"],
-                "required_fields": dm["requirements"]["required_fields"],  # type: ignore
-                "optional_fields": dm["requirements"]["optional_fields"],  # type: ignore
-                "unique_fields": dm["requirements"]["unique_fields"],  # type: ignore
                 "transfer_type": dm["transfer_type"],
                 "is_active": True,
+                "account_type": dm["account_type"],
             },
         )
+        for fsp in FinancialServiceProvider.objects.all():
+            DeliveryMechanismConfig.objects.get_or_create(
+                fsp=fsp, delivery_mechanism=delivery_mechanism, required_fields=dm.get("required_fields", [])
+            )

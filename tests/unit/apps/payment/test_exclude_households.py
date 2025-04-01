@@ -164,7 +164,7 @@ class TestExcludeHouseholds(APITestCase):
         hh_unicef_id_1 = Household.objects.get(id=self.household_1.id).unicef_id
         wrong_hh_id = "INVALID_ID"
 
-        self.assertEqual(self.payment_plan.exclusion_reason, "")
+        self.assertEqual(self.payment_plan.exclusion_reason, None)
 
         payment_plan_exclude_beneficiaries(
             payment_plan_id=self.payment_plan.pk,
@@ -190,7 +190,7 @@ class TestExcludeHouseholds(APITestCase):
         hh_unicef_id_2 = Household.objects.get(id=self.household_2.id).unicef_id
         hh_unicef_id_3 = Household.objects.get(id=self.household_3.id).unicef_id
 
-        self.assertEqual(self.payment_plan.exclusion_reason, "")
+        self.assertEqual(self.payment_plan.exclusion_reason, None)
 
         payment_plan_exclude_beneficiaries(
             payment_plan_id=self.payment_plan.pk,
@@ -221,7 +221,7 @@ class TestExcludeHouseholds(APITestCase):
         self.payment_plan.save(update_fields=["background_action_status"])
         self.household_1.refresh_from_db(fields=["unicef_id"])
 
-        self.assertEqual(self.payment_plan.exclusion_reason, "")
+        self.assertEqual(self.payment_plan.exclusion_reason, None)
 
         payment_plan_exclude_beneficiaries(
             payment_plan_id=self.payment_plan.pk, excluding_hh_or_ind_ids=[], exclusion_reason="Undo HH_1"
@@ -246,7 +246,7 @@ class TestExcludeHouseholds(APITestCase):
         hh_unicef_id_1 = Household.objects.get(id=self.household_1.id).unicef_id
         hh_unicef_id_2 = Household.objects.get(id=self.household_2.id).unicef_id
 
-        self.assertEqual(self.payment_plan.exclusion_reason, "")
+        self.assertEqual(self.payment_plan.exclusion_reason, None)
 
         payment_plan_exclude_beneficiaries(
             payment_plan_id=self.payment_plan.pk,
@@ -277,7 +277,7 @@ class TestExcludeHouseholds(APITestCase):
         ind_unicef_id_1 = Individual.objects.get(id=self.individual_1.id).unicef_id
         ind_unicef_id_2 = Individual.objects.get(id=self.individual_2.id).unicef_id
 
-        self.assertEqual(self.payment_plan.exclusion_reason, "")
+        self.assertEqual(self.payment_plan.exclusion_reason, None)
 
         payment_plan_exclude_beneficiaries(
             payment_plan_id=self.payment_plan.pk,
