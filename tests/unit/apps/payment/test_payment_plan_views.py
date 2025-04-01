@@ -1133,7 +1133,6 @@ class TestTargetPopulationActions:
             "program_slug": self.program_active.slug,
             "pk": tp_id,
         }
-
         self.url_lock = reverse("api:payments:target-populations-lock", kwargs=url_kwargs)
         self.url_unlock = reverse("api:payments:target-populations-unlock", kwargs=url_kwargs)
         self.url_rebuild = reverse("api:payments:target-populations-rebuild", kwargs=url_kwargs)
