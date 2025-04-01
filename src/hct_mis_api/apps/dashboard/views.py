@@ -18,6 +18,7 @@ from hct_mis_api.apps.account.permissions import Permissions, check_permissions
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.dashboard.celery_tasks import generate_dash_report_task
 from hct_mis_api.apps.dashboard.services import (
+    DashboardCacheBase,
     DashboardDataCache,
     DashboardGlobalDataCache,
 )
@@ -44,7 +45,7 @@ class DashboardDataView(APIView):
         """
         is_global = business_area_slug.lower() == "global"
         business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
-        data_cache: Type[DashboardDataCache] = DashboardGlobalDataCache if is_global else DashboardDataCache
+        data_cache: Type[DashboardCacheBase] = DashboardGlobalDataCache if is_global else DashboardDataCache
 
         if not check_permissions(request.user, [Permissions.DASHBOARD_VIEW_COUNTRY], business_area=business_area):
             return Response(

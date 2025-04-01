@@ -1,8 +1,10 @@
+import calendar
 import json
 from decimal import Decimal
 from typing import Any, Callable, Dict, Optional
 
 from django.core.cache import cache
+from django.utils import timezone
 
 import pytest
 
@@ -12,12 +14,19 @@ from hct_mis_api.apps.dashboard.services import (
     DashboardDataCache,
     DashboardGlobalDataCache,
 )
+from hct_mis_api.apps.payment.fixtures import (
+    DeliveryMechanismFactory,
+    FinancialServiceProviderFactory,
+)
 from hct_mis_api.apps.payment.models import Payment
 
 CACHE_CONFIG = [
     ("DashboardDataCache", DashboardDataCache, "test-area"),
     ("DashboardGlobalDataCache", DashboardGlobalDataCache, "global"),
 ]
+CURRENT_YEAR = timezone.now().year
+TEST_COUNTRY_SLUG = "afghanistan"
+TEST_DATE = timezone.datetime(CURRENT_YEAR, 7, 15, tzinfo=timezone.utc)
 
 
 @pytest.mark.parametrize("cache_name, cache_class, slug", CACHE_CONFIG)
@@ -73,7 +82,7 @@ def test_store_data(cache_name: str, cache_class: Any, slug: str) -> None:
             "DashboardGlobalDataCache",
             DashboardGlobalDataCache,
             "global",
-            {"country", "currency"},
+            {"country"},
         ),
     ],
 )
@@ -168,3 +177,99 @@ def test_dashboard_data_cache(
     total_usd = sum(Decimal(item["total_delivered_quantity_usd"]) for item in result)
     assert len(result) > 0
     assert total_usd == expected_total
+
+
+@pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
+def test_country_dashboard_unique_household_metrics(
+    populate_dashboard_cache: Callable, afghanistan: BusinessAreaFactory
+) -> None:
+    """
+    Verify country dashboard counts household metrics once for multiple payments
+    within the same aggregation group.
+    """
+    cache.delete(f"dashboard_data_{afghanistan.slug}")
+    household = populate_dashboard_cache(afghanistan)
+    expected_household_count = 1
+    expected_individuals = 5
+    expected_children = 2
+    expected_pwd = 3
+    expected_payment_count = 5
+
+    common_fsp = FinancialServiceProviderFactory()
+    common_delivery_type = DeliveryMechanismFactory()
+    common_status = "Transaction Successful"
+    common_currency = "USD"
+
+    Payment.objects.filter(household=household).update(
+        delivery_date=TEST_DATE,
+        financial_service_provider=common_fsp,
+        delivery_type=common_delivery_type,
+        status=common_status,
+        currency=common_currency,
+        program=household.program,
+    )
+    result = DashboardDataCache.refresh_data(TEST_COUNTRY_SLUG)
+    assert result is not None, "Result should not be None"
+    assert len(result) == 1, f"Expected 1 aggregation group, got {len(result)}"
+
+    agg_data = result[0]
+
+    assert agg_data["households"] == expected_household_count, "Household count mismatch"
+    assert agg_data["individuals"] == expected_individuals, "Individuals count mismatch"
+    assert agg_data["children_counts"] == expected_children, "Children count mismatch"
+    assert agg_data["pwd_counts"] == expected_pwd, "PWD count mismatch"
+    assert agg_data["payments"] == expected_payment_count, "Payment count mismatch"
+    assert agg_data["year"] == CURRENT_YEAR
+    assert agg_data["month"] == calendar.month_name[TEST_DATE.month]
+    assert agg_data["admin1"] == "Kabul"
+    assert agg_data["program"] == household.program.name
+    assert agg_data["sector"] == household.program.sector
+    assert agg_data["fsp"] == common_fsp.name
+    assert agg_data["delivery_types"] == common_delivery_type.name
+    assert agg_data["status"] == common_status
+    assert agg_data["currency"] == common_currency
+
+
+@pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
+def test_global_dashboard_unique_household_metrics(
+    populate_dashboard_cache: Callable, afghanistan: BusinessAreaFactory
+) -> None:
+    """
+    Verify global dashboard counts household metrics once for multiple payments.
+    """
+    cache.delete(f"dashboard_data_{afghanistan.slug}")
+
+    household = populate_dashboard_cache(afghanistan)
+    expected_household_count = 1
+    expected_individuals = 5
+    expected_children = 2
+    expected_pwd = 3
+    expected_payment_count = 5
+    common_delivery_type = DeliveryMechanismFactory()
+    common_status = "Transaction Successful"
+    Payment.objects.filter(household=household).update(
+        delivery_date=TEST_DATE,
+        delivery_type=common_delivery_type,
+        status=common_status,
+        program=household.program,
+    )
+    result = DashboardGlobalDataCache.refresh_data()
+    assert result is not None, "Result should not be None"
+    target_group_data = None
+    for item in result:
+        if (
+            item["year"] == CURRENT_YEAR
+            and item["country"] == afghanistan.name
+            and item["sector"] == household.program.sector
+            and item["delivery_types"] == common_delivery_type.name
+            and item["status"] == common_status
+        ):
+            target_group_data = item
+            break
+
+    assert target_group_data is not None, f"Expected aggregation group not found in global result: {result}"
+    assert target_group_data["households"] == expected_household_count, "Household count mismatch"
+    assert target_group_data["individuals"] == expected_individuals, "Individuals count mismatch"
+    assert target_group_data["children_counts"] == expected_children, "Children count mismatch"
+    assert target_group_data["pwd_counts"] == expected_pwd, "PWD count mismatch"
+    assert target_group_data["payments"] == expected_payment_count, "Payment count mismatch"
