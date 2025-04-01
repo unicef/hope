@@ -1171,6 +1171,21 @@ class TestIndividualFilter:
             },
         )
 
+    def test_filter_by_document_number(self) -> None:
+        document_passport = DocumentTypeFactory(key="passport")
+        document_id_card = DocumentTypeFactory(key="id_card")
+        individual1, individual2 = self._create_test_individuals()
+        individual3, individual4 = self._create_test_individuals()
+        DocumentFactory(individual=individual1, type=document_passport, document_number="123")
+        DocumentFactory(individual=individual2, type=document_passport, document_number="456")
+        DocumentFactory(individual=individual3, type=document_id_card, document_number="123")
+        DocumentFactory(individual=individual4, type=document_id_card, document_number="456")
+        response = self.api_client.get(self.list_url, {"document_number": "456", "document_type": "passport"})
+        assert response.status_code == status.HTTP_200_OK
+        response_data = response.json()["results"]
+        assert len(response_data) == 1
+        assert response_data[0]["id"] == get_encoded_individual_id(individual2)
+
     def test_filter_by_full_name(self) -> None:
         self._test_filter_individuals_in_list(
             filters={"full_name": "John"},
@@ -1358,4 +1373,3 @@ class TestIndividualFilter:
         assert len(response_data) == 1
         assert response_data[0]["id"] == get_encoded_individual_id(individual2)
         return response_data
-
