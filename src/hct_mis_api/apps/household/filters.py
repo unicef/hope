@@ -1,28 +1,22 @@
 import logging
 from typing import Any, Dict, List
+from django.utils import timezone
 
 from django.db.models import Q, QuerySet
 from django.db.models.functions import Lower
-
+from datetime import date, timedelta
 from constance import config
 from django_filters import (
     BooleanFilter,
     CharFilter,
     ChoiceFilter,
     FilterSet,
-    ModelMultipleChoiceFilter,
     MultipleChoiceFilter,
     OrderingFilter,
 )
 from django_filters import rest_framework as filters
-from graphene_django.filter import GlobalIDMultipleChoiceFilter
 
 from hct_mis_api.apps.core.exceptions import SearchException
-from hct_mis_api.apps.core.filters import (
-    AgeRangeFilter,
-    BusinessAreaSlugFilter,
-    DateRangeFilter,
-)
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
 from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
 from hct_mis_api.apps.household.models import (
@@ -101,8 +95,7 @@ class HouseholdFilter(FilterSet):
     class Meta:
         model = Household
         fields = {
-            "address": ["exact", "startswith"],
-            "head_of_household__full_name": ["exact", "startswith"],
+            "address": ["startswith"],
             "size": ["range", "lte", "gte"],
             "admin_area": ["exact"],
             "admin1": ["exact"],
@@ -278,12 +271,13 @@ class HouseholdFilter(FilterSet):
 
 
 class IndividualFilter(FilterSet):
-    age = AgeRangeFilter(field_name="birth_date")
+    age = filters.RangeFilter(method="filter_by_age")
+    full_name = CharFilter(field_name="full_name", lookup_expr="contains")
     sex = MultipleChoiceFilter(field_name="sex", choices=SEX_CHOICE)
     search = CharFilter(method="search_filter")
     document_type = CharFilter(method="document_type_filter")
     document_number = CharFilter(method="document_number_filter")
-    last_registration_date = DateRangeFilter(field_name="last_registration_date")
+    last_registration_date = filters.DateFromToRangeFilter(field_name="last_registration_date")
     admin1 = CharFilter(method="admin_field_filter", field_name="household__admin1")
     admin2 = CharFilter(method="admin_field_filter", field_name="household__admin2")
     status = MultipleChoiceFilter(choices=INDIVIDUAL_STATUS_CHOICES, method="status_filter")
@@ -299,8 +293,6 @@ class IndividualFilter(FilterSet):
         model = Individual
         fields = {
             "household__id": ["exact"],
-            "full_name": ["exact", "startswith", "endswith"],
-            "sex": ["exact"],
             "household__admin_area": ["exact"],
             "withdrawn": ["exact"],
             "program": ["exact"],
@@ -321,6 +313,27 @@ class IndividualFilter(FilterSet):
             "first_registration_date",
         )
     )
+
+    def filter_by_age(self, queryset: QuerySet, name: str, value: slice) -> QuerySet:
+        current = timezone.now().date()
+        query = Q()
+        if min_value := value.start:
+            max_date = date(
+                current.year - int(min_value),
+                current.month,
+                current.day,
+            )
+            query &= Q(birth_date__lte=max_date)
+        if max_value := value.stop:
+            min_date = date(
+                current.year - int(max_value) - 1,
+                current.month,
+                current.day,
+            )
+            min_date = min_date + timedelta(days=1)
+            query &= Q(birth_date__gte=min_date)
+        queryset = queryset.filter(query)
+        return queryset
 
     def rdi_merge_status_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         if value == MergeStatusModel.PENDING:
