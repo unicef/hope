@@ -92,11 +92,11 @@ class HouseholdFilter(FilterSet):
     admin_area = CharFilter(method="admin_field_filter", field_name="admin_area")
     admin1 = CharFilter(method="admin_field_filter", field_name="admin1")
     admin2 = CharFilter(method="admin_field_filter", field_name="admin2")
+    address = CharFilter(field_name="address", lookup_expr="icontains")
 
     class Meta:
         model = Household
         fields = {
-            "address": ["startswith"],
             "size": ["range", "lte", "gte"],
             "admin_area": ["exact"],
             "admin1": ["exact"],
