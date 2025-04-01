@@ -37,6 +37,7 @@ from hct_mis_api.apps.payment.api.filters import (
     TargetPopulationFilter,
 )
 from hct_mis_api.apps.payment.api.serializers import (
+    PaymentDetailSerializer,
     PaymentListSerializer,
     PaymentPlanBulkActionSerializer,
     PaymentPlanDetailSerializer,
@@ -83,7 +84,6 @@ class PaymentPlanViewSet(
     mixins.ListModelMixin,
     BaseViewSet,
 ):
-    # lookup_field = "payment_plan_id"
     program_model_field = "program_cycle__program"
     queryset = PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).order_by("unicef_id")
     PERMISSIONS = [Permissions.PM_VIEW_LIST]
@@ -314,7 +314,7 @@ class PaymentViewSet(
     PERMISSIONS = [Permissions.PM_VIEW_DETAILS, Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS]
     serializer_classes_by_action = {
         "list": PaymentListSerializer,
-        "retrieve": PaymentListSerializer,
+        "retrieve": PaymentDetailSerializer,
     }
     permissions_by_action = {
         "list": [

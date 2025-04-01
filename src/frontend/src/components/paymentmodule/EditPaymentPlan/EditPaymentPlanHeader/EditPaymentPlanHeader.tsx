@@ -21,7 +21,7 @@ interface EditPaymentPlanHeaderProps {
   handleSubmit: () => Promise<void>;
   baseUrl: string;
   permissions: string[];
-  paymentPlan: PaymentPlanDetail;
+  paymentPlan: Partial<PaymentPlanDetail>;
 }
 
 export function EditPaymentPlanHeader({

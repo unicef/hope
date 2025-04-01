@@ -34,6 +34,9 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
     PaymentPlanSplit,
     PaymentPlanSupportingDocument,
+    PaymentVerification,
+    PaymentVerificationPlan,
+    PaymentVerificationSummary,
 )
 from hct_mis_api.apps.payment.models.payment import (
     DeliveryMechanism,
@@ -86,12 +89,59 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 
+class PaymentVerificationSummarySerializer(serializers.ModelSerializer):
+    status = serializers.CharField(source="get_status_display")
+
+    class Meta:
+        model = PaymentVerificationSummary
+        fields = ("id", "status", "activation_date", "completion_date")
+
+
+class PaymentVerificationSerializer(serializers.ModelSerializer):
+    status = serializers.CharField(source="get_status_display")
+
+    class Meta:
+        model = PaymentVerification
+        fields = ("id", "status", "status_date", "received_amount")
+
+
+class PaymentVerificationPlanSerializer(serializers.ModelSerializer):
+    status = serializers.CharField(source="get_status_display")
+    verification_channel = serializers.CharField(source="get_verification_channel_display")
+    sampling = serializers.CharField(source="get_sampling_display")
+
+    class Meta:
+        model = PaymentVerificationPlan
+        fields = (
+            "id",
+            "status",
+            "verification_channel",
+            "sampling",
+            "sex_filter",
+            "activation_date",
+            "completion_date",
+            "sample_size",
+            "responded_count",
+            "received_count",
+            "not_received_count",
+            "received_with_problems_count",
+            "confidence_interval",
+            "margin_of_error",
+            "xlsx_file_exporting",
+            "xlsx_file_imported",
+            "error",
+        )
+
+
 class FollowUpPaymentPlanSerializer(EncodedIdSerializerMixin):
+    status = serializers.CharField(source="get_status_display")
+
     class Meta:
         model = PaymentPlan
         fields = (
             "id",
             "unicef_id",
+            "status",
             "dispersion_start_date",
             "dispersion_end_date",
         )
@@ -104,7 +154,7 @@ class PaymentPlanSerializer(serializers.ModelSerializer):
     follow_ups = FollowUpPaymentPlanSerializer(many=True, read_only=True)
     program = serializers.CharField(source="program_cycle.program.name")
     program_id = Base64ModelField(model_name="Program", source="program_cycle.program.id")
-    program_cycle_id = Base64ModelField(model_name="ProgramCycle", source="program_cycle_id")
+    program_cycle_id = Base64ModelField(model_name="ProgramCycle")
     last_approval_process_by = serializers.SerializerMethodField()
 
     class Meta:
@@ -129,6 +179,7 @@ class PaymentPlanSerializer(serializers.ModelSerializer):
             "program_cycle_id",
             "last_approval_process_date",
             "last_approval_process_by",
+            "admin_url",
         )
 
     def get_last_approval_process_by(self, obj: PaymentPlan) -> Optional[str]:
@@ -386,6 +437,8 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     steficon_rule = RuleSerializer(read_only=True)
     source_payment_plan = FollowUpPaymentPlanSerializer(read_only=True)
     eligible_payments_count = serializers.SerializerMethodField()
+    payment_verification_summary = PaymentVerificationSummarySerializer(read_only=True)
+    payment_verification_plans = PaymentVerificationPlanSerializer(many=True, read_only=True)
 
     class Meta(PaymentPlanListSerializer.Meta):
         fields = PaymentPlanListSerializer.Meta.fields + (  # type: ignore
@@ -438,6 +491,8 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "source_payment_plan",
             "exchange_rate",
             "eligible_payments_count",
+            "payment_verification_summary",
+            "payment_verification_plans",
         )
 
     @staticmethod
@@ -682,6 +737,17 @@ class PaymentListSerializer(serializers.ModelSerializer):
         ):
             return ""
         return obj.fsp_auth_code or ""
+
+
+class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
+    parent = FollowUpPaymentPlanSerializer()
+    payment_verifications = PaymentVerificationSerializer()
+
+    class Meta(PaymentListSerializer.Meta):
+        fields = PaymentListSerializer.Meta.fields + (  # type: ignore
+            "parent",
+            "payment_verifications",
+        )
 
 
 class TPHouseholdListSerializer(serializers.ModelSerializer):

@@ -13,7 +13,7 @@ const StyledBox = styled(Box)`
 `;
 
 interface AcceptanceProcessRowProps {
-  acceptanceProcess: PaymentPlanDetail['approval_process'][0];
+  acceptanceProcess: PaymentPlanDetail['approval_process'][number];
   paymentPlan: PaymentPlanDetail;
 }
 
@@ -33,7 +33,7 @@ export function AcceptanceProcessRow({
     rejected_on,
   } = acceptanceProcess;
 
-  const { approvalProcess } = paymentPlan;
+  const { approval_process } = paymentPlan;
 
   const getRejectedOnString = (stage: string): string => {
     switch (stage) {
@@ -51,7 +51,7 @@ export function AcceptanceProcessRow({
 
   return (
     <StyledBox m={5}>
-      <AcceptanceProcessStepper acceptance_process={acceptance_process} />
+      <AcceptanceProcessStepper acceptanceProcess={acceptanceProcess} />
       <Grid container>
         <Grid size={{ xs: 4 }}>
           {actions?.approval?.length > 0 && (
@@ -118,7 +118,7 @@ export function AcceptanceProcessRow({
           </Grid>
         )}
       </Grid>
-      {approval_process.total_count > 1 && <DividerLine />}
+      {approval_process.length > 1 && <DividerLine />}
     </StyledBox>
   );
 }

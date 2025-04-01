@@ -103,6 +103,7 @@ export type { ProgramCycleUpdate } from './models/ProgramCycleUpdate';
 export type { ProgramDetail } from './models/ProgramDetail';
 export type { ProgramGlobal } from './models/ProgramGlobal';
 export type { ProgramList } from './models/ProgramList';
+export type { ProgramSmall } from './models/ProgramSmall';
 export type { Project } from './models/Project';
 export type { PushPeople } from './models/PushPeople';
 export { PushPeopleTypeEnum } from './models/PushPeopleTypeEnum';

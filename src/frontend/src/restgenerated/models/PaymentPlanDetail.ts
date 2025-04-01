@@ -8,6 +8,7 @@ import type { DeliveryMechanismPerPaymentPlan } from './DeliveryMechanismPerPaym
 import type { FinancialServiceProvider } from './FinancialServiceProvider';
 import type { FollowUpPaymentPlan } from './FollowUpPaymentPlan';
 import type { PaymentPlanSupportingDocument } from './PaymentPlanSupportingDocument';
+import type { ProgramSmall } from './ProgramSmall';
 import type { Rule } from './Rule';
 export type PaymentPlanDetail = {
     id: string;
@@ -71,10 +72,14 @@ export type PaymentPlanDetail = {
      * Payment Plan end date
      */
     end_date?: string | null;
-    program: string;
+    readonly program: ProgramSmall;
     has_payment_list_export_file: boolean;
     readonly has_fsp_delivery_mechanism_xlsx_template: boolean;
     imported_file_name: string;
+    /**
+     * Imported File Date [sys]
+     */
+    imported_file_date?: string | null;
     readonly payments_conflicts_count: number;
     readonly delivery_mechanism: DeliveryMechanism;
     readonly delivery_mechanism_per_payment_plan: DeliveryMechanismPerPaymentPlan;
@@ -148,5 +153,6 @@ export type PaymentPlanDetail = {
      */
     exchange_rate?: string | null;
     readonly eligible_payments_count: number;
+    readonly admin_url: string;
 };
 

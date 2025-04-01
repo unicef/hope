@@ -7,7 +7,7 @@ import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { PaymentPlanQuery, useSplitPpMutation } from '@generated/graphql';
+import { useSplitPpMutation } from '@generated/graphql';
 import { LoadingButton } from '@core/LoadingButton';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import {
@@ -120,7 +120,7 @@ export const SplitIntoPaymentLists = ({
                     <Field
                       name="splitType"
                       label="Split Type"
-                      choices={paymentPlan.splitChoices}
+                      choices={paymentPlan.split_choices}
                       component={FormikSelectField}
                     />
                   </Grid>

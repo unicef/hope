@@ -245,7 +245,7 @@ export function Entitlement({
               alignItems="center"
               flexDirection="column"
             >
-              {paymentPlan.hasPaymentListExportFile ? (
+              {paymentPlan.has_payment_list_export_file ? (
                 <Button
                   color="primary"
                   startIcon={<DownloadIcon />}
@@ -303,20 +303,20 @@ export function Entitlement({
                   paymentPlan={paymentPlan}
                 />
               </Box>
-              {paymentPlan?.importedFileName ? (
+              {paymentPlan?.imported_file_name ? (
                 <Box alignItems="center" display="flex">
                   <SpinaczIconContainer>
                     <AttachFileIcon fontSize="inherit" />
                   </SpinaczIconContainer>
                   <Box mr={1}>
                     <GreyTextSmall data-cy="imported-file-name">
-                      {paymentPlan?.importedFileName}
+                      {paymentPlan?.imported_file_name}
                     </GreyTextSmall>
                   </Box>
                   <GreyTextSmall>
-                    {paymentPlan?.importedFileDate ? (
+                    {paymentPlan?.imported_file_name ? (
                       <UniversalMoment>
-                        {paymentPlan?.importedFileDate}
+                        {paymentPlan?.imported_file_date}
                       </UniversalMoment>
                     ) : null}
                   </GreyTextSmall>
@@ -331,12 +331,12 @@ export function Entitlement({
             </Box>
           </Box>
         </Box>
-        {paymentPlan.totalEntitledQuantityUsd ? (
+        {paymentPlan.total_entitled_quantity_usd ? (
           <>
             <Divider />
             <LabelizedField label={t('Total Entitled Quantity')}>
               <BigValue data-cy="total-entitled-quantity-usd">
-                {`${paymentPlan.totalEntitledQuantity} ${paymentPlan.currency} (${paymentPlan.totalEntitledQuantityUsd} USD)`}
+                {`${paymentPlan.total_entitled_quantity} ${paymentPlan.currency} (${paymentPlan.total_entitled_quantity_usd} USD)`}
               </BigValue>
             </LabelizedField>
           </>

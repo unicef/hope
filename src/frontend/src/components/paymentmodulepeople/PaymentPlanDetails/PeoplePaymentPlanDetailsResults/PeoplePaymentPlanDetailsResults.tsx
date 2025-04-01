@@ -160,7 +160,9 @@ export const PeoplePaymentPlanDetailsResults = ({
               <Grid size={{ xs: 6 }}>
                 <SummaryBorder>
                   <LabelizedField label={t('Total Number of People')}>
-                    <SummaryValue>{totalIndividualsCount || '0'}</SummaryValue>
+                    <SummaryValue>
+                      {total_individuals_count || '0'}
+                    </SummaryValue>
                   </LabelizedField>
                 </SummaryBorder>
               </Grid>
