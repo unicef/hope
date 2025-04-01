@@ -43,7 +43,7 @@ from hct_mis_api.apps.household.models import (
     LOT_DIFFICULTY,
     CANNOT_DO,
     DISABLED,
-    DocumentType,
+    DocumentType, FEMALE, MALE, OTHER, NOT_COLLECTED, STATUS_ACTIVE, STATUS_DUPLICATE, NEEDS_ADJUDICATION, UNIQUE,
 )
 from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms, DeliveryMechanismDataFactory
 from hct_mis_api.apps.payment.models import DeliveryMechanism
@@ -1171,12 +1171,66 @@ class TestIndividualFilter:
             },
         )
 
+    def test_filter_by_full_name(self) -> None:
+        self._test_filter_individuals_in_list(
+            filters={"full_name": "John"},
+            individual1_data={"full_name": "Jane Doe"},
+            individual2_data={"full_name": "John Doe"},
+        )
+
+    def test_filter_by_sex(self) -> None:
+        individual_m, individual_f = self._create_test_individuals(
+            individual1_data={"sex": MALE},
+            individual2_data={"sex": FEMALE},
+        )
+        individual_o, individual_nc = self._create_test_individuals(
+            individual1_data={"sex": OTHER},
+            individual2_data={"sex": NOT_COLLECTED},
+        )
+        response_male = self.api_client.get(self.list_url, {"sex": "MALE"})
+        assert response_male.status_code == status.HTTP_200_OK
+        response_data_male = response_male.json()["results"]
+        assert len(response_data_male) == 1
+        assert response_data_male[0]["id"] == get_encoded_individual_id(individual_m)
+
+        response_male_female = self.api_client.get(self.list_url, {"sex": ["MALE", "FEMALE"]})
+        assert response_male_female.status_code == status.HTTP_200_OK
+        response_data_male_female = response_male_female.json()["results"]
+        assert len(response_data_male_female) == 2
+        individuals_ids = [individual["id"] for individual in response_data_male_female]
+        assert get_encoded_individual_id(individual_m) in individuals_ids
+        assert get_encoded_individual_id(individual_f) in individuals_ids
+        assert get_encoded_individual_id(individual_o) not in individuals_ids
+        assert get_encoded_individual_id(individual_nc) not in individuals_ids
+
+    def test_filter_by_status(self) -> None:
+        self._test_filter_individuals_in_list(
+            filters={"status": STATUS_ACTIVE},
+            individual1_data={"duplicate": True},
+            individual2_data={"duplicate": False, "withdrawn": False},
+        )
+
+    def test_filter_by_flags(self) -> None:
+        self._test_filter_individuals_in_list(
+            filters={"flags": NEEDS_ADJUDICATION},
+            individual1_data={},
+            individual2_data={"deduplication_golden_record_status": NEEDS_ADJUDICATION},
+        )
+
     def test_filter_by_withdrawn(self) -> None:
         self._test_filter_individuals_in_list(
             filters={"withdrawn": True},
             individual1_data={"withdrawn": False},
             individual2_data={"withdrawn": True},
         )
+
+    def test_filter_by_excluded_id(self) -> None:
+        individual1, individual2 = self._create_test_individuals()
+        response_excluded = self.api_client.get(self.list_url, {"excluded_id": get_encoded_individual_id(individual1)})
+        assert response_excluded.status_code == status.HTTP_200_OK
+        response_data_male = response_excluded.json()["results"]
+        assert len(response_data_male) == 1
+        assert response_data_male[0]["id"] == get_encoded_individual_id(individual2)
 
     @pytest.mark.parametrize(
         "program_status,filter_value,expected_results",
@@ -1241,6 +1295,13 @@ class TestIndividualFilter:
         assert len(response_data_before) == 1
         assert response_data_before[0]["id"] == get_encoded_individual_id(individual2)
         return response_data_before
+
+    def test_filter_by_duplicates_only(self) -> None:
+        self._test_filter_individuals_in_list(
+            filters={"duplicates_only": True},
+            individual1_data={"deduplication_golden_record_status": UNIQUE},
+            individual2_data={"deduplication_golden_record_status": DUPLICATE},
+        )
 
     @override_config(USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH=True)
     @pytest.mark.parametrize(
