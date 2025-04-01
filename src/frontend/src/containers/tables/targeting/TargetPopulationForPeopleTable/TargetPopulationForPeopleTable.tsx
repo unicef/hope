@@ -1,23 +1,16 @@
+import { TableWrapper } from '@components/core/TableWrapper';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { adjustHeadCells, dateToIsoString } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
-import {
-  AllTargetPopulationsQueryVariables,
-  PaymentPlanNode,
-  useAllTargetPopulationsQuery,
-} from '@generated/graphql';
-import { TableWrapper } from '@components/core/TableWrapper';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { adjustHeadCells, dateToIsoString } from '@utils/utils';
-import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './TargetPopulationForPeopleTableHeadCells';
 import { TargetPopulationForPeopleTableRow } from './TargetPopulationForPeopleTableRow';
-import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
-import { error } from 'console';
-import { useQuery } from '@tanstack/react-query';
-import { RestService } from '@restgenerated/services/RestService';
-import { useProgramContext } from 'src/programContext';
 
 interface TargetPopulationProps {
   filter;
@@ -71,7 +64,7 @@ export function TargetPopulationForPeopleTable({
   const {
     data: targetPopulationsData,
     isLoading,
-    error,
+    error: targetPopulationsError,
   } = useQuery({
     queryKey: [
       'businessAreasProgramsTargetPopulationsList',
@@ -112,7 +105,7 @@ export function TargetPopulationForPeopleTable({
         setQueryVariables={setQueryVariables}
         data={targetPopulationsData}
         isLoading={isLoading}
-        error={error}
+        error={targetPopulationsError}
         renderRow={(row: PaymentPlanDetail) => (
           <TargetPopulationForPeopleTableRow
             radioChangeHandler={enableRadioButton && handleRadioChange}
