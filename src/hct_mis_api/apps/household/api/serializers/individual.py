@@ -98,14 +98,13 @@ class DeliveryMechanismDataSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "individual_tab_data",
-            "is_valid",
         )
 
     def get_name(self, obj: DeliveryMechanismData) -> str:
-        return obj.delivery_mechanism.name if obj.delivery_mechanism else None
+        return obj.account_type.label
 
     def get_individual_tab_data(self, obj: DeliveryMechanismData) -> Dict:
-        return {key: obj.data.get(key, None) for key in obj.all_dm_fields}
+        return dict(sorted(obj.data.items()))
 
 
 class HouseholdSimpleSerializer(serializers.ModelSerializer):
