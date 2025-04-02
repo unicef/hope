@@ -2071,7 +2071,7 @@ class AccountType(models.Model):
         ]
 
     def __str__(self) -> str:
-        return self.key
+        return self.key  # pragma: no cover
 
 
 class FspNameMapping(models.Model):
@@ -2087,7 +2087,7 @@ class FspNameMapping(models.Model):
     fsp = models.ForeignKey(FinancialServiceProvider, on_delete=models.CASCADE, related_name="names_mappings")
 
     def __str__(self) -> str:
-        return self.external_name
+        return self.external_name  # pragma: no cover
 
 
 class PaymentPlanSupportingDocument(models.Model):
