@@ -37,7 +37,7 @@ class GrievanceDetailsPage(BaseComponents):
     administrativeLevel = 'div[data-cy="label-Administrative Level 2"]'
     areaVillage = 'div[data-cy="label-Area / Village / Pay point"]'
     languagesSpoken = 'div[data-cy="label-Languages Spoken"]'
-    documentation = 'div[data-cy="label-Documentation"]'
+    documentation = 'div[data-cy="label-Grievance Supporting Documents"]'
     ticketDescription = 'div[data-cy="label-Description"]'
     labelCreatedBy = 'div[data-cy="label-Created By"]'
     comments = 'div[data-cy="label-Comments"]'
