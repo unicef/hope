@@ -57,7 +57,7 @@ class GrievanceDetailsPage(BaseComponents):
     newNoteField = 'textarea[data-cy="input-newNote"]'
     buttonNewNote = 'button[data-cy="button-add-note"]'
     labelLanguagesSpoken = 'div[data-cy="label-Languages Spoken"]'
-    labelDocumentation = 'div[data-cy="label-Documentation"]'
+    labelDocumentation = 'div[data-cy="label-Grievance Supporting Documents"]'
     labelDescription = 'div[data-cy="label-Description"]'
     noteRow = '[data-cy="note-row"]'
     noteName = '[data-cy="note-name"]'
