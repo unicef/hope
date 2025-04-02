@@ -1,13 +1,24 @@
+from unittest.mock import MagicMock, patch
+
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
+import pytest
+
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
-from hct_mis_api.apps.core.models import DataCollectingType
+from hct_mis_api.apps.core.models import DataCollectingType, FlexibleAttribute
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.targeting.validators import TargetingCriteriaInputValidator
+from hct_mis_api.apps.targeting.choices import FlexFieldClassification
+from hct_mis_api.apps.targeting.validators import (
+    TargetingCriteriaInputValidator,
+    TargetingCriteriaRuleFilterInputValidator,
+)
+
+pytestmark = pytest.mark.django_db
 
 
 class TestTargetingCriteriaInputValidator(TestCase):
@@ -44,7 +55,7 @@ class TestTargetingCriteriaInputValidator(TestCase):
             )
         )
 
-    def test_TargetingCriteriaInputValidator(self) -> None:
+    def test_targeting_criteria_input_validator(self) -> None:
         validator = TargetingCriteriaInputValidator
         create_household({"unicef_id": "HH-1", "size": 1}, {"unicef_id": "IND-12"})
         self._update_program(self.program_standard)
@@ -74,3 +85,47 @@ class TestTargetingCriteriaInputValidator(TestCase):
     def _update_program(self, program: Program) -> None:
         Household.objects.all().update(program=program)
         Individual.objects.all().update(program=program)
+
+
+class TestTargetingCriteriaRuleFilterInputValidator:
+    @pytest.fixture(autouse=True)
+    def setup(self) -> None:
+        self.program = MagicMock(spec=Program)
+        self.program.name = "Test Program"
+        self.field_name = "test_field"
+        self.valid_rule_filter = {
+            "flex_field_classification": FlexFieldClassification.NOT_FLEX_FIELD,
+            "field_name": self.field_name,
+            "comparison_method": "EQUAL",
+            "arguments": [10],
+        }
+
+    def test_validation_error_core_field_not_found(self) -> None:
+        with patch.object(FieldFactory, "from_scope", return_value=MagicMock(to_dict_by=lambda _: {})):
+            with pytest.raises(
+                ValidationError,
+                match=f"Can't find any core field attribute associated with {self.field_name} field name",
+            ):
+                TargetingCriteriaRuleFilterInputValidator.validate(self.valid_rule_filter, self.program)
+
+    def test_validation_error_flex_field_basic_not_found(self) -> None:
+        rule_filter = self.valid_rule_filter.copy()
+        rule_filter["flex_field_classification"] = FlexFieldClassification.FLEX_FIELD_BASIC
+
+        with patch.object(FlexibleAttribute.objects, "get", side_effect=FlexibleAttribute.DoesNotExist):
+            with pytest.raises(
+                ValidationError,
+                match=f"Can't find any flex field attribute associated with {self.field_name} field name",
+            ):
+                TargetingCriteriaRuleFilterInputValidator.validate(rule_filter, self.program)
+
+    def test_validation_error_flex_field_pdu_not_found(self) -> None:
+        rule_filter = self.valid_rule_filter.copy()
+        rule_filter["flex_field_classification"] = "FLEX_FIELD_PDU"
+
+        with patch.object(FlexibleAttribute.objects, "get", side_effect=FlexibleAttribute.DoesNotExist):
+            with pytest.raises(
+                ValidationError,
+                match=f"Can't find PDU flex field attribute associated with {self.field_name} field name in program {self.program.name}",
+            ):
+                TargetingCriteriaRuleFilterInputValidator.validate(rule_filter, self.program)

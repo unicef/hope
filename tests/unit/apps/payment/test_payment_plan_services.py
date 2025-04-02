@@ -1130,3 +1130,15 @@ class TestPaymentPlanServices(APITestCase):
                 PaymentPlanService.create_payments(payment_plan)
 
             self.assertIn(f"Couldn't find a primary collector in {household.unicef_id}", str(error.exception))
+
+    def test_acceptance_process_validation_error(self) -> None:
+        payment_plan = PaymentPlanFactory(
+            created_by=self.user,
+            status=PaymentPlan.Status.PREPARING,
+            business_area=self.business_area,
+            program_cycle=self.cycle,
+        )
+        with self.assertRaises(ValidationError) as error:
+            PaymentPlanService(payment_plan=payment_plan).acceptance_process()
+
+        self.assertIn(f"Approval Process object not found for PaymentPlan {payment_plan.id}", str(error.exception))

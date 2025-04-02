@@ -26,7 +26,7 @@ from hct_mis_api.apps.payment.fixtures import (
 )
 from hct_mis_api.apps.payment.models import Approval, PaymentPlan
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.models import Program, ProgramCycle
 
 pytestmark = pytest.mark.django_db
 
@@ -1225,3 +1225,68 @@ class TestTargetPopulationActions:
             assert "id" in response.json()
             assert PaymentPlan.objects.filter(name="Copied TP test 123").count() == 1
             assert PaymentPlan.objects.all().count() == 2
+
+    def test_copy_tp_validation_errors(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.TARGETING_DUPLICATE], self.afghanistan, self.program_active
+        )
+        cycle = ProgramCycleFactory(program=self.program_active, status=ProgramCycle.ACTIVE, title="Cycle123")
+        PaymentPlanFactory(
+            name="Copied TP AGAIN",
+            business_area=self.afghanistan,
+            program_cycle=cycle,
+        )
+        data = {
+            "name": "Copied TP AGAIN",
+            "program_cycle_id": encode_id_base64_required(cycle.pk, "ProgramCycle"),
+        }
+        # TP with the same name already exists
+        response = self.client.post(self.url_copy, data, format="json")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert (
+            "Target Population with name: Copied TP AGAIN and program cycle: Cycle123 already exists." in response.data
+        )
+
+        # Cycle status is Finished
+        cycle.status = ProgramCycle.FINISHED
+        cycle.save()
+        response_2 = self.client.post(self.url_copy, data, format="json")
+
+        assert response_2.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Not possible to assign Finished Program Cycle to Targeting." in response_2.data
+
+        # wrong input data to trigger validation error
+        response_3 = self.client.post(self.url_copy, {}, format="json")
+        assert response_3.status_code == status.HTTP_400_BAD_REQUEST
+        assert "name" in response_3.data
+        assert "program_cycle_id" in response_3.data
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.TARGETING_REMOVE], status.HTTP_204_NO_CONTENT),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_tp_delete(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        tp = PaymentPlanFactory(
+            name="TP_to_delete",
+            business_area=self.afghanistan,
+            program_cycle=self.cycle,
+            status=PaymentPlan.Status.TP_OPEN,
+            created_by=self.user,
+        )
+        tp_id = encode_id_base64_required(tp.pk, "PaymentPlan")
+        delete_url = reverse(
+            "api:payments:target-populations-detail",
+            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program_active.slug, "pk": tp_id},
+        )
+        response = self.client.delete(delete_url)
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_204_NO_CONTENT:
+            assert response.status_code == status.HTTP_204_NO_CONTENT
+            assert PaymentPlan.objects.filter(name="TP_to_delete").count() == 0
+            assert PaymentPlan.all_objects.filter(name="TP_to_delete").count() == 1  # is_removed = True

@@ -254,7 +254,7 @@ class TargetPopulationViewSet(
             program = program_cycle.program
 
             if program_cycle.status == ProgramCycle.FINISHED:
-                raise ValidationError("Not possible to assign Finished Program Cycle to Targeting")
+                raise ValidationError("Not possible to assign Finished Program Cycle to Targeting.")
             if PaymentPlan.objects.filter(name=name, program_cycle=program_cycle, is_removed=False).exists():
                 raise ValidationError(
                     f"Target Population with name: {name} and program cycle: {program_cycle.title} already exists."
