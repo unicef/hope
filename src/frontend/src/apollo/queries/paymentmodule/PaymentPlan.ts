@@ -280,6 +280,16 @@ export const PAYMENT_PLAN_QUERY = gql`
         title
         file
       }
+      availableFundsCommitments {
+              fundsCommitmentNumber
+              fundsCommitmentItems {
+                  paymentPlan {
+                      name
+                  }
+                  fundsCommitmentItem
+              }
+          }
+        }
       targetingCriteria {
         __typename
         id
