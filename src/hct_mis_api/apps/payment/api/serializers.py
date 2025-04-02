@@ -251,22 +251,6 @@ class FilteredActionsListSerializer(serializers.Serializer):
     reject = ApprovalInfoSerializer(read_only=True, many=True)
 
 
-class ApprovalSerializer(serializers.ModelSerializer):
-    created_by = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Approval
-        fields = (
-            "type",
-            "comment",
-            "created_by",
-            "created_at",
-        )
-
-    def get_created_by(self, obj: PaymentPlan) -> str:
-        return f"{obj.created_by.first_name} {obj.created_by.last_name}" if obj.created_by else ""
-
-
 class ApprovalProcessSerializer(serializers.ModelSerializer):
     sent_for_approval_by = serializers.SerializerMethodField()
     sent_for_finance_release_by = serializers.SerializerMethodField()

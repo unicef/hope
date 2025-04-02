@@ -4,11 +4,11 @@ from typing import Any, Callable, List
 from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
+from django.urls import reverse
 from django.utils import timezone
 
 import pytest
 from rest_framework import status
-from rest_framework.reverse import reverse
 
 from hct_mis_api.apps.account.fixtures import (
     BusinessAreaFactory,
@@ -22,9 +22,18 @@ from hct_mis_api.apps.payment.api.views import PaymentPlanManagerialViewSet
 from hct_mis_api.apps.payment.fixtures import (
     ApprovalFactory,
     ApprovalProcessFactory,
+    DeliveryMechanismFactory,
+    FinancialServiceProviderFactory,
+    FinancialServiceProviderXlsxTemplateFactory,
+    FspXlsxTemplatePerDeliveryMechanismFactory,
     PaymentPlanFactory,
+    PaymentPlanSplitFactory,
 )
-from hct_mis_api.apps.payment.models import Approval, PaymentPlan
+from hct_mis_api.apps.payment.models import (
+    Approval,
+    FinancialServiceProvider,
+    PaymentPlan,
+)
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 
@@ -590,6 +599,57 @@ class TestPaymentPlanDetail:
         assert payment_plan["can_download_xlsx"] is False
         assert payment_plan["can_send_xlsx_password"] is False
 
+    def test_has_fsp_delivery_mechanism_xlsx_template(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.PM_VIEW_DETAILS], self.afghanistan, self.program_active
+        )
+        xlsx_temp = FinancialServiceProviderXlsxTemplateFactory()
+        dm = DeliveryMechanismFactory()
+        fsp = FinancialServiceProviderFactory(
+            name="Test FSP 1",
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+            vision_vendor_number=123,
+        )
+        fsp.xlsx_templates.set([xlsx_temp])
+        FspXlsxTemplatePerDeliveryMechanismFactory(
+            financial_service_provider=fsp,
+            delivery_mechanism=dm,
+            xlsx_template=xlsx_temp,
+        )
+        self.pp.delivery_mechanism = dm
+        self.pp.financial_service_provider = fsp
+        self.pp.save()
+
+        response = self.client.get(self.pp_detail_url)
+        assert response.status_code == status.HTTP_200_OK
+        payment_plan = response.json()
+        assert payment_plan["has_fsp_delivery_mechanism_xlsx_template"] is True
+
+    def test_can_create_follow_up(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.PM_VIEW_DETAILS], self.afghanistan, self.program_active
+        )
+        self.pp.is_follow_up = True
+        self.pp.save()
+
+        response = self.client.get(self.pp_detail_url)
+        assert response.status_code == status.HTTP_200_OK
+        payment_plan = response.json()
+        assert payment_plan["can_create_follow_up"] is False
+
+    def test_get_can_split(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.PM_VIEW_DETAILS], self.afghanistan, self.program_active
+        )
+        PaymentPlanSplitFactory(payment_plan=self.pp, sent_to_payment_gateway=True)
+        self.pp.status = PaymentPlan.Status.ACCEPTED
+        self.pp.save()
+
+        response = self.client.get(self.pp_detail_url)
+        assert response.status_code == status.HTTP_200_OK
+        payment_plan = response.json()
+        assert payment_plan["can_split"] is False
+
 
 class TestPaymentPlanFilter:
     @pytest.fixture(autouse=True)
@@ -1108,6 +1168,142 @@ class TestTargetPopulationFilter:
         response_data = response.json()["results"]
         assert len(response_data) == 1
         assert response_data[0]["name"] == "TP_Uuuuu_Aaaaa"
+
+
+class TestTargetPopulationCreateUpdate:
+    @pytest.fixture(autouse=True)
+    def setup(self, api_client: Any) -> None:
+        self.afghanistan = create_afghanistan()
+        self.partner = PartnerFactory(name="unittest")
+        self.user = UserFactory(partner=self.partner)
+        self.program_active = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
+        self.cycle = self.program_active.cycles.first()
+
+        self.tp = PaymentPlanFactory(
+            business_area=self.afghanistan,
+            program_cycle=self.cycle,
+            status=PaymentPlan.Status.TP_OPEN,
+            created_by=self.user,
+        )
+
+        self.create_url = reverse(
+            "api:payments:target-populations-list",
+            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program_active.slug},
+        )
+        self.update_url = reverse(
+            "api:payments:target-populations-detail",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+                "pk": encode_id_base64_required(self.tp.pk, "PaymentPlan"),
+            },
+        )
+        self.client = api_client(self.user)
+        self.targeting_criteria = {
+            "flag_exclude_if_active_adjudication_ticket": False,
+            "flag_exclude_if_on_sanction_list": False,
+            "rules": [
+                {
+                    "individua_ids": "",
+                    "household_ids": "",
+                    "households_filters_blocks": [
+                        {
+                            "comparison_method": "RANGE",
+                            "arguments": [1, 11],
+                            "field_name": "size",
+                            "flex_field_classification": "NOT_FLEX_FIELD",
+                        }
+                    ],
+                    "individuals_filters_blocks": [],
+                    "collectors_filters_blocks": [],
+                }
+            ],
+        }
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.TARGETING_CREATE], status.HTTP_201_CREATED),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_create_payment_plan_success(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        data = {
+            "name": "New Payment Plan",
+            "program_cycle_id": encode_id_base64_required(self.cycle.id, "ProgramCycle"),
+            "targeting_criteria": self.targeting_criteria,
+            "excluded_ids": "IND-123",
+            "exclusion_reason": "Just MMM Qwool Test",
+        }
+
+        response = self.client.post(self.create_url, data, format="json")
+
+        assert response.status_code == expected_status
+        if response.status_code == status.HTTP_201_CREATED:
+            assert response.data["name"] == data["name"]
+            assert (
+                response.data["targeting_criteria"]["rules"][0]["households_filters_blocks"][0]["field_name"] == "size"
+            )
+            assert response.data["exclusion_reason"] == data["exclusion_reason"]
+            assert response.data["excluded_ids"] == data["excluded_ids"]
+
+    def test_create_payment_plan_invalid_data(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.TARGETING_CREATE], self.afghanistan, self.program_active
+        )
+        invalid_data = {
+            "name": "",
+            "program_cycle_id": None,
+            "targeting_criteria": {},
+        }
+        response = self.client.post(self.create_url, invalid_data, format="json")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "name" in response.data
+        assert "program_cycle_id" in response.data
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.TARGETING_UPDATE], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_update_payment_plan_success(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+
+        update_data = {
+            "name": "Test with NEW NAME",
+            "excluded_ids": "IND-999",
+            "exclusion_reason": "123",
+            "version": self.tp.version,
+        }
+
+        response = self.client.patch(self.update_url, update_data, format="json")
+
+        assert response.status_code == expected_status
+        if response.status_code == status.HTTP_200_OK:
+            assert response.data["name"] == update_data["name"]
+            assert response.data["exclusion_reason"] == update_data["exclusion_reason"]
+            assert response.data["excluded_ids"] == update_data["excluded_ids"]
+
+    def test_update_payment_plan_invalid_data(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.TARGETING_UPDATE], self.afghanistan, self.program_active
+        )
+        invalid_update_data = {
+            "name": "",
+            "version": self.tp.version,
+        }
+        response = self.client.patch(self.update_url, invalid_update_data, format="json")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "name" in response.data
 
 
 class TestTargetPopulationActions:

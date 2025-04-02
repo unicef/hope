@@ -125,7 +125,6 @@ class TargetPopulationViewSet(
 ):
     program_model_field = "program_cycle__program"
     queryset = PaymentPlan.objects.all().order_by("created_at")
-    PERMISSIONS = [Permissions.TARGETING_VIEW_LIST]
     http_method_names = ["get", "post", "patch", "delete"]
     serializer_classes_by_action = {
         "list": TargetPopulationListSerializer,
