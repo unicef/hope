@@ -472,6 +472,8 @@ class TestPaymentGatewayService(APITestCase):
                         "first_name": self.payments[0].collector.given_name,
                         "full_name": self.payments[0].collector.full_name,
                         "destination_currency": self.payments[0].currency,
+                        "delivery_mechanism": "transfer",
+                        "account_type": "bank",
                     },
                     "extra_data": {},
                 }
@@ -497,6 +499,8 @@ class TestPaymentGatewayService(APITestCase):
                         "full_name": self.payments[0].collector.full_name,
                         "destination_currency": self.payments[0].currency,
                         "service_provider_code": self.payments[0].collector.flex_fields["service_provider_code_i_f"],
+                        "delivery_mechanism": "mobile_money",
+                        "account_type": "mobile",
                     },
                     "extra_data": {},
                 }
@@ -553,6 +557,8 @@ class TestPaymentGatewayService(APITestCase):
                         "service_provider_code": "ABC",
                         "number": "123456789",
                         "provider": "Provider",
+                        "delivery_mechanism": "mobile_money",
+                        "account_type": "mobile",
                     },
                     "extra_data": {},
                 }
