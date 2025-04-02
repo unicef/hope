@@ -31,7 +31,11 @@ from hct_mis_api.apps.core.api.mixins import (
     SerializerActionMixin,
 )
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import decode_id_string, decode_id_string_required
+from hct_mis_api.apps.core.utils import (
+    check_concurrency_version_in_mutation,
+    decode_id_string,
+    decode_id_string_required,
+)
 from hct_mis_api.apps.payment.api.caches import PaymentPlanKeyConstructor
 from hct_mis_api.apps.payment.api.filters import (
     PaymentPlanFilter,
@@ -45,12 +49,16 @@ from hct_mis_api.apps.payment.api.serializers import (
     PaymentPlanListSerializer,
     PaymentPlanSerializer,
     PaymentPlanSupportingDocumentSerializer,
+    TargetPopulationApplyEngineFormulaSerializer,
     TargetPopulationCopySerializer,
     TargetPopulationCreateSerializer,
     TargetPopulationDetailSerializer,
     TPHouseholdListSerializer,
 )
-from hct_mis_api.apps.payment.celery_tasks import payment_plan_full_rebuild
+from hct_mis_api.apps.payment.celery_tasks import (
+    payment_plan_apply_steficon_hh_selection,
+    payment_plan_full_rebuild,
+)
 from hct_mis_api.apps.payment.models import (
     Payment,
     PaymentPlan,
@@ -58,6 +66,7 @@ from hct_mis_api.apps.payment.models import (
 )
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.program.models import ProgramCycle
+from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.targeting.api.serializers import TargetPopulationListSerializer
 
 logger = logging.getLogger(__name__)
@@ -109,6 +118,34 @@ class PaymentPlanViewSet(
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
+    # payment-module/program-cycles/UHJvZ3JhbUN5Y2xlOjhmNjljNGVkLWRlNGMtNGE0My04M2JjLTI5ODIzMTg3OTA5Nw==
+    # @action(detail=False, methods=["post"])
+    # def open(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    #     print("kwargs = = = =", kwargs)
+    #     user = request.user
+    #     request.data["target_population_id"] = kwargs.get("pk")
+    #
+    #     serializer = self.get_serializer(
+    #         data=request.data,
+    #     )
+    #     if serializer.is_valid():
+    #         # TODO:
+    #         log_create(
+    #             PaymentPlan.ACTIVITY_LOG_MAPPING,
+    #             "business_area",
+    #             user,
+    #             getattr(program, "pk", None),
+    #             None,
+    #             payment_plan_copy,
+    #         )
+    #         response_serializer = TargetPopulationDetailSerializer(payment_plan_copy, context={"request": request})
+    #         return Response(
+    #             data=response_serializer.data,
+    #             status=status.HTTP_201_CREATED,
+    #         )
+    #     else:
+    #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class TargetPopulationViewSet(
     CountActionMixin,
@@ -132,6 +169,7 @@ class TargetPopulationViewSet(
         "create": TargetPopulationCreateSerializer,
         "partial_update": TargetPopulationCreateSerializer,
         "copy": TargetPopulationCopySerializer,
+        "apply_engine_formula": TargetPopulationApplyEngineFormulaSerializer,
     }
     permissions_by_action = {
         "list": [Permissions.TARGETING_VIEW_LIST],
@@ -140,6 +178,7 @@ class TargetPopulationViewSet(
         "partial_update": [Permissions.TARGETING_UPDATE],
         "destroy": [Permissions.TARGETING_REMOVE],
         "copy": [Permissions.TARGETING_DUPLICATE],
+        "apply_engine_formula": [Permissions.TARGETING_UPDATE],
     }
     filterset_class = TargetPopulationFilter
 
@@ -299,6 +338,44 @@ class TargetPopulationViewSet(
             return Response(
                 data=response_serializer.data,
                 status=status.HTTP_201_CREATED,
+            )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=["post"])
+    def apply_engine_formula(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        tp = self.get_object()
+        serializer = self.get_serializer(
+            data=request.data,
+        )
+        if serializer.is_valid():
+            version = serializer.validated_data("version")
+            engine_formula_rule_id = decode_id_string_required(serializer.validated_data["engine_formula_rule_id"])
+            if version:
+                check_concurrency_version_in_mutation(version, tp)
+            engine_rule = get_object_or_404(Rule, id=engine_formula_rule_id)
+            # tp vulnerability_score
+            if tp.status in PaymentPlan.CAN_RUN_ENGINE_FORMULA_FOR_VULNERABILITY_SCORE:
+                old_tp = copy_model_object(tp)
+                rule_commit = engine_rule.latest
+                if not engine_rule.enabled or engine_rule.deprecated:
+                    raise ValidationError("This engine rule is not enabled or is deprecated.")
+                tp.steficon_rule_targeting = rule_commit
+                tp.status = PaymentPlan.Status.TP_STEFICON_WAIT
+                tp.save()
+                payment_plan_apply_steficon_hh_selection.delay(str(tp.pk), str(engine_rule.pk))
+            log_create(
+                mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+                business_area_field="business_area",
+                user=request.user,
+                programs=tp.program.pk,
+                old_object=old_tp,
+                new_object=tp,
+            )
+            response_serializer = TargetPopulationDetailSerializer(tp, context={"request": request})
+            return Response(
+                data=response_serializer.data,
+                status=status.HTTP_200_OK,
             )
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

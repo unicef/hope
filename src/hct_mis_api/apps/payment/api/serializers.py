@@ -832,3 +832,8 @@ class TargetPopulationCopySerializer(serializers.Serializer):
     name = serializers.CharField(required=True)
     target_population_id = serializers.CharField(required=True)
     program_cycle_id = serializers.CharField(required=True)
+
+
+class TargetPopulationApplyEngineFormulaSerializer(serializers.Serializer):
+    engine_formula_rule_id = serializers.CharField(required=True)
+    version = serializers.IntegerField(required=False)
