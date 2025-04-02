@@ -4,7 +4,8 @@ from datetime import date, datetime, timedelta
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 from django.conf import settings
-from django.contrib.gis.db.models import PointField, Q, UniqueConstraint
+from django.contrib.gis.db.models import Q, UniqueConstraint
+from django.contrib.gis.geos import Point
 from django.contrib.postgres.fields import ArrayField, CICharField
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVectorField
@@ -362,7 +363,8 @@ class Household(
             "admin3",
             "admin4",
             "representatives",
-            "geopoint",
+            "latitude",
+            "longitude",
             "female_age_group_0_5_count",
             "female_age_group_6_11_count",
             "female_age_group_12_17_count",
@@ -681,7 +683,8 @@ class Household(
     withdrawn_date = models.DateTimeField(
         null=True, blank=True, db_index=True, help_text="Household withdrawn date [sys]"
     )
-    geopoint = PointField(blank=True, null=True, help_text="Household geopoint [sys]")
+    longitude = models.FloatField(blank=True, null=True, help_text="Household longitude [sys]")
+    latitude = models.FloatField(blank=True, null=True, help_text="Household latitude [sys]")
     deviceid = models.CharField(max_length=250, blank=True, default=BLANK, help_text="Household deviceid [sys]")
     name_enumerator = models.CharField(
         max_length=250, blank=True, default=BLANK, help_text="Household name enumerator [sys]"
@@ -781,6 +784,20 @@ class Household(
         from hct_mis_api.contrib.aurora.models import Record
 
         return Record.objects.filter(id=self.flex_registrations_record_id).first()
+
+    @property
+    def geopoint(self) -> Optional[str]:
+        if self.latitude and self.longitude:
+            return f"{self.latitude},{self.longitude}"
+        return None
+
+    @geopoint.setter
+    def geopoint(self, value: Optional[Point]) -> None:
+        if value:
+            self.latitude, self.longitude = value.y, value.x
+        else:
+            self.latitude = None
+            self.longitude = None
 
     def __str__(self) -> str:
         return self.unicef_id or ""
