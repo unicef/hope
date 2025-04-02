@@ -2283,7 +2283,7 @@ type Mutations {
   excludeHouseholds(excludedHouseholdsIds: [String]!, exclusionReason: String, paymentPlanId: ID!): ExcludeHouseholdsMutation
   setSteficonRuleOnPaymentPlanPaymentList(paymentPlanId: ID!, steficonRuleId: ID!, version: BigInt): SetSteficonRuleOnPaymentPlanPaymentListMutation
   copyTargetingCriteria(name: String!, paymentPlanId: ID!, programCycleId: ID!): CopyTargetingCriteriaMutation
-  assignFundsCommitments(fundCommitmentItemsIds: [String]!, paymentPlanId: ID!): AssignFundsCommitmentsMutation
+  assignFundsCommitments(fundCommitmentItemsIds: [String], paymentPlanId: ID!): AssignFundsCommitmentsMutation
   exportXlsxPaymentPlanPaymentList(fspXlsxTemplateId: ID, paymentPlanId: ID!): ExportXLSXPaymentPlanPaymentListMutation
   exportXlsxPaymentPlanPaymentListPerFsp(fspXlsxTemplateId: ID, paymentPlanId: ID!): ExportXLSXPaymentPlanPaymentListPerFSPMutation
   importXlsxPaymentPlanPaymentList(file: Upload!, paymentPlanId: ID!): ImportXLSXPaymentPlanPaymentListMutation

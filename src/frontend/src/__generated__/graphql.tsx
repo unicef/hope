@@ -3435,7 +3435,7 @@ export type MutationsApproveSystemFlaggingArgs = {
 
 
 export type MutationsAssignFundsCommitmentsArgs = {
-  fundCommitmentItemsIds: Array<InputMaybe<Scalars['String']['input']>>;
+  fundCommitmentItemsIds?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   paymentPlanId: Scalars['ID']['input'];
 };
 
@@ -24004,7 +24004,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   approveNeedsAdjudication?: Resolver<Maybe<ResolversTypes['NeedsAdjudicationApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveNeedsAdjudicationArgs, 'grievanceTicketId'>>;
   approvePaymentDetails?: Resolver<Maybe<ResolversTypes['PaymentDetailsApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApprovePaymentDetailsArgs, 'approveStatus' | 'grievanceTicketId'>>;
   approveSystemFlagging?: Resolver<Maybe<ResolversTypes['SimpleApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveSystemFlaggingArgs, 'approveStatus' | 'grievanceTicketId'>>;
-  assignFundsCommitments?: Resolver<Maybe<ResolversTypes['AssignFundsCommitmentsMutation']>, ParentType, ContextType, RequireFields<MutationsAssignFundsCommitmentsArgs, 'fundCommitmentItemsIds' | 'paymentPlanId'>>;
+  assignFundsCommitments?: Resolver<Maybe<ResolversTypes['AssignFundsCommitmentsMutation']>, ParentType, ContextType, RequireFields<MutationsAssignFundsCommitmentsArgs, 'paymentPlanId'>>;
   bulkGrievanceAddNote?: Resolver<Maybe<ResolversTypes['BulkGrievanceAddNoteMutation']>, ParentType, ContextType, RequireFields<MutationsBulkGrievanceAddNoteArgs, 'businessAreaSlug' | 'grievanceTicketIds' | 'note'>>;
   bulkUpdateGrievanceAssignee?: Resolver<Maybe<ResolversTypes['BulkUpdateGrievanceTicketsAssigneesMutation']>, ParentType, ContextType, RequireFields<MutationsBulkUpdateGrievanceAssigneeArgs, 'assignedTo' | 'businessAreaSlug' | 'grievanceTicketIds'>>;
   bulkUpdateGrievancePriority?: Resolver<Maybe<ResolversTypes['BulkUpdateGrievanceTicketsPriorityMutation']>, ParentType, ContextType, RequireFields<MutationsBulkUpdateGrievancePriorityArgs, 'businessAreaSlug' | 'grievanceTicketIds' | 'priority'>>;

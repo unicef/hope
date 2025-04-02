@@ -1281,7 +1281,7 @@ class AssignFundsCommitmentsMutation(PermissionMutation):
 
     class Input:
         payment_plan_id = graphene.ID(required=True)
-        fund_commitment_items_ids = graphene.List(graphene.String, required=True)
+        fund_commitment_items_ids = graphene.List(graphene.String)
 
     @classmethod
     @is_authenticated
@@ -1290,7 +1290,7 @@ class AssignFundsCommitmentsMutation(PermissionMutation):
         root: Any,
         info: Any,
         payment_plan_id: str,
-        fund_commitment_items_ids: List[str],
+        fund_commitment_items_ids: List[Optional[str]],
     ) -> "AssignFundsCommitmentsMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
 
@@ -1299,12 +1299,12 @@ class AssignFundsCommitmentsMutation(PermissionMutation):
         if payment_plan.status != PaymentPlan.Status.IN_REVIEW:
             raise GraphQLError("Payment plan must be in review")
 
-        funds_commitment_items = FundsCommitmentItem.objects.filter(id__in=fund_commitment_items_ids)
+        funds_commitment_items = FundsCommitmentItem.objects.filter(rec_serial_number__in=fund_commitment_items_ids)
         if funds_commitment_items.filter(payment_plan_id__isnull=False).exists():
             raise GraphQLError("Chosen Funds Commitments are already assigned to Payment Plan")
 
         if funds_commitment_items.exclude(office=payment_plan.business_area).exists():
-            raise GraphQLError("Chosen Funds Commitments wrong Business Area")
+            raise GraphQLError("Chosen Funds Commitments have wrong Business Area")
 
         FundsCommitmentItem.objects.filter(payment_plan=payment_plan).update(payment_plan=None)
         funds_commitment_items.update(payment_plan=payment_plan)

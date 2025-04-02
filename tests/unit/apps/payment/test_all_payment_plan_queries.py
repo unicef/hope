@@ -300,6 +300,7 @@ class TestPaymentPlanQueries(APITestCase):
                       name
                   }
                   fundsCommitmentItem
+                  recSerialNumber
               }
           }
         }
@@ -1087,10 +1088,10 @@ class TestPaymentPlanQueries(APITestCase):
             variables={"businessArea": "afghanistan", "id": encoded_payment_plan_id},
         )
 
-        FundsCommitmentFactory(funds_commitment_number="123", funds_commitment_item="001")
-        FundsCommitmentFactory(funds_commitment_number="123", funds_commitment_item="002")
-        FundsCommitmentFactory(funds_commitment_number="345", funds_commitment_item="001")
-        FundsCommitmentFactory(funds_commitment_number="345", funds_commitment_item="002")
+        FundsCommitmentFactory(funds_commitment_number="123", funds_commitment_item="001", rec_serial_number="0001")
+        FundsCommitmentFactory(funds_commitment_number="123", funds_commitment_item="002", rec_serial_number="0002")
+        FundsCommitmentFactory(funds_commitment_number="345", funds_commitment_item="001", rec_serial_number="0003")
+        FundsCommitmentFactory(funds_commitment_number="345", funds_commitment_item="002", rec_serial_number="0004")
 
         self.snapshot_graphql_request(
             request_string=self.PAYMENT_PLAN_QUERY_FUNDS_COMMITMENTS_QUERY,
