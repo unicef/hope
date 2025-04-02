@@ -98,6 +98,8 @@ class PaymentPayloadSerializer(serializers.Serializer):
     full_name = serializers.CharField(required=False, allow_blank=True)
     destination_currency = serializers.CharField(required=True)
     service_provider_code = serializers.CharField(required=False, allow_blank=True)
+    delivery_mechanism = serializers.CharField(required=True)
+    account_type = serializers.CharField(required=True)
 
 
 class PaymentSerializer(ReadOnlyModelSerializer):
@@ -122,7 +124,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
             "amount": obj.entitlement_quantity,
             "destination_currency": obj.currency,
             "origination_currency": obj.currency,
-            "delivery_mechanism": obj.delivery_type.name,
+            "delivery_mechanism": obj.delivery_type.code,
             "account_type": obj.delivery_type.account_type.key,
             "phone_no": collector_data.get("phone_no", ""),
             "last_name": collector_data.get("family_name", ""),
