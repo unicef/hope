@@ -2070,6 +2070,9 @@ class AccountType(models.Model):
             for field_name in _account_type.unique_fields
         ]
 
+    def __str__(self) -> str:
+        return self.key  # pragma: no cover
+
 
 class FspNameMapping(models.Model):
     class SourceModel(models.TextChoices):
@@ -2082,6 +2085,9 @@ class FspNameMapping(models.Model):
     hope_name = models.CharField(max_length=255)  # default copy of external name
     source = models.CharField(max_length=30, choices=SourceModel.choices, default=SourceModel.ACCOUNT)
     fsp = models.ForeignKey(FinancialServiceProvider, on_delete=models.CASCADE, related_name="names_mappings")
+
+    def __str__(self) -> str:
+        return self.external_name  # pragma: no cover
 
 
 class PaymentPlanSupportingDocument(models.Model):
