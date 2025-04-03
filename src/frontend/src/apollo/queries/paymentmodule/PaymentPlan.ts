@@ -33,6 +33,18 @@ export const PAYMENT_PLAN_QUERY = gql`
         volume
         volumeUsd
       }
+      availableFundsCommitments {
+        fundsCommitmentNumber
+        fundsCommitmentItems {
+          paymentPlan {
+            id
+            name
+          }
+          fundsCommitmentItem
+          recSerialNumber
+        }
+      }
+      fundCommitmentItemsIds
       deliveryMechanism {
         id
         name

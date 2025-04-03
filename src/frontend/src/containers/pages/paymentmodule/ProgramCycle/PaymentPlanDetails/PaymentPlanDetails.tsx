@@ -1,4 +1,10 @@
-import { Box, Grid2 as Grid, IconButton, Tooltip, Typography } from '@mui/material';
+import {
+  Box,
+  Grid2 as Grid,
+  IconButton,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { renderUserName } from '@utils/utils';
 import { PaymentPlanQuery } from '@generated/graphql';
