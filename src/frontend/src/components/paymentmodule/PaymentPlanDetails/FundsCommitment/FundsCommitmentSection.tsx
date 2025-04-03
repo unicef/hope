@@ -138,7 +138,7 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
         </Box>
         <Box mt={2}>
           <FormControl fullWidth size="small">
-            <InputLabel>{t('Select Funds Commitment')}</InputLabel>
+            <InputLabel>{t('Funds Commitment')}</InputLabel>
             <Select
               size="small"
               value={selectedFundsCommitment}
@@ -165,6 +165,7 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
               <InputLabel>{t('Funds Commitment Items')}</InputLabel>
               <Select
                 multiple
+                label={t('Funds Commitment Items')}
                 value={selectedItems.map(String)}
                 onChange={handleItemsChange}
                 renderValue={(selected) => selected.join(', ')}
@@ -226,7 +227,7 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
                 loading={loadingAssign}
                 color="primary"
                 onClick={handleSubmit}
-                disabled={!canAssignFunds}
+                disabled={!canAssignFunds || selectedItems.length === 0}
               >
                 {t('Assign Funds Commitments')}
               </LoadingButton>
