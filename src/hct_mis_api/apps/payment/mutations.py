@@ -760,7 +760,7 @@ class OpenPaymentPlanMutation(PermissionMutation):
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
-            programs=payment_plan.program_cycle.program,
+            programs=payment_plan.program,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )

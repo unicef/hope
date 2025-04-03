@@ -1548,3 +1548,62 @@ class TestTargetPopulationActions:
             assert response.status_code == status.HTTP_204_NO_CONTENT
             assert PaymentPlan.objects.filter(name="TP_to_delete").count() == 0
             assert PaymentPlan.all_objects.filter(name="TP_to_delete").count() == 1  # is_removed = True
+
+
+class TestPaymentPlanActions:
+    @pytest.fixture(autouse=True)
+    def setup(self, api_client: Any) -> None:
+        self.afghanistan = create_afghanistan()
+        self.partner = PartnerFactory(name="unittest")
+        self.user = UserFactory(partner=self.partner)
+        self.program_active = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
+        self.cycle = self.program_active.cycles.first()
+        self.client = api_client(self.user)
+        self.target_population = PaymentPlanFactory(
+            name="DRAFT PP",
+            business_area=self.afghanistan,
+            program_cycle=self.cycle,
+            status=PaymentPlan.Status.DRAFT,
+            created_by=self.user,
+            created_at="2022-02-24",
+        )
+        pp_id = encode_id_base64_required(self.target_population.pk, "PaymentPlan")
+        url_kwargs = {
+            "business_area_slug": self.afghanistan.slug,
+            "program_slug": self.program_active.slug,
+            "pk": pp_id,
+        }
+        self.url_open = reverse("api:payments:payment-plans-open", kwargs=url_kwargs)
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.PM_CREATE], status.HTTP_201_CREATED),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_open_pp(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        data = {
+            "dispersion_start_date": "2025-02-01",
+            "dispersion_end_date": "2099-03-01",
+            "currency": "USD",
+            "version": self.target_population.version,
+        }
+        response = self.client.post(self.url_open, data, format="json")
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_201_CREATED:
+            assert response.status_code == status.HTTP_201_CREATED
+            resp_data = response.json()
+            assert "id" in resp_data
+            assert "United States dollar" == resp_data["currency"]
+            assert "Open" == resp_data["status"]
+
+    def test_open_pp_validation_errors(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PM_CREATE], self.afghanistan, self.program_active)
+        response = self.client.post(self.url_open, {}, format="json")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "dispersion_start_date" in response.json()
+        assert "dispersion_end_date" in response.json()
+        assert "currency" in response.json()

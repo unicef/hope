@@ -45,6 +45,7 @@ from hct_mis_api.apps.payment.api.serializers import (
     PaymentDetailSerializer,
     PaymentListSerializer,
     PaymentPlanBulkActionSerializer,
+    PaymentPlanCreateSerializer,
     PaymentPlanDetailSerializer,
     PaymentPlanListSerializer,
     PaymentPlanSerializer,
@@ -103,6 +104,7 @@ class PaymentPlanViewSet(
     serializer_classes_by_action = {
         "list": PaymentPlanListSerializer,
         "retrieve": PaymentPlanDetailSerializer,
+        "open": PaymentPlanCreateSerializer,
     }
     permissions_by_action = {
         "list": [
@@ -111,12 +113,40 @@ class PaymentPlanViewSet(
         "retrieve": [
             Permissions.PM_VIEW_DETAILS,
         ],
+        "open": [Permissions.PM_CREATE],
     }
+
+    def get_object(self) -> PaymentPlan:
+        return get_object_or_404(PaymentPlan, id=decode_id_string(self.kwargs.get("pk")))
 
     @etag_decorator(PaymentPlanKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=PaymentPlanKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
+
+    @action(detail=True, methods=["post"])
+    def open(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan = self.get_object()
+        serializer = self.get_serializer(data=request.data, context={"payment_plan": payment_plan})
+        if serializer.is_valid():
+            old_payment_plan = copy_model_object(payment_plan)
+
+            payment_plan = PaymentPlanService(payment_plan=payment_plan).open(input_data=serializer.validated_data)
+            log_create(
+                mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+                business_area_field="business_area",
+                user=request.user,
+                programs=payment_plan.program,
+                old_object=old_payment_plan,
+                new_object=payment_plan,
+            )
+            response_serializer = PaymentPlanDetailSerializer(payment_plan, context={"request": request})
+            return Response(
+                data=response_serializer.data,
+                status=status.HTTP_201_CREATED,
+            )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TargetPopulationViewSet(

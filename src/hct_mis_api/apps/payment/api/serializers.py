@@ -14,6 +14,7 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
+from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.utils import (
     check_concurrency_version_in_mutation,
     decode_id_string,
@@ -387,6 +388,19 @@ class VolumeByDeliveryMechanismSerializer(EncodedIdSerializerMixin):
             "volume",
             "volume_usd",
         )
+
+
+class PaymentPlanCreateSerializer(serializers.Serializer):
+    dispersion_start_date = serializers.DateField(required=True)
+    dispersion_end_date = serializers.DateField(required=True)
+    currency = serializers.ChoiceField(required=True, choices=CURRENCY_CHOICES)
+    version = serializers.IntegerField(required=False)
+
+    def validate_version(self, value: Optional[int]) -> Optional[int]:
+        payment_plan = self.context.get("payment_plan")
+        if payment_plan and value:
+            check_concurrency_version_in_mutation(value, payment_plan)
+        return value
 
 
 class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerializer):
