@@ -36,6 +36,8 @@ from hct_mis_api.apps.payment.models import (
 )
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle
+from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory
+from hct_mis_api.apps.steficon.models import Rule
 
 pytestmark = pytest.mark.django_db
 
@@ -1334,6 +1336,7 @@ class TestTargetPopulationActions:
         self.url_rebuild = reverse("api:payments:target-populations-rebuild", kwargs=url_kwargs)
         self.url_mark_ready = reverse("api:payments:target-populations-mark-ready", kwargs=url_kwargs)
         self.url_copy = reverse("api:payments:target-populations-copy", kwargs=url_kwargs)
+        self.url_apply_steficon = reverse("api:payments:target-populations-apply-engine-formula", kwargs=url_kwargs)
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -1457,6 +1460,65 @@ class TestTargetPopulationActions:
         assert response_3.status_code == status.HTTP_400_BAD_REQUEST
         assert "name" in response_3.data
         assert "program_cycle_id" in response_3.data
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.TARGETING_UPDATE], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_apply_engine_formula_tp(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        rule_for_tp = RuleCommitFactory(rule__type=Rule.TYPE_TARGETING, version=11).rule
+        self.target_population.status = PaymentPlan.Status.TP_LOCKED
+        self.target_population.save()
+        data = {
+            "engine_formula_rule_id": encode_id_base64_required(rule_for_tp.pk, "Rule"),
+            "version": self.target_population.version,
+        }
+        response = self.client.post(self.url_apply_steficon, data, format="json")
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.status_code == status.HTTP_200_OK
+            resp_data = response.json()
+            assert "id" in resp_data
+            assert "TARGETING" in resp_data["steficon_rule_targeting"]["rule"]["type"]
+
+    def test_apply_engine_formula_tp_validation_errors(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.TARGETING_UPDATE], self.afghanistan, self.program_active
+        )
+        rule_for_tp = RuleCommitFactory(rule__type=Rule.TYPE_TARGETING, rule__enabled=False, version=22).rule
+        self.target_population.status = PaymentPlan.Status.TP_STEFICON_ERROR
+        self.target_population.save()
+
+        data = {
+            "engine_formula_rule_id": encode_id_base64_required(rule_for_tp.pk, "Rule"),
+            "version": self.target_population.version,
+        }
+        response = self.client.post(self.url_apply_steficon, data, format="json")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "This engine rule is not enabled or is deprecated." in response.data
+
+        self.target_population.status = PaymentPlan.Status.TP_OPEN
+        self.target_population.save()
+        data = {
+            "engine_formula_rule_id": encode_id_base64_required(rule_for_tp.pk, "Rule"),
+            "version": self.target_population.version,
+        }
+        response_2 = self.client.post(self.url_apply_steficon, data, format="json")
+
+        assert response_2.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Not allowed to run engine formula within status TP_OPEN." in response_2.data
+
+        response_3 = self.client.post(self.url_apply_steficon, {}, format="json")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "engine_formula_rule_id" in response_3.data
 
     @pytest.mark.parametrize(
         "permissions, expected_status",

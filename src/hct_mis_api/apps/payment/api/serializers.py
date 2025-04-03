@@ -45,7 +45,10 @@ from hct_mis_api.apps.payment.models.payment import (
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.program.api.serializers import ProgramSmallSerializer
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.steficon.api.serializers import RuleSerializer
+from hct_mis_api.apps.steficon.api.serializers import (
+    RuleCommitSerializer,
+    RuleSerializer,
+)
 from hct_mis_api.apps.targeting.api.serializers import TargetingCriteriaSerializer
 
 
@@ -650,7 +653,7 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
     program = serializers.CharField(source="program_cycle.program.name")
     program_cycle = serializers.CharField(source="program_cycle.title")
     targeting_criteria = TargetingCriteriaSerializer(read_only=True)
-    steficon_rule_targeting = RuleSerializer(read_only=True)
+    steficon_rule_targeting = RuleCommitSerializer(read_only=True)
 
     class Meta(PaymentPlanListSerializer.Meta):
         fields = PaymentPlanListSerializer.Meta.fields + (  # type: ignore
