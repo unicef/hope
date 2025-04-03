@@ -528,7 +528,7 @@ const EditGrievancePage = (): ReactElement => {
                           <Title>
                             <Typography variant="h6">
                               {t(
-                                'Documentation: upload of document: support documentation for the ticket',
+                                'Grievance Supporting Documents: upload of document: support documentation for the ticket',
                               )}
                             </Typography>
                           </Title>
