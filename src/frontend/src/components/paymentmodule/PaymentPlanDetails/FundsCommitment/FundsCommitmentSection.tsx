@@ -43,7 +43,7 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
   paymentPlan,
 }) => {
   const initialFundsCommitment =
-    paymentPlan?.fundsCommitments?.fundsCommitmentNumber;
+    paymentPlan?.fundsCommitments?.fundsCommitmentNumber || '';
   const initialFundsCommitmentItems =
     paymentPlan?.fundsCommitments?.fundsCommitmentItems?.map(
       (el) => el.recSerialNumber,
