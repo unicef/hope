@@ -294,20 +294,10 @@ export const PAYMENT_PLAN_QUERY = gql`
       }
       unsuccessfulPaymentsCount
       supportingDocuments {
-        id
-        title
-        file
+          id
+          title
+          file
       }
-      availableFundsCommitments {
-              fundsCommitmentNumber
-              fundsCommitmentItems {
-                  paymentPlan {
-                      name
-                  }
-                  fundsCommitmentItem
-              }
-          }
-        }
       targetingCriteria {
         __typename
         id
