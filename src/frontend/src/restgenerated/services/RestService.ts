@@ -7,6 +7,8 @@ import type { CountResponse } from '../models/CountResponse';
 import type { DelegatePeople } from '../models/DelegatePeople';
 import type { HouseholdDetail } from '../models/HouseholdDetail';
 import type { HouseholdList } from '../models/HouseholdList';
+import type { HouseholdMember } from '../models/HouseholdMember';
+import type { IndividualDetail } from '../models/IndividualDetail';
 import type { PaginatedAreaList } from '../models/PaginatedAreaList';
 import type { PaginatedAreaListList } from '../models/PaginatedAreaListList';
 import type { PaginatedAreaTypeList } from '../models/PaginatedAreaTypeList';
@@ -14,6 +16,7 @@ import type { PaginatedBeneficiaryGroupList } from '../models/PaginatedBeneficia
 import type { PaginatedBusinessAreaList } from '../models/PaginatedBusinessAreaList';
 import type { PaginatedCountryList } from '../models/PaginatedCountryList';
 import type { PaginatedHouseholdListList } from '../models/PaginatedHouseholdListList';
+import type { PaginatedIndividualListList } from '../models/PaginatedIndividualListList';
 import type { PaginatedOrganizationList } from '../models/PaginatedOrganizationList';
 import type { PaginatedPaymentPlanList } from '../models/PaginatedPaymentPlanList';
 import type { PaginatedPeriodicDataUpdateTemplateListList } from '../models/PaginatedPeriodicDataUpdateTemplateListList';
@@ -584,7 +587,6 @@ export class RestService {
     public static restBusinessAreasHouseholdsList({
         businessAreaSlug,
         address,
-        addressStartswith,
         admin1,
         admin2,
         adminArea,
@@ -593,7 +595,6 @@ export class RestService {
         documentType,
         firstRegistrationDate,
         headOfHouseholdFullName,
-        headOfHouseholdFullNameStartswith,
         headOfHouseholdPhoneNoValid,
         isActiveProgram,
         lastRegistrationDateAfter,
@@ -616,7 +617,6 @@ export class RestService {
     }: {
         businessAreaSlug: string,
         address?: string,
-        addressStartswith?: string,
         admin1?: string,
         admin2?: string,
         adminArea?: string,
@@ -625,7 +625,6 @@ export class RestService {
         documentType?: string,
         firstRegistrationDate?: string,
         headOfHouseholdFullName?: string,
-        headOfHouseholdFullNameStartswith?: string,
         headOfHouseholdPhoneNoValid?: boolean,
         isActiveProgram?: boolean,
         lastRegistrationDateAfter?: string,
@@ -719,7 +718,6 @@ export class RestService {
             },
             query: {
                 'address': address,
-                'address__startswith': addressStartswith,
                 'admin1': admin1,
                 'admin2': admin2,
                 'admin_area': adminArea,
@@ -728,7 +726,6 @@ export class RestService {
                 'document_type': documentType,
                 'first_registration_date': firstRegistrationDate,
                 'head_of_household__full_name': headOfHouseholdFullName,
-                'head_of_household__full_name__startswith': headOfHouseholdFullNameStartswith,
                 'head_of_household__phone_no_valid': headOfHouseholdPhoneNoValid,
                 'is_active_program': isActiveProgram,
                 'last_registration_date_after': lastRegistrationDateAfter,
@@ -764,6 +761,181 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/households/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+        });
+    }
+    /**
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
+     * @returns PaginatedIndividualListList
+     * @throws ApiError
+     */
+    public static restBusinessAreasIndividualsList({
+        businessAreaSlug,
+        admin1,
+        admin2,
+        ageMax,
+        ageMin,
+        documentNumber,
+        documentType,
+        duplicatesOnly,
+        excludedId,
+        flags,
+        fullName,
+        householdAdminArea,
+        householdId,
+        isActiveProgram,
+        lastRegistrationDateAfter,
+        lastRegistrationDateBefore,
+        limit,
+        offset,
+        orderBy,
+        ordering,
+        program,
+        rdiId,
+        rdiMergeStatus,
+        search,
+        sex,
+        status,
+        withdrawn,
+    }: {
+        businessAreaSlug: string,
+        admin1?: string,
+        admin2?: string,
+        ageMax?: string,
+        ageMin?: string,
+        documentNumber?: string,
+        documentType?: string,
+        duplicatesOnly?: boolean,
+        excludedId?: any,
+        /**
+         * * `DUPLICATE` - Duplicate
+         * * `NEEDS_ADJUDICATION` - Needs adjudication
+         * * `SANCTION_LIST_CONFIRMED_MATCH` - Sanction list match
+         * * `SANCTION_LIST_POSSIBLE_MATCH` - Sanction list possible match
+         */
+        flags?: Array<'DUPLICATE' | 'NEEDS_ADJUDICATION' | 'SANCTION_LIST_CONFIRMED_MATCH' | 'SANCTION_LIST_POSSIBLE_MATCH'>,
+        fullName?: string,
+        householdAdminArea?: string,
+        householdId?: string,
+        isActiveProgram?: boolean,
+        lastRegistrationDateAfter?: string,
+        lastRegistrationDateBefore?: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `id` - Id
+         * * `-id` - Id (descending)
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `full_name` - Full name
+         * * `-full_name` - Full name (descending)
+         * * `household__id` - Household  id
+         * * `-household__id` - Household  id (descending)
+         * * `household__unicef_id` - Household  unicef id
+         * * `-household__unicef_id` - Household  unicef id (descending)
+         * * `birth_date` - Birth date
+         * * `-birth_date` - Birth date (descending)
+         * * `sex` - Sex
+         * * `-sex` - Sex (descending)
+         * * `relationship` - Relationship
+         * * `-relationship` - Relationship (descending)
+         * * `household__admin_area__name` - Household  admin area  name
+         * * `-household__admin_area__name` - Household  admin area  name (descending)
+         * * `last_registration_date` - Last registration date
+         * * `-last_registration_date` - Last registration date (descending)
+         * * `first_registration_date` - First registration date
+         * * `-first_registration_date` - First registration date (descending)
+         */
+        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__admin_area__name' | '-household__id' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__admin_area__name' | 'household__id' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        program?: string,
+        rdiId?: string,
+        /**
+         * * `PENDING` - Pending
+         * * `MERGED` - Merged
+         */
+        rdiMergeStatus?: 'MERGED' | 'PENDING',
+        search?: any,
+        /**
+         * Beneficiary gender
+         *
+         * * `MALE` - Male
+         * * `FEMALE` - Female
+         * * `OTHER` - Other
+         * * `NOT_COLLECTED` - Not collected
+         * * `NOT_ANSWERED` - Not answered
+         */
+        sex?: Array<'FEMALE' | 'MALE' | 'NOT_ANSWERED' | 'NOT_COLLECTED' | 'OTHER'>,
+        /**
+         * * `ACTIVE` - Active
+         * * `DUPLICATE` - Duplicate
+         * * `WITHDRAWN` - Withdrawn
+         */
+        status?: Array<'ACTIVE' | 'DUPLICATE' | 'WITHDRAWN'>,
+        withdrawn?: boolean,
+    }): CancelablePromise<PaginatedIndividualListList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/individuals/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'admin1': admin1,
+                'admin2': admin2,
+                'age_max': ageMax,
+                'age_min': ageMin,
+                'document_number': documentNumber,
+                'document_type': documentType,
+                'duplicates_only': duplicatesOnly,
+                'excluded_id': excludedId,
+                'flags': flags,
+                'full_name': fullName,
+                'household__admin_area': householdAdminArea,
+                'household__id': householdId,
+                'is_active_program': isActiveProgram,
+                'last_registration_date_after': lastRegistrationDateAfter,
+                'last_registration_date_before': lastRegistrationDateBefore,
+                'limit': limit,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'program': program,
+                'rdi_id': rdiId,
+                'rdi_merge_status': rdiMergeStatus,
+                'search': search,
+                'sex': sex,
+                'status': status,
+                'withdrawn': withdrawn,
+            },
+        });
+    }
+    /**
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasIndividualsCountRetrieve({
+        businessAreaSlug,
+    }: {
+        businessAreaSlug: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/individuals/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
             },
@@ -1295,7 +1467,6 @@ export class RestService {
         businessAreaSlug,
         programSlug,
         address,
-        addressStartswith,
         admin1,
         admin2,
         adminArea,
@@ -1304,7 +1475,6 @@ export class RestService {
         documentType,
         firstRegistrationDate,
         headOfHouseholdFullName,
-        headOfHouseholdFullNameStartswith,
         headOfHouseholdPhoneNoValid,
         isActiveProgram,
         lastRegistrationDateAfter,
@@ -1328,7 +1498,6 @@ export class RestService {
         businessAreaSlug: string,
         programSlug: string,
         address?: string,
-        addressStartswith?: string,
         admin1?: string,
         admin2?: string,
         adminArea?: string,
@@ -1337,7 +1506,6 @@ export class RestService {
         documentType?: string,
         firstRegistrationDate?: string,
         headOfHouseholdFullName?: string,
-        headOfHouseholdFullNameStartswith?: string,
         headOfHouseholdPhoneNoValid?: boolean,
         isActiveProgram?: boolean,
         lastRegistrationDateAfter?: string,
@@ -1432,7 +1600,6 @@ export class RestService {
             },
             query: {
                 'address': address,
-                'address__startswith': addressStartswith,
                 'admin1': admin1,
                 'admin2': admin2,
                 'admin_area': adminArea,
@@ -1441,7 +1608,6 @@ export class RestService {
                 'document_type': documentType,
                 'first_registration_date': firstRegistrationDate,
                 'head_of_household__full_name': headOfHouseholdFullName,
-                'head_of_household__full_name__startswith': headOfHouseholdFullNameStartswith,
                 'head_of_household__phone_no_valid': headOfHouseholdPhoneNoValid,
                 'is_active_program': isActiveProgram,
                 'last_registration_date_after': lastRegistrationDateAfter,
@@ -1484,6 +1650,33 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/households/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
+     * @returns HouseholdMember
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsHouseholdsMembersRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Household.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<HouseholdMember> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/households/{id}/members/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
@@ -1537,6 +1730,214 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/households/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
+     * @returns PaginatedIndividualListList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsIndividualsList({
+        businessAreaSlug,
+        programSlug,
+        admin1,
+        admin2,
+        ageMax,
+        ageMin,
+        documentNumber,
+        documentType,
+        duplicatesOnly,
+        excludedId,
+        flags,
+        fullName,
+        householdAdminArea,
+        householdId,
+        isActiveProgram,
+        lastRegistrationDateAfter,
+        lastRegistrationDateBefore,
+        limit,
+        offset,
+        orderBy,
+        ordering,
+        program,
+        rdiId,
+        rdiMergeStatus,
+        search,
+        sex,
+        status,
+        withdrawn,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        admin1?: string,
+        admin2?: string,
+        ageMax?: string,
+        ageMin?: string,
+        documentNumber?: string,
+        documentType?: string,
+        duplicatesOnly?: boolean,
+        excludedId?: any,
+        /**
+         * * `DUPLICATE` - Duplicate
+         * * `NEEDS_ADJUDICATION` - Needs adjudication
+         * * `SANCTION_LIST_CONFIRMED_MATCH` - Sanction list match
+         * * `SANCTION_LIST_POSSIBLE_MATCH` - Sanction list possible match
+         */
+        flags?: Array<'DUPLICATE' | 'NEEDS_ADJUDICATION' | 'SANCTION_LIST_CONFIRMED_MATCH' | 'SANCTION_LIST_POSSIBLE_MATCH'>,
+        fullName?: string,
+        householdAdminArea?: string,
+        householdId?: string,
+        isActiveProgram?: boolean,
+        lastRegistrationDateAfter?: string,
+        lastRegistrationDateBefore?: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `id` - Id
+         * * `-id` - Id (descending)
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `full_name` - Full name
+         * * `-full_name` - Full name (descending)
+         * * `household__id` - Household  id
+         * * `-household__id` - Household  id (descending)
+         * * `household__unicef_id` - Household  unicef id
+         * * `-household__unicef_id` - Household  unicef id (descending)
+         * * `birth_date` - Birth date
+         * * `-birth_date` - Birth date (descending)
+         * * `sex` - Sex
+         * * `-sex` - Sex (descending)
+         * * `relationship` - Relationship
+         * * `-relationship` - Relationship (descending)
+         * * `household__admin_area__name` - Household  admin area  name
+         * * `-household__admin_area__name` - Household  admin area  name (descending)
+         * * `last_registration_date` - Last registration date
+         * * `-last_registration_date` - Last registration date (descending)
+         * * `first_registration_date` - First registration date
+         * * `-first_registration_date` - First registration date (descending)
+         */
+        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__admin_area__name' | '-household__id' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__admin_area__name' | 'household__id' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        program?: string,
+        rdiId?: string,
+        /**
+         * * `PENDING` - Pending
+         * * `MERGED` - Merged
+         */
+        rdiMergeStatus?: 'MERGED' | 'PENDING',
+        search?: any,
+        /**
+         * Beneficiary gender
+         *
+         * * `MALE` - Male
+         * * `FEMALE` - Female
+         * * `OTHER` - Other
+         * * `NOT_COLLECTED` - Not collected
+         * * `NOT_ANSWERED` - Not answered
+         */
+        sex?: Array<'FEMALE' | 'MALE' | 'NOT_ANSWERED' | 'NOT_COLLECTED' | 'OTHER'>,
+        /**
+         * * `ACTIVE` - Active
+         * * `DUPLICATE` - Duplicate
+         * * `WITHDRAWN` - Withdrawn
+         */
+        status?: Array<'ACTIVE' | 'DUPLICATE' | 'WITHDRAWN'>,
+        withdrawn?: boolean,
+    }): CancelablePromise<PaginatedIndividualListList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/individuals/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            query: {
+                'admin1': admin1,
+                'admin2': admin2,
+                'age_max': ageMax,
+                'age_min': ageMin,
+                'document_number': documentNumber,
+                'document_type': documentType,
+                'duplicates_only': duplicatesOnly,
+                'excluded_id': excludedId,
+                'flags': flags,
+                'full_name': fullName,
+                'household__admin_area': householdAdminArea,
+                'household__id': householdId,
+                'is_active_program': isActiveProgram,
+                'last_registration_date_after': lastRegistrationDateAfter,
+                'last_registration_date_before': lastRegistrationDateBefore,
+                'limit': limit,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'program': program,
+                'rdi_id': rdiId,
+                'rdi_merge_status': rdiMergeStatus,
+                'search': search,
+                'sex': sex,
+                'status': status,
+                'withdrawn': withdrawn,
+            },
+        });
+    }
+    /**
+     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
+     * @returns IndividualDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsIndividualsRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Individual.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<IndividualDetail> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/individuals/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsIndividualsCountRetrieve({
+        businessAreaSlug,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/individuals/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,

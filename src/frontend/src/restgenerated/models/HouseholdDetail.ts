@@ -25,6 +25,7 @@ export type HouseholdDetail = {
     readonly has_duplicates: boolean;
     registration_data_import: RegistrationDataImport;
     readonly flex_fields: Record<string, any>;
+    readonly linked_grievances: Record<string, any>;
     readonly admin_area_title: string;
     readonly active_individuals_count: number;
     readonly geopoint: Array<number> | null;

@@ -6,6 +6,7 @@ import type { DataSourceEnum } from './DataSourceEnum';
 import type { RegistrationDataImportStatusEnum } from './RegistrationDataImportStatusEnum';
 import type { User } from './User';
 export type RegistrationDataImport = {
+    id: string;
     name: string;
     status?: RegistrationDataImportStatusEnum;
     readonly import_date: string;

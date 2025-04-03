@@ -1,17 +1,16 @@
 import { TableWrapper } from '@components/core/TableWrapper';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import {
-  AllIndividualsForPopulationTableQueryVariables,
-  AllIndividualsQueryVariables,
   HouseholdChoiceDataQuery,
-  IndividualNode,
   IndividualRdiMergeStatus,
-  useAllIndividualsForPopulationTableQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { IndividualList } from '@restgenerated/models/IndividualList';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import { adjustHeadCells, dateToIsoString } from '@utils/utils';
-import { ReactElement } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useProgramContext } from 'src/programContext';
-import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './IndividualsListTableHeadCells';
 import { IndividualsListTableRow } from './IndividualsListTableRow';
 
@@ -31,24 +30,26 @@ export function IndividualsListTable({
   const { programId } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiary_group;
-  const initialVariables: AllIndividualsForPopulationTableQueryVariables = {
-    age: JSON.stringify({ min: filter.ageMin, max: filter.ageMax }),
-    businessArea,
-    sex: [filter.sex],
-    search: filter.search.trim(),
-    documentType: filter.documentType,
-    documentNumber: filter.documentNumber.trim(),
-    admin2: [filter.admin2],
-    flags: filter.flags,
-    status: filter.status,
-    lastRegistrationDate: JSON.stringify({
-      min: dateToIsoString(filter.lastRegistrationDateMin, 'startOfDay'),
-      max: dateToIsoString(filter.lastRegistrationDateMax, 'endOfDay'),
+  const initialQueryVariables = useMemo(
+    () => ({
+      age: JSON.stringify({ min: filter.ageMin, max: filter.ageMax }),
+      businessArea,
+      sex: [filter.sex],
+      search: filter.search.trim(),
+      documentType: filter.documentType,
+      documentNumber: filter.documentNumber.trim(),
+      admin2: filter.admin2,
+      flags: filter.flags,
+      status: filter.status,
+      lastRegistrationDate: JSON.stringify({
+        min: dateToIsoString(filter.lastRegistrationDateMin, 'startOfDay'),
+        max: dateToIsoString(filter.lastRegistrationDateMax, 'endOfDay'),
+      }),
+      program: programId,
+      rdiMergeStatus: IndividualRdiMergeStatus.Merged,
     }),
-    program: programId,
-    rdiMergeStatus: IndividualRdiMergeStatus.Merged,
-  };
-
+    [businessArea, filter, programId],
+  );
   const replacements = {
     unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.member_label} ID`,
     fullName: (_beneficiaryGroup) => _beneficiaryGroup?.member_label,
@@ -64,18 +65,42 @@ export function IndividualsListTable({
     replacements,
   );
 
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: [
+      'businessAreasProgramsHouseholdsList',
+      queryVariables,
+      programId,
+      businessArea,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsIndividualsList({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+        ...queryVariables,
+      }),
+    enabled: !!businessArea && !!programId,
+  });
+
   return (
     <TableWrapper>
-      <UniversalTable<IndividualNode, AllIndividualsQueryVariables>
+      <UniversalRestTable
         title={beneficiaryGroup?.member_label_plural}
         headCells={adjustedHeadCells}
         rowsPerPageOptions={[10, 15, 20]}
-        query={useAllIndividualsForPopulationTableQuery}
-        queriedObjectName="allIndividuals"
-        initialVariables={initialVariables}
+        queryVariables={queryVariables}
+        setQueryVariables={setQueryVariables}
+        data={data}
+        error={error}
+        isLoading={isLoading}
         allowSort={false}
         filterOrderBy={filter.orderBy}
-        renderRow={(row) => (
+        renderRow={(row: IndividualList) => (
           <IndividualsListTableRow
             key={row.id}
             individual={row}
