@@ -577,8 +577,8 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
     can_download_xlsx = graphene.Boolean()
     can_send_xlsx_password = graphene.Boolean()
     failed_wallet_validation_collectors_ids = graphene.List(graphene.String)
-    available_funds_commitments = graphene.Field(FundsCommitmentNode)
-    funds_commitments = graphene.List(FundsCommitmentNode)
+    available_funds_commitments = graphene.List(FundsCommitmentNode)
+    funds_commitments = graphene.Field(FundsCommitmentNode)
 
     class Meta:
         model = PaymentPlan
