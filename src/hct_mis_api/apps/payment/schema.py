@@ -577,7 +577,8 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
     can_download_xlsx = graphene.Boolean()
     can_send_xlsx_password = graphene.Boolean()
     failed_wallet_validation_collectors_ids = graphene.List(graphene.String)
-    available_funds_commitments = graphene.List(FundsCommitmentNode)
+    available_funds_commitments = graphene.Field(FundsCommitmentNode)
+    funds_commitments = graphene.List(FundsCommitmentNode)
 
     class Meta:
         model = PaymentPlan
@@ -819,6 +820,21 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
             )
             for group in groups
         ]
+
+    @staticmethod
+    def resolve_funds_commitments(parent: PaymentPlan, info: Any) -> FundsCommitmentNode:
+        available_items_qs = FundsCommitmentItem.objects.filter(payment_plan=parent, office=parent.business_area)
+
+        # Prefetch related items grouped by `funds_commitment_group`
+        group = (
+            FundsCommitmentGroup.objects.filter(funds_commitment_items__in=available_items_qs)
+            .distinct()
+            .prefetch_related(Prefetch("funds_commitment_items", queryset=available_items_qs, to_attr="filtered_items"))
+        ).first()
+
+        return FundsCommitmentNode(
+            funds_commitment_number=group.funds_commitment_number, funds_commitment_items=group.filtered_items
+        )
 
 
 class PaymentVerificationNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
