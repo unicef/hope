@@ -822,7 +822,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
         ]
 
     @staticmethod
-    def resolve_funds_commitments(parent: PaymentPlan, info: Any) -> FundsCommitmentNode:
+    def resolve_funds_commitments(parent: PaymentPlan, info: Any) -> Optional[FundsCommitmentNode]:
         available_items_qs = FundsCommitmentItem.objects.filter(payment_plan=parent, office=parent.business_area)
 
         # Prefetch related items grouped by `funds_commitment_group`
@@ -832,9 +832,11 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
             .prefetch_related(Prefetch("funds_commitment_items", queryset=available_items_qs, to_attr="filtered_items"))
         ).first()
 
-        return FundsCommitmentNode(
-            funds_commitment_number=group.funds_commitment_number, funds_commitment_items=group.filtered_items
-        )
+        if group:
+            return FundsCommitmentNode(
+                funds_commitment_number=group.funds_commitment_number, funds_commitment_items=group.filtered_items
+            )
+        return None
 
 
 class PaymentVerificationNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
