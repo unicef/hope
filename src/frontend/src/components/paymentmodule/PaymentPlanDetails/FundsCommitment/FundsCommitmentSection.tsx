@@ -71,18 +71,14 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
   const handleItemsChange = (event: SelectChangeEvent<string[]>) => {
     const value = event.target.value as string[];
     if (value.includes('select-all')) {
-      // If "Select All" is chosen, select all items or clear all
-      if (
-        selectedItems.length ===
-        (selectedCommitment?.fundsCommitmentItems.length || 0)
-      ) {
+      const allItems =
+        selectedCommitment?.fundsCommitmentItems.map((item) =>
+          item.recSerialNumber.toString(),
+        ) || [];
+      if (selectedItems.length === allItems.length) {
         setSelectedItems([]);
       } else {
-        setSelectedItems(
-          selectedCommitment?.fundsCommitmentItems.map((item) =>
-            item.recSerialNumber.toString(),
-          ) || [],
-        );
+        setSelectedItems(allItems);
       }
     } else {
       setSelectedItems(value);
@@ -163,9 +159,20 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
                 <MenuItem value="select-all">
                   <Checkbox
                     checked={
-                      selectedItems.length ===
-                      selectedCommitment.fundsCommitmentItems.length
+                      selectedCommitment?.fundsCommitmentItems.length > 0 &&
+                      selectedCommitment.fundsCommitmentItems.every((item) =>
+                        selectedItems.includes(item.recSerialNumber.toString()),
+                      )
                     }
+                    indeterminate={
+                      selectedCommitment?.fundsCommitmentItems.some((item) =>
+                        selectedItems.includes(item.recSerialNumber.toString()),
+                      ) &&
+                      !selectedCommitment.fundsCommitmentItems.every((item) =>
+                        selectedItems.includes(item.recSerialNumber.toString()),
+                      )
+                    }
+                    onChange={handleItemsChange}
                   />
                   <ListItemText primary={t('Select All')} />
                 </MenuItem>
@@ -175,7 +182,9 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
                     value={item.recSerialNumber}
                   >
                     <Checkbox
-                      checked={selectedItems.includes(item.recSerialNumber)}
+                      checked={selectedItems.includes(
+                        item.recSerialNumber.toString(),
+                      )}
                     />
                     <ListItemText
                       primary={`${item.fundsCommitmentItem} - ${item.recSerialNumber}`}
