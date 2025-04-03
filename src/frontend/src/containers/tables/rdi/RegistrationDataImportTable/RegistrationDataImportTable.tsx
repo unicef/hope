@@ -8,13 +8,16 @@ import {
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { adjustHeadCells, dateToIsoString, decodeIdString } from '@utils/utils';
-import { ReactElement } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './RegistrationDataImportTableHeadCells';
 import { RegistrationDataImportTableRow } from './RegistrationDataImportTableRow';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
+import { UniversalRestQueryTable } from '@components/rest/UniversalRestQueryTable/UniversalRestQueryTable';
+import { RestService } from '@restgenerated/services/RestService';
 
 interface RegistrationDataImportProps {
   filter;
@@ -58,12 +61,23 @@ function RegistrationDataImportTable({
     status: filter.status !== '' ? filter.status : undefined,
     businessArea,
     program: programId,
-    importDateRange: JSON.stringify({
-      min: dateToIsoString(filter.importDateRangeMin, 'startOfDay'),
-      max: dateToIsoString(filter.importDateRangeMax, 'endOfDay'),
-    }),
-    size: JSON.stringify({ min: filter.sizeMin, max: filter.sizeMax }),
+    importDateRange:
+      filter.importDateRangeMin || filter.importDateRangeMax
+        ? JSON.stringify({
+            min: dateToIsoString(filter.importDateRangeMin, 'startOfDay'),
+            max: dateToIsoString(filter.importDateRangeMax, 'endOfDay'),
+          })
+        : undefined,
+    size:
+      filter.sizeMin || filter.sizeMax
+        ? JSON.stringify({ min: filter.sizeMin, max: filter.sizeMax })
+        : undefined,
   };
+  const [queryVariables, setQueryVariables] = useState(initialVariables);
+
+  useEffect(() => {
+    setQueryVariables(initialVariables);
+  }, [initialVariables]);
 
   const handleRadioChange = (id: string): void => {
     handleChange(id);
@@ -104,25 +118,7 @@ function RegistrationDataImportTable({
 
   const renderTable = (): ReactElement => (
     <TableWrapper>
-      <UniversalTable<
-        RegistrationDataImportNode,
-        AllRegistrationDataImportsQueryVariables
-      >
-        title={noTitle ? null : t('List of Imports')}
-        getTitle={(data) =>
-          noTitle
-            ? null
-            : `${t('List of Imports')} (${
-                data?.allRegistrationDataImports?.totalCount || 0
-              })`
-        }
-        headCells={prepareHeadCells()}
-        defaultOrderBy="importDate"
-        defaultOrderDirection="desc"
-        rowsPerPageOptions={[10, 15, 20]}
-        query={useAllRegistrationDataImportsQuery}
-        queriedObjectName="allRegistrationDataImports"
-        initialVariables={initialVariables}
+      <UniversalRestQueryTable
         renderRow={(row) => (
           <RegistrationDataImportTableRow
             key={row.id}
@@ -135,6 +131,11 @@ function RegistrationDataImportTable({
             }
           />
         )}
+        title={noTitle ? null : t('List of Imports')}
+        headCells={prepareHeadCells()}
+        queryVariables={queryVariables}
+        setQueryVariables={setQueryVariables}
+        query={RestService.restBusinessAreasProgramsRegistrationDataImportsList}
       />
     </TableWrapper>
   );

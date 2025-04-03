@@ -241,6 +241,12 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
     def biometric_deduplication_enabled(self) -> bool:
         return self.program.biometric_deduplication_enabled
 
+    @property
+    def biometric_deduplicated(self)->str:
+        if self.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_FINISHED:
+            return "YES"
+        return "NO"
+
     def update_duplicates_against_population_statistics(self) -> None:
         self.golden_record_duplicates = Individual.objects.filter(
             registration_data_import_id=self.id,

@@ -21,6 +21,7 @@ import {
   PROGRAM_STATES,
   TARGETING_STATES,
 } from './constants';
+import _ from 'lodash';
 
 const Gender = new Map([
   ['MALE', 'Male'],
@@ -1228,3 +1229,20 @@ export const filterEmptyParams = (params) => {
     ),
   );
 };
+
+export function deepCamelize(data) {
+  if (_.isArray(data)) {
+    return data.map(deepCamelize);
+  } else if (_.isObject(data)) {
+    return _.reduce(
+      data,
+      (result, value, key) => {
+        const camelKey = _.camelCase(key);
+        result[camelKey] = deepCamelize(value);
+        return result;
+      },
+      {},
+    );
+  }
+  return data;
+}

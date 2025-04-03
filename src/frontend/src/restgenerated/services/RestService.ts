@@ -1912,35 +1912,68 @@ export class RestService {
         });
     }
     /**
+     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaginatedRegistrationDataImportListList
      * @throws ApiError
      */
     public static restBusinessAreasProgramsRegistrationDataImportsList({
         businessAreaSlug,
         programSlug,
+        importDate,
+        importDateRange,
+        importedById,
         limit,
         name,
+        nameStartswith,
         offset,
+        orderBy,
         ordering,
+        search,
+        size,
         status,
-        updatedAtAfter,
-        updatedAtBefore,
+        totalHouseholdsCountWithValidPhoneNoMax,
+        totalHouseholdsCountWithValidPhoneNoMin,
     }: {
         businessAreaSlug: string,
         programSlug: string,
+        importDate?: string,
+        importDateRange?: string,
+        importedById?: string,
         /**
          * Number of results to return per page.
          */
         limit?: number,
         name?: string,
+        nameStartswith?: string,
         /**
          * The initial index from which to return the results.
          */
         offset?: number,
         /**
+         * Ordering
+         *
+         * * `name` - Name
+         * * `-name` - Name (descending)
+         * * `status` - Status
+         * * `-status` - Status (descending)
+         * * `import_date` - Import date
+         * * `-import_date` - Import date (descending)
+         * * `number_of_individuals` - Number of individuals
+         * * `-number_of_individuals` - Number of individuals (descending)
+         * * `number_of_households` - Number of households
+         * * `-number_of_households` - Number of households (descending)
+         * * `data_source` - Data source
+         * * `-data_source` - Data source (descending)
+         * * `imported_by__first_name` - Imported by  first name
+         * * `-imported_by__first_name` - Imported by  first name (descending)
+         */
+        orderBy?: Array<'-data_source' | '-import_date' | '-imported_by__first_name' | '-name' | '-number_of_households' | '-number_of_individuals' | '-status' | 'data_source' | 'import_date' | 'imported_by__first_name' | 'name' | 'number_of_households' | 'number_of_individuals' | 'status'>,
+        /**
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        search?: string,
+        size?: number,
         /**
          * * `LOADING` - Loading
          * * `DEDUPLICATION` - Deduplication
@@ -1956,8 +1989,8 @@ export class RestService {
          * * `REFUSED` - Refused import
          */
         status?: 'DEDUPLICATION' | 'DEDUPLICATION_FAILED' | 'IMPORTING' | 'IMPORT_ERROR' | 'IMPORT_SCHEDULED' | 'IN_REVIEW' | 'LOADING' | 'MERGED' | 'MERGE_ERROR' | 'MERGE_SCHEDULED' | 'MERGING' | 'REFUSED',
-        updatedAtAfter?: string,
-        updatedAtBefore?: string,
+        totalHouseholdsCountWithValidPhoneNoMax?: any,
+        totalHouseholdsCountWithValidPhoneNoMin?: any,
     }): CancelablePromise<PaginatedRegistrationDataImportListList> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -1967,17 +2000,73 @@ export class RestService {
                 'program_slug': programSlug,
             },
             query: {
+                'import_date': importDate,
+                'import_date_range': importDateRange,
+                'imported_by__id': importedById,
                 'limit': limit,
                 'name': name,
+                'name__startswith': nameStartswith,
                 'offset': offset,
+                'order_by': orderBy,
                 'ordering': ordering,
+                'search': search,
+                'size': size,
                 'status': status,
-                'updated_at_after': updatedAtAfter,
-                'updated_at_before': updatedAtBefore,
+                'total_households_count_with_valid_phone_no_max': totalHouseholdsCountWithValidPhoneNoMax,
+                'total_households_count_with_valid_phone_no_min': totalHouseholdsCountWithValidPhoneNoMin,
             },
         });
     }
     /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns RegistrationDataImportList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsRegistrationDataImportsRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Registration data import.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<RegistrationDataImportList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsRegistrationDataImportsCountRetrieve({
+        businessAreaSlug,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns RegistrationDataImportList
      * @throws ApiError
      */
@@ -2002,6 +2091,7 @@ export class RestService {
         });
     }
     /**
+     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns RegistrationDataImportList
      * @throws ApiError
      */

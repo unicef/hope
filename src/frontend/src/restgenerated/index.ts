@@ -7,6 +7,7 @@ export { CancelablePromise, CancelError } from './core/CancelablePromise';
 export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
+export type { Account } from './models/Account';
 export { ActionEnum } from './models/ActionEnum';
 export { Admin1Enum } from './models/Admin1Enum';
 export { Admin2Enum } from './models/Admin2Enum';
