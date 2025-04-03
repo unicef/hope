@@ -11,8 +11,8 @@ def migrate_gis_geopoint(apps, schema_editor):  # pragma: no cover
     for household_ids_chunk in chunks(household_ids, 100):
         households = Household.objects.filter(id__in=household_ids_chunk)
         for household in households:
-            household.latitude = household.point.y
-            household.longitude = household.point.x
+            household.latitude = household.geopoint.y
+            household.longitude = household.geopoint.x
         Household.objects.bulk_update(households, ["latitude", "longitude"])
 
 class Migration(migrations.Migration):
