@@ -2747,7 +2747,7 @@ type PaymentPlanNode implements Node {
   paymentVerificationSummary: PaymentVerificationSummaryNode
   messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   surveys(offset: Int, before: String, after: String, first: Int, last: Int): SurveyNodeConnection!
-  fundsCommitments: [FundsCommitmentNode]
+  fundsCommitments: FundsCommitmentNode
   adminUrl: String
   currencyName: String
   hasPaymentListExportFile: Boolean
@@ -2778,7 +2778,7 @@ type PaymentPlanNode implements Node {
   canDownloadXlsx: Boolean
   canSendXlsxPassword: Boolean
   failedWalletValidationCollectorsIds: [String]
-  availableFundsCommitments: FundsCommitmentNode
+  availableFundsCommitments: [FundsCommitmentNode]
 }
 
 type PaymentPlanNodeConnection {
