@@ -3,9 +3,10 @@ from typing import Any
 
 from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import mixins, status
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
+from rest_framework.mixins import RetrieveModelMixin, ListModelMixin
 from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -13,13 +14,14 @@ from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.api.mixins import BaseViewSet, ProgramMixin
+from hct_mis_api.apps.core.api.mixins import BaseViewSet, ProgramMixin, SerializerActionMixin, DecodeIdForDetailMixin, \
+    CountActionMixin
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.api.caches import RDIKeyConstructor
-from hct_mis_api.apps.registration_data.api.filters import RegistrationDataImportFilter
 from hct_mis_api.apps.registration_data.api.serializers import (
     RegistrationDataImportListSerializer,
 )
+from hct_mis_api.apps.registration_data.filters import RegistrationDataImportFilter
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     deduplication_engine_process,
@@ -31,17 +33,32 @@ logger = logging.getLogger(__name__)
 
 class RegistrationDataImportViewSet(
     ProgramMixin,
-    mixins.ListModelMixin,
+    SerializerActionMixin,
+    DecodeIdForDetailMixin,
+    CountActionMixin,
+    RetrieveModelMixin,
+    ListModelMixin,
     BaseViewSet,
 ):
     queryset = RegistrationDataImport.objects.all()
     serializer_class = RegistrationDataImportListSerializer
-    PERMISSIONS = [Permissions.RDI_VIEW_LIST]
+    serializer_classes_by_action = {
+        "list": RegistrationDataImportListSerializer,
+        "retrieve": RegistrationDataImportListSerializer,
+    }
+    permissions_by_action = {
+        "list": [
+            Permissions.RDI_VIEW_LIST,
+        ],
+        "retrieve": [
+            Permissions.RDI_VIEW_DETAILS,
+        ],
+    }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = RegistrationDataImportFilter
-
-    @etag_decorator(RDIKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=RDIKeyConstructor())
+    #
+    # @etag_decorator(RDIKeyConstructor)
+    # @cache_response(timeout=config.REST_API_TTL, key_func=RDIKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
