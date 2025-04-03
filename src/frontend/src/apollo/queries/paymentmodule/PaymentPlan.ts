@@ -44,7 +44,13 @@ export const PAYMENT_PLAN_QUERY = gql`
           recSerialNumber
         }
       }
-      fundCommitmentItemsIds
+      fundsCommitments {
+        fundsCommitmentNumber
+        fundsCommitmentItems {
+          fundsCommitmentItem
+          recSerialNumber
+        }
+      }
       deliveryMechanism {
         id
         name

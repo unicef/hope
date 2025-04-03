@@ -42,13 +42,22 @@ interface FundsCommitmentSectionProps {
 const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
   paymentPlan,
 }) => {
+  const initialFundsCommitment =
+    paymentPlan?.fundsCommitments?.fundsCommitmentNumber;
+  const initialFundsCommitmentItems =
+    paymentPlan?.fundsCommitments?.fundsCommitmentItems?.map(
+      (el) => el.recSerialNumber,
+    );
+
   const [mutate, { loading: loadingAssign }] =
     useAssignFundsCommitmentsPaymentPlanMutation();
+
   const [selectedFundsCommitment, setSelectedFundsCommitment] =
-    useState<string>('');
+    useState<string>(initialFundsCommitment || '');
   const [selectedItems, setSelectedItems] = useState<string[]>(
-    paymentPlan.fundCommitmentItemsIds || [],
+    initialFundsCommitmentItems || [],
   );
+
   const { showMessage } = useSnackbar();
   const permissions = usePermissions();
 
