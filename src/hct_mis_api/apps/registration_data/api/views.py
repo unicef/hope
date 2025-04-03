@@ -19,7 +19,7 @@ from hct_mis_api.apps.core.api.mixins import BaseViewSet, ProgramMixin, Serializ
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.api.caches import RDIKeyConstructor
 from hct_mis_api.apps.registration_data.api.serializers import (
-    RegistrationDataImportListSerializer,
+    RegistrationDataImportListSerializer, RegistrationDataImportDetailSerializer,
 )
 from hct_mis_api.apps.registration_data.filters import RegistrationDataImportFilter
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -34,7 +34,6 @@ logger = logging.getLogger(__name__)
 class RegistrationDataImportViewSet(
     ProgramMixin,
     SerializerActionMixin,
-    DecodeIdForDetailMixin,
     CountActionMixin,
     RetrieveModelMixin,
     ListModelMixin,
@@ -44,7 +43,7 @@ class RegistrationDataImportViewSet(
     serializer_class = RegistrationDataImportListSerializer
     serializer_classes_by_action = {
         "list": RegistrationDataImportListSerializer,
-        "retrieve": RegistrationDataImportListSerializer,
+        "retrieve": RegistrationDataImportDetailSerializer,
     }
     permissions_by_action = {
         "list": [
