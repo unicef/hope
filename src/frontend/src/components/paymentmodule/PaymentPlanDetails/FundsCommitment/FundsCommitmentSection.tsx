@@ -104,7 +104,7 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
   };
 
   const handleSubmit = async () => {
-    if (paymentPlan && selectedItems.length > 0) {
+    if (paymentPlan) {
       try {
         await mutate({
           variables: {
@@ -145,6 +145,9 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
               onChange={handleFundsCommitmentChange}
               label={t('Funds Commitment')}
             >
+              <MenuItem value="">
+                <em>{t('None')}</em>
+              </MenuItem>
               {availableFundsCommitments.map((commitment) => (
                 <MenuItem
                   key={commitment.fundsCommitmentNumber}
@@ -223,11 +226,7 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
                 loading={loadingAssign}
                 color="primary"
                 onClick={handleSubmit}
-                disabled={
-                  !canAssignFunds ||
-                  !selectedFundsCommitment ||
-                  selectedItems.length === 0
-                }
+                disabled={!canAssignFunds}
               >
                 {t('Assign Funds Commitments')}
               </LoadingButton>
