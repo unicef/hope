@@ -45,17 +45,17 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
   const initialFundsCommitment =
     paymentPlan?.fundsCommitments?.fundsCommitmentNumber || '';
   const initialFundsCommitmentItems =
-    paymentPlan?.fundsCommitments?.fundsCommitmentItems?.map((el) =>
-      el.recSerialNumber.toString(),
-    );
+    paymentPlan?.fundsCommitments?.fundsCommitmentItems?.map(
+      (el) => el.recSerialNumber,
+    ) || [];
 
   const [mutate, { loading: loadingAssign }] =
     useAssignFundsCommitmentsPaymentPlanMutation();
 
   const [selectedFundsCommitment, setSelectedFundsCommitment] =
-    useState<string>(initialFundsCommitment || '');
-  const [selectedItems, setSelectedItems] = useState<string[]>(
-    initialFundsCommitmentItems || [],
+    useState<string>(initialFundsCommitment);
+  const [selectedItems, setSelectedItems] = useState<number[]>(
+    initialFundsCommitmentItems,
   );
 
   const { showMessage } = useSnackbar();
@@ -71,7 +71,8 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
     setSelectedItems([]);
   };
 
-  const availableFundsCommitments = paymentPlan.availableFundsCommitments || [];
+  const availableFundsCommitments =
+    paymentPlan?.availableFundsCommitments || [];
   const selectedCommitment = availableFundsCommitments.find(
     (commitment) =>
       commitment.fundsCommitmentNumber === String(selectedFundsCommitment),
@@ -79,18 +80,26 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
 
   const handleItemsChange = (event: SelectChangeEvent<string[]>) => {
     const value = event.target.value as string[];
+
     if (value.includes('select-all')) {
       const allItems =
-        selectedCommitment?.fundsCommitmentItems.map((item) =>
-          item.recSerialNumber.toString(),
+        selectedCommitment?.fundsCommitmentItems.map(
+          (item) => item.recSerialNumber,
         ) || [];
       if (selectedItems.length === allItems.length) {
-        setSelectedItems([]);
+        setSelectedItems([]); // Deselect all
       } else {
-        setSelectedItems(allItems);
+        setSelectedItems(allItems); // Select all
       }
     } else {
-      setSelectedItems(value);
+      const clickedItem = Number(value[value.length - 1]); // Get the last clicked item
+      if (selectedItems.includes(clickedItem)) {
+        // If the item is already selected, remove it
+        setSelectedItems(selectedItems.filter((item) => item !== clickedItem));
+      } else {
+        // If the item is not selected, add it
+        setSelectedItems([...selectedItems, clickedItem]);
+      }
     }
   };
 
@@ -99,13 +108,18 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
       try {
         await mutate({
           variables: {
-            paymentPlanId: paymentPlan?.id,
-            fundCommitmentItemsIds: selectedItems,
+            paymentPlanId: paymentPlan.id,
+            fundCommitmentItemsIds: selectedItems.map((number) =>
+              number.toString(),
+            ),
           },
         });
-        showMessage('Funds commitment items assigned successfully');
-      } catch (e) {
-        e.graphQLErrors.map((x) => showMessage(x.message));
+        showMessage(t('Funds commitment items assigned successfully'));
+      } catch (error: any) {
+        const errorMessages = error.graphQLErrors?.map(
+          (x: any) => x.message,
+        ) || [t('An error occurred while assigning funds commitments')];
+        errorMessages.forEach((message) => showMessage(message));
       }
     }
   };
@@ -148,7 +162,7 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
               <InputLabel>{t('Funds Commitment Items')}</InputLabel>
               <Select
                 multiple
-                value={selectedItems}
+                value={selectedItems.map(String)}
                 onChange={handleItemsChange}
                 renderValue={(selected) => selected.join(', ')}
                 endAdornment={
@@ -170,18 +184,17 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
                     checked={
                       selectedCommitment?.fundsCommitmentItems.length > 0 &&
                       selectedCommitment.fundsCommitmentItems.every((item) =>
-                        selectedItems.includes(item.recSerialNumber.toString()),
+                        selectedItems.includes(item.recSerialNumber),
                       )
                     }
                     indeterminate={
                       selectedCommitment?.fundsCommitmentItems.some((item) =>
-                        selectedItems.includes(item.recSerialNumber.toString()),
+                        selectedItems.includes(item.recSerialNumber),
                       ) &&
                       !selectedCommitment.fundsCommitmentItems.every((item) =>
-                        selectedItems.includes(item.recSerialNumber.toString()),
+                        selectedItems.includes(item.recSerialNumber),
                       )
                     }
-                    onChange={handleItemsChange}
                   />
                   <ListItemText primary={t('Select All')} />
                 </MenuItem>
@@ -191,9 +204,7 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
                     value={item.recSerialNumber}
                   >
                     <Checkbox
-                      checked={selectedItems.includes(
-                        item.recSerialNumber.toString(),
-                      )}
+                      checked={selectedItems.includes(item.recSerialNumber)}
                     />
                     <ListItemText
                       primary={`${item.fundsCommitmentItem} - ${item.recSerialNumber}`}
