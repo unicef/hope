@@ -1300,8 +1300,8 @@ class AssignFundsCommitmentsMutation(PermissionMutation):
             raise GraphQLError("Payment plan must be in review")
 
         funds_commitment_items = FundsCommitmentItem.objects.filter(rec_serial_number__in=fund_commitment_items_ids)
-        if funds_commitment_items.filter(payment_plan_id__isnull=False).exists():
-            raise GraphQLError("Chosen Funds Commitments are already assigned to Payment Plan")
+        if funds_commitment_items.filter(payment_plan_id__isnull=False).exclude(payment_plan=payment_plan).exists():
+            raise GraphQLError("Chosen Funds Commitments are already assigned to different Payment Plan")
 
         if funds_commitment_items.exclude(office=payment_plan.business_area).exists():
             raise GraphQLError("Chosen Funds Commitments have wrong Business Area")
