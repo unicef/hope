@@ -247,6 +247,21 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
             return "YES"
         return "NO"
 
+    @property
+    def can_merge(self) -> bool:
+        if not self.program.is_active():
+            return False
+
+        is_still_processing = RegistrationDataImport.objects.filter(
+            program=self.program,
+            deduplication_engine_status__in=[
+                RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
+            ],
+        ).exists()
+        if is_still_processing:
+            return False
+        return True
+
     def update_duplicates_against_population_statistics(self) -> None:
         self.golden_record_duplicates = Individual.objects.filter(
             registration_data_import_id=self.id,

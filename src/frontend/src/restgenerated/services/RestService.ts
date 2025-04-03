@@ -43,6 +43,7 @@ import type { ProgramDetail } from '../models/ProgramDetail';
 import type { PushPeople } from '../models/PushPeople';
 import type { RDI } from '../models/RDI';
 import type { RDINested } from '../models/RDINested';
+import type { RegistrationDataImportDetail } from '../models/RegistrationDataImportDetail';
 import type { RegistrationDataImportList } from '../models/RegistrationDataImportList';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -2019,7 +2020,7 @@ export class RestService {
     }
     /**
      * Adds a count action to the viewset that returns the count of the queryset.
-     * @returns RegistrationDataImportList
+     * @returns RegistrationDataImportDetail
      * @throws ApiError
      */
     public static restBusinessAreasProgramsRegistrationDataImportsRetrieve({
@@ -2033,7 +2034,7 @@ export class RestService {
          */
         id: string,
         programSlug: string,
-    }): CancelablePromise<RegistrationDataImportList> {
+    }): CancelablePromise<RegistrationDataImportDetail> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/{id}/',
