@@ -29,6 +29,7 @@ class HouseholdListSerializer(serializers.ModelSerializer):
     program = serializers.CharField(source="program.name")
     total_cash_received = serializers.DecimalField(max_digits=64, decimal_places=2)
     total_cash_received_usd = serializers.DecimalField(max_digits=64, decimal_places=2)
+    has_duplicates = serializers.SerializerMethodField()
 
     class Meta:
         model = Household
@@ -45,7 +46,14 @@ class HouseholdListSerializer(serializers.ModelSerializer):
             "total_cash_received",
             "total_cash_received_usd",
             "last_registration_date",
+            "currency",
+            "has_duplicates",
+            "sanction_list_possible_match",
+            "sanction_list_confirmed_match",
         ]
+
+    def get_has_duplicates(self, obj: Household) -> bool:
+        return obj.individuals.filter(deduplication_golden_record_status=DUPLICATE).exists()
 
 
 class HeadOfHouseholdSerializer(serializers.ModelSerializer):

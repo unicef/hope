@@ -9,7 +9,7 @@ export type TargetPopulationList = {
      */
     name?: string | null;
     readonly status: string;
-    created_by?: string;
-    readonly created_at: string;
+    createdBy?: string;
+    readonly createdAt: string;
 };
 

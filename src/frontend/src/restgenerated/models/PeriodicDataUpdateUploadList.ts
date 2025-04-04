@@ -5,9 +5,9 @@
 export type PeriodicDataUpdateUploadList = {
     readonly id: number;
     template: number;
-    readonly created_at: string;
-    created_by?: string;
+    readonly createdAt: string;
+    createdBy?: string;
     status: string;
-    status_display: string;
+    statusDisplay: string;
 };
 

@@ -5,10 +5,10 @@
 import type { RdiMergeStatusEnum } from './RdiMergeStatusEnum';
 export type Account = {
     readonly id: string;
-    account_type: string;
+    accountType: string;
     data?: any;
-    rdi_merge_status?: RdiMergeStatusEnum;
-    readonly created_at: string;
-    readonly updated_at: string;
+    rdiMergeStatus?: RdiMergeStatusEnum;
+    readonly createdAt: string;
+    readonly updatedAt: string;
 };
 

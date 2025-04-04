@@ -5,10 +5,10 @@
 export type PeriodicDataUpdateUploadDetail = {
     readonly id: number;
     template: number;
-    readonly created_at: string;
-    created_by?: string;
+    readonly createdAt: string;
+    createdBy?: string;
     status: string;
-    status_display: string;
-    errors_info: any;
+    statusDisplay: string;
+    errorsInfo: any;
 };
 

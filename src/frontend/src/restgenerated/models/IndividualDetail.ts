@@ -19,23 +19,23 @@ import type { SexEnum } from './SexEnum';
 import type { WorkStatusEnum } from './WorkStatusEnum';
 export type IndividualDetail = {
     id: string;
-    unicef_id?: string | null;
+    unicefId?: string | null;
     /**
      * Full Name of the Beneficiary
      */
-    full_name: string;
+    fullName: string;
     /**
      * First name of the Beneficiary
      */
-    given_name?: string;
+    givenName?: string;
     /**
      * Middle name of the Beneficiary
      */
-    middle_name?: string;
+    middleName?: string;
     /**
      * Last name of the Beneficiary
      */
-    family_name?: string;
+    familyName?: string;
     /**
      * Beneficiary gender
      *
@@ -50,11 +50,11 @@ export type IndividualDetail = {
     /**
      * Beneficiary date of birth
      */
-    birth_date: string;
+    birthDate: string;
     /**
      * Estimated birth date flag
      */
-    estimated_birth_date?: boolean;
+    estimatedBirthDate?: boolean;
     /**
      * Beneficiary marital status
      *
@@ -65,7 +65,7 @@ export type IndividualDetail = {
      * * `SINGLE` - Single
      * * `WIDOWED` - Widowed
      */
-    marital_status?: MaritalStatusEnum;
+    maritalStatus?: MaritalStatusEnum;
     /**
      * Work status
      *
@@ -73,7 +73,7 @@ export type IndividualDetail = {
      * * `0` - No
      * * `NOT_PROVIDED` - Not provided
      */
-    work_status?: WorkStatusEnum;
+    workStatus?: WorkStatusEnum;
     /**
      * Pregnant status
      */
@@ -104,8 +104,8 @@ export type IndividualDetail = {
      * * `FREE_UNION` - Free union
      */
     relationship?: RelationshipEnum;
-    registration_data_import: RegistrationDataImport;
-    readonly import_id: string;
+    registrationDataImport: RegistrationDataImport;
+    readonly importId: string;
     /**
      * Preferred language
      *
@@ -126,8 +126,8 @@ export type IndividualDetail = {
      * * `uk-ua` - український | Ukrainian
      * * `hi-hi` - हिंदी
      */
-    preferred_language?: PreferredLanguageEnum | null;
-    readonly roles_in_households: Record<string, any>;
+    preferredLanguage?: PreferredLanguageEnum | null;
+    readonly rolesInHouseholds: Record<string, any>;
     /**
      * Observed disability status
      *
@@ -139,7 +139,7 @@ export type IndividualDetail = {
      * * `SELF_CARE` - Difficulty with self care (washing, dressing)
      * * `COMMUNICATING` - Difficulty communicating (e.g understanding or being understood)
      */
-    observed_disability?: ObservedDisabilityEnum;
+    observedDisability?: ObservedDisabilityEnum;
     /**
      * Seeing disability
      *
@@ -148,7 +148,7 @@ export type IndividualDetail = {
      * * `CANNOT_DO` - Cannot do at all
      * * `SOME_DIFFICULTY` - Some difficulty
      */
-    seeing_disability?: SeeingDisabilityEnum;
+    seeingDisability?: SeeingDisabilityEnum;
     /**
      * Hearing disability
      *
@@ -157,7 +157,7 @@ export type IndividualDetail = {
      * * `CANNOT_DO` - Cannot do at all
      * * `SOME_DIFFICULTY` - Some difficulty
      */
-    hearing_disability?: HearingDisabilityEnum;
+    hearingDisability?: HearingDisabilityEnum;
     /**
      * Physical disability
      *
@@ -166,7 +166,7 @@ export type IndividualDetail = {
      * * `CANNOT_DO` - Cannot do at all
      * * `SOME_DIFFICULTY` - Some difficulty
      */
-    physical_disability?: PhysicalDisabilityEnum;
+    physicalDisability?: PhysicalDisabilityEnum;
     /**
      * Memory disability
      *
@@ -175,7 +175,7 @@ export type IndividualDetail = {
      * * `CANNOT_DO` - Cannot do at all
      * * `SOME_DIFFICULTY` - Some difficulty
      */
-    memory_disability?: MemoryDisabilityEnum;
+    memoryDisability?: MemoryDisabilityEnum;
     /**
      * Selfcare disability
      *
@@ -184,7 +184,7 @@ export type IndividualDetail = {
      * * `CANNOT_DO` - Cannot do at all
      * * `SOME_DIFFICULTY` - Some difficulty
      */
-    selfcare_disability?: SelfcareDisabilityEnum;
+    selfcareDisability?: SelfcareDisabilityEnum;
     /**
      * Comms disability
      *
@@ -193,7 +193,7 @@ export type IndividualDetail = {
      * * `CANNOT_DO` - Cannot do at all
      * * `SOME_DIFFICULTY` - Some difficulty
      */
-    comms_disability?: CommsDisabilityEnum;
+    commsDisability?: CommsDisabilityEnum;
     /**
      * Disability status
      *
@@ -203,8 +203,8 @@ export type IndividualDetail = {
     disability?: DisabilityEnum;
     readonly documents: Record<string, any>;
     readonly identities: Record<string, any>;
-    readonly bank_account_info: Record<string, any>;
-    readonly delivery_mechanisms_data: Record<string, any>;
+    readonly bankAccountInfo: Record<string, any>;
+    readonly deliveryMechanismsData: Record<string, any>;
     /**
      * Beneficiary email address
      */
@@ -212,26 +212,26 @@ export type IndividualDetail = {
     /**
      * Beneficiary phone number
      */
-    phone_no?: string;
+    phoneNo?: string;
     /**
      * Beneficiary phone number alternative
      */
-    phone_no_alternative?: string;
-    readonly sanction_list_last_check: string | null;
+    phoneNoAlternative?: string;
+    readonly sanctionListLastCheck: string | null;
     /**
      * Cryptocurrency wallet name
      */
-    wallet_name?: string;
+    walletName?: string;
     /**
      * Cryptocurrency blockchain name
      */
-    blockchain_name?: string;
+    blockchainName?: string;
     /**
      * Cryptocurrency wallet address
      */
-    wallet_address?: string;
+    walletAddress?: string;
     readonly status: string;
-    readonly flex_fields: Record<string, any>;
-    readonly linked_grievances: Record<string, any>;
+    readonly flexFields: Record<string, any>;
+    readonly linkedGrievances: Record<string, any>;
 };
 

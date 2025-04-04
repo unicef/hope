@@ -5,6 +5,7 @@ export function useBaseUrl(): {
   baseUrl: string;
   programId: string;
   programSlug: string;
+  businessAreaSlug: string;
   businessArea: string;
   isAllPrograms: boolean;
   isGlobal: boolean;
@@ -21,6 +22,7 @@ export function useBaseUrl(): {
     baseUrl,
     isAllPrograms,
     isGlobal,
+    businessAreaSlug: businessArea,
     programSlug: programId,
   };
 }

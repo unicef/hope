@@ -6,16 +6,16 @@ export type RegistrationDataImportList = {
     readonly id: string;
     name: string;
     status: string;
-    data_source: string;
-    imported_by?: string;
-    readonly created_at: string;
+    dataSource: string;
+    importedBy?: string;
+    readonly createdAt: string;
     /**
      * Abort RDI
      */
     erased?: boolean;
-    readonly import_date: string;
-    number_of_households: number;
-    number_of_individuals: number;
-    readonly biometric_deduplicated: string;
+    readonly importDate: string;
+    numberOfHouseholds: number;
+    numberOfIndividuals: number;
+    readonly biometricDeduplicated: string;
 };
 

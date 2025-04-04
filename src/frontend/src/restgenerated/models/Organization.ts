@@ -3,8 +3,8 @@
 /* tslint:disable */
 /* eslint-disable */
 export type Organization = {
-    readonly aurora_id: number;
-    readonly hope_id: string | null;
+    readonly auroraId: number;
+    readonly hopeId: string | null;
     name: string;
 };
 

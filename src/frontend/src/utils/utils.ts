@@ -1246,3 +1246,20 @@ export function deepCamelize(data) {
   }
   return data;
 }
+
+export function deepUnderscore(data) {
+  if (_.isArray(data)) {
+    return data.map(deepUnderscore);
+  } else if (_.isObject(data)) {
+    return _.reduce(
+      data,
+      (result, value, key) => {
+        const underscoreKey = _.snakeCase(key);
+        result[underscoreKey] = deepUnderscore(value);
+        return result;
+      },
+      {}
+    );
+  }
+  return data;
+}

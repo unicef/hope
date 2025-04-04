@@ -19,7 +19,7 @@ import { RestService } from '@restgenerated/services/RestService';
 
 export const ManagerialConsolePage: FC = () => {
   const { t } = useTranslation();
-  const { businessArea } = useBaseUrl();
+  const { businessAreaSlug } = useBaseUrl();
   const [selectedApproved, setSelectedApproved] = useState([]);
   const [selectedAuthorized, setSelectedAuthorized] = useState([]);
   const [selectedInReview, setSelectedInReview] = useState([]);
@@ -55,15 +55,14 @@ export const ManagerialConsolePage: FC = () => {
   };
 
   const permissions = usePermissions();
-
   const fetchPaymentPlans = (status: string) => {
     return RestService.restBusinessAreasPaymentsPaymentPlansManagerialList({
-      businessArea,
+      businessAreaSlug,
       limit: 10000,
       offset: 0,
       //@ts-ignore
-     status,
-  });
+      status,
+    });
   };
 
   const {
@@ -71,7 +70,7 @@ export const ManagerialConsolePage: FC = () => {
     isLoading: inApprovalLoading,
     refetch: refetchInApproval,
   } = useQuery({
-    queryKey: ['paymentPlansInApproval', businessArea],
+    queryKey: ['paymentPlansInApproval', businessAreaSlug],
     queryFn: () => fetchPaymentPlans('IN_APPROVAL'),
   });
 
@@ -80,7 +79,7 @@ export const ManagerialConsolePage: FC = () => {
     isLoading: inAuthorizationLoading,
     refetch: refetchInAuthorization,
   } = useQuery({
-    queryKey: ['paymentPlansInAuthorization', businessArea],
+    queryKey: ['paymentPlansInAuthorization', businessAreaSlug],
     queryFn: () => fetchPaymentPlans('IN_AUTHORIZATION'),
   });
 
@@ -89,7 +88,7 @@ export const ManagerialConsolePage: FC = () => {
     isLoading: inReviewLoading,
     refetch: refetchInReview,
   } = useQuery({
-    queryKey: ['paymentPlansInReview', businessArea],
+    queryKey: ['paymentPlansInReview', businessAreaSlug],
     queryFn: () => fetchPaymentPlans('IN_REVIEW'),
   });
 
@@ -98,14 +97,14 @@ export const ManagerialConsolePage: FC = () => {
     isLoading: releasedLoading,
     refetch: refetchReleased,
   } = useQuery({
-    queryKey: ['paymentPlansReleased', businessArea],
+    queryKey: ['paymentPlansReleased', businessAreaSlug],
     queryFn: () => fetchPaymentPlans('ACCEPTED'),
   });
 
   const bulkAction = useMutation({
     mutationFn: (params: { ids: string[]; action: string; comment: string }) =>
       bulkActionPaymentPlansManagerial({
-        businessAreaSlug: businessArea,
+        businessAreaSlug,
         ids: params.ids,
         action: params.action,
         comment: params.comment,

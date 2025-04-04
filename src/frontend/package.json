@@ -12,10 +12,12 @@
     "test": "vitest",
     "preview": "vite preview",
     "download-dev-schema": "wget --no-check-certificate -O data/schema.graphql https://dev-hct.unitst.org/api/graphql/schema.graphql",
+    "download-dev-openapi": "wget --no-check-certificate -O data/openapi.yml http://localhost:8080/api/rest/",
     "download-local-schema": "wget --no-check-certificate -O data/schema.graphql http://localhost:3000/api/graphql/schema.graphql",
     "generate-types": "yarn download-dev-schema && graphql-codegen --config codegen.yml --debug",
     "generate-types-local": "yarn download-local-schema && graphql-codegen --config codegen.yml --debug",
-    "generate-rest-api-types": "npx openapi-typescript-codegen --input http://localhost:8080/api/rest/ --output src/restgenerated --useOptions"
+    "generate-rest-api-types": "npx openapi-typescript-codegen --input http://localhost:8080/api/rest/ --output src/restgenerated --useOptions  --exportCore false",
+    "generate-rest-api-types-camelcase": "yarn download-dev-openapi && node camelize_openapi.js && npx openapi-typescript-codegen --input data/openapi-camelcase.yml --output src/restgenerated --useOptions --postfixModels CamelCase  --exportCore false"
   },
   "engines": {
     "node": ">=20.0.0"
@@ -101,8 +103,8 @@
     "@graphql-codegen/typescript-react-apollo": "^4.2.0",
     "@graphql-codegen/typescript-resolvers": "^4.0.1",
     "@tanstack/eslint-plugin-query": "^5.27.7",
-    "@testing-library/react": "^16.2.0",
     "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.2.0",
     "@types/graphql": "^14.5.0",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
@@ -122,13 +124,14 @@
     "eslint-plugin-react-hooks": "^4.3.0",
     "faker": "^6.6.6",
     "globals": "^15.14.0",
+    "js-yaml": "^4.1.0",
     "micromatch": "4.0.8",
     "msw": "^2.7.3",
     "openapi-typescript-codegen": "^0.29.0",
     "prettier": "3.4.2",
-    "typescript": "^5.5.4",
-    "vitest": "^3.0.7",
     "react-test-renderer": "^19.0.0",
-    "vite-plugin-csp-guard": "^2.1.0"
+    "typescript": "^5.5.4",
+    "vite-plugin-csp-guard": "^2.1.0",
+    "vitest": "^3.0.7"
   }
 }

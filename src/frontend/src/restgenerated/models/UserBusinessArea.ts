@@ -7,6 +7,6 @@ export type UserBusinessArea = {
     name: string;
     slug: string;
     readonly permissions: Array<any>;
-    readonly is_accountability_applicable: boolean;
+    readonly isAccountabilityApplicable: boolean;
 };
 

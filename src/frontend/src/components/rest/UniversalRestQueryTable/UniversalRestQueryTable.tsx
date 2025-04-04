@@ -47,11 +47,10 @@ export const UniversalRestQueryTable = <T, K>(
       }),
     enabled: !!businessArea && !!programSlug,
   });
-  const camelCaseData = deepCamelize(data);
   return (
     <UniversalRestTable<T, K>
       {...propsToPass}
-      data={camelCaseData}
+      data={data}
       isLoading={isLoading}
       error={error}
     />

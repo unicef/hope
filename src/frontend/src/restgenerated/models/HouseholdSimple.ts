@@ -4,7 +4,7 @@
 /* eslint-disable */
 export type HouseholdSimple = {
     id: string;
-    unicef_id?: string | null;
+    unicefId?: string | null;
     admin2?: string;
 };
 
