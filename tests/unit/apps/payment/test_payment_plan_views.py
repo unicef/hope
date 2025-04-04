@@ -1582,6 +1582,9 @@ class TestPaymentPlanActions:
         self.url_apply_steficon = reverse("api:payments:payment-plans-apply-engine-formula", kwargs=url_kwargs)
         self.url_lock_fsp = reverse("api:payments:payment-plans-lock-fsp", kwargs=url_kwargs)
         self.url_unlock_fsp = reverse("api:payments:payment-plans-unlock-fsp", kwargs=url_kwargs)
+        self.url_export_entitlement_xlsx = reverse(
+            "api:payments:payment-plans-entitlement-export-xlsx", kwargs=url_kwargs
+        )
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -1826,3 +1829,32 @@ class TestPaymentPlanActions:
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
             assert response.json() == {"message": "Payment Plan FSP unlocked"}
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.PM_VIEW_LIST], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_pp_entitlement_export_xlsx(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        self.pp.status = PaymentPlan.Status.LOCKED
+        self.pp.save()
+
+        response = self.client.get(self.url_export_entitlement_xlsx)
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            self.pp.refresh_from_db()
+            assert self.pp.has_export_file is True
+
+    def test_pp_entitlement_export_xlsx_invalid_status(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PM_VIEW_LIST], self.afghanistan, self.program_active)
+        self.pp.status = PaymentPlan.Status.OPEN
+        self.pp.save()
+
+        response = self.client.get(self.url_export_entitlement_xlsx)
+        assert status.HTTP_400_BAD_REQUEST
+        assert "You can only export Payment List for LOCKED Payment Plan" in response.data

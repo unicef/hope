@@ -314,6 +314,27 @@ class PaymentPlanViewSet(
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @action(detail=True, methods=["get"], PERMISSIONS=[Permissions.PM_VIEW_LIST])
+    def entitlement_export_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan = self.get_object()
+        old_payment_plan = copy_model_object(payment_plan)
+
+        if payment_plan.status not in [PaymentPlan.Status.LOCKED]:
+            raise ValidationError("You can only export Payment List for LOCKED Payment Plan")
+
+        payment_plan = PaymentPlanService(payment_plan=payment_plan).export_xlsx(user_id=request.user.pk)
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=request.user,
+            programs=payment_plan.program.pk,
+            old_object=old_payment_plan,
+            new_object=payment_plan,
+        )
+        return Response(
+            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data, status=status.HTTP_200_OK
+        )
+
 
 class TargetPopulationViewSet(
     CountActionMixin,
