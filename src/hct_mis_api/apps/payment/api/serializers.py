@@ -11,8 +11,15 @@ from rest_framework import serializers
 from hct_mis_api.api.utils import EncodedIdSerializerMixin
 from hct_mis_api.apps.account.api.fields import Base64ModelField
 from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.activity_log.models import log_create
+from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
-from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object
+from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
+from hct_mis_api.apps.core.utils import (
+    check_concurrency_version_in_mutation,
+    decode_id_string,
+    to_choice_object,
+)
 from hct_mis_api.apps.household.api.serializers.household import (
     HouseholdSmallSerializer,
 )
@@ -36,8 +43,10 @@ from hct_mis_api.apps.payment.models.payment import (
     DeliveryMechanism,
     DeliveryMechanismPerPaymentPlan,
 )
+from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.program.api.serializers import ProgramSmallSerializer
-from hct_mis_api.apps.steficon.api.serializers import RuleSerializer
+from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.steficon.api.serializers import RuleCommitSerializer
 from hct_mis_api.apps.targeting.api.serializers import TargetingCriteriaSerializer
 
 
@@ -243,22 +252,6 @@ class FilteredActionsListSerializer(serializers.Serializer):
     reject = ApprovalInfoSerializer(read_only=True, many=True)
 
 
-class ApprovalSerializer(serializers.ModelSerializer):
-    created_by = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Approval
-        fields = (
-            "type",
-            "comment",
-            "created_by",
-            "created_at",
-        )
-
-    def get_created_by(self, obj: PaymentPlan) -> str:
-        return f"{obj.created_by.first_name} {obj.created_by.last_name}" if obj.created_by else ""
-
-
 class ApprovalProcessSerializer(serializers.ModelSerializer):
     sent_for_approval_by = serializers.SerializerMethodField()
     sent_for_finance_release_by = serializers.SerializerMethodField()
@@ -394,6 +387,29 @@ class VolumeByDeliveryMechanismSerializer(EncodedIdSerializerMixin):
         )
 
 
+class PaymentPlanExcludeBeneficiariesSerializer(serializers.Serializer):
+    excluded_households_ids = serializers.ListField(child=serializers.CharField(), required=True)
+    exclusion_reason = serializers.CharField(required=False)
+
+    def validate_excluded_households_ids(self, value: List[str]) -> List[str]:
+        if len(value) != len(set(value)):
+            raise serializers.ValidationError("Duplicate IDs are not allowed.")
+        return value
+
+
+class PaymentPlanCreateUpdateSerializer(serializers.Serializer):
+    dispersion_start_date = serializers.DateField(required=True)
+    dispersion_end_date = serializers.DateField(required=True)
+    currency = serializers.ChoiceField(required=True, choices=CURRENCY_CHOICES)
+    version = serializers.IntegerField(required=False)
+
+    def validate_version(self, value: Optional[int]) -> Optional[int]:
+        payment_plan = self.context.get("payment_plan")
+        if payment_plan and value:
+            check_concurrency_version_in_mutation(value, payment_plan)
+        return value
+
+
 class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerializer):
     background_action_status = serializers.CharField(source="get_background_action_status_display")
     program = ProgramSmallSerializer(read_only=True, source="program_cycle.program")
@@ -426,7 +442,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     can_send_xlsx_password = serializers.SerializerMethodField()
     split_choices = serializers.SerializerMethodField()
     approval_process = ApprovalProcessSerializer(read_only=True, many=True)
-    steficon_rule = RuleSerializer(read_only=True)
+    steficon_rule = RuleCommitSerializer(read_only=True)
     source_payment_plan = FollowUpPaymentPlanSerializer(read_only=True)
     eligible_payments_count = serializers.SerializerMethodField()
     payment_verification_summary = PaymentVerificationSummarySerializer(read_only=True)
@@ -659,7 +675,7 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
     program = serializers.CharField(source="program_cycle.program.name")
     program_cycle = serializers.CharField(source="program_cycle.title")
     targeting_criteria = TargetingCriteriaSerializer(read_only=True)
-    steficon_rule_targeting = RuleSerializer(read_only=True)
+    steficon_rule_targeting = RuleCommitSerializer(read_only=True)
 
     class Meta(PaymentPlanListSerializer.Meta):
         fields = PaymentPlanListSerializer.Meta.fields + (  # type: ignore
@@ -674,6 +690,7 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
             "female_adults_count",
             "targeting_criteria",
             "steficon_rule_targeting",
+            "admin_url",
         )
 
 
@@ -740,6 +757,7 @@ class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
         fields = PaymentListSerializer.Meta.fields + (  # type: ignore
             "parent",
             "payment_verifications",
+            "admin_url",
         )
 
 
@@ -762,3 +780,85 @@ class TPHouseholdListSerializer(serializers.ModelSerializer):
 
     def get_hoh_full_name(self, obj: Payment) -> str:
         return obj.head_of_household.full_name if obj.head_of_household else ""
+
+
+class TargetPopulationCreateSerializer(EncodedIdSerializerMixin):
+    name = serializers.CharField(required=True)
+    program_cycle_id = Base64ModelField(model_name="ProgramCycle", required=True)
+    targeting_criteria = TargetingCriteriaSerializer(required=True)
+    excluded_ids = serializers.CharField()
+    exclusion_reason = serializers.CharField()
+    fsp_id = Base64ModelField(model_name="FinancialServiceProvider", required=False)
+    delivery_mechanism_code = serializers.CharField(required=False)
+    vulnerability_score_min = serializers.DecimalField(required=False, max_digits=6, decimal_places=3)
+    vulnerability_score_max = serializers.DecimalField(required=False, max_digits=6, decimal_places=3)
+    version = serializers.IntegerField(required=False, read_only=True)
+
+    class Meta:
+        model = PaymentPlan
+        fields = (
+            "id",
+            "version",
+            "name",
+            "program_cycle_id",
+            "targeting_criteria",
+            "excluded_ids",
+            "exclusion_reason",
+            "fsp_id",
+            "delivery_mechanism_code",
+            "vulnerability_score_min",
+            "vulnerability_score_max",
+        )
+
+    def get_program(self) -> Program:
+        request = self.context["request"]
+        business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
+        program_slug = request.parser_context["kwargs"]["program_slug"]
+        program = get_object_or_404(Program, business_area__slug=business_area_slug, slug=program_slug)
+        return program
+
+    def create(self, data: Dict) -> PaymentPlan:
+        request = self.context["request"]
+        program = self.get_program()
+        data["program"] = program
+        data["created_by"] = request.user
+        business_area = program.business_area
+
+        payment_plan = PaymentPlanService.create(
+            input_data=data, user=request.user, business_area_slug=business_area.slug
+        )
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=request.user,
+            programs=str(program.pk),
+            new_object=payment_plan,
+        )
+        return payment_plan
+
+    def update(self, payment_plan: PaymentPlan, validated_data: Dict) -> PaymentPlan:
+        request = self.context["request"]
+        check_concurrency_version_in_mutation(validated_data.get("version"), payment_plan)
+        old_payment_plan = copy_model_object(payment_plan)
+
+        payment_plan = PaymentPlanService(payment_plan=payment_plan).update(input_data=validated_data)
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=request.user,
+            programs=payment_plan.program.pk,
+            old_object=old_payment_plan,
+            new_object=payment_plan,
+        )
+        return payment_plan
+
+
+class TargetPopulationCopySerializer(serializers.Serializer):
+    name = serializers.CharField(required=True)
+    target_population_id = serializers.CharField(required=True)
+    program_cycle_id = serializers.CharField(required=True)
+
+
+class TargetPopulationApplyEngineFormulaSerializer(serializers.Serializer):
+    engine_formula_rule_id = serializers.CharField(required=True)
+    version = serializers.IntegerField(required=False)

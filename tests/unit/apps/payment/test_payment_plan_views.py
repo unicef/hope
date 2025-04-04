@@ -1,14 +1,14 @@
 import json
-from typing import Any, Callable
+from typing import Any, Callable, List
 
 from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
+from django.urls import reverse
 from django.utils import timezone
 
 import pytest
 from rest_framework import status
-from rest_framework.reverse import reverse
 
 from hct_mis_api.apps.account.fixtures import (
     BusinessAreaFactory,
@@ -22,11 +22,23 @@ from hct_mis_api.apps.payment.api.views import PaymentPlanManagerialViewSet
 from hct_mis_api.apps.payment.fixtures import (
     ApprovalFactory,
     ApprovalProcessFactory,
+    DeliveryMechanismFactory,
+    FinancialServiceProviderFactory,
+    FinancialServiceProviderXlsxTemplateFactory,
+    FspXlsxTemplatePerDeliveryMechanismFactory,
+    PaymentFactory,
     PaymentPlanFactory,
+    PaymentPlanSplitFactory,
 )
-from hct_mis_api.apps.payment.models import Approval, PaymentPlan
+from hct_mis_api.apps.payment.models import (
+    Approval,
+    FinancialServiceProvider,
+    PaymentPlan,
+)
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.models import Program, ProgramCycle
+from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory
+from hct_mis_api.apps.steficon.models import Rule
 
 pytestmark = pytest.mark.django_db
 
@@ -590,6 +602,57 @@ class TestPaymentPlanDetail:
         assert payment_plan["can_download_xlsx"] is False
         assert payment_plan["can_send_xlsx_password"] is False
 
+    def test_has_fsp_delivery_mechanism_xlsx_template(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.PM_VIEW_DETAILS], self.afghanistan, self.program_active
+        )
+        xlsx_temp = FinancialServiceProviderXlsxTemplateFactory()
+        dm = DeliveryMechanismFactory()
+        fsp = FinancialServiceProviderFactory(
+            name="Test FSP 1",
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+            vision_vendor_number=123,
+        )
+        fsp.xlsx_templates.set([xlsx_temp])
+        FspXlsxTemplatePerDeliveryMechanismFactory(
+            financial_service_provider=fsp,
+            delivery_mechanism=dm,
+            xlsx_template=xlsx_temp,
+        )
+        self.pp.delivery_mechanism = dm
+        self.pp.financial_service_provider = fsp
+        self.pp.save()
+
+        response = self.client.get(self.pp_detail_url)
+        assert response.status_code == status.HTTP_200_OK
+        payment_plan = response.json()
+        assert payment_plan["has_fsp_delivery_mechanism_xlsx_template"] is True
+
+    def test_can_create_follow_up(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.PM_VIEW_DETAILS], self.afghanistan, self.program_active
+        )
+        self.pp.is_follow_up = True
+        self.pp.save()
+
+        response = self.client.get(self.pp_detail_url)
+        assert response.status_code == status.HTTP_200_OK
+        payment_plan = response.json()
+        assert payment_plan["can_create_follow_up"] is False
+
+    def test_get_can_split(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.PM_VIEW_DETAILS], self.afghanistan, self.program_active
+        )
+        PaymentPlanSplitFactory(payment_plan=self.pp, sent_to_payment_gateway=True)
+        self.pp.status = PaymentPlan.Status.ACCEPTED
+        self.pp.save()
+
+        response = self.client.get(self.pp_detail_url)
+        assert response.status_code == status.HTTP_200_OK
+        payment_plan = response.json()
+        assert payment_plan["can_split"] is False
+
 
 class TestPaymentPlanFilter:
     @pytest.fixture(autouse=True)
@@ -866,7 +929,7 @@ class TestTargetPopulationList:
 
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 35
+            assert len(ctx.captured_queries) == 23
 
         # Test that reoccurring requests use cached data
         with CaptureQueriesContext(connection) as ctx:
@@ -887,7 +950,7 @@ class TestTargetPopulationList:
 
             etag_call_after_update = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 29
+            assert len(ctx.captured_queries) == 17
 
             assert etag_call_after_update != etag
 
@@ -1108,3 +1171,690 @@ class TestTargetPopulationFilter:
         response_data = response.json()["results"]
         assert len(response_data) == 1
         assert response_data[0]["name"] == "TP_Uuuuu_Aaaaa"
+
+
+class TestTargetPopulationCreateUpdate:
+    @pytest.fixture(autouse=True)
+    def setup(self, api_client: Any) -> None:
+        self.afghanistan = create_afghanistan()
+        self.partner = PartnerFactory(name="unittest")
+        self.user = UserFactory(partner=self.partner)
+        self.program_active = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
+        self.cycle = self.program_active.cycles.first()
+
+        self.tp = PaymentPlanFactory(
+            business_area=self.afghanistan,
+            program_cycle=self.cycle,
+            status=PaymentPlan.Status.TP_OPEN,
+            created_by=self.user,
+        )
+
+        self.create_url = reverse(
+            "api:payments:target-populations-list",
+            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program_active.slug},
+        )
+        self.update_url = reverse(
+            "api:payments:target-populations-detail",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+                "pk": encode_id_base64_required(self.tp.pk, "PaymentPlan"),
+            },
+        )
+        self.client = api_client(self.user)
+        self.targeting_criteria = {
+            "flag_exclude_if_active_adjudication_ticket": False,
+            "flag_exclude_if_on_sanction_list": False,
+            "rules": [
+                {
+                    "individua_ids": "",
+                    "household_ids": "",
+                    "households_filters_blocks": [
+                        {
+                            "comparison_method": "RANGE",
+                            "arguments": [1, 11],
+                            "field_name": "size",
+                            "flex_field_classification": "NOT_FLEX_FIELD",
+                        }
+                    ],
+                    "individuals_filters_blocks": [],
+                    "collectors_filters_blocks": [],
+                }
+            ],
+        }
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.TARGETING_CREATE], status.HTTP_201_CREATED),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_create_payment_plan_success(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        data = {
+            "name": "New Payment Plan",
+            "program_cycle_id": encode_id_base64_required(self.cycle.id, "ProgramCycle"),
+            "targeting_criteria": self.targeting_criteria,
+            "excluded_ids": "IND-123",
+            "exclusion_reason": "Just MMM Qwool Test",
+        }
+
+        response = self.client.post(self.create_url, data, format="json")
+
+        assert response.status_code == expected_status
+        if response.status_code == status.HTTP_201_CREATED:
+            assert response.data["name"] == data["name"]
+            assert (
+                response.data["targeting_criteria"]["rules"][0]["households_filters_blocks"][0]["field_name"] == "size"
+            )
+            assert response.data["exclusion_reason"] == data["exclusion_reason"]
+            assert response.data["excluded_ids"] == data["excluded_ids"]
+
+    def test_create_payment_plan_invalid_data(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.TARGETING_CREATE], self.afghanistan, self.program_active
+        )
+        invalid_data = {
+            "name": "",
+            "program_cycle_id": None,
+            "targeting_criteria": {},
+        }
+        response = self.client.post(self.create_url, invalid_data, format="json")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "name" in response.data
+        assert "program_cycle_id" in response.data
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.TARGETING_UPDATE], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_update_payment_plan_success(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+
+        update_data = {
+            "name": "Test with NEW NAME",
+            "excluded_ids": "IND-999",
+            "exclusion_reason": "123",
+            "version": self.tp.version,
+        }
+
+        response = self.client.patch(self.update_url, update_data, format="json")
+
+        assert response.status_code == expected_status
+        if response.status_code == status.HTTP_200_OK:
+            assert response.data["name"] == update_data["name"]
+            assert response.data["exclusion_reason"] == update_data["exclusion_reason"]
+            assert response.data["excluded_ids"] == update_data["excluded_ids"]
+
+    def test_update_payment_plan_invalid_data(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.TARGETING_UPDATE], self.afghanistan, self.program_active
+        )
+        invalid_update_data = {
+            "name": "",
+            "version": self.tp.version,
+        }
+        response = self.client.patch(self.update_url, invalid_update_data, format="json")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "name" in response.data
+
+
+class TestTargetPopulationActions:
+    @pytest.fixture(autouse=True)
+    def setup(self, api_client: Any) -> None:
+        self.afghanistan = create_afghanistan()
+        self.partner = PartnerFactory(name="unittest")
+        self.user = UserFactory(partner=self.partner)
+        self.program_active = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
+        self.cycle = self.program_active.cycles.first()
+        self.client = api_client(self.user)
+        self.target_population = PaymentPlanFactory(
+            name="TP_OPEN",
+            business_area=self.afghanistan,
+            program_cycle=self.cycle,
+            status=PaymentPlan.Status.TP_OPEN,
+            created_by=self.user,
+            created_at="2022-02-24",
+        )
+        tp_id = encode_id_base64_required(self.target_population.pk, "PaymentPlan")
+        url_kwargs = {
+            "business_area_slug": self.afghanistan.slug,
+            "program_slug": self.program_active.slug,
+            "pk": tp_id,
+        }
+        self.url_lock = reverse("api:payments:target-populations-lock", kwargs=url_kwargs)
+        self.url_unlock = reverse("api:payments:target-populations-unlock", kwargs=url_kwargs)
+        self.url_rebuild = reverse("api:payments:target-populations-rebuild", kwargs=url_kwargs)
+        self.url_mark_ready = reverse("api:payments:target-populations-mark-ready", kwargs=url_kwargs)
+        self.url_copy = reverse("api:payments:target-populations-copy", kwargs=url_kwargs)
+        self.url_apply_steficon = reverse("api:payments:target-populations-apply-engine-formula", kwargs=url_kwargs)
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.TARGETING_LOCK], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_lock(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+
+        response = self.client.get(self.url_lock)
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.json() == {"message": "Target Population locked"}
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.TARGETING_UNLOCK], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_unlock(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        self.target_population.status = PaymentPlan.Status.TP_LOCKED
+        self.target_population.save()
+
+        response = self.client.get(self.url_unlock)
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.json() == {"message": "Target Population unlocked"}
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.TARGETING_LOCK], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_rebuild(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+
+        response = self.client.get(self.url_rebuild)
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.json() == {"message": "Target Population rebuilding"}
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.TARGETING_CREATE, Permissions.TARGETING_SEND], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_mark_ready(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+
+        response = self.client.get(self.url_mark_ready)
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.json() == {"message": "Target Population ready for Payment Plan"}
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.TARGETING_DUPLICATE], status.HTTP_201_CREATED),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_copy_tp(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        data = {
+            "name": "Copied TP test 123",
+            "program_cycle_id": encode_id_base64_required(self.cycle.pk, "ProgramCycle"),
+        }
+        response = self.client.post(self.url_copy, data, format="json")
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_201_CREATED:
+            assert response.status_code == status.HTTP_201_CREATED
+            assert "id" in response.json()
+            assert PaymentPlan.objects.filter(name="Copied TP test 123").count() == 1
+            assert PaymentPlan.objects.all().count() == 2
+
+    def test_copy_tp_validation_errors(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.TARGETING_DUPLICATE], self.afghanistan, self.program_active
+        )
+        cycle = ProgramCycleFactory(program=self.program_active, status=ProgramCycle.ACTIVE, title="Cycle123")
+        PaymentPlanFactory(
+            name="Copied TP AGAIN",
+            business_area=self.afghanistan,
+            program_cycle=cycle,
+        )
+        data = {
+            "name": "Copied TP AGAIN",
+            "program_cycle_id": encode_id_base64_required(cycle.pk, "ProgramCycle"),
+        }
+        # TP with the same name already exists
+        response = self.client.post(self.url_copy, data, format="json")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert (
+            "Target Population with name: Copied TP AGAIN and program cycle: Cycle123 already exists." in response.data
+        )
+
+        # Cycle status is Finished
+        cycle.status = ProgramCycle.FINISHED
+        cycle.save()
+        response_2 = self.client.post(self.url_copy, data, format="json")
+
+        assert response_2.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Not possible to assign Finished Program Cycle to Targeting." in response_2.data
+
+        # wrong input data to trigger validation error
+        response_3 = self.client.post(self.url_copy, {}, format="json")
+        assert response_3.status_code == status.HTTP_400_BAD_REQUEST
+        assert "name" in response_3.data
+        assert "program_cycle_id" in response_3.data
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.TARGETING_UPDATE], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_apply_engine_formula_tp(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        rule_for_tp = RuleCommitFactory(rule__type=Rule.TYPE_TARGETING, version=11).rule
+        self.target_population.status = PaymentPlan.Status.TP_LOCKED
+        self.target_population.save()
+        data = {
+            "engine_formula_rule_id": encode_id_base64_required(rule_for_tp.pk, "Rule"),
+            "version": self.target_population.version,
+        }
+        response = self.client.post(self.url_apply_steficon, data, format="json")
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.status_code == status.HTTP_200_OK
+            resp_data = response.json()
+            assert "id" in resp_data
+            assert "TARGETING" in resp_data["steficon_rule_targeting"]["rule"]["type"]
+
+    def test_apply_engine_formula_tp_validation_errors(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.TARGETING_UPDATE], self.afghanistan, self.program_active
+        )
+        rule_for_tp = RuleCommitFactory(rule__type=Rule.TYPE_TARGETING, rule__enabled=False, version=22).rule
+        self.target_population.status = PaymentPlan.Status.TP_STEFICON_ERROR
+        self.target_population.save()
+
+        data = {
+            "engine_formula_rule_id": encode_id_base64_required(rule_for_tp.pk, "Rule"),
+            "version": self.target_population.version,
+        }
+        response = self.client.post(self.url_apply_steficon, data, format="json")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "This engine rule is not enabled or is deprecated." in response.data
+
+        self.target_population.status = PaymentPlan.Status.TP_OPEN
+        self.target_population.save()
+        data = {
+            "engine_formula_rule_id": encode_id_base64_required(rule_for_tp.pk, "Rule"),
+            "version": self.target_population.version,
+        }
+        response_2 = self.client.post(self.url_apply_steficon, data, format="json")
+
+        assert response_2.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Not allowed to run engine formula within status TP_OPEN." in response_2.data
+
+        response_3 = self.client.post(self.url_apply_steficon, {}, format="json")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "engine_formula_rule_id" in response_3.data
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.TARGETING_REMOVE], status.HTTP_204_NO_CONTENT),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_tp_delete(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        tp = PaymentPlanFactory(
+            name="TP_to_delete",
+            business_area=self.afghanistan,
+            program_cycle=self.cycle,
+            status=PaymentPlan.Status.TP_OPEN,
+            created_by=self.user,
+        )
+        tp_id = encode_id_base64_required(tp.pk, "PaymentPlan")
+        delete_url = reverse(
+            "api:payments:target-populations-detail",
+            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program_active.slug, "pk": tp_id},
+        )
+        response = self.client.delete(delete_url)
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_204_NO_CONTENT:
+            assert response.status_code == status.HTTP_204_NO_CONTENT
+            assert PaymentPlan.objects.filter(name="TP_to_delete").count() == 0
+            assert PaymentPlan.all_objects.filter(name="TP_to_delete").count() == 1  # is_removed = True
+
+
+class TestPaymentPlanActions:
+    @pytest.fixture(autouse=True)
+    def setup(self, api_client: Any) -> None:
+        self.afghanistan = create_afghanistan()
+        self.partner = PartnerFactory(name="unittest")
+        self.user = UserFactory(partner=self.partner)
+        self.program_active = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
+        self.cycle = self.program_active.cycles.first()
+        self.client = api_client(self.user)
+        self.pp = PaymentPlanFactory(
+            name="DRAFT PP",
+            business_area=self.afghanistan,
+            program_cycle=self.cycle,
+            status=PaymentPlan.Status.DRAFT,
+            created_by=self.user,
+            created_at="2022-02-24",
+        )
+        pp_id = encode_id_base64_required(self.pp.pk, "PaymentPlan")
+        url_kwargs = {
+            "business_area_slug": self.afghanistan.slug,
+            "program_slug": self.program_active.slug,
+            "pk": pp_id,
+        }
+        self.url_details = reverse("api:payments:payment-plans-open", kwargs=url_kwargs)
+        self.url_open = reverse("api:payments:payment-plans-open", kwargs=url_kwargs)
+        self.url_lock = reverse("api:payments:payment-plans-lock", kwargs=url_kwargs)
+        self.url_unlock = reverse("api:payments:payment-plans-unlock", kwargs=url_kwargs)
+        self.url_exclude_hh = reverse("api:payments:payment-plans-exclude-beneficiaries", kwargs=url_kwargs)
+        self.url_apply_steficon = reverse("api:payments:payment-plans-apply-engine-formula", kwargs=url_kwargs)
+        self.url_lock_fsp = reverse("api:payments:payment-plans-lock-fsp", kwargs=url_kwargs)
+        self.url_unlock_fsp = reverse("api:payments:payment-plans-unlock-fsp", kwargs=url_kwargs)
+        self.url_export_entitlement_xlsx = reverse(
+            "api:payments:payment-plans-entitlement-export-xlsx", kwargs=url_kwargs
+        )
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.PM_CREATE], status.HTTP_201_CREATED),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_open_pp(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        data = {
+            "dispersion_start_date": "2025-02-01",
+            "dispersion_end_date": "2099-03-01",
+            "currency": "USD",
+            "version": self.pp.version,
+        }
+        response = self.client.post(self.url_open, data, format="json")
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_201_CREATED:
+            assert response.status_code == status.HTTP_201_CREATED
+            resp_data = response.json()
+            assert "id" in resp_data
+            assert "United States dollar" == resp_data["currency"]
+            assert "Open" == resp_data["status"]
+
+    def test_open_pp_validation_errors(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PM_CREATE], self.afghanistan, self.program_active)
+        response = self.client.post(self.url_open, {}, format="json")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "dispersion_start_date" in response.json()
+        assert "dispersion_end_date" in response.json()
+        assert "currency" in response.json()
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.PM_LOCK_AND_UNLOCK], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_pp_lock(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        self.pp.status = PaymentPlan.Status.OPEN
+        self.pp.save()
+        PaymentFactory(parent=self.pp)
+        response = self.client.get(self.url_lock)
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.json() == {"message": "Payment Plan locked"}
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.PM_LOCK_AND_UNLOCK], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_pp_unlock(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        self.pp.status = PaymentPlan.Status.LOCKED
+        self.pp.save()
+
+        response = self.client.get(self.url_unlock)
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.json() == {"message": "Payment Plan unlocked"}
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.PM_CREATE], status.HTTP_204_NO_CONTENT),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_payment_plan_delete(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        pp = PaymentPlanFactory(
+            name="new pp for delete test",
+            business_area=self.afghanistan,
+            program_cycle=self.cycle,
+            status=PaymentPlan.Status.OPEN,
+            created_by=self.user,
+        )
+        pp_id = encode_id_base64_required(pp.pk, "PaymentPlan")
+        delete_url = reverse(
+            "api:payments:payment-plans-detail",
+            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program_active.slug, "pk": pp_id},
+        )
+        response = self.client.delete(delete_url)
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_204_NO_CONTENT:
+            assert response.status_code == status.HTTP_204_NO_CONTENT
+            assert PaymentPlan.objects.filter(name="new pp for delete test").count() == 1
+            assert PaymentPlan.objects.filter(name="new pp for delete test").first().status == PaymentPlan.Status.DRAFT
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_exclude_beneficiaries(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        self.pp.status = PaymentPlan.Status.LOCKED
+        self.pp.save()
+        data = {
+            "excluded_households_ids": ["HH-1", "HH-2"],
+            "exclusion_reason": "Test Reason",
+        }
+        response = self.client.post(self.url_exclude_hh, data, format="json")
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.status_code == status.HTTP_200_OK
+            resp_data = response.json()
+            assert "id" in resp_data
+            assert "Exclude Beneficiaries Running" == resp_data["background_action_status"]
+
+    def test_exclude_beneficiaries_validation_errors(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP], self.afghanistan, self.program_active
+        )
+
+        response_1 = self.client.post(self.url_exclude_hh, {"excluded_households_ids": ["HH-1"]}, format="json")
+        assert response_1.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Beneficiary can be excluded only for 'Open' or 'Locked' status of Payment Plan" in response_1.data
+
+        self.pp.status = PaymentPlan.Status.LOCKED
+        self.pp.save()
+        response_2 = self.client.post(self.url_exclude_hh, {"excluded_households_ids": ["HH-1", "HH-1"]}, format="json")
+        assert response_2.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Duplicate IDs are not allowed." in response_2.data["excluded_households_ids"][0]
+
+        response_3 = self.client.post(self.url_exclude_hh, {}, format="json")
+        assert response_3.status_code == status.HTTP_400_BAD_REQUEST
+        assert "excluded_households_ids" in response_3.json()
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_apply_engine_formula_pp(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        rule_for_pp = RuleCommitFactory(rule__type=Rule.TYPE_PAYMENT_PLAN, version=11).rule
+        self.pp.status = PaymentPlan.Status.LOCKED
+        self.pp.save()
+        self.pp.refresh_from_db()
+        data = {
+            "engine_formula_rule_id": encode_id_base64_required(rule_for_pp.pk, "Rule"),
+            "version": self.pp.version,
+        }
+        response = self.client.post(self.url_apply_steficon, data, format="json")
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.status_code == status.HTTP_200_OK
+            resp_data = response.json()
+            assert "id" in resp_data
+            assert "Rule Engine Running" in resp_data["background_action_status"]
+
+    def test_apply_engine_formula_tp_validation_errors(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS],
+            self.afghanistan,
+            self.program_active,
+        )
+        rule_for_pp = RuleCommitFactory(rule__type=Rule.TYPE_PAYMENT_PLAN, rule__enabled=False, version=22).rule
+        self.pp.status = PaymentPlan.Status.LOCKED
+        self.pp.save()
+
+        data = {
+            "engine_formula_rule_id": encode_id_base64_required(rule_for_pp.pk, "Rule"),
+            "version": self.pp.version,
+        }
+        response = self.client.post(self.url_apply_steficon, data, format="json")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "This engine rule is not enabled or is deprecated." in response.data
+
+        self.pp.status = PaymentPlan.Status.TP_OPEN
+        self.pp.save()
+        data = {
+            "engine_formula_rule_id": encode_id_base64_required(rule_for_pp.pk, "Rule"),
+            "version": self.pp.version,
+        }
+        response_2 = self.client.post(self.url_apply_steficon, data, format="json")
+
+        assert response_2.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Not allowed to run engine formula within status TP_OPEN." in response_2.data
+
+        response_3 = self.client.post(self.url_apply_steficon, {}, format="json")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "engine_formula_rule_id" in response_3.data
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.PM_LOCK_AND_UNLOCK_FSP], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_pp_fsp_lock(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        self.pp.status = PaymentPlan.Status.LOCKED
+        self.pp.save()
+        PaymentFactory(parent=self.pp)
+        response = self.client.get(self.url_lock_fsp)
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.json() == {"message": "Payment Plan FSP locked"}
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.PM_LOCK_AND_UNLOCK_FSP], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_pp_fsp_unlock(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        self.pp.status = PaymentPlan.Status.LOCKED_FSP
+        self.pp.save()
+
+        response = self.client.get(self.url_unlock_fsp)
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.json() == {"message": "Payment Plan FSP unlocked"}
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.PM_VIEW_LIST], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_pp_entitlement_export_xlsx(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        self.pp.status = PaymentPlan.Status.LOCKED
+        self.pp.save()
+
+        response = self.client.get(self.url_export_entitlement_xlsx)
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            self.pp.refresh_from_db()
+            assert self.pp.has_export_file is True
+
+    def test_pp_entitlement_export_xlsx_invalid_status(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PM_VIEW_LIST], self.afghanistan, self.program_active)
+        self.pp.status = PaymentPlan.Status.OPEN
+        self.pp.save()
+
+        response = self.client.get(self.url_export_entitlement_xlsx)
+        assert status.HTTP_400_BAD_REQUEST
+        assert "You can only export Payment List for LOCKED Payment Plan" in response.data

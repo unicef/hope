@@ -284,6 +284,22 @@ class ApprovalProcessSerializerTest(TestCase):
         self.assertEqual(data_with_users["sent_for_authorization_by"], user_name_str)
         self.assertEqual(data_with_users["sent_for_finance_release_by"], user_name_str)
 
+    def test_rejected_on(self) -> None:
+        approval_process = ApprovalProcessFactory(payment_plan=self.pp, sent_for_approval_date="2025-11-12")
+        ApprovalFactory(approval_process=approval_process, type=Approval.REJECT, created_by=self.user)
+        data = ApprovalProcessSerializer(instance=approval_process).data
+        self.assertEqual(data["rejected_on"], "IN_APPROVAL")
+
+        approval_process.sent_for_authorization_date = approval_process.sent_for_approval_date
+        approval_process.save()
+        data = ApprovalProcessSerializer(instance=approval_process).data
+        self.assertEqual(data["rejected_on"], "IN_AUTHORIZATION")
+
+        approval_process.sent_for_finance_release_date = approval_process.sent_for_approval_date
+        approval_process.save()
+        data = ApprovalProcessSerializer(instance=approval_process).data
+        self.assertEqual(data["rejected_on"], "IN_REVIEW")
+
 
 class VolumeByDeliveryMechanismSerializerTest(TestCase):
     @classmethod

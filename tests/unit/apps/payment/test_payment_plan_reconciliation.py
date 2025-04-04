@@ -401,7 +401,6 @@ class TestPaymentPlanReconciliation(APITestCase):
         FspXlsxTemplatePerDeliveryMechanismFactory(
             financial_service_provider=santander_fsp, delivery_mechanism=dm_transfer
         )
-        encoded_santander_fsp_id = encode_id_base64(santander_fsp.id, "FinancialServiceProvider")
 
         available_fsps_query_response = self.graphql_request(
             request_string=AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY,
@@ -434,7 +433,7 @@ class TestPaymentPlanReconciliation(APITestCase):
                 variables={
                     "input": {
                         "name": "paymentPlanName",
-                        "programCycleId": self.id_to_base64(cycle.id, "ProgramCycleNode"),
+                        "programCycleId": cycle.id,
                         "excludedIds": "",
                         "targetingCriteria": {
                             "flagExcludeIfActiveAdjudicationTicket": False,
@@ -449,7 +448,7 @@ class TestPaymentPlanReconciliation(APITestCase):
                                 }
                             ],
                         },
-                        "fspId": encoded_santander_fsp_id,
+                        "fspId": santander_fsp.id,
                         "deliveryMechanismCode": dm_cash.code,
                     },
                 },
