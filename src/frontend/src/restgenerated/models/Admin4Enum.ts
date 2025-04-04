@@ -2,4 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type Admin4Enum = string;
+/**
+ * * `UA011603311` - TESTlevel4
+ */
+export enum Admin4Enum {
+    UA011603311 = 'UA011603311',
+}

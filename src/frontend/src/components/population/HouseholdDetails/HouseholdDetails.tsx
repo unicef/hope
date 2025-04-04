@@ -60,6 +60,45 @@ export function HouseholdDetails({
         <Title>
           <Typography variant="h6">{t('Details')}</Typography>
         </Title>
+          <Grid container spacing={3}>
+            <Grid size={{ xs: 3 }}>
+              <LabelizedField label={`${beneficiaryGroup?.group_label} Size`}>
+                {household?.size}
+              </LabelizedField>
+            </Grid>
+            <Grid size={{ xs: 3 }}>
+               <LabelizedField label={t('Residence Status')}>
+              {household?.residence_status}
+            </LabelizedField>
+            </Grid>
+            <Grid size={{ xs: 6 }}>
+              <LabelizedField label={`Head of ${beneficiaryGroup?.group_label}`}>
+                <ContentLink
+                  href={`/${baseUrl}/population/individuals/${household?.headOfHousehold?.id}`}
+                >
+                  {household?.headOfHousehold?.fullName}
+                </ContentLink>
+              </LabelizedField>
+            </Grid>
+            <Grid size={{ xs: 3 }}>
+              <LabelizedField
+                label={t('FEMALE CHILD HEADED ' + beneficiaryGroup?.group_label)}
+              >
+                {household?.fchildHoh ? t('Yes') : t('No')}
+              </LabelizedField>
+            </Grid>
+            <Grid size={{ xs: 3 }}>
+              <LabelizedField
+                label={t('CHILD HEADED ' + beneficiaryGroup?.group_label)}
+              >
+                {household?.childHoh ? t('Yes') : t('No')}
+              </LabelizedField>
+            </Grid>
+            <Grid size={{ xs: 3 }}>
+              <LabelizedField label={t('Country')}>
+                {household?.country}
+              </LabelizedField>
+            </Grid>
         <Grid container spacing={3}>
           <Grid size={{ xs: 3 }}>
             <LabelizedField label={`${beneficiaryGroup?.group_label} Size`}>
@@ -211,7 +250,7 @@ export function HouseholdDetails({
               {/* {household?.deliveredQuantities?.length ? (
                 <Box mb={2}>
                   <Grid container>
-                    <Grid size={{ xs:6 }}>
+                    <Grid size={{ xs: 6 }}>
                       <Box display="flex" flexDirection="column">
                         {household?.deliveredQuantities?.map((item) => (
                           <Box

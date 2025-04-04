@@ -273,7 +273,7 @@ class GenericRegistrationService(BaseRegistrationService):
                     data={
                         "bank_account_number": account_data["data"].get("number", ""),
                         "bank_name": account_data["data"].get("name", ""),
-                        "bank_code": account_data["data"].get("code", ""),
+                        "uba_code": account_data["data"].get("uba_code", ""),
                         "account_holder_name": account_data["data"].get("holder_name", ""),
                     },
                 )
