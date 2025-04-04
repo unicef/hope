@@ -6,7 +6,7 @@ export type PaymentPlanSupportingDocument = {
     readonly id: string;
     title: string;
     file: string;
-    readonly uploaded_at: string;
-    created_by?: string | null;
+    readonly uploadedAt: string;
+    createdBy?: string | null;
 };
 

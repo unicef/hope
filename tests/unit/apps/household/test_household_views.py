@@ -20,13 +20,23 @@ from hct_mis_api.apps.core.utils import (
     resolve_flex_fields_choices_to_string,
 )
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
+from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
 from hct_mis_api.apps.household.fixtures import (
     BankAccountInfoFactory,
     DocumentFactory,
     DocumentTypeFactory,
+    IndividualRoleInHouseholdFactory,
     create_household_and_individuals,
 )
-from hct_mis_api.apps.household.models import DUPLICATE, HOST, REFUGEE, Household
+from hct_mis_api.apps.household.models import (
+    DUPLICATE,
+    HOST,
+    REFUGEE,
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+    Household,
+    Individual,
+)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
@@ -38,6 +48,10 @@ pytestmark = pytest.mark.django_db
 
 def get_encoded_household_id(household: Household) -> str:
     return encode_id_base64_required(household.id, "Household")
+
+
+def get_encoded_individual_id(individual: Individual) -> str:
+    return encode_id_base64_required(individual.id, "Individual")
 
 
 class TestHouseholdList:
@@ -115,23 +129,23 @@ class TestHouseholdList:
 
         response_ids = [result["id"] for result in response_results]
         assert get_encoded_household_id(self.household1) in response_ids
+        assert get_encoded_household_id(self.household2) in response_ids
 
         for i, household in enumerate([self.household1, self.household2]):
-            household_result_first = response_results[i]
-            assert household_result_first["id"] == encode_id_base64_required(household.id, "Household")
-            assert household_result_first["unicef_id"] == household.unicef_id
-            assert household_result_first["head_of_household"] == household.head_of_household.full_name
-            assert household_result_first["admin1"] == household.admin1.name
-            assert household_result_first["admin2"] == household.admin2.name
-            assert household_result_first["program"] == household.program.name
-            assert household_result_first["status"] == household.status
-            assert household_result_first["size"] == household.size
-            assert household_result_first["residence_status"] == household.residence_status
-            assert household_result_first["total_cash_received"] == household.total_cash_received
-            assert household_result_first["total_cash_received_usd"] == household.total_cash_received_usd
+            household_result = response_results[i]
+            assert household_result["id"] == get_encoded_household_id(household)
+            assert household_result["unicef_id"] == household.unicef_id
+            assert household_result["head_of_household"] == household.head_of_household.full_name
+            assert household_result["admin1"] == household.admin1.name
+            assert household_result["admin2"] == household.admin2.name
+            assert household_result["program"] == household.program.name
+            assert household_result["status"] == household.status
+            assert household_result["size"] == household.size
+            assert household_result["residence_status"] == household.residence_status
+            assert household_result["total_cash_received"] == household.total_cash_received
+            assert household_result["total_cash_received_usd"] == household.total_cash_received_usd
             assert (
-                household_result_first["last_registration_date"]
-                == f"{household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}"
+                household_result["last_registration_date"] == f"{household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}"
             )
 
     @pytest.mark.parametrize(
@@ -352,6 +366,9 @@ class TestHouseholdDetail:
         duplicated_individual.duplicate = True
         duplicated_individual.save()
 
+        self.grievance_ticket = GrievanceTicketFactory(household_unicef_id=self.household.unicef_id)
+        GrievanceTicketFactory()  # not linked ticket
+
     @pytest.mark.parametrize(
         "permissions",
         [
@@ -382,7 +399,7 @@ class TestHouseholdDetail:
         assert data["id"] == encoded_household_id
         assert data["unicef_id"] == self.household.unicef_id
         assert data["head_of_household"] == {
-            "id": encode_id_base64_required(self.individuals[0].id, "Individual"),
+            "id": get_encoded_individual_id(self.individuals[0]),
             "full_name": self.individuals[0].full_name,
         }
         assert data["admin1"] == self.household.admin1.name
@@ -397,6 +414,7 @@ class TestHouseholdDetail:
         assert data["total_cash_received_usd"] == self.household.total_cash_received_usd
         assert data["has_duplicates"] is True
         assert data["registration_data_import"] == {
+            "id": encode_id_base64_required(self.registration_data_import.id, "RegistrationDataImport"),
             "name": self.registration_data_import.name,
             "status": self.registration_data_import.status,
             "import_date": f"{self.registration_data_import.import_date:%Y-%m-%dT%H:%M:%S.%fZ}",
@@ -455,6 +473,13 @@ class TestHouseholdDetail:
         assert data["size"] == self.household.size
         assert data["residence_status"] == self.household.residence_status
         assert data["program_registration_id"] == self.household.program_registration_id
+        assert data["linked_grievances"] == [
+            {
+                "id": encode_id_base64_required(self.grievance_ticket.id, "GrievanceTicket"),
+                "category": self.grievance_ticket.category,
+                "status": self.grievance_ticket.status,
+            }
+        ]
 
     @pytest.mark.parametrize(
         "permissions",
@@ -472,7 +497,7 @@ class TestHouseholdDetail:
             business_area=self.afghanistan,
             program=self.program,
         )
-        encoded_household_id = encode_id_base64_required(self.household.id, "Household")
+        encoded_household_id = get_encoded_household_id(self.household)
         response = self.api_client.get(
             reverse(
                 self.detail_url_name,
@@ -495,7 +520,7 @@ class TestHouseholdDetail:
             business_area=self.afghanistan,
             program=program_other,
         )
-        encoded_household_id = encode_id_base64_required(self.household.id, "Household")
+        encoded_household_id = get_encoded_household_id(self.household)
         response = self.api_client.get(
             reverse(
                 self.detail_url_name,
@@ -507,6 +532,183 @@ class TestHouseholdDetail:
             )
         )
         assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+class TestHouseholdMembers:
+    @pytest.fixture(autouse=True)
+    def setup(self, api_client: Any) -> None:
+        self.members_url_name = "api:households:households-members"
+
+        self.afghanistan = create_afghanistan()
+        self.program = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
+        self.partner = PartnerFactory(name="TestPartner")
+        self.user = UserFactory(partner=self.partner)
+        self.api_client = api_client(self.user)
+
+        self.household1, (self.individual1_1, self.individual1_2) = create_household_and_individuals(
+            household_data={
+                "program": self.program,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[
+                {
+                    "program": self.program,
+                    "business_area": self.afghanistan,
+                },
+                {
+                    "program": self.program,
+                    "business_area": self.afghanistan,
+                },
+            ],
+        )
+        self.household2, (self.individual2_1, self.individual2_2) = create_household_and_individuals(
+            household_data={
+                "program": self.program,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[
+                {
+                    "program": self.program,
+                    "business_area": self.afghanistan,
+                },
+                {
+                    "program": self.program,
+                    "business_area": self.afghanistan,
+                },
+            ],
+        )
+
+        IndividualRoleInHouseholdFactory(
+            household=self.household1,
+            individual=self.individual1_1,
+            role=ROLE_PRIMARY,
+        )
+        # external alternate collector
+        IndividualRoleInHouseholdFactory(
+            household=self.household1,
+            individual=self.individual2_1,
+            role=ROLE_ALTERNATE,
+        )
+
+        # role in household2 (should not be displayed)
+        IndividualRoleInHouseholdFactory(
+            household=self.household2,
+            individual=self.individual2_2,
+            role=ROLE_PRIMARY,
+        )
+        IndividualRoleInHouseholdFactory(
+            household=self.household2,
+            individual=self.individual1_1,
+            role=ROLE_ALTERNATE,
+        )
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS], status.HTTP_200_OK),
+            ([Permissions.RDI_VIEW_DETAILS], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_household_members_permissions(
+        self,
+        permissions: list,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
+    ) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=permissions,
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+        encoded_household_id = get_encoded_household_id(self.household1)
+        response = self.api_client.get(
+            reverse(
+                self.members_url_name,
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "program_slug": self.program.slug,
+                    "pk": encoded_household_id,
+                },
+            )
+        )
+        assert response.status_code == expected_status
+
+    def test_household_members(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+        encoded_household_id = get_encoded_household_id(self.household1)
+        response = self.api_client.get(
+            reverse(
+                self.members_url_name,
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "program_slug": self.program.slug,
+                    "pk": encoded_household_id,
+                },
+            )
+        )
+        assert response.status_code == status.HTTP_200_OK
+        response_results = response.json()["results"]
+        assert len(response_results) == 3
+
+        response_ids = [result["id"] for result in response_results]
+        assert get_encoded_individual_id(self.individual1_1) in response_ids
+        assert get_encoded_individual_id(self.individual1_2) in response_ids
+        assert get_encoded_individual_id(self.individual2_1) in response_ids
+        assert get_encoded_individual_id(self.individual2_2) not in response_ids
+        assert response_results == [
+            {
+                "id": get_encoded_individual_id(self.individual1_1),
+                "unicef_id": self.individual1_1.unicef_id,
+                "full_name": self.individual1_1.full_name,
+                "role": "PRIMARY",
+                "relationship": self.individual1_1.relationship,
+                "status": self.individual1_1.status,
+                "birth_date": f"{self.individual1_1.birth_date:%Y-%m-%d}",
+                "sex": self.individual1_1.sex,
+                "household": {
+                    "id": get_encoded_household_id(self.household1),
+                    "unicef_id": self.household1.unicef_id,
+                    "admin2": "",
+                },
+            },
+            {
+                "id": get_encoded_individual_id(self.individual1_2),
+                "unicef_id": self.individual1_2.unicef_id,
+                "full_name": self.individual1_2.full_name,
+                "role": "NO_ROLE",
+                "relationship": self.individual1_2.relationship,
+                "status": self.individual1_2.status,
+                "birth_date": f"{self.individual1_2.birth_date:%Y-%m-%d}",
+                "sex": self.individual1_2.sex,
+                "household": {
+                    "id": get_encoded_household_id(self.household1),
+                    "unicef_id": self.household1.unicef_id,
+                    "admin2": "",
+                },
+            },
+            {
+                "id": get_encoded_individual_id(self.individual2_1),
+                "unicef_id": self.individual2_1.unicef_id,
+                "full_name": self.individual2_1.full_name,
+                "role": "ALTERNATE",
+                "relationship": self.individual2_1.relationship,
+                "status": self.individual2_1.status,
+                "birth_date": f"{self.individual2_1.birth_date:%Y-%m-%d}",
+                "sex": self.individual2_1.sex,
+                "household": {
+                    "id": get_encoded_household_id(self.household2),
+                    "unicef_id": self.household2.unicef_id,
+                    "admin2": "",
+                },
+            },
+        ]
 
 
 class TestHouseholdGlobalViewSet:
@@ -615,13 +817,13 @@ class TestHouseholdGlobalViewSet:
         assert response_count.json()["count"] == 2
 
         result_ids = [result["id"] for result in response_results]
-        assert encode_id_base64_required(self.household_afghanistan1.id, "Household") in result_ids
-        assert encode_id_base64_required(self.household_afghanistan2.id, "Household") in result_ids
-        assert encode_id_base64_required(self.household_ukraine.id, "Household") not in result_ids
+        assert get_encoded_household_id(self.household_afghanistan1) in result_ids
+        assert get_encoded_household_id(self.household_afghanistan2) in result_ids
+        assert get_encoded_household_id(self.household_ukraine) not in result_ids
 
         for i, household in enumerate([self.household_afghanistan1, self.household_afghanistan2]):
             household_result_first = response_results[i]
-            assert household_result_first["id"] == encode_id_base64_required(household.id, "Household")
+            assert household_result_first["id"] == get_encoded_household_id(household)
             assert household_result_first["unicef_id"] == household.unicef_id
             assert household_result_first["head_of_household"] == household.head_of_household.full_name
             assert household_result_first["admin1"] == household.admin1.name
@@ -655,9 +857,9 @@ class TestHouseholdGlobalViewSet:
         assert len(response_results) == 1
 
         result_ids = [result["id"] for result in response_results]
-        assert encode_id_base64_required(self.household_afghanistan1.id, "Household") in result_ids
-        assert encode_id_base64_required(self.household_afghanistan2.id, "Household") not in result_ids
-        assert encode_id_base64_required(self.household_ukraine.id, "Household") not in result_ids
+        assert get_encoded_household_id(self.household_afghanistan1) in result_ids
+        assert get_encoded_household_id(self.household_afghanistan2) not in result_ids
+        assert get_encoded_household_id(self.household_ukraine) not in result_ids
 
     @pytest.mark.parametrize(
         "permissions",
@@ -802,7 +1004,7 @@ class TestHouseholdFilter:
         assert response.status_code == status.HTTP_200_OK, response.json()
         response_data = response.json()["results"]
         assert len(response_data) == 1
-        assert response_data[0]["id"] == encode_id_base64_required(household1.id, "Household")
+        assert response_data[0]["id"] == get_encoded_household_id(household1)
         return response_data
 
     def test_filter_by_rdi_id(self) -> None:
@@ -865,7 +1067,7 @@ class TestHouseholdFilter:
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
         assert len(response_data) == 1
-        assert response_data[0]["id"] == encode_id_base64_required(household_passport1.id, "Household")
+        assert response_data[0]["id"] == get_encoded_household_id(household_passport1)
 
     def test_filter_by_address(self) -> None:
         self._test_filter_households_in_list(
@@ -1028,7 +1230,7 @@ class TestHouseholdFilter:
         assert response.status_code == status.HTTP_200_OK, response.json()
         response_data = response.json()["results"]
         assert len(response_data) == 1
-        assert response_data[0]["id"] == encode_id_base64_required(household1.id, "Household")
+        assert response_data[0]["id"] == get_encoded_household_id(household1)
         return response_data
 
     @override_config(USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH=True)
@@ -1054,5 +1256,5 @@ class TestHouseholdFilter:
         assert response.status_code == status.HTTP_200_OK, response.json()
         response_data = response.json()["results"]
         assert len(response_data) == 1
-        assert response_data[0]["id"] == encode_id_base64_required(household1.id, "Household")
+        assert response_data[0]["id"] == get_encoded_household_id(household1)
         return response_data

@@ -31,5 +31,5 @@ export function usePermissions(): string[] {
     return [];
   }
   //@ts-ignore
-  return meData?.permissions_in_scope ?? [];
+  return meData?.permissionsInScope ?? [];
 }

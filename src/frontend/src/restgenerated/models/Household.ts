@@ -13,23 +13,23 @@ import type { RdiMergeStatusEnum } from './RdiMergeStatusEnum';
 import type { RegistrationMethodEnum } from './RegistrationMethodEnum';
 import type { ResidenceStatusEnum } from './ResidenceStatusEnum';
 export type Household = {
-    first_registration_date?: string;
-    last_registration_date?: string;
+    firstRegistrationDate?: string;
+    lastRegistrationDate?: string;
     members: Array<Individual>;
     country: CountryEnum;
-    country_origin?: CountryOriginEnum;
+    countryOrigin?: CountryOriginEnum;
     size?: number | null;
-    rdi_merge_status?: RdiMergeStatusEnum;
-    is_removed?: boolean;
-    removed_date?: string | null;
-    readonly created_at: string;
-    readonly updated_at: string;
-    last_sync_at?: string | null;
-    internal_data?: any;
+    rdiMergeStatus?: RdiMergeStatusEnum;
+    isRemoved?: boolean;
+    removedDate?: string | null;
+    readonly createdAt: string;
+    readonly updatedAt: string;
+    lastSyncAt?: string | null;
+    internalData?: any;
     /**
      * Household consent sign image
      */
-    consent_sign?: string;
+    consentSign?: string;
     /**
      * Household consent
      */
@@ -43,7 +43,7 @@ export type Household = {
      * * `PRIVATE_PARTNER` - Private partners
      * * `UNICEF` - UNICEF
      */
-    consent_sharing?: ConsentSharingEnum;
+    consentSharing?: ConsentSharingEnum;
     /**
      * Household residence status
      *
@@ -55,7 +55,7 @@ export type Household = {
      * * `NON_HOST` - Non-displaced  |   Non-host
      * * `RETURNEE` - Displaced  |   Returnee
      */
-    residence_status?: ResidenceStatusEnum;
+    residenceStatus?: ResidenceStatusEnum;
     /**
      * Household address
      */
@@ -63,123 +63,123 @@ export type Household = {
     /**
      * Household zip code
      */
-    zip_code?: string | null;
+    zipCode?: string | null;
     /**
      * Household female age group 0-5
      */
-    female_age_group_0_5_count?: number | null;
+    femaleAgeGroup05Count?: number | null;
     /**
      * Household female age group 6-11
      */
-    female_age_group_6_11_count?: number | null;
+    femaleAgeGroup611Count?: number | null;
     /**
      * Household female age group 12-17
      */
-    female_age_group_12_17_count?: number | null;
+    femaleAgeGroup1217Count?: number | null;
     /**
      * Household female age group 18-59
      */
-    female_age_group_18_59_count?: number | null;
+    femaleAgeGroup1859Count?: number | null;
     /**
      * Household female age group 60
      */
-    female_age_group_60_count?: number | null;
+    femaleAgeGroup60Count?: number | null;
     /**
      * Household pregnant count
      */
-    pregnant_count?: number | null;
+    pregnantCount?: number | null;
     /**
      * Household male age group 0-5
      */
-    male_age_group_0_5_count?: number | null;
+    maleAgeGroup05Count?: number | null;
     /**
      * Household male age group 6-11
      */
-    male_age_group_6_11_count?: number | null;
+    maleAgeGroup611Count?: number | null;
     /**
      * Household male age group 12-17
      */
-    male_age_group_12_17_count?: number | null;
+    maleAgeGroup1217Count?: number | null;
     /**
      * Household male age group 18-59
      */
-    male_age_group_18_59_count?: number | null;
+    maleAgeGroup1859Count?: number | null;
     /**
      * Household male age group 60
      */
-    male_age_group_60_count?: number | null;
+    maleAgeGroup60Count?: number | null;
     /**
      * Household female age group 0-5
      */
-    female_age_group_0_5_disabled_count?: number | null;
+    femaleAgeGroup05DisabledCount?: number | null;
     /**
      * Household female age group 6-11
      */
-    female_age_group_6_11_disabled_count?: number | null;
+    femaleAgeGroup611DisabledCount?: number | null;
     /**
      * Household female age group 12-17
      */
-    female_age_group_12_17_disabled_count?: number | null;
+    femaleAgeGroup1217DisabledCount?: number | null;
     /**
      * Household female age group 18-59
      */
-    female_age_group_18_59_disabled_count?: number | null;
+    femaleAgeGroup1859DisabledCount?: number | null;
     /**
      * Household female age group 60
      */
-    female_age_group_60_disabled_count?: number | null;
+    femaleAgeGroup60DisabledCount?: number | null;
     /**
      * Household male age group 0-5
      */
-    male_age_group_0_5_disabled_count?: number | null;
+    maleAgeGroup05DisabledCount?: number | null;
     /**
      * Household male age group 6-1
      */
-    male_age_group_6_11_disabled_count?: number | null;
+    maleAgeGroup611DisabledCount?: number | null;
     /**
      * Household male age group 12-17
      */
-    male_age_group_12_17_disabled_count?: number | null;
+    maleAgeGroup1217DisabledCount?: number | null;
     /**
      * Household male age group 18-59
      */
-    male_age_group_18_59_disabled_count?: number | null;
+    maleAgeGroup1859DisabledCount?: number | null;
     /**
      * Household male age group 60
      */
-    male_age_group_60_disabled_count?: number | null;
+    maleAgeGroup60DisabledCount?: number | null;
     /**
      * Household children count
      */
-    children_count?: number | null;
+    childrenCount?: number | null;
     /**
      * Household male children count
      */
-    male_children_count?: number | null;
+    maleChildrenCount?: number | null;
     /**
      * Household female children count
      */
-    female_children_count?: number | null;
+    femaleChildrenCount?: number | null;
     /**
      * Household children disabled count
      */
-    children_disabled_count?: number | null;
+    childrenDisabledCount?: number | null;
     /**
      * Household male children disabled count
      */
-    male_children_disabled_count?: number | null;
+    maleChildrenDisabledCount?: number | null;
     /**
      * Household female children disabled count
      */
-    female_children_disabled_count?: number | null;
+    femaleChildrenDisabledCount?: number | null;
     /**
      * Household other sex group count
      */
-    other_sex_group_count?: number | null;
+    otherSexGroupCount?: number | null;
     /**
      * Household unknown sex group count
      */
-    unknown_sex_group_count?: number | null;
+    unknownSexGroupCount?: number | null;
     /**
      * Household returnee status
      */
@@ -187,11 +187,11 @@ export type Household = {
     /**
      * Female child headed household flag
      */
-    fchild_hoh?: boolean | null;
+    fchildHoh?: boolean | null;
     /**
      * Child headed household flag
      */
-    child_hoh?: boolean | null;
+    childHoh?: boolean | null;
     /**
      * Household village
      */
@@ -367,7 +367,7 @@ export type Household = {
     /**
      * Household unhcr id
      */
-    unhcr_id?: string;
+    unhcrId?: string;
     /**
      * Data collection start date
      */
@@ -379,46 +379,46 @@ export type Household = {
      * * `COMMUNITY` - Community-level Registration
      * * `HH_REGISTRATION` - Household Registration
      */
-    registration_method?: RegistrationMethodEnum;
+    registrationMethod?: RegistrationMethodEnum;
     /**
      * Family ID eDopomoga household id [sys]
      */
-    family_id?: string | null;
+    familyId?: string | null;
     /**
      * Household origin unicef id [sys]
      */
-    origin_unicef_id?: string | null;
+    originUnicefId?: string | null;
     /**
      * Household migration status [sys]
      */
-    is_migration_handled?: boolean;
+    isMigrationHandled?: boolean;
     /**
      * Household migrated at [sys]
      */
-    migrated_at?: string | null;
+    migratedAt?: string | null;
     /**
      * Household collect type [sys]
      *
      * * `STANDARD` - Standard
      * * `SINGLE` - Single
      */
-    collect_type?: CollectTypeEnum;
+    collectType?: CollectTypeEnum;
     /**
      * Beneficiary Program Registration id [sys]
      */
-    program_registration_id?: string | null;
+    programRegistrationId?: string | null;
     /**
      * Household cash received usd [sys]
      */
-    total_cash_received_usd?: string | null;
+    totalCashReceivedUsd?: string | null;
     /**
      * Household cash received [sys]
      */
-    total_cash_received?: string | null;
+    totalCashReceived?: string | null;
     /**
      * Household flex fields [sys]
      */
-    flex_fields?: any;
+    flexFields?: any;
     /**
      * Household withdrawn [sys]
      */
@@ -426,7 +426,7 @@ export type Household = {
     /**
      * Household withdrawn date [sys]
      */
-    withdrawn_date?: string | null;
+    withdrawnDate?: string | null;
     /**
      * Household deviceid [sys]
      */
@@ -434,7 +434,7 @@ export type Household = {
     /**
      * Household name enumerator [sys]
      */
-    name_enumerator?: string;
+    nameEnumerator?: string;
     /**
      * Household org enumerator [sys]
      *
@@ -442,35 +442,35 @@ export type Household = {
      * * `PARTNER` - Partner
      * * `UNICEF` - UNICEF
      */
-    org_enumerator?: OrgEnumeratorEnum;
+    orgEnumerator?: OrgEnumeratorEnum;
     /**
      * Household org name enumerator [sys]
      */
-    org_name_enumerator?: string;
+    orgNameEnumerator?: string;
     /**
      * Household enumerator record [sys]
      */
-    enumerator_rec_id?: number | null;
+    enumeratorRecId?: number | null;
     /**
      * Household flex registrations record [sys]
      */
-    flex_registrations_record_id?: number | null;
+    flexRegistrationsRecordId?: number | null;
     /**
      * Collection of household representations
      */
-    household_collection?: number | null;
+    householdCollection?: number | null;
     /**
      * Household storage object
      */
-    storage_obj?: number | null;
+    storageObj?: number | null;
     /**
      * If this household was copied from another household, this field will contain the household it was copied from.
      */
-    copied_from?: string | null;
+    copiedFrom?: string | null;
     /**
      * Household lowest administrative area
      */
-    admin_area?: string | null;
+    adminArea?: string | null;
     /**
      * Household administrative area level 1
      */

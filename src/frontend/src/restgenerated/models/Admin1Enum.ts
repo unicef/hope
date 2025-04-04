@@ -3,24 +3,24 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * * `AF31` - Andersonbury
- * * `HR30` - East Alexanderfurt
- * * `UA53` - East Christina
- * * `AF37` - Mitchellport
- * * `HR56` - North Maria
- * * `UA35` - South Jonathanland
- * * `HR59` - Westburgh
- * * `UA73` - Wilkinsonview
- * * `AF27` - Wilsonport
+ * * `UA45` - Cisnerosland
+ * * `HR78` - East Jamesstad
+ * * `HR53` - East Jo
+ * * `UA86` - Juliehaven
+ * * `AF48` - Kirstenstad
+ * * `HR54` - Lake Christinaside
+ * * `AF99` - Mooreview
+ * * `AF96` - West Caitlinmouth
+ * * `UA91` - West Lisachester
  */
 export enum Admin1Enum {
-    AF31 = 'AF31',
-    HR30 = 'HR30',
-    UA53 = 'UA53',
-    AF37 = 'AF37',
-    HR56 = 'HR56',
-    UA35 = 'UA35',
-    HR59 = 'HR59',
-    UA73 = 'UA73',
-    AF27 = 'AF27',
+    UA45 = 'UA45',
+    HR78 = 'HR78',
+    HR53 = 'HR53',
+    UA86 = 'UA86',
+    AF48 = 'AF48',
+    HR54 = 'HR54',
+    AF99 = 'AF99',
+    AF96 = 'AF96',
+    UA91 = 'UA91',
 }

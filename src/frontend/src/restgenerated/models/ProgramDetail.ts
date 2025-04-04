@@ -13,7 +13,7 @@ export type ProgramDetail = {
     /**
      * Program code
      */
-    programme_code?: string | null;
+    programmeCode?: string | null;
     /**
      * Program slug [sys]
      */
@@ -25,11 +25,11 @@ export type ProgramDetail = {
     /**
      * Program start date
      */
-    start_date: string;
+    startDate: string;
     /**
      * Program end date
      */
-    end_date?: string | null;
+    endDate?: string | null;
     /**
      * Program budget
      */
@@ -40,7 +40,7 @@ export type ProgramDetail = {
      * * `ONE_OFF` - One-off
      * * `REGULAR` - Regular
      */
-    frequency_of_payments: FrequencyOfPaymentsEnum;
+    frequencyOfPayments: FrequencyOfPaymentsEnum;
     /**
      * Program sector
      *
@@ -56,13 +56,13 @@ export type ProgramDetail = {
     /**
      * Program cash+
      */
-    cash_plus: boolean;
+    cashPlus: boolean;
     /**
      * Program population goal
      */
-    population_goal: number;
-    data_collecting_type: DataCollectingType;
-    beneficiary_group: BeneficiaryGroup;
+    populationGoal: number;
+    dataCollectingType: DataCollectingType;
+    beneficiaryGroup: BeneficiaryGroup;
     /**
      * Status
      *
@@ -71,12 +71,12 @@ export type ProgramDetail = {
      * * `FINISHED` - Finished
      */
     status: Status791Enum;
-    readonly pdu_fields: Array<string>;
+    readonly pduFields: Array<string>;
     /**
      * Program household count [sys]
      */
-    household_count?: number;
-    readonly admin_url: string;
+    householdCount?: number;
+    readonly adminUrl: string;
     /**
      * Program description
      */
@@ -84,7 +84,7 @@ export type ProgramDetail = {
     /**
      * Program administrative area of implementation
      */
-    administrative_areas_of_implementation?: string;
+    administrativeAreasOfImplementation?: string;
     /**
      * record revision number
      */
@@ -97,8 +97,8 @@ export type ProgramDetail = {
      * * `NONE_PARTNERS_ACCESS` - None partners access
      * * `SELECTED_PARTNERS_ACCESS` - Selected partners access
      */
-    partner_access?: PartnerAccessEnum;
-    readonly registration_imports_total_count: number;
-    readonly target_populations_count: number;
+    partnerAccess?: PartnerAccessEnum;
+    readonly registrationImportsTotalCount: number;
+    readonly targetPopulationsCount: number;
 };
 

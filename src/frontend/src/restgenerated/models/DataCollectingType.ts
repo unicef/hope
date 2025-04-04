@@ -7,7 +7,7 @@ export type DataCollectingType = {
     label: string;
     code: string;
     type: string;
-    household_filters_available?: boolean;
-    individual_filters_available?: boolean;
+    householdFiltersAvailable?: boolean;
+    individualFiltersAvailable?: boolean;
 };
 
