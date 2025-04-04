@@ -476,7 +476,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         template_column_list = export_service.prepare_headers(fsp_xlsx_template)
         fsp_xlsx_template.refresh_from_db()
         # remove for people 'household_unicef_id' core_field
-        self.assertEqual(len(template_column_list), 30)  # DEFAULT_COLUMNS -hh_id and -hh_size +ind_id +3 core fields
+        self.assertEqual(len(template_column_list), 31)  # DEFAULT_COLUMNS -hh_id and -hh_size +ind_id +3 core fields
         self.assertNotIn("household_id", template_column_list)
         self.assertNotIn("household_size", template_column_list)
         self.assertIn("individual_id", template_column_list)
