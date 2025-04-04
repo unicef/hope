@@ -1,7 +1,8 @@
 import { HeadCell } from '@core/Table/EnhancedTableHead';
 import { ProgramCycle } from '@api/programCycleApi';
+import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 
-const headCells: HeadCell<ProgramCycle>[] = [
+const headCells: HeadCell<ProgramCycleList>[] = [
   {
     id: 'title',
     numeric: false,
