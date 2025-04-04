@@ -149,7 +149,7 @@ class TestPaymentPlanMutation(APITestCase):
             variables={
                 "input": {
                     "name": "paymentPlanName",
-                    "programCycleId": self.id_to_base64(self.cycle.id, "ProgramCycleNode"),
+                    "programCycleId": self.cycle.id,
                     "excludedIds": "",
                     "targetingCriteria": {
                         "flagExcludeIfActiveAdjudicationTicket": False,

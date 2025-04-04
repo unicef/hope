@@ -2,10 +2,10 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { TargetPopulationList } from './TargetPopulationList';
-export type PaginatedTargetPopulationListList = {
+import type { PaymentPlanList } from './PaymentPlanList';
+export type PaginatedPaymentPlanListList = {
     next?: string | null;
     previous?: string | null;
-    results: Array<TargetPopulationList>;
+    results: Array<PaymentPlanList>;
 };
 

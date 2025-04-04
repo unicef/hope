@@ -4,6 +4,19 @@
 /* eslint-disable */
 export type FollowUpPaymentPlan = {
     readonly id: string;
+<<<<<<< HEAD
+    unicef_id?: string | null;
+    status: string;
+    /**
+     * Dispersion Start Date
+     */
+    dispersion_start_date?: string | null;
+    /**
+     * Dispersion End Date
+     */
+    dispersion_end_date?: string | null;
+=======
     unicefId?: string | null;
+>>>>>>> long-term/rest-api-refactor
 };
 

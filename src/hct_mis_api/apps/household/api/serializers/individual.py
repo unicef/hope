@@ -60,6 +60,17 @@ class DocumentSerializer(serializers.ModelSerializer):
         )
 
 
+class IndividualSmallSerializer(serializers.ModelSerializer):
+    id = Base64ModelField(model_name="IndividualIdentity")
+
+    class Meta:
+        model = Individual
+        fields = (
+            "id",
+            "unicef_id",
+        )
+
+
 class IndividualIdentitySerializer(serializers.ModelSerializer):
     id = Base64ModelField(model_name="IndividualIdentity")
     country = CountrySerializer()

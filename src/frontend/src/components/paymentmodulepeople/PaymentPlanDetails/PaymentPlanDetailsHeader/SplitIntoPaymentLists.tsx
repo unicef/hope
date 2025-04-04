@@ -7,7 +7,7 @@ import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { PaymentPlanQuery, useSplitPpMutation } from '@generated/graphql';
+import { useSplitPpMutation } from '@generated/graphql';
 import { LoadingButton } from '@core/LoadingButton';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import {
@@ -19,6 +19,7 @@ import {
   Grid2 as Grid,
 } from '@mui/material';
 import ReorderIcon from '@mui/icons-material/Reorder';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface FormValues {
   splitType: string;
@@ -31,7 +32,7 @@ const initialValues: FormValues = {
 };
 
 interface SplitIntoPaymentListsProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
   canSplit: boolean;
 }
 
@@ -45,10 +46,10 @@ export const SplitIntoPaymentLists = ({
   const { showMessage } = useSnackbar();
 
   let minPaymentsNoMessage = 'Payments Number must be greater than 10';
-  let maxPaymentsNoMessage = `Payments Number must be less than ${paymentPlan.paymentItems.totalCount}`;
+  let maxPaymentsNoMessage = `Payments Number must be less than ${paymentPlan.eligible_payments_count}`;
 
-  if (paymentPlan.paymentItems.totalCount <= 10) {
-    const msg = `There are too few payments (${paymentPlan.paymentItems.totalCount}) to split`;
+  if (paymentPlan.eligible_payments_count <= 10) {
+    const msg = `There are too few payments (${paymentPlan.eligible_payments_count}) to split`;
     minPaymentsNoMessage = msg;
     maxPaymentsNoMessage = msg;
   }
@@ -61,7 +62,7 @@ export const SplitIntoPaymentLists = ({
         schema
           .required('Payments Number is required')
           .min(10, minPaymentsNoMessage)
-          .max(paymentPlan.paymentItems.totalCount, maxPaymentsNoMessage),
+          .max(paymentPlan.eligible_payments_count, maxPaymentsNoMessage),
     }),
   });
 
@@ -119,7 +120,7 @@ export const SplitIntoPaymentLists = ({
                     <Field
                       name="splitType"
                       label="Split Type"
-                      choices={paymentPlan.splitChoices}
+                      choices={paymentPlan.split_choices}
                       component={FormikSelectField}
                     />
                   </Grid>

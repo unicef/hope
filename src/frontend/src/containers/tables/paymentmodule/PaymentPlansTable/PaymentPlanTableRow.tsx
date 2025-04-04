@@ -11,9 +11,10 @@ import {
 } from '@utils/utils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface PaymentPlanTableRowProps {
-  plan;
+  plan: Partial<PaymentPlanDetail>;
   canViewDetails: boolean;
 }
 
@@ -24,7 +25,7 @@ export const PaymentPlanTableRow = ({
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
   const paymentPlanPath = `/${baseUrl}/payment-module/${
-    plan.isFollowUp ? 'followup-payment-plans' : 'payment-plans'
+    plan.is_follow_up ? 'followup-payment-plans' : 'payment-plans'
   }/${plan.id}`;
   const handleClick = (): void => {
     navigate(paymentPlanPath);
@@ -35,15 +36,15 @@ export const PaymentPlanTableRow = ({
   if (!statusChoicesData) return null;
 
   const followUpLinks = (): ReactElement => {
-    if (!plan.followUps?.edges?.length) return <>-</>;
+    if (!plan.follow_ups?.length) return <>-</>;
     return (
       <Box display="flex" flexDirection="column">
-        {plan.followUps?.edges?.map((followUp) => {
-          const followUpPaymentPlanPath = `/${baseUrl}/payment-module/followup-payment-plans/${followUp?.node?.id}`;
+        {plan.follow_ups?.map((followUp) => {
+          const followUpPaymentPlanPath = `/${baseUrl}/payment-module/followup-payment-plans/${followUp?.id}`;
           return (
-            <Box key={followUp?.node?.id} mb={1}>
-              <BlackLink key={followUp?.node?.id} to={followUpPaymentPlanPath}>
-                {followUp?.node?.unicefId}
+            <Box key={followUp?.id} mb={1}>
+              <BlackLink key={followUp?.id} to={followUpPaymentPlanPath}>
+                {followUp?.unicef_id}
               </BlackLink>
             </Box>
           );
@@ -60,11 +61,11 @@ export const PaymentPlanTableRow = ({
       key={plan.id}
     >
       <TableCell align="left">
-        {plan.isFollowUp ? 'Follow-up: ' : ''}
+        {plan.is_follow_up ? 'Follow-up: ' : ''}
         {canViewDetails ? (
-          <BlackLink to={paymentPlanPath}>{plan.unicefId}</BlackLink>
+          <BlackLink to={paymentPlanPath}>{plan.unicef_id}</BlackLink>
         ) : (
-          plan.unicefId
+          plan.unicef_id
         )}
       </TableCell>
       <TableCell align="left">
@@ -74,31 +75,31 @@ export const PaymentPlanTableRow = ({
         />
       </TableCell>
       <TableCell align="left">{plan.name}</TableCell>
-      <TableCell align="left">{plan.totalHouseholdsCount || '-'}</TableCell>
-      <TableCell align="left">{plan.currencyName}</TableCell>
+      <TableCell align="left">{plan.total_households_count || '-'}</TableCell>
+      <TableCell align="left">{plan.currency}</TableCell>
       <TableCell align="right">
         {`${formatCurrencyWithSymbol(
-          plan.totalEntitledQuantity,
+          Number(plan.total_entitled_quantity),
           plan.currency,
         )}`}
       </TableCell>
       <TableCell align="right">
         {`${formatCurrencyWithSymbol(
-          plan.totalDeliveredQuantity,
+          Number(plan.total_delivered_quantity),
           plan.currency,
         )}`}
       </TableCell>
       <TableCell align="right">
         {`${formatCurrencyWithSymbol(
-          plan.totalUndeliveredQuantity,
+          Number(plan.total_undelivered_quantity),
           plan.currency,
         )}`}
       </TableCell>
       <TableCell align="left">
-        <UniversalMoment>{plan.dispersionStartDate}</UniversalMoment>
+        <UniversalMoment>{plan.dispersion_start_date}</UniversalMoment>
       </TableCell>
       <TableCell align="left">
-        <UniversalMoment>{plan.dispersionEndDate}</UniversalMoment>
+        <UniversalMoment>{plan.dispersion_end_date}</UniversalMoment>
       </TableCell>
       <TableCell align="left">{followUpLinks()}</TableCell>
     </ClickableTableRow>

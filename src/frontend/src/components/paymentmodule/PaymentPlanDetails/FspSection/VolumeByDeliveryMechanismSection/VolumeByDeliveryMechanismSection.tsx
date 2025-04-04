@@ -2,11 +2,11 @@ import { Box, Grid2 as Grid, Typography } from '@mui/material';
 import { Pie } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { PaymentPlanQuery } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import { FieldBorder } from '@core/FieldBorder';
 import type { ChartData, ChartOptions } from 'chart.js';
 import { FC } from 'react';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(2)};
@@ -23,7 +23,7 @@ const ChartContainer = styled.div`
 `;
 
 interface VolumeByDeliveryMechanismSectionProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 const DeliveryMechanismsColorsMap = new Map([
@@ -43,10 +43,10 @@ const DeliveryMechanismsColorsMap = new Map([
 ]);
 
 export const getDeliveryMechanismColor = (
-  deliveryMechanism: string,
+  delivery_mechanism: string,
 ): string => {
-  if (DeliveryMechanismsColorsMap.has(deliveryMechanism)) {
-    return DeliveryMechanismsColorsMap.get(deliveryMechanism);
+  if (DeliveryMechanismsColorsMap.has(delivery_mechanism)) {
+    return DeliveryMechanismsColorsMap.get(delivery_mechanism);
   }
   return '#CCC';
 };
@@ -55,36 +55,37 @@ export const VolumeByDeliveryMechanismSection: FC<
   VolumeByDeliveryMechanismSectionProps
 > = ({ paymentPlan }) => {
   const { t } = useTranslation();
-  const { volumeByDeliveryMechanism } = paymentPlan;
+  const { volume_by_delivery_mechanism } = paymentPlan;
 
-  const mappedDeliveryMechanism = volumeByDeliveryMechanism?.map(
+  const mappedDeliveryMechanism = volume_by_delivery_mechanism?.map(
     (vdm, index) => (
       <Grid
         size={{ xs: 6 }}
         /* eslint-disable-next-line react/no-array-index-key */
-        key={`${vdm.deliveryMechanism.id}-${index}`}
+        key={`${vdm.delivery_mechanism.id}-${index}`}
       >
         <FieldBorder
-          color={getDeliveryMechanismColor(vdm.deliveryMechanism.name)}
+          color={getDeliveryMechanismColor(vdm.delivery_mechanism.name)}
         >
           <LabelizedField
-            label={`${vdm.deliveryMechanism.name} (${vdm.deliveryMechanism.fsp?.name ?? '-'})`}
-            value={`${vdm.volume ?? '0.00'} ${paymentPlan.currency} (${vdm.volumeUsd ?? '0.00'} USD)`}
+            label={`${vdm.delivery_mechanism.name} (${vdm.delivery_mechanism.fsp?.name ?? '-'})`}
+            value={`${vdm.volume ?? '0.00'} ${paymentPlan.currency} (${vdm.volume_usd ?? '0.00'} USD)`}
           />
         </FieldBorder>
       </Grid>
     ),
   );
 
-  const chartLabels = volumeByDeliveryMechanism.map(
-    (el) => `${el.deliveryMechanism.name} (${el.deliveryMechanism.fsp?.name})`,
+  const chartLabels = volume_by_delivery_mechanism.map(
+    (el) =>
+      `${el.delivery_mechanism.name} (${el.delivery_mechanism.fsp?.name})`,
   );
 
-  const chartData = volumeByDeliveryMechanism.map((el) => el.volumeUsd);
+  const chartData = volume_by_delivery_mechanism.map((el) => el.volume_usd);
 
   const chartColors = (): string[] => {
-    return volumeByDeliveryMechanism.map((el) =>
-      getDeliveryMechanismColor(el.deliveryMechanism.name),
+    return volume_by_delivery_mechanism.map((el) =>
+      getDeliveryMechanismColor(el.delivery_mechanism.name),
     );
   };
 

@@ -1,9 +1,5 @@
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
-import {
-  PaymentPlanQuery,
-  PaymentPlanStatus,
-  useUpdatePpMutation,
-} from '@generated/graphql';
+import { PaymentPlanStatus, useUpdatePpMutation } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Divider, Grid2 as Grid, Typography } from '@mui/material';
@@ -26,9 +22,10 @@ import { PaperContainer } from '../PaperContainer';
 import AddFilterTargetingCriteriaDisplay from '../TargetingCriteriaDisplay/AddFilterTargetingCriteriaDisplay';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import EditTargetPopulationHeader from './EditTargetPopulationHeader';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface EditTargetPopulationProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
   screenBeneficiary: boolean;
 }
 
@@ -60,12 +57,12 @@ const EditTargetPopulation = ({
   const navigate = useNavigate();
   const { t } = useTranslation();
   const targetingCriteriaCopy: TargetingCriteriaRuleNodeExtended[] =
-    paymentPlan.targetingCriteria?.rules.map((rule) => ({ ...rule })) || [];
+    paymentPlan.targeting_criteria?.rules.map((rule) => ({ ...rule })) || [];
 
   if (targetingCriteriaCopy.length > 0) {
     targetingCriteriaCopy[0].deliveryMechanism =
-      paymentPlan.deliveryMechanism?.code;
-    targetingCriteriaCopy[0].fsp = paymentPlan.financialServiceProvider?.id;
+      paymentPlan.delivery_mechanism?.code;
+    targetingCriteriaCopy[0].fsp = paymentPlan.financial_service_provider?.id;
   }
 
   const initialValues = {
@@ -76,13 +73,13 @@ const EditTargetPopulation = ({
     excludedIds: paymentPlan.excludedIds || '',
     exclusionReason: paymentPlan.exclusionReason || '',
     flagExcludeIfActiveAdjudicationTicket:
-      paymentPlan.targetingCriteria.flagExcludeIfActiveAdjudicationTicket ||
+      paymentPlan.targeting_criteria.flagExcludeIfActiveAdjudicationTicket ||
       false,
     flagExcludeIfOnSanctionList:
-      paymentPlan.targetingCriteria.flagExcludeIfOnSanctionList || false,
+      paymentPlan.targeting_criteria.flagExcludeIfOnSanctionList || false,
     programCycleId: {
-      value: paymentPlan.programCycle.id,
-      name: paymentPlan.programCycle.title,
+      value: paymentPlan.program_cycle.id,
+      name: paymentPlan.program_cycle.title,
     },
   };
 

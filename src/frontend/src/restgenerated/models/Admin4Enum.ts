@@ -3,6 +3,12 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
+<<<<<<< HEAD
+ * * `UA011603311` - TESTlevel4
+ */
+export enum Admin4Enum {
+    UA011603311 = 'UA011603311',
+=======
  * * `UA45258367` - North Kevin
  * * `UA45258355` - Port Sandra
  * * `UA45254745` - Brandonborough
@@ -219,4 +225,5 @@ export enum Admin4Enum {
     UA91473532 = 'UA91473532',
     UA91476480 = 'UA91476480',
     UA91476481 = 'UA91476481',
+>>>>>>> long-term/rest-api-refactor
 }

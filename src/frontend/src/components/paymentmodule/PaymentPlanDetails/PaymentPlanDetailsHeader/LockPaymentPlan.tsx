@@ -13,13 +13,14 @@ import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { Action, PaymentPlanQuery } from '@generated/graphql';
+import { Action } from '@generated/graphql';
 import { GreyText } from '@core/GreyText';
 import { LoadingButton } from '@core/LoadingButton';
 import { useProgramContext } from 'src/programContext';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 export interface LockPaymentPlanProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export function LockPaymentPlan({
@@ -67,15 +68,15 @@ export function LockPaymentPlan({
                 'After you lock this Payment Plan, you will be able to run entitlement formula for selected target population.',
               )}
             </Box>
-            {paymentPlan.paymentsConflictsCount > 0 && (
+            {paymentPlan.payments_conflicts_count > 0 && (
               <Box p={5}>
                 <GreyText>
                   {t('Note:')}{' '}
-                  {paymentPlan.paymentsConflictsCount === 1
+                  {paymentPlan.payments_conflicts_count === 1
                     ? t('There is')
                     : t('There are')}{' '}
-                  {paymentPlan.paymentsConflictsCount}{' '}
-                  {paymentPlan.paymentsConflictsCount === 1
+                  {paymentPlan.payments_conflicts_count}{' '}
+                  {paymentPlan.payments_conflicts_count === 1
                     ? t(beneficiaryGroup?.group_label)
                     : t(beneficiaryGroup?.group_label_plural)}{' '}
                   {t('that will be ignored in this Payment Plan.')}

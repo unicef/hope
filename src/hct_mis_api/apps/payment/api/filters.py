@@ -1,4 +1,6 @@
-from django.db.models import QuerySet
+from typing import Any
+
+from django.db.models import Q, QuerySet
 
 import django_filters
 from django_filters import FilterSet
@@ -8,10 +10,12 @@ from hct_mis_api.apps.payment.models import PaymentPlan
 
 
 class PaymentPlanFilter(FilterSet):
+    search = django_filters.CharFilter(method="search_filter")
     status = django_filters.ChoiceFilter(
         choices=PaymentPlan.Status.choices,
     )
     program = django_filters.CharFilter(method="filter_by_program")
+    program_cycle = django_filters.CharFilter(method="filter_by_program_cycle")
     name = django_filters.CharFilter(field_name="name", lookup_expr="startswith")
 
     class Meta:
@@ -25,3 +29,40 @@ class PaymentPlanFilter(FilterSet):
 
     def filter_by_program(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         return qs.filter(program_cycle__program_id=decode_id_string_required(value))
+
+    def filter_by_program_cycle(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+        return qs.filter(program_cycle_id=decode_id_string_required(value))
+
+    def search_filter(self, qs: QuerySet, name: str, value: str) -> "QuerySet[PaymentPlan]":
+        return qs.filter(Q(id__icontains=value) | Q(unicef_id__icontains=value) | Q(name__istartswith=value))
+
+
+class TargetPopulationFilter(PaymentPlanFilter):
+    status = django_filters.ChoiceFilter(
+        method="filter_by_status", choices=PaymentPlan.Status.choices + [("ASSIGNED", "Assigned")]
+    )
+
+    class Meta:
+        model = PaymentPlan
+        fields = {
+            "created_at": ["gte", "lte"],
+            "total_households_count": ["gte", "lte"],
+            "total_individuals_count": ["gte", "lte"],
+        }
+
+    @staticmethod
+    def filter_by_status(queryset: "QuerySet", model_field: str, value: Any) -> "QuerySet":
+        # assigned TP statuses
+        is_assigned = [
+            PaymentPlan.Status.PREPARING.value,
+            PaymentPlan.Status.OPEN.value,
+            PaymentPlan.Status.LOCKED.value,
+            PaymentPlan.Status.LOCKED_FSP.value,
+            PaymentPlan.Status.IN_APPROVAL.value,
+            PaymentPlan.Status.IN_AUTHORIZATION.value,
+            PaymentPlan.Status.IN_REVIEW.value,
+            PaymentPlan.Status.ACCEPTED.value,
+            PaymentPlan.Status.FINISHED.value,
+        ]
+        value_list = is_assigned if value == "ASSIGNED" else [value]
+        return queryset.filter(status__in=value_list)

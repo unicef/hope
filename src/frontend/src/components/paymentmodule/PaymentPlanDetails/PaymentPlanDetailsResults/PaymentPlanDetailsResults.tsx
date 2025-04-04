@@ -1,7 +1,6 @@
 import { Grid2 as Grid, Typography } from '@mui/material';
 import { Pie } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
-import { PaymentPlanQuery } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import { PaperContainer } from '../../../targeting/PaperContainer';
 import { FieldBorder } from '@core/FieldBorder';
@@ -15,9 +14,10 @@ import {
 import { ResultsForHouseholds } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults/ResultsForHouseholds';
 import { ResultsForPeople } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults/ResultsForPeople';
 import { ReactElement } from 'react';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface PaymentPlanDetailsResultsProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export const PaymentPlanDetailsResults = ({
@@ -26,10 +26,10 @@ export const PaymentPlanDetailsResults = ({
   const { t } = useTranslation();
   const { isSocialDctType } = useProgramContext();
   const {
-    femaleChildrenCount,
-    maleChildrenCount,
-    femaleAdultsCount,
-    maleAdultsCount,
+    female_children_count,
+    male_children_count,
+    female_adults_count,
+    male_adults_count,
   } = paymentPlan;
 
   const ResultsComponent = isSocialDctType
@@ -45,35 +45,35 @@ export const PaymentPlanDetailsResults = ({
         <Grid container>
           <Grid size={{ xs: 4 }}>
             <Grid container spacing={3} justifyContent="flex-start">
-              <Grid size={{ xs:6 }}>
+              <Grid size={{ xs: 6 }}>
                 <FieldBorder color={colors.femaleChildren}>
                   <LabelizedField
                     label={t('Female Children')}
-                    value={femaleChildrenCount}
+                    value={female_children_count}
                   />
                 </FieldBorder>
               </Grid>
-              <Grid size={{ xs:6 }}>
+              <Grid size={{ xs: 6 }}>
                 <FieldBorder color={colors.femaleAdult}>
                   <LabelizedField
                     label={t('Female Adults')}
-                    value={femaleAdultsCount}
+                    value={female_adults_count}
                   />
                 </FieldBorder>
               </Grid>
-              <Grid size={{ xs:6 }}>
+              <Grid size={{ xs: 6 }}>
                 <FieldBorder color={colors.maleChildren}>
                   <LabelizedField
                     label={t('Male Children')}
-                    value={maleChildrenCount}
+                    value={male_children_count}
                   />
                 </FieldBorder>
               </Grid>
-              <Grid size={{ xs:6 }}>
+              <Grid size={{ xs: 6 }}>
                 <FieldBorder color={colors.maleAdult}>
                   <LabelizedField
                     label={t('Male Adults')}
-                    value={maleAdultsCount}
+                    value={male_adults_count}
                   />
                 </FieldBorder>
               </Grid>
@@ -110,10 +110,10 @@ export const PaymentPlanDetailsResults = ({
                       datasets: [
                         {
                           data: [
-                            femaleChildrenCount,
-                            femaleAdultsCount,
-                            maleChildrenCount,
-                            maleAdultsCount,
+                            female_children_count,
+                            female_adults_count,
+                            male_children_count,
+                            male_adults_count,
                           ],
                           backgroundColor: [
                             colors.femaleChildren,

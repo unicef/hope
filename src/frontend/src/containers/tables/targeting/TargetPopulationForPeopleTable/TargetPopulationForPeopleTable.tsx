@@ -1,15 +1,14 @@
-import { ReactElement } from 'react';
-import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import {
-  AllTargetPopulationsQueryVariables,
-  PaymentPlanNode,
-  useAllTargetPopulationsQuery,
-} from '@generated/graphql';
 import { TableWrapper } from '@components/core/TableWrapper';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { dateToIsoString } from '@utils/utils';
-import { UniversalTable } from '../../UniversalTable';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { adjustHeadCells, dateToIsoString } from '@utils/utils';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useProgramContext } from 'src/programContext';
+import styled from 'styled-components';
 import { headCells } from './TargetPopulationForPeopleTableHeadCells';
 import { TargetPopulationForPeopleTableRow } from './TargetPopulationForPeopleTableRow';
 
@@ -40,8 +39,10 @@ export function TargetPopulationForPeopleTable({
   noTitle,
 }: TargetPopulationProps): ReactElement {
   const { t } = useTranslation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
   const { businessArea, programId } = useBaseUrl();
-  const initialVariables: AllTargetPopulationsQueryVariables = {
+  const initialQueryVariables = {
     name: filter.name,
     totalHouseholdsCountMin: filter.totalHouseholdsCountMin || null,
     totalHouseholdsCountMax: filter.totalHouseholdsCountMax || null,
@@ -53,22 +54,59 @@ export function TargetPopulationForPeopleTable({
       max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
     }),
   };
+
   const handleRadioChange = (id: string): void => {
     handleChange(id);
   };
 
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+
+  const {
+    data: targetPopulationsData,
+    isLoading,
+    error: targetPopulationsError,
+  } = useQuery({
+    queryKey: [
+      'businessAreasProgramsTargetPopulationsList',
+      businessArea,
+      programId,
+      queryVariables,
+    ],
+    queryFn: () => {
+      return RestService.restBusinessAreasProgramsTargetPopulationsList({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+      });
+    },
+  });
+
+  const replacements = {
+    total_households_count: (_beneficiaryGroup) =>
+      `Num. of ${_beneficiaryGroup?.group_labelPlural}`,
+  };
+
+  const adjustedHeadCells = adjustHeadCells(
+    headCells,
+    beneficiaryGroup,
+    replacements,
+  );
+
   const renderTable = (): ReactElement => (
     <TableWrapper>
-      <UniversalTable<PaymentPlanNode, AllTargetPopulationsQueryVariables>
+      <UniversalRestTable
         title={noTitle ? null : t('Target Populations')}
-        headCells={enableRadioButton ? headCells : headCells.slice(1)}
+        headCells={
+          enableRadioButton ? adjustedHeadCells : adjustedHeadCells.slice(1)
+        }
         rowsPerPageOptions={[10, 15, 20]}
-        query={useAllTargetPopulationsQuery}
-        queriedObjectName="allPaymentPlans"
         defaultOrderBy="createdAt"
         defaultOrderDirection="desc"
-        initialVariables={initialVariables}
-        renderRow={(row) => (
+        queryVariables={queryVariables}
+        setQueryVariables={setQueryVariables}
+        data={targetPopulationsData}
+        isLoading={isLoading}
+        error={targetPopulationsError}
+        renderRow={(row: PaymentPlanDetail) => (
           <TargetPopulationForPeopleTableRow
             radioChangeHandler={enableRadioButton && handleRadioChange}
             selectedTargetPopulation={selectedTargetPopulation}

@@ -12,7 +12,6 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.household.fixtures import (
     HouseholdFactory,
     IndividualFactory,
@@ -137,9 +136,6 @@ class TestPaymentSignature(APITestCase):
         for ind in [hoh1, hoh2]:
             DeliveryMechanismDataFactory(individual=ind)
 
-        program_cycle = program.cycles.first()
-        program_cycle_id = self.id_to_base64(program_cycle.id, "ProgramCycleNode")
-
         fsp = FinancialServiceProviderFactory()
 
         targeting_criteria = {
@@ -159,10 +155,10 @@ class TestPaymentSignature(APITestCase):
         input_data = dict(
             business_area_slug="afghanistan",
             name="paymentPlanName",
-            program_cycle_id=program_cycle_id,
+            program_cycle_id=str(program.cycles.first().id),
             targeting_criteria=targeting_criteria,
             excluded_ids="TEST_INVALID_ID_01, TEST_INVALID_ID_02",
-            fsp_id=encode_id_base64(fsp.id, "FinancialServiceProvider"),
+            fsp_id=fsp.id,
             delivery_mechanism_code=dm_cash.code,
         )
 

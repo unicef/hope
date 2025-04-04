@@ -18,12 +18,13 @@ import { FormikTextField } from '@shared/Formik/FormikTextField/FormikTextField'
 import { LoadingButton } from '@core/LoadingButton';
 import { GreyText } from '@core/GreyText';
 import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
-import { Action, PaymentPlanQuery } from '@generated/graphql';
+import { Action } from '@generated/graphql';
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { useProgramContext } from '../../../../programContext';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 export interface AuthorizePaymentPlanProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export function AuthorizePaymentPlan({
@@ -51,10 +52,12 @@ export function AuthorizePaymentPlan({
 
   const shouldShowLastAuthorizerMessage = (): boolean => {
     const authorizationNumberRequired =
-      paymentPlan.approvalProcess?.edges[0]?.node.authorizationNumberRequired;
+      paymentPlan.approval_process?.[paymentPlan.approval_process.length - 1]
+        ?.authorization_number_required;
 
     const authorizationsCount =
-      paymentPlan.approvalProcess?.edges[0]?.node.actions.authorization.length;
+      paymentPlan.approval_process?.[paymentPlan.approval_process.length - 1]
+        .actions?.authorization?.length;
 
     return authorizationNumberRequired - 1 === authorizationsCount;
   };

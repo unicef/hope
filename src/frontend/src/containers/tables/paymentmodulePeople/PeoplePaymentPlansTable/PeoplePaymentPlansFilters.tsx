@@ -1,11 +1,14 @@
-import { Box, Checkbox, FormControlLabel, Grid2 as Grid, MenuItem } from '@mui/material';
+import {
+  Box,
+  Checkbox,
+  FormControlLabel,
+  Grid2 as Grid,
+  MenuItem,
+} from '@mui/material';
 import moment from 'moment';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import {
-  AllPaymentPlansForTableQueryVariables,
-  usePaymentPlanStatusChoicesQueryQuery,
-} from '@generated/graphql';
+import { usePaymentPlanStatusChoicesQueryQuery } from '@generated/graphql';
 import { DatePickerFilter } from '@components/core/DatePickerFilter';
 import { FiltersSection } from '@components/core/FiltersSection';
 import { NumberTextField } from '@components/core/NumberTextField';
@@ -13,17 +16,6 @@ import { SearchTextField } from '@components/core/SearchTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { ReactElement } from 'react';
-
-export type FilterProps = Pick<
-  AllPaymentPlansForTableQueryVariables,
-  | 'search'
-  | 'status'
-  | 'totalEntitledQuantityFrom'
-  | 'totalEntitledQuantityTo'
-  | 'dispersionStartDate'
-  | 'dispersionEndDate'
-  | 'isFollowUp'
->;
 
 interface PeoplePaymentPlansFiltersProps {
   filter;
@@ -164,19 +156,20 @@ export const PeoplePaymentPlansFilters = ({
             minDateMessage={<span />}
           />
         </Grid>
+        is_follow_up
         <Grid size={{ xs: 12 }}>
           <Box ml={2}>
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={Boolean(filter.isFollowUp)}
-                  value={filter.isFollowUp}
+                  checked={Boolean(filter.is_follow_up)}
+                  value={filter.is_follow_up}
                   color="primary"
                   onChange={(e) => {
                     if (e.target.checked) {
-                      handleFilterChange('isFollowUp', true);
+                      handleFilterChange('is_follow_up', true);
                     } else {
-                      handleFilterChange('isFollowUp', false);
+                      handleFilterChange('is_follow_up', false);
                     }
                   }}
                 />

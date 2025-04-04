@@ -1,5 +1,4 @@
 import { Box } from '@mui/material';
-import { PaymentPlanQuery } from '@generated/graphql';
 import { useTranslation } from 'react-i18next';
 import { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
@@ -22,10 +21,11 @@ import { useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AdminButton } from '@core/AdminButton';
 import { RestService } from '@restgenerated/services/RestService';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface PaymentPlanDetailsHeaderProps {
   permissions: string[];
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export const PaymentPlanDetailsHeader = ({
@@ -34,7 +34,7 @@ export const PaymentPlanDetailsHeader = ({
 }: PaymentPlanDetailsHeaderProps): ReactElement => {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
-  const programCycleId = paymentPlan.programCycle?.id;
+  const programCycleId = paymentPlan.program_cycle?.id;
   const { data: programCycleData } = useQuery({
     queryKey: [
       'programCyclesDetails',
@@ -91,10 +91,10 @@ export const PaymentPlanDetailsHeader = ({
     permissions,
   );
   const canSplit =
-    hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
+    hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.can_split;
   const canSendToPaymentGateway =
     hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
-    paymentPlan.canSendToPaymentGateway;
+    paymentPlan.can_send_to_payment_gateway;
 
   let buttons: ReactElement | null = null;
   switch (paymentPlan.status) {
@@ -182,7 +182,7 @@ export const PaymentPlanDetailsHeader = ({
         <Box display="flex" alignItems="center">
           {t('Payment Plan')} ID:{' '}
           <Box ml={1} mr={2}>
-            <span data-cy="pp-unicef-id">{paymentPlan.unicefId}</span>
+            <span data-cy="pp-unicef-id">{paymentPlan.unicef_id}</span>
           </Box>
           <Box mr={2}>
             <StatusBox
@@ -191,9 +191,9 @@ export const PaymentPlanDetailsHeader = ({
             />
           </Box>
           <Box mr={2}>
-            {paymentPlan.backgroundActionStatus && (
+            {paymentPlan.background_action_status && (
               <StatusBox
-                status={paymentPlan.backgroundActionStatus}
+                status={paymentPlan.background_action_status}
                 statusToColor={paymentPlanBackgroundActionStatusToColor}
               />
             )}
@@ -205,7 +205,7 @@ export const PaymentPlanDetailsHeader = ({
           ? breadCrumbsItems
           : null
       }
-      flags={<AdminButton adminUrl={paymentPlan.adminUrl} />}
+      flags={<AdminButton adminUrl={paymentPlan.admin_url} />}
     >
       {buttons}
     </PageHeader>

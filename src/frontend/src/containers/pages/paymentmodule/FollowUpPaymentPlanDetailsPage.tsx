@@ -1,56 +1,64 @@
-import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { FollowUpPaymentPlanDetails } from '@components/paymentmodule/FollowUpPaymentPlanDetails/FollowUpPaymentPlanDetails';
 import { FollowUpPaymentPlanDetailsHeader } from '@components/paymentmodule/FollowUpPaymentPlanDetails/FollowUpPaymentPlanDetailsHeader';
+import ExcludeSection from '@components/paymentmodule/PaymentPlanDetails/ExcludeSection/ExcludeSection';
 import { FspSection } from '@components/paymentmodule/PaymentPlanDetails/FspSection';
 import { PaymentPlanDetailsResults } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults';
 import { ReconciliationSummary } from '@components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
 import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
-import { PaymentPlanStatus, usePaymentPlanQuery } from '@generated/graphql';
+import { AcceptanceProcess } from '@components/paymentmodulepeople/PaymentPlanDetails/AcceptanceProcess';
+import { Entitlement } from '@components/paymentmodulepeople/PaymentPlanDetails/Entitlement';
+import PaymentsTable from '@containers/tables/paymentmodule/PaymentsTable/PaymentsTable';
+import {
+  PaymentPlanBackgroundActionStatus,
+  PaymentPlanStatus,
+} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
-import { ReactElement, useEffect } from 'react';
+import { ReactElement } from 'react';
 import { useParams } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
-import PaymentsTable from '@containers/tables/paymentmodule/PaymentsTable/PaymentsTable';
-import { AcceptanceProcess } from '@components/paymentmodulepeople/PaymentPlanDetails/AcceptanceProcess';
-import { Entitlement } from '@components/paymentmodulepeople/PaymentPlanDetails/Entitlement';
-import ExcludeSection from '@components/paymentmodule/PaymentPlanDetails/ExcludeSection/ExcludeSection';
 
 export function FollowUpPaymentPlanDetailsPage(): ReactElement {
   const { paymentPlanId } = useParams();
   const permissions = usePermissions();
-  const { baseUrl, businessArea } = useBaseUrl();
-  const { data, loading, startPolling, stopPolling, error } =
-    usePaymentPlanQuery({
-      variables: {
+  const { baseUrl, businessArea, programId } = useBaseUrl();
+  const { data: paymentPlan, error } = useQuery({
+    queryKey: ['paymentPlan', businessArea, paymentPlanId, programId],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlansRetrieve({
+        businessAreaSlug: businessArea,
         id: paymentPlanId,
-      },
-      fetchPolicy: 'cache-and-network',
-    });
+        programSlug: programId,
+      }),
+    refetchInterval: () => {
+      const { status, background_action_status } = paymentPlan;
+      if (
+        status === PaymentPlanStatus.Preparing ||
+        (background_action_status !== null &&
+          background_action_status !==
+            PaymentPlanBackgroundActionStatus.ExcludeBeneficiariesError)
+      ) {
+        return 3000;
+      }
 
-  const status = data?.paymentPlan?.status;
-
-  useEffect(() => {
-    if (PaymentPlanStatus.Preparing === status) {
-      startPolling(3000);
-    } else {
-      stopPolling();
-    }
-    return stopPolling;
-  }, [status, startPolling, stopPolling]);
-
-  if (loading && !data) return <LoadingComponent />;
-  if (permissions === null || !data) return null;
+      return false;
+    },
+    refetchIntervalInBackground: true,
+  });
 
   if (
     !hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions) ||
     isPermissionDeniedError(error)
   )
     return <PermissionDenied />;
+
+  const { status } = paymentPlan;
 
   const shouldDisplayEntitlement =
     status !== PaymentPlanStatus.Open && status !== PaymentPlanStatus.Accepted;
@@ -60,7 +68,6 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
     status === PaymentPlanStatus.Accepted ||
     status === PaymentPlanStatus.Finished;
 
-  const { paymentPlan } = data;
   return (
     <>
       <FollowUpPaymentPlanDetailsHeader
@@ -73,9 +80,7 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
       {shouldDisplayEntitlement && (
         <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
       )}
-      {shouldDisplayFsp && (
-        <FspSection paymentPlan={paymentPlan} />
-      )}
+      {shouldDisplayFsp && <FspSection paymentPlan={paymentPlan} />}
       <ExcludeSection paymentPlan={paymentPlan} />
       <SupportingDocumentsSection paymentPlan={paymentPlan} />
       <PaymentPlanDetailsResults paymentPlan={paymentPlan} />

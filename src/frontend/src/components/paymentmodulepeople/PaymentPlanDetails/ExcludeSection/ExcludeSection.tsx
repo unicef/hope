@@ -12,7 +12,6 @@ import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import {
   PaymentPlanDocument,
-  PaymentPlanQuery,
   PaymentPlanStatus,
   useExcludeHouseholdsPpMutation,
 } from '@generated/graphql';
@@ -26,10 +25,11 @@ import { GreyText } from '@core/GreyText';
 import { PaperContainer } from '../../../targeting/PaperContainer';
 import { useProgramContext } from '../../../../programContext';
 import { ExcludedItem } from './ExcludedItem';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface ExcludeSectionProps {
   initialOpen?: boolean;
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export function ExcludeSection({
@@ -38,12 +38,12 @@ export function ExcludeSection({
 }: ExcludeSectionProps): ReactElement {
   const {
     status,
-    backgroundActionStatus,
-    exclusionReason,
-    excludeHouseholdError,
+    background_action_status,
+    exclusion_reason,
+    exclude_household_error,
   } = paymentPlan;
 
-  const initialExcludedIds = paymentPlan?.excludedHouseholds?.map(
+  const initialExcludedIds = paymentPlan?.excluded_households?.map(
     (el) => el.unicefId,
   );
   const [isExclusionsOpen, setExclusionsOpen] = useState(initialOpen);
@@ -88,7 +88,7 @@ export function ExcludeSection({
     setIdsValue(event.target.value);
   };
   const initialValues = {
-    exclusionReason: paymentPlan.exclusionReason || '',
+    exclusionReason: paymentPlan.exclusion_reason || '',
   };
   const validationSchema = Yup.object().shape({
     exclusionReason: Yup.string().max(500, t('Too long')),
@@ -195,7 +195,7 @@ export function ExcludeSection({
       !hasExcludePermission ||
       !hasOpenOrLockedStatus ||
       excludedIds.length === 0 ||
-      Boolean(backgroundActionStatus);
+      Boolean(background_action_status);
 
     const editExclusionsDisabled =
       !hasExcludePermission || !hasOpenOrLockedStatus;
@@ -291,7 +291,7 @@ export function ExcludeSection({
     const applyDisabled =
       !hasExcludePermission ||
       !hasOpenOrLockedStatus ||
-      Boolean(backgroundActionStatus);
+      Boolean(background_action_status);
 
     if (isEdit || numberOfExcluded === 0) {
       return (
@@ -307,7 +307,7 @@ export function ExcludeSection({
                 component={FormikTextField}
               />
             </Grid>
-            <Grid size={{ xs:6 }}>
+            <Grid size={{ xs: 6 }}>
               <Box mr={2}>
                 <StyledTextField
                   label={t('Beneficiaries Ids')}
@@ -375,14 +375,14 @@ export function ExcludeSection({
             ) : null}
             <Collapse in={isExclusionsOpen}>
               <Box display="flex" flexDirection="column">
-                {isExclusionsOpen && exclusionReason && !isEdit ? (
+                {isExclusionsOpen && exclusion_reason && !isEdit ? (
                   <Grid container>
-                    <Grid size={{ xs:8 }}>
+                    <Grid size={{ xs: 8 }}>
                       <Box display="flex" flexDirection="column">
                         <Box
                           display="flex"
                           alignItems={
-                            exclusionReason.length > 100
+                            exclusion_reason.length > 100
                               ? 'flex-start'
                               : 'center'
                           }
@@ -392,11 +392,11 @@ export function ExcludeSection({
                           <Box mr={2}>
                             <GreyText>{t('Reason')}:</GreyText>
                           </Box>
-                          <Typography>{exclusionReason}</Typography>
+                          <Typography>{exclusion_reason}</Typography>
                         </Box>
-                        {excludeHouseholdError && (
+                        {exclude_household_error && (
                           <Box display="flex" flexDirection="column" mt={2}>
-                            {formatErrorToArray(excludeHouseholdError).map(
+                            {formatErrorToArray(exclude_household_error).map(
                               (el) => (
                                 <FormHelperText key={el} error>
                                   {el}
@@ -412,7 +412,7 @@ export function ExcludeSection({
                 {renderInputAndApply()}
                 <Grid container size={{ xs: 6 }}>
                   {errors?.map((formError) => (
-                    <Grid key={formError}  size={{ xs: 12 }}>
+                    <Grid key={formError} size={{ xs: 12 }}>
                       <FormHelperText key={formError} error>
                         {formError}
                       </FormHelperText>
@@ -421,7 +421,7 @@ export function ExcludeSection({
                 </Grid>
                 <Grid container direction="column" size={{ xs: 3 }}>
                   {excludedIds.map((id) => (
-                    <Grid key={id}  size={{ xs: 12 }}>
+                    <Grid key={id} size={{ xs: 12 }}>
                       <ExcludedItem
                         key={id}
                         id={id}

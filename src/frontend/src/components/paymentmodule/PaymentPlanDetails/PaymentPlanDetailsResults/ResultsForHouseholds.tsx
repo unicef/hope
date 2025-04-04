@@ -4,17 +4,17 @@ import {
   SummaryValue,
 } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults/Styles';
 import { LabelizedField } from '@core/LabelizedField';
-import { PaymentPlanQuery } from '@generated/graphql';
 import { useProgramContext } from 'src/programContext';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface ResultsForHouseholdsProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export const ResultsForHouseholds = ({
   paymentPlan,
 }: ResultsForHouseholdsProps) => {
-  const { totalHouseholdsCount, totalIndividualsCount } = paymentPlan;
+  const { total_households_count, total_individuals_count } = paymentPlan;
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
@@ -26,7 +26,7 @@ export const ResultsForHouseholds = ({
             <LabelizedField
               label={`Total Number of ${beneficiaryGroup?.group_label_plural}`}
             >
-              <SummaryValue>{totalHouseholdsCount || '0'}</SummaryValue>
+              <SummaryValue>{total_households_count || '0'}</SummaryValue>
             </LabelizedField>
           </SummaryBorder>
         </Grid>
@@ -35,7 +35,7 @@ export const ResultsForHouseholds = ({
             <LabelizedField
               label={`Targeted ${beneficiaryGroup?.member_label_plural}`}
             >
-              <SummaryValue>{totalIndividualsCount || '0'}</SummaryValue>
+              <SummaryValue>{total_individuals_count || '0'}</SummaryValue>
             </LabelizedField>
           </SummaryBorder>
         </Grid>

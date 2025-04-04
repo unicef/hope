@@ -11,13 +11,13 @@ import {
   ImportXlsxPpListPerFspMutation,
   PaymentPlanBackgroundActionStatus,
   PaymentPlanDocument,
-  PaymentPlanQuery,
   useImportXlsxPpListPerFspMutation,
 } from '@generated/graphql';
 import { DropzoneField } from '@core/DropzoneField';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useProgramContext } from '../../../../programContext';
 import { LoadingButton } from '@core/LoadingButton';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
@@ -33,7 +33,7 @@ const DisabledUploadIcon = styled(Publish)`
 `;
 
 interface ImportXlsxPaymentPlanPaymentListPerFspProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
   permissions: string[];
 }
 
@@ -63,7 +63,10 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
     hasPermissions(
       PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION,
       permissions,
-    ) && allowedState.includes(paymentPlan.backgroundActionStatus);
+    ) &&
+    allowedState.includes(
+      paymentPlan.background_action_status as PaymentPlanBackgroundActionStatus,
+    );
 
   const handleImport = async (): Promise<void> => {
     if (fileToImport) {
@@ -97,7 +100,7 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
 
   return (
     <>
-      {canUploadReconciliation && paymentPlan.canSendToPaymentGateway && (
+      {canUploadReconciliation && paymentPlan.can_send_to_payment_gateway && (
         <Box key="import">
           <Button
             startIcon={

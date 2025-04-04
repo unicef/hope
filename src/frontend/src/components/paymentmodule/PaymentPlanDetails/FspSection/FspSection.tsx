@@ -1,20 +1,20 @@
-import { Box, Grid2 as Grid, Typography } from '@mui/material';
-import { useTranslation } from 'react-i18next';
-import { PaymentPlanQuery } from '@generated/graphql';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { DividerLine } from '@core/DividerLine';
 import { LabelizedField } from '@core/LabelizedField';
-import { VolumeByDeliveryMechanismSection } from './VolumeByDeliveryMechanismSection';
+import { Box, Grid2 as Grid, Typography } from '@mui/material';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { VolumeByDeliveryMechanismSection } from './VolumeByDeliveryMechanismSection';
 
 interface FspSectionProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export const FspSection = ({ paymentPlan }: FspSectionProps): ReactElement => {
   const { t } = useTranslation();
 
-  const { deliveryMechanism, financialServiceProvider } = paymentPlan;
+  const { delivery_mechanism_per_payment_plan } = paymentPlan;
 
   return (
     <Box m={5}>
@@ -30,12 +30,12 @@ export const FspSection = ({ paymentPlan }: FspSectionProps): ReactElement => {
         <Grid container spacing={3}>
           <>
             <Grid
-              key={`${deliveryMechanism?.name}-${financialServiceProvider?.name}`}
+              key={`${delivery_mechanism_per_payment_plan.name}-${delivery_mechanism_per_payment_plan.fsp.name}`}
               size={{ xs: 3 }}
             >
               <LabelizedField
-                label={deliveryMechanism?.name || '-'}
-                value={financialServiceProvider?.name || '-'}
+                label={delivery_mechanism_per_payment_plan.name || '-'}
+                value={delivery_mechanism_per_payment_plan.fsp.name || '-'}
               />
             </Grid>
           </>

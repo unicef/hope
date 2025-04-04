@@ -5,7 +5,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import * as Yup from 'yup';
 import {
   useAllTargetPopulationsQuery,
-  usePaymentPlanQuery,
   useUpdatePpMutation,
 } from '@generated/graphql';
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
@@ -21,23 +20,27 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { today } from '@utils/utils';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 
 const EditFollowUpPaymentPlanPage = (): ReactElement => {
   const navigate = useNavigate();
   const { paymentPlanId } = useParams();
   const { t } = useTranslation();
-  const { data: paymentPlanData, loading: loadingPaymentPlan } =
-    usePaymentPlanQuery({
-      variables: {
-        id: paymentPlanId,
-      },
-      fetchPolicy: 'cache-and-network',
-    });
-
   const [mutate] = useUpdatePpMutation();
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
+
+  const { data: paymentPlan, isLoading: loadingPaymentPlan } = useQuery({
+    queryKey: ['paymentPlan', businessArea, paymentPlanId, programId],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlansRetrieve({
+        businessAreaSlug: businessArea,
+        id: paymentPlanId,
+        programSlug: programId,
+      }),
+  });
 
   const { data: allTargetPopulationsData, loading: loadingTargetPopulations } =
     useAllTargetPopulationsQuery({
@@ -49,21 +52,19 @@ const EditFollowUpPaymentPlanPage = (): ReactElement => {
     });
   if (loadingTargetPopulations || loadingPaymentPlan)
     return <LoadingComponent />;
-  if (!allTargetPopulationsData || !paymentPlanData) return null;
+  if (!allTargetPopulationsData || !paymentPlan) return null;
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.PM_CREATE, permissions))
     return <PermissionDenied />;
 
-  const { paymentPlan } = paymentPlanData;
-
   const initialValues = {
     paymentPlanId: paymentPlan.id,
     currency: {
-      name: paymentPlan.currencyName,
+      name: paymentPlan.currency,
       value: paymentPlan.currency,
     },
-    dispersionStartDate: paymentPlan.dispersionStartDate,
-    dispersionEndDate: paymentPlan.dispersionEndDate,
+    dispersionStartDate: paymentPlan.dispersion_start_date,
+    dispersionEndDate: paymentPlan.dispersion_end_date,
   };
 
   const validationSchema = Yup.object().shape({

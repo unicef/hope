@@ -1,7 +1,12 @@
-import { Box, Grid2 as Grid, IconButton, Tooltip, Typography } from '@mui/material';
+import {
+  Box,
+  Grid2 as Grid,
+  IconButton,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { renderUserName } from '@utils/utils';
-import { PaymentPlanQuery } from '@generated/graphql';
 import { BlackLink } from '@core/BlackLink';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LabelizedField } from '@core/LabelizedField';
@@ -12,10 +17,11 @@ import { FieldBorder } from '@core/FieldBorder';
 import { RelatedFollowUpPaymentPlans } from './RelatedFollowUpPaymentPlans';
 import { Info } from '@mui/icons-material';
 import { ReactElement } from 'react';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface PaymentPlanDetailsProps {
   baseUrl: string;
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export const PaymentPlanDetails = ({
@@ -26,15 +32,15 @@ export const PaymentPlanDetails = ({
   const {
     id,
     name,
-    createdBy,
+    created_by,
     program,
     currency,
-    startDate,
-    endDate,
-    dispersionStartDate,
-    dispersionEndDate,
-    followUps,
-    exchangeRate,
+    start_date,
+    end_date,
+    dispersion_start_date,
+    dispersion_end_date,
+    follow_ups,
+    exchange_rate,
   } = paymentPlan;
 
   return (
@@ -48,7 +54,7 @@ export const PaymentPlanDetails = ({
             <Grid container size={{ xs: 9 }} spacing={6}>
               <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Created By')}>
-                  {renderUserName(createdBy)}
+                  {renderUserName(created_by)}
                 </LabelizedField>
               </Grid>
               <Grid size={{ xs: 3 }}>
@@ -72,28 +78,28 @@ export const PaymentPlanDetails = ({
               </Grid>
               <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Start Date')}>
-                  <UniversalMoment>{startDate}</UniversalMoment>
+                  <UniversalMoment>{start_date}</UniversalMoment>
                 </LabelizedField>
               </Grid>
               <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('End Date')}>
-                  <UniversalMoment>{endDate}</UniversalMoment>
+                  <UniversalMoment>{end_date}</UniversalMoment>
                 </LabelizedField>
               </Grid>
               <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Dispersion Start Date')}>
-                  <UniversalMoment>{dispersionStartDate}</UniversalMoment>
+                  <UniversalMoment>{dispersion_start_date}</UniversalMoment>
                 </LabelizedField>
               </Grid>
               <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Dispersion End Date')}>
-                  <UniversalMoment>{dispersionEndDate}</UniversalMoment>
+                  <UniversalMoment>{dispersion_end_date}</UniversalMoment>
                 </LabelizedField>
               </Grid>
               <Grid size={{ xs: 3 }}>
                 <Box mr={1}>
                   <LabelizedField label={t('FX Rate Applied')}>
-                    {exchangeRate}
+                    {exchange_rate}
                   </LabelizedField>
                 </Box>
                 <Tooltip
@@ -115,7 +121,7 @@ export const PaymentPlanDetails = ({
               <Grid size={{ xs: 12 }}>
                 <FieldBorder color="#84A1CA">
                   <RelatedFollowUpPaymentPlans
-                    followUps={followUps}
+                    followUps={follow_ups}
                     baseUrl={baseUrl}
                   />
                 </FieldBorder>

@@ -2,14 +2,18 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type TargetPopulationList = {
+export type ProgramSmall = {
     readonly id: string;
     /**
-     * Name
+     * Program name
      */
+<<<<<<< HEAD:src/frontend/src/restgenerated/models/ProgramSmall.ts
+    name: string;
+=======
     name?: string | null;
     readonly status: string;
     createdBy?: string;
     readonly createdAt: string;
+>>>>>>> long-term/rest-api-refactor:src/frontend/src/restgenerated/models/TargetPopulationList.ts
 };
 

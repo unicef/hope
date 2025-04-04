@@ -24,7 +24,7 @@ export const PeoplePaymentPlanTableRow = ({
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
   const paymentPlanPath = `/${baseUrl}/payment-module/${
-    plan.isFollowUp ? 'followup-payment-plans' : 'payment-plans'
+    plan.is_follow_up ? 'followup-payment-plans' : 'payment-plans'
   }/${plan.id}`;
   const handleClick = (): void => {
     navigate(paymentPlanPath);
@@ -60,7 +60,7 @@ export const PeoplePaymentPlanTableRow = ({
       key={plan.id}
     >
       <TableCell align="left">
-        {plan.isFollowUp ? 'Follow-up: ' : ''}
+        {plan.is_follow_up ? 'Follow-up: ' : ''}
         {canViewDetails ? (
           <BlackLink to={paymentPlanPath}>{plan.unicefId}</BlackLink>
         ) : (

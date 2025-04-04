@@ -18,7 +18,7 @@ const initialFilter = {
   status: [],
   totalEntitledQuantityFrom: '',
   totalEntitledQuantityTo: '',
-  isFollowUp: '',
+  is_follow_up: '',
 };
 
 function PaymentModulePage(): ReactElement {

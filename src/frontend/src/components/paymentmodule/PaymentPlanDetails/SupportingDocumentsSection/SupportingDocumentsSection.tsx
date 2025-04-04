@@ -10,7 +10,7 @@ import { LoadingButton } from '@components/core/LoadingButton';
 import { BlueText } from '@components/grievances/LookUps/LookUpStyles';
 import { PaperContainer } from '@components/targeting/PaperContainer';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { PaymentPlanQuery, PaymentPlanStatus } from '@generated/graphql';
+import { PaymentPlanStatus } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -38,6 +38,7 @@ import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import styled from 'styled-components';
 import { useDownloadSupportingDocument } from './SupportingDocumentsSectionActions';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const StyledBox = styled(Box)`
   max-width: 300px;
@@ -51,7 +52,7 @@ const StyledBox = styled(Box)`
 
 interface SupportingDocumentsSectionProps {
   initialOpen?: boolean;
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export const SupportingDocumentsSection = ({
@@ -68,7 +69,7 @@ export const SupportingDocumentsSection = ({
 
   const { businessArea, programId } = useBaseUrl();
   const [documents, setDocuments] = useState(
-    paymentPlan?.supportingDocuments || [],
+    paymentPlan?.supporting_documents || [],
   );
   const [fileToImport, setFileToImport] = useState<File | null>(null);
   const [title, setTitle] = useState('');
@@ -124,7 +125,7 @@ export const SupportingDocumentsSection = ({
         setOpenImport(false);
         setDocuments([
           ...documents,
-          { id: doc.id, title: doc.title, file: doc.file },
+          { id: doc.id, title: doc.title, file: doc.file, uploaded_at: null },
         ]);
       },
       onError: (err: Error) => {
