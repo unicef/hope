@@ -19,6 +19,10 @@ import {
 import { LoadingButton } from '@core/LoadingButton';
 import { useProgramContext } from '../../../programContext';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useMutation } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useHopeDetailsQuery } from '@hooks/useActionMutation';
 
 interface MergeRegistrationDataImportDialogProps {
   registration: RegistrationDetailedFragment;
@@ -31,25 +35,28 @@ function MergeRegistrationDataImportDialog({
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const { isSocialDctType, selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const [mutate, { loading }] = useMergeRdiMutation({
-    variables: { id: registration.id },
-  });
+  const { mutateAsync, isPending } = useHopeDetailsQuery(
+    registration.id,
+    RestService.restBusinessAreasProgramsRegistrationDataImportsMergeCreate,
+    [RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve.name],
+  );
   const merge = async (): Promise<void> => {
-    const { errors } = await mutate();
+    const { errors } = await mutateAsync();
     if (errors) {
       showMessage(t('Error while merging Registration Data Import'));
       return;
     }
+    setOpen(false);
     showMessage(t('Registration Data Import Merging started'));
   };
   let dataCountInformation = (
     <div>
       <strong>
-        {registration.numberOfHouseholds} {beneficiaryGroup?.group_label_plural}{' '}
+        {registration.numberOfHouseholds} {beneficiaryGroup?.groupLabelPlural}{' '}
         and {registration.numberOfIndividuals}{' '}
-        {beneficiaryGroup?.member_label_plural} will be merged.{' '}
+        {beneficiaryGroup?.memberLabelPlural} will be merged.{' '}
       </strong>
       {t('Do you want to proceed?')}
     </div>
@@ -59,7 +66,7 @@ function MergeRegistrationDataImportDialog({
       <div>
         <strong>
           {registration.numberOfIndividuals}{' '}
-          {beneficiaryGroup?.member_label_plural} will be merged.
+          {beneficiaryGroup?.memberLabelPlural} will be merged.
         </strong>
         {t('Do you want to proceed?')}
       </div>
@@ -98,7 +105,7 @@ function MergeRegistrationDataImportDialog({
               {t('CANCEL')}
             </Button>
             <LoadingButton
-              loading={loading}
+              loading={isPending}
               type="submit"
               color="primary"
               variant="contained"

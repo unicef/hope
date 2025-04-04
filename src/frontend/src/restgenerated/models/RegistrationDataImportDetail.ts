@@ -7,6 +7,7 @@ export type RegistrationDataImportDetail = {
     readonly id: string;
     name: string;
     status: string;
+    statusDisplay: string;
     dataSource: string;
     importedBy?: string;
     readonly createdAt: string;
@@ -27,5 +28,6 @@ export type RegistrationDataImportDetail = {
     readonly goldenRecordDuplicatesCountAndPercentage: Array<Record<string, number>>;
     readonly goldenRecordPossibleDuplicatesCountAndPercentage: Array<Record<string, number>>;
     readonly goldenRecordUniqueCountAndPercentage: Array<Record<string, number>>;
+    readonly adminUrl: string;
 };
 
