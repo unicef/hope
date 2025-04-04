@@ -37,7 +37,7 @@ export const HouseholdTable = ({
 }: HouseholdTableRestProps): ReactElement => {
   const { selectedProgram } = useProgramContext();
   const { businessArea, programId } = useBaseUrl();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const initialQueryVariables = useMemo(() => {
     const matchWithdrawnValue = (): boolean | undefined => {
@@ -188,7 +188,7 @@ export const HouseholdTable = ({
   return (
     <TableWrapper>
       <UniversalRestTable
-        title={`${beneficiaryGroup?.group_label_plural}`}
+        title={`${beneficiaryGroup?.groupLabelPlural}`}
         renderRow={renderRow}
         headCells={adjustedHeadCells}
         data={data}
