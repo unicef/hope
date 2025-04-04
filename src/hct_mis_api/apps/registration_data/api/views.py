@@ -1,25 +1,26 @@
 import logging
 from typing import Any
 
-from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
-from rest_framework.mixins import RetrieveModelMixin, ListModelMixin
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework_extensions.cache.decorators import cache_response
 
-from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.api.mixins import BaseViewSet, ProgramMixin, SerializerActionMixin, DecodeIdForDetailMixin, \
-    CountActionMixin
+from hct_mis_api.apps.core.api.mixins import (
+    BaseViewSet,
+    CountActionMixin,
+    ProgramMixin,
+    SerializerActionMixin,
+)
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.api.caches import RDIKeyConstructor
 from hct_mis_api.apps.registration_data.api.serializers import (
-    RegistrationDataImportListSerializer, RegistrationDataImportDetailSerializer,
+    RegistrationDataImportDetailSerializer,
+    RegistrationDataImportListSerializer,
 )
 from hct_mis_api.apps.registration_data.filters import RegistrationDataImportFilter
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -55,6 +56,7 @@ class RegistrationDataImportViewSet(
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = RegistrationDataImportFilter
+
     #
     # @etag_decorator(RDIKeyConstructor)
     # @cache_response(timeout=config.REST_API_TTL, key_func=RDIKeyConstructor())

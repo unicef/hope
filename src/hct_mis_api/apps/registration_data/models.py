@@ -242,7 +242,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         return self.program.biometric_deduplication_enabled
 
     @property
-    def biometric_deduplicated(self)->str:
+    def biometric_deduplicated(self) -> str:
         if self.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_FINISHED:
             return "YES"
         return "NO"
