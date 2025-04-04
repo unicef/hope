@@ -114,7 +114,7 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
 
   let breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: beneficiaryGroup?.group_label_plural,
+      title: beneficiaryGroup?.groupLabelPlural,
       to: `/${baseUrl}/population/household`,
     },
   ];
@@ -133,7 +133,7 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
   return (
     <>
       <PageHeader
-        title={`${beneficiaryGroup?.group_label}: ${renderSomethingOrDash(
+        title={`${beneficiaryGroup?.groupLabel}: ${renderSomethingOrDash(
           household?.unicefId,
         )}`}
         breadCrumbs={
