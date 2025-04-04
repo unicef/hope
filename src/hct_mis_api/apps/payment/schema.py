@@ -9,6 +9,7 @@ from django.db.models import (
     Exists,
     F,
     OuterRef,
+    Prefetch,
     Q,
     QuerySet,
     Sum,
@@ -102,6 +103,7 @@ from hct_mis_api.apps.utils.schema import (
     TableTotalCashTransferred,
     TableTotalCashTransferredForPeople,
 )
+from hct_mis_api.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
 
 
 class RapidProFlowResult(graphene.ObjectType):
@@ -518,6 +520,18 @@ class PaymentPlanSupportingDocumentNode(DjangoObjectType):
         interfaces = (relay.Node,)
 
 
+class FundsCommitmentItemNode(DjangoObjectType):
+    class Meta:
+        model = FundsCommitmentItem
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
+class FundsCommitmentNode(graphene.ObjectType):
+    funds_commitment_number = graphene.String()
+    funds_commitment_items = graphene.List(FundsCommitmentItemNode)
+
+
 class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PM_VIEW_DETAILS),)
     dispersion_start_date = graphene.Date()
@@ -563,6 +577,8 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
     can_download_xlsx = graphene.Boolean()
     can_send_xlsx_password = graphene.Boolean()
     failed_wallet_validation_collectors_ids = graphene.List(graphene.String)
+    available_funds_commitments = graphene.List(FundsCommitmentNode)
+    funds_commitments = graphene.Field(FundsCommitmentNode)
 
     class Meta:
         model = PaymentPlan
@@ -784,6 +800,43 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
             )
             .values_list("collector__unicef_id", flat=True)
         )
+
+    @staticmethod
+    def resolve_available_funds_commitments(parent: PaymentPlan, info: Any) -> List[FundsCommitmentNode]:
+        available_items_qs = FundsCommitmentItem.objects.filter(
+            Q(payment_plan__isnull=True) | Q(payment_plan=parent), office=parent.business_area
+        )
+
+        # Prefetch related items grouped by `funds_commitment_group`
+        groups = (
+            FundsCommitmentGroup.objects.filter(funds_commitment_items__in=available_items_qs)
+            .distinct()
+            .prefetch_related(Prefetch("funds_commitment_items", queryset=available_items_qs, to_attr="filtered_items"))
+        )
+
+        return [
+            FundsCommitmentNode(
+                funds_commitment_number=group.funds_commitment_number, funds_commitment_items=group.filtered_items
+            )
+            for group in groups
+        ]
+
+    @staticmethod
+    def resolve_funds_commitments(parent: PaymentPlan, info: Any) -> Optional[FundsCommitmentNode]:
+        available_items_qs = FundsCommitmentItem.objects.filter(payment_plan=parent, office=parent.business_area)
+
+        # Prefetch related items grouped by `funds_commitment_group`
+        group = (
+            FundsCommitmentGroup.objects.filter(funds_commitment_items__in=available_items_qs)
+            .distinct()
+            .prefetch_related(Prefetch("funds_commitment_items", queryset=available_items_qs, to_attr="filtered_items"))
+        ).first()
+
+        if group:
+            return FundsCommitmentNode(
+                funds_commitment_number=group.funds_commitment_number, funds_commitment_items=group.filtered_items
+            )
+        return None
 
 
 class PaymentVerificationNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):

@@ -82,9 +82,12 @@ function Selection({
 
     return choices.map((choice) => {
       if (
-        choice.name === 'Add Individual' ||
-        choice.name === 'Household Data Update' ||
-        choice.name === 'Withdraw Household'
+        //Add individual
+        choice.value === '16' ||
+        //HH data update
+        choice.value === '13' ||
+        //Withdraw HH
+        choice.value === '17'
       ) {
         return { ...choice, disabled: true };
       }
