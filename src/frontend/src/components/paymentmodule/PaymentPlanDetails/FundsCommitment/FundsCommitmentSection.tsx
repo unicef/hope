@@ -227,7 +227,11 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
                 loading={loadingAssign}
                 color="primary"
                 onClick={handleSubmit}
-                disabled={!canAssignFunds || selectedItems.length === 0}
+                disabled={
+                  !canAssignFunds || // Permission check
+                  (selectedFundsCommitment && selectedItems.length === 0) || // Items required if commitment is filled
+                  (!selectedFundsCommitment && selectedItems.length > 0) // Commitment required if items are filled
+                }
               >
                 {t('Assign Funds Commitments')}
               </LoadingButton>
