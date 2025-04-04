@@ -26,6 +26,7 @@ from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
+    PaymentFactory,
     PaymentPlanFactory,
     PaymentPlanSplitFactory,
 )
@@ -1559,7 +1560,7 @@ class TestPaymentPlanActions:
         self.program_active = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
         self.cycle = self.program_active.cycles.first()
         self.client = api_client(self.user)
-        self.target_population = PaymentPlanFactory(
+        self.pp = PaymentPlanFactory(
             name="DRAFT PP",
             business_area=self.afghanistan,
             program_cycle=self.cycle,
@@ -1567,13 +1568,17 @@ class TestPaymentPlanActions:
             created_by=self.user,
             created_at="2022-02-24",
         )
-        pp_id = encode_id_base64_required(self.target_population.pk, "PaymentPlan")
+        pp_id = encode_id_base64_required(self.pp.pk, "PaymentPlan")
         url_kwargs = {
             "business_area_slug": self.afghanistan.slug,
             "program_slug": self.program_active.slug,
             "pk": pp_id,
         }
+        self.url_details = reverse("api:payments:payment-plans-open", kwargs=url_kwargs)
         self.url_open = reverse("api:payments:payment-plans-open", kwargs=url_kwargs)
+        self.url_lock = reverse("api:payments:payment-plans-lock", kwargs=url_kwargs)
+        self.url_unlock = reverse("api:payments:payment-plans-unlock", kwargs=url_kwargs)
+        self.url_exclude_hh = reverse("api:payments:payment-plans-exclude-beneficiaries", kwargs=url_kwargs)
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -1588,7 +1593,7 @@ class TestPaymentPlanActions:
             "dispersion_start_date": "2025-02-01",
             "dispersion_end_date": "2099-03-01",
             "currency": "USD",
-            "version": self.target_population.version,
+            "version": self.pp.version,
         }
         response = self.client.post(self.url_open, data, format="json")
 
@@ -1607,3 +1612,114 @@ class TestPaymentPlanActions:
         assert "dispersion_start_date" in response.json()
         assert "dispersion_end_date" in response.json()
         assert "currency" in response.json()
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.PM_LOCK_AND_UNLOCK], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_pp_lock(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        self.pp.status = PaymentPlan.Status.OPEN
+        self.pp.save()
+        PaymentFactory(parent=self.pp)
+        response = self.client.get(self.url_lock)
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.json() == {"message": "Payment Plan locked"}
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.PM_LOCK_AND_UNLOCK], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_pp_unlock(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        self.pp.status = PaymentPlan.Status.LOCKED
+        self.pp.save()
+
+        response = self.client.get(self.url_unlock)
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.json() == {"message": "Payment Plan unlocked"}
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.PM_CREATE], status.HTTP_204_NO_CONTENT),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_payment_plan_delete(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        pp = PaymentPlanFactory(
+            name="new pp for delete test",
+            business_area=self.afghanistan,
+            program_cycle=self.cycle,
+            status=PaymentPlan.Status.OPEN,
+            created_by=self.user,
+        )
+        pp_id = encode_id_base64_required(pp.pk, "PaymentPlan")
+        delete_url = reverse(
+            "api:payments:payment-plans-detail",
+            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program_active.slug, "pk": pp_id},
+        )
+        response = self.client.delete(delete_url)
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_204_NO_CONTENT:
+            assert response.status_code == status.HTTP_204_NO_CONTENT
+            assert PaymentPlan.objects.filter(name="new pp for delete test").count() == 1
+            assert PaymentPlan.objects.filter(name="new pp for delete test").first().status == PaymentPlan.Status.DRAFT
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_exclude_beneficiaries(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        self.pp.status = PaymentPlan.Status.LOCKED
+        self.pp.save()
+        data = {
+            "excluded_households_ids": ["HH-1", "HH-2"],
+            "exclusion_reason": "Test Reason",
+        }
+        response = self.client.post(self.url_exclude_hh, data, format="json")
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.status_code == status.HTTP_200_OK
+            resp_data = response.json()
+            assert "id" in resp_data
+            assert "Exclude Beneficiaries Running" == resp_data["background_action_status"]
+
+    def test_exclude_beneficiaries_validation_errors(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP], self.afghanistan, self.program_active
+        )
+
+        response_1 = self.client.post(self.url_exclude_hh, {"excluded_households_ids": ["HH-1"]}, format="json")
+        assert response_1.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Beneficiary can be excluded only for 'Open' or 'Locked' status of Payment Plan" in response_1.data
+
+        self.pp.status = PaymentPlan.Status.LOCKED
+        self.pp.save()
+        response_2 = self.client.post(self.url_exclude_hh, {"excluded_households_ids": ["HH-1", "HH-1"]}, format="json")
+        assert response_2.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Duplicate IDs are not allowed." in response_2.data["excluded_households_ids"][0]
+
+        response_3 = self.client.post(self.url_exclude_hh, {}, format="json")
+        assert response_3.status_code == status.HTTP_400_BAD_REQUEST
+        assert "excluded_households_ids" in response_3.json()

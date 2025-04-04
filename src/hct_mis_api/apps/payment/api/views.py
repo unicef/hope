@@ -45,8 +45,9 @@ from hct_mis_api.apps.payment.api.serializers import (
     PaymentDetailSerializer,
     PaymentListSerializer,
     PaymentPlanBulkActionSerializer,
-    PaymentPlanCreateSerializer,
+    PaymentPlanCreateUpdateSerializer,
     PaymentPlanDetailSerializer,
+    PaymentPlanExcludeBeneficiariesSerializer,
     PaymentPlanListSerializer,
     PaymentPlanSerializer,
     PaymentPlanSupportingDocumentSerializer,
@@ -58,6 +59,7 @@ from hct_mis_api.apps.payment.api.serializers import (
 )
 from hct_mis_api.apps.payment.celery_tasks import (
     payment_plan_apply_steficon_hh_selection,
+    payment_plan_exclude_beneficiaries,
     payment_plan_full_rebuild,
 )
 from hct_mis_api.apps.payment.models import (
@@ -96,15 +98,20 @@ class PaymentPlanViewSet(
     DecodeIdForDetailMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
     BaseViewSet,
 ):
     program_model_field = "program_cycle__program"
     queryset = PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).order_by("unicef_id")
+    http_method_names = ["get", "post", "patch", "delete"]
     PERMISSIONS = [Permissions.PM_VIEW_LIST]
     serializer_classes_by_action = {
         "list": PaymentPlanListSerializer,
         "retrieve": PaymentPlanDetailSerializer,
-        "open": PaymentPlanCreateSerializer,
+        "open": PaymentPlanCreateUpdateSerializer,
+        "partial_update": PaymentPlanCreateUpdateSerializer,
+        "exclude_beneficiaries": PaymentPlanExcludeBeneficiariesSerializer,
     }
     permissions_by_action = {
         "list": [
@@ -114,6 +121,9 @@ class PaymentPlanViewSet(
             Permissions.PM_VIEW_DETAILS,
         ],
         "open": [Permissions.PM_CREATE],
+        "partial_update": [Permissions.PM_CREATE],
+        "destroy": [Permissions.PM_CREATE],
+        "exclude_beneficiaries": [Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP],
     }
 
     def get_object(self) -> PaymentPlan:
@@ -147,6 +157,85 @@ class PaymentPlanViewSet(
             )
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan = self.get_object()
+        old_payment_plan = copy_model_object(payment_plan)
+        payment_plan = PaymentPlanService(payment_plan=payment_plan).delete()
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=request.user,
+            programs=payment_plan.program.pk,
+            old_object=old_payment_plan,
+            new_object=payment_plan,
+        )
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=["post"])
+    def exclude_beneficiaries(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan = self.get_object()
+
+        if payment_plan.status not in (PaymentPlan.Status.OPEN, PaymentPlan.Status.LOCKED):
+            raise ValidationError("Beneficiary can be excluded only for 'Open' or 'Locked' status of Payment Plan")
+
+        serializer = self.get_serializer(
+            data=request.data,
+        )
+        if serializer.is_valid():
+            payment_plan_exclude_beneficiaries.delay(
+                str(payment_plan.id),
+                serializer.validated_data["excluded_households_ids"],
+                serializer.validated_data.get("exclusion_reason", ""),
+            )
+
+            payment_plan.background_action_status_excluding_beneficiaries()
+            payment_plan.exclude_household_error = ""
+            payment_plan.save(update_fields=["background_action_status", "exclude_household_error"])
+
+            payment_plan.refresh_from_db()
+
+            response_serializer = PaymentPlanDetailSerializer(payment_plan, context={"request": request})
+            return Response(
+                data=response_serializer.data,
+                status=status.HTTP_200_OK,
+            )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=["get"], PERMISSIONS=[Permissions.PM_LOCK_AND_UNLOCK])
+    def lock(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan = self.get_object()
+        old_payment_plan = copy_model_object(payment_plan)
+        payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
+            input_data={"action": PaymentPlan.Action.LOCK}, user=request.user
+        )
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=request.user,
+            programs=payment_plan.program.pk,
+            old_object=old_payment_plan,
+            new_object=payment_plan,
+        )
+        return Response(status=status.HTTP_200_OK, data={"message": "Payment Plan locked"})
+
+    @action(detail=True, methods=["get"], PERMISSIONS=[Permissions.PM_LOCK_AND_UNLOCK])
+    def unlock(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan = self.get_object()
+        old_payment_plan = copy_model_object(payment_plan)
+        payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
+            input_data={"action": PaymentPlan.Action.UNLOCK}, user=request.user
+        )
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=request.user,
+            programs=payment_plan.program.pk,
+            old_object=old_payment_plan,
+            new_object=payment_plan,
+        )
+        return Response(status=status.HTTP_200_OK, data={"message": "Payment Plan unlocked"})
 
 
 class TargetPopulationViewSet(

@@ -1296,11 +1296,11 @@ class Mutations(graphene.ObjectType):
 
     # Payment Plan
     action_payment_plan_mutation = ActionPaymentPlanMutation.Field()
-    create_payment_plan = CreatePaymentPlanMutation.Field()
-    open_payment_plan = OpenPaymentPlanMutation.Field()
+    create_payment_plan = CreatePaymentPlanMutation.Field()  # done
+    open_payment_plan = OpenPaymentPlanMutation.Field()  # done
     create_follow_up_payment_plan = CreateFollowUpPaymentPlanMutation.Field()
     update_payment_plan = UpdatePaymentPlanMutation.Field()
-    delete_payment_plan = DeletePaymentPlanMutation.Field()
+    delete_payment_plan = DeletePaymentPlanMutation.Field()  # done
     split_payment_plan = SplitPaymentPlanMutation.Field()
     exclude_households = ExcludeHouseholdsMutation.Field()
     set_steficon_rule_on_payment_plan_payment_list = SetSteficonRuleOnPaymentPlanPaymentListMutation.Field()

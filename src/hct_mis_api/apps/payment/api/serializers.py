@@ -390,7 +390,17 @@ class VolumeByDeliveryMechanismSerializer(EncodedIdSerializerMixin):
         )
 
 
-class PaymentPlanCreateSerializer(serializers.Serializer):
+class PaymentPlanExcludeBeneficiariesSerializer(serializers.Serializer):
+    excluded_households_ids = serializers.ListField(child=serializers.CharField(), required=True)
+    exclusion_reason = serializers.CharField(required=False)
+
+    def validate_excluded_households_ids(self, value: List[str]) -> List[str]:
+        if len(value) != len(set(value)):
+            raise serializers.ValidationError("Duplicate IDs are not allowed.")
+        return value
+
+
+class PaymentPlanCreateUpdateSerializer(serializers.Serializer):
     dispersion_start_date = serializers.DateField(required=True)
     dispersion_end_date = serializers.DateField(required=True)
     currency = serializers.ChoiceField(required=True, choices=CURRENCY_CHOICES)
