@@ -1,10 +1,10 @@
-import { ProgramQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import EditIcon from '@mui/icons-material/EditRounded';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { Button, ListItemText, Menu, MenuItem } from '@mui/material';
 import { styled } from '@mui/system';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { MouseEvent, ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -25,7 +25,7 @@ const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
 }));
 
 interface EditProgramMenuProps {
-  program: ProgramQuery['program'];
+  program: ProgramDetail;
 }
 
 export const EditProgramMenu = ({

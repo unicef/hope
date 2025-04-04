@@ -217,7 +217,7 @@ export const TargetingCriteriaForm = ({
     'Are you sure you want to ‘Lock’ TP without validating FSP and Delivery Mechanism requirements? This might result in individuals’ exclusion at later stages.',
   );
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const { data, loading } = useCachedIndividualFieldsQuery(
     businessArea,
@@ -384,7 +384,7 @@ export const TargetingCriteriaForm = ({
                 <DialogDescription>
                   {isSocialWorkingProgram
                     ? ''
-                    : `All rules defined below have to be true for the entire ${beneficiaryGroup?.groupLabelPlural}.`}{' '}
+                    : `All rules defined below have to be true for the entire ${beneficiaryGroup?.group_label_plural}.`}{' '}
                 </DialogDescription>
                 <Grid container spacing={3}>
                   {householdFiltersAvailable && (
@@ -395,7 +395,7 @@ export const TargetingCriteriaForm = ({
                         fullWidth
                         multiline
                         variant="outlined"
-                        label={t(`${beneficiaryGroup?.groupLabelPlural} IDs`)}
+                        label={t(`${beneficiaryGroup?.group_label_plural} IDs`)}
                         component={FormikTextField}
                       />
                     </Grid>
@@ -456,7 +456,7 @@ export const TargetingCriteriaForm = ({
                         ADD{' '}
                         {isSocialWorkingProgram
                           ? 'PEOPLE'
-                          : beneficiaryGroup?.groupLabel.toUpperCase()}{' '}
+                          : beneficiaryGroup?.group_label.toUpperCase()}{' '}
                         RULE
                       </Button>
                     </ButtonBox>
@@ -479,7 +479,7 @@ export const TargetingCriteriaForm = ({
                               fullWidth
                               variant="outlined"
                               label={t(
-                                `${beneficiaryGroup?.memberLabelPlural} IDs`,
+                                `${beneficiaryGroup?.member_label_plural} IDs`,
                               )}
                               component={FormikTextField}
                             />
@@ -529,7 +529,7 @@ export const TargetingCriteriaForm = ({
                           color="primary"
                           startIcon={<AddCircleOutline />}
                         >
-                          {`ADD ${beneficiaryGroup?.memberLabel.toUpperCase()}
+                          {`ADD ${beneficiaryGroup?.member_label.toUpperCase()}
                           RULE GROUP`}
                         </Button>
                       </ButtonBox>

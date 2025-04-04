@@ -68,7 +68,7 @@ const BiometricsResultsRdi = ({
   );
 
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const [loadIndividual1Data] = useIndividualLazyQuery({
     variables: {
@@ -142,7 +142,7 @@ const BiometricsResultsRdi = ({
                   <Placeholder />
                 )}
                 <Typography variant="subtitle2">
-                  {beneficiaryGroup?.memberLabel} {individual1Data?.unicefId}:{' '}
+                  {beneficiaryGroup?.member_label} {individual1Data?.unicefId}:{' '}
                   {individual1Data?.fullName}
                 </Typography>
               </Box>
@@ -162,7 +162,7 @@ const BiometricsResultsRdi = ({
                   <Placeholder />
                 )}
                 <Typography variant="subtitle2">
-                  {beneficiaryGroup?.memberLabel} {individual2Data?.unicefId}:{' '}
+                  {beneficiaryGroup?.member_label} {individual2Data?.unicefId}:{' '}
                   {individual2Data?.fullName}
                 </Typography>
               </Box>

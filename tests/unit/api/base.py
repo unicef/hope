@@ -39,17 +39,17 @@ class HOPEApiTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        user = UserFactory()
+        cls.user = UserFactory()
         cls.business_area = BusinessAreaFactory(name="Afghanistan")
         cls.role = RoleFactory(
             subsystem="API",
             name="c",
             permissions=[p.name for p in cls.user_permissions],
         )
-        user.user_roles.create(role=cls.role, business_area=cls.business_area)
+        cls.user.role_assignments.create(role=cls.role, business_area=cls.business_area)
 
         cls.token = APITokenFactory(
-            user=user,
+            user=cls.user,
             grants=[c.name for c in cls.user_permissions],
         )
         cls.token.valid_for.set([cls.business_area])

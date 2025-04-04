@@ -41,7 +41,7 @@ export const NeedsAdjudicationDetailsOld = ({
   const confirm = useConfirmation();
   const { isActiveProgram } = useProgramContext();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const [approve] = useApproveNeedsAdjudicationMutation({
     refetchQueries: () => [
@@ -167,10 +167,10 @@ export const NeedsAdjudicationDetailsOld = ({
           <TableRow>
             <TableCell align="left" />
             <TableCell data-cy="table-cell-individual-id" align="left">
-              {`${beneficiaryGroup?.memberLabel} ID`}
+              {`${beneficiaryGroup?.member_label} ID`}
             </TableCell>
             <TableCell data-cy="table-cell-household-id" align="left">
-              {`${beneficiaryGroup?.groupLabel} ID`}
+              {`${beneficiaryGroup?.group_label} ID`}
             </TableCell>
             <TableCell data-cy="table-cell-full-name" align="left">
               {t('Full Name')}

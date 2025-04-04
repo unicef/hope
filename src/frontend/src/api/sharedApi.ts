@@ -1,10 +1,15 @@
-import { api } from './api';
+import { api, handleApiResponse } from './api';
 import { PaginatedAreaList } from '@restgenerated/models/PaginatedAreaList';
 
 export const fetchAreas = async (
   businessArea: string,
   queryParams: string,
 ): Promise<PaginatedAreaList> => {
-  const response = await api.get(`${businessArea}/geo/areas/?${queryParams}`);
-  return response;
+  return handleApiResponse(
+    api.get(`${businessArea}/geo/areas/?${queryParams}`),
+  );
+};
+
+export const fetchMe = async () => {
+  return handleApiResponse(api.get('profile'));
 };

@@ -38,7 +38,7 @@ export function LookUpProgrammesTableSurveys({
   setFieldValue,
 }: LookUpProgrammesTableSurveysProps): ReactElement {
   const { selectedProgram: programFromContext } = useProgramContext();
-  const beneficiaryGroup = programFromContext?.beneficiaryGroup;
+  const beneficiaryGroup = programFromContext?.beneficiary_group;
   const initialVariables: AllActiveProgramsQueryVariables = {
     businessArea,
     search: filter.search,
@@ -61,7 +61,7 @@ export function LookUpProgrammesTableSurveys({
 
   const replacements = {
     totalHhCount: (_beneficiaryGroup) =>
-      `Num. of ${_beneficiaryGroup?.groupLabelPlural}`,
+      `Num. of ${_beneficiaryGroup?.group_labelPlural}`,
   };
 
   const adjustedHeadCells = adjustHeadCells(
@@ -84,6 +84,8 @@ export function LookUpProgrammesTableSurveys({
           renderRow={(row) => (
             <LookUpProgrammesTableRowSurveys
               key={row.id}
+              //TODO: fix
+              //@ts-ignore
               program={row}
               choicesData={choicesData}
               radioChangeHandler={handleRadioChange}

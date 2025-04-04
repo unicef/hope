@@ -14,14 +14,14 @@ export function PaymentVerificationSection({
 }: PaymentVerificationSectionProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   if (!data) return null;
 
   const renderContacted = () => {
     return data.households === 1
-      ? `${beneficiaryGroup?.groupLabel} contacted`
-      : `${beneficiaryGroup?.groupLabelPlural} contacted`;
+      ? `${beneficiaryGroup?.group_label} contacted`
+      : `${beneficiaryGroup?.group_label_plural} contacted`;
   };
 
   return (

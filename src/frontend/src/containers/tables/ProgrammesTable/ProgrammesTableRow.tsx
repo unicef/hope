@@ -3,12 +3,10 @@ import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import {
-  AllProgramsForTableQuery,
-  ProgrammeChoiceDataQuery,
-} from '@generated/graphql';
+import { ProgrammeChoiceDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import TableCell from '@mui/material/TableCell';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import {
   choicesToDict,
   formatCurrency,
@@ -18,7 +16,7 @@ import { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface ProgrammesTableRowProps {
-  program: AllProgramsForTableQuery['allPrograms']['edges'][number]['node'];
+  program: ProgramDetail;
   choicesData: ProgrammeChoiceDataQuery;
 }
 
@@ -28,7 +26,7 @@ function ProgrammesTableRow({
 }: ProgrammesTableRowProps): ReactElement {
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
-  const programDetailsPath = `/${baseUrl}/details/${program.id}`;
+  const programDetailsPath = `/${baseUrl}/details/${program.slug}`;
   const handleClick = (): void => {
     navigate(programDetailsPath);
   };
@@ -56,14 +54,16 @@ function ProgrammesTableRow({
           />
         </TableCell>
         <TableCell align="left">
-          <UniversalMoment>{program.startDate}</UniversalMoment> -{' '}
-          <UniversalMoment>{program.endDate}</UniversalMoment>
+          <UniversalMoment>{program.start_date}</UniversalMoment> -{' '}
+          <UniversalMoment>{program.end_date}</UniversalMoment>
         </TableCell>
         <TableCell align="left">
           {programSectorChoiceDict[program.sector]}
         </TableCell>
-        <TableCell align="right">{program.totalNumberOfHouseholds}</TableCell>
-        <TableCell align="right">{formatCurrency(program.budget)}</TableCell>
+        <TableCell align="right">{program.household_count}</TableCell>
+        <TableCell align="right">
+          {formatCurrency(Number(program.budget))}
+        </TableCell>
       </ClickableTableRow>
     </>
   );

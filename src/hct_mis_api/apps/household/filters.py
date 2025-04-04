@@ -14,6 +14,7 @@ from django_filters import (
     MultipleChoiceFilter,
     OrderingFilter,
 )
+from django_filters import rest_framework as filters
 from graphene_django.filter import GlobalIDMultipleChoiceFilter
 
 from hct_mis_api.apps.core.exceptions import SearchException
@@ -21,7 +22,6 @@ from hct_mis_api.apps.core.filters import (
     AgeRangeFilter,
     BusinessAreaSlugFilter,
     DateRangeFilter,
-    IntegerRangeFilter,
 )
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
 from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
@@ -83,23 +83,24 @@ def _prepare_kobo_asset_id_value(code: str) -> str:  # pragma: no cover
 
 class HouseholdFilter(FilterSet):
     rdi_id = CharFilter(method="filter_rdi_id")
-    business_area = BusinessAreaSlugFilter()
-    size = IntegerRangeFilter(field_name="size")
+    size = filters.RangeFilter(field_name="size")
     search = CharFilter(method="search_filter")
     document_type = CharFilter(method="document_type_filter")
     document_number = CharFilter(method="document_number_filter")
     head_of_household__full_name = CharFilter(field_name="head_of_household__full_name", lookup_expr="startswith")
     head_of_household__phone_no_valid = BooleanFilter(method="phone_no_valid_filter")
-    last_registration_date = DateRangeFilter(field_name="last_registration_date")
+    last_registration_date = filters.DateFromToRangeFilter(field_name="last_registration_date")
     withdrawn = BooleanFilter(field_name="withdrawn")
     country_origin = CharFilter(field_name="country_origin__iso_code3", lookup_expr="startswith")
     is_active_program = BooleanFilter(method="filter_is_active_program")
     rdi_merge_status = ChoiceFilter(method="rdi_merge_status_filter", choices=MergeStatusModel.STATUS_CHOICE)
+    admin_area = CharFilter(method="admin_field_filter", field_name="admin_area")
+    admin1 = CharFilter(method="admin_field_filter", field_name="admin1")
+    admin2 = CharFilter(method="admin_field_filter", field_name="admin2")
 
     class Meta:
         model = Household
         fields = {
-            "business_area": ["exact"],
             "address": ["exact", "startswith"],
             "head_of_household__full_name": ["exact", "startswith"],
             "size": ["range", "lte", "gte"],
@@ -170,7 +171,6 @@ class HouseholdFilter(FilterSet):
         return qs.filter(Q(id__in=es_ids) | inner_query).distinct()
 
     def _get_elasticsearch_query_for_households(self, search: str) -> Dict:
-        business_area = self.data["business_area"]
         query: Dict[str, Any] = {
             "size": "100",
             "_source": False,
@@ -195,6 +195,7 @@ class HouseholdFilter(FilterSet):
             },
         }
         if config.USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH_USE_BUSINESS_AREA:  # pragma: no cover
+            business_area = self.request.parser_context["kwargs"]["business_area_slug"]
             query["query"]["bool"]["filter"] = [{"term": {"business_area": business_area}}]
         return query
 
@@ -264,16 +265,16 @@ class HouseholdFilter(FilterSet):
     def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
         if value is True:
             return qs.filter(program__status=Program.ACTIVE)
-        elif value is False:
-            return qs.filter(program__status=Program.FINISHED)
-        else:
-            return qs
+        return qs.filter(program__status=Program.FINISHED)
 
     def rdi_merge_status_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         if value == MergeStatusModel.PENDING:
             return qs.filter(rdi_merge_status=MergeStatusModel.PENDING)
-        else:
-            return qs.filter(rdi_merge_status=MergeStatusModel.MERGED)
+        return qs.filter(rdi_merge_status=MergeStatusModel.MERGED)
+
+    def admin_field_filter(self, qs: QuerySet, field_name: str, value: str) -> QuerySet:
+        encoded_value = decode_id_string(value)
+        return qs.filter(**{field_name: encoded_value})
 
 
 class IndividualFilter(FilterSet):

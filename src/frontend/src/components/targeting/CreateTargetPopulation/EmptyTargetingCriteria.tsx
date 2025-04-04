@@ -13,11 +13,13 @@ const Label = styled.p`
 function EmptyTargetingCriteria(): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
   return (
     <PaperContainer>
       <Typography variant="h6">
-        {t(`Target Population Entries (${beneficiaryGroup?.groupLabelPlural})`)}
+        {t(
+          `Target Population Entries (${beneficiaryGroup?.group_label_plural})`,
+        )}
       </Typography>
       <Label>{t('Add targeting criteria to see results.')}</Label>
     </PaperContainer>

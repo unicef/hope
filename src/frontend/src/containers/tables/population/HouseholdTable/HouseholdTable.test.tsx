@@ -1,58 +1,33 @@
-import { MockedProvider } from '@apollo/react-testing';
+import '@testing-library/jest-dom';
+import { screen } from '@testing-library/react';
+import { renderWithProviders } from 'src/testUtils/testUtils';
+import { expect, it } from 'vitest';
+import { HouseholdTable } from './HouseholdTable';
 
-import { act } from 'react';
-import wait from 'waait';
-import { render, ApolloLoadingLink } from '../../../../testUtils/testUtils';
-import { fakeHouseholdChoices } from '../../../../../fixtures/population/fakeHouseholdChoices';
-import { fakeApolloAllHouseholdsForPopulationTable } from '../../../../../fixtures/population/fakeApolloAllHouseholdsForPopulationTable';
-import { HouseholdTable } from '.';
+it('HouseholdTable renders correctly after data is fetched', async () => {
+  const { asFragment } = renderWithProviders(
+    <HouseholdTable
+      filter={{
+        search: '',
+        documentType: '',
+        documentNumber: '',
+        residenceStatus: '',
+        admin1: '',
+        admin2: '',
+        householdSizeMin: '',
+        householdSizeMax: '',
+        orderBy: 'unicef_id',
+        withdrawn: '',
+      }}
+      canViewDetails={true}
+    />,
+  );
 
-describe('containers/tables/population/HouseholdTable', () => {
-  const initialFilter = {
-    search: '',
-    documentType: '',
-    documentNumber: '',
-    residenceStatus: '',
-    admin2: '',
-    householdSizeMin: '',
-    householdSizeMax: '',
-    orderBy: 'unicef_id',
-  };
+  const table = await screen.findByRole('table');
+  const tableRows = await screen.findAllByRole('row');
 
-  it('should render with data', async () => {
-    const { container } = render(
-      <MockedProvider
-        addTypename={false}
-        mocks={fakeApolloAllHouseholdsForPopulationTable}
-      >
-        <HouseholdTable
-          businessArea="afghanistan"
-          filter={initialFilter}
-          canViewDetails
-          choicesData={fakeHouseholdChoices}
-        />
-      </MockedProvider>,
-    );
-    await act(() => wait(0)); // wait for response
+  expect(table).toBeInTheDocument();
+  expect(tableRows).toHaveLength(6);
 
-    expect(container).toMatchSnapshot();
-  });
-
-  it('should render loading', () => {
-    const { container } = render(
-      <MockedProvider
-        addTypename={false}
-        mocks={fakeApolloAllHouseholdsForPopulationTable}
-      >
-        <HouseholdTable
-          businessArea="afghanistan"
-          filter={initialFilter}
-          canViewDetails
-          choicesData={fakeHouseholdChoices}
-        />
-      </MockedProvider>,
-    );
-
-    expect(container).toMatchSnapshot();
-  });
+  expect(asFragment()).toMatchSnapshot();
 });

@@ -58,6 +58,7 @@ class TestPaymentVerificationMutations(APITestCase):
             cls.user,
             Permissions,
             cls.business_area,
+            whole_business_area_access=True,
         )
         program = ProgramFactory(business_area=cls.business_area)
         program.admin_areas.set(Area.objects.order_by("?")[:3])

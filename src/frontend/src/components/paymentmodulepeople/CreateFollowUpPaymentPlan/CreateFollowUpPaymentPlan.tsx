@@ -50,7 +50,7 @@ export function CreateFollowUpPaymentPlan({
   const [mutate, { loading }] = useCreateFollowUpPpMutation();
   const { isActiveProgram, selectedProgram } = useProgramContext();
   const { showMessage } = useSnackbar();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const { id, totalWithdrawnHouseholdsCount, unsuccessfulPaymentsCount } =
     paymentPlan;
@@ -155,7 +155,7 @@ export function CreateFollowUpPaymentPlan({
                         <FieldBorder color="#FF0200">
                           <GreyText>
                             {t(
-                              `Withdrawn ${beneficiaryGroup?.groupLabel} cannot be added into follow-up payment plan`,
+                              `Withdrawn ${beneficiaryGroup?.group_label} cannot be added into follow-up payment plan`,
                             )}
                           </GreyText>
                         </FieldBorder>
@@ -163,21 +163,21 @@ export function CreateFollowUpPaymentPlan({
                     )}
                   </Box>
                   <Grid container spacing={3}>
-                    <Grid size={{ xs:6 }}>
+                    <Grid size={{ xs: 6 }}>
                       <Box mt={2}>
                         <Typography>
                           {t('Main Payment Plan Details')}
                         </Typography>
                       </Box>
                     </Grid>
-                    <Grid size={{ xs:6 }} />
+                    <Grid size={{ xs: 6 }} />
                     {/* //TODO: Figure it out */}
                     {/* <Grid size={{xs:6}}>
                       <Typography>
                         {t('Follow-up Payment Plan Details')}
                       </Typography>
                     </Grid> */}
-                    <Grid size={{ xs:6 }}>
+                    <Grid size={{ xs: 6 }}>
                       <LabelizedField label={t('Unsuccessful payments')}>
                         {unsuccessfulPaymentsCount}
                       </LabelizedField>
@@ -189,10 +189,10 @@ export function CreateFollowUpPaymentPlan({
                         <Missing />
                       </LabelizedField>
                     </Grid> */}
-                    <Grid size={{ xs:6 }}>
+                    <Grid size={{ xs: 6 }}>
                       <LabelizedField
                         label={t(
-                          `Withdrawn ${beneficiaryGroup?.groupLabelPlural}`,
+                          `Withdrawn ${beneficiaryGroup?.group_label_plural}`,
                         )}
                       >
                         {' '}
@@ -207,7 +207,7 @@ export function CreateFollowUpPaymentPlan({
                     <Typography>{t('Set the Dispersion Dates')}</Typography>
                   </Box>
                   <Grid container spacing={3}>
-                    <Grid size={{ xs:6 }}>
+                    <Grid size={{ xs: 6 }}>
                       <Field
                         name="dispersionStartDate"
                         label={t('Dispersion Start Date')}
@@ -224,7 +224,7 @@ export function CreateFollowUpPaymentPlan({
                         )}
                       />
                     </Grid>
-                    <Grid size={{ xs:6 }}>
+                    <Grid size={{ xs: 6 }}>
                       <Field
                         name="dispersionEndDate"
                         label={t('Dispersion End Date')}

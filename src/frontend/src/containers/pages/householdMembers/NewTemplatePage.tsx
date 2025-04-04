@@ -1,7 +1,4 @@
-import {
-  createPeriodicDataUpdateTemplate,
-  fetchPeriodicFields,
-} from '@api/periodicDataUpdateApi';
+import { createPeriodicDataUpdateTemplate } from '@api/periodicDataUpdateApi';
 import { BaseSection } from '@components/core/BaseSection';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -13,6 +10,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Button, Step, StepLabel, Stepper } from '@mui/material';
+import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Formik } from 'formik';
 import moment from 'moment';
@@ -24,7 +22,7 @@ import { useProgramContext } from 'src/programContext';
 
 export const NewTemplatePage = (): ReactElement => {
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
@@ -76,14 +74,18 @@ export const NewTemplatePage = (): ReactElement => {
 
   const [activeStep, setActiveStep] = useState(0);
   const steps = [
-    `Filter ${isPeople ? 'People' : beneficiaryGroup?.memberLabelPlural}`,
+    `Filter ${isPeople ? 'People' : beneficiaryGroup?.member_label_plural}`,
     'Fields to Update',
   ];
 
   const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
     useQuery({
-      queryKey: ['periodicFields', businessArea, programId],
-      queryFn: () => fetchPeriodicFields(businessArea, programId),
+      queryKey: ['periodicFields', businessArea, programId, programId],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsPeriodicFieldsList({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+        }),
     });
 
   if (periodicFieldsLoading) {
@@ -123,7 +125,7 @@ export const NewTemplatePage = (): ReactElement => {
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: beneficiaryGroup?.memberLabelPlural,
+      title: beneficiaryGroup?.member_label_plural,
       to: `/${baseUrl}/population/individuals`,
     },
   ];

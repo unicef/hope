@@ -35,7 +35,7 @@ export function LookUpHouseholdFiltersCommunication({
   const navigate = useNavigate();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
@@ -108,7 +108,7 @@ export function LookUpHouseholdFiltersCommunication({
         </Grid>
         <Grid size={{ xs: 3 }}>
           <NumberTextField
-            topLabel={`${beneficiaryGroup?.groupLabel} Size`}
+            topLabel={`${beneficiaryGroup?.group_label} Size`}
             value={filter.householdSizeMin}
             placeholder={t('From')}
             icon={<GroupIcon />}

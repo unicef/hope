@@ -59,7 +59,7 @@ function RegistrationDetails({
 }: RegistrationDetailsProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const withinBatchOptions: OptionType[] = [
     {
@@ -117,7 +117,7 @@ function RegistrationDetails({
           <Grid size={{ xs: 6 }}>
             <BigValueContainer>
               <LabelizedField
-                label={`Total Number of ${beneficiaryGroup?.groupLabelPlural}`}
+                label={`Total Number of ${beneficiaryGroup?.group_label_plural}`}
                 dataCy="households"
               >
                 <BigValue>{registration?.numberOfHouseholds}</BigValue>
@@ -127,7 +127,7 @@ function RegistrationDetails({
           <Grid size={{ xs: 6 }}>
             <BigValueContainer>
               <LabelizedField
-                label={`Total Number of ${beneficiaryGroup?.memberLabelPlural}`}
+                label={`Total Number of ${beneficiaryGroup?.member_label_plural}`}
                 dataCy="individuals"
               >
                 <BigValue>{registration?.numberOfIndividuals}</BigValue>

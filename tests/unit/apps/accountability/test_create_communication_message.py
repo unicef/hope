@@ -54,7 +54,7 @@ mutation CreateAccountabilityCommunicationMessage (
         partner = PartnerFactory(name="Partner")
         cls.user = UserFactory(first_name="John", last_name="Wick", partner=partner)
         cls.program = ProgramFactory(status=Program.ACTIVE)
-        cls.update_partner_access_to_program(partner, cls.program)
+        cls.create_partner_role_with_permissions(partner, [], cls.business_area, cls.program)
         cls.payment_plan = PaymentPlanFactory(
             name="Test Message Payment Plan",
             business_area=cls.business_area,
@@ -88,7 +88,7 @@ mutation CreateAccountabilityCommunicationMessage (
         }
 
     def test_create_accountability_communication_message_without_permission(self) -> None:
-        self.create_user_role_with_permissions(self.user, [], self.business_area)
+        self.create_user_role_with_permissions(self.user, [], self.business_area, self.program)
 
         self.snapshot_graphql_request(
             request_string=self.MUTATION,
@@ -118,7 +118,7 @@ mutation CreateAccountabilityCommunicationMessage (
     )
     def test_create_accountability_communication_message_by_target_population(self, sampling_type: str) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE], self.business_area
+            self.user, [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE], self.business_area, self.program
         )
         broadcast_message_mock = MagicMock(return_value=None)
         with (
@@ -157,7 +157,7 @@ mutation CreateAccountabilityCommunicationMessage (
     )
     def test_create_accountability_communication_message_by_households(self, sampling_type: str) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE], self.business_area
+            self.user, [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE], self.business_area, self.program
         )
         broadcast_message_mock = MagicMock(return_value=None)
         with (

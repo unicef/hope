@@ -1,20 +1,17 @@
 import logging
 from typing import Any
 
-from django.db.models import QuerySet
-
 from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins
 from rest_framework.filters import OrderingFilter
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet
 from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
-from hct_mis_api.apps.account.api.permissions import TargetingViewListPermission
-from hct_mis_api.apps.core.api.mixins import BusinessAreaProgramMixin
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.api.mixins import BaseViewSet, ProgramMixin
 from hct_mis_api.apps.payment.api.filters import PaymentPlanFilter
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.targeting.api.caches import TPKeyConstructor
@@ -24,19 +21,16 @@ logger = logging.getLogger(__name__)
 
 
 class TargetPopulationViewSet(
-    BusinessAreaProgramMixin,
+    ProgramMixin,
     mixins.ListModelMixin,
-    GenericViewSet,
+    BaseViewSet,
 ):
+    queryset = PaymentPlan.objects.all()
+    program_model_field = "program_cycle__program"
     serializer_class = TargetPopulationListSerializer
-    permission_classes = [TargetingViewListPermission]
+    PERMISSIONS = [Permissions.TARGETING_VIEW_LIST]
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = PaymentPlanFilter
-
-    def get_queryset(self) -> QuerySet:
-        business_area = self.get_business_area()
-        program = self.get_program()
-        return PaymentPlan.objects.filter(business_area=business_area, program_cycle__program=program)
 
     @etag_decorator(TPKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=TPKeyConstructor())

@@ -36,7 +36,7 @@ export const TargetPopulationCore = ({
 }: TargetPopulationCoreProps): ReactElement => {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   if (!targetPopulation) return null;
 
@@ -71,7 +71,7 @@ export const TargetPopulationCore = ({
           {t('Target Population is building')}
         </Typography>
         <Label>
-          {`Target population is processing, the list of ${beneficiaryGroup?.groupLabelPlural} will be
+          {`Target population is processing, the list of ${beneficiaryGroup?.group_label_plural} will be
          available when the process is finished`}
         </Label>
       </PaperContainer>
@@ -99,21 +99,17 @@ export const TargetPopulationCore = ({
             {isSocialDctType
               ? t('Excluded Target Population Entries')
               : t(
-                  `Excluded Target Population Entries (${beneficiaryGroup?.groupLabelPlural} or ${beneficiaryGroup?.memberLabelPlural})`,
+                  `Excluded Target Population Entries (${beneficiaryGroup?.group_label_plural} or ${beneficiaryGroup?.member_label_plural})`,
                 )}
           </Typography>
           <Box mt={2}>
             <Grid container>
-              <Grid size={{ xs:6 }}>
-                {targetPopulation?.excludedIds}
-              </Grid>
+              <Grid size={{ xs: 6 }}>{targetPopulation?.excludedIds}</Grid>
             </Grid>
           </Box>
           <Box mt={2}>
             <Grid container>
-              <Grid size={{ xs:6 }}>
-                {targetPopulation?.exclusionReason}
-              </Grid>
+              <Grid size={{ xs: 6 }}>{targetPopulation?.exclusionReason}</Grid>
             </Grid>
           </Box>
         </PaperContainer>

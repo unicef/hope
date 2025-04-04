@@ -70,7 +70,7 @@ class TestAccountabilitySampleSizeQueries(APITestCase):
         ]
     )
     def test_sample_size_by_target_population(self, sampling_type: str) -> None:
-        self.create_user_role_with_permissions(self.user, [], self.business_area)
+        self.create_user_role_with_permissions(self.user, [], self.business_area, whole_business_area_access=True)
 
         self.snapshot_graphql_request(
             request_string=self.QUERY,

@@ -47,7 +47,7 @@ export function PaymentDetails({
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   let paymentVerification: PaymentQuery['payment']['verification'] = null;
   if (
@@ -152,11 +152,11 @@ export function PaymentDetails({
       ) : null}
       <Overview>
         <Title>
-          <Typography variant="h6">{beneficiaryGroup?.groupLabel}</Typography>
+          <Typography variant="h6">{beneficiaryGroup?.group_label}</Typography>
         </Title>
         <Grid container spacing={3}>
           <Grid size={{ xs: 3 }}>
-            <LabelizedField label={`${beneficiaryGroup?.groupLabel} ID`}>
+            <LabelizedField label={`${beneficiaryGroup?.group_label} ID`}>
               {payment.household?.id && canViewHouseholdDetails ? (
                 <BlackLink
                   to={`/${businessArea}/programs/${programId}/population/household/${payment.household.id}`}

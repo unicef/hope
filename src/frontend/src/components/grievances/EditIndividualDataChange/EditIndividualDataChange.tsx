@@ -41,7 +41,7 @@ function EditIndividualDataChange({
   const { t } = useTranslation();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiary_group;
 
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'] =
@@ -75,7 +75,7 @@ function EditIndividualDataChange({
   if (!individual) {
     return (
       <div>
-        {t(`You have to select a ${beneficiaryGroup?.memberLabel} earlier`)}
+        {t(`You have to select a ${beneficiaryGroup?.member_label} earlier`)}
       </div>
     );
   }

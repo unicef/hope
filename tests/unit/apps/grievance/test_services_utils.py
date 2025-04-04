@@ -13,6 +13,7 @@ from hct_mis_api.apps.account.fixtures import (
     PartnerFactory,
     UserFactory,
 )
+from hct_mis_api.apps.account.models import AdminAreaLimitedTo
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.models import FlexibleAttribute as Core_FlexibleAttribute
@@ -287,6 +288,13 @@ class TestGrievanceUtils(TestCase):
         ticket_details.ticket = grievance
         ticket_details.save()
         partner = PartnerFactory(name="other")
+
+        area_other = AreaFactory(name="Other", area_type=area_type_level_2, p_code="area3")
+        area_limits = AdminAreaLimitedTo.objects.create(
+            partner=partner,
+            program=program,
+        )
+        area_limits.areas.add(area_other)
         partner_unicef = PartnerFactory()
 
         with pytest.raises(PermissionDenied) as e:

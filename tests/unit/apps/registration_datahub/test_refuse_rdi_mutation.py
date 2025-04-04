@@ -1,6 +1,6 @@
 from typing import Any, List
 
-from django.conf import settings
+from django.core.management import call_command
 
 import pytest
 from parameterized import parameterized
@@ -21,7 +21,6 @@ pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 class TestRefuseRdiMutation(APITestCase):
     databases = "__all__"
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     REFUSE_IMPORT_QUERY = """
       mutation RefuseRDI($id: ID!, $refuseReason: String) {
@@ -37,6 +36,7 @@ class TestRefuseRdiMutation(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         cls.user = UserFactory()
         create_afghanistan()
         cls.business_area_slug = "afghanistan"
@@ -66,7 +66,9 @@ class TestRefuseRdiMutation(APITestCase):
         ]
     )
     def test_refuse_registration_data_import(self, _: Any, permissions: List[Permissions], status: bool) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
         self.rdi.status = status
         self.rdi.save()
 
@@ -77,7 +79,9 @@ class TestRefuseRdiMutation(APITestCase):
         )
 
     def test_refuse_registration_data_import_removes_data_links(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.RDI_REFUSE_IMPORT], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.RDI_REFUSE_IMPORT], self.business_area, whole_business_area_access=True
+        )
 
         rdi = RegistrationDataImportFactory(status=RegistrationDataImport.IN_REVIEW)
 
@@ -99,7 +103,9 @@ class TestRefuseRdiMutation(APITestCase):
         self.assertEqual(Individual.objects.all().count(), 0)
 
     def test_refuse_registration_data_import_with_reason(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.RDI_REFUSE_IMPORT], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.RDI_REFUSE_IMPORT], self.business_area, whole_business_area_access=True
+        )
 
         rdi = RegistrationDataImportFactory(status=RegistrationDataImport.IN_REVIEW)
         imported_household = HouseholdFactory(registration_data_import=rdi)

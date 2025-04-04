@@ -9,14 +9,17 @@ import {
   useAllAreasTreeQuery,
   useCopyProgramMutation,
   usePduSubtypeChoicesDataQuery,
-  useProgramQuery,
   useUserPartnerChoicesQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Fade } from '@mui/material';
-import { decodeIdString } from '@utils/utils';
+import {
+  decodeIdString,
+  mapPartnerChoicesWithoutUnicef,
+  isPartnerVisible,
+} from '@utils/utils';
 import { Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -31,6 +34,8 @@ import {
 import { omit } from 'lodash';
 import { editProgramDetailsValidationSchema } from '@components/programs/CreateProgram/editProgramValidationSchema';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 
 const DuplicateProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -45,10 +50,15 @@ const DuplicateProgramPage = (): ReactElement => {
   const { data: treeData, loading: treeLoading } = useAllAreasTreeQuery({
     variables: { businessArea },
   });
-  const { data, loading: loadingProgram } = useProgramQuery({
-    variables: { id },
-    fetchPolicy: 'cache-and-network',
+  const { data: program, isLoading: loadingProgram } = useQuery({
+    queryKey: ['businessAreaProgram', businessArea, id],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsRetrieve({
+        businessAreaSlug: businessArea,
+        slug: id,
+      }),
   });
+
   const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } =
     useUserPartnerChoicesQuery();
 
@@ -167,53 +177,57 @@ const DuplicateProgramPage = (): ReactElement => {
     pdusubtypeChoicesLoading
   )
     return <LoadingComponent />;
-  if (!data || !treeData || !userPartnerChoicesData || !pdusubtypeChoicesData)
+  if (
+    !program ||
+    !treeData ||
+    !userPartnerChoicesData ||
+    !pdusubtypeChoicesData
+  )
     return null;
 
   const {
     name,
-    startDate,
-    endDate,
+    start_date,
+    end_date,
     sector,
-    dataCollectingType,
-    beneficiaryGroup,
+    data_collecting_type,
+    beneficiary_group,
     description,
     budget = '',
-    administrativeAreasOfImplementation,
-    populationGoal = 0,
-    cashPlus = false,
-    frequencyOfPayments = 'REGULAR',
+    administrative_areas_of_implementation,
+    population_goal = 0,
+    cash_plus = false,
+    frequency_of_payments = 'REGULAR',
     partners,
-    partnerAccess = ProgramPartnerAccess.AllPartnersAccess,
-  } = data.program;
+    partner_access = ProgramPartnerAccess.AllPartnersAccess,
+  } = program;
 
   const initialValues = {
     editMode: true,
     name: `Copy of Programme: (${name})`,
     programmeCode: '',
-    startDate,
-    endDate,
+    startDate: start_date,
+    endDate: end_date,
     sector,
-    dataCollectingTypeCode: dataCollectingType?.code,
-    beneficiaryGroup: decodeIdString(beneficiaryGroup?.id),
+    dataCollectingTypeCode: data_collecting_type?.code,
+    beneficiaryGroup: decodeIdString(beneficiary_group?.id),
     description,
     budget,
-    administrativeAreasOfImplementation,
-    populationGoal,
-    cashPlus,
-    frequencyOfPayments,
+    administrativeAreasOfImplementation: administrative_areas_of_implementation,
+    populationGoal: population_goal,
+    cashPlus: cash_plus,
+    frequencyOfPayments: frequency_of_payments,
     partners: partners
-      .filter((partner) => partner.name !== 'UNICEF')
+      .filter((partner) => isPartnerVisible(partner.name))
       .map((partner) => ({
         id: partner.id,
         areas: partner.areas.map((area) => decodeIdString(area.id)),
         areaAccess: partner.areaAccess,
       })),
-    partnerAccess,
+    partnerAccess: partner_access,
     pduFields: [],
   };
-  initialValues.budget =
-    data.program.budget === '0.00' ? '' : data.program.budget;
+  initialValues.budget = program.budget === '0.00' ? '' : program.budget;
 
   const stepFields = [
     [
@@ -289,14 +303,10 @@ const DuplicateProgramPage = (): ReactElement => {
         errors,
         setErrors,
       }) => {
-        const mappedPartnerChoices = userPartnerChoices
-          .filter((partner) => partner.name !== 'UNICEF')
-          .map((partner) => ({
-            value: partner.value,
-            label: partner.name,
-            disabled: values.partners.some((p) => p.id === partner.value),
-          }));
-
+        const mappedPartnerChoices = mapPartnerChoicesWithoutUnicef(
+          userPartnerChoices,
+          values.partners,
+        );
         const handleNextStep = async () => {
           await handleNext({
             validateForm,
