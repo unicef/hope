@@ -5,7 +5,7 @@
 import type { SubtypeEnum } from './SubtypeEnum';
 export type PeriodicFieldData = {
     subtype: SubtypeEnum;
-    number_of_rounds: number;
-    rounds_names?: Array<string>;
+    numberOfRounds: number;
+    roundsNames?: Array<string>;
 };
 

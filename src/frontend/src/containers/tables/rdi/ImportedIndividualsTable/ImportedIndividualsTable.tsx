@@ -14,8 +14,6 @@ import { useProgramContext } from 'src/programContext';
 import { adjustHeadCells } from '@utils/utils';
 import { headCells as mergedIndividualHeadCells } from './MergedIndividualsTableHeadCells';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { UniversalRestQueryTable } from '@components/rest/UniversalRestQueryTable/UniversalRestQueryTable';
-import { RestService } from '@restgenerated/services/RestService';
 
 interface ImportedIndividualsTableProps {
   rdi;
@@ -113,10 +111,10 @@ function ImportedIndividualsTable({
           )}
         />
       ) : (
-        <UniversalRestQueryTable renderRow={} headCells={} queryVariables={} setQueryVariables={} query={}
+        <UniversalTable<IndividualMinimalFragment, AllIndividualsQueryVariables>
           title={title}
           headCells={adjustedImportedIndividualsHeadCells}
-          query={RestService.restH}
+          query={useAllIndividualsQuery}
           queriedObjectName="allIndividuals"
           rowsPerPageOptions={rowsPerPageOptions}
           initialVariables={initialVariables}

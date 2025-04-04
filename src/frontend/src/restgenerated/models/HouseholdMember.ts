@@ -7,11 +7,11 @@ import type { RelationshipEnum } from './RelationshipEnum';
 import type { SexEnum } from './SexEnum';
 export type HouseholdMember = {
     id: string;
-    unicef_id?: string | null;
+    unicefId?: string | null;
     /**
      * Full Name of the Beneficiary
      */
-    full_name: string;
+    fullName: string;
     readonly role: string;
     /**
      * This represents the MEMBER relationship. can be blank
@@ -41,7 +41,7 @@ export type HouseholdMember = {
     /**
      * Beneficiary date of birth
      */
-    birth_date: string;
+    birthDate: string;
     /**
      * Beneficiary gender
      *

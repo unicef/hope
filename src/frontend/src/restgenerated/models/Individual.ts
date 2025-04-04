@@ -20,25 +20,25 @@ import type { SelfcareDisabilityEnum } from './SelfcareDisabilityEnum';
 import type { SexEnum } from './SexEnum';
 import type { WorkStatusEnum } from './WorkStatusEnum';
 export type Individual = {
-    first_registration_date?: string;
-    last_registration_date?: string;
+    firstRegistrationDate?: string;
+    lastRegistrationDate?: string;
     readonly household: string;
     role?: string;
-    observed_disability?: string;
-    country_origin?: string;
-    marital_status?: string;
+    observedDisability?: string;
+    countryOrigin?: string;
+    maritalStatus?: string;
     documents?: Array<Document>;
-    birth_date: string;
-    delivery_mechanisms_data?: Array<Account>;
-    rdi_merge_status?: RdiMergeStatusEnum;
-    is_removed?: boolean;
-    removed_date?: string | null;
-    last_sync_at?: string | null;
-    internal_data?: any;
+    birthDate: string;
+    deliveryMechanismsData?: Array<Account>;
+    rdiMergeStatus?: RdiMergeStatusEnum;
+    isRemoved?: boolean;
+    removedDate?: string | null;
+    lastSyncAt?: string | null;
+    internalData?: any;
     /**
      * Individual ID
      */
-    individual_id?: string;
+    individualId?: string;
     /**
      * Photo
      */
@@ -46,19 +46,19 @@ export type Individual = {
     /**
      * Full Name of the Beneficiary
      */
-    full_name: string;
+    fullName: string;
     /**
      * First name of the Beneficiary
      */
-    given_name?: string;
+    givenName?: string;
     /**
      * Middle name of the Beneficiary
      */
-    middle_name?: string;
+    middleName?: string;
     /**
      * Last name of the Beneficiary
      */
-    family_name?: string;
+    familyName?: string;
     /**
      * Beneficiary gender
      *
@@ -72,15 +72,15 @@ export type Individual = {
     /**
      * Estimated birth date flag
      */
-    estimated_birth_date?: boolean;
+    estimatedBirthDate?: boolean;
     /**
      * Beneficiary phone number
      */
-    phone_no?: string;
+    phoneNo?: string;
     /**
      * Beneficiary phone number alternative
      */
-    phone_no_alternative?: string;
+    phoneNoAlternative?: string;
     /**
      * Beneficiary email address
      */
@@ -88,7 +88,7 @@ export type Individual = {
     /**
      * Beneficiary contact phone number
      */
-    payment_delivery_phone_no?: string | null;
+    paymentDeliveryPhoneNo?: string | null;
     /**
      * This represents the MEMBER relationship. can be blank
      * as well if household is null!
@@ -120,7 +120,7 @@ export type Individual = {
      * * `0` - No
      * * `NOT_PROVIDED` - Not provided
      */
-    work_status?: WorkStatusEnum;
+    workStatus?: WorkStatusEnum;
     /**
      * Pregnant status
      */
@@ -128,11 +128,11 @@ export type Individual = {
     /**
      * Child is female and Head of Household flag
      */
-    fchild_hoh?: boolean;
+    fchildHoh?: boolean;
     /**
      * Child is Head of Household flag
      */
-    child_hoh?: boolean;
+    childHoh?: boolean;
     /**
      * Disability status
      *
@@ -143,7 +143,7 @@ export type Individual = {
     /**
      * Disability certificate picture
      */
-    disability_certificate_picture?: string | null;
+    disabilityCertificatePicture?: string | null;
     /**
      * Seeing disability
      *
@@ -152,7 +152,7 @@ export type Individual = {
      * * `CANNOT_DO` - Cannot do at all
      * * `SOME_DIFFICULTY` - Some difficulty
      */
-    seeing_disability?: SeeingDisabilityEnum;
+    seeingDisability?: SeeingDisabilityEnum;
     /**
      * Hearing disability
      *
@@ -161,7 +161,7 @@ export type Individual = {
      * * `CANNOT_DO` - Cannot do at all
      * * `SOME_DIFFICULTY` - Some difficulty
      */
-    hearing_disability?: HearingDisabilityEnum;
+    hearingDisability?: HearingDisabilityEnum;
     /**
      * Physical disability
      *
@@ -170,7 +170,7 @@ export type Individual = {
      * * `CANNOT_DO` - Cannot do at all
      * * `SOME_DIFFICULTY` - Some difficulty
      */
-    physical_disability?: PhysicalDisabilityEnum;
+    physicalDisability?: PhysicalDisabilityEnum;
     /**
      * Memory disability
      *
@@ -179,7 +179,7 @@ export type Individual = {
      * * `CANNOT_DO` - Cannot do at all
      * * `SOME_DIFFICULTY` - Some difficulty
      */
-    memory_disability?: MemoryDisabilityEnum;
+    memoryDisability?: MemoryDisabilityEnum;
     /**
      * Selfcare disability
      *
@@ -188,7 +188,7 @@ export type Individual = {
      * * `CANNOT_DO` - Cannot do at all
      * * `SOME_DIFFICULTY` - Some difficulty
      */
-    selfcare_disability?: SelfcareDisabilityEnum;
+    selfcareDisability?: SelfcareDisabilityEnum;
     /**
      * Comms disability
      *
@@ -197,15 +197,15 @@ export type Individual = {
      * * `CANNOT_DO` - Cannot do at all
      * * `SOME_DIFFICULTY` - Some difficulty
      */
-    comms_disability?: CommsDisabilityEnum;
+    commsDisability?: CommsDisabilityEnum;
     /**
      * Who answers phone number
      */
-    who_answers_phone?: string;
+    whoAnswersPhone?: string;
     /**
      * Who answers alternative phone number
      */
-    who_answers_alt_phone?: string;
+    whoAnswersAltPhone?: string;
     /**
      * Preferred language
      *
@@ -226,23 +226,23 @@ export type Individual = {
      * * `uk-ua` - український | Ukrainian
      * * `hi-hi` - हिंदी
      */
-    preferred_language?: PreferredLanguageEnum | null;
+    preferredLanguage?: PreferredLanguageEnum | null;
     /**
      * Relationship confirmed status
      */
-    relationship_confirmed?: boolean;
+    relationshipConfirmed?: boolean;
     /**
      * Cryptocurrency wallet name
      */
-    wallet_name?: string;
+    walletName?: string;
     /**
      * Cryptocurrency blockchain name
      */
-    blockchain_name?: string;
+    blockchainName?: string;
     /**
      * Cryptocurrency wallet address
      */
-    wallet_address?: string;
+    walletAddress?: string;
     /**
      * Duplicate status [sys]
      */
@@ -250,7 +250,7 @@ export type Individual = {
     /**
      * Duplicate date [sys]
      */
-    duplicate_date?: string | null;
+    duplicateDate?: string | null;
     /**
      * Withdrawn status [sys]
      */
@@ -258,23 +258,23 @@ export type Individual = {
     /**
      * Withdrawn date [sys]
      */
-    withdrawn_date?: string | null;
+    withdrawnDate?: string | null;
     /**
      * FlexFields JSON representation [sys]
      */
-    flex_fields?: any;
+    flexFields?: any;
     /**
      * Beneficiary phone number valid [sys]
      */
-    phone_no_valid?: boolean | null;
+    phoneNoValid?: boolean | null;
     /**
      * Beneficiary phone number alternative valid [sys]
      */
-    phone_no_alternative_valid?: boolean | null;
+    phoneNoAlternativeValid?: boolean | null;
     /**
      * Enrolled in nutrition program [sys]
      */
-    enrolled_in_nutrition_programme?: boolean | null;
+    enrolledInNutritionProgramme?: boolean | null;
     /**
      * Deduplication golden record status [sys]
      *
@@ -284,7 +284,7 @@ export type Individual = {
      * * `POSTPONE` - Postpone
      * * `UNIQUE` - Unique
      */
-    deduplication_golden_record_status?: DeduplicationGoldenRecordStatusEnum;
+    deduplicationGoldenRecordStatus?: DeduplicationGoldenRecordStatusEnum;
     /**
      * Deduplication golden record status [sys]
      *
@@ -294,7 +294,7 @@ export type Individual = {
      * * `POSTPONE` - Postpone
      * * `UNIQUE` - Unique
      */
-    biometric_deduplication_golden_record_status?: BiometricDeduplicationGoldenRecordStatusEnum;
+    biometricDeduplicationGoldenRecordStatus?: BiometricDeduplicationGoldenRecordStatusEnum;
     /**
      * Deduplication batch status [sys]
      *
@@ -303,58 +303,58 @@ export type Individual = {
      * * `SIMILAR_IN_BATCH` - Similar in batch
      * * `UNIQUE_IN_BATCH` - Unique in batch
      */
-    biometric_deduplication_batch_status?: BiometricDeduplicationBatchStatusEnum;
+    biometricDeduplicationBatchStatus?: BiometricDeduplicationBatchStatusEnum;
     /**
      * Deduplication golden record results [sys]
      */
-    biometric_deduplication_golden_record_results?: any;
+    biometricDeduplicationGoldenRecordResults?: any;
     /**
      * Deduplication batch results [sys]
      */
-    biometric_deduplication_batch_results?: any;
+    biometricDeduplicationBatchResults?: any;
     /**
      * Imported individual ID [sys]
      */
-    imported_individual_id?: string | null;
+    importedIndividualId?: string | null;
     /**
      * Sanction list possible match [sys]
      */
-    sanction_list_possible_match?: boolean;
+    sanctionListPossibleMatch?: boolean;
     /**
      * Sanction list confirmed match [sys]
      */
-    sanction_list_confirmed_match?: boolean;
+    sanctionListConfirmedMatch?: boolean;
     /**
      * Kobo asset ID, Xlsx row ID, Aurora registration ID [sys]
      */
-    detail_id?: string | null;
+    detailId?: string | null;
     /**
      * Beneficiary Program Registration ID [sys]
      */
-    program_registration_id?: string | null;
+    programRegistrationId?: string | null;
     /**
      * Age at registration [sys]
      */
-    age_at_registration?: number | null;
+    ageAtRegistration?: number | null;
     /**
      * Original unicef_id [sys]
      */
-    origin_unicef_id?: string | null;
+    originUnicefId?: string | null;
     /**
      * Migration status [sys]
      */
-    is_migration_handled?: boolean;
+    isMigrationHandled?: boolean;
     /**
      * Migrated at [sys]
      */
-    migrated_at?: string | null;
+    migratedAt?: string | null;
     /**
      * Collection of individual representations
      */
-    individual_collection?: number | null;
+    individualCollection?: number | null;
     /**
      * If this individual was copied from another individual, this field will contain the individual it was copied from.
      */
-    copied_from?: string | null;
+    copiedFrom?: string | null;
 };
 

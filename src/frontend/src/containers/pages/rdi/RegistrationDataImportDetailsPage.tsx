@@ -81,7 +81,7 @@ const RegistrationDataImportDetailsPage = (): ReactElement => {
     return undefined;
   };
   const {
-    data: underscoredData,
+    data,
     isLoading: loading,
     error,
   } = useHopeDetailsQuery(
@@ -90,9 +90,6 @@ const RegistrationDataImportDetailsPage = (): ReactElement => {
     refetchInterval,
   );
 
-  const data = deepCamelize(underscoredData);
-
-  console.log('xDDDDD', data);
   const { data: choicesData, loading: choicesLoading } =
     useHouseholdChoiceDataQuery();
 
