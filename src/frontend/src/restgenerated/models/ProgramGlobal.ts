@@ -15,7 +15,7 @@ export type ProgramGlobal = {
     /**
      * Program code
      */
-    programme_code?: string | null;
+    programmeCode?: string | null;
     /**
      * Program status
      *
@@ -27,11 +27,11 @@ export type ProgramGlobal = {
     /**
      * Program start date
      */
-    start_date: string;
+    startDate: string;
     /**
      * Program end date
      */
-    end_date?: string | null;
+    endDate?: string | null;
     /**
      * Program budget
      */
@@ -42,7 +42,7 @@ export type ProgramGlobal = {
      * * `ONE_OFF` - One-off
      * * `REGULAR` - Regular
      */
-    frequency_of_payments: FrequencyOfPaymentsEnum;
+    frequencyOfPayments: FrequencyOfPaymentsEnum;
     /**
      * Program sector
      *
@@ -65,11 +65,15 @@ export type ProgramGlobal = {
     /**
      * Program cash+
      */
-    cash_plus: boolean;
+    cashPlus: boolean;
     /**
      * Program population goal
      */
-    population_goal: number;
-    readonly business_area_code: string;
+    populationGoal: number;
+    readonly businessAreaCode: string;
+    /**
+     * Program beneficiary group
+     */
+    beneficiaryGroup: string;
 };
 

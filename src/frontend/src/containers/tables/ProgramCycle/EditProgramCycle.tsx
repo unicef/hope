@@ -36,13 +36,14 @@ import type { DefaultError } from '@tanstack/query-core';
 import { useSnackbar } from '@hooks/useSnackBar';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 
 interface MutationError extends DefaultError {
   data: any;
 }
 
 interface EditProgramCycleProps {
-  programCycle: ProgramCycle;
+  programCycle: ProgramCycleList;
   program: ProgramDetail;
 }
 
@@ -77,7 +78,7 @@ const EditProgramCycle = ({
     },
   });
 
-  const isEndDateRequired = !!programCycle.end_date;
+  const isEndDateRequired = !!programCycle.endDate;
 
   const handleUpdate = async (values: any): Promise<void> => {
     try {
@@ -92,8 +93,8 @@ const EditProgramCycle = ({
     [key: string]: string | boolean | number;
   } = {
     title: programCycle.title,
-    start_date: programCycle.start_date,
-    end_date: programCycle.end_date ?? undefined,
+    start_date: programCycle.startDate,
+    end_date: programCycle.endDate ?? undefined,
   };
 
   const endDateValidationSchema = () => {
@@ -110,9 +111,9 @@ const EditProgramCycle = ({
           : schema,
       );
 
-    if (program.end_date) {
+    if (program.endDate) {
       validation = validation.max(
-        new Date(program.end_date),
+        new Date(program.endDate),
         t('End Date cannot be after Programme End Date'),
       );
     }
@@ -132,7 +133,7 @@ const EditProgramCycle = ({
     start_date: Yup.date()
       .required(t('Start Date is required'))
       .min(
-        program.start_date,
+        program.startDate,
         t('Start Date cannot be before Programme Start Date'),
       ),
     end_date: endDateValidationSchema(),

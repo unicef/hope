@@ -10,15 +10,15 @@ export type Profile = {
      */
     username: string;
     email: string;
-    first_name?: string;
-    last_name?: string;
+    firstName?: string;
+    lastName?: string;
     /**
      * Designates that this user has all permissions without explicitly assigning them.
      */
-    is_superuser?: boolean;
-    business_areas: Array<UserBusinessArea>;
-    readonly permissions_in_scope: string;
-    readonly user_roles: Record<string, any>;
-    readonly partner_roles: Record<string, any>;
+    isSuperuser?: boolean;
+    businessAreas: Array<UserBusinessArea>;
+    readonly permissionsInScope: string;
+    readonly userRoles: Record<string, any>;
+    readonly partnerRoles: Record<string, any>;
 };
 

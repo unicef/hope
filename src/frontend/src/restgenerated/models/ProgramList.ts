@@ -12,7 +12,7 @@ export type ProgramList = {
     /**
      * Program code
      */
-    programme_code?: string | null;
+    programmeCode?: string | null;
     /**
      * Program slug [sys]
      */
@@ -24,11 +24,11 @@ export type ProgramList = {
     /**
      * Program start date
      */
-    start_date: string;
+    startDate: string;
     /**
      * Program end date
      */
-    end_date?: string | null;
+    endDate?: string | null;
     /**
      * Program budget
      */
@@ -39,7 +39,7 @@ export type ProgramList = {
      * * `ONE_OFF` - One-off
      * * `REGULAR` - Regular
      */
-    frequency_of_payments: FrequencyOfPaymentsEnum;
+    frequencyOfPayments: FrequencyOfPaymentsEnum;
     /**
      * Program sector
      *
@@ -55,13 +55,13 @@ export type ProgramList = {
     /**
      * Program cash+
      */
-    cash_plus: boolean;
+    cashPlus: boolean;
     /**
      * Program population goal
      */
-    population_goal: number;
-    data_collecting_type: DataCollectingType;
-    beneficiary_group: BeneficiaryGroup;
+    populationGoal: number;
+    dataCollectingType: DataCollectingType;
+    beneficiaryGroup: BeneficiaryGroup;
     /**
      * Status
      *
@@ -70,10 +70,10 @@ export type ProgramList = {
      * * `FINISHED` - Finished
      */
     status: Status791Enum;
-    readonly pdu_fields: Array<string>;
+    readonly pduFields: Array<string>;
     /**
      * Program household count [sys]
      */
-    household_count?: number;
+    householdCount?: number;
 };
 

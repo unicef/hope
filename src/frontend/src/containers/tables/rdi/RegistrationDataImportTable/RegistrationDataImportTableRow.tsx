@@ -9,9 +9,10 @@ import { UniversalMoment } from '@components/core/UniversalMoment';
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
+import { RegistrationDataImportList } from '@restgenerated/models/RegistrationDataImportList';
 
 interface PaymentRecordTableRowProps {
-  registrationDataImport: RegistrationDataImportNode;
+  registrationDataImport: RegistrationDataImportList;
   canViewDetails: boolean;
   selectedRDI?;
   radioChangeHandler?: (id: string) => void;
@@ -37,10 +38,7 @@ export function RegistrationDataImportTableRow({
   };
   const renderImportedBy = (): string => {
     if (registrationDataImport?.importedBy) {
-      if (registrationDataImport.importedBy.firstName) {
-        return `${registrationDataImport.importedBy.firstName} ${registrationDataImport.importedBy.lastName}`;
-      }
-      return registrationDataImport.importedBy.email;
+      return registrationDataImport.importedBy;
     }
     return '-';
   };

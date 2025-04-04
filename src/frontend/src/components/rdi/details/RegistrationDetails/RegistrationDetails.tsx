@@ -49,7 +49,7 @@ const BoldGrey = styled.span`
 `;
 
 interface RegistrationDetailsProps {
-  registration: RegistrationDataImportQuery['registrationDataImport'];
+  registration: any;
   isSocialWorkerProgram?: boolean;
 }
 
@@ -198,7 +198,7 @@ function RegistrationDetails({
               <Grid size={{ xs: 6 }}>
                 <LabelizedField
                   label={t('Imported by')}
-                  value={renderImportedBy()}
+                  value={registration?.importedBy}
                 />
               </Grid>
               {registration.status === RegistrationDataImportStatus.Refused &&

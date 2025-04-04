@@ -160,13 +160,11 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
         cls, root: Any, info: Any, registration_data_import_data: Dict
     ) -> "RegistrationXlsxImportMutation":
         cls.validate_import_data(registration_data_import_data.import_data_id)
-
-        program_id: str = decode_id_string_required(info.context.headers.get("Program"))
-        program = Program.objects.get(id=program_id)
+        program = Program.objects.get(name=info.context.headers.get("Program"))
         if program.status == Program.FINISHED:
             raise ValidationError("In order to proceed this action, program status must not be finished")
 
-        registration_data_import_data["program_id"] = program_id
+        registration_data_import_data["program_id"] = program.id
         (
             created_obj_hct,
             import_data_obj,
@@ -184,7 +182,7 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
             RegistrationDataImport.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
-            program_id,
+            program.id,
             None,
             created_obj_hct,
         )
@@ -197,7 +195,7 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
                 registration_data_import_id=str(created_obj_hct.id),
                 import_data_id=str(import_data_obj.id),
                 business_area_id=str(business_area.id),
-                program_id=str(program_id),
+                program_id=str(program.id),
             )
         )
 
@@ -529,7 +527,7 @@ class UploadImportDataXLSXFileAsync(PermissionMutation):
     @is_authenticated
     def mutate(cls, root: Any, info: Any, file: IO, business_area_slug: str) -> "UploadImportDataXLSXFileAsync":
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area_slug)
-        program_id: str = decode_id_string_required(info.context.headers.get("Program"))
+        program: Program = Program.objects.get(name=info.context.headers.get("Program"))
         import_data = ImportData.objects.create(
             file=file,
             data_type=ImportData.XLSX,
@@ -537,7 +535,7 @@ class UploadImportDataXLSXFileAsync(PermissionMutation):
             created_by_id=info.context.user.id,
             business_area_slug=business_area_slug,
         )
-        transaction.on_commit(partial(validate_xlsx_import_task.delay, import_data.id, program_id))
+        transaction.on_commit(partial(validate_xlsx_import_task.delay, import_data.id, program.id))
         return UploadImportDataXLSXFileAsync(import_data, [])
 
 

@@ -5,7 +5,7 @@
 import type { FollowUpPaymentPlan } from './FollowUpPaymentPlan';
 export type PaymentPlan = {
     id: string;
-    unicef_id?: string | null;
+    unicefId?: string | null;
     /**
      * Name
      */
@@ -14,40 +14,40 @@ export type PaymentPlan = {
     /**
      * Target Criteria
      */
-    targeting_criteria: string;
+    targetingCriteria: string;
     /**
      * Total Households Count [sys]
      */
-    total_households_count?: number;
+    totalHouseholdsCount?: number;
     currency: string;
     /**
      * Total Entitled Quantity [sys]
      */
-    total_entitled_quantity?: string | null;
+    totalEntitledQuantity?: string | null;
     /**
      * Total Delivered Quantity [sys]
      */
-    total_delivered_quantity?: string | null;
+    totalDeliveredQuantity?: string | null;
     /**
      * Total Undelivered Quantity [sys]
      */
-    total_undelivered_quantity?: string | null;
+    totalUndeliveredQuantity?: string | null;
     /**
      * Dispersion Start Date
      */
-    dispersion_start_date?: string | null;
+    dispersionStartDate?: string | null;
     /**
      * Dispersion End Date
      */
-    dispersion_end_date?: string | null;
+    dispersionEndDate?: string | null;
     /**
      * Follow Up Payment Plan flag [sys]
      */
-    is_follow_up?: boolean;
-    readonly follow_ups: Array<FollowUpPaymentPlan>;
+    isFollowUp?: boolean;
+    readonly followUps: Array<FollowUpPaymentPlan>;
     program: string;
-    program_id: string;
-    readonly last_approval_process_date: string | null;
-    readonly last_approval_process_by: string | null;
+    programId: string;
+    readonly lastApprovalProcessDate: string | null;
+    readonly lastApprovalProcessBy: string | null;
 };
 

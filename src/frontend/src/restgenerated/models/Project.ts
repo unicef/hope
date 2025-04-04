@@ -4,8 +4,8 @@
 /* eslint-disable */
 export type Project = {
     readonly organization: string;
-    readonly aurora_id: number;
-    readonly hope_id: string | null;
+    readonly auroraId: number;
+    readonly hopeId: string | null;
     name: string;
 };
 

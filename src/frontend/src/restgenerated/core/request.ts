@@ -8,6 +8,7 @@ import type { ApiResult } from './ApiResult';
 import { CancelablePromise } from './CancelablePromise';
 import type { OnCancel } from './CancelablePromise';
 import type { OpenAPIConfig } from './OpenAPI';
+import { deepCamelize, deepUnderscore } from '../../utils/utils';
 
 export const isDefined = <T>(value: T | null | undefined): value is Exclude<T, null | undefined> => {
     return value !== undefined && value !== null;
@@ -202,10 +203,14 @@ export const sendRequest = async (
     onCancel: OnCancel
 ): Promise<Response> => {
     const controller = new AbortController();
-
+    const camelizedBodyData = body ?? formData;
+    let underscoreBodyData;
+    if(camelizedBodyData){
+        underscoreBodyData = deepUnderscore(camelizedBodyData);
+    }
     const request: RequestInit = {
         headers,
-        body: body ?? formData,
+        body: underscoreBodyData,
         method: options.method,
         signal: controller.signal,
     };
@@ -216,7 +221,13 @@ export const sendRequest = async (
 
     onCancel(() => controller.abort());
 
-    return await fetch(url, request);
+    let response = await fetch(url, request);
+    const content = await response.json();
+    response.json = async () => {
+
+        return deepCamelize(content);
+    }
+    return response;
 };
 
 export const getResponseHeader = (response: Response, responseHeader?: string): string | undefined => {

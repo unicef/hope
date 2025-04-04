@@ -4,17 +4,17 @@
 /* eslint-disable */
 export type AreaType = {
     readonly id: string;
-    readonly created_at: string;
-    readonly updated_at: string;
-    original_id?: string | null;
+    readonly createdAt: string;
+    readonly updatedAt: string;
+    originalId?: string | null;
     name: string;
-    area_level?: number;
-    readonly valid_from: string | null;
-    valid_until?: string | null;
+    areaLevel?: number;
+    readonly validFrom: string | null;
+    validUntil?: string | null;
     extras?: any;
     readonly lft: number;
     readonly rght: number;
-    readonly tree_id: number;
+    readonly treeId: number;
     readonly level: number;
     country: string;
     parent?: string | null;

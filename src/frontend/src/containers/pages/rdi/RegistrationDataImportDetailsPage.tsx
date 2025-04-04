@@ -14,7 +14,7 @@ import {
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Typography } from '@mui/material';
-import { isPermissionDeniedError } from '@utils/utils';
+import { deepCamelize, isPermissionDeniedError } from '@utils/utils';
 import { ReactElement, ReactNode, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -24,6 +24,9 @@ import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { ImportedHouseholdTable } from '../../tables/rdi/ImportedHouseholdsTable';
 import { ImportedIndividualsTable } from '../../tables/rdi/ImportedIndividualsTable';
 import RegistrationDetails from '@components/rdi/details/RegistrationDetails/RegistrationDetails';
+import { useQuery } from '@tanstack/react-query';
+import { useHopeDetailsQuery } from '@hooks/useHopeDetailsQuery';
+import { RestService } from '@restgenerated/services/RestService';
 
 const Container = styled.div`
   && {
@@ -60,46 +63,45 @@ const RegistrationDataImportDetailsPage = (): ReactElement => {
   const { id } = useParams();
   const permissions = usePermissions();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const { businessArea, programSlug } = useBaseUrl();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const refetchInterval = (result) => {
+    if (
+      [
+        'Loading',
+        'Deduplication',
+        'Import  Scheduled',
+        'Importing',
+        'Merge Scheduled',
+        'Merging',
+      ].includes(result?.state?.data?.status)
+    ) {
+      return 30000;
+    }
+    return undefined;
+  };
+  const {
+    data,
+    isLoading: loading,
+    error,
+  } = useHopeDetailsQuery(
+    id,
+    RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve,
+    { refetchInterval },
+  );
 
-  const { businessArea } = useBaseUrl();
-  const { data, loading, error, stopPolling, startPolling } =
-    useRegistrationDataImportQuery({
-      variables: { id },
-      fetchPolicy: 'cache-and-network',
-    });
   const { data: choicesData, loading: choicesLoading } =
     useHouseholdChoiceDataQuery();
 
   const [selectedTab, setSelectedTab] = useState(0);
 
-  const status = data?.registrationDataImport?.status;
-  useEffect(() => {
-    if (
-      [
-        RegistrationDataImportStatus.Loading,
-        RegistrationDataImportStatus.Deduplication,
-        RegistrationDataImportStatus.ImportScheduled,
-        RegistrationDataImportStatus.Importing,
-        RegistrationDataImportStatus.MergeScheduled,
-        RegistrationDataImportStatus.Merging,
-      ].includes(status)
-    ) {
-      startPolling(30000);
-    } else {
-      stopPolling();
-    }
-    return stopPolling;
-  }, [status, startPolling, stopPolling]);
-
   if (loading || choicesLoading) return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
-  if (!data?.registrationDataImport || !choicesData || permissions === null) {
+  if (!data || !choicesData || permissions === null) {
     return null;
   }
 
-  const isMerged =
-    RegistrationDataImportStatus.Merged === data.registrationDataImport.status;
+  const isMerged = 'Merged' === data.status;
 
   function RegistrationContainer({
     isErased,
@@ -108,7 +110,7 @@ const RegistrationDataImportDetailsPage = (): ReactElement => {
   }): ReactElement {
     return (
       <Container>
-        <RegistrationDetails registration={data.registrationDataImport} />
+        <RegistrationDetails registration={data} />
         {isErased ? null : (
           <TableWrapper>
             <ContainerColumnWithBorder>
@@ -128,19 +130,19 @@ const RegistrationDataImportDetailsPage = (): ReactElement => {
                 >
                   <Tab
                     data-cy="tab-Households"
-                    label={beneficiaryGroup?.group_label_plural}
+                    label={beneficiaryGroup?.groupLabelPlural}
                   />
                   <Tab
                     data-cy="tab-Individuals"
-                    label={beneficiaryGroup?.member_label_plural}
+                    label={beneficiaryGroup?.memberLabelPlural}
                   />
                 </StyledTabs>
               </TabsContainer>
               <TabPanel value={selectedTab} index={0}>
                 <ImportedHouseholdTable
-                  key={`${data.registrationDataImport.status}-household`}
+                  key={`${data.status}-household`}
                   isMerged={isMerged}
-                  rdi={data.registrationDataImport}
+                  rdi={data}
                   businessArea={businessArea}
                 />
               </TabPanel>
@@ -150,9 +152,9 @@ const RegistrationDataImportDetailsPage = (): ReactElement => {
                   rdiId={id}
                   isMerged={isMerged}
                   businessArea={businessArea}
-                  key={`${data.registrationDataImport.status}-individual`}
+                  key={`${data.status}-individual`}
                   choicesData={choicesData}
-                  rdi={data.registrationDataImport}
+                  rdi={data}
                 />
               </TabPanel>
             </ContainerColumnWithBorder>
@@ -165,7 +167,7 @@ const RegistrationDataImportDetailsPage = (): ReactElement => {
   return (
     <>
       <RegistrationDataImportDetailsPageHeader
-        registration={data.registrationDataImport}
+        registration={data}
         canMerge={hasPermissions(PERMISSIONS.RDI_MERGE_IMPORT, permissions)}
         canRerunDedupe={hasPermissions(
           PERMISSIONS.RDI_RERUN_DEDUPE,
@@ -174,7 +176,7 @@ const RegistrationDataImportDetailsPage = (): ReactElement => {
         canViewList={hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions)}
         canRefuse={hasPermissions(PERMISSIONS.RDI_REFUSE_IMPORT, permissions)}
       />
-      <RegistrationContainer isErased={data.registrationDataImport.erased} />
+      <RegistrationContainer isErased={data.erased} />
     </>
   );
 };

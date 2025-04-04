@@ -1,11 +1,10 @@
 import TableCell from '@mui/material/TableCell';
-import { ReactElement, ReactNode, useState } from 'react';
+import { ReactElement, ReactNode, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BlackLink } from '@components/core/BlackLink';
 import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { Order, TableComponent } from '@components/core/Table/TableComponent';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import {
   adjustHeadCells,
@@ -18,6 +17,10 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Bold } from '@components/core/Bold';
 import { useProgramContext } from 'src/programContext';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { HouseholdMember } from '@restgenerated/models/HouseholdMember';
 
 const headCells: HeadCell<IndividualNode>[] = [
   {
@@ -68,10 +71,7 @@ export const HouseholdMembersTable = ({
 }: HouseholdMembersTableProps): ReactElement => {
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [orderBy, setOrderBy] = useState(null);
-  const [orderDirection, setOrderDirection] = useState('asc');
+
   const handleClick = (row): void => {
     navigate(`/${baseUrl}/population/individuals/${row.id}`);
   };
@@ -79,23 +79,9 @@ export const HouseholdMembersTable = ({
   const relationshipChoicesDict = choicesToDict(
     choicesData?.relationshipChoices,
   );
-  const allIndividuals = [];
-  //TODO:
-  // household?.individuals?.edges?.map(
-  //   (edge) => edge.node,
-  // );
+
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiary_group;
-
-  if (orderBy) {
-    if (orderDirection === 'asc') {
-      allIndividuals.sort((a, b) => (a[orderBy] < b[orderBy] ? 1 : -1));
-    } else {
-      allIndividuals.sort((a, b) => (a[orderBy] > b[orderBy] ? 1 : -1));
-    }
-  }
-
-  const totalCount = allIndividuals.length;
 
   const replacements = {
     unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.member_label} ID`,
@@ -110,15 +96,48 @@ export const HouseholdMembersTable = ({
     replacements,
   );
 
+  const { programId, businessArea } = useBaseUrl();
+
+  const initialQueryVariables = useMemo(() => {
+    return {
+      businessAreaSlug: businessArea,
+      programSlug: programId,
+    };
+  }, [businessArea, programId]);
+
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: [
+      'businessAreasProgramsHouseholdsMembers',
+      programId,
+      businessArea,
+      household.id,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsHouseholdsMembersRetrieve({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+        id: household.id,
+      }),
+    enabled: !!businessArea && !!programId,
+  });
+
   return (
-    <TableComponent<IndividualNode>
+    <UniversalRestTable
       title={`${beneficiaryGroup?.group_label} Members`}
-      data={allIndividuals.slice(
-        page * rowsPerPage,
-        page * rowsPerPage + rowsPerPage,
-      )}
       allowSort={false}
-      renderRow={(row) => {
+      headCells={adjustedHeadCells}
+      data={data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)}
+      error={error}
+      isLoading={isLoading}
+      queryVariables={queryVariables}
+      setQueryVariables={setQueryVariables}
+      renderRow={(row: HouseholdMember) => {
         const isHead = row.relationship === 'HEAD';
 
         const renderTableCellContent = (content: ReactNode) => {
@@ -135,12 +154,12 @@ export const HouseholdMembersTable = ({
             <TableCell align="left">
               {renderTableCellContent(
                 <BlackLink to={`/${baseUrl}/population/individuals/${row.id}`}>
-                  {row.unicefId}
+                  {row.unicef_id}
                 </BlackLink>,
               )}
             </TableCell>
             <TableCell align="left">
-              {renderTableCellContent(row.fullName)}
+              {renderTableCellContent(row.full_name)}
             </TableCell>
             <TableCell align="left">
               <StatusBox
@@ -157,7 +176,7 @@ export const HouseholdMembersTable = ({
             </TableCell>
             <TableCell align="right">
               {renderTableCellContent(
-                <UniversalMoment>{row.birthDate}</UniversalMoment>,
+                <UniversalMoment>{row.birth_date}</UniversalMoment>,
               )}
             </TableCell>
             <TableCell align="left">
@@ -166,28 +185,6 @@ export const HouseholdMembersTable = ({
           </ClickableTableRow>
         );
       }}
-      headCells={adjustedHeadCells}
-      rowsPerPageOptions={totalCount < 5 ? [totalCount] : [5, 10, 15]}
-      rowsPerPage={totalCount > 5 ? rowsPerPage : totalCount}
-      page={page}
-      itemsCount={totalCount}
-      handleChangePage={(_event, newPage) => {
-        setPage(newPage);
-      }}
-      handleChangeRowsPerPage={(event) => {
-        setRowsPerPage(Number(event.target.value));
-        setPage(0);
-      }}
-      handleRequestSort={(_event, property) => {
-        let direction = 'asc';
-        if (property === orderBy) {
-          direction = orderDirection === 'asc' ? 'desc' : 'asc';
-        }
-        setOrderBy(property);
-        setOrderDirection(direction);
-      }}
-      orderBy={orderBy}
-      order={orderDirection as Order}
     />
   );
 };
