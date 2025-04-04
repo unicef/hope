@@ -127,7 +127,7 @@ class HouseholdFilter(FilterSet):
     )
 
     def filter_rdi_id(self, queryset: "QuerySet", model_field: Any, value: str) -> "QuerySet":
-        return queryset.filter(registration_data_import__pk=decode_id_string(value))
+        return queryset.filter(registration_data_import__pk=value)
 
     def phone_no_valid_filter(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
         """
@@ -456,7 +456,7 @@ class IndividualFilter(FilterSet):
             return qs
 
     def filter_rdi_id(self, queryset: "QuerySet", model_field: Any, value: str) -> "QuerySet":
-        return queryset.filter(registration_data_import__pk=decode_id_string(value))
+        return queryset.filter(registration_data_import__pk=value)
 
     def filter_duplicates_only(self, queryset: "QuerySet", model_field: Any, value: bool) -> "QuerySet":
         if value is True:
@@ -496,7 +496,7 @@ class MergedHouseholdFilter(FilterSet):
     )
 
     def filter_rdi_id(self, queryset: "QuerySet", model_field: Any, value: str) -> "QuerySet":
-        return queryset.filter(registration_data_import_id=decode_id_string(value))
+        return queryset.filter(registration_data_import_id=value)
 
 
 class MergedIndividualFilter(FilterSet):
@@ -525,7 +525,7 @@ class MergedIndividualFilter(FilterSet):
     )
 
     def filter_rdi_id(self, queryset: "QuerySet", model_field: Any, value: str) -> "QuerySet":
-        return queryset.filter(registration_data_import_id=decode_id_string(value))
+        return queryset.filter(registration_data_import_id=value)
 
     def filter_duplicates_only(self, queryset: "QuerySet", model_field: Any, value: bool) -> "QuerySet":
         if value:
