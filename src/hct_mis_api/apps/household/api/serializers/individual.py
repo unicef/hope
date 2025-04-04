@@ -1,10 +1,3 @@
-<<<<<<< HEAD
-from hct_mis_api.api.utils import EncodedIdSerializerMixin
-from hct_mis_api.apps.household.models import Individual
-
-
-class IndividualSmallSerializer(EncodedIdSerializerMixin):
-=======
 from typing import Dict
 
 from rest_framework import serializers
@@ -64,6 +57,17 @@ class DocumentSerializer(serializers.ModelSerializer):
             "type",
             "country",
             "document_number",
+        )
+
+
+class IndividualSmallSerializer(serializers.ModelSerializer):
+    id = Base64ModelField(model_name="IndividualIdentity")
+
+    class Meta:
+        model = Individual
+        fields = (
+            "id",
+            "unicef_id",
         )
 
 
@@ -156,15 +160,11 @@ class IndividualListSerializer(serializers.ModelSerializer):
     id = Base64ModelField(model_name="Individual")
     household = HouseholdSimpleSerializer()
 
->>>>>>> long-term/rest-api-refactor
     class Meta:
         model = Individual
         fields = (
             "id",
             "unicef_id",
-<<<<<<< HEAD
-        )
-=======
             "full_name",
             "household",
             "status",
@@ -278,4 +278,3 @@ class IndividualDetailSerializer(serializers.ModelSerializer):
 
     def get_import_id(self, obj: Individual) -> str:
         return f"{obj.unicef_id} (Detail ID {obj.detail_id})" if obj.detail_id else obj.unicef_id
->>>>>>> long-term/rest-api-refactor
