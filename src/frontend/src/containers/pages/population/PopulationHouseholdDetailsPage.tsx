@@ -69,7 +69,7 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
   const permissions = usePermissions();
   const { programId } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const {
     data: household,
@@ -114,7 +114,7 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
 
   let breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: beneficiaryGroup?.group_label_plural,
+      title: beneficiaryGroup?.groupLabelPlural,
       to: `/${baseUrl}/population/household`,
     },
   ];
@@ -133,8 +133,8 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
   return (
     <>
       <PageHeader
-        title={`${beneficiaryGroup?.group_label}: ${renderSomethingOrDash(
-          household?.unicef_id,
+        title={`${beneficiaryGroup?.groupLabel}: ${renderSomethingOrDash(
+          household?.unicefId,
         )}`}
         breadCrumbs={
           hasPermissions(
@@ -147,27 +147,27 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
         flags={
           <>
             <Box mr={2}>
-              {household?.has_duplicates && (
+              {household?.hasDuplicates && (
                 <WarningTooltip
                   confirmed
-                  message={`${beneficiaryGroup?.group_label} has Duplicates`}
+                  message={`${beneficiaryGroup?.groupLabel} has Duplicates`}
                 />
               )}
             </Box>
             <Box mr={2}>
-              {household?.sanction_list_possible_match && (
+              {household?.sanctionListPossibleMatch && (
                 <FlagTooltip message={t('Sanction List Possible Match')} />
               )}
             </Box>
             <Box mr={2}>
-              {household?.sanction_list_confirmed_match && (
+              {household?.sanctionListConfirmedMatch && (
                 <FlagTooltip
                   message={t('Sanction List Confirmed Match')}
                   confirmed
                 />
               )}
             </Box>
-            <AdminButton adminUrl={household?.admin_url} />
+            <AdminButton adminUrl={household?.adminUrl} />
           </>
         }
       />
@@ -215,19 +215,19 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
           <Grid container spacing={6}>
             <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Source')}>
-                <div>{household?.registration_data_import?.data_source}</div>
+                <div>{household?.registrationDataImport?.dataSource}</div>
               </LabelizedField>
             </Grid>
             <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Import name')}>
-                <div>{household?.registration_data_import?.name}</div>
+                <div>{household?.registrationDataImport?.name}</div>
               </LabelizedField>
             </Grid>
             <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Registration Date')}>
                 <div>
                   <UniversalMoment>
-                    {household?.last_registration_date}
+                    {household?.lastRegistrationDate}
                   </UniversalMoment>
                 </div>
               </LabelizedField>
@@ -235,7 +235,7 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
             <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('User name')}>
                 {<Missing />}
-                {household?.registration_data_import.imported_by.email}
+                {household?.registrationDataImport.importedBy.email}
               </LabelizedField>
             </Grid>
             {/* {household?.programRegistrationId && (
@@ -246,7 +246,7 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
               </Grid>
             )} */}
           </Grid>
-          {household?.registration_data_import?.data_source === 'XLS' ? null : (
+          {household?.registrationDataImport?.dataSource === 'XLS' ? null : (
             <>
               <hr />
               <SubTitle variant="h6">{t('Data Collection')}</SubTitle>
@@ -259,7 +259,7 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
                 <Grid size={{ xs: 3 }}>
                   <LabelizedField label={t('End time')}>
                     <UniversalMoment>
-                      {household?.first_registration_date}
+                      {household?.firstRegistrationDate}
                     </UniversalMoment>
                   </LabelizedField>
                 </Grid>

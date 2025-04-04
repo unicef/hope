@@ -7,6 +7,6 @@ export type HeadOfHousehold = {
     /**
      * Full Name of the Beneficiary
      */
-    full_name: string;
+    fullName: string;
 };
 

@@ -8,40 +8,41 @@ import type { RegistrationDataImport } from './RegistrationDataImport';
 import type { ResidenceStatusEnum } from './ResidenceStatusEnum';
 export type HouseholdDetail = {
     id: string;
-    unicef_id: string | null;
-    head_of_household: HeadOfHousehold;
+    unicefId: string | null;
+    headOfHousehold: HeadOfHousehold;
     admin1?: string;
     admin2?: string;
     admin3?: string;
     admin4?: string;
     program: string;
     country?: string;
-    country_origin?: string;
+    countryOrigin?: string;
     readonly status: string;
-    total_cash_received: string;
-    total_cash_received_usd: string;
-    readonly sanction_list_possible_match: boolean;
-    readonly sanction_list_confirmed_match: boolean;
-    readonly has_duplicates: boolean;
-    registration_data_import: RegistrationDataImport;
-    readonly flex_fields: Record<string, any>;
-    readonly admin_area_title: string;
-    readonly active_individuals_count: number;
+    totalCashReceived: string;
+    totalCashReceivedUsd: string;
+    readonly sanctionListPossibleMatch: boolean;
+    readonly sanctionListConfirmedMatch: boolean;
+    readonly hasDuplicates: boolean;
+    registrationDataImport: RegistrationDataImport;
+    readonly flexFields: Record<string, any>;
+    readonly linkedGrievances: Record<string, any>;
+    readonly adminAreaTitle: string;
+    readonly activeIndividualsCount: number;
     readonly geopoint: Array<number> | null;
-    readonly import_id: string;
-    readonly admin_url: string;
+    readonly importId: string;
+    readonly adminUrl: string;
     /**
      * Household male children count
      */
-    male_children_count?: number | null;
+    maleChildrenCount?: number | null;
     /**
      * Household female children count
      */
-    female_children_count?: number | null;
+    femaleChildrenCount?: number | null;
     /**
      * Household children disabled count
      */
-    children_disabled_count?: number | null;
+    childrenDisabledCount?: number | null;
     /**
      * Household currency
      *
@@ -213,15 +214,15 @@ export type HouseholdDetail = {
     /**
      * Household first registration date [sys]
      */
-    first_registration_date: string;
+    firstRegistrationDate: string;
     /**
      * Household last registration date [sys]
      */
-    last_registration_date: string;
+    lastRegistrationDate: string;
     /**
      * Household unhcr id
      */
-    unhcr_id?: string;
+    unhcrId?: string;
     /**
      * Household village
      */
@@ -233,91 +234,91 @@ export type HouseholdDetail = {
     /**
      * Household zip code
      */
-    zip_code?: string | null;
+    zipCode?: string | null;
     /**
      * Household female age group 0-5
      */
-    female_age_group_0_5_count?: number | null;
+    femaleAgeGroup05Count?: number | null;
     /**
      * Household female age group 6-11
      */
-    female_age_group_6_11_count?: number | null;
+    femaleAgeGroup611Count?: number | null;
     /**
      * Household female age group 12-17
      */
-    female_age_group_12_17_count?: number | null;
+    femaleAgeGroup1217Count?: number | null;
     /**
      * Household female age group 18-59
      */
-    female_age_group_18_59_count?: number | null;
+    femaleAgeGroup1859Count?: number | null;
     /**
      * Household female age group 60
      */
-    female_age_group_60_count?: number | null;
+    femaleAgeGroup60Count?: number | null;
     /**
      * Household pregnant count
      */
-    pregnant_count?: number | null;
+    pregnantCount?: number | null;
     /**
      * Household male age group 0-5
      */
-    male_age_group_0_5_count?: number | null;
+    maleAgeGroup05Count?: number | null;
     /**
      * Household male age group 6-11
      */
-    male_age_group_6_11_count?: number | null;
+    maleAgeGroup611Count?: number | null;
     /**
      * Household male age group 12-17
      */
-    male_age_group_12_17_count?: number | null;
+    maleAgeGroup1217Count?: number | null;
     /**
      * Household male age group 18-59
      */
-    male_age_group_18_59_count?: number | null;
+    maleAgeGroup1859Count?: number | null;
     /**
      * Household male age group 60
      */
-    male_age_group_60_count?: number | null;
+    maleAgeGroup60Count?: number | null;
     /**
      * Household female age group 0-5
      */
-    female_age_group_0_5_disabled_count?: number | null;
+    femaleAgeGroup05DisabledCount?: number | null;
     /**
      * Household female age group 6-11
      */
-    female_age_group_6_11_disabled_count?: number | null;
+    femaleAgeGroup611DisabledCount?: number | null;
     /**
      * Household female age group 12-17
      */
-    female_age_group_12_17_disabled_count?: number | null;
+    femaleAgeGroup1217DisabledCount?: number | null;
     /**
      * Household female age group 18-59
      */
-    female_age_group_18_59_disabled_count?: number | null;
+    femaleAgeGroup1859DisabledCount?: number | null;
     /**
      * Household female age group 60
      */
-    female_age_group_60_disabled_count?: number | null;
+    femaleAgeGroup60DisabledCount?: number | null;
     /**
      * Household male age group 0-5
      */
-    male_age_group_0_5_disabled_count?: number | null;
+    maleAgeGroup05DisabledCount?: number | null;
     /**
      * Household male age group 6-1
      */
-    male_age_group_6_11_disabled_count?: number | null;
+    maleAgeGroup611DisabledCount?: number | null;
     /**
      * Household male age group 12-17
      */
-    male_age_group_12_17_disabled_count?: number | null;
+    maleAgeGroup1217DisabledCount?: number | null;
     /**
      * Household male age group 18-59
      */
-    male_age_group_18_59_disabled_count?: number | null;
+    maleAgeGroup1859DisabledCount?: number | null;
     /**
      * Household male age group 60
      */
-    male_age_group_60_disabled_count?: number | null;
+    maleAgeGroup60DisabledCount?: number | null;
     /**
      * Data collection start date
      */
@@ -329,11 +330,11 @@ export type HouseholdDetail = {
     /**
      * Female child headed household flag
      */
-    fchild_hoh?: boolean | null;
+    fchildHoh?: boolean | null;
     /**
      * Child headed household flag
      */
-    child_hoh?: boolean | null;
+    childHoh?: boolean | null;
     /**
      * Household returnee status
      */
@@ -353,10 +354,10 @@ export type HouseholdDetail = {
      * * `NON_HOST` - Non-displaced  |   Non-host
      * * `RETURNEE` - Displaced  |   Returnee
      */
-    residence_status?: ResidenceStatusEnum;
+    residenceStatus?: ResidenceStatusEnum;
     /**
      * Beneficiary Program Registration id [sys]
      */
-    program_registration_id?: string | null;
+    programRegistrationId?: string | null;
 };
 

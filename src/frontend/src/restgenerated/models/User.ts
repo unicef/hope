@@ -3,8 +3,8 @@
 /* tslint:disable */
 /* eslint-disable */
 export type User = {
-    first_name?: string;
-    last_name?: string;
+    firstName?: string;
+    lastName?: string;
     email: string;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.

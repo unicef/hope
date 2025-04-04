@@ -24,6 +24,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import { headCells } from './HouseholdTableHeadCells';
+import { HouseholdList } from '@restgenerated/models/HouseholdList';
 
 interface HouseholdTableRestProps {
   filter;
@@ -36,7 +37,7 @@ export const HouseholdTable = ({
 }: HouseholdTableRestProps): ReactElement => {
   const { selectedProgram } = useProgramContext();
   const { businessArea, programId } = useBaseUrl();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const initialQueryVariables = useMemo(() => {
     const matchWithdrawnValue = (): boolean | undefined => {
@@ -100,8 +101,6 @@ export const HouseholdTable = ({
     enabled: !!businessArea && !!programId,
   });
 
-  console.log(countData);
-
   const replacements = {
     unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.group_label} ID`,
     head_of_household__full_name: (_beneficiaryGroup) =>
@@ -119,7 +118,7 @@ export const HouseholdTable = ({
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
 
-  const renderRow = (household: HouseholdDetail): ReactElement => {
+  const renderRow = (household: HouseholdList): ReactElement => {
     if (!household) {
       return <></>;
     }
@@ -132,13 +131,13 @@ export const HouseholdTable = ({
         hover
         onClick={canViewDetails ? handleClick : undefined}
         role="checkbox"
-        key={household.unicef_id}
+        key={household.unicefId}
         data-cy="household-table-row"
       >
         <TableCell align="left">
           <>
             <Box mr={2}>
-              {household.has_duplicates && (
+              {household.hasDuplicates && (
                 <WarningTooltip
                   confirmed
                   message={t('Houesehold has Duplicates')}
@@ -146,12 +145,12 @@ export const HouseholdTable = ({
               )}
             </Box>
             <Box mr={2}>
-              {household.sanction_list_possible_match && (
+              {household.sanctionListPossibleMatch && (
                 <FlagTooltip message={t('Sanction List Possible Match')} />
               )}
             </Box>
             <Box mr={2}>
-              {household.sanction_list_confirmed_match && (
+              {household.sanctionListConfirmedMatch && (
                 <FlagTooltip
                   message={t('Sanction List Confirmed Match')}
                   confirmed
@@ -161,7 +160,7 @@ export const HouseholdTable = ({
           </>
         </TableCell>
         <TableCell align="left">
-          <BlackLink to={householdDetailsPath}>{household.unicef_id}</BlackLink>
+          <BlackLink to={householdDetailsPath}>{household.unicefId}</BlackLink>
         </TableCell>
         <TableCell align="left">
           <StatusBox
@@ -169,18 +168,18 @@ export const HouseholdTable = ({
             statusToColor={householdStatusToColor}
           />
         </TableCell>
-        <AnonTableCell>{household.head_of_household.full_name}</AnonTableCell>
+        <AnonTableCell>{household.headOfHousehold}</AnonTableCell>
         <TableCell align="left">{household.size}</TableCell>
         <TableCell align="left">{household.admin2 || '-'}</TableCell>
-        <TableCell align="left">{household.residence_status}</TableCell>
+        <TableCell align="left">{household.residenceStatus}</TableCell>
         <TableCell align="right">
           {formatCurrencyWithSymbol(
-            Number(household.total_cash_received),
+            Number(household.totalCashReceived),
             household.currency?.toString(),
           )}
         </TableCell>
         <TableCell align="right">
-          <UniversalMoment>{household.last_registration_date}</UniversalMoment>
+          <UniversalMoment>{household.lastRegistrationDate}</UniversalMoment>
         </TableCell>
       </ClickableTableRow>
     );
@@ -189,7 +188,7 @@ export const HouseholdTable = ({
   return (
     <TableWrapper>
       <UniversalRestTable
-        title={`${beneficiaryGroup?.group_label_plural}`}
+        title={`${beneficiaryGroup?.groupLabelPlural}`}
         renderRow={renderRow}
         headCells={adjustedHeadCells}
         data={data}

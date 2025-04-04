@@ -5,10 +5,20 @@ from rest_framework import serializers
 from hct_mis_api.apps.account.api.fields import Base64ModelField
 from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
 from hct_mis_api.apps.core.utils import resolve_flex_fields_choices_to_string
+from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.household.api.serializers.individual import (
+    HouseholdSimpleSerializer,
+    LinkedGrievanceTicketSerializer,
+)
 from hct_mis_api.apps.household.api.serializers.registration_data_import import (
     RegistrationDataImportSerializer,
 )
-from hct_mis_api.apps.household.models import DUPLICATE, Household, Individual
+from hct_mis_api.apps.household.models import (
+    DUPLICATE,
+    ROLE_NO_ROLE,
+    Household,
+    Individual,
+)
 
 
 class HouseholdListSerializer(serializers.ModelSerializer):
@@ -19,6 +29,7 @@ class HouseholdListSerializer(serializers.ModelSerializer):
     program = serializers.CharField(source="program.name")
     total_cash_received = serializers.DecimalField(max_digits=64, decimal_places=2)
     total_cash_received_usd = serializers.DecimalField(max_digits=64, decimal_places=2)
+    has_duplicates = serializers.SerializerMethodField()
 
     class Meta:
         model = Household
@@ -35,7 +46,14 @@ class HouseholdListSerializer(serializers.ModelSerializer):
             "total_cash_received",
             "total_cash_received_usd",
             "last_registration_date",
+            "currency",
+            "has_duplicates",
+            "sanction_list_possible_match",
+            "sanction_list_confirmed_match",
         ]
+
+    def get_has_duplicates(self, obj: Household) -> bool:
+        return obj.individuals.filter(deduplication_golden_record_status=DUPLICATE).exists()
 
 
 class HeadOfHouseholdSerializer(serializers.ModelSerializer):
@@ -47,6 +65,32 @@ class HeadOfHouseholdSerializer(serializers.ModelSerializer):
             "id",
             "full_name",
         )
+
+
+class HouseholdMemberSerializer(serializers.ModelSerializer):
+    id = Base64ModelField(model_name="Individual")
+    role = serializers.SerializerMethodField()
+    household = HouseholdSimpleSerializer()
+
+    class Meta:
+        model = Individual
+        fields = (
+            "id",
+            "unicef_id",
+            "full_name",
+            "role",
+            "relationship",
+            "status",
+            "birth_date",
+            "sex",
+            "household",
+        )
+
+    def get_role(self, obj: Individual) -> str:
+        role = obj.households_and_roles(manager="all_merge_status_objects").first()
+        if role:
+            return role.role
+        return ROLE_NO_ROLE
 
 
 class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
@@ -64,6 +108,7 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
     has_duplicates = serializers.SerializerMethodField()
     registration_data_import = RegistrationDataImportSerializer()
     flex_fields = serializers.SerializerMethodField()
+    linked_grievances = serializers.SerializerMethodField()
     admin_area_title = serializers.SerializerMethodField()
     active_individuals_count = serializers.SerializerMethodField()
     geopoint = serializers.SerializerMethodField()
@@ -90,6 +135,7 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
             "has_duplicates",
             "registration_data_import",
             "flex_fields",
+            "linked_grievances",
             "admin_area_title",
             "active_individuals_count",
             "geopoint",
@@ -141,6 +187,11 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
 
     def get_flex_fields(self, obj: Household) -> Dict:
         return resolve_flex_fields_choices_to_string(obj)
+
+    def get_linked_grievances(self, obj: Individual) -> Dict:
+        return LinkedGrievanceTicketSerializer(
+            GrievanceTicket.objects.filter(household_unicef_id=obj.unicef_id), many=True
+        ).data
 
     def get_admin_area_title(self, obj: Household) -> str:
         if obj.admin_area:

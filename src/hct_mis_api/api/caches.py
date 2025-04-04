@@ -1,6 +1,7 @@
 import functools
 from typing import Any, Callable, Optional
 
+from django.conf import settings
 from django.core.cache import cache
 from django.db.models import Count, Max, QuerySet
 
@@ -36,7 +37,7 @@ def etag_decorator(key_constructor_class: "KeyConstructor", compare_etags: bool 
 
             # If etag from header and calculated are the same,
             # return 304 status code as request consists of the same data already (cached on client side)
-            if compare_etags and request.headers.get("If-None-Match") == etag:
+            if compare_etags and request.headers.get("If-None-Match") == etag and not settings.DEBUG:
                 return Response(status=status.HTTP_304_NOT_MODIFIED, headers={"ETAG": etag})
             res = function(*args, **kwargs)
             res.headers["ETAG"] = etag

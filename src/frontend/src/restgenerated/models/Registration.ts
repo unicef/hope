@@ -4,7 +4,7 @@
 /* eslint-disable */
 export type Registration = {
     readonly organization: string;
-    readonly aurora_id: number;
+    readonly auroraId: number;
     readonly project: string;
     name: string;
 };

@@ -13,11 +13,11 @@ export type ProgramAPI = {
     /**
      * Program start date
      */
-    start_date: string;
+    startDate: string;
     /**
      * Program end date
      */
-    end_date?: string | null;
+    endDate?: string | null;
     /**
      * Program budget
      */
@@ -28,7 +28,7 @@ export type ProgramAPI = {
      * * `ONE_OFF` - One-off
      * * `REGULAR` - Regular
      */
-    frequency_of_payments: FrequencyOfPaymentsEnum;
+    frequencyOfPayments: FrequencyOfPaymentsEnum;
     /**
      * Program sector
      *
@@ -44,18 +44,18 @@ export type ProgramAPI = {
     /**
      * Program cash+
      */
-    cash_plus: boolean;
+    cashPlus: boolean;
     /**
      * Program population goal
      */
-    population_goal: number;
+    populationGoal: number;
     /**
      * Program data collecting type
      */
-    data_collecting_type: number;
+    dataCollectingType: number;
     /**
      * Program beneficiary group
      */
-    beneficiary_group: string;
+    beneficiaryGroup: string;
 };
 
