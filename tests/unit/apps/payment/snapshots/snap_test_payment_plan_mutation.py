@@ -59,7 +59,7 @@ snapshots['TestPaymentPlanMutation::test_assign_funds_commitments_mutation 3'] =
                     'line': 3
                 }
             ],
-            'message': 'Chosen Funds Commitments are already assigned to Payment Plan',
+            'message': 'Chosen Funds Commitments are already assigned to different Payment Plan',
             'path': [
                 'assignFundsCommitments'
             ]
