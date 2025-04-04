@@ -10,7 +10,7 @@ from hct_mis_api.apps.core.filters import (
     IntegerFilter,
     IntegerRangeFilter,
 )
-from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string_required
+from hct_mis_api.apps.core.utils import CustomOrderingFilter
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 
@@ -28,7 +28,6 @@ class RegistrationDataImportFilter(FilterSet):
         field_name="name",
         lookup_expr="startswith",
     )
-
 
     class Meta:
         model = RegistrationDataImport
