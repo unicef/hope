@@ -46,10 +46,7 @@ from hct_mis_api.apps.payment.models.payment import (
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.program.api.serializers import ProgramSmallSerializer
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.steficon.api.serializers import (
-    RuleCommitSerializer,
-    RuleSerializer,
-)
+from hct_mis_api.apps.steficon.api.serializers import RuleCommitSerializer
 from hct_mis_api.apps.targeting.api.serializers import TargetingCriteriaSerializer
 
 
@@ -445,7 +442,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     can_send_xlsx_password = serializers.SerializerMethodField()
     split_choices = serializers.SerializerMethodField()
     approval_process = ApprovalProcessSerializer(read_only=True, many=True)
-    steficon_rule = RuleSerializer(read_only=True)
+    steficon_rule = RuleCommitSerializer(read_only=True)
     source_payment_plan = FollowUpPaymentPlanSerializer(read_only=True)
     eligible_payments_count = serializers.SerializerMethodField()
     payment_verification_summary = PaymentVerificationSummarySerializer(read_only=True)

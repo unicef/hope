@@ -58,6 +58,7 @@ from hct_mis_api.apps.payment.api.serializers import (
     TPHouseholdListSerializer,
 )
 from hct_mis_api.apps.payment.celery_tasks import (
+    payment_plan_apply_engine_rule,
     payment_plan_apply_steficon_hh_selection,
     payment_plan_exclude_beneficiaries,
     payment_plan_full_rebuild,
@@ -112,6 +113,7 @@ class PaymentPlanViewSet(
         "open": PaymentPlanCreateUpdateSerializer,
         "partial_update": PaymentPlanCreateUpdateSerializer,
         "exclude_beneficiaries": PaymentPlanExcludeBeneficiariesSerializer,
+        "apply_engine_formula": TargetPopulationApplyEngineFormulaSerializer,
     }
     permissions_by_action = {
         "list": [
@@ -124,6 +126,7 @@ class PaymentPlanViewSet(
         "partial_update": [Permissions.PM_CREATE],
         "destroy": [Permissions.PM_CREATE],
         "exclude_beneficiaries": [Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP],
+        "apply_engine_formula": [Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS],
     }
 
     def get_object(self) -> PaymentPlan:
@@ -236,6 +239,80 @@ class PaymentPlanViewSet(
             new_object=payment_plan,
         )
         return Response(status=status.HTTP_200_OK, data={"message": "Payment Plan unlocked"})
+
+    @action(detail=True, methods=["get"], PERMISSIONS=[Permissions.PM_LOCK_AND_UNLOCK_FSP])
+    def lock_fsp(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan = self.get_object()
+        old_payment_plan = copy_model_object(payment_plan)
+        payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
+            input_data={"action": PaymentPlan.Action.LOCK_FSP}, user=request.user
+        )
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=request.user,
+            programs=payment_plan.program.pk,
+            old_object=old_payment_plan,
+            new_object=payment_plan,
+        )
+        return Response(status=status.HTTP_200_OK, data={"message": "Payment Plan FSP locked"})
+
+    @action(detail=True, methods=["get"], PERMISSIONS=[Permissions.PM_LOCK_AND_UNLOCK_FSP])
+    def unlock_fsp(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan = self.get_object()
+        old_payment_plan = copy_model_object(payment_plan)
+        payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
+            input_data={"action": PaymentPlan.Action.UNLOCK_FSP}, user=request.user
+        )
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=request.user,
+            programs=payment_plan.program.pk,
+            old_object=old_payment_plan,
+            new_object=payment_plan,
+        )
+        return Response(status=status.HTTP_200_OK, data={"message": "Payment Plan FSP unlocked"})
+
+    @action(detail=True, methods=["post"])
+    def apply_engine_formula(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan = self.get_object()
+        serializer = self.get_serializer(
+            data=request.data,
+        )
+        if serializer.is_valid():
+            engine_formula_rule_id = decode_id_string_required(serializer.validated_data["engine_formula_rule_id"])
+            if version := serializer.validated_data.get("version"):
+                check_concurrency_version_in_mutation(version, payment_plan)
+            engine_rule = get_object_or_404(Rule, id=engine_formula_rule_id)
+            if payment_plan.status not in PaymentPlan.CAN_RUN_ENGINE_FORMULA_FOR_ENTITLEMENT:
+                raise ValidationError(f"Not allowed to run engine formula within status {payment_plan.status}.")
+            if not engine_rule.enabled or engine_rule.deprecated:
+                raise ValidationError("This engine rule is not enabled or is deprecated.")
+            # PaymentPlan entitlement
+            if payment_plan.status in PaymentPlan.CAN_RUN_ENGINE_FORMULA_FOR_ENTITLEMENT:
+                old_payment_plan = copy_model_object(payment_plan)
+                if payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.RULE_ENGINE_RUN:
+                    raise ValidationError("Rule Engine run in progress")
+                payment_plan.background_action_status_steficon_run()
+                payment_plan.save()
+                payment_plan_apply_engine_rule.delay(str(payment_plan.pk), str(engine_rule.pk))
+
+            log_create(
+                mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+                business_area_field="business_area",
+                user=request.user,
+                programs=payment_plan.program.pk,
+                old_object=old_payment_plan,
+                new_object=payment_plan,
+            )
+            response_serializer = PaymentPlanDetailSerializer(payment_plan, context={"request": request})
+            return Response(
+                data=response_serializer.data,
+                status=status.HTTP_200_OK,
+            )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TargetPopulationViewSet(

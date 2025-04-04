@@ -1579,6 +1579,9 @@ class TestPaymentPlanActions:
         self.url_lock = reverse("api:payments:payment-plans-lock", kwargs=url_kwargs)
         self.url_unlock = reverse("api:payments:payment-plans-unlock", kwargs=url_kwargs)
         self.url_exclude_hh = reverse("api:payments:payment-plans-exclude-beneficiaries", kwargs=url_kwargs)
+        self.url_apply_steficon = reverse("api:payments:payment-plans-apply-engine-formula", kwargs=url_kwargs)
+        self.url_lock_fsp = reverse("api:payments:payment-plans-lock-fsp", kwargs=url_kwargs)
+        self.url_unlock_fsp = reverse("api:payments:payment-plans-unlock-fsp", kwargs=url_kwargs)
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -1723,3 +1726,103 @@ class TestPaymentPlanActions:
         response_3 = self.client.post(self.url_exclude_hh, {}, format="json")
         assert response_3.status_code == status.HTTP_400_BAD_REQUEST
         assert "excluded_households_ids" in response_3.json()
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_apply_engine_formula_pp(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        rule_for_pp = RuleCommitFactory(rule__type=Rule.TYPE_PAYMENT_PLAN, version=11).rule
+        self.pp.status = PaymentPlan.Status.LOCKED
+        self.pp.save()
+        self.pp.refresh_from_db()
+        data = {
+            "engine_formula_rule_id": encode_id_base64_required(rule_for_pp.pk, "Rule"),
+            "version": self.pp.version,
+        }
+        response = self.client.post(self.url_apply_steficon, data, format="json")
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.status_code == status.HTTP_200_OK
+            resp_data = response.json()
+            assert "id" in resp_data
+            assert "Rule Engine Running" in resp_data["background_action_status"]
+
+    def test_apply_engine_formula_tp_validation_errors(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS],
+            self.afghanistan,
+            self.program_active,
+        )
+        rule_for_pp = RuleCommitFactory(rule__type=Rule.TYPE_PAYMENT_PLAN, rule__enabled=False, version=22).rule
+        self.pp.status = PaymentPlan.Status.LOCKED
+        self.pp.save()
+
+        data = {
+            "engine_formula_rule_id": encode_id_base64_required(rule_for_pp.pk, "Rule"),
+            "version": self.pp.version,
+        }
+        response = self.client.post(self.url_apply_steficon, data, format="json")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "This engine rule is not enabled or is deprecated." in response.data
+
+        self.pp.status = PaymentPlan.Status.TP_OPEN
+        self.pp.save()
+        data = {
+            "engine_formula_rule_id": encode_id_base64_required(rule_for_pp.pk, "Rule"),
+            "version": self.pp.version,
+        }
+        response_2 = self.client.post(self.url_apply_steficon, data, format="json")
+
+        assert response_2.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Not allowed to run engine formula within status TP_OPEN." in response_2.data
+
+        response_3 = self.client.post(self.url_apply_steficon, {}, format="json")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "engine_formula_rule_id" in response_3.data
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.PM_LOCK_AND_UNLOCK_FSP], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_pp_fsp_lock(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        self.pp.status = PaymentPlan.Status.LOCKED
+        self.pp.save()
+        PaymentFactory(parent=self.pp)
+        response = self.client.get(self.url_lock_fsp)
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.json() == {"message": "Payment Plan FSP locked"}
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.PM_LOCK_AND_UNLOCK_FSP], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_pp_fsp_unlock(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        self.pp.status = PaymentPlan.Status.LOCKED_FSP
+        self.pp.save()
+
+        response = self.client.get(self.url_unlock_fsp)
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.json() == {"message": "Payment Plan FSP unlocked"}
