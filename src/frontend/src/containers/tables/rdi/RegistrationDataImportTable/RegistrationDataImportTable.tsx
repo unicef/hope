@@ -47,7 +47,7 @@ function RegistrationDataImportTable({
 }: RegistrationDataImportProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { data: deduplicationFlags } = useDeduplicationFlagsQuery({
     fetchPolicy: 'cache-and-network',

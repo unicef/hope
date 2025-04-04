@@ -64,7 +64,7 @@ const RegistrationDataImportDetailsPage = (): ReactElement => {
   const permissions = usePermissions();
   const { selectedProgram } = useProgramContext();
   const { businessArea, programSlug } = useBaseUrl();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const refetchInterval = (result) => {
     if (
       [
@@ -87,7 +87,7 @@ const RegistrationDataImportDetailsPage = (): ReactElement => {
   } = useHopeDetailsQuery(
     id,
     RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve,
-    refetchInterval,
+    { refetchInterval },
   );
 
   const { data: choicesData, loading: choicesLoading } =
@@ -130,11 +130,11 @@ const RegistrationDataImportDetailsPage = (): ReactElement => {
                 >
                   <Tab
                     data-cy="tab-Households"
-                    label={beneficiaryGroup?.group_label_plural}
+                    label={beneficiaryGroup?.groupLabelPlural}
                   />
                   <Tab
                     data-cy="tab-Individuals"
-                    label={beneficiaryGroup?.member_label_plural}
+                    label={beneficiaryGroup?.memberLabelPlural}
                   />
                 </StyledTabs>
               </TabsContainer>
