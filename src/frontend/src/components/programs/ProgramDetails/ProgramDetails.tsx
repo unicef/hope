@@ -110,19 +110,19 @@ export const ProgramDetails = ({
           <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('START DATE')}
-              value={<UniversalMoment>{program.start_date}</UniversalMoment>}
+              value={<UniversalMoment>{program.startDate}</UniversalMoment>}
             />
           </Grid>
           <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('END DATE')}
-              value={<UniversalMoment>{program.end_date}</UniversalMoment>}
+              value={<UniversalMoment>{program.endDate}</UniversalMoment>}
             />
           </Grid>
           <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('Programme Code')}
-              value={program.programme_code}
+              value={program.programmeCode}
             />
           </Grid>
           <Grid size={{ xs: 4 }}>
@@ -134,13 +134,13 @@ export const ProgramDetails = ({
           <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('Data Collecting Type')}
-              value={program?.data_collecting_type?.label}
+              value={program?.dataCollectingType?.label}
             />
           </Grid>
           <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('Beneficiary Group')}
-              value={program?.beneficiary_group?.name}
+              value={program?.beneficiaryGroup?.name}
             />
           </Grid>
           <Grid size={{ xs: 4 }}>
@@ -148,7 +148,7 @@ export const ProgramDetails = ({
               label={t('Frequency of Payment')}
               value={
                 programFrequencyOfPaymentsChoicesDict[
-                  program.frequency_of_payments
+                  program.frequencyOfPayments
                 ]
               }
             />
@@ -156,7 +156,7 @@ export const ProgramDetails = ({
           <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('Administrative Areas of implementation')}
-              value={program.administrative_areas_of_implementation}
+              value={program.administrativeAreasOfImplementation}
             />
           </Grid>
           <Grid size={{ xs: 4 }}>
@@ -168,20 +168,20 @@ export const ProgramDetails = ({
           <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('CASH+')}
-              value={program.cash_plus ? t('Yes') : t('No')}
+              value={program.cashPlus ? t('Yes') : t('No')}
             />
           </Grid>
           <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('Partner Access')}
-              value={PartnerAccess[program.partner_access]}
+              value={PartnerAccess[program.partnerAccess]}
             />
           </Grid>
         </Grid>
         <NumberOfHouseHolds>
           <LabelizedField label={t('Programme size')}>
             <NumberOfHouseHoldsValue>
-              {program.household_count}
+              {program.householdCount}
             </NumberOfHouseHoldsValue>
           </LabelizedField>
         </NumberOfHouseHolds>
