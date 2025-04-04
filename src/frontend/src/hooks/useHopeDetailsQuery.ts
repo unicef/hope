@@ -1,12 +1,13 @@
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useQuery } from '@tanstack/react-query';
+import { QueryFunction, QueryKey, useQuery } from '@tanstack/react-query';
 import type { UseQueryResult } from '@tanstack/react-query/src/types';
+import type { UndefinedInitialDataOptions } from '@tanstack/react-query/src/queryOptions';
 
-export const useHopeDetailsQuery = (
+export const useHopeDetailsQuery = <TData,TOptions>(
   id: string,
-  queryFn: (variables: any) => Promise<any>,
-  refetchInterval: any = undefined,
-): UseQueryResult => {
+  queryFn: (data:TOptions)=>Promise<TData>,
+  options: any
+): UseQueryResult<TData> => {
   const { businessArea, programSlug } = useBaseUrl();
   return useQuery({
     queryKey: [queryFn.name, id, programSlug, businessArea],
@@ -15,8 +16,8 @@ export const useHopeDetailsQuery = (
         id,
         businessAreaSlug: businessArea,
         programSlug,
-      }),
-    refetchInterval,
+      } as TOptions),
     enabled: !!businessArea && !!programSlug,
-  });
+    ...options
+  }) as UseQueryResult<TData>;
 };
