@@ -4,7 +4,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid,
+  Grid2 as Grid,
   IconButton,
   Table,
   TableBody,
@@ -258,6 +258,7 @@ interface CriteriaProps {
   householdIds: string;
   individualIds: string;
   deliveryMechanism;
+  financialServiceProvider;
   criteriaIndex: number;
   criteria;
 }
@@ -276,6 +277,7 @@ export function Criteria({
   householdIds,
   individualIds,
   deliveryMechanism,
+  financialServiceProvider,
   criteriaIndex,
   criteria,
 }: CriteriaProps): ReactElement {
@@ -325,12 +327,17 @@ export function Criteria({
         ?.fsps.map((el) => ({ name: el.name, value: el.id })) || [];
 
     const fspName =
-      deliveryMechanism?.fsp?.name ||
+      financialServiceProvider?.name ||
       mappedFsps?.find((el) => el.value === criteria.fsp)?.name;
 
     setDeliveryMechanismToDisplay(deliveryMechanismName);
     setFspToDisplay(fspName);
-  }, [deliveryMechanism, availableFspsForDeliveryMechanismData, criteria]);
+  }, [
+    deliveryMechanism,
+    financialServiceProvider,
+    availableFspsForDeliveryMechanismData,
+    criteria,
+  ]);
 
   if (!availableFspsForDeliveryMechanismData) return null;
 
@@ -382,13 +389,13 @@ export function Criteria({
     <CriteriaElement alternative={alternative} data-cy="criteria-container">
       {deliveryMechanismToDisplay && criteriaIndex === 0 && (
         <Grid container>
-          <Grid item xs={6}>
+          <Grid size={{ xs: 6 }}>
             <LabelizedField
               label={t('Delivery Mechanism')}
               value={deliveryMechanismToDisplay}
             />
           </Grid>
-          <Grid item xs={6}>
+          <Grid size={{ xs: 6 }}>
             <LabelizedField label={t('FSP')} value={fspToDisplay} />
           </Grid>
         </Grid>
