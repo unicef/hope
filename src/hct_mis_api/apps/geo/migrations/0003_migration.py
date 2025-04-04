@@ -6,18 +6,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('household', '0016_migration'),
+        ('geo', '0002_migration'),
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='household',
-            name='latitude',
-            field=models.FloatField(blank=True, help_text='Household latitude [sys]', null=True),
+        migrations.RemoveField(
+            model_name='area',
+            name='geom',
         ),
         migrations.AddField(
-            model_name='household',
+            model_name='area',
+            name='latitude',
+            field=models.FloatField(blank=True, null=True),
+        ),
+        migrations.AddField(
+            model_name='area',
             name='longitude',
-            field=models.FloatField(blank=True, help_text='Household longitude [sys]', null=True),
+            field=models.FloatField(blank=True, null=True),
         ),
     ]
