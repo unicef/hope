@@ -171,7 +171,7 @@ export const GlobalProgramSelect = () => {
       status: Status791Enum.ACTIVE,
       dataCollectingType: null,
       pduFields: null,
-      programme_code: null,
+      programmeCode: null,
       slug: null,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps

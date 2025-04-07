@@ -114,7 +114,7 @@ const CreateProgramCycle = ({
     try {
       await mutateAsync({
         title: values.title,
-        startDate: values.startDate,
+        start_date: values.startDate,
         end_date: values.endDate,
       });
       showMessage(t('Programme Cycle Created'));

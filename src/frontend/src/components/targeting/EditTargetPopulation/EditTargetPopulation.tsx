@@ -22,10 +22,10 @@ import { PaperContainer } from '../PaperContainer';
 import AddFilterTargetingCriteriaDisplay from '../TargetingCriteriaDisplay/AddFilterTargetingCriteriaDisplay';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import EditTargetPopulationHeader from './EditTargetPopulationHeader';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 
 interface EditTargetPopulationProps {
-  paymentPlan: PaymentPlanDetail;
+  paymentPlan: TargetPopulationDetail;
   screenBeneficiary: boolean;
 }
 

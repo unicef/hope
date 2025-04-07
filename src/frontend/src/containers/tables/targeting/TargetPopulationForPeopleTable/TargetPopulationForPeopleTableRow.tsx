@@ -5,7 +5,7 @@ import { UniversalMoment } from '@components/core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Radio } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
-import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
+import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
 import {
   paymentPlanStatusToColor,
   targetPopulationStatusDisplayMap,
@@ -14,7 +14,7 @@ import { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface TargetPopulationTableRowProps {
-  targetPopulation: TargetPopulationDetail;
+  targetPopulation: PaginatedTargetPopulationListList['results'][number];
   canViewDetails: boolean;
   selectedTargetPopulation?;
   radioChangeHandler?: (id: string) => void;

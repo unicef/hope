@@ -175,7 +175,7 @@ export const HouseholdMembersTable = ({
             </TableCell>
             <TableCell align="right">
               {renderTableCellContent(
-                <UniversalMoment>{row.birth_date}</UniversalMoment>,
+                <UniversalMoment>{row.birthDate}</UniversalMoment>,
               )}
             </TableCell>
             <TableCell align="left">
