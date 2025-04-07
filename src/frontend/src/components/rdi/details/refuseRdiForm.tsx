@@ -40,10 +40,7 @@ const RefuseRdiForm = ({
       onSubmit={async (values) => {
         try {
           await refuseMutate({
-            variables: {
-              id,
-              refuseReason: values.refuseReason,
-            },
+            reason: values.refuseReason,
           });
           onClose();
           showMessage('RDI refused');

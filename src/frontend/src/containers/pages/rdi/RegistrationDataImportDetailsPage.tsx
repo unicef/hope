@@ -101,7 +101,7 @@ const RegistrationDataImportDetailsPage = (): ReactElement => {
     return null;
   }
 
-  const isMerged = 'Merged' === data.status;
+  const isMerged = 'MERGED' === data.status;
 
   function RegistrationContainer({
     isErased,
