@@ -48,6 +48,7 @@ from hct_mis_api.apps.payment.api.serializers import (
     PaymentPlanCreateUpdateSerializer,
     PaymentPlanDetailSerializer,
     PaymentPlanExcludeBeneficiariesSerializer,
+    PaymentPlanImportEntitlementSerializer,
     PaymentPlanListSerializer,
     PaymentPlanSerializer,
     PaymentPlanSupportingDocumentSerializer,
@@ -56,8 +57,10 @@ from hct_mis_api.apps.payment.api.serializers import (
     TargetPopulationCreateSerializer,
     TargetPopulationDetailSerializer,
     TPHouseholdListSerializer,
+    XlsxErrorSerializer,
 )
 from hct_mis_api.apps.payment.celery_tasks import (
+    import_payment_plan_payment_list_from_xlsx,
     payment_plan_apply_engine_rule,
     payment_plan_apply_steficon_hh_selection,
     payment_plan_exclude_beneficiaries,
@@ -69,6 +72,9 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlanSupportingDocument,
 )
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
+from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_import_service import (
+    XlsxPaymentPlanImportService,
+)
 from hct_mis_api.apps.program.models import ProgramCycle
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.targeting.api.serializers import TargetPopulationListSerializer
@@ -114,6 +120,7 @@ class PaymentPlanViewSet(
         "partial_update": PaymentPlanCreateUpdateSerializer,
         "exclude_beneficiaries": PaymentPlanExcludeBeneficiariesSerializer,
         "apply_engine_formula": TargetPopulationApplyEngineFormulaSerializer,
+        "entitlement_import_xlsx": PaymentPlanImportEntitlementSerializer,
     }
     permissions_by_action = {
         "list": [
@@ -331,6 +338,47 @@ class PaymentPlanViewSet(
             old_object=old_payment_plan,
             new_object=payment_plan,
         )
+        return Response(
+            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data, status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, methods=["post"], PERMISSIONS=[Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS])
+    def entitlement_import_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan = self.get_object()
+        if payment_plan.status != PaymentPlan.Status.LOCKED:
+            raise ValidationError("User can only import for LOCKED Payment Plan")
+        if payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS:
+            raise ValidationError("Import in progress")
+
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        file = serializer.validated_data["file"]
+        with transaction.atomic():
+            import_service = XlsxPaymentPlanImportService(payment_plan, file)
+            import_service.open_workbook()
+            import_service.validate()
+            if import_service.errors:
+                return Response(
+                    data=XlsxErrorSerializer(import_service.errors, context={"request": request}).data,
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            old_payment_plan = copy_model_object(payment_plan)
+            if old_payment_plan.imported_file:
+                old_payment_plan.imported_file = copy_model_object(payment_plan.imported_file)
+            payment_plan.background_action_status_xlsx_importing_entitlements()
+            payment_plan.save()
+            payment_plan = import_service.create_import_xlsx_file(request.user)
+
+            transaction.on_commit(lambda: import_payment_plan_payment_list_from_xlsx.delay(payment_plan.id))
+            log_create(
+                mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+                business_area_field="business_area",
+                user=request.user,
+                programs=payment_plan.program.pk,
+                old_object=old_payment_plan,
+                new_object=payment_plan,
+            )
         return Response(
             data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data, status=status.HTTP_200_OK
         )

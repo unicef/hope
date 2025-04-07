@@ -1,6 +1,6 @@
 import io
 from decimal import Decimal
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.utils import timezone
@@ -18,6 +18,9 @@ from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_base_service import (
 )
 
 if TYPE_CHECKING:
+    from django.contrib.auth.base_user import AbstractBaseUser
+    from django.contrib.auth.models import AnonymousUser
+
     from hct_mis_api.apps.account.models import User
 
 Row = Tuple[Cell]
@@ -215,7 +218,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
                 )
         return None
 
-    def create_import_xlsx_file(self, user: "User") -> PaymentPlan:
+    def create_import_xlsx_file(self, user: Union["User", "AbstractBaseUser", "AnonymousUser"]) -> PaymentPlan:
         # remove old imported file
         self.payment_plan.remove_imported_file()
 
