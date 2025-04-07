@@ -11,7 +11,6 @@ import { HouseholdRdiMergeStatus } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { TableCell } from '@mui/material';
 import { Box } from '@mui/system';
-import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import {
