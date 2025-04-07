@@ -5,10 +5,10 @@
 
 export type { Account as AccountCamelCase } from './models/Account';
 export { ActionEnum as ActionEnumCamelCase } from './models/ActionEnum';
-export type { Admin1Enum as Admin1EnumCamelCase } from './models/Admin1Enum';
-export type { Admin2Enum as Admin2EnumCamelCase } from './models/Admin2Enum';
-export type { Admin3Enum as Admin3EnumCamelCase } from './models/Admin3Enum';
-export type { Admin4Enum as Admin4EnumCamelCase } from './models/Admin4Enum';
+export { Admin1Enum as Admin1EnumCamelCase } from './models/Admin1Enum';
+export { Admin2Enum as Admin2EnumCamelCase } from './models/Admin2Enum';
+export { Admin3Enum as Admin3EnumCamelCase } from './models/Admin3Enum';
+export { Admin4Enum as Admin4EnumCamelCase } from './models/Admin4Enum';
 export type { ApprovalProcess as ApprovalProcessCamelCase } from './models/ApprovalProcess';
 export type { Area as AreaCamelCase } from './models/Area';
 export type { AreaList as AreaListCamelCase } from './models/AreaList';
