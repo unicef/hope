@@ -17,9 +17,10 @@ import {
 } from '@generated/graphql';
 import { LoadingButton } from '@core/LoadingButton';
 import { useProgramContext } from '../../../programContext';
+import { RegistrationDataImportDetail } from '@restgenerated/models/RegistrationDataImportDetail';
 
 interface RerunDedupeProps {
-  registration: RegistrationDetailedFragment;
+  registration: RegistrationDataImportDetail;
 }
 
 export const RerunDedupe = ({

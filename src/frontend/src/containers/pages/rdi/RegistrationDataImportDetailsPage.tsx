@@ -63,7 +63,7 @@ const RegistrationDataImportDetailsPage = (): ReactElement => {
   const { id } = useParams();
   const permissions = usePermissions();
   const { selectedProgram } = useProgramContext();
-  const { businessArea, programSlug } = useBaseUrl();
+  const { businessArea } = useBaseUrl();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const refetchInterval = (result) => {
     if (
@@ -163,7 +163,6 @@ const RegistrationDataImportDetailsPage = (): ReactElement => {
       </Container>
     );
   }
-
   return (
     <>
       <RegistrationDataImportDetailsPageHeader

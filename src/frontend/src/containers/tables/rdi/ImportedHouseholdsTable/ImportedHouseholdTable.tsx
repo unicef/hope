@@ -11,6 +11,7 @@ import { ImportedHouseholdTableRow } from './ImportedHouseholdTableRow';
 import { headCells as mergedHeadCells } from './MergedHouseholdTableHeadCells';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { UniversalRestQueryTable } from '@components/rest/UniversalRestQueryTable/UniversalRestQueryTable';
 
 function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
   const { selectedProgram } = useProgramContext();
@@ -30,24 +31,14 @@ function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: [
-      'businessAreasProgramsHouseholdsList',
-      queryVariables,
-      programId,
-    ],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsHouseholdsList(queryVariables),
-    enabled: !!businessArea && !!programId,
-  });
 
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const mergedReplacements = {
-    id: (_beneficiaryGroup) => `${_beneficiaryGroup?.member_label} ID`,
+    id: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
     head_of_household__full_name: (_beneficiaryGroup) =>
-      `Head of ${_beneficiaryGroup?.group_label}`,
-    size: (_beneficiaryGroup) => `${_beneficiaryGroup?.group_label} Size`,
+      `Head of ${_beneficiaryGroup?.groupLabel}`,
+    size: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} Size`,
   };
 
   const adjustedMergedHeadCells = adjustHeadCells(
@@ -57,10 +48,10 @@ function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
   );
 
   const importedReplacements = {
-    id: (_beneficiaryGroup) => `${_beneficiaryGroup?.group_label} ID`,
+    id: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} ID`,
     head_of_household__full_name: (_beneficiaryGroup) =>
-      `Head of ${_beneficiaryGroup?.group_label}`,
-    size: (_beneficiaryGroup) => `${_beneficiaryGroup?.group_label} Size`,
+      `Head of ${_beneficiaryGroup?.groupLabel}`,
+    size: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} Size`,
   };
 
   const adjustedImportedHeadCells = adjustHeadCells(
@@ -70,7 +61,7 @@ function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
   );
   if (isMerged) {
     return (
-      <UniversalRestTable
+      <UniversalRestQueryTable
         renderRow={(row) => (
           <ImportedHouseholdTableRow
             rdi={rdi}
@@ -78,17 +69,15 @@ function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
             household={row}
           />
         )}
+        query={RestService.restBusinessAreasProgramsHouseholdsList}
         headCells={adjustedMergedHeadCells}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
-        data={data}
-        isLoading={isLoading}
-        error={error}
       />
     );
   }
   return (
-    <UniversalRestTable
+    <UniversalRestQueryTable
       renderRow={(row) => (
         <ImportedHouseholdTableRow
           rdi={rdi}
@@ -99,9 +88,7 @@ function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
       headCells={adjustedImportedHeadCells}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
-      data={data}
-      isLoading={isLoading}
-      error={error}
+      query={RestService.restBusinessAreasProgramsHouseholdsList}
     />
   );
 }

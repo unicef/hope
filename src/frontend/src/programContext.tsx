@@ -31,13 +31,13 @@ export function ProgramProvider({
     useState<ProgramContextType>(null);
   let isActiveProgram = selectedProgram?.status === Status791Enum.ACTIVE;
   const isSocialDctType =
-    selectedProgram?.data_collecting_type?.type?.toUpperCase() ===
+    selectedProgram?.dataCollectingType?.type?.toUpperCase() ===
     DataCollectingTypeType.Social;
   const isStandardDctType =
-    selectedProgram?.data_collecting_type?.type?.toUpperCase() ===
+    selectedProgram?.dataCollectingType?.type?.toUpperCase() ===
     DataCollectingTypeType.Standard;
 
-  const programHasPdu = selectedProgram?.pdu_fields?.length > 0;
+  const programHasPdu = selectedProgram?.pduFields?.length > 0;
 
   // Set isActiveProgram to true if All Programs is selected
   if (selectedProgram === null) {

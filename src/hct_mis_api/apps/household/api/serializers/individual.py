@@ -1,6 +1,7 @@
 from typing import Dict
 
 from rest_framework import serializers
+from rest_framework.fields import SerializerMethodField
 
 from hct_mis_api.apps.account.api.fields import Base64ModelField
 from hct_mis_api.apps.account.permissions import Permissions
@@ -148,19 +149,17 @@ class LinkedGrievanceTicketSerializer(serializers.ModelSerializer):
 class IndividualListSerializer(serializers.ModelSerializer):
     id = Base64ModelField(model_name="Individual")
     household = HouseholdSimpleSerializer()
+    role = SerializerMethodField()
 
     class Meta:
         model = Individual
-        fields = (
-            "id",
-            "unicef_id",
-            "full_name",
-            "household",
-            "status",
-            "relationship",
-            "age",
-            "sex",
-        )
+        fields = ("id", "unicef_id", "full_name", "household", "status", "relationship", "age", "sex", "role")
+
+    def get_role(self, obj: Individual) -> str:
+        role = obj.households_and_roles(manager="all_objects").filter(household=obj.household).first()
+        if role:
+            return role.get_role_display()
+        return "-"
 
 
 class IndividualDetailSerializer(serializers.ModelSerializer):

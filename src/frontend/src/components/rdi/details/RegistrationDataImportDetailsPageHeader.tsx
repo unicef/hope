@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import {
-  RegistrationDataImportStatus,
   RegistrationDetailedFragment,
   useEraseRdiMutation,
   useRefuseRdiMutation,
@@ -20,9 +19,13 @@ import { RerunDedupe } from './RerunDedupe';
 import { RefuseRdiForm } from './refuseRdiForm';
 import { AdminButton } from '@core/AdminButton';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { RegistrationDataImportStatusEnum } from '@restgenerated/models/RegistrationDataImportStatusEnum';
+import { RegistrationDataImportDetail } from '@restgenerated/models/RegistrationDataImportDetail';
+import { useHopeDetailsQuery } from '@hooks/useActionMutation';
+import { RestService } from '@restgenerated/services/RestService';
 
 export interface RegistrationDataImportDetailsPageHeaderPropTypes {
-  registration: RegistrationDetailedFragment;
+  registration: RegistrationDataImportDetail;
   canMerge: boolean;
   canRerunDedupe: boolean;
   canViewList: boolean;
@@ -46,7 +49,11 @@ const RegistrationDataImportDetailsPageHeader = ({
   const navigate = useNavigate();
   const { isActiveProgram } = useProgramContext();
   const [refuseMutate, { loading: refuseLoading }] = useRefuseRdiMutation();
-  const [eraseRdiMutate, { loading: eraseLoading }] = useEraseRdiMutation();
+  const { mutateAsync:eraseRdiMutate, isPending:eraseLoading } = useHopeDetailsQuery(
+    registration.id,
+    RestService.restBusinessAreasProgramsRegistrationDataImportsEraseCreate,
+    [RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve.name],
+  );
   const [showRefuseRdiForm, setShowRefuseRdiForm] = useState(false);
 
   let buttons = null;
@@ -61,9 +68,7 @@ const RegistrationDataImportDetailsPageHeader = ({
             'Are you sure you want to erase RDI? Erasing RDI causes deletion of all related datahub RDI data',
           ),
         }).then(async () => {
-          await eraseRdiMutate({
-            variables: { id: registration.id },
-          });
+          await eraseRdiMutate();
         })
       }
       variant="contained"
@@ -76,11 +81,11 @@ const RegistrationDataImportDetailsPageHeader = ({
   );
   // eslint-disable-next-line default-case
   switch (registration?.status) {
-    case RegistrationDataImportStatus.ImportError:
-    case RegistrationDataImportStatus.MergeError:
+    case RegistrationDataImportStatusEnum.IMPORT_ERROR:
+    case RegistrationDataImportStatusEnum.MERGE_ERROR:
       buttons = <div>{canRefuse && eraseButton}</div>;
       break;
-    case RegistrationDataImportStatus.InReview:
+    case RegistrationDataImportStatusEnum.IN_REVIEW:
       buttons = (
         <div>
           {canMerge && canRefuse && (
@@ -103,7 +108,7 @@ const RegistrationDataImportDetailsPageHeader = ({
         </div>
       );
       break;
-    case RegistrationDataImportStatus.DeduplicationFailed:
+    case RegistrationDataImportStatusEnum.DEDUPLICATION_FAILED:
       buttons = (
         <div>
           {canRefuse && eraseButton}
@@ -115,7 +120,7 @@ const RegistrationDataImportDetailsPageHeader = ({
         </div>
       );
       break;
-    case RegistrationDataImportStatus.Merged:
+    case RegistrationDataImportStatusEnum.MERGED:
       buttons = (
         <MergeButtonContainer>
           <Button

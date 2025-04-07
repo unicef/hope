@@ -49,5 +49,6 @@ export type IndividualList = {
      * * `NOT_ANSWERED` - Not answered
      */
     sex: SexEnum;
+    readonly role: string;
 };
 

@@ -47,7 +47,6 @@ import type { PushPeople } from '../models/PushPeople';
 import type { RDI } from '../models/RDI';
 import type { RDINested } from '../models/RDINested';
 import type { RegistrationDataImportDetail } from '../models/RegistrationDataImportDetail';
-import type { RegistrationDataImportList } from '../models/RegistrationDataImportList';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
@@ -2448,6 +2447,60 @@ export class RestService {
     }
     /**
      * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsRegistrationDataImportsEraseCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Registration data import.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/{id}/erase/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsRegistrationDataImportsMergeCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Registration data import.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/{id}/merge/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -2469,18 +2522,16 @@ export class RestService {
     }
     /**
      * Adds a count action to the viewset that returns the count of the queryset.
-     * @returns RegistrationDataImportList
+     * @returns any No response body
      * @throws ApiError
      */
     public static restBusinessAreasProgramsRegistrationDataImportsRunDeduplicationCreate({
         businessAreaSlug,
         programSlug,
-        requestBody,
     }: {
         businessAreaSlug: string,
         programSlug: string,
-        requestBody: RegistrationDataImportList,
-    }): CancelablePromise<RegistrationDataImportList> {
+    }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/run-deduplication/',
@@ -2488,13 +2539,11 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,
             },
-            body: requestBody,
-            mediaType: 'application/json',
         });
     }
     /**
      * Adds a count action to the viewset that returns the count of the queryset.
-     * @returns RegistrationDataImportList
+     * @returns any No response body
      * @throws ApiError
      */
     public static restBusinessAreasProgramsRegistrationDataImportsWebhookdeduplicationRetrieve({
@@ -2503,7 +2552,7 @@ export class RestService {
     }: {
         businessAreaSlug: string,
         programSlug: string,
-    }): CancelablePromise<RegistrationDataImportList> {
+    }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/webhookdeduplication/',
