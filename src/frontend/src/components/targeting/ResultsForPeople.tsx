@@ -1,3 +1,8 @@
+import { Pointer } from '@components/core/Pointer';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { FieldBorder } from '@core/FieldBorder';
+import { LabelizedField } from '@core/LabelizedField';
+import { PaymentPlanBuildStatus } from '@generated/graphql';
 import {
   Button,
   Dialog,
@@ -9,17 +14,12 @@ import {
   ListItem,
   Typography,
 } from '@mui/material';
+import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { MiśTheme } from '../../theme';
-import { LabelizedField } from '@core/LabelizedField';
 import { PaperContainer } from './PaperContainer';
-import { FieldBorder } from '@core/FieldBorder';
-import { ReactElement, useState } from 'react';
-import { PaymentPlanBuildStatus } from '@generated/graphql';
-import withErrorBoundary from '@components/core/withErrorBoundary';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
-import { Pointer } from '@components/core/Pointer';
 
 const colors = {
   femaleChildren: '#5F02CF',
@@ -53,20 +53,20 @@ const SummaryValue = styled.div`
 `;
 
 interface ResultsProps {
-  targetPopulation: PaymentPlanDetail;
+  targetPopulation: TargetPopulationDetail;
 }
 
 function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
   const { t } = useTranslation();
   const [openDialog, setOpenDialog] = useState(false);
   const handleOpen = () => {
-    if (targetPopulation?.failed_wallet_validation_collectors_ids?.length > 0) {
+    if (targetPopulation?.failedWalletValidationCollectorsIds?.length > 0) {
       setOpenDialog(true);
     }
   };
   const handleClose = () => setOpenDialog(false);
 
-  if (targetPopulation.build_status !== PaymentPlanBuildStatus.Ok) {
+  if (targetPopulation.backgroundActionStatus !== PaymentPlanBuildStatus.Ok) {
     return null;
   }
 

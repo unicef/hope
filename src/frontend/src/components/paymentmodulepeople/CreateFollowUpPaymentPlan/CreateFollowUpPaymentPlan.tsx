@@ -49,7 +49,7 @@ export function CreateFollowUpPaymentPlan({
   const { isActiveProgram, selectedProgram } = useProgramContext();
   const { showMessage } = useSnackbar();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-  const { id, total_withdrawn_households_count, unsuccessful_payments_count } =
+  const { id, totalWithdrawnHouseholdsCount, unsuccessfulPaymentsCount } =
     paymentPlan;
 
   if (permissions === null) return null;
@@ -136,7 +136,7 @@ export function CreateFollowUpPaymentPlan({
               <DialogContainer>
                 <Box p={5}>
                   <Box display="flex" flexDirection="column">
-                    {unsuccessful_payments_count === 0 && (
+                    {unsuccessfulPaymentsCount === 0 && (
                       <Box mb={2}>
                         <FieldBorder color="#FF0200">
                           <GreyText>
@@ -147,7 +147,7 @@ export function CreateFollowUpPaymentPlan({
                         </FieldBorder>
                       </Box>
                     )}
-                    {total_withdrawn_households_count > 0 && (
+                    {totalWithdrawnHouseholdsCount > 0 && (
                       <Box mb={4}>
                         <FieldBorder color="#FF0200">
                           <GreyText>
@@ -176,7 +176,7 @@ export function CreateFollowUpPaymentPlan({
                     </Grid> */}
                     <Grid size={{ xs: 6 }}>
                       <LabelizedField label={t('Unsuccessful payments')}>
-                        {unsuccessful_payments_count}
+                        {unsuccessfulPaymentsCount}
                       </LabelizedField>
                     </Grid>
                     {/* <Grid size={{xs:6}}>
@@ -193,7 +193,7 @@ export function CreateFollowUpPaymentPlan({
                         )}
                       >
                         {' '}
-                        {total_withdrawn_households_count}
+                        {totalWithdrawnHouseholdsCount}
                       </LabelizedField>
                     </Grid>
                   </Grid>

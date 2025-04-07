@@ -6,6 +6,7 @@ import { useCashAssistUrlPrefixQuery } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 
 const IconContainer = styled.span`
   button {
@@ -19,7 +20,7 @@ const IconContainer = styled.span`
 `;
 
 export interface FinalizedTargetPopulationHeaderButtonsPropTypes {
-  targetPopulation: PaymentPlanDetail;
+  targetPopulation: TargetPopulationDetail;
   canDuplicate: boolean;
 }
 

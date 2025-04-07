@@ -14,7 +14,7 @@ interface ResultsForHouseholdsProps {
 export const ResultsForHouseholds = ({
   paymentPlan,
 }: ResultsForHouseholdsProps) => {
-  const { total_households_count, totalIndividualsCount } = paymentPlan;
+  const { totalHouseholdsCount, totalIndividualsCount } = paymentPlan;
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   return (
@@ -25,7 +25,7 @@ export const ResultsForHouseholds = ({
             <LabelizedField
               label={`Total Number of ${beneficiaryGroup?.groupLabelPlural}`}
             >
-              <SummaryValue>{total_households_count || '0'}</SummaryValue>
+              <SummaryValue>{totalHouseholdsCount || '0'}</SummaryValue>
             </LabelizedField>
           </SummaryBorder>
         </Grid>

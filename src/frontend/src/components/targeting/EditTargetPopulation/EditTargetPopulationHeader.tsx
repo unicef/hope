@@ -6,13 +6,13 @@ import { LoadingButton } from '@core/LoadingButton';
 import { PageHeader } from '@core/PageHeader';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 
 interface EditTargetPopulationProps {
   handleSubmit: () => Promise<void>;
   values;
   baseUrl: string;
-  targetPopulation: PaymentPlanDetail;
+  targetPopulation: TargetPopulationDetail;
   loading: boolean;
 }
 

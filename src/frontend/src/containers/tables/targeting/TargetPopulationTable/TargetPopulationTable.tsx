@@ -1,16 +1,16 @@
-import { ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { TableWrapper } from '@components/core/TableWrapper';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { adjustHeadCells, dateToIsoString } from '@utils/utils';
-import { headCells } from './TargetPopulationTableHeadCells';
-import { TargetPopulationTableRow } from './TargetPopulationTableRow';
-import { useProgramContext } from 'src/programContext';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { adjustHeadCells, dateToIsoString } from '@utils/utils';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useProgramContext } from 'src/programContext';
+import styled from 'styled-components';
+import { headCells } from './TargetPopulationTableHeadCells';
+import { TargetPopulationTableRow } from './TargetPopulationTableRow';
 
 interface TargetPopulationProps {
   filter;
@@ -106,7 +106,7 @@ export function TargetPopulationTable({
         data={targetPopulationsData}
         isLoading={isLoading}
         error={error}
-        renderRow={(row: PaymentPlanDetail) => (
+        renderRow={(row: TargetPopulationDetail) => (
           <TargetPopulationTableRow
             radioChangeHandler={enableRadioButton && handleRadioChange}
             selectedTargetPopulation={selectedTargetPopulation}

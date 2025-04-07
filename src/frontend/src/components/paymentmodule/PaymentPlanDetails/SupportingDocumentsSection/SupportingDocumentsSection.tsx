@@ -69,7 +69,7 @@ export const SupportingDocumentsSection = ({
 
   const { businessArea, programId } = useBaseUrl();
   const [documents, setDocuments] = useState(
-    paymentPlan?.supporting_documents || [],
+    paymentPlan?.supportingDocuments || [],
   );
   const [fileToImport, setFileToImport] = useState<File | null>(null);
   const [title, setTitle] = useState('');
@@ -125,7 +125,7 @@ export const SupportingDocumentsSection = ({
         setOpenImport(false);
         setDocuments([
           ...documents,
-          { id: doc.id, title: doc.title, file: doc.file, uploaded_at: null },
+          { id: doc.id, title: doc.title, file: doc.file, uploadedAt: null },
         ]);
       },
       onError: (err: Error) => {

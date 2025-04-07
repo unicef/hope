@@ -8,13 +8,13 @@ import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { FileCopy } from '@mui/icons-material';
 import { Box, Button, Tooltip } from '@mui/material';
+import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useProgramContext } from '../../../programContext';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { FinalizeTargetPopulationPaymentPlan } from '../../dialogs/targetPopulation/FinalizeTargetPopulationPaymentPlan';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const IconContainer = styled.span`
   button {
@@ -28,7 +28,7 @@ const IconContainer = styled.span`
 `;
 
 export interface ApprovedTargetPopulationHeaderButtonsPropTypes {
-  targetPopulation: PaymentPlanDetail;
+  targetPopulation: TargetPopulationDetail;
   canUnlock: boolean;
   canDuplicate: boolean;
   canSend: boolean;

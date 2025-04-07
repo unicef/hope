@@ -35,7 +35,7 @@ const EditTargetPopulation = ({
 }: EditTargetPopulationProps): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const targetingCriteriaCopy: TargetingCriteriaRuleNodeExtended[] =
+  const targetingCriteriaCopy =
     paymentPlan.targetingCriteria?.rules.map((rule) => ({ ...rule })) || [];
 
   if (targetingCriteriaCopy.length > 0) {

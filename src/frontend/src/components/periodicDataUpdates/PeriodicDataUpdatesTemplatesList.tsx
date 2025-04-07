@@ -172,7 +172,7 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
     <ClickableTableRow key={row.id} data-cy={`template-row-${row.id}`}>
       <TableCell data-cy={`template-id-${row.id}`}>{row.id}</TableCell>
       <TableCell data-cy={`template-records-${row.id}`} align="right">
-        {row.number_of_records}
+        {row.numberOfRecords}
       </TableCell>
       <TableCell data-cy={`template-created-at-${row.id}`}>
         <UniversalMoment>{row.createdAt}</UniversalMoment>
@@ -195,7 +195,7 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
         {row.status === 'EXPORTED' ? (
           <Tooltip
             title={
-              row?.number_of_records === 0
+              row?.numberOfRecords === 0
                 ? t('There are no records available')
                 : ''
             }
@@ -208,14 +208,14 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
                 startIcon={<GetAppIcon />}
                 data-cy={`download-btn-${row.id}`}
                 disabled={
-                  row?.number_of_records === 0 || !canExportOrDownloadTemplate
+                  row?.numberOfRecords === 0 || !canExportOrDownloadTemplate
                 }
               >
                 Download
               </ButtonTooltip>
             </span>
           </Tooltip>
-        ) : row.can_export ? (
+        ) : row.canExport ? (
           <ButtonTooltip
             variant="contained"
             color="primary"

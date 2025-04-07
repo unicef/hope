@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 
 interface AddNewProgramCycleProps {
   program: ProgramDetail;
-  lastProgramCycle?: ProgramCycle;
+  lastProgramCycle?: ProgramCycleDetail;
 }
 
 const AddNewProgramCycle = ({

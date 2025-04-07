@@ -70,24 +70,24 @@ export function HouseholdCompositionTable({
           <TableRow>
             <TableCell align="left">6 - 11</TableCell>
             <GreyTableCell align="left">
-              {household?.female_age_group_6_11_count}
+              {household?.femaleAgeGroup611Count}
             </GreyTableCell>
             <GreyTableCell align="left">
-              {household?.female_age_group_6_11_disabled_count}
+              {household?.femaleAgeGroup611DisabledCount}
             </GreyTableCell>
             <GreyTableCell align="left">-</GreyTableCell>
             <TableCell align="left" />
             <GreyTableCell align="left">
-              {household?.male_age_group_6_11_count}
+              {household?.maleAgeGroup611Count}
             </GreyTableCell>
             <GreyTableCell align="left">
-              {household?.male_age_group_6_11_disabled_count}
+              {household?.maleAgeGroup611DisabledCount}
             </GreyTableCell>
           </TableRow>
           <TableRow>
             <TableCell align="left">12 - 17</TableCell>
             <GreyTableCell align="left">
-              {household?.female_age_group_12_17_count}
+              {household?.femaleAgeGroup1217Count}
             </GreyTableCell>
             <GreyTableCell align="left">
               {household?.female_age_group_12_17_disabled_count}

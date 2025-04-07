@@ -157,20 +157,20 @@ export const GlobalProgramSelect = () => {
   useEffect(() => {
     // Initial setup for selectedProgram
     setSelectedProgram({
-      beneficiary_group: {
+      beneficiaryGroup: {
         id: 'default-id',
         name: 'Beneficiaries',
-        group_label: 'Group',
-        group_label_plural: 'Groups',
-        member_label: 'Member',
-        member_label_plural: 'Members',
-        master_detail: false,
+        groupLabel: 'Group',
+        groupLabelPlural: 'Groups',
+        memberLabel: 'Member',
+        memberLabelPlural: 'Members',
+        masterDetail: false,
       },
       id: 'all',
       name: 'All Programmes',
       status: Status791Enum.ACTIVE,
-      data_collecting_type: null,
-      pdu_fields: null,
+      dataCollectingType: null,
+      pduFields: null,
       programme_code: null,
       slug: null,
     });
@@ -188,10 +188,10 @@ export const GlobalProgramSelect = () => {
           id,
           name,
           status,
-          data_collecting_type,
-          pdu_fields,
-          beneficiary_group,
-          programme_code,
+          dataCollectingType,
+          pduFields,
+          beneficiaryGroup,
+          programmeCode,
           slug,
         } = program;
 
@@ -199,10 +199,10 @@ export const GlobalProgramSelect = () => {
           id,
           name,
           status,
-          data_collecting_type,
-          pdu_fields,
-          beneficiary_group,
-          programme_code,
+          dataCollectingType,
+          pduFields,
+          beneficiaryGroup,
+          programmeCode,
           slug,
         });
       }
@@ -262,21 +262,21 @@ export const GlobalProgramSelect = () => {
       handleClose();
       if (selectedValue.id === 'all') {
         setSelectedProgram({
-          beneficiary_group: {
+          beneficiaryGroup: {
             id: 'default-id',
             name: 'Beneficiaries',
-            group_label: 'Group',
-            group_label_plural: 'Groups',
-            member_label: 'Member',
-            member_label_plural: 'Members',
-            master_detail: false,
+            groupLabel: 'Group',
+            groupLabelPlural: 'Groups',
+            memberLabel: 'Member',
+            memberLabelPlural: 'Members',
+            masterDetail: false,
           },
           id: 'all',
           name: 'All Programmes',
           status: Status791Enum.ACTIVE,
-          data_collecting_type: null,
-          pdu_fields: null,
-          programme_code: null,
+          dataCollectingType: null,
+          pduFields: null,
+          programmeCode: null,
           slug: null,
         });
         navigate(`/${businessArea}/programs/all/list`);

@@ -85,21 +85,21 @@ export const PaymentPlanTableRow = ({
       </TableCell>
       <TableCell align="right">
         {`${formatCurrencyWithSymbol(
-          Number(plan.total_delivered_quantity),
+          Number(plan.totalDeliveredQuantity),
           plan.currency,
         )}`}
       </TableCell>
       <TableCell align="right">
         {`${formatCurrencyWithSymbol(
-          Number(plan.total_undelivered_quantity),
+          Number(plan.totalUndeliveredQuantity),
           plan.currency,
         )}`}
       </TableCell>
       <TableCell align="left">
-        <UniversalMoment>{plan.dispersion_startDate}</UniversalMoment>
+        <UniversalMoment>{plan.dispersionStartDate}</UniversalMoment>
       </TableCell>
       <TableCell align="left">
-        <UniversalMoment>{plan.dispersion_end_date}</UniversalMoment>
+        <UniversalMoment>{plan.dispersionEndDate}</UniversalMoment>
       </TableCell>
       <TableCell align="left">{followUpLinks()}</TableCell>
     </ClickableTableRow>

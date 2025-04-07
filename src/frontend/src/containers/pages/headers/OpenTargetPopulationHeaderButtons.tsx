@@ -1,25 +1,25 @@
-import { ReactElement, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Box, Button, IconButton } from '@mui/material';
+import { Action } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
-  EditRounded,
   Delete,
+  EditRounded,
   FileCopy,
   RefreshRounded,
 } from '@mui/icons-material';
-import { Action } from '@generated/graphql';
+import { Box, Button, IconButton } from '@mui/material';
+import { t } from 'i18next';
+import { ReactElement, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useProgramContext } from '../../../programContext';
 import { DeleteTargetPopulation } from '../../dialogs/targetPopulation/DeleteTargetPopulation';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { LockTargetPopulationDialog } from '../../dialogs/targetPopulation/LockTargetPopulationDialog';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useProgramContext } from '../../../programContext';
-import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
-import { t } from 'i18next';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 
 export interface InProgressTargetPopulationHeaderButtonsPropTypes {
-  targetPopulation: PaymentPlanDetail;
+  targetPopulation: TargetPopulationDetail;
   canDuplicate: boolean;
   canRemove: boolean;
   canEdit: boolean;

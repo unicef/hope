@@ -2,7 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type PaymentPlanImportEntitlement = {
-    file: string;
+export type PaymentPlanCreateFollowUp = {
+    dispersionStartDate: string;
+    dispersionEndDate: string;
 };
 

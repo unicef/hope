@@ -328,7 +328,7 @@ export const TargetingCriteriaForm = ({
       <Formik
         initialValues={initialValue}
         onSubmit={handleSubmit}
-        validate={(values) => validate(values, beneficiary_group)}
+        validate={(values) => validate(values, beneficiaryGroup)}
         validationSchema={validationSchema}
         enableReinitialize
       >
