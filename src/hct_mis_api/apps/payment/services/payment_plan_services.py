@@ -56,6 +56,9 @@ from hct_mis_api.apps.targeting.validators import TargetingCriteriaInputValidato
 if TYPE_CHECKING:  # pragma: no cover
     from uuid import UUID
 
+    from django.contrib.auth.base_user import AbstractBaseUser
+    from django.contrib.auth.models import AnonymousUser
+
     from hct_mis_api.apps.account.models import AbstractUser, User
 
 
@@ -656,7 +659,7 @@ class PaymentPlanService:
         self.payment_plan.refresh_from_db(fields=["background_action_status", "export_file_per_fsp"])
         return self.payment_plan
 
-    def import_xlsx_per_fsp(self, user: "User", file: IO) -> PaymentPlan:
+    def import_xlsx_per_fsp(self, user: Union["User", "AbstractBaseUser", "AnonymousUser"], file: IO) -> PaymentPlan:
         with transaction.atomic():
             self.payment_plan.background_action_status_xlsx_importing_reconciliation()
             self.payment_plan.save()
@@ -704,7 +707,10 @@ class PaymentPlanService:
 
     @transaction.atomic
     def create_follow_up(
-        self, user: "User", dispersion_start_date: datetime.date, dispersion_end_date: datetime.date
+        self,
+        user: Union["User", "AbstractBaseUser", "AnonymousUser"],
+        dispersion_start_date: datetime.date,
+        dispersion_end_date: datetime.date,
     ) -> PaymentPlan:
         source_pp = self.payment_plan
 

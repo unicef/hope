@@ -109,7 +109,21 @@ class XlsxErrorSerializer(serializers.Serializer):
         return parent.message
 
 
-class PaymentPlanImportEntitlementSerializer(serializers.Serializer):
+class AcceptanceProcessSerializer(serializers.Serializer):
+    action = serializers.ChoiceField(required=True, choices=PaymentPlan.Action)
+    comment = serializers.CharField(required=False)
+
+
+class PaymentPlanExportAuthCodeSerializer(serializers.Serializer):
+    fsp_xlsx_template_id = serializers.CharField(required=True)
+
+
+class SplitPaymentPlanSerializer(serializers.Serializer):
+    split_type = serializers.ChoiceField(required=True, choices=PaymentPlanSplit.SplitType)
+    payments_no = serializers.IntegerField(required=False)
+
+
+class PaymentPlanImportFileSerializer(serializers.Serializer):
     file = serializers.FileField(use_url=False, required=True)
 
 
@@ -431,6 +445,11 @@ class PaymentPlanCreateUpdateSerializer(serializers.Serializer):
         if payment_plan and value:
             check_concurrency_version_in_mutation(value, payment_plan)
         return value
+
+
+class PaymentPlanCreateFollowUpSerializer(serializers.Serializer):
+    dispersion_start_date = serializers.DateField(required=True)
+    dispersion_end_date = serializers.DateField(required=True)
 
 
 class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerializer):
