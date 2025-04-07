@@ -6,7 +6,7 @@ import type { CommunicationChannelEnum } from './CommunicationChannelEnum';
 export type FinancialServiceProvider = {
     readonly id: string;
     name: string;
-    communication_channel: CommunicationChannelEnum;
-    is_payment_gateway: boolean;
+    communicationChannel: CommunicationChannelEnum;
+    isPaymentGateway: boolean;
 };
 

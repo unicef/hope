@@ -3,16 +3,16 @@
 /* tslint:disable */
 /* eslint-disable */
 export type ApprovalProcess = {
-    readonly sent_for_approval_by: string;
-    readonly sent_for_authorization_by: string;
-    readonly sent_for_finance_release_by: string;
-    sent_for_approval_date?: string | null;
-    sent_for_authorization_date?: string | null;
-    sent_for_finance_release_date?: string | null;
-    approval_number_required?: number;
-    authorization_number_required?: number;
-    finance_release_number_required?: number;
-    readonly rejected_on: string | null;
+    readonly sentForApprovalBy: string;
+    readonly sentForAuthorizationBy: string;
+    readonly sentForFinanceReleaseBy: string;
+    sentForApprovalDate?: string | null;
+    sentForAuthorizationDate?: string | null;
+    sentForFinanceReleaseDate?: string | null;
+    approvalNumberRequired?: number;
+    authorizationNumberRequired?: number;
+    financeReleaseNumberRequired?: number;
+    readonly rejectedOn: string | null;
     readonly actions: Record<string, any>;
 };
 

@@ -46,16 +46,10 @@ export type PaymentPlan = {
     isFollowUp?: boolean;
     readonly followUps: Array<FollowUpPaymentPlan>;
     program: string;
-<<<<<<< HEAD
-    program_id: string;
-    program_cycle_id: string;
-    readonly last_approval_process_date: string | null;
-    readonly last_approval_process_by: string | null;
-    readonly admin_url: string;
-=======
     programId: string;
+    programCycleId: string;
     readonly lastApprovalProcessDate: string | null;
     readonly lastApprovalProcessBy: string | null;
->>>>>>> long-term/rest-api-refactor
+    readonly adminUrl: string;
 };
 

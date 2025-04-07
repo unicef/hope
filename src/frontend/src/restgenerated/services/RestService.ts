@@ -30,12 +30,20 @@ import type { PaginatedProgramListList } from '../models/PaginatedProgramListLis
 import type { PaginatedProjectList } from '../models/PaginatedProjectList';
 import type { PaginatedRegistrationDataImportListList } from '../models/PaginatedRegistrationDataImportListList';
 import type { PaginatedRegistrationList } from '../models/PaginatedRegistrationList';
+import type { PaginatedRuleList } from '../models/PaginatedRuleList';
+import type { PaginatedTargetPopulationListList } from '../models/PaginatedTargetPopulationListList';
 import type { PaginatedTPHouseholdListList } from '../models/PaginatedTPHouseholdListList';
+import type { PatchedPaymentPlanCreateUpdate } from '../models/PatchedPaymentPlanCreateUpdate';
 import type { PatchedProgramCycleUpdate } from '../models/PatchedProgramCycleUpdate';
 import type { PatchedRDI } from '../models/PatchedRDI';
+import type { PatchedTargetPopulationCreate } from '../models/PatchedTargetPopulationCreate';
 import type { PaymentDetail } from '../models/PaymentDetail';
+import type { PaymentPlan } from '../models/PaymentPlan';
 import type { PaymentPlanBulkAction } from '../models/PaymentPlanBulkAction';
+import type { PaymentPlanCreateUpdate } from '../models/PaymentPlanCreateUpdate';
 import type { PaymentPlanDetail } from '../models/PaymentPlanDetail';
+import type { PaymentPlanExcludeBeneficiaries } from '../models/PaymentPlanExcludeBeneficiaries';
+import type { PaymentPlanImportEntitlement } from '../models/PaymentPlanImportEntitlement';
 import type { PaymentPlanSupportingDocument } from '../models/PaymentPlanSupportingDocument';
 import type { PeriodicDataUpdateTemplateCreate } from '../models/PeriodicDataUpdateTemplateCreate';
 import type { PeriodicDataUpdateTemplateDetail } from '../models/PeriodicDataUpdateTemplateDetail';
@@ -52,6 +60,9 @@ import type { RDI } from '../models/RDI';
 import type { RDINested } from '../models/RDINested';
 import type { RegistrationDataImportDetail } from '../models/RegistrationDataImportDetail';
 import type { RegistrationDataImportList } from '../models/RegistrationDataImportList';
+import type { TargetPopulationApplyEngineFormula } from '../models/TargetPopulationApplyEngineFormula';
+import type { TargetPopulationCopy } from '../models/TargetPopulationCopy';
+import type { TargetPopulationCreate } from '../models/TargetPopulationCreate';
 import type { TargetPopulationDetail } from '../models/TargetPopulationDetail';
 import type { TPHouseholdList } from '../models/TPHouseholdList';
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -1746,34 +1757,6 @@ export class RestService {
         });
     }
     /**
-<<<<<<< HEAD
-     * Adds a count action to the viewset that returns the count of the queryset.
-     * @returns PaginatedPaymentPlanListList
-     * @throws ApiError
-     */
-    public static restBusinessAreasProgramsPaymentPlansList({
-        businessAreaSlug,
-        programSlug,
-        dispersionEndDateLte,
-        dispersionStartDateGte,
-        isFollowUp,
-        limit,
-        name,
-        offset,
-        ordering,
-        program,
-        programCycle,
-        search,
-        status,
-        totalEntitledQuantityGte,
-        totalEntitledQuantityLte,
-    }: {
-        businessAreaSlug: string,
-        programSlug: string,
-        dispersionEndDateLte?: string,
-        dispersionStartDateGte?: string,
-        isFollowUp?: boolean,
-=======
      * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
      * @returns PaginatedIndividualListList
      * @throws ApiError
@@ -1831,22 +1814,15 @@ export class RestService {
         isActiveProgram?: boolean,
         lastRegistrationDateAfter?: string,
         lastRegistrationDateBefore?: string,
->>>>>>> long-term/rest-api-refactor
         /**
          * Number of results to return per page.
          */
         limit?: number,
-<<<<<<< HEAD
-        name?: string,
-=======
->>>>>>> long-term/rest-api-refactor
         /**
          * The initial index from which to return the results.
          */
         offset?: number,
         /**
-<<<<<<< HEAD
-=======
          * Ordering
          *
          * * `id` - Id
@@ -1874,12 +1850,161 @@ export class RestService {
          */
         orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__admin_area__name' | '-household__id' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__admin_area__name' | 'household__id' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
         /**
->>>>>>> long-term/rest-api-refactor
          * Which field to use when ordering the results.
          */
         ordering?: string,
         program?: string,
-<<<<<<< HEAD
+        rdiId?: string,
+        /**
+         * * `PENDING` - Pending
+         * * `MERGED` - Merged
+         */
+        rdiMergeStatus?: 'MERGED' | 'PENDING',
+        search?: any,
+        /**
+         * Beneficiary gender
+         *
+         * * `MALE` - Male
+         * * `FEMALE` - Female
+         * * `OTHER` - Other
+         * * `NOT_COLLECTED` - Not collected
+         * * `NOT_ANSWERED` - Not answered
+         */
+        sex?: Array<'FEMALE' | 'MALE' | 'NOT_ANSWERED' | 'NOT_COLLECTED' | 'OTHER'>,
+        /**
+         * * `ACTIVE` - Active
+         * * `DUPLICATE` - Duplicate
+         * * `WITHDRAWN` - Withdrawn
+         */
+        status?: Array<'ACTIVE' | 'DUPLICATE' | 'WITHDRAWN'>,
+        withdrawn?: boolean,
+    }): CancelablePromise<PaginatedIndividualListList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/individuals/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            query: {
+                'admin1': admin1,
+                'admin2': admin2,
+                'age_max': ageMax,
+                'age_min': ageMin,
+                'document_number': documentNumber,
+                'document_type': documentType,
+                'duplicates_only': duplicatesOnly,
+                'excluded_id': excludedId,
+                'flags': flags,
+                'full_name': fullName,
+                'household__admin_area': householdAdminArea,
+                'household__id': householdId,
+                'is_active_program': isActiveProgram,
+                'last_registration_date_after': lastRegistrationDateAfter,
+                'last_registration_date_before': lastRegistrationDateBefore,
+                'limit': limit,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'program': program,
+                'rdi_id': rdiId,
+                'rdi_merge_status': rdiMergeStatus,
+                'search': search,
+                'sex': sex,
+                'status': status,
+                'withdrawn': withdrawn,
+            },
+        });
+    }
+    /**
+     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
+     * @returns IndividualDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsIndividualsRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Individual.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<IndividualDetail> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/individuals/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsIndividualsCountRetrieve({
+        businessAreaSlug,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/individuals/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaginatedPaymentPlanListList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlansList({
+        businessAreaSlug,
+        programSlug,
+        dispersionEndDateLte,
+        dispersionStartDateGte,
+        isFollowUp,
+        limit,
+        name,
+        offset,
+        ordering,
+        program,
+        programCycle,
+        search,
+        status,
+        totalEntitledQuantityGte,
+        totalEntitledQuantityLte,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        dispersionEndDateLte?: string,
+        dispersionStartDateGte?: string,
+        isFollowUp?: boolean,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        name?: string,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        program?: string,
         programCycle?: string,
         /**
          * A search term.
@@ -1913,42 +2038,11 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/',
-=======
-        rdiId?: string,
-        /**
-         * * `PENDING` - Pending
-         * * `MERGED` - Merged
-         */
-        rdiMergeStatus?: 'MERGED' | 'PENDING',
-        search?: any,
-        /**
-         * Beneficiary gender
-         *
-         * * `MALE` - Male
-         * * `FEMALE` - Female
-         * * `OTHER` - Other
-         * * `NOT_COLLECTED` - Not collected
-         * * `NOT_ANSWERED` - Not answered
-         */
-        sex?: Array<'FEMALE' | 'MALE' | 'NOT_ANSWERED' | 'NOT_COLLECTED' | 'OTHER'>,
-        /**
-         * * `ACTIVE` - Active
-         * * `DUPLICATE` - Duplicate
-         * * `WITHDRAWN` - Withdrawn
-         */
-        status?: Array<'ACTIVE' | 'DUPLICATE' | 'WITHDRAWN'>,
-        withdrawn?: boolean,
-    }): CancelablePromise<PaginatedIndividualListList> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/individuals/',
->>>>>>> long-term/rest-api-refactor
             path: {
                 'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,
             },
             query: {
-<<<<<<< HEAD
                 'dispersion_end_date__lte': dispersionEndDateLte,
                 'dispersion_start_date__gte': dispersionStartDateGte,
                 'is_follow_up': isFollowUp,
@@ -1962,39 +2056,10 @@ export class RestService {
                 'status': status,
                 'total_entitled_quantity__gte': totalEntitledQuantityGte,
                 'total_entitled_quantity__lte': totalEntitledQuantityLte,
-=======
-                'admin1': admin1,
-                'admin2': admin2,
-                'age_max': ageMax,
-                'age_min': ageMin,
-                'document_number': documentNumber,
-                'document_type': documentType,
-                'duplicates_only': duplicatesOnly,
-                'excluded_id': excludedId,
-                'flags': flags,
-                'full_name': fullName,
-                'household__admin_area': householdAdminArea,
-                'household__id': householdId,
-                'is_active_program': isActiveProgram,
-                'last_registration_date_after': lastRegistrationDateAfter,
-                'last_registration_date_before': lastRegistrationDateBefore,
-                'limit': limit,
-                'offset': offset,
-                'order_by': orderBy,
-                'ordering': ordering,
-                'program': program,
-                'rdi_id': rdiId,
-                'rdi_merge_status': rdiMergeStatus,
-                'search': search,
-                'sex': sex,
-                'status': status,
-                'withdrawn': withdrawn,
->>>>>>> long-term/rest-api-refactor
             },
         });
     }
     /**
-<<<<<<< HEAD
      * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaginatedPaymentListList
      * @throws ApiError
@@ -2041,20 +2106,10 @@ export class RestService {
         businessAreaSlug,
         id,
         paymentPlanId,
-=======
-     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
-     * @returns IndividualDetail
-     * @throws ApiError
-     */
-    public static restBusinessAreasProgramsIndividualsRetrieve({
-        businessAreaSlug,
-        id,
->>>>>>> long-term/rest-api-refactor
         programSlug,
     }: {
         businessAreaSlug: string,
         /**
-<<<<<<< HEAD
          * A UUID string identifying this payment.
          */
         id: string,
@@ -2068,25 +2123,11 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
                 'payment_plan_id': paymentPlanId,
-=======
-         * A UUID string identifying this Individual.
-         */
-        id: string,
-        programSlug: string,
-    }): CancelablePromise<IndividualDetail> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/individuals/{id}/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'id': id,
->>>>>>> long-term/rest-api-refactor
                 'program_slug': programSlug,
             },
         });
     }
     /**
-<<<<<<< HEAD
      * Adds a count action to the viewset that returns the count of the queryset.
      * @returns CountResponse
      * @throws ApiError
@@ -2098,31 +2139,14 @@ export class RestService {
     }: {
         businessAreaSlug: string,
         paymentPlanId: string,
-=======
-     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
-     * @returns CountResponse
-     * @throws ApiError
-     */
-    public static restBusinessAreasProgramsIndividualsCountRetrieve({
-        businessAreaSlug,
-        programSlug,
-    }: {
-        businessAreaSlug: string,
->>>>>>> long-term/rest-api-refactor
         programSlug: string,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-<<<<<<< HEAD
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_id}/payments/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'payment_plan_id': paymentPlanId,
-=======
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/individuals/count/',
-            path: {
-                'business_area_slug': businessAreaSlug,
->>>>>>> long-term/rest-api-refactor
                 'program_slug': programSlug,
             },
         });
@@ -2226,6 +2250,323 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaymentPlanCreateUpdate
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlansPartialUpdate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+        requestBody?: PatchedPaymentPlanCreateUpdate,
+    }): CancelablePromise<PaymentPlanCreateUpdate> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns void
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlansDestroy({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<void> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns TargetPopulationApplyEngineFormula
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlansApplyEngineFormulaCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+        requestBody: TargetPopulationApplyEngineFormula,
+    }): CancelablePromise<TargetPopulationApplyEngineFormula> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/apply_engine_formula/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaymentPlan
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlansEntitlementExportXlsxRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<PaymentPlan> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/entitlement_export_xlsx/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaymentPlanImportEntitlement
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlansEntitlementImportXlsxCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+        requestBody: PaymentPlanImportEntitlement,
+    }): CancelablePromise<PaymentPlanImportEntitlement> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/entitlement_import_xlsx/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaymentPlanExcludeBeneficiaries
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlansExcludeBeneficiariesCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+        requestBody: PaymentPlanExcludeBeneficiaries,
+    }): CancelablePromise<PaymentPlanExcludeBeneficiaries> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/exclude_beneficiaries/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaymentPlan
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlansLockRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<PaymentPlan> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/lock/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaymentPlan
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlansLockFspRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<PaymentPlan> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/lock_fsp/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaymentPlanCreateUpdate
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlansOpenCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+        requestBody: PaymentPlanCreateUpdate,
+    }): CancelablePromise<PaymentPlanCreateUpdate> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/open/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaymentPlan
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlansUnlockRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<PaymentPlan> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/unlock/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaymentPlan
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlansUnlockFspRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<PaymentPlan> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/unlock_fsp/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
@@ -2746,7 +3087,7 @@ export class RestService {
     }
     /**
      * Adds a count action to the viewset that returns the count of the queryset.
-     * @returns PaginatedPaymentPlanListList
+     * @returns PaginatedTargetPopulationListList
      * @throws ApiError
      */
     public static restBusinessAreasProgramsTargetPopulationsList({
@@ -2815,7 +3156,7 @@ export class RestService {
         totalHouseholdsCountLte?: number,
         totalIndividualsCountGte?: number,
         totalIndividualsCountLte?: number,
-    }): CancelablePromise<PaginatedPaymentPlanListList> {
+    }): CancelablePromise<PaginatedTargetPopulationListList> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/',
@@ -2843,6 +3184,31 @@ export class RestService {
     }
     /**
      * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns TargetPopulationCreate
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsTargetPopulationsCreate({
+        businessAreaSlug,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        requestBody: TargetPopulationCreate,
+    }): CancelablePromise<TargetPopulationCreate> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns TargetPopulationDetail
      * @throws ApiError
      */
@@ -2861,6 +3227,234 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns TargetPopulationCreate
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsTargetPopulationsPartialUpdate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+        requestBody?: PatchedTargetPopulationCreate,
+    }): CancelablePromise<TargetPopulationCreate> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns void
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsTargetPopulationsDestroy({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<void> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns TargetPopulationApplyEngineFormula
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsTargetPopulationsApplyEngineFormulaCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+        requestBody: TargetPopulationApplyEngineFormula,
+    }): CancelablePromise<TargetPopulationApplyEngineFormula> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/{id}/apply_engine_formula/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns TargetPopulationCopy
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsTargetPopulationsCopyCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+        requestBody: TargetPopulationCopy,
+    }): CancelablePromise<TargetPopulationCopy> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/{id}/copy/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaymentPlan
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsTargetPopulationsLockRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<PaymentPlan> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/{id}/lock/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaymentPlan
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsTargetPopulationsMarkReadyRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<PaymentPlan> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/{id}/mark_ready/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaymentPlan
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsTargetPopulationsRebuildRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<PaymentPlan> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/{id}/rebuild/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaymentPlan
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsTargetPopulationsUnlockRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<PaymentPlan> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/{id}/unlock/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
@@ -3099,6 +3693,17 @@ export class RestService {
         });
     }
     /**
+     * Returns the list of currency choices.
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restCurrencyRetrieve(): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/currency/',
+        });
+    }
+    /**
      * Retrieve dashboard data for a given business area from Redis cache.
      * If data is not cached or needs updating, refresh it.
      * @returns any No response body
@@ -3133,6 +3738,53 @@ export class RestService {
             url: '/api/rest/dashboard/generate/{business_area_slug}/',
             path: {
                 'business_area_slug': businessAreaSlug,
+            },
+        });
+    }
+    /**
+     * @returns PaginatedRuleList
+     * @throws ApiError
+     */
+    public static restEngineRulesList({
+        type,
+        deprecated,
+        enabled,
+        limit,
+        offset,
+        ordering,
+    }: {
+        /**
+         * Use Rule for Targeting or Payment Plan
+         *
+         * * `PAYMENT_PLAN` - Payment Plan
+         * * `TARGETING` - Targeting
+         */
+        type: 'PAYMENT_PLAN' | 'TARGETING',
+        deprecated?: boolean,
+        enabled?: boolean,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+    }): CancelablePromise<PaginatedRuleList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/engine-rules/',
+            query: {
+                'deprecated': deprecated,
+                'enabled': enabled,
+                'limit': limit,
+                'offset': offset,
+                'ordering': ordering,
+                'type': type,
             },
         });
     }

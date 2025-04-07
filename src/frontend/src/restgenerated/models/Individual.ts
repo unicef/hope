@@ -28,15 +28,6 @@ export type Individual = {
     countryOrigin?: string;
     maritalStatus?: string;
     documents?: Array<Document>;
-<<<<<<< HEAD
-    birth_date: string;
-    delivery_mechanisms_data?: Array<Account>;
-    rdi_merge_status?: RdiMergeStatusEnum;
-    is_removed?: boolean;
-    removed_date?: string | null;
-    last_sync_at?: string | null;
-    internal_data?: any;
-=======
     birthDate: string;
     deliveryMechanismsData?: Array<Account>;
     rdiMergeStatus?: RdiMergeStatusEnum;
@@ -44,7 +35,6 @@ export type Individual = {
     removedDate?: string | null;
     lastSyncAt?: string | null;
     internalData?: any;
->>>>>>> long-term/rest-api-refactor
     /**
      * Individual ID
      */

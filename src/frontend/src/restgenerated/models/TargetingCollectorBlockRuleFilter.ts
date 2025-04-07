@@ -5,10 +5,9 @@
 import type { FlexFieldClassificationEnum } from './FlexFieldClassificationEnum';
 import type { TargetingCollectorBlockRuleFilterComparisonMethodEnum } from './TargetingCollectorBlockRuleFilterComparisonMethodEnum';
 export type TargetingCollectorBlockRuleFilter = {
-    readonly id: string;
-    comparison_method: TargetingCollectorBlockRuleFilterComparisonMethodEnum;
-    flex_field_classification?: FlexFieldClassificationEnum;
-    field_name: string;
+    comparisonMethod: TargetingCollectorBlockRuleFilterComparisonMethodEnum;
+    flexFieldClassification?: FlexFieldClassificationEnum;
+    fieldName: string;
     /**
      *
      * Array of arguments

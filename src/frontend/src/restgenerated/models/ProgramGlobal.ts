@@ -69,20 +69,11 @@ export type ProgramGlobal = {
     /**
      * Program population goal
      */
-<<<<<<< HEAD
-    population_goal: number;
-    readonly business_area_code: string;
-    /**
-     * Program beneficiary group
-     */
-    beneficiary_group: string;
-=======
     populationGoal: number;
     readonly businessAreaCode: string;
     /**
      * Program beneficiary group
      */
     beneficiaryGroup: string;
->>>>>>> long-term/rest-api-refactor
 };
 

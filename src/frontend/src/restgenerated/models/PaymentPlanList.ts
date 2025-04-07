@@ -5,7 +5,7 @@
 import type { FollowUpPaymentPlan } from './FollowUpPaymentPlan';
 export type PaymentPlanList = {
     id: string;
-    unicef_id?: string | null;
+    unicefId?: string | null;
     /**
      * Name
      */
@@ -14,43 +14,43 @@ export type PaymentPlanList = {
     /**
      * Total Households Count [sys]
      */
-    total_households_count?: number;
+    totalHouseholdsCount?: number;
     /**
      * Total Individuals Count [sys]
      */
-    total_individuals_count?: number;
+    totalIndividualsCount?: number;
     currency: string;
     /**
      * Targeting level exclusion IDs
      */
-    excluded_ids?: string | null;
+    excludedIds?: string | null;
     /**
      * Total Entitled Quantity [sys]
      */
-    total_entitled_quantity?: string | null;
+    totalEntitledQuantity?: string | null;
     /**
      * Total Delivered Quantity [sys]
      */
-    total_delivered_quantity?: string | null;
+    totalDeliveredQuantity?: string | null;
     /**
      * Total Undelivered Quantity [sys]
      */
-    total_undelivered_quantity?: string | null;
+    totalUndeliveredQuantity?: string | null;
     /**
      * Dispersion Start Date
      */
-    dispersion_start_date?: string | null;
+    dispersionStartDate?: string | null;
     /**
      * Dispersion End Date
      */
-    dispersion_end_date?: string | null;
+    dispersionEndDate?: string | null;
     /**
      * Follow Up Payment Plan flag [sys]
      */
-    is_follow_up?: boolean;
-    readonly follow_ups: Array<FollowUpPaymentPlan>;
-    readonly created_by: string;
-    readonly created_at: string;
-    readonly updated_at: string;
+    isFollowUp?: boolean;
+    readonly followUps: Array<FollowUpPaymentPlan>;
+    readonly createdBy: string;
+    readonly createdAt: string;
+    readonly updatedAt: string;
 };
 

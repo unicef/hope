@@ -7,8 +7,8 @@ export type DeliveryMechanism = {
     readonly id: string;
     name: string;
     code: string;
-    is_active?: boolean;
-    transfer_type?: TransferTypeEnum;
-    account_type?: number | null;
+    isActive?: boolean;
+    transferType?: TransferTypeEnum;
+    accountType?: number | null;
 };
 

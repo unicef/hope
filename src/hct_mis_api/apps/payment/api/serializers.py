@@ -44,6 +44,7 @@ from hct_mis_api.apps.payment.models.payment import (
     DeliveryMechanismPerPaymentPlan,
 )
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
+from hct_mis_api.apps.payment.xlsx.xlsx_error import XlsxError
 from hct_mis_api.apps.program.api.serializers import ProgramSmallSerializer
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.steficon.api.serializers import RuleCommitSerializer
@@ -88,6 +89,28 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data: Dict[str, Any]) -> PaymentPlanSupportingDocument:
         return super().create(validated_data)
+
+
+class XlsxErrorSerializer(serializers.Serializer):
+    sheet = serializers.CharField()
+    coordinates = serializers.CharField()
+    message = serializers.CharField()
+
+    @staticmethod
+    def get_sheet(parent: XlsxError) -> str:
+        return parent.sheet
+
+    @staticmethod
+    def get_coordinates(parent: XlsxError) -> Optional[str]:
+        return parent.coordinates
+
+    @staticmethod
+    def get_message(parent: XlsxError) -> str:
+        return parent.message
+
+
+class PaymentPlanImportEntitlementSerializer(serializers.Serializer):
+    file = serializers.FileField(use_url=False, required=True)
 
 
 class PaymentVerificationSummarySerializer(serializers.ModelSerializer):

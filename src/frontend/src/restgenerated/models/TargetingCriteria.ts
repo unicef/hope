@@ -8,11 +8,11 @@ export type TargetingCriteria = {
     /**
      * Exclude households with individuals (members or collectors) that have active adjudication ticket(s).
      */
-    flag_exclude_if_active_adjudication_ticket?: boolean;
+    flagExcludeIfActiveAdjudicationTicket?: boolean;
     /**
      * Exclude households with individuals (members or collectors) on sanction list.
      */
-    flag_exclude_if_on_sanction_list?: boolean;
-    readonly rules: Array<TargetingCriteriaRule>;
+    flagExcludeIfOnSanctionList?: boolean;
+    rules: Array<TargetingCriteriaRule>;
 };
 

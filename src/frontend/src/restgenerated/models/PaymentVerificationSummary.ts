@@ -5,7 +5,7 @@
 export type PaymentVerificationSummary = {
     readonly id: string;
     status: string;
-    activation_date?: string | null;
-    completion_date?: string | null;
+    activationDate?: string | null;
+    completionDate?: string | null;
 };
 

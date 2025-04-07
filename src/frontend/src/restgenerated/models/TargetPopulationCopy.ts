@@ -2,4 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type Admin2Enum = string;
+export type TargetPopulationCopy = {
+    name: string;
+    targetPopulationId: string;
+    programCycleId: string;
+};
+

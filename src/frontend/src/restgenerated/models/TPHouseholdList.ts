@@ -4,13 +4,13 @@
 /* eslint-disable */
 export type TPHouseholdList = {
     id: string;
-    household_unicef_id: string;
-    readonly hoh_full_name: string;
-    household_size: number;
-    readonly household_admin2: string;
+    householdUnicefId: string;
+    readonly hohFullName: string;
+    householdSize: number;
+    readonly householdAdmin2: string;
     /**
      * Written by Steficon
      */
-    vulnerability_score?: string | null;
+    vulnerabilityScore?: string | null;
 };
 

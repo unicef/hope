@@ -3,11 +3,11 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { FollowUpPaymentPlan } from './FollowUpPaymentPlan';
-import type { Rule } from './Rule';
+import type { RuleCommit } from './RuleCommit';
 import type { TargetingCriteria } from './TargetingCriteria';
 export type TargetPopulationDetail = {
     id: string;
-    unicef_id?: string | null;
+    unicefId?: string | null;
     /**
      * Name
      */
@@ -16,72 +16,73 @@ export type TargetPopulationDetail = {
     /**
      * Total Households Count [sys]
      */
-    total_households_count?: number;
+    totalHouseholdsCount?: number;
     /**
      * Total Individuals Count [sys]
      */
-    total_individuals_count?: number;
+    totalIndividualsCount?: number;
     currency: string;
     /**
      * Targeting level exclusion IDs
      */
-    excluded_ids?: string | null;
+    excludedIds?: string | null;
     /**
      * Total Entitled Quantity [sys]
      */
-    total_entitled_quantity?: string | null;
+    totalEntitledQuantity?: string | null;
     /**
      * Total Delivered Quantity [sys]
      */
-    total_delivered_quantity?: string | null;
+    totalDeliveredQuantity?: string | null;
     /**
      * Total Undelivered Quantity [sys]
      */
-    total_undelivered_quantity?: string | null;
+    totalUndeliveredQuantity?: string | null;
     /**
      * Dispersion Start Date
      */
-    dispersion_start_date?: string | null;
+    dispersionStartDate?: string | null;
     /**
      * Dispersion End Date
      */
-    dispersion_end_date?: string | null;
+    dispersionEndDate?: string | null;
     /**
      * Follow Up Payment Plan flag [sys]
      */
-    is_follow_up?: boolean;
-    readonly follow_ups: Array<FollowUpPaymentPlan>;
-    readonly created_by: string;
-    readonly created_at: string;
-    readonly updated_at: string;
-    background_action_status: string;
+    isFollowUp?: boolean;
+    readonly followUps: Array<FollowUpPaymentPlan>;
+    readonly createdBy: string;
+    readonly createdAt: string;
+    readonly updatedAt: string;
+    backgroundActionStatus: string;
     /**
      * Payment Plan start date
      */
-    start_date?: string | null;
+    startDate?: string | null;
     /**
      * Payment Plan end date
      */
-    end_date?: string | null;
+    endDate?: string | null;
     program: string;
-    program_cycle: string;
+    programCycle: string;
     /**
      * Male Children Count [sys]
      */
-    male_children_count?: number;
+    maleChildrenCount?: number;
     /**
      * Female Children Count [sys]
      */
-    female_children_count?: number;
+    femaleChildrenCount?: number;
     /**
      * Male Adults Count [sys]
      */
-    male_adults_count?: number;
+    maleAdultsCount?: number;
     /**
      * Female Adults Count [sys]
      */
-    female_adults_count?: number;
-    readonly targeting_criteria: TargetingCriteria;
-    readonly steficon_rule_targeting: Rule;
+    femaleAdultsCount?: number;
+    readonly targetingCriteria: TargetingCriteria;
+    readonly steficonRuleTargeting: RuleCommit;
+    readonly adminUrl: string;
 };
 

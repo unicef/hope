@@ -2,10 +2,10 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type PaymentVerification = {
+import type { Rule } from './Rule';
+export type RuleCommit = {
     readonly id: string;
-    status: string;
-    statusDate?: string | null;
-    receivedAmount?: string | null;
+    version: number;
+    readonly rule: Rule;
 };
 

@@ -11,10 +11,10 @@ import type { PaymentPlanSupportingDocument } from './PaymentPlanSupportingDocum
 import type { PaymentVerificationPlan } from './PaymentVerificationPlan';
 import type { PaymentVerificationSummary } from './PaymentVerificationSummary';
 import type { ProgramSmall } from './ProgramSmall';
-import type { Rule } from './Rule';
+import type { RuleCommit } from './RuleCommit';
 export type PaymentPlanDetail = {
     id: string;
-    unicef_id?: string | null;
+    unicefId?: string | null;
     /**
      * Name
      */
@@ -23,140 +23,140 @@ export type PaymentPlanDetail = {
     /**
      * Total Households Count [sys]
      */
-    total_households_count?: number;
+    totalHouseholdsCount?: number;
     /**
      * Total Individuals Count [sys]
      */
-    total_individuals_count?: number;
+    totalIndividualsCount?: number;
     currency: string;
     /**
      * Targeting level exclusion IDs
      */
-    excluded_ids?: string | null;
+    excludedIds?: string | null;
     /**
      * Total Entitled Quantity [sys]
      */
-    total_entitled_quantity?: string | null;
+    totalEntitledQuantity?: string | null;
     /**
      * Total Delivered Quantity [sys]
      */
-    total_delivered_quantity?: string | null;
+    totalDeliveredQuantity?: string | null;
     /**
      * Total Undelivered Quantity [sys]
      */
-    total_undelivered_quantity?: string | null;
+    totalUndeliveredQuantity?: string | null;
     /**
      * Dispersion Start Date
      */
-    dispersion_start_date?: string | null;
+    dispersionStartDate?: string | null;
     /**
      * Dispersion End Date
      */
-    dispersion_end_date?: string | null;
+    dispersionEndDate?: string | null;
     /**
      * Follow Up Payment Plan flag [sys]
      */
-    is_follow_up?: boolean;
-    readonly follow_ups: Array<FollowUpPaymentPlan>;
-    readonly created_by: string;
-    readonly created_at: string;
-    readonly updated_at: string;
+    isFollowUp?: boolean;
+    readonly followUps: Array<FollowUpPaymentPlan>;
+    readonly createdBy: string;
+    readonly createdAt: string;
+    readonly updatedAt: string;
     /**
      * record revision number
      */
     version?: number;
-    background_action_status: string;
+    backgroundActionStatus: string;
     /**
      * Payment Plan start date
      */
-    start_date?: string | null;
+    startDate?: string | null;
     /**
      * Payment Plan end date
      */
-    end_date?: string | null;
+    endDate?: string | null;
     readonly program: ProgramSmall;
-    has_payment_list_export_file: boolean;
-    readonly has_fsp_delivery_mechanism_xlsx_template: boolean;
-    imported_file_name: string;
+    hasPaymentListExportFile: boolean;
+    readonly hasFspDeliveryMechanismXlsxTemplate: boolean;
+    importedFileName: string;
     /**
      * Imported File Date [sys]
      */
-    imported_file_date?: string | null;
-    readonly payments_conflicts_count: number;
-    readonly delivery_mechanism: DeliveryMechanism;
-    readonly delivery_mechanism_per_payment_plan: DeliveryMechanismPerPaymentPlan;
-    readonly volume_by_delivery_mechanism: Record<string, any>;
-    readonly split_choices: Array<Record<string, any>>;
+    importedFileDate?: string | null;
+    readonly paymentsConflictsCount: number;
+    readonly deliveryMechanism: DeliveryMechanism;
+    readonly deliveryMechanismPerPaymentPlan: DeliveryMechanismPerPaymentPlan;
+    readonly volumeByDeliveryMechanism: Record<string, any>;
+    readonly splitChoices: Array<Record<string, any>>;
     /**
      * Exclusion reason (Targeting level)
      */
-    exclusion_reason?: string | null;
+    exclusionReason?: string | null;
     /**
      * Exclusion reason (Targeting level) [sys]
      */
-    exclude_household_error?: string | null;
-    bank_reconciliation_success: number;
-    bank_reconciliation_error: number;
-    can_create_payment_verification_plan: boolean;
-    readonly available_payment_records_count: number;
-    readonly reconciliation_summary: Record<string, number>;
-    readonly excluded_households: Record<string, any>;
-    readonly excluded_individuals: Record<string, any>;
-    readonly can_create_follow_up: boolean;
-    readonly total_withdrawn_households_count: number;
-    readonly unsuccessful_payments_count: number;
-    can_send_to_payment_gateway: boolean;
-    readonly can_split: boolean;
-    readonly supporting_documents: Array<PaymentPlanSupportingDocument>;
-    readonly total_households_count_with_valid_phone_no: number;
-    can_create_xlsx_with_fsp_auth_code: boolean;
-    fsp_communication_channel: string;
-    readonly financial_service_provider: FinancialServiceProvider;
-    readonly can_export_xlsx: boolean;
-    readonly can_download_xlsx: boolean;
-    readonly can_send_xlsx_password: boolean;
-    readonly approval_process: Array<ApprovalProcess>;
+    excludeHouseholdError?: string | null;
+    bankReconciliationSuccess: number;
+    bankReconciliationError: number;
+    canCreatePaymentVerificationPlan: boolean;
+    readonly availablePaymentRecordsCount: number;
+    readonly reconciliationSummary: Record<string, number>;
+    readonly excludedHouseholds: Record<string, any>;
+    readonly excludedIndividuals: Record<string, any>;
+    readonly canCreateFollowUp: boolean;
+    readonly totalWithdrawnHouseholdsCount: number;
+    readonly unsuccessfulPaymentsCount: number;
+    canSendToPaymentGateway: boolean;
+    readonly canSplit: boolean;
+    readonly supportingDocuments: Array<PaymentPlanSupportingDocument>;
+    readonly totalHouseholdsCountWithValidPhoneNo: number;
+    canCreateXlsxWithFspAuthCode: boolean;
+    fspCommunicationChannel: string;
+    readonly financialServiceProvider: FinancialServiceProvider;
+    readonly canExportXlsx: boolean;
+    readonly canDownloadXlsx: boolean;
+    readonly canSendXlsxPassword: boolean;
+    readonly approvalProcess: Array<ApprovalProcess>;
     /**
      * Total Entitled Quantity USD [sys]
      */
-    total_entitled_quantity_usd?: string | null;
+    totalEntitledQuantityUsd?: string | null;
     /**
      * Total Entitled Quantity Revised USD [sys]
      */
-    total_entitled_quantity_revised_usd?: string | null;
+    totalEntitledQuantityRevisedUsd?: string | null;
     /**
      * Total Delivered Quantity USD [sys]
      */
-    total_delivered_quantity_usd?: string | null;
+    totalDeliveredQuantityUsd?: string | null;
     /**
      * Total Undelivered Quantity USD [sys]
      */
-    total_undelivered_quantity_usd?: string | null;
+    totalUndeliveredQuantityUsd?: string | null;
     /**
      * Male Children Count [sys]
      */
-    male_children_count?: number;
+    maleChildrenCount?: number;
     /**
      * Female Children Count [sys]
      */
-    female_children_count?: number;
+    femaleChildrenCount?: number;
     /**
      * Male Adults Count [sys]
      */
-    male_adults_count?: number;
+    maleAdultsCount?: number;
     /**
      * Female Adults Count [sys]
      */
-    female_adults_count?: number;
-    readonly steficon_rule: Rule;
-    readonly source_payment_plan: FollowUpPaymentPlan;
+    femaleAdultsCount?: number;
+    readonly steficonRule: RuleCommit;
+    readonly sourcePaymentPlan: FollowUpPaymentPlan;
     /**
      * Exchange Rate [sys]
      */
-    exchange_rate?: string | null;
-    readonly eligible_payments_count: number;
-    readonly payment_verification_summary: PaymentVerificationSummary;
-    readonly payment_verification_plans: Array<PaymentVerificationPlan>;
-    readonly admin_url: string;
+    exchangeRate?: string | null;
+    readonly eligiblePaymentsCount: number;
+    readonly paymentVerificationSummary: PaymentVerificationSummary;
+    readonly paymentVerificationPlans: Array<PaymentVerificationPlan>;
+    readonly adminUrl: string;
 };
 

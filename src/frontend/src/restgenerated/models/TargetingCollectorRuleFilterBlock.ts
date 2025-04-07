@@ -4,7 +4,6 @@
 /* eslint-disable */
 import type { TargetingCollectorBlockRuleFilter } from './TargetingCollectorBlockRuleFilter';
 export type TargetingCollectorRuleFilterBlock = {
-    readonly id: string;
-    readonly collector_block_filters: Array<TargetingCollectorBlockRuleFilter>;
+    collectorBlockFilters: Array<TargetingCollectorBlockRuleFilter>;
 };
 
