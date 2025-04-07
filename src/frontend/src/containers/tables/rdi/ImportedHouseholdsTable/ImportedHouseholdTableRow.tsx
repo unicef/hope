@@ -8,6 +8,8 @@ import { UniversalMoment } from '@components/core/UniversalMoment';
 import { WarningTooltip } from '@components/core/WarningTooltip';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
+import { HouseholdList } from '@restgenerated/models/HouseholdList';
+import { RegistrationDataImportDetail } from '@restgenerated/models/RegistrationDataImportDetail';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -18,10 +20,8 @@ export const StyledLink = styled.div`
 `;
 
 interface ImportedHouseholdTableRowProps {
-  household;
-  //TODO: add types
-  // household: HouseholdDetail;
-  rdi;
+  household: HouseholdList
+  rdi: RegistrationDataImportDetail;
 }
 
 export function ImportedHouseholdTableRow({
@@ -51,20 +51,20 @@ export function ImportedHouseholdTableRow({
       data-cy="imported-households-row"
     >
       <TableCell align="left">
-        {household.has_duplicates && (
+        {household.hasDuplicates && (
           <WarningTooltip confirmed message={t('Household has Duplicates')} />
         )}
       </TableCell>
       <TableCell align="left">
         <StyledLink onClick={() => handleClick()}>
-          {household.unicef_id}
+          {household.unicefId}
         </StyledLink>
       </TableCell>
-      <AnonTableCell>{household?.head_of_household}</AnonTableCell>
+      <AnonTableCell>{household?.headOfHousehold}</AnonTableCell>
       <TableCell align="right">{household.size}</TableCell>
       <TableCell align="left">{household?.admin2}</TableCell>
       <TableCell align="left">
-        <UniversalMoment>{household.first_registration_date}</UniversalMoment>
+        <UniversalMoment>{household.firstRegistrationDate}</UniversalMoment>
       </TableCell>
     </ClickableTableRow>
   );

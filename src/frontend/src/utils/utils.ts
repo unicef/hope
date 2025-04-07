@@ -1,6 +1,6 @@
 import {
   AllProgramsQuery,
-  ChoiceObject,
+  ChoiceObject, IndividualMinimalFragment,
   PaymentPlanBackgroundActionStatus,
   PaymentPlanBuildStatus,
   PaymentPlanStatus,
@@ -22,6 +22,7 @@ import {
   TARGETING_STATES,
 } from './constants';
 import _ from 'lodash';
+import { HeadCell } from '@core/Table/EnhancedTableHead';
 
 const Gender = new Map([
   ['MALE', 'Male'],
@@ -1205,17 +1206,18 @@ export const isProgramNodeUuidFormat = (id: string): boolean => {
 export const arraysHaveSameContent = (a: any[], b: any[]): boolean =>
   a.length === b.length && a.every((val, index) => val === b[index]);
 
-export function adjustHeadCells(
-  headCells,
+export function adjustHeadCells<T>(
+  headCells:HeadCell<T>[],
   beneficiaryGroup: any | undefined,
   replacements: {
     [key: string]: (beneficiaryGroup) => string;
   },
 ) {
   if (!beneficiaryGroup) return headCells;
-
   return headCells.map((cell) => {
+    // @ts-ignore
     if (replacements[cell.id]) {
+      // @ts-ignore
       return { ...cell, label: replacements[cell.id](beneficiaryGroup) };
     }
     return cell;
