@@ -63,8 +63,8 @@ const EditFollowUpPaymentPlanPage = (): ReactElement => {
       name: paymentPlan.currency,
       value: paymentPlan.currency,
     },
-    dispersionStartDate: paymentPlan.dispersion_start_date,
-    dispersionEndDate: paymentPlan.dispersion_end_date,
+    dispersionStartDate: paymentPlan.dispersionStartDate,
+    dispersionEndDate: paymentPlan.dispersionEndDate,
   };
 
   const validationSchema = Yup.object().shape({

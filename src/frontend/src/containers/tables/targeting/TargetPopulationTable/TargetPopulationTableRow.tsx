@@ -74,15 +74,15 @@ export function TargetPopulationTableRow({
         />
       </TableCell>
       <TableCell align="left">
-        {targetPopulation.total_households_count || '0'}
+        {targetPopulation.totalHouseholdsCount || '0'}
       </TableCell>
       <TableCell align="left">
-        <UniversalMoment>{targetPopulation.created_at}</UniversalMoment>
+        <UniversalMoment>{targetPopulation.createdAt}</UniversalMoment>
       </TableCell>
       <TableCell align="left">
-        <UniversalMoment>{targetPopulation.updated_at}</UniversalMoment>
+        <UniversalMoment>{targetPopulation.updatedAt}</UniversalMoment>
       </TableCell>
-      <TableCell align="left">{targetPopulation.created_by}</TableCell>
+      <TableCell align="left">{targetPopulation.createdBy}</TableCell>
     </ClickableTableRow>
   );
 }

@@ -37,11 +37,11 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
         programSlug: programId,
       }),
     refetchInterval: () => {
-      const { status, background_action_status } = paymentPlan;
+      const { status, backgroundActionStatus } = paymentPlan;
       if (
         status === PaymentPlanStatus.Preparing ||
-        (background_action_status !== null &&
-          background_action_status !==
+        (backgroundActionStatus !== null &&
+          backgroundActionStatus !==
             PaymentPlanBackgroundActionStatus.ExcludeBeneficiariesError)
       ) {
         return 3000;

@@ -32,7 +32,7 @@ export const PeoplePaymentDetailsPage = (): ReactElement => {
     fetchPolicy: 'cache-and-network',
   });
   const paymentPlanStatus = data?.payment?.parent?.status;
-  const paymentPlanIsFollowUp = data?.payment?.parent?.is_follow_up;
+  const paymentPlanIsFollowUp = data?.payment?.parent?.isFollowUp;
   const permissions = usePermissions();
   const { baseUrl } = useBaseUrl();
   if (loading || caLoading) return <LoadingComponent />;

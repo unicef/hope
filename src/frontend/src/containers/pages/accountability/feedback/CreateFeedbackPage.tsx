@@ -147,11 +147,10 @@ function CreateFeedbackPage(): ReactElement {
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
-
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const steps = [
     'Category Selection',
-    `${beneficiaryGroup?.group_label}/${beneficiaryGroup?.member_label} Look up`,
+    `${beneficiaryGroup?.groupLabel}/${beneficiaryGroup?.memberLabel} Look up`,
     'Identity Verification',
     'Description',
   ];
@@ -353,7 +352,7 @@ function CreateFeedbackPage(): ReactElement {
                               <Box py={4}>
                                 <Typography variant="subtitle2">
                                   {t(
-                                    `${beneficiaryGroup?.group_label} Questionnaire`,
+                                    `${beneficiaryGroup?.groupLabel} Questionnaire`,
                                   )}
                                 </Typography>
                                 <Box py={4}>
@@ -362,7 +361,7 @@ function CreateFeedbackPage(): ReactElement {
                               </Box>
                               <Typography variant="subtitle2">
                                 {t(
-                                  `${beneficiaryGroup?.member_label} Questionnaire`,
+                                  `${beneficiaryGroup?.memberLabel} Questionnaire`,
                                 )}
                               </Typography>
                               <Box py={4}>
@@ -404,9 +403,7 @@ function CreateFeedbackPage(): ReactElement {
                                 </Grid>
                                 <Grid size={{ xs: 6 }}>
                                   <LabelizedField
-                                    label={t(
-                                      `${beneficiaryGroup?.group_label}`,
-                                    )}
+                                    label={t(`${beneficiaryGroup?.groupLabel}`)}
                                   >
                                     {values.selectedHousehold?.unicefId}
                                   </LabelizedField>
@@ -414,7 +411,7 @@ function CreateFeedbackPage(): ReactElement {
                                 <Grid size={{ xs: 6 }}>
                                   <LabelizedField
                                     label={t(
-                                      `${beneficiaryGroup?.member_label}`,
+                                      `${beneficiaryGroup?.memberLabel}`,
                                     )}
                                   >
                                     {values.selectedIndividual?.unicefId}

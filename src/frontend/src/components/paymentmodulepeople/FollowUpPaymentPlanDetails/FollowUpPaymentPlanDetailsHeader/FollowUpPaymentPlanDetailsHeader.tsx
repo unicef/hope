@@ -154,7 +154,7 @@ export function FollowUpPaymentPlanDetailsHeader({
         <Box display="flex" alignItems="center">
           {t('Follow-up Payment Plan')} ID:{' '}
           <Box ml={1}>
-            <span data-cy="pp-unicef-id">{paymentPlan.unicef_id}</span>
+            <span data-cy="pp-unicef-id">{paymentPlan.unicefId}</span>
           </Box>
           <StatusWrapper>
             <StatusBox
@@ -162,10 +162,10 @@ export function FollowUpPaymentPlanDetailsHeader({
               statusToColor={paymentPlanStatusToColor}
             />
           </StatusWrapper>
-          {paymentPlan.background_action_status && (
+          {paymentPlan.backgroundActionStatus && (
             <StatusWrapper>
               <StatusBox
-                status={paymentPlan.background_action_status}
+                status={paymentPlan.backgroundActionStatus}
                 statusToColor={paymentPlanBackgroundActionStatusToColor}
               />
             </StatusWrapper>

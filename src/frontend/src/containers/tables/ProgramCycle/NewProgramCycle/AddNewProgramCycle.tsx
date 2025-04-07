@@ -1,4 +1,3 @@
-import { ProgramCycle } from '@api/programCycleApi';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import CreateProgramCycle from '@containers/tables/ProgramCycle/NewProgramCycle/CreateProgramCycle';
 import UpdateProgramCycle from '@containers/tables/ProgramCycle/NewProgramCycle/UpdateProgramCycle';
@@ -43,7 +42,7 @@ const AddNewProgramCycle = ({
   };
 
   const stepsToRender = [];
-  if (lastProgramCycle.end_date) {
+  if (lastProgramCycle.endDate) {
     stepsToRender.push(
       <CreateProgramCycle
         program={program}

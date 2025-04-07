@@ -15,7 +15,7 @@ interface FspSectionProps {
 export function FspSection({ paymentPlan }: FspSectionProps): ReactElement {
   const { t } = useTranslation();
 
-  const { delivery_mechanism, financial_service_provider } = paymentPlan;
+  const { deliveryMechanism, financialServiceProvider } = paymentPlan;
 
   return (
     <Box m={5}>
@@ -31,12 +31,12 @@ export function FspSection({ paymentPlan }: FspSectionProps): ReactElement {
         <Grid container spacing={3}>
           <>
             <Grid
-              key={`${delivery_mechanism?.name}-${financial_service_provider?.name}`}
+              key={`${deliveryMechanism?.name}-${financialServiceProvider?.name}`}
               size={{ xs: 3 }}
             >
               <LabelizedField
-                label={delivery_mechanism?.name || '-'}
-                value={financial_service_provider?.name || '-'}
+                label={deliveryMechanism?.name || '-'}
+                value={financialServiceProvider?.name || '-'}
               />
             </Grid>
           </>

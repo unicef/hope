@@ -36,8 +36,7 @@ export const TargetPopulationCore = ({
 }: TargetPopulationCoreProps): ReactElement => {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
-
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   if (!targetPopulation) return null;
 
   const ResultComponent = targetPopulation.program.isSocialWorkerProgram
@@ -71,7 +70,7 @@ export const TargetPopulationCore = ({
           {t('Target Population is building')}
         </Typography>
         <Label>
-          {`Target population is processing, the list of ${beneficiaryGroup?.group_label_plural} will be
+          {`Target population is processing, the list of ${beneficiaryGroup?.groupLabelPlural} will be
          available when the process is finished`}
         </Label>
       </PaperContainer>
@@ -99,7 +98,7 @@ export const TargetPopulationCore = ({
             {isSocialDctType
               ? t('Excluded Target Population Entries')
               : t(
-                  `Excluded Target Population Entries (${beneficiaryGroup?.group_label_plural} or ${beneficiaryGroup?.member_label_plural})`,
+                  `Excluded Target Population Entries (${beneficiaryGroup?.groupLabelPlural} or ${beneficiaryGroup?.memberLabelPlural})`,
                 )}
           </Typography>
           <Box mt={2}>

@@ -57,10 +57,10 @@ export function ImportedHouseholdTableRow({
       </TableCell>
       <TableCell align="left">
         <StyledLink onClick={() => handleClick()}>
-          {household.unicef_id}
+          {household.unicefId}
         </StyledLink>
       </TableCell>
-      <AnonTableCell>{household?.head_of_household}</AnonTableCell>
+      <AnonTableCell>{household?.headOfHousehold}</AnonTableCell>
       <TableCell align="right">{household.size}</TableCell>
       <TableCell align="left">{household?.admin2}</TableCell>
       <TableCell align="left">

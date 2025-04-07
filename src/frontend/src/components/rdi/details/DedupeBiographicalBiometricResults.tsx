@@ -61,8 +61,7 @@ export function DedupeBiographicalBiometricResults({
   const [open, setOpen] = useState(false);
   const { baseUrl } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
-
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const createBiographicalData = (
     unicefId: string,
     fullName: string,
@@ -172,7 +171,7 @@ export function DedupeBiographicalBiometricResults({
               <TableHead>
                 <TableRow>
                   <TableCell style={{ width: 100 }}>
-                    {t(`${beneficiaryGroup?.member_label} ID`)}
+                    {t(`${beneficiaryGroup?.memberLabel} ID`)}
                   </TableCell>
                   <TableCell style={{ width: 100 }}>{t('Full Name')}</TableCell>
                   <TableCell style={{ width: 100 }}>{t('Age')}</TableCell>
@@ -217,7 +216,7 @@ export function DedupeBiographicalBiometricResults({
               <TableHead>
                 <TableRow>
                   <TableCell style={{ width: 100 }}>
-                    {t(`${beneficiaryGroup?.member_label} ID`)}
+                    {t(`${beneficiaryGroup?.memberLabel} ID`)}
                   </TableCell>
                   <TableCell style={{ width: 100 }}>{t('Full Name')}</TableCell>
                   <TableCell style={{ width: 100 }}>{t('Age')}</TableCell>

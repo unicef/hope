@@ -25,8 +25,7 @@ function FeedbackTable({
 }: FeedbackTableProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
-
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { isAllPrograms, programId } = useBaseUrl();
   const initialVariables: AllFeedbacksQueryVariables = {
     feedbackId: filter.feedbackId,
@@ -45,7 +44,7 @@ function FeedbackTable({
 
   const replacements = {
     household_lookup: (_beneficiaryGroup) =>
-      `${_beneficiaryGroup?.group_label} ID`,
+      `${_beneficiaryGroup?.groupLabel} ID`,
   };
 
   const adjustedHeadCells = adjustHeadCells(

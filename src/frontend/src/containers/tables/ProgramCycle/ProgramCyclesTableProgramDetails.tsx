@@ -1,4 +1,3 @@
-import { fetchProgramCycles, ProgramCycle } from '@api/programCycleApi';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import DeleteProgramCycle from '@containers/tables/ProgramCycle/DeleteProgramCycle';
 import EditProgramCycle from '@containers/tables/ProgramCycle/EditProgramCycle';
@@ -40,8 +39,8 @@ const ProgramCyclesTableProgramDetails = ({
     hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_CREATE, permissions);
 
   const { data, error, isLoading } = useQuery({
-    queryKey: ['programCycles', businessAreaSlug, program.slug, queryVariables],
-    queryFn: async () => {
+    queryKey: ['programCycles', businessAreaSlug, programSlug, queryVariables],
+    queryFn: () => {
       return RestService.restBusinessAreasProgramsCyclesList({
         businessAreaSlug,
         programSlug,

@@ -187,8 +187,8 @@ const DuplicateProgramPage = (): ReactElement => {
 
   const {
     name,
-    start_date,
-    end_date,
+    startDate,
+    endDate,
     sector,
     data_collecting_type,
     beneficiary_group,
@@ -206,8 +206,8 @@ const DuplicateProgramPage = (): ReactElement => {
     editMode: true,
     name: `Copy of Programme: (${name})`,
     programmeCode: '',
-    startDate: start_date,
-    endDate: end_date,
+    startDate: startDate,
+    endDate: endDate,
     sector,
     dataCollectingTypeCode: data_collecting_type?.code,
     beneficiaryGroup: decodeIdString(beneficiary_group?.id),

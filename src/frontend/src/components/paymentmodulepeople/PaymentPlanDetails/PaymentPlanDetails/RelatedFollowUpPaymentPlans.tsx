@@ -8,7 +8,7 @@ import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface RelatedFollowUpPaymentPlansProps {
   baseUrl: string;
-  followUps: PaymentPlanDetail['follow_ups'];
+  followUps: PaymentPlanDetail['followUps'];
 }
 
 export function RelatedFollowUpPaymentPlans({
@@ -30,7 +30,7 @@ export function RelatedFollowUpPaymentPlans({
         key={followUp?.id}
         to={`/${baseUrl}/payment-module/followup-payment-plans/${followUp?.id}`}
       >
-        {followUp?.unicef_id}
+        {followUp?.unicefId}
         <br />
       </BlackLink>
     ));

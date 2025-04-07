@@ -41,13 +41,12 @@ function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
     enabled: !!businessArea && !!programId,
   });
 
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
-
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const mergedReplacements = {
-    id: (_beneficiaryGroup) => `${_beneficiaryGroup?.member_label} ID`,
+    id: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
     head_of_household__full_name: (_beneficiaryGroup) =>
-      `Head of ${_beneficiaryGroup?.group_label}`,
-    size: (_beneficiaryGroup) => `${_beneficiaryGroup?.group_label} Size`,
+      `Head of ${_beneficiaryGroup?.groupLabel}`,
+    size: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} Size`,
   };
 
   const adjustedMergedHeadCells = adjustHeadCells(
@@ -57,10 +56,10 @@ function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
   );
 
   const importedReplacements = {
-    id: (_beneficiaryGroup) => `${_beneficiaryGroup?.group_label} ID`,
+    id: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} ID`,
     head_of_household__full_name: (_beneficiaryGroup) =>
-      `Head of ${_beneficiaryGroup?.group_label}`,
-    size: (_beneficiaryGroup) => `${_beneficiaryGroup?.group_label} Size`,
+      `Head of ${_beneficiaryGroup?.groupLabel}`,
+    size: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} Size`,
   };
 
   const adjustedImportedHeadCells = adjustHeadCells(

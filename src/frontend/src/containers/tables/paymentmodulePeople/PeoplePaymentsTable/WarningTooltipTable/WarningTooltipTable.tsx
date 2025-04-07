@@ -59,8 +59,7 @@ export function WarningTooltipTable({
 }: WarningTooltipTableProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
-
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   if (!payment) return null;
   const mappedPaymentPlanRows = (): ReactElement[] => {
     const {
@@ -121,25 +120,25 @@ export function WarningTooltipTable({
       </DialogTitleWrapper>
       <DialogContent>
         <Box mt={4} mb={2} display="flex">
-          {t('Payment Plan ID')} <Bold>{paymentPlan.unicef_id}</Bold>{' '}
+          {t('Payment Plan ID')} <Bold>{paymentPlan.unicefId}</Bold>{' '}
           {t('details')}:
         </Box>
         <GreyBox p={3}>
           <Grid container>
             <Grid size={{ xs: 6 }}>
               <LabelizedField label={t('Start Date')}>
-                <UniversalMoment>{paymentPlan.start_date}</UniversalMoment>
+                <UniversalMoment>{paymentPlan.startDate}</UniversalMoment>
               </LabelizedField>
             </Grid>
             <Grid size={{ xs: 6 }}>
               <LabelizedField label={t('End Date')}>
-                <UniversalMoment>{paymentPlan.end_date}</UniversalMoment>
+                <UniversalMoment>{paymentPlan.endDate}</UniversalMoment>
               </LabelizedField>
             </Grid>
           </Grid>
         </GreyBox>
         <Box mt={10} mb={10} display="flex">
-          {`${beneficiaryGroup?.group_label} ID`}{' '}
+          {`${beneficiaryGroup?.groupLabel} ID`}{' '}
           <Bold>{payment.household?.unicefId}</Bold>{' '}
           {t('is also included in the following Payment Plans')}:
         </Box>

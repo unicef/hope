@@ -126,7 +126,7 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
   const isFinished =
     paymentPlan?.payment_verification_summary?.status === 'FINISHED';
 
-  const { is_follow_up } = paymentPlan;
+  const { isFollowUp } = paymentPlan;
 
   const toolbar = (
     <PageHeader
@@ -135,12 +135,12 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
         <BlackLink
           data-cy="plan-link"
           to={`/${baseUrl}/payment-module/${
-            is_follow_up ? 'followup-payment-plans' : 'payment-plans'
+            isFollowUp ? 'followup-payment-plans' : 'payment-plans'
           }/${paymentPlan.id}`}
           fullWidth
         >
           {t('Payment Plan')}{' '}
-          <span data-cy="plan-id">{paymentPlan.unicef_id}</span>
+          <span data-cy="plan-id">{paymentPlan.unicefId}</span>
         </BlackLink>
       }
       breadCrumbs={

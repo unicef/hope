@@ -46,10 +46,10 @@ export const SplitIntoPaymentLists = ({
   const { showMessage } = useSnackbar();
 
   let minPaymentsNoMessage = 'Payments Number must be greater than 10';
-  let maxPaymentsNoMessage = `Payments Number must be less than ${paymentPlan.eligible_payments_count}`;
+  let maxPaymentsNoMessage = `Payments Number must be less than ${paymentPlan.eligiblePaymentsCount}`;
 
-  if (paymentPlan.eligible_payments_count <= 10) {
-    const msg = `There are too few payments (${paymentPlan.eligible_payments_count}) to split`;
+  if (paymentPlan.eligiblePaymentsCount <= 10) {
+    const msg = `There are too few payments (${paymentPlan.eligiblePaymentsCount}) to split`;
     minPaymentsNoMessage = msg;
     maxPaymentsNoMessage = msg;
   }
@@ -62,7 +62,7 @@ export const SplitIntoPaymentLists = ({
         schema
           .required('Payments Number is required')
           .min(10, minPaymentsNoMessage)
-          .max(paymentPlan.eligible_payments_count, maxPaymentsNoMessage),
+          .max(paymentPlan.eligiblePaymentsCount, maxPaymentsNoMessage),
     }),
   });
 

@@ -20,7 +20,7 @@ const initialFilter = {
   status: [],
   totalEntitledQuantityFrom: null,
   totalEntitledQuantityTo: null,
-  is_follow_up: false,
+  isFollowUp: false,
 };
 
 export const ProgramCycleDetailsPage = (): ReactElement => {

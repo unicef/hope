@@ -175,15 +175,14 @@ const AddFilterTargetingCriteriaDisplay = ({
   };
 
   // const  collectorFiltersAvailable =
-  //   selectedProgram?.data_collecting_type?.collectorFiltersAvailable;
+  //   selectedProgram?.dataCollectingType?.collectorFiltersAvailable;
 
   let individualFiltersAvailable =
-    selectedProgram?.data_collecting_type?.individual_filters_available;
+    selectedProgram?.dataCollectingType?.individualFiltersAvailable;
   let householdFiltersAvailable =
-    selectedProgram?.data_collecting_type?.household_filters_available;
+    selectedProgram?.dataCollectingType?.householdFiltersAvailable;
   const isSocialWorkingProgram =
-    selectedProgram?.data_collecting_type?.type ===
-    DataCollectingTypeType.Social;
+    selectedProgram?.dataCollectingType?.type === DataCollectingTypeType.Social;
   // Allow use filters on non-migrated programs
   if (individualFiltersAvailable === undefined) {
     individualFiltersAvailable = true;
@@ -252,7 +251,7 @@ const AddFilterTargetingCriteriaDisplay = ({
                         }
                         householdIds={criteria.householdIds}
                         individualIds={criteria.individualIds}
-                        deliveryMechanism={targetPopulation?.delivery_mechanism}
+                        deliveryMechanism={targetPopulation?.deliveryMechanism}
                         criteria={criteria}
                         editFunction={() => editCriteria(criteria, index)}
                         removeFunction={() => helpers.remove(index)}

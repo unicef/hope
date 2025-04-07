@@ -29,9 +29,9 @@ export function GrievanceFlexFieldPhotoModal({
 
   const flexFields = isIndividual
     ? data.grievanceTicket?.individualDataUpdateTicketDetails?.individualData
-        ?.flex_fields
+        ?.flexFields
     : data.grievanceTicket?.householdDataUpdateTicketDetails?.householdData
-        ?.flex_fields;
+        ?.flexFields;
 
   const picUrl: string = isCurrent
     ? flexFields[field.name]?.previous_value

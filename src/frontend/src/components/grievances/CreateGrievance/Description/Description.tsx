@@ -82,8 +82,7 @@ function Description({
     fetchPolicy: 'network-only',
   });
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
-
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   // Set program value based on selected household or individual
   useEffect(() => {
     if (values.selectedHousehold?.program?.id) {
@@ -139,7 +138,7 @@ function Description({
                 size: 9,
               },
               {
-                label: `${beneficiaryGroup?.group_label} ID`,
+                label: `${beneficiaryGroup?.groupLabel} ID`,
                 value: (
                   <span>
                     {values.selectedHousehold?.id &&
@@ -158,7 +157,7 @@ function Description({
                 size: 3,
               },
               {
-                label: `${beneficiaryGroup?.member_label} ID`,
+                label: `${beneficiaryGroup?.memberLabel} ID`,
                 value: (
                   <span>
                     {values.selectedIndividual?.id &&

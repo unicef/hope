@@ -29,7 +29,7 @@ export function LockPaymentPlan({
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const [lockDialogOpen, setLockDialogOpen] = useState(false);
   const { mutatePaymentPlanAction: lock, loading: loadingLock } =
     usePaymentPlanAction(
@@ -68,17 +68,17 @@ export function LockPaymentPlan({
                 'After you lock this Payment Plan, you will be able to run entitlement formula for selected target population.',
               )}
             </Box>
-            {paymentPlan.payments_conflicts_count > 0 && (
+            {paymentPlan.paymentsConflictsCount > 0 && (
               <Box p={5}>
                 <GreyText>
                   {t('Note:')}{' '}
-                  {paymentPlan.payments_conflicts_count === 1
+                  {paymentPlan.paymentsConflictsCount === 1
                     ? t('There is')
                     : t('There are')}{' '}
-                  {paymentPlan.payments_conflicts_count}{' '}
-                  {paymentPlan.payments_conflicts_count === 1
-                    ? t(beneficiaryGroup?.group_label)
-                    : t(beneficiaryGroup?.group_label_plural)}{' '}
+                  {paymentPlan.paymentsConflictsCount}{' '}
+                  {paymentPlan.paymentsConflictsCount === 1
+                    ? t(beneficiaryGroup?.groupLabel)
+                    : t(beneficiaryGroup?.groupLabelPlural)}{' '}
                   {t('that will be ignored in this Payment Plan.')}
                 </GreyText>
               </Box>

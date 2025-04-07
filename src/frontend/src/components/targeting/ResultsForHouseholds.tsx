@@ -62,7 +62,7 @@ function ResultsForHouseholds({
 }: ResultsProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const [openDialog, setOpenDialog] = useState(false);
   const handleOpen = () => {
     if (targetPopulation?.failed_wallet_validation_collectors_ids?.length > 0) {
@@ -89,7 +89,7 @@ function ResultsForHouseholds({
                   <FieldBorder color={colors.femaleChildren}>
                     <LabelizedField
                       label={t('Female Children')}
-                      value={targetPopulation.female_children_count}
+                      value={targetPopulation.femaleChildrenCount}
                     />
                   </FieldBorder>
                 </Grid>
@@ -97,7 +97,7 @@ function ResultsForHouseholds({
                   <FieldBorder color={colors.femaleAdult}>
                     <LabelizedField
                       label={t('Female Adults')}
-                      value={targetPopulation.female_adults_count}
+                      value={targetPopulation.femaleAdultsCount}
                     />
                   </FieldBorder>
                 </Grid>
@@ -105,7 +105,7 @@ function ResultsForHouseholds({
                   <FieldBorder color={colors.maleChildren}>
                     <LabelizedField
                       label={t('Male Children')}
-                      value={targetPopulation.male_children_count}
+                      value={targetPopulation.maleChildrenCount}
                     />
                   </FieldBorder>
                 </Grid>
@@ -113,7 +113,7 @@ function ResultsForHouseholds({
                   <FieldBorder color={colors.maleAdult}>
                     <LabelizedField
                       label={t('Male Adults')}
-                      value={targetPopulation.male_adults_count}
+                      value={targetPopulation.maleAdultsCount}
                     />
                   </FieldBorder>
                 </Grid>
@@ -212,10 +212,10 @@ function ResultsForHouseholds({
                 <Grid size={{ xs: 6 }}>
                   <SummaryBorder>
                     <LabelizedField
-                      label={`Total Number of ${beneficiaryGroup?.group_label_plural}`}
+                      label={`Total Number of ${beneficiaryGroup?.groupLabelPlural}`}
                     >
                       <SummaryValue data-cy="total-number-of-households-count">
-                        {targetPopulation.total_households_count || '0'}
+                        {targetPopulation.totalHouseholdsCount || '0'}
                       </SummaryValue>
                     </LabelizedField>
                   </SummaryBorder>
@@ -223,10 +223,10 @@ function ResultsForHouseholds({
                 <Grid size={{ xs: 6 }}>
                   <SummaryBorder>
                     <LabelizedField
-                      label={`Targeted ${beneficiaryGroup?.member_label_plural}`}
+                      label={`Targeted ${beneficiaryGroup?.memberLabelPlural}`}
                     >
                       <SummaryValue>
-                        {targetPopulation.total_individuals_count || '0'}
+                        {targetPopulation.totalIndividualsCount || '0'}
                       </SummaryValue>
                     </LabelizedField>
                   </SummaryBorder>

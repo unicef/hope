@@ -42,8 +42,7 @@ function ImportedIndividualsTable({
 }: ImportedIndividualsTableProps): ReactElement {
   const [showDuplicates, setShowDuplicates] = useState(false);
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
-
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const initialVariables = {
     rdiId,
     household,
@@ -55,10 +54,10 @@ function ImportedIndividualsTable({
   };
 
   const replacements = {
-    id: (_beneficiaryGroup) => `${_beneficiaryGroup?.member_label} ID`,
-    full_name: (_beneficiaryGroup) => _beneficiaryGroup?.member_label,
+    id: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
+    full_name: (_beneficiaryGroup) => _beneficiaryGroup?.memberLabel,
     relationship: (_beneficiaryGroup) =>
-      `Relationship to Head of ${_beneficiaryGroup?.group_label}`,
+      `Relationship to Head of ${_beneficiaryGroup?.groupLabel}`,
   };
 
   const adjustedMergedIndividualsHeadCells = adjustHeadCells(

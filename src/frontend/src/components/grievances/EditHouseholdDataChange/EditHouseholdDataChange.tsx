@@ -27,7 +27,7 @@ function EditHouseholdDataChange({
   const location = useLocation();
   const { businessArea, programId } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const isEditTicket = location.pathname.includes('edit-ticket');
   const household: HouseholdDetail = values.selectedHousehold;
 
@@ -71,7 +71,7 @@ function EditHouseholdDataChange({
 
   if (!household) {
     return (
-      <div>{`You have to select a ${beneficiaryGroup?.group_label} earlier`}</div>
+      <div>{`You have to select a ${beneficiaryGroup?.groupLabel} earlier`}</div>
     );
   }
   if (fullHouseholdLoading || householdFieldsLoading || !fullHousehold) {
@@ -84,7 +84,7 @@ function EditHouseholdDataChange({
     !isEditTicket && (
       <>
         <Title>
-          <Typography variant="h6">{`${beneficiaryGroup?.group_label} Data`}</Typography>
+          <Typography variant="h6">{`${beneficiaryGroup?.groupLabel} Data`}</Typography>
         </Title>
         <Grid container spacing={3}>
           <FieldArray

@@ -65,7 +65,7 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
       permissions,
     ) &&
     allowedState.includes(
-      paymentPlan.background_action_status as PaymentPlanBackgroundActionStatus,
+      paymentPlan.backgroundActionStatus as PaymentPlanBackgroundActionStatus,
     );
 
   const handleImport = async (): Promise<void> => {
@@ -100,7 +100,7 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
 
   return (
     <>
-      {canUploadReconciliation && paymentPlan.can_send_to_payment_gateway && (
+      {canUploadReconciliation && paymentPlan.canSendToPaymentGateway && (
         <Box key="import">
           <Button
             startIcon={

@@ -46,8 +46,7 @@ export function PeopleFilter({
   const location = useLocation();
   const { isAllPrograms } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
-
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
       initialFilter,
@@ -68,7 +67,7 @@ export function PeopleFilter({
 
   // Show admin area filter only for social programs
   const showAdminAreaFilter =
-    selectedProgram?.data_collecting_type?.type?.toUpperCase() ===
+    selectedProgram?.dataCollectingType?.type?.toUpperCase() ===
     DataCollectingTypeType.Social;
 
   const individualTableOrderOptions =

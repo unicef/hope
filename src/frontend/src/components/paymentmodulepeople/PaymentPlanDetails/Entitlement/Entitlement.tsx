@@ -102,7 +102,7 @@ export function Entitlement({
   const { isActiveProgram } = useProgramContext();
 
   const [steficonRuleValue, setSteficonRuleValue] = useState<string>(
-    paymentPlan.steficon_rule?.id || '',
+    paymentPlan.steficonRule?.id || '',
   );
   const options = {
     refetchQueries: () => [
@@ -148,7 +148,7 @@ export function Entitlement({
   const shouldDisableExportXlsx =
     loadingExport ||
     paymentPlan.status !== PaymentPlanStatus.Locked ||
-    paymentPlan?.background_action_status ===
+    paymentPlan?.backgroundActionStatus ===
       PaymentPlanBackgroundActionStatus.XlsxExporting ||
     !isActiveProgram;
 
@@ -204,7 +204,7 @@ export function Entitlement({
                     loadingSetSteficonRule ||
                     !steficonRuleValue ||
                     paymentPlan.status !== PaymentPlanStatus.Locked ||
-                    paymentPlan.background_action_status ===
+                    paymentPlan.backgroundActionStatus ===
                       PaymentPlanBackgroundActionStatus.RuleEngineRun ||
                     !isActiveProgram
                   }
@@ -245,7 +245,7 @@ export function Entitlement({
               alignItems="center"
               flexDirection="column"
             >
-              {paymentPlan.has_payment_list_export_file ? (
+              {paymentPlan.hasPaymentListExportFile ? (
                 <Button
                   color="primary"
                   startIcon={<DownloadIcon />}
@@ -303,20 +303,20 @@ export function Entitlement({
                   paymentPlan={paymentPlan}
                 />
               </Box>
-              {paymentPlan?.imported_file_name ? (
+              {paymentPlan?.importedFileName ? (
                 <Box alignItems="center" display="flex">
                   <SpinaczIconContainer>
                     <AttachFileIcon fontSize="inherit" />
                   </SpinaczIconContainer>
                   <Box mr={1}>
                     <GreyTextSmall data-cy="imported-file-name">
-                      {paymentPlan?.imported_file_name}
+                      {paymentPlan?.importedFileName}
                     </GreyTextSmall>
                   </Box>
                   <GreyTextSmall>
-                    {paymentPlan?.imported_file_name ? (
+                    {paymentPlan?.importedFileName ? (
                       <UniversalMoment>
-                        {paymentPlan?.imported_file_date}
+                        {paymentPlan?.importedFileDate}
                       </UniversalMoment>
                     ) : null}
                   </GreyTextSmall>
@@ -331,12 +331,12 @@ export function Entitlement({
             </Box>
           </Box>
         </Box>
-        {paymentPlan.total_entitled_quantity_usd ? (
+        {paymentPlan.totalEntitledQuantityUsd ? (
           <>
             <Divider />
             <LabelizedField label={t('Total Entitled Quantity')}>
               <BigValue data-cy="total-entitled-quantity-usd">
-                {`${paymentPlan.total_entitled_quantity} ${paymentPlan.currency} (${paymentPlan.total_entitled_quantity_usd} USD)`}
+                {`${paymentPlan.totalEntitledQuantity} ${paymentPlan.currency} (${paymentPlan.totalEntitledQuantityUsd} USD)`}
               </BigValue>
             </LabelizedField>
           </>

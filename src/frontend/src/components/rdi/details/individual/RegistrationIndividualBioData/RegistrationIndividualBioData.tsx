@@ -42,8 +42,7 @@ export function RegistrationIndividualBioData({
   const { baseUrl } = useBaseUrl();
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
-
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const relationshipChoicesDict = choicesToDict(
     choicesData.relationshipChoices,
   );
@@ -154,7 +153,7 @@ export function RegistrationIndividualBioData({
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
-          <LabelizedField label={t(`${beneficiaryGroup?.group_label} ID`)}>
+          <LabelizedField label={t(`${beneficiaryGroup?.groupLabel} ID`)}>
             {' '}
             {individual?.household?.id ? (
               <ContentLink

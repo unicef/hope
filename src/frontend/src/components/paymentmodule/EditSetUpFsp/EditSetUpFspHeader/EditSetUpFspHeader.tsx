@@ -17,13 +17,13 @@ export function EditSetUpFspHeader({
   const location = useLocation();
   const { t } = useTranslation();
   const { paymentPlanId } = useParams();
-  const is_follow_up = location.pathname.indexOf('followup') !== -1;
+  const isFollowUp = location.pathname.indexOf('followup') !== -1;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
       to: `/${baseUrl}/payment-module/${
-        is_follow_up ? 'followup-payment-plans' : 'payment-plans'
+        isFollowUp ? 'followup-payment-plans' : 'payment-plans'
       }/${paymentPlanId}`,
     },
   ];

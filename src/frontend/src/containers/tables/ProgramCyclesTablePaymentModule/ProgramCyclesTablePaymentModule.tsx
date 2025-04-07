@@ -8,16 +8,14 @@ import { UniversalRestTable } from '@components/rest/UniversalRestTable/Universa
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  fetchProgramCycles,
   finishProgramCycle,
-  ProgramCycle,
-  ProgramCyclesQuery,
   reactivateProgramCycle,
 } from '@api/programCycleApi';
 import { BlackLink } from '@core/BlackLink';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@mui/material';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { RestService } from '@restgenerated/services/RestService';
 
 interface ProgramCyclesTablePaymentModuleProps {
   program;
@@ -45,7 +43,11 @@ export const ProgramCyclesTablePaymentModule = ({
   const { data, refetch, error, isLoading } = useQuery({
     queryKey: ['programCycles', businessArea, program.id, queryVariables],
     queryFn: async () => {
-      return fetchProgramCycles(businessArea, program.id, queryVariables);
+      return RestService.restBusinessAreasProgramsCyclesList({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+        queryVariables,
+      });
     },
   });
 
@@ -120,13 +122,13 @@ export const ProgramCyclesTablePaymentModule = ({
         align="right"
         data-cy="program-cycle-total-entitled-quantity-usd"
       >
-        {row.total_entitled_quantity_usd || '-'}
+        {row.totalEntitledQuantityUsd || '-'}
       </TableCell>
       <TableCell data-cy="program-cycle-start-date">
-        <UniversalMoment>{row.start_date}</UniversalMoment>
+        <UniversalMoment>{row.startDate}</UniversalMoment>
       </TableCell>
       <TableCell data-cy="program-cycle-end-date">
-        <UniversalMoment>{row.end_date}</UniversalMoment>
+        <UniversalMoment>{row.endDate}</UniversalMoment>
       </TableCell>
       <TableCell data-cy="program-cycle-details-btn">
         {row.status === 'Finished' && (

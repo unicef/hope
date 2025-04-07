@@ -38,12 +38,12 @@ export function ExcludeSection({
 }: ExcludeSectionProps): ReactElement {
   const {
     status,
-    background_action_status,
-    exclusion_reason,
-    exclude_household_error,
+    backgroundActionStatus,
+    exclusionReason,
+    excludeHouseholdError,
   } = paymentPlan;
 
-  const initialExcludedIds = paymentPlan?.excluded_households?.map(
+  const initialExcludedIds = paymentPlan?.excludedHouseholds?.map(
     (el) => el.unicefId,
   );
   const [isExclusionsOpen, setExclusionsOpen] = useState(initialOpen);
@@ -88,7 +88,7 @@ export function ExcludeSection({
     setIdsValue(event.target.value);
   };
   const initialValues = {
-    exclusionReason: paymentPlan.exclusion_reason || '',
+    exclusionReason: paymentPlan.exclusionReason || '',
   };
   const validationSchema = Yup.object().shape({
     exclusionReason: Yup.string().max(500, t('Too long')),
@@ -195,7 +195,7 @@ export function ExcludeSection({
       !hasExcludePermission ||
       !hasOpenOrLockedStatus ||
       excludedIds.length === 0 ||
-      Boolean(background_action_status);
+      Boolean(backgroundActionStatus);
 
     const editExclusionsDisabled =
       !hasExcludePermission || !hasOpenOrLockedStatus;
@@ -291,7 +291,7 @@ export function ExcludeSection({
     const applyDisabled =
       !hasExcludePermission ||
       !hasOpenOrLockedStatus ||
-      Boolean(background_action_status);
+      Boolean(backgroundActionStatus);
 
     if (isEdit || numberOfExcluded === 0) {
       return (
@@ -375,14 +375,14 @@ export function ExcludeSection({
             ) : null}
             <Collapse in={isExclusionsOpen}>
               <Box display="flex" flexDirection="column">
-                {isExclusionsOpen && exclusion_reason && !isEdit ? (
+                {isExclusionsOpen && exclusionReason && !isEdit ? (
                   <Grid container>
                     <Grid size={{ xs: 8 }}>
                       <Box display="flex" flexDirection="column">
                         <Box
                           display="flex"
                           alignItems={
-                            exclusion_reason.length > 100
+                            exclusionReason.length > 100
                               ? 'flex-start'
                               : 'center'
                           }
@@ -392,11 +392,11 @@ export function ExcludeSection({
                           <Box mr={2}>
                             <GreyText>{t('Reason')}:</GreyText>
                           </Box>
-                          <Typography>{exclusion_reason}</Typography>
+                          <Typography>{exclusionReason}</Typography>
                         </Box>
-                        {exclude_household_error && (
+                        {excludeHouseholdError && (
                           <Box display="flex" flexDirection="column" mt={2}>
-                            {formatErrorToArray(exclude_household_error).map(
+                            {formatErrorToArray(excludeHouseholdError).map(
                               (el) => (
                                 <FormHelperText key={el} error>
                                   {el}

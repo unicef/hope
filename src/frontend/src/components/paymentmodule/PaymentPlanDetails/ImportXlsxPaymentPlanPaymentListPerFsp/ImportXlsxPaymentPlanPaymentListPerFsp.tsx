@@ -65,9 +65,9 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
       permissions,
     ) &&
     allowedState.includes(
-      paymentPlan.background_action_status as PaymentPlanBackgroundActionStatus,
+      paymentPlan.backgroundActionStatus as PaymentPlanBackgroundActionStatus,
     ) &&
-    paymentPlan.fsp_communication_channel == 'XLSX';
+    paymentPlan.fspCommunicationChannel == 'XLSX';
 
   const handleImport = async (): Promise<void> => {
     if (fileToImport) {

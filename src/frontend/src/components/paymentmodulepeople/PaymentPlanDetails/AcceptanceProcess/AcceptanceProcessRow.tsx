@@ -13,7 +13,7 @@ const StyledBox = styled(Box)`
 `;
 
 interface AcceptanceProcessRowProps {
-  acceptanceProcess: PaymentPlanDetail['approval_process'][number];
+  acceptanceProcess: PaymentPlanDetail['approvalProcess'][number];
   paymentPlan: PaymentPlanDetail;
 }
 
@@ -24,16 +24,16 @@ export function AcceptanceProcessRow({
   const { t } = useTranslation();
   const {
     actions,
-    sent_for_approval_date,
-    sent_for_approval_by,
-    sent_for_authorization_date,
-    sent_for_authorization_by,
-    sent_for_finance_release_date,
-    sent_for_finance_release_by,
-    rejected_on,
+    sentForApprovalDate,
+    sentForApprovalBy,
+    sentForAuthorizationDate,
+    sentForAuthorizationBy,
+    sentForFinanceReleaseDate,
+    sentForFinanceReleaseBy,
+    rejectedOn,
   } = acceptanceProcess;
 
-  const { approval_process } = paymentPlan;
+  const { approvalProcess } = paymentPlan;
 
   const getRejectedOnString = (stage: string): string => {
     switch (stage) {
@@ -57,9 +57,9 @@ export function AcceptanceProcessRow({
           {actions?.approval?.length > 0 && (
             <GreyInfoCard
               topMessage={`Sent for approval by ${renderUserName(
-                sent_for_approval_by,
+                sentForApprovalBy,
               )}`}
-              topDate={sent_for_approval_date}
+              topDate={sentForApprovalDate}
               approvals={actions.approval}
             />
           )}
@@ -68,9 +68,9 @@ export function AcceptanceProcessRow({
           {actions.authorization.length > 0 && (
             <GreyInfoCard
               topMessage={`Sent for authorization by ${renderUserName(
-                sent_for_authorization_by,
+                sentForAuthorizationBy,
               )}`}
-              topDate={sent_for_authorization_date}
+              topDate={sentForAuthorizationDate}
               approvals={actions.authorization}
             />
           )}
@@ -79,9 +79,9 @@ export function AcceptanceProcessRow({
           {actions.financeRelease.length > 0 && (
             <GreyInfoCard
               topMessage={`Sent for review by ${renderUserName(
-                sent_for_finance_release_by,
+                sentForFinanceReleaseBy,
               )}`}
-              topDate={sent_for_finance_release_date}
+              topDate={sentForFinanceReleaseDate}
               approvals={actions.financeRelease}
             />
           )}
@@ -89,27 +89,27 @@ export function AcceptanceProcessRow({
         {actions.reject.length > 0 && (
           <Grid container>
             <Grid size={{ xs: 4 }}>
-              {rejected_on === 'IN_APPROVAL' && (
+              {rejectedOn === 'IN_APPROVAL' && (
                 <GreyInfoCard
-                  topMessage={getRejectedOnString(rejected_on)}
+                  topMessage={getRejectedOnString(rejectedOn)}
                   topDate={actions.reject[0]?.createdAt}
                   approvals={actions.reject}
                 />
               )}
             </Grid>
             <Grid size={{ xs: 4 }}>
-              {rejected_on === 'IN_AUTHORIZATION' && (
+              {rejectedOn === 'IN_AUTHORIZATION' && (
                 <GreyInfoCard
-                  topMessage={getRejectedOnString(rejected_on)}
+                  topMessage={getRejectedOnString(rejectedOn)}
                   topDate={actions.reject[0]?.createdAt}
                   approvals={actions.reject}
                 />
               )}
             </Grid>
             <Grid size={{ xs: 4 }}>
-              {rejected_on === 'IN_REVIEW' && (
+              {rejectedOn === 'IN_REVIEW' && (
                 <GreyInfoCard
-                  topMessage={getRejectedOnString(rejected_on)}
+                  topMessage={getRejectedOnString(rejectedOn)}
                   topDate={actions.reject[0]?.createdAt}
                   approvals={actions.reject}
                 />
@@ -118,7 +118,7 @@ export function AcceptanceProcessRow({
           </Grid>
         )}
       </Grid>
-      {approval_process.length > 1 && <DividerLine />}
+      {approvalProcess.length > 1 && <DividerLine />}
     </StyledBox>
   );
 }

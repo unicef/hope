@@ -192,14 +192,14 @@ export function PaymentPlansFilters({
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={Boolean(filter.is_follow_up)}
-                  value={filter.is_follow_up}
+                  checked={Boolean(filter.isFollowUp)}
+                  value={filter.isFollowUp}
                   color="primary"
                   onChange={(e) => {
                     if (e.target.checked) {
-                      handleFilterChange('is_follow_up', true);
+                      handleFilterChange('isFollowUp', true);
                     } else {
-                      handleFilterChange('is_follow_up', false);
+                      handleFilterChange('isFollowUp', false);
                     }
                   }}
                 />

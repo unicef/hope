@@ -53,11 +53,11 @@ export function ApprovePaymentPlan({
 
   const shouldShowLastApproverMessage = (): boolean => {
     const approvalNumberRequired =
-      paymentPlan.approval_process?.[paymentPlan.approval_process.length - 1]
-        ?.approval_number_required;
+      paymentPlan.approvalProcess?.[paymentPlan.approvalProcess.length - 1]
+        ?.approvalNumberRequired;
 
     const approvalsCount =
-      paymentPlan.approval_process?.[paymentPlan.approval_process.length - 1]
+      paymentPlan.approvalProcess?.[paymentPlan.approvalProcess.length - 1]
         .actions?.approval?.length;
 
     return approvalNumberRequired - 1 === approvalsCount;

@@ -39,8 +39,8 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
         programSlug: programId,
       }),
     refetchInterval: () => {
-      const { background_action_status } = paymentPlan;
-      if (['BUILDING', 'PENDING'].includes(background_action_status)) {
+      const { backgroundActionStatus } = paymentPlan;
+      if (['BUILDING', 'PENDING'].includes(backgroundActionStatus)) {
         return 3000;
       }
 
@@ -57,7 +57,7 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
 
   const canDuplicate =
     hasPermissions(PERMISSIONS.TARGETING_DUPLICATE, permissions) &&
-    Boolean(paymentPlan.targeting_criteria);
+    Boolean(paymentPlan.targetingCriteria);
 
   return (
     <>

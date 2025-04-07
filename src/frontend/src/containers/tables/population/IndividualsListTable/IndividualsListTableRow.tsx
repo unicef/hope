@@ -45,11 +45,11 @@ export function IndividualsListTableRow({
         <IndividualFlags individual={individual} />
       </TableCell>
       <TableCell align="left">
-        <BlackLink to={individualDetailsPath}>{individual.unicef_id}</BlackLink>
+        <BlackLink to={individualDetailsPath}>{individual.unicefId}</BlackLink>
       </TableCell>
-      <AnonTableCell>{individual.full_name}</AnonTableCell>
+      <AnonTableCell>{individual.fullName}</AnonTableCell>
       <TableCell align="left">
-        {individual.household ? individual.household.unicef_id : ''}
+        {individual.household ? individual.household.unicefId : ''}
       </TableCell>
       <TableCell align="left">
         {relationshipChoicesDict[individual.relationship]}

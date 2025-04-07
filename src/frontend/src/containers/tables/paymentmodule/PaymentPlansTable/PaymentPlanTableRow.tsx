@@ -25,7 +25,7 @@ export const PaymentPlanTableRow = ({
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
   const paymentPlanPath = `/${baseUrl}/payment-module/${
-    plan.is_follow_up ? 'followup-payment-plans' : 'payment-plans'
+    plan.isFollowUp ? 'followup-payment-plans' : 'payment-plans'
   }/${plan.id}`;
   const handleClick = (): void => {
     navigate(paymentPlanPath);
@@ -36,15 +36,15 @@ export const PaymentPlanTableRow = ({
   if (!statusChoicesData) return null;
 
   const followUpLinks = (): ReactElement => {
-    if (!plan.follow_ups?.length) return <>-</>;
+    if (!plan.followUps?.length) return <>-</>;
     return (
       <Box display="flex" flexDirection="column">
-        {plan.follow_ups?.map((followUp) => {
+        {plan.followUps?.map((followUp) => {
           const followUpPaymentPlanPath = `/${baseUrl}/payment-module/followup-payment-plans/${followUp?.id}`;
           return (
             <Box key={followUp?.id} mb={1}>
               <BlackLink key={followUp?.id} to={followUpPaymentPlanPath}>
-                {followUp?.unicef_id}
+                {followUp?.unicefId}
               </BlackLink>
             </Box>
           );
@@ -61,11 +61,11 @@ export const PaymentPlanTableRow = ({
       key={plan.id}
     >
       <TableCell align="left">
-        {plan.is_follow_up ? 'Follow-up: ' : ''}
+        {plan.isFollowUp ? 'Follow-up: ' : ''}
         {canViewDetails ? (
-          <BlackLink to={paymentPlanPath}>{plan.unicef_id}</BlackLink>
+          <BlackLink to={paymentPlanPath}>{plan.unicefId}</BlackLink>
         ) : (
-          plan.unicef_id
+          plan.unicefId
         )}
       </TableCell>
       <TableCell align="left">
@@ -75,11 +75,11 @@ export const PaymentPlanTableRow = ({
         />
       </TableCell>
       <TableCell align="left">{plan.name}</TableCell>
-      <TableCell align="left">{plan.total_households_count || '-'}</TableCell>
+      <TableCell align="left">{plan.totalHouseholdsCount || '-'}</TableCell>
       <TableCell align="left">{plan.currency}</TableCell>
       <TableCell align="right">
         {`${formatCurrencyWithSymbol(
-          Number(plan.total_entitled_quantity),
+          Number(plan.totalEntitledQuantity),
           plan.currency,
         )}`}
       </TableCell>
@@ -96,7 +96,7 @@ export const PaymentPlanTableRow = ({
         )}`}
       </TableCell>
       <TableCell align="left">
-        <UniversalMoment>{plan.dispersion_start_date}</UniversalMoment>
+        <UniversalMoment>{plan.dispersion_startDate}</UniversalMoment>
       </TableCell>
       <TableCell align="left">
         <UniversalMoment>{plan.dispersion_end_date}</UniversalMoment>

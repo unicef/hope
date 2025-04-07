@@ -24,8 +24,7 @@ function PaymentPlansTable({
   const { t } = useTranslation();
   const { programId, businessArea } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
-
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const initialQueryVariables = {
     businessArea,
     search: filter.search,
@@ -34,7 +33,7 @@ function PaymentPlansTable({
     totalEntitledQuantityTo: filter.totalEntitledQuantityTo || null,
     dispersionStartDate: filter.dispersionStartDate || null,
     dispersionEndDate: filter.dispersionEndDate || null,
-    is_follow_up: filter.is_follow_up ? true : null,
+    isFollowUp: filter.isFollowUp ? true : null,
     program: programId,
     isPaymentPlan: true,
   };
@@ -58,7 +57,7 @@ function PaymentPlansTable({
 
   const replacements = {
     totalHouseholdsCount: (_beneficiaryGroup) =>
-      `Num. of ${_beneficiaryGroup?.group_labelPlural}`,
+      `Num. of ${_beneficiaryGroup?.groupLabelPlural}`,
   };
 
   const adjustedHeadCells = adjustHeadCells(

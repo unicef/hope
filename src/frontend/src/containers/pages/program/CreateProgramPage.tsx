@@ -41,8 +41,7 @@ export const CreateProgramPage = (): ReactElement => {
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
-
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { data: treeData, loading: treeLoading } = useAllAreasTreeQuery({
     variables: { businessArea },
   });
@@ -273,7 +272,7 @@ export const CreateProgramPage = (): ReactElement => {
           {
             title: t('Programme Time Series Fields'),
             description: t(
-              `The Time Series Fields feature allows serial updating of ${beneficiaryGroup?.member_label} data through an XLSX file.`,
+              `The Time Series Fields feature allows serial updating of ${beneficiaryGroup?.memberLabel} data through an XLSX file.`,
             ),
             dataCy: 'step-button-time-series-fields',
           },

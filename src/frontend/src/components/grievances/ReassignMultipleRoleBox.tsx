@@ -42,8 +42,7 @@ export function ReassignMultipleRoleBox({
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
-
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const reassignData = JSON.parse(
     ticket.needsAdjudicationTicketDetails.roleReassignData,
   );
@@ -77,9 +76,7 @@ export function ReassignMultipleRoleBox({
                   <>{capitalize(householdAndRole.role)} Collector</>
                 </LabelizedField>
                 <LabelizedField
-                  label={t(
-                    `${beneficiaryGroup?.member_label.toUpperCase()} ID`,
-                  )}
+                  label={t(`${beneficiaryGroup?.memberLabel.toUpperCase()} ID`)}
                 >
                   <ContentLink
                     href={`/${baseUrl}/population/individuals/${householdAndRole.individual.id}`}
@@ -89,7 +86,7 @@ export function ReassignMultipleRoleBox({
                   {householdAndRole.individual.fullName}
                 </LabelizedField>
                 <LabelizedField
-                  label={t(`${beneficiaryGroup?.group_label.toUpperCase()} ID`)}
+                  label={t(`${beneficiaryGroup?.groupLabel.toUpperCase()} ID`)}
                 >
                   <ContentLink
                     href={`/${baseUrl}/population/household/${householdAndRole.household.id}`}
@@ -127,11 +124,11 @@ export function ReassignMultipleRoleBox({
               <Box mb={2} mt={2}>
                 <Box mb={2}>
                   <LabelizedField label={t('ROLE')}>
-                    <>{t(`Head of ${beneficiaryGroup?.group_label}`)}</>
+                    <>{t(`Head of ${beneficiaryGroup?.groupLabel}`)}</>
                   </LabelizedField>
                   <LabelizedField
                     label={t(
-                      `${beneficiaryGroup?.member_label.toUpperCase()} ID`,
+                      `${beneficiaryGroup?.memberLabel.toUpperCase()} ID`,
                     )}
                   >
                     <ContentLink
@@ -143,7 +140,7 @@ export function ReassignMultipleRoleBox({
                   </LabelizedField>
                   <LabelizedField
                     label={t(
-                      `${beneficiaryGroup?.group_label.toUpperCase()} ID`,
+                      `${beneficiaryGroup?.groupLabel.toUpperCase()} ID`,
                     )}
                   >
                     <ContentLink
@@ -180,18 +177,18 @@ export function ReassignMultipleRoleBox({
         <Typography variant="h6">
           <WarnIcon />
           {t(
-            `${beneficiaryGroup?.member_label} is the Head of ${beneficiaryGroup?.group_label} or the collector for the ${beneficiaryGroup?.group_label}`,
+            `${beneficiaryGroup?.memberLabel} is the Head of ${beneficiaryGroup?.groupLabel} or the collector for the ${beneficiaryGroup?.groupLabel}`,
           )}
         </Typography>
       </OrangeTitle>
       <Typography variant="body2">
         {t(
-          `Upon changing you will need to select new ${beneficiaryGroup?.member_label_plural} for this role.`,
+          `Upon changing you will need to select new ${beneficiaryGroup?.memberLabelPlural} for this role.`,
         )}
       </Typography>
       <Typography variant="body2">
         {t(
-          `Upon removing you will need to select new ${beneficiaryGroup?.member_label_plural} for this role.`,
+          `Upon removing you will need to select new ${beneficiaryGroup?.memberLabelPlural} for this role.`,
         )}
       </Typography>
       <Box mt={3} display="flex" flexDirection="column">

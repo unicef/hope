@@ -49,9 +49,8 @@ export function CreateFollowUpPaymentPlan({
   const { isActiveProgram } = useProgramContext();
   const { showMessage } = useSnackbar();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
-
-  const { id, total_withdrawn_households_count, unsuccessful_payments_count } =
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const { id, totalWithdrawnHouseholdsCount, unsuccessfulPaymentsCount } =
     paymentPlan;
 
   if (permissions === null) return null;
@@ -138,7 +137,7 @@ export function CreateFollowUpPaymentPlan({
               <DialogContainer>
                 <Box p={5}>
                   <Box display="flex" flexDirection="column">
-                    {unsuccessful_payments_count === 0 && (
+                    {unsuccessfulPaymentsCount === 0 && (
                       <Box mb={2}>
                         <FieldBorder color="#FF0200">
                           <GreyText>
@@ -149,12 +148,12 @@ export function CreateFollowUpPaymentPlan({
                         </FieldBorder>
                       </Box>
                     )}
-                    {total_withdrawn_households_count > 0 && (
+                    {totalWithdrawnHouseholdsCount > 0 && (
                       <Box mb={4}>
                         <FieldBorder color="#FF0200">
                           <GreyText>
                             {t(
-                              `Withdrawn ${beneficiaryGroup?.group_label} cannot be added into follow-up payment plan`,
+                              `Withdrawn ${beneficiaryGroup?.groupLabel} cannot be added into follow-up payment plan`,
                             )}
                           </GreyText>
                         </FieldBorder>
@@ -178,7 +177,7 @@ export function CreateFollowUpPaymentPlan({
                     </Grid> */}
                     <Grid size={{ xs: 6 }}>
                       <LabelizedField label={t('Unsuccessful payments')}>
-                        {unsuccessful_payments_count}
+                        {unsuccessfulPaymentsCount}
                       </LabelizedField>
                     </Grid>
                     {/* <Grid size={{xs:6}}>
@@ -191,10 +190,10 @@ export function CreateFollowUpPaymentPlan({
                     <Grid size={{ xs: 6 }}>
                       <LabelizedField
                         label={t(
-                          `Withdrawn ${beneficiaryGroup?.group_label_plural}`,
+                          `Withdrawn ${beneficiaryGroup?.groupLabelPlural}`,
                         )}
                       >
-                        {total_withdrawn_households_count}
+                        {totalWithdrawnHouseholdsCount}
                       </LabelizedField>
                     </Grid>
                   </Grid>

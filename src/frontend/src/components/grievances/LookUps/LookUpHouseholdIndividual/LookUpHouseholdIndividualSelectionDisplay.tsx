@@ -33,8 +33,7 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
   setSelectedIndividual,
 }: LookUpHouseholdIndividualSelectionDisplayProps): React.ReactElement => {
   const { selectedProgram, isSocialDctType } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
-
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const handleRemove = (type): void => {
     if (type === Types.household) {
       onValueChange('selectedHousehold', null);
@@ -55,14 +54,14 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
             <Grid container alignItems="center" justifyContent="space-between">
               <Grid>
                 <Box display="flex">
-                  {`${beneficiaryGroup?.group_label} ID`}:
+                  {`${beneficiaryGroup?.groupLabel} ID`}:
                   <BlueText>
                     &ensp;
-                    {selectedHousehold?.unicef_id || '-'}
+                    {selectedHousehold?.unicefId || '-'}
                   </BlueText>
                 </Box>
               </Grid>
-              {!disableUnselectHousehold && selectedHousehold?.unicef_id && (
+              {!disableUnselectHousehold && selectedHousehold?.unicefId && (
                 <Grid>
                   <DarkGrey>
                     <Flex>
@@ -84,7 +83,7 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
           <Grid container alignItems="center" justifyContent="space-between">
             <Grid>
               <Box display="flex">
-                {`${beneficiaryGroup?.member_label} ID`}:
+                {`${beneficiaryGroup?.memberLabel} ID`}:
                 <BlueText>
                   &ensp;
                   {selectedIndividual?.unicefId || '-'}

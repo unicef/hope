@@ -31,13 +31,13 @@ export function EditPaymentPlanHeader({
   paymentPlan,
 }: EditPaymentPlanHeaderProps): ReactElement {
   const { t } = useTranslation();
-  const { id, is_follow_up } = paymentPlan;
+  const { id, isFollowUp } = paymentPlan;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
       to: `/${baseUrl}/payment-module/${
-        is_follow_up ? 'followup-payment-plans' : 'payment-plans'
+        isFollowUp ? 'followup-payment-plans' : 'payment-plans'
       }/${id}`,
     },
   ];
@@ -46,18 +46,18 @@ export function EditPaymentPlanHeader({
     <PageHeader
       title={
         <Box display="flex" alignItems="center">
-          {t(is_follow_up ? 'Follow-up Payment Plan' : 'Payment Plan')} ID{' '}
-          {paymentPlan.unicef_id}
+          {t(isFollowUp ? 'Follow-up Payment Plan' : 'Payment Plan')} ID{' '}
+          {paymentPlan.unicefId}
           <StatusWrapper>
             <StatusBox
               status={paymentPlan.status}
               statusToColor={paymentPlanStatusToColor}
             />
           </StatusWrapper>
-          {paymentPlan.background_action_status && (
+          {paymentPlan.backgroundActionStatus && (
             <StatusWrapper>
               <StatusBox
-                status={paymentPlan.background_action_status}
+                status={paymentPlan.backgroundActionStatus}
                 statusToColor={paymentPlanBackgroundActionStatusToColor}
               />
             </StatusWrapper>

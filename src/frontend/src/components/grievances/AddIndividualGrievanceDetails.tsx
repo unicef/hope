@@ -30,8 +30,7 @@ function AddIndividualGrievanceDetails({
   const { data, loading } = useAllAddIndividualFieldsQuery();
   const [mutate] = useApproveAddIndividualDataChangeMutation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
-
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const confirm = useConfirmation();
   const { showMessage } = useSnackbar();
   if (loading) {
@@ -55,8 +54,8 @@ function AddIndividualGrievanceDetails({
   const identities = individualData?.identities;
   delete individualData.documents;
   delete individualData.identities;
-  const flexFields = individualData?.flex_fields;
-  delete individualData?.flex_fields;
+  const flexFields = individualData?.flexFields;
+  delete individualData?.flexFields;
   delete individualData.documents;
   delete individualData.identities;
   const labels =
@@ -122,11 +121,11 @@ function AddIndividualGrievanceDetails({
   ];
 
   let dialogText = t(
-    `You did not approve the following add ${beneficiaryGroup?.member_label} data. Are you sure you want to continue?`,
+    `You did not approve the following add ${beneficiaryGroup?.memberLabel} data. Are you sure you want to continue?`,
   );
   if (!ticket.addIndividualTicketDetails.approveStatus) {
     dialogText = t(
-      `You are approving the following Add ${beneficiaryGroup?.member_label} data. Are you sure you want to continue?`,
+      `You are approving the following Add ${beneficiaryGroup?.memberLabel} data. Are you sure you want to continue?`,
     );
   }
 
@@ -135,7 +134,7 @@ function AddIndividualGrievanceDetails({
       <Title>
         <Box display="flex" justifyContent="space-between">
           <Typography variant="h6">
-            {t(`${beneficiaryGroup?.member_label} Data`)}
+            {t(`${beneficiaryGroup?.memberLabel} Data`)}
           </Typography>
           {canApproveDataChange && (
             <Button

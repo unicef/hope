@@ -32,8 +32,7 @@ function LookUpProgrammesFiltersSurveys({
   const navigate = useNavigate();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
-
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
       initialFilter,
@@ -124,7 +123,7 @@ function LookUpProgrammesFiltersSurveys({
         </Grid>
         <Grid size={{ xs: 3 }}>
           <NumberTextField
-            topLabel={`Num. of ${beneficiaryGroup?.group_label_plural}`}
+            topLabel={`Num. of ${beneficiaryGroup?.groupLabelPlural}`}
             placeholder="From"
             data-cy="filters-number-of-households-min"
             value={filter.numberOfHouseholdsMin}

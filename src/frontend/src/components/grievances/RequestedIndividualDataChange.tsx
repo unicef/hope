@@ -61,9 +61,9 @@ export function RequestedIndividualDataChange({
   const paymentChannelsToRemove =
     individualData.payment_channels_to_remove || [];
   const paymentChannelsToEdit = individualData.payment_channels_to_edit || [];
-  const flexFields = individualData.flex_fields || {};
+  const flexFields = individualData.flexFields || {};
 
-  delete individualData.flex_fields;
+  delete individualData.flexFields;
   delete individualData.documents;
   delete individualData.identities;
   delete individualData.documents_to_remove;

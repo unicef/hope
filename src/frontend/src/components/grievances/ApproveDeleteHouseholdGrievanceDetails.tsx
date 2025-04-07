@@ -49,8 +49,7 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
   const { approveStatus, reasonHousehold } =
     ticket.deleteHouseholdTicketDetails;
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
-
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const validationSchema = Yup.object().shape({
     reasonHhId: Yup.string().when(
       'withdrawReason',
@@ -58,7 +57,7 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
         const value = String(withdrawReasonValue);
         if (value === 'duplicate' && !approveStatus) {
           return Yup.string()
-            .required(`${beneficiaryGroup?.group_label} Unicef Id is required`)
+            .required(`${beneficiaryGroup?.groupLabel} Unicef Id is required`)
             .max(15, 'Too long');
         }
         return Yup.string();
@@ -162,10 +161,10 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
                     <Typography variant="body2">
                       {showWithdraw()
                         ? t(
-                            `Please provide the reason of withdrawal of this ${beneficiaryGroup?.group_label}.`,
+                            `Please provide the reason of withdrawal of this ${beneficiaryGroup?.groupLabel}.`,
                           )
                         : t(
-                            `You did not approve the following ${beneficiaryGroup?.group_label} to be withdrawn. Are you sure you want to continue?`,
+                            `You did not approve the following ${beneficiaryGroup?.groupLabel} to be withdrawn. Are you sure you want to continue?`,
                           )}
                     </Typography>
                   </Box>
@@ -176,7 +175,7 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
                         choices={[
                           {
                             value: 'duplicate',
-                            name: `This ${beneficiaryGroup?.group_label} is a duplicate of another ${beneficiaryGroup?.group_label}`,
+                            name: `This ${beneficiaryGroup?.groupLabel} is a duplicate of another ${beneficiaryGroup?.groupLabel}`,
                           },
                         ]}
                         component={FormikRadioGroup}
@@ -189,7 +188,7 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
                               name="reasonHhId"
                               fullWidth
                               variant="outlined"
-                              label={`${beneficiaryGroup?.group_label} Unicef Id`}
+                              label={`${beneficiaryGroup?.groupLabel} Unicef Id`}
                               component={FormikTextField}
                               required
                             />

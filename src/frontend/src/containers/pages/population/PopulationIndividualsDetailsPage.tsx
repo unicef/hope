@@ -44,7 +44,7 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
   const { id } = useParams();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { t } = useTranslation();
 
   const { baseUrl, businessArea, programId } = useBaseUrl();
@@ -100,7 +100,7 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
 
   let breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: `${beneficiaryGroup?.group_label_plural}`,
+      title: `${beneficiaryGroup?.groupLabelPlural}`,
       to: `/${baseUrl}/population/individuals`,
     },
   ];
@@ -122,7 +122,7 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
   return (
     <>
       <PageHeader
-        title={`${t(`${beneficiaryGroup?.member_label} ID`)}: ${individual?.unicefId}`}
+        title={`${t(`${beneficiaryGroup?.memberLabel} ID`)}: ${individual?.unicefId}`}
         breadCrumbs={
           hasPermissions(
             PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST,

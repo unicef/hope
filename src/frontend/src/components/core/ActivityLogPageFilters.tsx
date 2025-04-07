@@ -28,8 +28,7 @@ export function ActivityLogPageFilters({
   const navigate = useNavigate();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
-
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
       initialFilter,
@@ -51,8 +50,8 @@ export function ActivityLogPageFilters({
 
   const modules = {
     program: 'Programme',
-    household: `${beneficiaryGroup?.group_label}`,
-    individual: `${beneficiaryGroup?.member_label}`,
+    household: `${beneficiaryGroup?.groupLabel}`,
+    individual: `${beneficiaryGroup?.memberLabel}`,
     grievanceticket: 'Grievance Tickets',
     paymentverificationplan: 'Payment Plan Payment Verification',
     targetpopulation: 'Target Population',

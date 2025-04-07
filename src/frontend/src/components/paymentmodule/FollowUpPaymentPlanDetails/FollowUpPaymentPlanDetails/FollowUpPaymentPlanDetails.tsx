@@ -28,18 +28,18 @@ export function FollowUpPaymentPlanDetails({
 }: FollowUpPaymentPlanDetailsProps): ReactElement {
   const { t } = useTranslation();
   const {
-    created_by,
+    createdBy,
     program,
     currency,
-    start_date,
-    end_date,
-    dispersion_start_date,
-    dispersion_end_date,
-    source_payment_plan: {
+    startDate,
+    endDate,
+    dispersionStartDate,
+    dispersionEndDate,
+    sourcePaymentPlan: {
       id: sourcePaymentPlanId,
-      unicef_id: sourcePaymentPlanUnicefId,
+      unicefId: sourcePaymentPlanUnicefId,
     },
-    exchange_rate,
+    exchangeRate,
   } = paymentPlan;
 
   return (
@@ -61,7 +61,7 @@ export function FollowUpPaymentPlanDetails({
             </Grid>
             <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Created By')}>
-                {renderUserName(created_by)}
+                {renderUserName(createdBy)}
               </LabelizedField>
             </Grid>
             <Grid size={{ xs: 3 }}>
@@ -85,29 +85,29 @@ export function FollowUpPaymentPlanDetails({
             </Grid>
             <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Start Date')}>
-                <UniversalMoment>{start_date}</UniversalMoment>
+                <UniversalMoment>{startDate}</UniversalMoment>
               </LabelizedField>
             </Grid>
             <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('End Date')}>
-                <UniversalMoment>{end_date}</UniversalMoment>
+                <UniversalMoment>{endDate}</UniversalMoment>
               </LabelizedField>
             </Grid>
             <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Dispersion Start Date')}>
-                <UniversalMoment>{dispersion_start_date}</UniversalMoment>
+                <UniversalMoment>{dispersionStartDate}</UniversalMoment>
               </LabelizedField>
             </Grid>
             <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Dispersion End Date')}>
-                <UniversalMoment>{dispersion_end_date}</UniversalMoment>
+                <UniversalMoment>{dispersionEndDate}</UniversalMoment>
               </LabelizedField>
             </Grid>
             <Grid size={{ xs: 3 }}>
               <Box display="flex" alignItems="center">
                 <Box mr={1}>
                   <LabelizedField label={t('FX Rate Applied')}>
-                    {exchange_rate}
+                    {exchangeRate}
                   </LabelizedField>
                 </Box>
                 <Tooltip

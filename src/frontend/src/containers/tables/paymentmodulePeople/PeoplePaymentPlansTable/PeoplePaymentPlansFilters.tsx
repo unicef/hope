@@ -156,20 +156,20 @@ export const PeoplePaymentPlansFilters = ({
             minDateMessage={<span />}
           />
         </Grid>
-        is_follow_up
+        isFollowUp
         <Grid size={{ xs: 12 }}>
           <Box ml={2}>
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={Boolean(filter.is_follow_up)}
-                  value={filter.is_follow_up}
+                  checked={Boolean(filter.isFollowUp)}
+                  value={filter.isFollowUp}
                   color="primary"
                   onChange={(e) => {
                     if (e.target.checked) {
-                      handleFilterChange('is_follow_up', true);
+                      handleFilterChange('isFollowUp', true);
                     } else {
-                      handleFilterChange('is_follow_up', false);
+                      handleFilterChange('isFollowUp', false);
                     }
                   }}
                 />

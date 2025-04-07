@@ -84,7 +84,7 @@ export const AuthorizationSection: FC<AuthorizationSectionProps> = ({
 
   const selectedPlansUnicefIds = inAuthorizationData?.results
     .filter((plan) => selectedAuthorized.includes(plan.id))
-    .map((plan) => plan.unicef_id);
+    .map((plan) => plan.unicefId);
 
   const columns = [
     {
@@ -93,7 +93,7 @@ export const AuthorizationSection: FC<AuthorizationSectionProps> = ({
       width: 200,
       renderCell: (params) => (
         <BlackLink
-          to={`/${businessArea}/programs/${params.row.program_id}/payment-module/${params.row.is_follow_up ? 'followup-payment-plans' : 'payment-plans'}/${params.row.id}`}
+          to={`/${businessArea}/programs/${params.row.program_id}/payment-module/${params.row.isFollowUp ? 'followup-payment-plans' : 'payment-plans'}/${params.row.id}`}
           newTab={true}
         >
           {params.value}

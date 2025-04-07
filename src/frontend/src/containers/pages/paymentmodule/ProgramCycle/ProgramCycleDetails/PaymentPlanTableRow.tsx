@@ -31,11 +31,11 @@ export const PaymentPlanTableRow = ({
   return (
     <ClickableTableRow key={paymentPlan.id}>
       <TableCell align="left">
-        {paymentPlan.is_follow_up ? 'Follow-up: ' : ''}
+        {paymentPlan.isFollowUp ? 'Follow-up: ' : ''}
         {canViewDetails ? (
-          <BlackLink to={paymentPlanPath}>{paymentPlan.unicef_id}</BlackLink>
+          <BlackLink to={paymentPlanPath}>{paymentPlan.unicefId}</BlackLink>
         ) : (
-          paymentPlan.unicef_id
+          paymentPlan.unicefId
         )}
       </TableCell>
       <TableCell align="left">
@@ -45,22 +45,22 @@ export const PaymentPlanTableRow = ({
         />
       </TableCell>
       <TableCell align="left">
-        {paymentPlan.total_households_count || '-'}
+        {paymentPlan.totalHouseholdsCount || '-'}
       </TableCell>
       <TableCell align="right">
-        {`${formatCurrencyWithSymbol(Number(paymentPlan.total_entitled_quantity), paymentPlan.currency)}`}
+        {`${formatCurrencyWithSymbol(Number(paymentPlan.totalEntitledQuantity), paymentPlan.currency)}`}
       </TableCell>
       <TableCell align="right">
-        {`${formatCurrencyWithSymbol(Number(paymentPlan.total_undelivered_quantity), paymentPlan.currency)}`}
+        {`${formatCurrencyWithSymbol(Number(paymentPlan.totalUndeliveredQuantity), paymentPlan.currency)}`}
       </TableCell>
       <TableCell align="right">
-        {`${formatCurrencyWithSymbol(Number(paymentPlan.total_delivered_quantity), paymentPlan.currency)}`}
+        {`${formatCurrencyWithSymbol(Number(paymentPlan.totalDeliveredQuantity), paymentPlan.currency)}`}
       </TableCell>
       <TableCell align="left">
-        <UniversalMoment>{paymentPlan.dispersion_start_date}</UniversalMoment>
+        <UniversalMoment>{paymentPlan.dispersionStartDate}</UniversalMoment>
       </TableCell>
       <TableCell align="left">
-        <UniversalMoment>{paymentPlan.dispersion_end_date}</UniversalMoment>
+        <UniversalMoment>{paymentPlan.dispersionEndDate}</UniversalMoment>
       </TableCell>
 
       <TableCell align="left">

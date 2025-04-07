@@ -175,10 +175,10 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
         {row.number_of_records}
       </TableCell>
       <TableCell data-cy={`template-created-at-${row.id}`}>
-        <UniversalMoment>{row.created_at}</UniversalMoment>
+        <UniversalMoment>{row.createdAt}</UniversalMoment>
       </TableCell>
       <TableCell data-cy={`template-created-by-${row.id}`}>
-        {row.created_by}
+        {row.createdBy}
       </TableCell>
       <TableCell data-cy={`template-details-btn-${row.id}`}>
         <IconButton color="primary" onClick={() => handleDialogOpen(row)}>

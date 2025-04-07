@@ -42,7 +42,7 @@ export const FollowUpPaymentPlansModal = ({
   const [open, setOpen] = useState(false);
   const { baseUrl } = useBaseUrl();
 
-  const followUps = paymentPlan.follow_ups || [];
+  const followUps = paymentPlan.followUps || [];
 
   if (!followUps.length) return null;
 
@@ -52,11 +52,11 @@ export const FollowUpPaymentPlansModal = ({
         <BlackLink
           to={`/${baseUrl}/payment-module/followup-payment-plans/${row.id}`}
         >
-          {row.unicef_id}
+          {row.unicefId}
         </BlackLink>
       </TableCell>
       <TableCell align="left">
-        <UniversalMoment>{row.dispersion_start_date}</UniversalMoment>
+        <UniversalMoment>{row.dispersion_startDate}</UniversalMoment>
       </TableCell>
       <TableCell align="left">
         <UniversalMoment>{row.dispersion_end_date}</UniversalMoment>
@@ -86,10 +86,10 @@ export const FollowUpPaymentPlansModal = ({
                     to={`/${baseUrl}/payment-module/payment-plans
                 /${paymentPlan.id}`}
                   >
-                    {paymentPlan.unicef_id}
+                    {paymentPlan.unicefId}
                   </BlackLink>
                 ) : (
-                  paymentPlan.unicef_id
+                  paymentPlan.unicefId
                 )}
               </LabelizedField>
             </Box>

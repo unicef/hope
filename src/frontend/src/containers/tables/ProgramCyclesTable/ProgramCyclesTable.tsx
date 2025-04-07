@@ -124,13 +124,13 @@ const ProgramCyclesTablePaymentModule = ({
         align="right"
         data-cy="program-cycle-total-entitled-quantity-usd"
       >
-        {formatCurrencyWithSymbol(row.total_entitled_quantity_usd)}
+        {formatCurrencyWithSymbol(row.totalEntitledQuantityUsd)}
       </TableCell>
       <TableCell data-cy="program-cycle-start-date">
-        <UniversalMoment>{row.start_date}</UniversalMoment>
+        <UniversalMoment>{row.startDate}</UniversalMoment>
       </TableCell>
       <TableCell data-cy="program-cycle-end-date">
-        <UniversalMoment>{row.end_date}</UniversalMoment>
+        <UniversalMoment>{row.endDate}</UniversalMoment>
       </TableCell>
       <TableCell data-cy="program-cycle-details-btn">
         {row.status === 'Finished' && (

@@ -41,7 +41,7 @@ function PaymentDetailsPage(): ReactElement {
   });
 
   const paymentPlanStatus = payment.parent?.status;
-  const paymentPlanIsFollowUp = payment.parent?.is_follow_up;
+  const paymentPlanIsFollowUp = payment.parent?.isFollowUp;
   const permissions = usePermissions();
   const { baseUrl } = useBaseUrl();
   if (loading || caLoading) return <LoadingComponent />;
@@ -88,9 +88,9 @@ function PaymentDetailsPage(): ReactElement {
   return (
     <>
       <PageHeader
-        title={`Payment ${payment.unicef_id}`}
+        title={`Payment ${payment.unicefId}`}
         breadCrumbs={breadCrumbsItems}
-        flags={<AdminButton adminUrl={payment.admin_url} />}
+        flags={<AdminButton adminUrl={payment.adminUrl} />}
       >
         {renderButton()}
       </PageHeader>

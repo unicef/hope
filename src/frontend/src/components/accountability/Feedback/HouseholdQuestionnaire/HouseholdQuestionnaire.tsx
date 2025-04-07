@@ -19,14 +19,13 @@ function HouseholdQuestionnaire({
   const { t } = useTranslation();
   const selectedHouseholdData = values.selectedHousehold;
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
-
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   return (
     <Grid container spacing={6}>
       {[
         {
           name: 'questionnaire_size',
-          label: `${beneficiaryGroup?.group_label} Size`,
+          label: `${beneficiaryGroup?.groupLabel} Size`,
           value: selectedHouseholdData.size,
           size: 3,
         },
@@ -50,7 +49,7 @@ function HouseholdQuestionnaire({
         },
         {
           name: 'questionnaire_headOfHousehold',
-          label: `Head of ${beneficiaryGroup?.group_label}`,
+          label: `Head of ${beneficiaryGroup?.groupLabel}`,
           value: (
             <ContentLink
               href={`/${baseUrl}/population/individuals/${selectedHouseholdData.headOfHousehold?.id}`}

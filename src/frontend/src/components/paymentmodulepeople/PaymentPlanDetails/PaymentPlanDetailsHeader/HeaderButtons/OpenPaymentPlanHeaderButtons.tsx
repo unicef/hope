@@ -25,7 +25,7 @@ export function OpenPaymentPlanHeaderButtons({
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const { isActiveProgram } = useProgramContext();
-  const { id, is_follow_up } = paymentPlan;
+  const { id, isFollowUp } = paymentPlan;
 
   return (
     <Box display="flex" alignItems="center">
@@ -38,7 +38,7 @@ export function OpenPaymentPlanHeaderButtons({
             startIcon={<EditRounded />}
             component={Link}
             to={`/${baseUrl}/payment-module/${
-              is_follow_up ? 'followup-payment-plans' : 'payment-plans'
+              isFollowUp ? 'followup-payment-plans' : 'payment-plans'
             }/${id}/edit`}
             disabled={!isActiveProgram}
           >

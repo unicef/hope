@@ -34,7 +34,7 @@ export const PaymentPlanDetailsHeader = ({
 }: PaymentPlanDetailsHeaderProps): ReactElement => {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
-  const programCycleId = paymentPlan.program_cycle?.id;
+  const programCycleId = paymentPlan.programCycle?.id;
   const { data: programCycleData } = useQuery({
     queryKey: [
       'programCyclesDetails',
@@ -182,7 +182,7 @@ export const PaymentPlanDetailsHeader = ({
         <Box display="flex" alignItems="center">
           {t('Payment Plan')} ID:{' '}
           <Box ml={1} mr={2}>
-            <span data-cy="pp-unicef-id">{paymentPlan.unicef_id}</span>
+            <span data-cy="pp-unicef-id">{paymentPlan.unicefId}</span>
           </Box>
           <Box mr={2}>
             <StatusBox
@@ -191,9 +191,9 @@ export const PaymentPlanDetailsHeader = ({
             />
           </Box>
           <Box mr={2}>
-            {paymentPlan.background_action_status && (
+            {paymentPlan.backgroundActionStatus && (
               <StatusBox
-                status={paymentPlan.background_action_status}
+                status={paymentPlan.backgroundActionStatus}
                 statusToColor={paymentPlanBackgroundActionStatusToColor}
               />
             )}
@@ -205,7 +205,7 @@ export const PaymentPlanDetailsHeader = ({
           ? breadCrumbsItems
           : null
       }
-      flags={<AdminButton adminUrl={paymentPlan.admin_url} />}
+      flags={<AdminButton adminUrl={paymentPlan.adminUrl} />}
     >
       {buttons}
     </PageHeader>

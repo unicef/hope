@@ -19,13 +19,13 @@ const IndividualQuestionnaire = ({
   const { baseUrl } = useBaseUrl();
   const { isSocialDctType, selectedProgram } = useProgramContext();
   const selectedIndividualData =
-    values.selectedIndividual || values.selectedHousehold.head_of_household;
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+    values.selectedIndividual || values.selectedHousehold.headOfHousehold;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const questionFields = isSocialDctType
     ? [
         {
           name: 'questionnaire_fullName',
-          label: t(`${beneficiaryGroup?.member_label} Full Name`),
+          label: t(`${beneficiaryGroup?.memberLabel} Full Name`),
           value: (
             <ContentLink
               href={`/${baseUrl}/population/individuals/${selectedIndividualData.id}`}
@@ -99,7 +99,7 @@ const IndividualQuestionnaire = ({
     : [
         {
           name: 'questionnaire_fullName',
-          label: `${beneficiaryGroup?.member_label} full name`,
+          label: `${beneficiaryGroup?.memberLabel} full name`,
           value: (
             <ContentLink
               href={`/${baseUrl}/population/individuals/${selectedIndividualData.id}`}
@@ -129,7 +129,7 @@ const IndividualQuestionnaire = ({
         },
         {
           name: 'questionnaire_relationship',
-          label: `Relationship to Head of ${beneficiaryGroup?.group_label}`,
+          label: `Relationship to Head of ${beneficiaryGroup?.groupLabel}`,
           value: selectedIndividualData.relationship,
           size: 3,
         },

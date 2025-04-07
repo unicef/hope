@@ -48,8 +48,7 @@ function LookUpHouseholdTableCommunication({
 }: LookUpHouseholdTableCommunicationProps): ReactElement {
   const { programId } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
-
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const initialQueryVariables = useMemo(() => {
     const matchWithdrawnValue = (): boolean | undefined => {
       if (filter.withdrawn === 'true') {
@@ -145,10 +144,10 @@ function LookUpHouseholdTableCommunication({
   };
 
   const replacements = {
-    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.group_label} ID`,
+    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} ID`,
     head_of_household__full_name: (_beneficiaryGroup) =>
-      `Head of ${_beneficiaryGroup?.group_label}`,
-    size: (_beneficiaryGroup) => `${_beneficiaryGroup?.group_label} Size`,
+      `Head of ${_beneficiaryGroup?.groupLabel}`,
+    size: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} Size`,
   };
 
   const adjustedHeadCells = adjustHeadCells(

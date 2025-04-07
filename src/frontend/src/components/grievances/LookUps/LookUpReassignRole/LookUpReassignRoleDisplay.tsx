@@ -18,19 +18,18 @@ export function LookUpReassignRoleDisplay({
   disabled?: boolean;
 }): ReactElement {
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
-
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   return (
     <StyledBox>
       <Grid container>
         <Grid>
           <Box display="flex" flexDirection="column">
             <span>
-              {`${beneficiaryGroup?.group_label} ID`}:
-              <BlueText> {selectedHousehold?.unicef_id || '-'}</BlueText>
+              {`${beneficiaryGroup?.groupLabel} ID`}:
+              <BlueText> {selectedHousehold?.unicefId || '-'}</BlueText>
             </span>
             <span>
-              {`${beneficiaryGroup?.member_label} ID`}:
+              {`${beneficiaryGroup?.memberLabel} ID`}:
               <BlueText>{selectedIndividual?.unicefId || '-'}</BlueText>
             </span>
           </Box>

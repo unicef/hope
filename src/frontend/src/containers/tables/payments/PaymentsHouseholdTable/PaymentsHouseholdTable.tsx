@@ -34,14 +34,13 @@ function PaymentsHouseholdTable({
     program: programId,
   };
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
-
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const replacements = {
     headOfHousehold: (_beneficiaryGroup) =>
-      `Head of ${_beneficiaryGroup?.group_label}`,
-    fullName: (_beneficiaryGroup) => `${_beneficiaryGroup?.member_label}`,
+      `Head of ${_beneficiaryGroup?.groupLabel}`,
+    fullName: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel}`,
     relationship: (_beneficiaryGroup) =>
-      `Relationship to Head of ${_beneficiaryGroup?.group_label}`,
+      `Relationship to Head of ${_beneficiaryGroup?.groupLabel}`,
   };
 
   const adjustedHeadCells = adjustHeadCells(

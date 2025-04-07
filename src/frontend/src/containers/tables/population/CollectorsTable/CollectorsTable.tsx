@@ -55,12 +55,11 @@ export const CollectorsTable = ({
     navigate(`/${baseUrl}/population/individuals/${row.id}`);
   };
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
-
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const replacements = {
-    fullName: (_beneficiaryGroup) => `${_beneficiaryGroup?.member_label}`,
+    fullName: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel}`,
     relationship: (_beneficiaryGroup) =>
-      `Relationship to ${_beneficiaryGroup?.group_label}`,
+      `Relationship to ${_beneficiaryGroup?.groupLabel}`,
   };
 
   const adjustedHeadCells = adjustHeadCells(

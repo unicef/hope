@@ -27,8 +27,7 @@ function FeedbackDetails({
   const { t } = useTranslation();
   const { baseUrl, isAllPrograms } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
-
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   return (
     <Grid size={{ xs: 12 }}>
       <ContainerColumnWithBorder>
@@ -55,7 +54,7 @@ function FeedbackDetails({
                 size: 3,
               },
               {
-                label: `${beneficiaryGroup?.group_label} ID`,
+                label: `${beneficiaryGroup?.groupLabel} ID`,
                 value: (
                   <span>
                     {feedback.householdLookup?.id &&
@@ -78,7 +77,7 @@ function FeedbackDetails({
                 size: 3,
               },
               {
-                label: `${beneficiaryGroup?.member_label} ID`,
+                label: `${beneficiaryGroup?.memberLabel} ID`,
                 value: (
                   <span>
                     {feedback.individualLookup?.id &&

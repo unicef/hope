@@ -26,10 +26,10 @@ export const PaymentPlanDetailsResults = ({
   const { t } = useTranslation();
   const { isSocialDctType } = useProgramContext();
   const {
-    female_children_count,
-    male_children_count,
-    female_adults_count,
-    male_adults_count,
+    femaleChildrenCount,
+    maleChildrenCount,
+    femaleAdultsCount,
+    maleAdultsCount,
   } = paymentPlan;
 
   const ResultsComponent = isSocialDctType
@@ -49,7 +49,7 @@ export const PaymentPlanDetailsResults = ({
                 <FieldBorder color={colors.femaleChildren}>
                   <LabelizedField
                     label={t('Female Children')}
-                    value={female_children_count}
+                    value={femaleChildrenCount}
                   />
                 </FieldBorder>
               </Grid>
@@ -57,7 +57,7 @@ export const PaymentPlanDetailsResults = ({
                 <FieldBorder color={colors.femaleAdult}>
                   <LabelizedField
                     label={t('Female Adults')}
-                    value={female_adults_count}
+                    value={femaleAdultsCount}
                   />
                 </FieldBorder>
               </Grid>
@@ -65,7 +65,7 @@ export const PaymentPlanDetailsResults = ({
                 <FieldBorder color={colors.maleChildren}>
                   <LabelizedField
                     label={t('Male Children')}
-                    value={male_children_count}
+                    value={maleChildrenCount}
                   />
                 </FieldBorder>
               </Grid>
@@ -73,7 +73,7 @@ export const PaymentPlanDetailsResults = ({
                 <FieldBorder color={colors.maleAdult}>
                   <LabelizedField
                     label={t('Male Adults')}
-                    value={male_adults_count}
+                    value={maleAdultsCount}
                   />
                 </FieldBorder>
               </Grid>
@@ -110,10 +110,10 @@ export const PaymentPlanDetailsResults = ({
                       datasets: [
                         {
                           data: [
-                            female_children_count,
-                            female_adults_count,
-                            male_children_count,
-                            male_adults_count,
+                            femaleChildrenCount,
+                            femaleAdultsCount,
+                            maleChildrenCount,
+                            maleAdultsCount,
                           ],
                           backgroundColor: [
                             colors.femaleChildren,

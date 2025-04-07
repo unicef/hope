@@ -31,11 +31,11 @@ export function HouseholdCompositionTable({
 }: HouseholdCompositionTableProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   return (
     <OverviewPaper>
       <Title>
-        <Typography variant="h6">{`${beneficiaryGroup?.group_label} Composition`}</Typography>
+        <Typography variant="h6">{`${beneficiaryGroup?.groupLabel} Composition`}</Typography>
       </Title>
       <Table>
         <TableHead>
@@ -53,18 +53,18 @@ export function HouseholdCompositionTable({
           <TableRow data-cy="row05">
             <TableCell align="left">0 - 5</TableCell>
             <GreyTableCell align="left">
-              {household?.female_age_group_0_5_count}
+              {household?.femaleAgeGroup05Count}
             </GreyTableCell>
             <GreyTableCell align="left">
-              {household?.female_age_group_0_5_disabled_count}
+              {household?.femaleAgeGroup05DisabledCount}
             </GreyTableCell>
             <GreyTableCell align="left">-</GreyTableCell>
             <TableCell align="left" />
             <GreyTableCell align="left">
-              {household?.male_age_group_0_5_count}
+              {household?.maleAgeGroup05Count}
             </GreyTableCell>
             <GreyTableCell align="left">
-              {household?.male_age_group_0_5_disabled_count}
+              {household?.maleAgeGroup05DisabledCount}
             </GreyTableCell>
           </TableRow>
           <TableRow>

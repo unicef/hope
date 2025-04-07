@@ -73,7 +73,7 @@ export const ProgramCyclesTableProgramDetails = ({
           align="right"
           data-cy="program-cycle-total-entitled-quantity"
         >
-          {row.total_entitled_quantity_usd || '-'}
+          {row.totalEntitledQuantityUsd || '-'}
         </TableCell>
         <TableCell
           align="right"
@@ -88,10 +88,10 @@ export const ProgramCyclesTableProgramDetails = ({
           {row.total_delivered_quantity_usd || '-'}
         </TableCell>
         <TableCell data-cy="program-cycle-start-date">
-          <UniversalMoment>{row.start_date}</UniversalMoment>
+          <UniversalMoment>{row.startDate}</UniversalMoment>
         </TableCell>
         <TableCell data-cy="program-cycle-end-date">
-          <UniversalMoment>{row.end_date}</UniversalMoment>
+          <UniversalMoment>{row.endDate}</UniversalMoment>
         </TableCell>
 
         <TableCell data-cy="program-cycle-details-btn">

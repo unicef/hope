@@ -25,8 +25,7 @@ export const PaymentPlansTable = ({
 }: PaymentPlansTableProps): ReactElement => {
   const { programId, businessArea } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
-
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const initialQueryVariables = React.useMemo(
     () => ({
       programSlug: programId,
@@ -37,7 +36,7 @@ export const PaymentPlansTable = ({
       totalEntitledQuantityTo: filter.totalEntitledQuantityTo,
       dispersionStartDate: filter.dispersionStartDate,
       dispersionEndDate: filter.dispersionEndDate,
-      is_follow_up: null,
+      isFollowUp: null,
       program: programId,
       programCycle: programCycle.id,
       isPaymentPlan: true,
@@ -79,7 +78,7 @@ export const PaymentPlansTable = ({
 
   const replacements = {
     totalHouseholdsCount: (_beneficiaryGroup) =>
-      `Num. of ${_beneficiaryGroup?.group_labelPlural}`,
+      `Num. of ${_beneficiaryGroup?.groupLabelPlural}`,
   };
 
   const adjustedHeadCells = adjustHeadCells(

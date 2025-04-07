@@ -58,11 +58,11 @@ export function AcceptedPaymentPlanHeaderButtons({
 
   const shouldDisableExportXlsx =
     loadingExport ||
-    !paymentPlan.can_export_xlsx ||
-    paymentPlan.background_action_status ===
+    !paymentPlan.canExportXlsx ||
+    paymentPlan.backgroundActionStatus ===
       PaymentPlanBackgroundActionStatus.XlsxExporting;
 
-  const shouldDisableDownloadXlsx = !paymentPlan.can_download_xlsx;
+  const shouldDisableDownloadXlsx = !paymentPlan.canDownloadXlsx;
 
   if (loading) return <LoadingComponent />;
   if (!data) return null;
@@ -111,7 +111,7 @@ export function AcceptedPaymentPlanHeaderButtons({
   return (
     <Box display="flex" alignItems="center">
       <>
-        {paymentPlan.can_create_follow_up && (
+        {paymentPlan.canCreateFollowUp && (
           <Box p={2}>
             <CreateFollowUpPaymentPlan paymentPlan={paymentPlan} />
           </Box>
@@ -122,7 +122,7 @@ export function AcceptedPaymentPlanHeaderButtons({
             canSplit={canSplit}
           />
         </Box>
-        {!paymentPlan.has_payment_list_export_file && (
+        {!paymentPlan.hasPaymentListExportFile && (
           <Box m={2}>
             <LoadingButton
               loading={loadingExport}
@@ -132,7 +132,7 @@ export function AcceptedPaymentPlanHeaderButtons({
               startIcon={<GetApp />}
               data-cy="button-export-xlsx"
               onClick={
-                paymentPlan.fsp_communication_channel === 'API'
+                paymentPlan.fspCommunicationChannel === 'API'
                   ? handleClickOpen
                   : handleExport
               }
@@ -179,7 +179,7 @@ export function AcceptedPaymentPlanHeaderButtons({
             </Button>
           </DialogActions>
         </Dialog>
-        {paymentPlan.has_payment_list_export_file && (
+        {paymentPlan.hasPaymentListExportFile && (
           <>
             <Box m={2}>
               <Button
@@ -194,7 +194,7 @@ export function AcceptedPaymentPlanHeaderButtons({
                 {t('Download XLSX')}
               </Button>
             </Box>
-            {paymentPlan.can_send_xlsx_password && (
+            {paymentPlan.canSendXlsxPassword && (
               <Box m={2}>
                 <LoadingButton
                   loading={loadingSend}

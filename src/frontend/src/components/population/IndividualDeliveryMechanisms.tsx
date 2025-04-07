@@ -31,8 +31,7 @@ export const IndividualDeliveryMechanisms: FC<
     permissions,
   );
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
-
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   if (
     !individual?.deliveryMechanismsData?.length ||
     !canViewDeliveryMechanisms
@@ -43,7 +42,7 @@ export const IndividualDeliveryMechanisms: FC<
     <Overview>
       <Title>
         <Typography variant="h6">
-          {t(`${beneficiaryGroup?.member_label} Delivery Mechanisms`)}
+          {t(`${beneficiaryGroup?.memberLabel} Delivery Mechanisms`)}
         </Typography>
       </Title>
       <Grid container spacing={6}>

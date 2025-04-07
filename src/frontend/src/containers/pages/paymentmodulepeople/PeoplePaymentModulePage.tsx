@@ -18,7 +18,7 @@ const initialFilter = {
   status: [],
   totalEntitledQuantityFrom: '',
   totalEntitledQuantityTo: '',
-  is_follow_up: '',
+  isFollowUp: '',
 };
 
 export const PeoplePaymentModulePage = (): ReactElement => {

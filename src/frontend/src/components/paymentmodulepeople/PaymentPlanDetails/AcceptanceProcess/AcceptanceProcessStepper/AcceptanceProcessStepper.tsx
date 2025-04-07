@@ -6,50 +6,49 @@ import { ReactElement } from 'react';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface AcceptanceProcessStepperProps {
-  acceptanceProcess: PaymentPlanDetail['approval_process'][number];
+  acceptanceProcess: PaymentPlanDetail['approvalProcess'][number];
 }
 
 export function AcceptanceProcessStepper({
   acceptanceProcess,
 }: AcceptanceProcessStepperProps): ReactElement {
   const {
-    rejected_on,
+    rejectedOn,
     actions,
-    approval_number_required,
-    authorization_number_required,
-    finance_release_number_required,
+    approvalNumberRequired,
+    authorizationNumberRequired,
+    financeReleaseNumberRequired,
   } = acceptanceProcess;
   const { t } = useTranslation();
   const steps = [
     {
       name: `${t('Approval')} (${
         actions?.approval?.length
-      }/${approval_number_required})`,
-      hasError: rejected_on === 'IN_APPROVAL',
-      isCompleted: actions?.approval?.length === approval_number_required,
+      }/${approvalNumberRequired})`,
+      hasError: rejectedOn === 'IN_APPROVAL',
+      isCompleted: actions?.approval?.length === approvalNumberRequired,
     },
     {
       name: `${t('Authorization')} (${
         actions.authorization.length
-      }/${authorization_number_required})`,
-      hasError: rejected_on === 'IN_AUTHORIZATION',
-      isCompleted:
-        actions.authorization.length === authorization_number_required,
+      }/${authorizationNumberRequired})`,
+      hasError: rejectedOn === 'IN_AUTHORIZATION',
+      isCompleted: actions.authorization.length === authorizationNumberRequired,
     },
     {
       name: `${t('Finance Release')} (${
         actions.financeRelease.length
-      }/${finance_release_number_required})`,
-      hasError: rejected_on === 'IN_REVIEW',
+      }/${financeReleaseNumberRequired})`,
+      hasError: rejectedOn === 'IN_REVIEW',
       isCompleted:
-        actions.financeRelease.length === finance_release_number_required,
+        actions.financeRelease.length === financeReleaseNumberRequired,
     },
   ];
   const getActiveStep = (): number => {
-    if (actions.authorization.length === authorization_number_required) {
+    if (actions.authorization.length === authorizationNumberRequired) {
       return 2;
     }
-    if (actions?.approval?.length === approval_number_required) {
+    if (actions?.approval?.length === approvalNumberRequired) {
       return 1;
     }
     return 0;

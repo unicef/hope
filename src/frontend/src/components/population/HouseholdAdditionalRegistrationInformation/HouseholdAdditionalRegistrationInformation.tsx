@@ -37,7 +37,7 @@ export const HouseholdAdditionalRegistrationInformation = ({
     '*',
   );
 
-  const fields = Object.entries(household?.flex_fields || {}).map(
+  const fields = Object.entries(household?.flexFields || {}).map(
     ([key, value]: [string, string | string[]]) => {
       if (flexAttributesDict[key]?.type === 'IMAGE') {
         return (

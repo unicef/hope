@@ -54,13 +54,13 @@ function ProgrammesTableRow({
           />
         </TableCell>
         <TableCell align="left">
-          <UniversalMoment>{program.start_date}</UniversalMoment> -{' '}
-          <UniversalMoment>{program.end_date}</UniversalMoment>
+          <UniversalMoment>{program.startDate}</UniversalMoment> -{' '}
+          <UniversalMoment>{program.endDate}</UniversalMoment>
         </TableCell>
         <TableCell align="left">
           {programSectorChoiceDict[program.sector]}
         </TableCell>
-        <TableCell align="right">{program.household_count}</TableCell>
+        <TableCell align="right">{program.householdCount}</TableCell>
         <TableCell align="right">
           {formatCurrency(Number(program.budget))}
         </TableCell>

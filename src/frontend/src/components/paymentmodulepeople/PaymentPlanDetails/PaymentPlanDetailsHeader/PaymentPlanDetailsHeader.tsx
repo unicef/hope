@@ -60,9 +60,9 @@ export function PaymentPlanDetailsHeader({
   );
   const canSendToPaymentGateway =
     hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
-    paymentPlan.can_send_to_payment_gateway;
+    paymentPlan.canSendToPaymentGateway;
   const canSplit =
-    hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.can_split;
+    hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
 
   let buttons: ReactElement | null = null;
   switch (paymentPlan.status) {
@@ -151,7 +151,7 @@ export function PaymentPlanDetailsHeader({
           <Box display="flex" flexDirection="column">
             <Box> {t('Payment Plan')} ID: </Box>
             <Box>
-              <span data-cy="pp-unicef-id">{paymentPlan.unicef_id}</span>
+              <span data-cy="pp-unicef-id">{paymentPlan.unicefId}</span>
             </Box>
           </Box>
           <Box ml={2}>
@@ -160,10 +160,10 @@ export function PaymentPlanDetailsHeader({
               statusToColor={paymentPlanStatusToColor}
             />
           </Box>
-          {paymentPlan.background_action_status && (
+          {paymentPlan.backgroundActionStatus && (
             <Box>
               <StatusBox
-                status={paymentPlan.background_action_status}
+                status={paymentPlan.backgroundActionStatus}
                 statusToColor={paymentPlanBackgroundActionStatusToColor}
               />
             </Box>
@@ -175,7 +175,7 @@ export function PaymentPlanDetailsHeader({
           ? breadCrumbsItems
           : null
       }
-      flags={<AdminButton adminUrl={paymentPlan.admin_url} />}
+      flags={<AdminButton adminUrl={paymentPlan.adminUrl} />}
     >
       {buttons}
     </PageHeader>

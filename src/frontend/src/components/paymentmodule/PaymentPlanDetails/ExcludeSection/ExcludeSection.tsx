@@ -39,15 +39,14 @@ function ExcludeSection({
 }: ExcludeSectionProps): ReactElement {
   const {
     status,
-    background_action_status,
-    exclusion_reason,
-    exclude_household_error,
+    backgroundActionStatus,
+    exclusionReason,
+    excludeHouseholdError,
   } = paymentPlan;
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
-
-  const initialExcludedIds = paymentPlan?.excluded_households?.map(
-    (el) => el.unicef_id,
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const initialExcludedIds = paymentPlan?.excludedHouseholds?.map(
+    (el) => el.unicefId,
   );
   const [isExclusionsOpen, setExclusionsOpen] = useState(initialOpen);
   const [idsValue, setIdsValue] = useState('');
@@ -68,7 +67,7 @@ function ExcludeSection({
 
   const getTooltipText = (): string => {
     if (!hasOpenOrLockedStatus) {
-      return `${beneficiaryGroup?.group_label_plural} can only be excluded from a Payment Plan in status open or locked`;
+      return `${beneficiaryGroup?.groupLabelPlural} can only be excluded from a Payment Plan in status open or locked`;
     }
     if (!hasExcludePermission) {
       return t('Permission denied');
@@ -89,7 +88,7 @@ function ExcludeSection({
     setIdsValue(event.target.value);
   };
   const initialValues = {
-    exclusionReason: paymentPlan.exclusion_reason || '',
+    exclusionReason: paymentPlan.exclusionReason || '',
   };
   const validationSchema = Yup.object().shape({
     exclusionReason: Yup.string().max(500, t('Too long')),
@@ -115,9 +114,7 @@ function ExcludeSection({
         awaitRefetchQueries: true,
       });
       if (!error) {
-        showMessage(
-          `${beneficiaryGroup?.group_label_plural} exclusion started`,
-        );
+        showMessage(`${beneficiaryGroup?.groupLabelPlural} exclusion started`);
         setExclusionsOpen(false);
       }
     } catch (e) {
@@ -198,7 +195,7 @@ function ExcludeSection({
       !hasExcludePermission ||
       !hasOpenOrLockedStatus ||
       excludedIds.length === 0 ||
-      Boolean(background_action_status);
+      Boolean(backgroundActionStatus);
 
     const editExclusionsDisabled =
       !hasExcludePermission || !hasOpenOrLockedStatus;
@@ -294,7 +291,7 @@ function ExcludeSection({
     const applyDisabled =
       !hasExcludePermission ||
       !hasOpenOrLockedStatus ||
-      Boolean(background_action_status);
+      Boolean(backgroundActionStatus);
 
     if (isEdit || numberOfExcluded === 0) {
       return (
@@ -313,7 +310,7 @@ function ExcludeSection({
             <Grid size={{ xs: 6 }}>
               <Box mr={2}>
                 <StyledTextField
-                  label={`${beneficiaryGroup?.group_label_plural} Ids`}
+                  label={`${beneficiaryGroup?.groupLabelPlural} Ids`}
                   data-cy="input-households-ids"
                   value={idsValue}
                   onChange={handleIdsChange}
@@ -372,22 +369,22 @@ function ExcludeSection({
                 <GreyText>
                   {`${numberOfExcluded} ${
                     numberOfExcluded === 1
-                      ? `${beneficiaryGroup?.group_label}`
-                      : `${beneficiaryGroup?.group_label_plural}`
+                      ? `${beneficiaryGroup?.groupLabel}`
+                      : `${beneficiaryGroup?.groupLabelPlural}`
                   } excluded`}
                 </GreyText>
               </Box>
             ) : null}
             <Collapse in={isExclusionsOpen}>
               <Box display="flex" flexDirection="column">
-                {isExclusionsOpen && exclusion_reason && !isEdit ? (
+                {isExclusionsOpen && exclusionReason && !isEdit ? (
                   <Grid container>
                     <Grid size={{ xs: 8 }}>
                       <Box display="flex" flexDirection="column">
                         <Box
                           display="flex"
                           alignItems={
-                            exclusion_reason.length > 100
+                            exclusionReason.length > 100
                               ? 'flex-start'
                               : 'center'
                           }
@@ -397,11 +394,11 @@ function ExcludeSection({
                           <Box mr={2}>
                             <GreyText>{t('Reason')}:</GreyText>
                           </Box>
-                          <Typography>{exclusion_reason}</Typography>
+                          <Typography>{exclusionReason}</Typography>
                         </Box>
-                        {exclude_household_error && (
+                        {excludeHouseholdError && (
                           <Box display="flex" flexDirection="column" mt={2}>
-                            {formatErrorToArray(exclude_household_error).map(
+                            {formatErrorToArray(excludeHouseholdError).map(
                               (el) => (
                                 <FormHelperText key={el} error>
                                   {el}

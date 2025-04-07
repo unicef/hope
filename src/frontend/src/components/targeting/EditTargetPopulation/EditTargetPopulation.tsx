@@ -29,27 +29,6 @@ interface EditTargetPopulationProps {
   screenBeneficiary: boolean;
 }
 
-type TargetingCriteriaRuleNodeExtended = {
-  __typename: 'TargetingCriteriaRuleNode';
-  id: any;
-  householdIds: string;
-  individualIds: string;
-  individualsFiltersBlocks?: {
-    __typename: 'TargetingIndividualRuleFilterBlockNode';
-    individualBlockFilters?: {
-      // Define the properties of individualBlockFilters here
-    }[];
-  }[];
-  collectorsFiltersBlocks: {
-    // Define the properties of collectorsFiltersBlocks here
-  }[];
-  householdsFiltersBlocks?: {
-    // Define the properties of householdsFiltersBlocks here
-  }[];
-  deliveryMechanism?: string;
-  fsp?: string;
-};
-
 const EditTargetPopulation = ({
   paymentPlan,
   screenBeneficiary,
@@ -57,12 +36,12 @@ const EditTargetPopulation = ({
   const navigate = useNavigate();
   const { t } = useTranslation();
   const targetingCriteriaCopy: TargetingCriteriaRuleNodeExtended[] =
-    paymentPlan.targeting_criteria?.rules.map((rule) => ({ ...rule })) || [];
+    paymentPlan.targetingCriteria?.rules.map((rule) => ({ ...rule })) || [];
 
   if (targetingCriteriaCopy.length > 0) {
     targetingCriteriaCopy[0].deliveryMechanism =
-      paymentPlan.delivery_mechanism?.code;
-    targetingCriteriaCopy[0].fsp = paymentPlan.financial_service_provider?.id;
+      paymentPlan.deliveryMechanism?.code;
+    targetingCriteriaCopy[0].fsp = paymentPlan.financialServiceProvider?.id;
   }
 
   const initialValues = {
@@ -73,13 +52,13 @@ const EditTargetPopulation = ({
     excludedIds: paymentPlan.excludedIds || '',
     exclusionReason: paymentPlan.exclusionReason || '',
     flagExcludeIfActiveAdjudicationTicket:
-      paymentPlan.targeting_criteria.flagExcludeIfActiveAdjudicationTicket ||
+      paymentPlan.targetingCriteria.flagExcludeIfActiveAdjudicationTicket ||
       false,
     flagExcludeIfOnSanctionList:
-      paymentPlan.targeting_criteria.flagExcludeIfOnSanctionList || false,
+      paymentPlan.targetingCriteria.flagExcludeIfOnSanctionList || false,
     programCycleId: {
-      value: paymentPlan.program_cycle.id,
-      name: paymentPlan.program_cycle.title,
+      value: paymentPlan.programCycle.id,
+      name: paymentPlan.programCycle.title,
     },
   };
 
@@ -88,14 +67,13 @@ const EditTargetPopulation = ({
   const { baseUrl } = useBaseUrl();
   const { selectedProgram, isSocialDctType, isStandardDctType } =
     useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
-
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const handleValidate = (values): { targetingCriteria?: string } => {
     const { targetingCriteria, householdIds, individualIds } = values;
     const errors: { targetingCriteria?: string } = {};
     if (!targetingCriteria.length && !householdIds && !individualIds) {
       errors.targetingCriteria = t(
-        `You need to select at least one targeting criteria or ${beneficiaryGroup?.member_label} ID or ${beneficiaryGroup?.group_label} ID`,
+        `You need to select at least one targeting criteria or ${beneficiaryGroup?.memberLabel} ID or ${beneficiaryGroup?.groupLabel} ID`,
       );
     }
     return errors;
@@ -225,12 +203,12 @@ const EditTargetPopulation = ({
           >
             <Typography style={{ color: '#b1b1b5' }} variant="h6">
               {t(
-                `Save to see the list of ${beneficiaryGroup?.group_label_plural}`,
+                `Save to see the list of ${beneficiaryGroup?.groupLabelPlural}`,
               )}
             </Typography>
             <Typography style={{ color: '#b1b1b5' }} variant="subtitle1">
               {t(
-                `List of ${beneficiaryGroup?.group_label_plural} will be available after saving`,
+                `List of ${beneficiaryGroup?.groupLabelPlural} will be available after saving`,
               )}{' '}
             </Typography>
           </Box>

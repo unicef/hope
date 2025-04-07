@@ -166,7 +166,7 @@ export const ProgramCycleDetailsHeader = ({
         </Box>
       }
       breadCrumbs={breadCrumbsItems}
-      flags={<AdminButton adminUrl={programCycle.admin_url} />}
+      flags={<AdminButton adminUrl={programCycle.adminUrl} />}
     >
       {buttons}
     </PageHeader>

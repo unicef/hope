@@ -33,13 +33,13 @@ export function CashPlanDetailsSection({
   const { baseUrl } = useBaseUrl();
 
   const bankReconciliationSuccessPercentage = countPercentage(
-    planNode.bank_reconciliation_success,
-    planNode.eligible_payments_count,
+    planNode.bankReconciliationSuccess,
+    planNode.eligiblePaymentsCount,
   );
 
   const bankReconciliationErrorPercentage = countPercentage(
-    planNode.bank_reconciliation_error,
-    planNode.eligible_payments_count,
+    planNode.bankReconciliationError,
+    planNode.eligiblePaymentsCount,
   );
 
   return (
@@ -61,15 +61,15 @@ export function CashPlanDetailsSection({
               },
               {
                 label: t('PAYMENT RECORDS'),
-                value: planNode.available_payment_records_count,
+                value: planNode.availablePaymentRecordsCount,
               },
               {
                 label: t('START DATE'),
-                value: <UniversalMoment>{planNode.start_date}</UniversalMoment>,
+                value: <UniversalMoment>{planNode.startDate}</UniversalMoment>,
               },
               {
                 label: t('END DATE'),
-                value: <UniversalMoment>{planNode.end_date}</UniversalMoment>,
+                value: <UniversalMoment>{planNode.endDate}</UniversalMoment>,
               },
             ].map((el) => (
               <Grid size={{ xs: 3 }} key={el.label}>

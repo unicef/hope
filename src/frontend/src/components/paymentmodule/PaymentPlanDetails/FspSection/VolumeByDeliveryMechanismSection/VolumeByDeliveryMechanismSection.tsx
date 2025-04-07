@@ -55,20 +55,20 @@ export const VolumeByDeliveryMechanismSection: FC<
   VolumeByDeliveryMechanismSectionProps
 > = ({ paymentPlan }) => {
   const { t } = useTranslation();
-  const { volume_by_delivery_mechanism } = paymentPlan;
+  const { volumeByDeliveryMechanism } = paymentPlan;
 
-  const mappedDeliveryMechanism = volume_by_delivery_mechanism?.map(
+  const mappedDeliveryMechanism = volumeByDeliveryMechanism?.map(
     (vdm, index) => (
       <Grid
         size={{ xs: 6 }}
         /* eslint-disable-next-line react/no-array-index-key */
-        key={`${vdm.delivery_mechanism.id}-${index}`}
+        key={`${vdm.deliveryMechanism.id}-${index}`}
       >
         <FieldBorder
-          color={getDeliveryMechanismColor(vdm.delivery_mechanism.name)}
+          color={getDeliveryMechanismColor(vdm.deliveryMechanism.name)}
         >
           <LabelizedField
-            label={`${vdm.delivery_mechanism.name} (${vdm.delivery_mechanism.fsp?.name ?? '-'})`}
+            label={`${vdm.deliveryMechanism.name} (${vdm.deliveryMechanism.fsp?.name ?? '-'})`}
             value={`${vdm.volume ?? '0.00'} ${paymentPlan.currency} (${vdm.volume_usd ?? '0.00'} USD)`}
           />
         </FieldBorder>
@@ -76,16 +76,15 @@ export const VolumeByDeliveryMechanismSection: FC<
     ),
   );
 
-  const chartLabels = volume_by_delivery_mechanism.map(
-    (el) =>
-      `${el.delivery_mechanism.name} (${el.delivery_mechanism.fsp?.name})`,
+  const chartLabels = volumeByDeliveryMechanism.map(
+    (el) => `${el.deliveryMechanism.name} (${el.deliveryMechanism.fsp?.name})`,
   );
 
-  const chartData = volume_by_delivery_mechanism.map((el) => el.volume_usd);
+  const chartData = volumeByDeliveryMechanism.map((el) => el.volume_usd);
 
   const chartColors = (): string[] => {
-    return volume_by_delivery_mechanism.map((el) =>
-      getDeliveryMechanismColor(el.delivery_mechanism.name),
+    return volumeByDeliveryMechanism.map((el) =>
+      getDeliveryMechanismColor(el.deliveryMechanism.name),
     );
   };
 
