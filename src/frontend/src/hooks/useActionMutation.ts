@@ -12,7 +12,7 @@ import type { UndefinedInitialDataOptions } from '@tanstack/react-query/src/quer
 import { RestService } from '@restgenerated/services/RestService';
 import type { DefaultError } from '@tanstack/query-core';
 
-export const useHopeDetailsQuery = <TData, TOptions>(
+export const useActionMutation = <TData, TOptions>(
   id: string,
   mutationFn: (data: TOptions) => Promise<TData>,
   invalidateQuery: string[],

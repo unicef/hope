@@ -22,7 +22,7 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useMutation } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useHopeDetailsQuery } from '@hooks/useActionMutation';
+import { useActionMutation } from '@hooks/useActionMutation';
 
 interface MergeRegistrationDataImportDialogProps {
   registration: RegistrationDetailedFragment;
@@ -37,7 +37,7 @@ function MergeRegistrationDataImportDialog({
   const { isSocialDctType, selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const { mutateAsync, isPending } = useHopeDetailsQuery(
+  const { mutateAsync, isPending } = useActionMutation(
     registration.id,
     RestService.restBusinessAreasProgramsRegistrationDataImportsMergeCreate,
     [RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve.name],
