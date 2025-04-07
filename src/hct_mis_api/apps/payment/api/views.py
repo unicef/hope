@@ -417,7 +417,7 @@ class PaymentPlanViewSet(
             import_service.validate()
             if import_service.errors:
                 return Response(
-                    data=XlsxErrorSerializer(import_service.errors, context={"request": request}).data,
+                    data=XlsxErrorSerializer(import_service.errors, many=True, context={"request": request}).data,
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             old_payment_plan = copy_model_object(payment_plan)
@@ -673,7 +673,7 @@ class PaymentPlanViewSet(
             import_service.validate()
             if import_service.errors:
                 return Response(
-                    data=XlsxErrorSerializer(import_service.errors, context={"request": request}).data,
+                    data=XlsxErrorSerializer(import_service.errors, many=True, context={"request": request}).data,
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
