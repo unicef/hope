@@ -1166,7 +1166,7 @@ class TestIndividualFilter:
             imported_by=self.user, business_area=self.afghanistan, program=self.program
         )
         self._test_filter_individuals_in_list(
-            filters={"rdi_id": encode_id_base64_required(registration_data_import_2.id, "RegistrationDataImport")},
+            filters={"rdi_id": registration_data_import_2.id},
             individual1_data={
                 "registration_data_import": registration_data_import_1,
             },

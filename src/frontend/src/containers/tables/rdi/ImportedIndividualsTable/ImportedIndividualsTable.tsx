@@ -5,7 +5,7 @@ import {
   IndividualRdiMergeStatus,
 } from '@generated/graphql';
 import { Box, Checkbox, FormControlLabel, Grid2 as Grid } from '@mui/material';
-import { ReactElement, useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState, useMemo } from 'react';
 import { headCells as importedIndividualHeadCells } from './ImportedIndividualsTableHeadCells';
 import { ImportedIndividualsTableRow } from './ImportedIndividualsTableRow';
 import { useProgramContext } from 'src/programContext';
@@ -42,19 +42,25 @@ function ImportedIndividualsTable({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const initialVariables = {
-    rdiId,
-    household,
-    duplicatesOnly: showDuplicates,
-    businessArea,
-    rdiMergeStatus: isMerged
-      ? IndividualRdiMergeStatus.Merged
-      : IndividualRdiMergeStatus.Pending,
-  };
+  // Wrap initialVariables in useMemo to avoid recreating it on every render
+  const initialVariables = useMemo(
+    () => ({
+      rdiId,
+      household,
+      duplicatesOnly: showDuplicates,
+      businessArea,
+      rdiMergeStatus: isMerged
+        ? IndividualRdiMergeStatus.Merged
+        : IndividualRdiMergeStatus.Pending,
+    }),
+    [rdiId, household, showDuplicates, businessArea, isMerged],
+  );
+
   const [queryVariables, setQueryVariables] = useState(initialVariables);
+
   useEffect(() => {
     setQueryVariables(initialVariables);
-  }, [JSON.stringify(initialVariables)]);
+  }, [initialVariables]);
 
   const replacements = {
     id: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,

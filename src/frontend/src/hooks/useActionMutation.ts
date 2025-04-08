@@ -1,18 +1,12 @@
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import {
-  QueryFunction,
-  QueryKey,
   useMutation,
   UseMutationResult,
-  useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
-import type { UseQueryResult } from '@tanstack/react-query/src/types';
-import type { UndefinedInitialDataOptions } from '@tanstack/react-query/src/queryOptions';
-import { RestService } from '@restgenerated/services/RestService';
 import type { DefaultError } from '@tanstack/query-core';
 
-export const useHopeDetailsQuery = <TData, TOptions>(
+export const useActionMutation = <TData, TOptions>(
   id: string,
   mutationFn: (data: TOptions) => Promise<TData>,
   invalidateQuery: string[],

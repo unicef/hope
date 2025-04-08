@@ -129,6 +129,7 @@ export { PushPeopleTypeEnum as PushPeopleTypeEnumCamelCase } from './models/Push
 export type { RDI as RDICamelCase } from './models/RDI';
 export { RdiMergeStatusEnum as RdiMergeStatusEnumCamelCase } from './models/RdiMergeStatusEnum';
 export type { RDINested as RDINestedCamelCase } from './models/RDINested';
+export type { RefuseRdi as RefuseRdiCamelCase } from './models/RefuseRdi';
 export type { Registration as RegistrationCamelCase } from './models/Registration';
 export type { RegistrationDataImport as RegistrationDataImportCamelCase } from './models/RegistrationDataImport';
 export type { RegistrationDataImportDetail as RegistrationDataImportDetailCamelCase } from './models/RegistrationDataImportDetail';

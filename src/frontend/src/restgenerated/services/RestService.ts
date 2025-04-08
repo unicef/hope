@@ -61,6 +61,7 @@ import type { ProgramDetail } from '../models/ProgramDetail';
 import type { PushPeople } from '../models/PushPeople';
 import type { RDI } from '../models/RDI';
 import type { RDINested } from '../models/RDINested';
+import type { RefuseRdi } from '../models/RefuseRdi';
 import type { RegistrationDataImportDetail } from '../models/RegistrationDataImportDetail';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -1044,7 +1045,1422 @@ export class RestService {
     rdiMergeStatus?: 'MERGED' | 'PENDING';
     search?: any;
     /**
-     * Beneficiary gender
+     * @returns ProgramCycleList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsCyclesRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Programme Cycle.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<ProgramCycleList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/cycles/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * @returns ProgramCycleUpdate
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsCyclesUpdate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Programme Cycle.
+         */
+        id: string,
+        programSlug: string,
+        requestBody?: ProgramCycleUpdate,
+    }): CancelablePromise<ProgramCycleUpdate> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/cycles/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns ProgramCycleUpdate
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsCyclesPartialUpdate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Programme Cycle.
+         */
+        id: string,
+        programSlug: string,
+        requestBody?: PatchedProgramCycleUpdate,
+    }): CancelablePromise<ProgramCycleUpdate> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/cycles/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns void
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsCyclesDestroy({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Programme Cycle.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<void> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/cycles/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsCyclesFinishCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Programme Cycle.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/cycles/{id}/finish/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsCyclesReactivateCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Programme Cycle.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/cycles/{id}/reactivate/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
+     * @returns PaginatedHouseholdListList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsHouseholdsList({
+        businessAreaSlug,
+        programSlug,
+        address,
+        admin1,
+        admin2,
+        adminArea,
+        countryOrigin,
+        documentNumber,
+        documentType,
+        firstRegistrationDate,
+        headOfHouseholdFullName,
+        headOfHouseholdPhoneNoValid,
+        isActiveProgram,
+        lastRegistrationDateAfter,
+        lastRegistrationDateBefore,
+        limit,
+        offset,
+        orderBy,
+        ordering,
+        program,
+        rdiId,
+        rdiMergeStatus,
+        residenceStatus,
+        search,
+        sizeGte,
+        sizeLte,
+        sizeRange,
+        sizeMax,
+        sizeMin,
+        withdrawn,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        address?: string,
+        admin1?: string,
+        admin2?: string,
+        adminArea?: string,
+        countryOrigin?: string,
+        documentNumber?: string,
+        documentType?: string,
+        firstRegistrationDate?: string,
+        headOfHouseholdFullName?: string,
+        headOfHouseholdPhoneNoValid?: boolean,
+        isActiveProgram?: boolean,
+        lastRegistrationDateAfter?: string,
+        lastRegistrationDateBefore?: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `age` - Age
+         * * `-age` - Age (descending)
+         * * `sex` - Sex
+         * * `-sex` - Sex (descending)
+         * * `household__id` - Household  id
+         * * `-household__id` - Household  id (descending)
+         * * `id` - Id
+         * * `-id` - Id (descending)
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `size` - Size
+         * * `-size` - Size (descending)
+         * * `status_label` - Status label
+         * * `-status_label` - Status label (descending)
+         * * `head_of_household__full_name` - Head of household  full name
+         * * `-head_of_household__full_name` - Head of household  full name (descending)
+         * * `admin_area__name` - Admin area  name
+         * * `-admin_area__name` - Admin area  name (descending)
+         * * `residence_status` - Residence status
+         * * `-residence_status` - Residence status (descending)
+         * * `registration_data_import__name` - Registration data import  name
+         * * `-registration_data_import__name` - Registration data import  name (descending)
+         * * `total_cash_received` - Total cash received
+         * * `-total_cash_received` - Total cash received (descending)
+         * * `last_registration_date` - Last registration date
+         * * `-last_registration_date` - Last registration date (descending)
+         * * `first_registration_date` - First registration date
+         * * `-first_registration_date` - First registration date (descending)
+         */
+        orderBy?: Array<'-admin_area__name' | '-age' | '-first_registration_date' | '-head_of_household__full_name' | '-household__id' | '-id' | '-last_registration_date' | '-registration_data_import__name' | '-residence_status' | '-sex' | '-size' | '-status_label' | '-total_cash_received' | '-unicef_id' | 'admin_area__name' | 'age' | 'first_registration_date' | 'head_of_household__full_name' | 'household__id' | 'id' | 'last_registration_date' | 'registration_data_import__name' | 'residence_status' | 'sex' | 'size' | 'status_label' | 'total_cash_received' | 'unicef_id'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        program?: string,
+        rdiId?: string,
+        /**
+         * * `PENDING` - Pending
+         * * `MERGED` - Merged
+         */
+        rdiMergeStatus?: 'MERGED' | 'PENDING',
+        /**
+         * Household residence status
+         *
+         * * `` - None
+         * * `IDP` - Displaced  |  Internally Displaced People
+         * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
+         * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
+         * * `HOST` - Non-displaced  |   Host
+         * * `NON_HOST` - Non-displaced  |   Non-host
+         * * `RETURNEE` - Displaced  |   Returnee
+         */
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        search?: any,
+        sizeGte?: number,
+        sizeLte?: number,
+        /**
+         * Multiple values may be separated by commas.
+         */
+        sizeRange?: Array<number>,
+        /**
+         * Household size
+         */
+        sizeMax?: number | null,
+        /**
+         * Household size
+         */
+        sizeMin?: number | null,
+        withdrawn?: boolean,
+    }): CancelablePromise<PaginatedHouseholdListList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/households/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            query: {
+                'address': address,
+                'admin1': admin1,
+                'admin2': admin2,
+                'admin_area': adminArea,
+                'country_origin': countryOrigin,
+                'document_number': documentNumber,
+                'document_type': documentType,
+                'first_registration_date': firstRegistrationDate,
+                'head_of_household__full_name': headOfHouseholdFullName,
+                'head_of_household__phone_no_valid': headOfHouseholdPhoneNoValid,
+                'is_active_program': isActiveProgram,
+                'last_registration_date_after': lastRegistrationDateAfter,
+                'last_registration_date_before': lastRegistrationDateBefore,
+                'limit': limit,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'program': program,
+                'rdi_id': rdiId,
+                'rdi_merge_status': rdiMergeStatus,
+                'residence_status': residenceStatus,
+                'search': search,
+                'size__gte': sizeGte,
+                'size__lte': sizeLte,
+                'size__range': sizeRange,
+                'size_max': sizeMax,
+                'size_min': sizeMin,
+                'withdrawn': withdrawn,
+            },
+        });
+    }
+    /**
+     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
+     * @returns HouseholdDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsHouseholdsRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Household.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<HouseholdDetail> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/households/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
+     * @returns HouseholdMember
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsHouseholdsMembersRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Household.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<HouseholdMember> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/households/{id}/members/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
+     * @returns HouseholdList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsHouseholdsWithdrawCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Household.
+         */
+        id: string,
+        programSlug: string,
+        requestBody: HouseholdList,
+    }): CancelablePromise<HouseholdList> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/households/{id}/withdraw/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsHouseholdsCountRetrieve({
+        businessAreaSlug,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/households/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
+     * @returns PaginatedIndividualListList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsIndividualsList({
+        businessAreaSlug,
+        programSlug,
+        admin1,
+        admin2,
+        ageMax,
+        ageMin,
+        documentNumber,
+        documentType,
+        duplicatesOnly,
+        excludedId,
+        flags,
+        fullName,
+        householdAdminArea,
+        householdId,
+        isActiveProgram,
+        lastRegistrationDateAfter,
+        lastRegistrationDateBefore,
+        limit,
+        offset,
+        orderBy,
+        ordering,
+        program,
+        rdiId,
+        rdiMergeStatus,
+        search,
+        sex,
+        status,
+        withdrawn,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        admin1?: string,
+        admin2?: string,
+        ageMax?: string,
+        ageMin?: string,
+        documentNumber?: string,
+        documentType?: string,
+        duplicatesOnly?: boolean,
+        excludedId?: any,
+        /**
+         * * `DUPLICATE` - Duplicate
+         * * `NEEDS_ADJUDICATION` - Needs adjudication
+         * * `SANCTION_LIST_CONFIRMED_MATCH` - Sanction list match
+         * * `SANCTION_LIST_POSSIBLE_MATCH` - Sanction list possible match
+         */
+        flags?: Array<'DUPLICATE' | 'NEEDS_ADJUDICATION' | 'SANCTION_LIST_CONFIRMED_MATCH' | 'SANCTION_LIST_POSSIBLE_MATCH'>,
+        fullName?: string,
+        householdAdminArea?: string,
+        householdId?: string,
+        isActiveProgram?: boolean,
+        lastRegistrationDateAfter?: string,
+        lastRegistrationDateBefore?: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `id` - Id
+         * * `-id` - Id (descending)
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `full_name` - Full name
+         * * `-full_name` - Full name (descending)
+         * * `household__id` - Household  id
+         * * `-household__id` - Household  id (descending)
+         * * `household__unicef_id` - Household  unicef id
+         * * `-household__unicef_id` - Household  unicef id (descending)
+         * * `birth_date` - Birth date
+         * * `-birth_date` - Birth date (descending)
+         * * `sex` - Sex
+         * * `-sex` - Sex (descending)
+         * * `relationship` - Relationship
+         * * `-relationship` - Relationship (descending)
+         * * `household__admin_area__name` - Household  admin area  name
+         * * `-household__admin_area__name` - Household  admin area  name (descending)
+         * * `last_registration_date` - Last registration date
+         * * `-last_registration_date` - Last registration date (descending)
+         * * `first_registration_date` - First registration date
+         * * `-first_registration_date` - First registration date (descending)
+         */
+        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__admin_area__name' | '-household__id' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__admin_area__name' | 'household__id' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        program?: string,
+        rdiId?: string,
+        /**
+         * * `PENDING` - Pending
+         * * `MERGED` - Merged
+         */
+        rdiMergeStatus?: 'MERGED' | 'PENDING',
+        search?: any,
+        /**
+         * Beneficiary gender
+         *
+         * * `MALE` - Male
+         * * `FEMALE` - Female
+         * * `OTHER` - Other
+         * * `NOT_COLLECTED` - Not collected
+         * * `NOT_ANSWERED` - Not answered
+         */
+        sex?: Array<'FEMALE' | 'MALE' | 'NOT_ANSWERED' | 'NOT_COLLECTED' | 'OTHER'>,
+        /**
+         * * `ACTIVE` - Active
+         * * `DUPLICATE` - Duplicate
+         * * `WITHDRAWN` - Withdrawn
+         */
+        status?: Array<'ACTIVE' | 'DUPLICATE' | 'WITHDRAWN'>,
+        withdrawn?: boolean,
+    }): CancelablePromise<PaginatedIndividualListList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/individuals/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            query: {
+                'admin1': admin1,
+                'admin2': admin2,
+                'age_max': ageMax,
+                'age_min': ageMin,
+                'document_number': documentNumber,
+                'document_type': documentType,
+                'duplicates_only': duplicatesOnly,
+                'excluded_id': excludedId,
+                'flags': flags,
+                'full_name': fullName,
+                'household__admin_area': householdAdminArea,
+                'household__id': householdId,
+                'is_active_program': isActiveProgram,
+                'last_registration_date_after': lastRegistrationDateAfter,
+                'last_registration_date_before': lastRegistrationDateBefore,
+                'limit': limit,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'program': program,
+                'rdi_id': rdiId,
+                'rdi_merge_status': rdiMergeStatus,
+                'search': search,
+                'sex': sex,
+                'status': status,
+                'withdrawn': withdrawn,
+            },
+        });
+    }
+    /**
+     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
+     * @returns IndividualDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsIndividualsRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Individual.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<IndividualDetail> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/individuals/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsIndividualsCountRetrieve({
+        businessAreaSlug,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/individuals/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * @returns PaymentPlanSupportingDocument
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlansSupportingDocumentsCreate({
+        businessAreaSlug,
+        paymentPlanId,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        paymentPlanId: string,
+        programSlug: string,
+        requestBody: PaymentPlanSupportingDocument,
+    }): CancelablePromise<PaymentPlanSupportingDocument> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_id}/supporting-documents/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'payment_plan_id': paymentPlanId,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns void
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlansSupportingDocumentsDestroy({
+        businessAreaSlug,
+        fileId,
+        paymentPlanId,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        fileId: string,
+        paymentPlanId: string,
+        programSlug: string,
+    }): CancelablePromise<void> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_id}/supporting-documents/{file_id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'file_id': fileId,
+                'payment_plan_id': paymentPlanId,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * @returns PaymentPlanSupportingDocument
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlansSupportingDocumentsDownloadRetrieve({
+        businessAreaSlug,
+        fileId,
+        paymentPlanId,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        fileId: string,
+        paymentPlanId: string,
+        programSlug: string,
+    }): CancelablePromise<PaymentPlanSupportingDocument> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_id}/supporting-documents/{file_id}/download/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'file_id': fileId,
+                'payment_plan_id': paymentPlanId,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * @returns PaginatedPeriodicDataUpdateTemplateListList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPeriodicDataUpdateTemplatesList({
+        businessAreaSlug,
+        programSlug,
+        limit,
+        offset,
+        ordering,
+        updatedAtAfter,
+        updatedAtBefore,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        updatedAtAfter?: string,
+        updatedAtBefore?: string,
+    }): CancelablePromise<PaginatedPeriodicDataUpdateTemplateListList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-templates/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            query: {
+                'limit': limit,
+                'offset': offset,
+                'ordering': ordering,
+                'updated_at_after': updatedAtAfter,
+                'updated_at_before': updatedAtBefore,
+            },
+        });
+    }
+    /**
+     * @returns PeriodicDataUpdateTemplateCreate
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPeriodicDataUpdateTemplatesCreate({
+        businessAreaSlug,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        requestBody: PeriodicDataUpdateTemplateCreate,
+    }): CancelablePromise<PeriodicDataUpdateTemplateCreate> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-templates/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns PeriodicDataUpdateTemplateDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPeriodicDataUpdateTemplatesRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A unique integer value identifying this periodic data update template.
+         */
+        id: number,
+        programSlug: string,
+    }): CancelablePromise<PeriodicDataUpdateTemplateDetail> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-templates/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPeriodicDataUpdateTemplatesDownloadRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A unique integer value identifying this periodic data update template.
+         */
+        id: number,
+        programSlug: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-templates/{id}/download/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPeriodicDataUpdateTemplatesExportCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A unique integer value identifying this periodic data update template.
+         */
+        id: number,
+        programSlug: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-templates/{id}/export/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * @returns PaginatedPeriodicDataUpdateUploadListList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPeriodicDataUpdateUploadsList({
+        businessAreaSlug,
+        programSlug,
+        limit,
+        offset,
+        ordering,
+        updatedAtAfter,
+        updatedAtBefore,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        updatedAtAfter?: string,
+        updatedAtBefore?: string,
+    }): CancelablePromise<PaginatedPeriodicDataUpdateUploadListList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-uploads/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            query: {
+                'limit': limit,
+                'offset': offset,
+                'ordering': ordering,
+                'updated_at_after': updatedAtAfter,
+                'updated_at_before': updatedAtBefore,
+            },
+        });
+    }
+    /**
+     * @returns PeriodicDataUpdateUploadDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPeriodicDataUpdateUploadsRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A unique integer value identifying this periodic data update upload.
+         */
+        id: number,
+        programSlug: string,
+    }): CancelablePromise<PeriodicDataUpdateUploadDetail> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-uploads/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * @returns PeriodicDataUpdateUpload
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPeriodicDataUpdateUploadsUploadCreate({
+        businessAreaSlug,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        requestBody: PeriodicDataUpdateUpload,
+    }): CancelablePromise<PeriodicDataUpdateUpload> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-data-update-uploads/upload/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns PaginatedPeriodicFieldList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPeriodicFieldsList({
+        businessAreaSlug,
+        programSlug,
+        limit,
+        offset,
+        ordering,
+        updatedAtAfter,
+        updatedAtBefore,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        updatedAtAfter?: string,
+        updatedAtBefore?: string,
+    }): CancelablePromise<PaginatedPeriodicFieldList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/periodic-fields/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            query: {
+                'limit': limit,
+                'offset': offset,
+                'ordering': ordering,
+                'updated_at_after': updatedAtAfter,
+                'updated_at_before': updatedAtBefore,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaginatedRegistrationDataImportListList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsRegistrationDataImportsList({
+        businessAreaSlug,
+        programSlug,
+        importDate,
+        importDateRange,
+        importedById,
+        limit,
+        name,
+        nameStartswith,
+        offset,
+        orderBy,
+        ordering,
+        search,
+        size,
+        status,
+        totalHouseholdsCountWithValidPhoneNoMax,
+        totalHouseholdsCountWithValidPhoneNoMin,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        importDate?: string,
+        importDateRange?: string,
+        importedById?: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        name?: string,
+        nameStartswith?: string,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `name` - Name
+         * * `-name` - Name (descending)
+         * * `status` - Status
+         * * `-status` - Status (descending)
+         * * `import_date` - Import date
+         * * `-import_date` - Import date (descending)
+         * * `number_of_individuals` - Number of individuals
+         * * `-number_of_individuals` - Number of individuals (descending)
+         * * `number_of_households` - Number of households
+         * * `-number_of_households` - Number of households (descending)
+         * * `data_source` - Data source
+         * * `-data_source` - Data source (descending)
+         * * `imported_by__first_name` - Imported by  first name
+         * * `-imported_by__first_name` - Imported by  first name (descending)
+         */
+        orderBy?: Array<'-data_source' | '-import_date' | '-imported_by__first_name' | '-name' | '-number_of_households' | '-number_of_individuals' | '-status' | 'data_source' | 'import_date' | 'imported_by__first_name' | 'name' | 'number_of_households' | 'number_of_individuals' | 'status'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        search?: string,
+        size?: number,
+        /**
+         * * `LOADING` - Loading
+         * * `DEDUPLICATION` - Deduplication
+         * * `DEDUPLICATION_FAILED` - Deduplication Failed
+         * * `IMPORT_SCHEDULED` - Import Scheduled
+         * * `IMPORTING` - Importing
+         * * `IMPORT_ERROR` - Import Error
+         * * `IN_REVIEW` - In Review
+         * * `MERGE_SCHEDULED` - Merge Scheduled
+         * * `MERGED` - Merged
+         * * `MERGING` - Merging
+         * * `MERGE_ERROR` - Merge Error
+         * * `REFUSED` - Refused import
+         */
+        status?: 'DEDUPLICATION' | 'DEDUPLICATION_FAILED' | 'IMPORTING' | 'IMPORT_ERROR' | 'IMPORT_SCHEDULED' | 'IN_REVIEW' | 'LOADING' | 'MERGED' | 'MERGE_ERROR' | 'MERGE_SCHEDULED' | 'MERGING' | 'REFUSED',
+        totalHouseholdsCountWithValidPhoneNoMax?: any,
+        totalHouseholdsCountWithValidPhoneNoMin?: any,
+    }): CancelablePromise<PaginatedRegistrationDataImportListList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            query: {
+                'import_date': importDate,
+                'import_date_range': importDateRange,
+                'imported_by__id': importedById,
+                'limit': limit,
+                'name': name,
+                'name__startswith': nameStartswith,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'search': search,
+                'size': size,
+                'status': status,
+                'total_households_count_with_valid_phone_no_max': totalHouseholdsCountWithValidPhoneNoMax,
+                'total_households_count_with_valid_phone_no_min': totalHouseholdsCountWithValidPhoneNoMin,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns RegistrationDataImportDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsRegistrationDataImportsRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Registration data import.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<RegistrationDataImportDetail> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsRegistrationDataImportsDeduplicateCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Registration data import.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/{id}/deduplicate/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsRegistrationDataImportsEraseCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Registration data import.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/{id}/erase/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsRegistrationDataImportsMergeCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Registration data import.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/{id}/merge/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns RefuseRdi
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsRegistrationDataImportsRefuseCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Registration data import.
+         */
+        id: string,
+        programSlug: string,
+        requestBody: RefuseRdi,
+    }): CancelablePromise<RefuseRdi> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/{id}/refuse/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsRegistrationDataImportsCountRetrieve({
+        businessAreaSlug,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsRegistrationDataImportsRunDeduplicationCreate({
+        businessAreaSlug,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/run-deduplication/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsRegistrationDataImportsWebhookdeduplicationRetrieve({
+        businessAreaSlug,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/webhookdeduplication/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * @returns PaginatedTargetPopulationListList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsTargetPopulationsList({
+        businessAreaSlug,
+        programSlug,
+        dispersionEndDateLte,
+        dispersionStartDateGte,
+        isFollowUp,
+        limit,
+        name,
+        offset,
+        ordering,
+        program,
+        status,
+        totalEntitledQuantityGte,
+        totalEntitledQuantityLte,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        dispersionEndDateLte?: string,
+        dispersionStartDateGte?: string,
+        isFollowUp?: boolean,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        name?: string,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        program?: string,
+        /**
+         * Status [sys]
+         *
+         * * `TP_OPEN` - Open
+         * * `TP_LOCKED` - Locked
+         * * `PROCESSING` - Processing
+         * * `STEFICON_WAIT` - Steficon Wait
+         * * `STEFICON_RUN` - Steficon Run
+         * * `STEFICON_COMPLETED` - Steficon Completed
+         * * `STEFICON_ERROR` - Steficon Error
+         * * `DRAFT` - Draft
+         * * `PREPARING` - Preparing
+         * * `OPEN` - Open
+         * * `LOCKED` - Locked
+         * * `LOCKED_FSP` - Locked FSP
+         * * `IN_APPROVAL` - In Approval
+         * * `IN_AUTHORIZATION` - In Authorization
+         * * `IN_REVIEW` - In Review
+         * * `ACCEPTED` - Accepted
+         * * `FINISHED` - Finished
+         */
+        status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        totalEntitledQuantityGte?: number,
+        totalEntitledQuantityLte?: number,
+    }): CancelablePromise<PaginatedTargetPopulationListList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            query: {
+                'dispersion_end_date__lte': dispersionEndDateLte,
+                'dispersion_start_date__gte': dispersionStartDateGte,
+                'is_follow_up': isFollowUp,
+                'limit': limit,
+                'name': name,
+                'offset': offset,
+                'ordering': ordering,
+                'program': program,
+                'status': status,
+                'total_entitled_quantity__gte': totalEntitledQuantityGte,
+                'total_entitled_quantity__lte': totalEntitledQuantityLte,
+            },
+        });
+    }
+    /**
+     * Base validation class, inherit from this class to create custom validators.
+     * Your custom validators have to implement validation methods that starts
+     * with name "validate_" so validate can call all the validators from your
+     * custom validator.
      *
      * * `MALE` - Male
      * * `FEMALE` - Female

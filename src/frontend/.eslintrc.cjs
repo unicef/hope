@@ -88,6 +88,7 @@ module.exports = {
     'import/extensions': 'off',
     'import/no-named-as-default': 'off',
     'import/no-named-as-default-member': 'off',
+    '@typescript-eslint/unbound-method': ["error", { ignoreStatic: true }],
     "padding-line-between-statements": [
       "error",
       { "blankLine": "never", "prev": "import", "next": "import" }

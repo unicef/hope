@@ -1,7 +1,5 @@
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { QueryFunction, QueryKey, useQuery } from '@tanstack/react-query';
-import type { UseQueryResult } from '@tanstack/react-query/src/types';
-import type { UndefinedInitialDataOptions } from '@tanstack/react-query/src/queryOptions';
+import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 
 export const useHopeDetailsQuery = <TData, TOptions>(
   id: string,

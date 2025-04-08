@@ -46,8 +46,8 @@ export function NewDocumentationFieldArray({
               >
                 {t(
                   values.documentation?.length > 0
-                    ? 'Add more documentation'
-                    : 'Add documentation',
+                    ? 'Add more grievance supporting documents'
+                    : 'Add grievance supporting documents',
                 )}
               </Button>
             </Grid>

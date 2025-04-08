@@ -132,3 +132,7 @@ class RegistrationDataImportDetailSerializer(serializers.ModelSerializer, AdminU
             biometric_unique = obj.number_of_individuals - obj.dedup_engine_golden_record_duplicates
             result.append(get_count_and_percentage(biometric_unique, obj.number_of_individuals))
         return result
+
+
+class RefuseRdiSerializer(serializers.Serializer):
+    reason = serializers.CharField(required=True)
