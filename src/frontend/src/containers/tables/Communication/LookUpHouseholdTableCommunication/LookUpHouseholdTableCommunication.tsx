@@ -11,6 +11,7 @@ import styled from 'styled-components';
 import { headCells } from './LookUpHouseholdComunicationTableHeadCells';
 import { LookUpHouseholdTableRowCommunication } from './LookUpHouseholdTableRowCommunication';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { PaginatedHouseholdListList } from '@restgenerated/models/PaginatedHouseholdListList';
 
 interface LookUpHouseholdTableCommunicationProps {
   businessArea: string;
@@ -49,6 +50,7 @@ function LookUpHouseholdTableCommunication({
   const { programId } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const initialQueryVariables = useMemo(() => {
     const matchWithdrawnValue = (): boolean | undefined => {
       if (filter.withdrawn === 'true') {
@@ -84,7 +86,7 @@ function LookUpHouseholdTableCommunication({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery<PaginatedHouseholdListList>({
     queryKey: [
       'businessAreasProgramsHouseholdsList',
       queryVariables,

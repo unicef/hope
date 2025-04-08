@@ -38,6 +38,7 @@ import { BulkAddNoteModal } from './bulk/BulkAddNoteModal';
 import { BulkAssignModal } from './bulk/BulkAssignModal';
 import { BulkSetPriorityModal } from './bulk/BulkSetPriorityModal';
 import { BulkSetUrgencyModal } from './bulk/BulkSetUrgencyModal';
+import { Profile } from '@restgenerated/models/Profile';
 
 interface GrievancesTableProps {
   filter;
@@ -137,8 +138,8 @@ export const GrievancesTable = ({
   const { data: choicesData, loading: choicesLoading } =
     useGrievancesChoiceDataQuery();
 
-  const { data: currentUserData, isLoading: currentUserDataLoading } = useQuery(
-    {
+  const { data: currentUserData, isLoading: currentUserDataLoading } =
+    useQuery<Profile>({
       queryKey: ['profile', businessArea, programId],
       queryFn: () => {
         return RestService.restUsersProfileRetrieve({
@@ -146,8 +147,7 @@ export const GrievancesTable = ({
           programSlug: programId === 'all' ? undefined : programId,
         });
       },
-    },
-  );
+    });
 
   const permissions = usePermissions();
 

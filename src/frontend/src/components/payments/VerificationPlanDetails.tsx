@@ -27,7 +27,7 @@ const Container = styled.div`
 `;
 
 interface VerificationPlanDetailsProps {
-  verificationPlan: PaymentPlanDetail['verificationPlans']['edges'][0]['node'];
+  verificationPlan: PaymentPlanDetail['paymentVerificationPlans'][number];
   samplingChoicesData: CashPlanVerificationSamplingChoicesQuery;
   planNode: PaymentPlanDetail;
 }

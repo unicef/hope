@@ -2,6 +2,7 @@ from typing import Dict, List, Union
 
 from rest_framework import serializers
 
+from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
 from hct_mis_api.apps.core.utils import get_count_and_percentage
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
@@ -33,8 +34,9 @@ class DeduplicationResultSerializer(serializers.Serializer):
     percentage = serializers.FloatField()
 
 
-class RegistrationDataImportDetailSerializer(serializers.ModelSerializer):
-    status = serializers.CharField(source="get_status_display")
+class RegistrationDataImportDetailSerializer(serializers.ModelSerializer, AdminUrlSerializerMixin):
+    status = serializers.CharField()
+    status_display = serializers.CharField(source="get_status_display")
     data_source = serializers.CharField(source="get_data_source_display")
     imported_by = serializers.CharField(source="imported_by.get_full_name", default="")
     batch_duplicates_count_and_percentage = serializers.SerializerMethodField(
@@ -59,6 +61,7 @@ class RegistrationDataImportDetailSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "status",
+            "status_display",
             "data_source",
             "imported_by",
             "created_at",
@@ -76,6 +79,7 @@ class RegistrationDataImportDetailSerializer(serializers.ModelSerializer):
             "golden_record_duplicates_count_and_percentage",
             "golden_record_possible_duplicates_count_and_percentage",
             "golden_record_unique_count_and_percentage",
+            "admin_url",
         )
 
     def resolve_batch_duplicates_count_and_percentage(
@@ -128,3 +132,7 @@ class RegistrationDataImportDetailSerializer(serializers.ModelSerializer):
             biometric_unique = obj.number_of_individuals - obj.dedup_engine_golden_record_duplicates
             result.append(get_count_and_percentage(biometric_unique, obj.number_of_individuals))
         return result
+
+
+class RefuseRdiSerializer(serializers.Serializer):
+    reason = serializers.CharField(required=True)

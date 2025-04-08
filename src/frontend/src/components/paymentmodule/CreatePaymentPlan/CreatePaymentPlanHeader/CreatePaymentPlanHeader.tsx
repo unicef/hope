@@ -10,6 +10,7 @@ import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
+import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 
 interface CreatePaymentPlanHeaderProps {
   handleSubmit: () => Promise<void>;
@@ -28,8 +29,8 @@ export function CreatePaymentPlanHeader({
 
   const decodedProgramCycleId = decodeIdString(programCycleId);
 
-  const { data: programCycleData, isLoading: isLoadingProgramCycle } = useQuery(
-    {
+  const { data: programCycleData, isLoading: isLoadingProgramCycle } =
+    useQuery<ProgramCycleList>({
       queryKey: [
         'programCyclesDetails',
         businessArea,
@@ -43,8 +44,7 @@ export function CreatePaymentPlanHeader({
           programSlug: programId,
         });
       },
-    },
-  );
+    });
 
   if (isLoadingProgramCycle) {
     return null;

@@ -15,6 +15,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { Profile } from '@restgenerated/models/Profile';
 
 const initialFilter = {
   type: '',
@@ -33,7 +34,7 @@ function ReportingPage(): ReactElement {
   const { data: choicesData, loading: choicesLoading } =
     useReportChoiceDataQuery();
 
-  const { data: meData, isLoading: meLoading } = useQuery({
+  const { data: meData, isLoading: meLoading } = useQuery<Profile>({
     queryKey: ['profile', businessArea, programId],
     queryFn: () => {
       return RestService.restUsersProfileRetrieve({

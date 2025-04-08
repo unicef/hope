@@ -22,6 +22,7 @@ import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const EditFollowUpPaymentPlanPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -32,15 +33,16 @@ const EditFollowUpPaymentPlanPage = (): ReactElement => {
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
 
-  const { data: paymentPlan, isLoading: loadingPaymentPlan } = useQuery({
-    queryKey: ['paymentPlan', businessArea, paymentPlanId, programId],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsPaymentPlansRetrieve({
-        businessAreaSlug: businessArea,
-        id: paymentPlanId,
-        programSlug: programId,
-      }),
-  });
+  const { data: paymentPlan, isLoading: loadingPaymentPlan } =
+    useQuery<PaymentPlanDetail>({
+      queryKey: ['paymentPlan', businessArea, paymentPlanId, programId],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsPaymentPlansRetrieve({
+          businessAreaSlug: businessArea,
+          id: paymentPlanId,
+          programSlug: programId,
+        }),
+    });
 
   const { data: allTargetPopulationsData, loading: loadingTargetPopulations } =
     useAllTargetPopulationsQuery({

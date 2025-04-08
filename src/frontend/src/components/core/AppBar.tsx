@@ -13,6 +13,7 @@ import { theme as muiTheme } from 'src/theme';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { Profile } from '@restgenerated/models/Profile';
 
 const StyledToolbar = styled(Toolbar)(() => ({
   display: 'flex',
@@ -65,7 +66,7 @@ const StyledIconButton = styled(IconButton)<AppBarProps>(({ open }) => ({
 export const AppBar = ({ open, handleDrawerOpen }): ReactElement => {
   const { businessArea, programId } = useBaseUrl();
 
-  const { data: meData } = useQuery({
+  const { data: meData } = useQuery<Profile>({
     queryKey: ['profile', businessArea, programId],
     queryFn: () => {
       return RestService.restUsersProfileRetrieve({

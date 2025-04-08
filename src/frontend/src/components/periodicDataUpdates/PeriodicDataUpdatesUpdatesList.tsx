@@ -12,6 +12,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import { PeriodicDataUpdatesUploadDetailsDialog } from '@components/periodicDataUpdates/PeriodicDataUpdatesUploadDetailsDialog';
 import { PeriodicDataUpdateUploadList } from '@restgenerated/models/PeriodicDataUpdateUploadList';
 import { RestService } from '@restgenerated/services/RestService';
+import { PaginatedPeriodicDataUpdateUploadListList } from '@restgenerated/models/PaginatedPeriodicDataUpdateUploadListList';
 
 const updatesHeadCells: HeadCell<PeriodicDataUpdateUploadList>[] = [
   {
@@ -76,7 +77,7 @@ export const PeriodicDataUpdatesUpdatesList = (): ReactElement => {
     data: updatesData,
     isLoading,
     error,
-  } = useQuery({
+  } = useQuery<PaginatedPeriodicDataUpdateUploadListList>({
     queryKey: [
       'periodicDataUpdateUploads',
       businessAreaSlug,

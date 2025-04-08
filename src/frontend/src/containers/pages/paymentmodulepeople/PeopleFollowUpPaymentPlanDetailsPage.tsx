@@ -25,12 +25,13 @@ import { ReactElement } from 'react';
 import { useParams } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 export const PeopleFollowUpPaymentPlanDetailsPage = (): ReactElement => {
   const { paymentPlanId } = useParams();
   const permissions = usePermissions();
   const { baseUrl, businessArea, programId } = useBaseUrl();
-  const { data: paymentPlan, isLoading } = useQuery({
+  const { data: paymentPlan, isLoading } = useQuery<PaymentPlanDetail>({
     queryKey: ['paymentPlan', businessArea, paymentPlanId, programId],
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlansRetrieve({

@@ -3,17 +3,17 @@ import {
   HouseholdChoiceDataQuery,
   IndividualMinimalFragment,
   IndividualRdiMergeStatus,
-  useAllIndividualsQuery,
 } from '@generated/graphql';
 import { Box, Checkbox, FormControlLabel, Grid2 as Grid } from '@mui/material';
-import { ReactElement, useState } from 'react';
-import { UniversalTable } from '../../UniversalTable';
+import { ReactElement, useEffect, useState, useMemo } from 'react';
 import { headCells as importedIndividualHeadCells } from './ImportedIndividualsTableHeadCells';
 import { ImportedIndividualsTableRow } from './ImportedIndividualsTableRow';
 import { useProgramContext } from 'src/programContext';
 import { adjustHeadCells } from '@utils/utils';
 import { headCells as mergedIndividualHeadCells } from './MergedIndividualsTableHeadCells';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { UniversalRestQueryTable } from '@components/rest/UniversalRestQueryTable/UniversalRestQueryTable';
+import { RestService } from '@restgenerated/services/RestService';
 
 interface ImportedIndividualsTableProps {
   rdi;
@@ -31,10 +31,8 @@ interface ImportedIndividualsTableProps {
 function ImportedIndividualsTable({
   rdi,
   rdiId,
-  isOnPaper = false,
   title,
   household,
-  rowsPerPageOptions = [10, 15, 20],
   showCheckbox,
   businessArea,
   choicesData,
@@ -43,15 +41,26 @@ function ImportedIndividualsTable({
   const [showDuplicates, setShowDuplicates] = useState(false);
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-  const initialVariables = {
-    rdiId,
-    household,
-    duplicatesOnly: showDuplicates,
-    businessArea,
-    rdiMergeStatus: isMerged
-      ? IndividualRdiMergeStatus.Merged
-      : IndividualRdiMergeStatus.Pending,
-  };
+
+  // Wrap initialVariables in useMemo to avoid recreating it on every render
+  const initialVariables = useMemo(
+    () => ({
+      rdiId,
+      household,
+      duplicatesOnly: showDuplicates,
+      businessArea,
+      rdiMergeStatus: isMerged
+        ? IndividualRdiMergeStatus.Merged
+        : IndividualRdiMergeStatus.Pending,
+    }),
+    [rdiId, household, showDuplicates, businessArea, isMerged],
+  );
+
+  const [queryVariables, setQueryVariables] = useState(initialVariables);
+
+  useEffect(() => {
+    setQueryVariables(initialVariables);
+  }, [initialVariables]);
 
   const replacements = {
     id: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
@@ -92,14 +101,15 @@ function ImportedIndividualsTable({
       )}
 
       {isMerged ? (
-        <UniversalTable<IndividualMinimalFragment, AllIndividualsQueryVariables>
+        <UniversalRestQueryTable<
+          IndividualMinimalFragment,
+          AllIndividualsQueryVariables
+        >
           title={title}
           headCells={adjustedMergedIndividualsHeadCells}
-          query={useAllIndividualsQuery}
-          queriedObjectName="allIndividuals"
-          rowsPerPageOptions={rowsPerPageOptions}
-          initialVariables={initialVariables}
-          isOnPaper={isOnPaper}
+          query={RestService.restBusinessAreasProgramsIndividualsList}
+          queryVariables={queryVariables}
+          setQueryVariables={setQueryVariables}
           renderRow={(row) => (
             <ImportedIndividualsTableRow
               choices={choicesData}
@@ -110,14 +120,12 @@ function ImportedIndividualsTable({
           )}
         />
       ) : (
-        <UniversalTable<IndividualMinimalFragment, AllIndividualsQueryVariables>
+        <UniversalRestQueryTable
+          queryVariables={queryVariables}
+          setQueryVariables={setQueryVariables}
+          query={RestService.restBusinessAreasProgramsIndividualsList}
           title={title}
           headCells={adjustedImportedIndividualsHeadCells}
-          query={useAllIndividualsQuery}
-          queriedObjectName="allIndividuals"
-          rowsPerPageOptions={rowsPerPageOptions}
-          initialVariables={initialVariables}
-          isOnPaper={isOnPaper}
           renderRow={(row) => (
             <ImportedIndividualsTableRow
               choices={choicesData}

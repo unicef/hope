@@ -10,6 +10,8 @@ import { useTranslation } from 'react-i18next';
 import { headCells } from './ProgrammesHeadCells';
 import ProgrammesTableRow from './ProgrammesTableRow';
 import { filterEmptyParams } from '@utils/utils';
+import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
+import { CountResponse } from '@restgenerated/models/CountResponse';
 
 interface ProgrammesTableProps {
   businessArea: string;
@@ -65,7 +67,7 @@ function ProgrammesTable({
     data: dataPrograms,
     isLoading: isLoadingPrograms,
     error: errorPrograms,
-  } = useQuery({
+  } = useQuery<PaginatedProgramListList>({
     queryKey: [
       'businessAreasProgramsList',
       filteredQueryVariables,
@@ -76,7 +78,7 @@ function ProgrammesTable({
       RestService.restBusinessAreasProgramsList(filteredQueryVariables),
   });
 
-  const { data: dataProgramsCount } = useQuery({
+  const { data: dataProgramsCount } = useQuery<CountResponse>({
     queryKey: [
       'businessAreasProgramsCount',
       filteredQueryVariables,

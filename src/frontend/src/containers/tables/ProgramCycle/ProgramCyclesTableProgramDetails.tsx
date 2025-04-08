@@ -19,6 +19,7 @@ import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { Status791Enum } from '@restgenerated/models/Status791Enum';
 import { RestService } from '@restgenerated/services/RestService';
 import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
+import { PaginatedProgramCycleListList } from '@restgenerated/models/PaginatedProgramCycleListList';
 
 interface ProgramCyclesTableProgramDetailsProps {
   program: ProgramDetail;
@@ -38,7 +39,7 @@ const ProgramCyclesTableProgramDetails = ({
     program.status === Status791Enum.ACTIVE &&
     hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_CREATE, permissions);
 
-  const { data, error, isLoading } = useQuery({
+  const { data, error, isLoading } = useQuery<PaginatedProgramCycleListList>({
     queryKey: ['programCycles', businessAreaSlug, programSlug, queryVariables],
     queryFn: () => {
       return RestService.restBusinessAreasProgramsCyclesList({

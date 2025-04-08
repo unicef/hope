@@ -110,7 +110,7 @@ function prepareVariables(
 }
 
 export interface Props {
-  paymentVerificationPlanNode: PaymentPlanDetail['verificationPlans']['edges'][0]['node'];
+  paymentVerificationPlanNode: PaymentPlanDetail['paymentVerificationPlans'][number];
   cashOrPaymentPlanId: string;
   isPaymentPlan: boolean;
 }

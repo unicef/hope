@@ -34,6 +34,7 @@ import { useProgramContext } from '../../../programContext';
 import { UniversalActivityLogTablePaymentVerification } from '../../tables/UniversalActivityLogTablePaymentVerification';
 import { VerificationsTable } from '../../tables/payments/VerificationRecordsTable';
 import { VerificationRecordsFilters } from '../../tables/payments/VerificationRecordsTable/VerificationRecordsFilters';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const Container = styled.div`
   display: flex;
@@ -76,7 +77,7 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
     getFilterFromQueryParams(location, initialFilter),
   );
 
-  const { data: paymentPlan, isLoading } = useQuery({
+  const { data: paymentPlan, isLoading } = useQuery<PaymentPlanDetail>({
     queryKey: ['paymentPlan', businessArea, paymentPlanId, programId],
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlansRetrieve({

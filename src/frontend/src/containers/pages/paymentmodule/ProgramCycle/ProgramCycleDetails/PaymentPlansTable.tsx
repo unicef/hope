@@ -2,6 +2,7 @@ import { UniversalRestTable } from '@components/rest/UniversalRestTable/Universa
 import { headCells } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansHeadCells';
 import { PaymentPlanTableRow } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlanTableRow';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { PaginatedPaymentPlanListList } from '@restgenerated/models/PaginatedPaymentPlanListList';
 import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
 import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { RestService } from '@restgenerated/services/RestService';
@@ -64,7 +65,7 @@ export const PaymentPlansTable = ({
     data: dataPaymentPlans,
     isLoading: isLoadingPaymentPlans,
     error: errorPaymentPlans,
-  } = useQuery({
+  } = useQuery<PaginatedPaymentPlanListList>({
     queryKey: [
       'businessAreasPaymentPlans',
       queryVariables,

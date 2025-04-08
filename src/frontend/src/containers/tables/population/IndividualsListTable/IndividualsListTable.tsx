@@ -13,6 +13,7 @@ import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useProgramContext } from 'src/programContext';
 import { headCells } from './IndividualsListTableHeadCells';
 import { IndividualsListTableRow } from './IndividualsListTableRow';
+import { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
 
 interface IndividualsListTableProps {
   filter;
@@ -71,7 +72,7 @@ export function IndividualsListTable({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery<PaginatedIndividualListList>({
     queryKey: [
       'businessAreasProgramsHouseholdsList',
       queryVariables,

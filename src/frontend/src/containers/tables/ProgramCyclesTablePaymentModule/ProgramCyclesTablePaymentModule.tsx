@@ -9,6 +9,8 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   finishProgramCycle,
+  ProgramCycle,
+  ProgramCyclesQuery,
   reactivateProgramCycle,
 } from '@api/programCycleApi';
 import { BlackLink } from '@core/BlackLink';
@@ -16,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@mui/material';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { RestService } from '@restgenerated/services/RestService';
+import { PaginatedProgramCycleListList } from '@restgenerated/models/PaginatedProgramCycleListList';
 
 interface ProgramCyclesTablePaymentModuleProps {
   program;
@@ -40,16 +43,17 @@ export const ProgramCyclesTablePaymentModule = ({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  const { data, refetch, error, isLoading } = useQuery({
-    queryKey: ['programCycles', businessArea, program.id, queryVariables],
-    queryFn: async () => {
-      return RestService.restBusinessAreasProgramsCyclesList({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
-        queryVariables,
-      });
-    },
-  });
+  const { data, refetch, error, isLoading } =
+    useQuery<PaginatedProgramCycleListList>({
+      queryKey: ['programCycles', businessArea, program.id, queryVariables],
+      queryFn: () => {
+        return RestService.restBusinessAreasProgramsCyclesList({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          queryVariables,
+        });
+      },
+    });
 
   const { mutateAsync: finishMutation, isPending: isPendingFinishing } =
     useMutation({

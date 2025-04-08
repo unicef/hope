@@ -15,6 +15,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   fetchProgramCycles,
   finishProgramCycle,
+  PaginatedListResponse,
   ProgramCycle,
   ProgramCyclesQuery,
   reactivateProgramCycle,
@@ -46,7 +47,9 @@ const ProgramCyclesTablePaymentModule = ({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  const { data, refetch, error, isLoading } = useQuery({
+  const { data, refetch, error, isLoading } = useQuery<
+    PaginatedListResponse<ProgramCycle>
+  >({
     queryKey: ['programCycles', businessArea, program.id, queryVariables],
     queryFn: async () => {
       return fetchProgramCycles(businessArea, program.id, queryVariables);
