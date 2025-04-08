@@ -14,14 +14,11 @@ import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '@hooks/useSnackBar';
 import {
   RegistrationDetailedFragment,
-  useMergeRdiMutation,
 } from '@generated/graphql';
 import { LoadingButton } from '@core/LoadingButton';
 import { useProgramContext } from '../../../programContext';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { useMutation } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useActionMutation } from '@hooks/useActionMutation';
 
 interface MergeRegistrationDataImportDialogProps {

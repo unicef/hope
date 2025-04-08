@@ -21,7 +21,7 @@ const RefuseRdiForm = ({
 }): ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
-  const { id, name } = registration;
+  const { name } = registration;
   const initialValues = {
     refuseReason: '',
   };

@@ -3,7 +3,7 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useDeduplicationFlagsQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { adjustHeadCells, dateToIsoString, decodeIdString } from '@utils/utils';
-import { ReactElement, useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
@@ -46,7 +46,8 @@ function RegistrationDataImportTable({
     fetchPolicy: 'cache-and-network',
   });
   const { businessArea, programId } = useBaseUrl();
-  const initialVariables = {
+
+  const initialVariables = useMemo(() => ({
     search: filter.search,
     importedBy: filter.importedBy
       ? decodeIdString(filter.importedBy)
@@ -65,7 +66,18 @@ function RegistrationDataImportTable({
       filter.sizeMin || filter.sizeMax
         ? JSON.stringify({ min: filter.sizeMin, max: filter.sizeMax })
         : undefined,
-  };
+  }), [
+    filter.importDateRangeMax,
+    filter.importDateRangeMin,
+    filter.importedBy,
+    filter.search,
+    filter.sizeMax,
+    filter.sizeMin,
+    filter.status,
+    businessArea,
+    programId,
+  ]);
+
   const [queryVariables, setQueryVariables] = useState(initialVariables);
 
   useEffect(() => {
