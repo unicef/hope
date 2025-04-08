@@ -1,6 +1,6 @@
 import {
   AllProgramsQuery,
-  ChoiceObject, IndividualMinimalFragment,
+  ChoiceObject,
   PaymentPlanBackgroundActionStatus,
   PaymentPlanBuildStatus,
   PaymentPlanStatus,
@@ -1260,7 +1260,7 @@ export function deepUnderscore(data) {
         result[underscoreKey] = deepUnderscore(value);
         return result;
       },
-      {}
+      {},
     );
   }
   return data;

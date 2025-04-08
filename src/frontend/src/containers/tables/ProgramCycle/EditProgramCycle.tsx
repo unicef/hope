@@ -25,7 +25,6 @@ import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { LoadingButton } from '@core/LoadingButton';
 import {
-  ProgramCycle,
   ProgramCycleUpdate,
   ProgramCycleUpdateResponse,
   updateProgramCycle,

@@ -29,7 +29,6 @@ export function ImportedIndividualsTableRow({
   const { baseUrl, businessArea } = useBaseUrl();
 
   const relationshipChoicesDict = choicesToDict(choices.relationshipChoices);
-  const roleChoicesDict = choicesToDict(choices.roleChoices);
   const deduplicationBatchDict = choicesToDict(
     choices.deduplicationBatchStatusChoices,
   );

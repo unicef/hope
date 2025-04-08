@@ -46,6 +46,7 @@ import type { ProgramDetail } from '../models/ProgramDetail';
 import type { PushPeople } from '../models/PushPeople';
 import type { RDI } from '../models/RDI';
 import type { RDINested } from '../models/RDINested';
+import type { RefuseRdi } from '../models/RefuseRdi';
 import type { RegistrationDataImportDetail } from '../models/RegistrationDataImportDetail';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -2450,6 +2451,33 @@ export class RestService {
      * @returns any No response body
      * @throws ApiError
      */
+    public static restBusinessAreasProgramsRegistrationDataImportsDeduplicateCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Registration data import.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/{id}/deduplicate/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns any No response body
+     * @throws ApiError
+     */
     public static restBusinessAreasProgramsRegistrationDataImportsEraseCreate({
         businessAreaSlug,
         id,
@@ -2497,6 +2525,37 @@ export class RestService {
                 'id': id,
                 'program_slug': programSlug,
             },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns RefuseRdi
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsRegistrationDataImportsRefuseCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Registration data import.
+         */
+        id: string,
+        programSlug: string,
+        requestBody: RefuseRdi,
+    }): CancelablePromise<RefuseRdi> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/{id}/refuse/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
     /**

@@ -6,25 +6,20 @@ import { Title } from '@components/core/Title';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import RegistrationDataImportDetailsPageHeader from '@components/rdi/details/RegistrationDataImportDetailsPageHeader';
 import { Tab, Tabs } from '@core/Tabs';
-import {
-  RegistrationDataImportStatus,
-  useHouseholdChoiceDataQuery,
-  useRegistrationDataImportQuery,
-} from '@generated/graphql';
+import { useHouseholdChoiceDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Typography } from '@mui/material';
-import { deepCamelize, isPermissionDeniedError } from '@utils/utils';
-import { ReactElement, ReactNode, useEffect, useState } from 'react';
+import { isPermissionDeniedError } from '@utils/utils';
+import { ReactElement, ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
-import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { ImportedHouseholdTable } from '../../tables/rdi/ImportedHouseholdsTable';
 import { ImportedIndividualsTable } from '../../tables/rdi/ImportedIndividualsTable';
 import RegistrationDetails from '@components/rdi/details/RegistrationDetails/RegistrationDetails';
-import { useQuery } from '@tanstack/react-query';
 import { useHopeDetailsQuery } from '@hooks/useHopeDetailsQuery';
 import { RestService } from '@restgenerated/services/RestService';
 
@@ -101,7 +96,7 @@ const RegistrationDataImportDetailsPage = (): ReactElement => {
     return null;
   }
 
-  const isMerged = 'Merged' === data.status;
+  const isMerged = 'MERGED' === data.status;
 
   function RegistrationContainer({
     isErased,

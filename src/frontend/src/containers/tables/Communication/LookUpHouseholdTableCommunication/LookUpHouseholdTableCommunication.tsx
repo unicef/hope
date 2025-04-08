@@ -48,7 +48,7 @@ function LookUpHouseholdTableCommunication({
 }: LookUpHouseholdTableCommunicationProps): ReactElement {
   const { programId } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const initialQueryVariables = useMemo(() => {
     const matchWithdrawnValue = (): boolean | undefined => {
