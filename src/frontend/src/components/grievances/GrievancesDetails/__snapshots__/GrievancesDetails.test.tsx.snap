@@ -421,10 +421,10 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 class="sc-dycHyt hCGPcL"
                 color="textSecondary"
               >
-                Documentation
+                Grievance Supporting Documents
               </span>
               <div
-                data-cy="label-Documentation"
+                data-cy="label-Grievance Supporting Documents"
               >
                 <span
                   class="sc-jbAkgO kuLorh"
