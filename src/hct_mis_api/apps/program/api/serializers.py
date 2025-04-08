@@ -320,4 +320,14 @@ class ProgramSmallSerializer(EncodedIdSerializerMixin):
         fields = (
             "id",
             "name",
+            "status",
+        )
+
+
+class ProgramCycleSmallSerializer(EncodedIdSerializerMixin):
+    class Meta:
+        model = ProgramCycle
+        fields = (
+            "id",
+            "title",
         )

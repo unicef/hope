@@ -45,7 +45,10 @@ from hct_mis_api.apps.payment.models.payment import (
 )
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.payment.xlsx.xlsx_error import XlsxError
-from hct_mis_api.apps.program.api.serializers import ProgramSmallSerializer
+from hct_mis_api.apps.program.api.serializers import (
+    ProgramCycleSmallSerializer,
+    ProgramSmallSerializer,
+)
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.steficon.api.serializers import RuleCommitSerializer
 from hct_mis_api.apps.targeting.api.serializers import TargetingCriteriaSerializer
@@ -455,6 +458,7 @@ class PaymentPlanCreateFollowUpSerializer(serializers.Serializer):
 class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerializer):
     background_action_status = serializers.CharField(source="get_background_action_status_display")
     program = ProgramSmallSerializer(read_only=True, source="program_cycle.program")
+    program_cycle = ProgramCycleSmallSerializer()
     has_payment_list_export_file = serializers.BooleanField(source="has_export_file")
     has_fsp_delivery_mechanism_xlsx_template = serializers.SerializerMethodField()
     imported_file_name = serializers.CharField()
@@ -489,6 +493,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     eligible_payments_count = serializers.SerializerMethodField()
     payment_verification_summary = PaymentVerificationSummarySerializer(read_only=True)
     payment_verification_plans = PaymentVerificationPlanSerializer(many=True, read_only=True)
+    payment_verification_plans_count = serializers.SerializerMethodField()
 
     class Meta(PaymentPlanListSerializer.Meta):
         fields = PaymentPlanListSerializer.Meta.fields + (  # type: ignore
@@ -497,6 +502,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "start_date",
             "end_date",
             "program",
+            "program_cycle",
             "has_payment_list_export_file",
             "has_fsp_delivery_mechanism_xlsx_template",
             "imported_file_name",
@@ -543,6 +549,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "eligible_payments_count",
             "payment_verification_summary",
             "payment_verification_plans",
+            "payment_verification_plans_count",
             "admin_url",
         )
 
@@ -705,6 +712,9 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     def get_eligible_payments_count(self, obj: PaymentPlan) -> int:
         return obj.eligible_payments.count()
 
+    def get_payment_verification_plans_count(self, obj: PaymentPlan) -> int:
+        return obj.payment_verification_plans.count()
+
 
 class PaymentPlanBulkActionSerializer(serializers.Serializer):
     ids = serializers.ListField(child=serializers.CharField())
@@ -714,10 +724,13 @@ class PaymentPlanBulkActionSerializer(serializers.Serializer):
 
 class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerializer):
     background_action_status = serializers.CharField(source="get_background_action_status_display")
-    program = serializers.CharField(source="program_cycle.program.name")
-    program_cycle = serializers.CharField(source="program_cycle.title")
+    program = ProgramSmallSerializer(read_only=True, source="program_cycle.program")
+    program_cycle = ProgramCycleSmallSerializer(source="program_cycle")
     targeting_criteria = TargetingCriteriaSerializer(read_only=True)
     steficon_rule_targeting = RuleCommitSerializer(read_only=True)
+    delivery_mechanism = DeliveryMechanismSerializer(read_only=True)
+    financial_service_provider = FinancialServiceProviderSerializer(read_only=True)
+    failed_wallet_validation_collectors_ids = serializers.SerializerMethodField()
 
     class Meta(PaymentPlanListSerializer.Meta):
         fields = PaymentPlanListSerializer.Meta.fields + (  # type: ignore
@@ -726,13 +739,33 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
             "end_date",
             "program",
             "program_cycle",
+            "exclusion_reason",
             "male_children_count",
             "female_children_count",
             "male_adults_count",
             "female_adults_count",
             "targeting_criteria",
             "steficon_rule_targeting",
+            "vulnerability_score_min",
+            "vulnerability_score_max",
+            "delivery_mechanism",
+            "financial_service_provider",
+            "failed_wallet_validation_collectors_ids",
+            "version",
             "admin_url",
+        )
+
+    def get_failed_wallet_validation_collectors_ids(self, obj: PaymentPlan) -> List[str]:
+        fsp = getattr(obj, "financial_service_provider", None)
+        dm = getattr(obj, "delivery_mechanism", None)
+        if not fsp or not dm:
+            return []
+        return list(
+            obj.payment_items.select_related("collector")
+            .filter(
+                has_valid_wallet=False,
+            )
+            .values_list("collector__unicef_id", flat=True)
         )
 
 
