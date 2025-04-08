@@ -5,6 +5,7 @@ from hct_mis_api.apps.payment.api.views import (
     PaymentPlanManagerialViewSet,
     PaymentPlanSupportingDocumentViewSet,
     PaymentPlanViewSet,
+    PaymentVerificationViewSet,
     PaymentViewSet,
     TargetPopulationViewSet,
     TPHouseholdViewSet,
@@ -43,6 +44,16 @@ program_nested_router.register(
     PaymentViewSet,
     basename="payments",
 )
+program_nested_router.register(
+    "payment-verifications",
+    PaymentVerificationViewSet,
+    basename="payment-verifications",
+)
+# program_nested_router.register(
+#     r"payment-verifications/(?P<payment_plan_id>[^/.]+)/verifications",
+#     VerificationViewSet,
+#     basename="verifications",
+# )
 
 urlpatterns = [
     path("", include(business_area_nested_router.urls)),
