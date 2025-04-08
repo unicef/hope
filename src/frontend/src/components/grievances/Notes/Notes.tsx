@@ -12,7 +12,6 @@ import {
   useCreateGrievanceTicketNoteMutation,
 } from '@generated/graphql';
 import { LoadingButton } from '@core/LoadingButton';
-import { OverviewContainerColumn } from '@core/OverviewContainerColumn';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useProgramContext } from '../../../programContext';
@@ -140,53 +139,47 @@ export function Notes({
               <Title>
                 <Typography variant="h6">Notes</Typography>
               </Title>
-              <OverviewContainerColumn>
-                {mappedNotes}
-                {canAddNote && (
-                  <Grid container>
-                    <Grid size={{ xs: 2 }}>
-                      <Avatar src={myName} alt={myName} />
+              {mappedNotes}
+              {canAddNote && (
+                <Grid container>
+                  <Grid size={{ xs: 2 }}>
+                    <Avatar src={myName} alt={myName} />
+                  </Grid>
+                  <Grid size={{ xs: 10 }}>
+                    <Grid size={{ xs: 12 }}>
+                      <Box display="flex" justifyContent="space-between">
+                        <Name>{renderUserName(meData.me)}</Name>
+                      </Box>
                     </Grid>
-                    <Grid size={{ xs: 10 }}>
-                      <Grid size={{ xs: 12 }}>
-                        <Box display="flex" justifyContent="space-between">
-                          <Name>{renderUserName(meData)}</Name>
-                        </Box>
-                      </Grid>
-                      <Grid size={{ xs: 12 }}>
-                        <DescMargin>
-                          <Form>
-                            <Field
-                              name="newNote"
-                              multiline
-                              fullWidth
-                              variant="filled"
-                              label="Add a note ..."
-                              component={FormikTextField}
-                            />
-                            <Box
-                              mt={2}
-                              display="flex"
-                              justifyContent="flex-end"
+                    <Grid size={{ xs: 12 }}>
+                      <DescMargin>
+                        <Form>
+                          <Field
+                            name="newNote"
+                            multiline
+                            fullWidth
+                            variant="filled"
+                            label="Add a note ..."
+                            component={FormikTextField}
+                          />
+                          <Box mt={2} display="flex" justifyContent="flex-end">
+                            <LoadingButton
+                              data-cy="button-add-note"
+                              loading={loading}
+                              color="primary"
+                              variant="contained"
+                              onClick={submitForm}
+                              disabled={!isActiveProgram}
                             >
-                              <LoadingButton
-                                data-cy="button-add-note"
-                                loading={loading}
-                                color="primary"
-                                variant="contained"
-                                onClick={submitForm}
-                                disabled={!isActiveProgram}
-                              >
-                                {t('Add New Note')}
-                              </LoadingButton>
-                            </Box>
-                          </Form>
-                        </DescMargin>
-                      </Grid>
+                              {t('Add New Note')}
+                            </LoadingButton>
+                          </Box>
+                        </Form>
+                      </DescMargin>
                     </Grid>
                   </Grid>
-                )}
-              </OverviewContainerColumn>
+                </Grid>
+              )}
             </StyledBox>
           )}
         </Formik>

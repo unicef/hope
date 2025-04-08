@@ -253,6 +253,9 @@ const AddFilterTargetingCriteriaDisplay = ({
                         householdIds={criteria.householdIds}
                         individualIds={criteria.individualIds}
                         deliveryMechanism={targetPopulation?.deliveryMechanism}
+                        financialServiceProvider={
+                          targetPopulation?.financialServiceProvider
+                        }
                         criteria={criteria}
                         editFunction={() => editCriteria(criteria, index)}
                         removeFunction={() => helpers.remove(index)}
