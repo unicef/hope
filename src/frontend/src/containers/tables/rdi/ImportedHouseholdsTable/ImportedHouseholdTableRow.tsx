@@ -20,7 +20,7 @@ export const StyledLink = styled.div`
 `;
 
 interface ImportedHouseholdTableRowProps {
-  household: HouseholdList
+  household: HouseholdList;
   rdi: RegistrationDataImportDetail;
 }
 

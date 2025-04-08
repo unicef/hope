@@ -3,11 +3,9 @@ import {
   HouseholdChoiceDataQuery,
   IndividualMinimalFragment,
   IndividualRdiMergeStatus,
-  useAllIndividualsQuery,
 } from '@generated/graphql';
 import { Box, Checkbox, FormControlLabel, Grid2 as Grid } from '@mui/material';
 import { ReactElement, useEffect, useState } from 'react';
-import { UniversalTable } from '../../UniversalTable';
 import { headCells as importedIndividualHeadCells } from './ImportedIndividualsTableHeadCells';
 import { ImportedIndividualsTableRow } from './ImportedIndividualsTableRow';
 import { useProgramContext } from 'src/programContext';
@@ -33,10 +31,8 @@ interface ImportedIndividualsTableProps {
 function ImportedIndividualsTable({
   rdi,
   rdiId,
-  isOnPaper = false,
   title,
   household,
-  rowsPerPageOptions = [10, 15, 20],
   showCheckbox,
   businessArea,
   choicesData,
