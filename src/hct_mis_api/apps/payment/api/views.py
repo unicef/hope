@@ -163,7 +163,6 @@ class PaymentPlanViewSet(
         "split": [Permissions.PM_SPLIT],
         "reconciliation_import_xlsx": [Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION],
         "export_pdf_payment_plan_summary": [Permissions.PM_EXPORT_PDF_SUMMARY],
-        "finish": [],
     }
 
     def get_object(self) -> PaymentPlan:

@@ -3,6 +3,7 @@ from io import BytesIO
 from typing import Any, Callable, List
 from unittest.mock import Mock, patch
 
+from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import connection
@@ -21,6 +22,7 @@ from hct_mis_api.apps.account.fixtures import (
 )
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.core.utils import encode_id_base64, encode_id_base64_required
 from hct_mis_api.apps.payment.api.views import PaymentPlanManagerialViewSet
 from hct_mis_api.apps.payment.fixtures import (
@@ -37,7 +39,9 @@ from hct_mis_api.apps.payment.fixtures import (
 from hct_mis_api.apps.payment.models import (
     Approval,
     FinancialServiceProvider,
+    Payment,
     PaymentPlan,
+    PaymentPlanSplit,
 )
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle
@@ -1030,8 +1034,8 @@ class TestTargetPopulationDetail:
 
         assert tp["id"] == encode_id_base64_required(self.tp.id, "PaymentPlan")
         assert tp["name"] == self.tp.name
-        assert tp["program_cycle"] == self.cycle.title
-        assert tp["program"] == self.program_active.name
+        assert tp["program_cycle"]["title"] == self.cycle.title
+        assert tp["program"]["name"] == self.program_active.name
         assert tp["status"] == self.tp.get_status_display()
         assert tp["total_households_count"] == self.tp.total_households_count
         assert tp["total_individuals_count"] == self.tp.total_individuals_count
@@ -1619,6 +1623,17 @@ class TestPaymentPlanActions:
         self.url_export_pdf_payment_plan_summary = reverse(
             "api:payments:payment-plans-export-pdf-payment-plan-summary", kwargs=url_kwargs
         )
+        self.url_generate_xlsx_with_auth_code = reverse(
+            "api:payments:payment-plans-generate-xlsx-with-auth-code", kwargs=url_kwargs
+        )
+        self.url_send_xlsx_password = reverse("api:payments:payment-plans-send-xlsx-password", kwargs=url_kwargs)
+        self.url_reconciliation_export_xlsx = reverse(
+            "api:payments:payment-plans-reconciliation-export-xlsx", kwargs=url_kwargs
+        )
+        self.url_reconciliation_import_xlsx = reverse(
+            "api:payments:payment-plans-reconciliation-import-xlsx", kwargs=url_kwargs
+        )
+        self.url_pp_split = reverse("api:payments:payment-plans-split", kwargs=url_kwargs)
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -2081,6 +2096,209 @@ class TestPaymentPlanActions:
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
             assert response.json()["status"] == "Accepted"
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.PM_DOWNLOAD_FSP_AUTH_CODE], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_generate_xlsx_with_auth_code(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        fsp_xlsx_template_id = encode_id_base64_required(
+            FinancialServiceProviderXlsxTemplateFactory().pk, "FinancialServiceProviderXlsxTemplate"
+        )
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        test_file = FileTemp.objects.create(
+            object_id=self.pp.pk, content_type=get_content_type_for_model(self.pp), created_by=self.user
+        )
+        fsp = FinancialServiceProviderFactory(
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API, payment_gateway_id="123"
+        )
+        PaymentPlanSplitFactory(payment_plan=self.pp)
+        self.pp.status = PaymentPlan.Status.IN_APPROVAL
+        self.pp.financial_service_provider = fsp
+        self.pp.save()
+        response = self.client.post(
+            self.url_generate_xlsx_with_auth_code, {"fsp_xlsx_template_id": fsp_xlsx_template_id}, format="json"
+        )
+
+        if expected_status == status.HTTP_200_OK:
+            assert status.HTTP_400_BAD_REQUEST == response.status_code
+            assert (
+                "Payment List Per FSP export is only available for ACCEPTED or FINISHED Payment Plans." in response.data
+            )
+
+            self.pp.status = PaymentPlan.Status.ACCEPTED
+            self.pp.export_file_per_fsp = test_file
+            self.pp.save()
+            response_2 = self.client.post(
+                self.url_generate_xlsx_with_auth_code, {"fsp_xlsx_template_id": fsp_xlsx_template_id}, format="json"
+            )
+
+            assert status.HTTP_400_BAD_REQUEST == response_2.status_code
+            assert "Export failed: Payment Plan already has created exported file." in response_2.data
+
+            self.pp.export_file_per_fsp = None
+            self.pp.save()
+            payment = PaymentFactory(parent=self.pp, status=Payment.STATUS_PENDING)
+            response_3 = self.client.post(
+                self.url_generate_xlsx_with_auth_code, {"fsp_xlsx_template_id": fsp_xlsx_template_id}, format="json"
+            )
+
+            assert status.HTTP_400_BAD_REQUEST == response_3.status_code
+            assert (
+                "Export failed: There could be not Pending Payments and FSP communication channel should be set to API."
+                in response_3.data
+            )
+
+            # success
+            payment.status = Payment.STATUS_SENT_TO_PG
+            payment.save()
+            response_ok = self.client.post(
+                self.url_generate_xlsx_with_auth_code, {"fsp_xlsx_template_id": fsp_xlsx_template_id}, format="json"
+            )
+
+            assert status.HTTP_200_OK == response_ok.status_code
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.PM_SEND_XLSX_PASSWORD], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_send_xlsx_password(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        self.pp.status = PaymentPlan.Status.ACCEPTED
+        self.pp.save()
+
+        response = self.client.get(self.url_send_xlsx_password)
+        assert response.status_code == expected_status
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.PM_VIEW_LIST], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_reconciliation_export_xlsx(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        self.pp.status = PaymentPlan.Status.ACCEPTED
+        self.pp.save()
+        PaymentFactory(parent=self.pp, status=Payment.STATUS_PENDING)
+
+        response = self.client.get(self.url_reconciliation_export_xlsx)
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert status.HTTP_200_OK == response.status_code
+            assert "id" in response.data
+
+            self.pp.eligible_payments.delete()
+            response_1 = self.client.get(self.url_reconciliation_export_xlsx)
+            assert status.HTTP_400_BAD_REQUEST == response_1.status_code
+            assert "Export failed: The Payment List is empty." in response_1.data
+
+            self.pp.status = PaymentPlan.Status.IN_APPROVAL
+            self.pp.save()
+            response_2 = self.client.get(self.url_reconciliation_export_xlsx)
+            assert status.HTTP_400_BAD_REQUEST == response_2.status_code
+            assert (
+                "Payment List Per FSP export is only available for ACCEPTED or FINISHED Payment Plans."
+                in response_2.data
+            )
+
+    def test_pp_reconciliation_import_xlsx_invalid(self, create_user_role_with_permissions: Any) -> None:
+        self.pp.status = PaymentPlan.Status.OPEN
+        self.pp.save()
+        create_user_role_with_permissions(
+            self.user, [Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION], self.afghanistan, self.program_active
+        )
+        test_file = SimpleUploadedFile("test.xlsx", b"123", content_type="application/vnd.ms-excel")
+        response = self.client.post(self.url_reconciliation_import_xlsx, {"file": test_file}, format="multipart")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert (
+            "Payment List Per FSP export is only available for ACCEPTED or FINISHED Payment Plans." in response.data[0]
+        )
+
+        fsp_api = FinancialServiceProviderFactory(
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API, payment_gateway_id="123"
+        )
+        self.pp.status = PaymentPlan.Status.ACCEPTED
+        self.pp.financial_service_provider = fsp_api
+        self.pp.save()
+        response_2 = self.client.post(self.url_reconciliation_import_xlsx, {"file": test_file}, format="multipart")
+        assert response_2.status_code == status.HTTP_400_BAD_REQUEST
+        assert (
+            "Only for FSP with Communication Channel XLSX can be imported reconciliation manually."
+            in response_2.data[0]
+        )
+
+    # def test_split
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.PM_SPLIT], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_split(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        fsp = FinancialServiceProviderFactory(
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API, payment_gateway_id="123"
+        )
+        split = PaymentPlanSplitFactory(payment_plan=self.pp, sent_to_payment_gateway=True)
+        self.pp.status = PaymentPlan.Status.IN_APPROVAL
+        self.pp.financial_service_provider = fsp
+        self.pp.save()
+        data = {"payments_no": 1, "split_type": PaymentPlanSplit.SplitType.BY_RECORDS}
+        response = self.client.post(self.url_pp_split, data, format="json")
+
+        if expected_status == status.HTTP_200_OK:
+            assert status.HTTP_400_BAD_REQUEST == response.status_code
+            assert "Payment plan is already sent to payment gateway" in response.data
+
+            split.sent_to_payment_gateway = False
+            split.save()
+            response_2 = self.client.post(self.url_pp_split, data, format="json")
+            assert status.HTTP_400_BAD_REQUEST == response_2.status_code
+            assert "Payment plan must be accepted to make a split" in response_2.data
+
+            self.pp.status = PaymentPlan.Status.ACCEPTED
+            self.pp.save()
+            self.pp.eligible_payments.delete()
+            response_3 = self.client.post(
+                self.url_pp_split, {"split_type": PaymentPlanSplit.SplitType.BY_RECORDS}, format="json"
+            )
+            assert status.HTTP_400_BAD_REQUEST == response_3.status_code
+            assert "Payment Number is required for split by records" in response_3.data
+
+            fsp_api = FinancialServiceProviderFactory(
+                communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API, payment_gateway_id="123"
+            )
+            PaymentFactory.create_batch(
+                51, parent=self.pp, status=Payment.STATUS_PENDING, financial_service_provider=fsp_api
+            )
+            response_4 = self.client.post(self.url_pp_split, data, format="json")
+            assert status.HTTP_400_BAD_REQUEST == response_4.status_code
+            assert "Cannot split Payment Plan into more than 50 parts" in response_4.data
+
+            # success
+            response_ok = self.client.post(
+                self.url_pp_split,
+                {"payments_no": 30, "split_type": PaymentPlanSplit.SplitType.BY_RECORDS},
+                format="json",
+            )
+            assert status.HTTP_200_OK == response_ok.status_code
+            assert "id" in response_ok.data
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
