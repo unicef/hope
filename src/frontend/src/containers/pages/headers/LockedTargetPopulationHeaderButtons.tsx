@@ -1,9 +1,5 @@
 import { LoadingButton } from '@components/core/LoadingButton';
-import {
-  Action,
-  BusinessAreaDataQuery,
-  ProgramStatus,
-} from '@generated/graphql';
+import { Action, BusinessAreaDataQuery } from '@generated/graphql';
 import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { FileCopy } from '@mui/icons-material';
@@ -15,6 +11,7 @@ import styled from 'styled-components';
 import { useProgramContext } from '../../../programContext';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { FinalizeTargetPopulationPaymentPlan } from '../../dialogs/targetPopulation/FinalizeTargetPopulationPaymentPlan';
+import { Status791Enum } from '@restgenerated/models/Status791Enum';
 
 const IconContainer = styled.span`
   button {
@@ -82,7 +79,7 @@ export function LockedTargetPopulationHeaderButtons({
         <Box m={2}>
           <Tooltip
             title={
-              targetPopulation.program.status !== ProgramStatus.Active
+              targetPopulation.program.status !== Status791Enum.ACTIVE
                 ? t('Assigned programme is not ACTIVE')
                 : ''
             }

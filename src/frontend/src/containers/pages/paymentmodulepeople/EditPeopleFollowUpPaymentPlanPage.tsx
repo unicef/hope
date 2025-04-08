@@ -6,8 +6,9 @@ import { PaymentPlanParameters } from '@components/paymentmodule/CreatePaymentPl
 import { PaymentPlanTargeting } from '@components/paymentmodule/CreatePaymentPlan/PaymentPlanTargeting/PaymentPlanTargeting';
 import { EditPaymentPlanHeader } from '@components/paymentmodule/EditPaymentPlan/EditPaymentPlanHeader';
 import {
+  PaymentPlanBackgroundActionStatus,
+  PaymentPlanStatus,
   useAllTargetPopulationsQuery,
-  usePaymentPlanQuery,
   useUpdatePpMutation,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -21,22 +22,43 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import * as Yup from 'yup';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
+import { useQuery } from '@tanstack/react-query';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { RestService } from '@restgenerated/services/RestService';
 
 const EditPeopleFollowUpPaymentPlanPage = (): ReactElement => {
   const navigate = useNavigate();
   const { paymentPlanId } = useParams();
   const { t } = useTranslation();
-  const { data: paymentPlanData, loading: loadingPaymentPlan } =
-    usePaymentPlanQuery({
-      variables: {
-        id: paymentPlanId,
+  const { baseUrl, businessArea, programId } = useBaseUrl();
+
+  const { data: paymentPlan, isLoading: loadingPaymentPlan } =
+    useQuery<PaymentPlanDetail>({
+      queryKey: ['paymentPlan', businessArea, paymentPlanId, programId],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsPaymentPlansRetrieve({
+          businessAreaSlug: businessArea,
+          id: paymentPlanId,
+          programSlug: programId,
+        }),
+      refetchInterval: () => {
+        const { status, backgroundActionStatus } = paymentPlan;
+        if (
+          status === PaymentPlanStatus.Preparing ||
+          (backgroundActionStatus !== null &&
+            backgroundActionStatus !==
+              PaymentPlanBackgroundActionStatus.ExcludeBeneficiariesError)
+        ) {
+          return 3000;
+        }
+
+        return false;
       },
-      fetchPolicy: 'cache-and-network',
+      refetchIntervalInBackground: true,
     });
 
   const [mutate] = useUpdatePpMutation();
   const { showMessage } = useSnackbar();
-  const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
 
   const { data: allTargetPopulationsData, loading: loadingTargetPopulations } =
@@ -49,17 +71,15 @@ const EditPeopleFollowUpPaymentPlanPage = (): ReactElement => {
     });
   if (loadingTargetPopulations || loadingPaymentPlan)
     return <LoadingComponent />;
-  if (!allTargetPopulationsData || !paymentPlanData) return null;
+  if (!allTargetPopulationsData || !paymentPlan) return null;
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.PM_CREATE, permissions))
     return <PermissionDenied />;
 
-  const { paymentPlan } = paymentPlanData;
-
   const initialValues = {
     paymentPlanId: paymentPlan.id,
     currency: {
-      name: paymentPlan.currencyName,
+      name: paymentPlan.currency,
       value: paymentPlan.currency,
     },
     dispersionStartDate: paymentPlan.dispersionStartDate,

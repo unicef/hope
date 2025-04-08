@@ -135,8 +135,8 @@ function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
                         >
                           <Pointer>
                             {targetPopulation
-                              ?.failed_wallet_validation_collectors_ids
-                              ?.length || '-'}
+                              ?.failedWalletValidationCollectorsIds?.length ||
+                              '-'}
                           </Pointer>
                         </SummaryValue>
                       </LabelizedField>
@@ -144,7 +144,7 @@ function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
                         <DialogTitle>View IDs</DialogTitle>
                         <DialogContent>
                           <List>
-                            {targetPopulation?.failed_wallet_validation_collectors_ids?.map(
+                            {targetPopulation?.failedWalletValidationCollectorsIds?.map(
                               (id, index) => (
                                 <ListItem key={index}>{id}</ListItem>
                               ),

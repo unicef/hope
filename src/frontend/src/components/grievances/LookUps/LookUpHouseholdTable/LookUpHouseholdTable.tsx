@@ -14,7 +14,6 @@ import styled from 'styled-components';
 import { headCells } from './LookUpHouseholdTableHeadCells';
 import { LookUpHouseholdTableRow } from './LookUpHouseholdTableRow';
 import { PaginatedHouseholdListList } from '@restgenerated/models/PaginatedHouseholdListList';
-import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 
 interface LookUpHouseholdTableProps {
   businessArea: string;
@@ -108,7 +107,7 @@ export function LookUpHouseholdTable({
     data: dataHouseholdsAllPrograms,
     isLoading: isLoadingHouseholdsAllPrograms,
     error: errorHouseholdsAllPrograms,
-  } = useQuery<PaginatedProgramListList>({
+  } = useQuery<PaginatedHouseholdListList>({
     queryKey: [
       'businessAreasHouseholdsList',
       queryVariables,

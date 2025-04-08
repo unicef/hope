@@ -7,12 +7,14 @@ import { PaymentPlanTargeting } from '@components/paymentmodule/CreatePaymentPla
 import { EditPaymentPlanHeader } from '@components/paymentmodule/EditPaymentPlan/EditPaymentPlanHeader';
 import {
   useAllTargetPopulationsQuery,
-  usePaymentPlanQuery,
   useUpdatePpMutation,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import { today } from '@utils/utils';
 import { Form, Formik } from 'formik';
 import moment from 'moment';
@@ -25,18 +27,22 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 const EditPeoplePaymentPlanPage = (): ReactElement => {
   const navigate = useNavigate();
   const { paymentPlanId } = useParams();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
   const { t } = useTranslation();
-  const { data: paymentPlanData, loading: loadingPaymentPlan } =
-    usePaymentPlanQuery({
-      variables: {
-        id: paymentPlanId,
-      },
-      fetchPolicy: 'cache-and-network',
+
+  const { data: paymentPlan, isLoading: loadingPaymentPlan } =
+    useQuery<PaymentPlanDetail>({
+      queryKey: ['paymentPlan', businessArea, paymentPlanId, programId],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsPaymentPlansRetrieve({
+          businessAreaSlug: businessArea,
+          id: paymentPlanId,
+          programSlug: programId,
+        }),
     });
 
   const [mutate] = useUpdatePpMutation();
   const { showMessage } = useSnackbar();
-  const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
 
   const { data: allTargetPopulationsData, loading: loadingTargetPopulations } =
@@ -49,15 +55,14 @@ const EditPeoplePaymentPlanPage = (): ReactElement => {
     });
   if (loadingTargetPopulations || loadingPaymentPlan)
     return <LoadingComponent />;
-  if (!allTargetPopulationsData || !paymentPlanData) return null;
+  if (!allTargetPopulationsData || !paymentPlan) return null;
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.PM_CREATE, permissions))
     return <PermissionDenied />;
-  const { paymentPlan } = paymentPlanData;
 
   const initialValues = {
     currency: {
-      name: paymentPlan.currencyName,
+      name: paymentPlan.currency,
       value: paymentPlan.currency,
     },
     dispersionStartDate: paymentPlan.dispersionStartDate,

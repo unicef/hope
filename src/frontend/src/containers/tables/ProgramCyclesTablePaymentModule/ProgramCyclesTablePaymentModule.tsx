@@ -9,7 +9,6 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   finishProgramCycle,
-  ProgramCycle,
   ProgramCyclesQuery,
   reactivateProgramCycle,
 } from '@api/programCycleApi';
@@ -19,6 +18,7 @@ import { Button } from '@mui/material';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { RestService } from '@restgenerated/services/RestService';
 import { PaginatedProgramCycleListList } from '@restgenerated/models/PaginatedProgramCycleListList';
+import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 
 interface ProgramCyclesTablePaymentModuleProps {
   program;
@@ -39,18 +39,18 @@ export const ProgramCyclesTablePaymentModule = ({
     ...filters,
   });
 
-  const { businessArea } = useBaseUrl();
+  const { businessArea, programId } = useBaseUrl();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   const { data, refetch, error, isLoading } =
     useQuery<PaginatedProgramCycleListList>({
-      queryKey: ['programCycles', businessArea, program.id, queryVariables],
+      queryKey: ['programCycles', businessArea, programId, queryVariables],
       queryFn: () => {
         return RestService.restBusinessAreasProgramsCyclesList({
           businessAreaSlug: businessArea,
           programSlug: programId,
-          queryVariables,
+          ...queryVariables,
         });
       },
     });
@@ -87,7 +87,7 @@ export const ProgramCyclesTablePaymentModule = ({
     void refetch();
   }, [queryVariables, refetch]);
 
-  const finishAction = async (programCycle: ProgramCycle) => {
+  const finishAction = async (programCycle: ProgramCycleList) => {
     try {
       const decodedProgramCycleId = decodeIdString(programCycle.id);
       await finishMutation({ programCycleId: decodedProgramCycleId });
@@ -99,7 +99,7 @@ export const ProgramCyclesTablePaymentModule = ({
     }
   };
 
-  const reactivateAction = async (programCycle: ProgramCycle) => {
+  const reactivateAction = async (programCycle: ProgramCycleList) => {
     try {
       const decodedProgramCycleId = decodeIdString(programCycle.id);
       await reactivateMutation({ programCycleId: decodedProgramCycleId });
@@ -111,7 +111,7 @@ export const ProgramCyclesTablePaymentModule = ({
     }
   };
 
-  const renderRow = (row: ProgramCycle): ReactElement => (
+  const renderRow = (row: ProgramCycleList): ReactElement => (
     <ClickableTableRow key={row.id} data-cy="program-cycle-row">
       <TableCell data-cy="program-cycle-title">
         <BlackLink to={`./${row.id}`}>{row.title}</BlackLink>

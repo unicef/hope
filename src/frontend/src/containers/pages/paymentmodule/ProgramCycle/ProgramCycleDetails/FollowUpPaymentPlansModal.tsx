@@ -23,10 +23,10 @@ import { StyledTable } from '@components/grievances/GrievancesApproveSection/App
 import TableHead from '@mui/material/TableHead';
 import TableBody from '@mui/material/TableBody';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
-import { PaginatedPaymentPlanList } from '@restgenerated/models/PaginatedPaymentPlanList';
+import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
 
 interface FollowUpPaymentPlansModalProps {
-  paymentPlan: PaginatedPaymentPlanList;
+  paymentPlan: PaymentPlanList;
   canViewDetails: boolean;
 }
 
@@ -56,10 +56,10 @@ export const FollowUpPaymentPlansModal = ({
         </BlackLink>
       </TableCell>
       <TableCell align="left">
-        <UniversalMoment>{row.dispersion_startDate}</UniversalMoment>
+        <UniversalMoment>{row.dispersionStartDate}</UniversalMoment>
       </TableCell>
       <TableCell align="left">
-        <UniversalMoment>{row.dispersion_end_date}</UniversalMoment>
+        <UniversalMoment>{row.dispersionEndDate}</UniversalMoment>
       </TableCell>
     </TableRow>
   ));
