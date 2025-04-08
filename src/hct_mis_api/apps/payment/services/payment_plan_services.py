@@ -242,6 +242,9 @@ class PaymentPlanService:
         if self.payment_plan.eligible_payments.filter(financial_service_provider__isnull=True).exists():
             raise GraphQLError("All Payments must have assigned FSP")
 
+        if self.payment_plan.eligible_payments.filter(entitlement_quantity__isnull=True).exists():
+            raise GraphQLError("All Payments must have entitlement quantity set.")
+
         self.payment_plan.status_lock_fsp()
         self.payment_plan.save()
 
