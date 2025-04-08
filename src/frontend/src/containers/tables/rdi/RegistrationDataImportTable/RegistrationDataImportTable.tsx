@@ -1,21 +1,14 @@
 import { TableWrapper } from '@components/core/TableWrapper';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import {
-  AllRegistrationDataImportsQueryVariables,
-  RegistrationDataImportNode,
-  useAllRegistrationDataImportsQuery,
-  useDeduplicationFlagsQuery,
-} from '@generated/graphql';
+import { useDeduplicationFlagsQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { adjustHeadCells, dateToIsoString, decodeIdString } from '@utils/utils';
 import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
-import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './RegistrationDataImportTableHeadCells';
 import { RegistrationDataImportTableRow } from './RegistrationDataImportTableRow';
-import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { UniversalRestQueryTable } from '@components/rest/UniversalRestQueryTable/UniversalRestQueryTable';
 import { RestService } from '@restgenerated/services/RestService';
 

@@ -1,8 +1,6 @@
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { HouseholdRdiMergeStatus } from '@generated/graphql';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useMemo, useState } from 'react';
 import { useProgramContext } from 'src/programContext';
@@ -30,7 +28,6 @@ function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
   );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-
 
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
@@ -63,11 +60,7 @@ function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
     return (
       <UniversalRestQueryTable
         renderRow={(row) => (
-          <ImportedHouseholdTableRow
-            rdi={rdi}
-            key={(row as any).id}
-            household={row}
-          />
+          <ImportedHouseholdTableRow rdi={rdi} key={row.id} household={row} />
         )}
         query={RestService.restBusinessAreasProgramsHouseholdsList}
         headCells={adjustedMergedHeadCells}
