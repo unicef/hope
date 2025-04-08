@@ -1,11 +1,9 @@
 import { ReactElement } from 'react';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useQuery } from '@tanstack/react-query';
-import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { HeadCell } from '@core/Table/EnhancedTableHead';
 import { Order } from '@components/rest/TableRestComponent/TableRestComponent';
-import { deepCamelize } from '@utils/utils';
 import { isUndefined, omitBy } from 'lodash';
 
 interface UniversalRestQueryTableProps<T = any, K = any> {
@@ -38,7 +36,7 @@ export const UniversalRestQueryTable = <T, K>(
   const { queryVariables } = props;
   const cleanedQueryVariables = omitBy(queryVariables, isUndefined);
   const { data, isLoading, error } = useQuery({
-    queryKey: [query.name, queryVariables, programSlug, businessArea],
+    queryKey: [query.name, cleanedQueryVariables, programSlug, businessArea],
     queryFn: () =>
       query({
         businessAreaSlug: businessArea,

@@ -1,4 +1,3 @@
-import { fetchProgramCycles, ProgramCycle } from '@api/programCycleApi';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import DeleteProgramCycle from '@containers/tables/ProgramCycle/DeleteProgramCycle';
 import EditProgramCycle from '@containers/tables/ProgramCycle/EditProgramCycle';
