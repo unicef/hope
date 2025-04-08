@@ -12,13 +12,12 @@ import { DialogDescription } from '@containers/dialogs/DialogDescription';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '@hooks/useSnackBar';
-import {
-  RegistrationDetailedFragment,
-  useMergeRdiMutation,
-} from '@generated/graphql';
+import { RegistrationDetailedFragment } from '@generated/graphql';
 import { LoadingButton } from '@core/LoadingButton';
 import { useProgramContext } from '../../../programContext';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { RestService } from '@restgenerated/services/RestService';
+import { useHopeDetailsQuery } from '@hooks/useActionMutation';
 
 interface MergeRegistrationDataImportDialogProps {
   registration: RegistrationDetailedFragment;
@@ -32,15 +31,19 @@ function MergeRegistrationDataImportDialog({
   const { showMessage } = useSnackbar();
   const { isSocialDctType, selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-  const [mutate, { loading }] = useMergeRdiMutation({
-    variables: { id: registration.id },
-  });
+
+  const { mutateAsync, isPending } = useHopeDetailsQuery(
+    registration.id,
+    RestService.restBusinessAreasProgramsRegistrationDataImportsMergeCreate,
+    [RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve.name],
+  );
   const merge = async (): Promise<void> => {
-    const { errors } = await mutate();
+    const { errors } = await mutateAsync();
     if (errors) {
       showMessage(t('Error while merging Registration Data Import'));
       return;
     }
+    setOpen(false);
     showMessage(t('Registration Data Import Merging started'));
   };
   let dataCountInformation = (
@@ -97,7 +100,7 @@ function MergeRegistrationDataImportDialog({
               {t('CANCEL')}
             </Button>
             <LoadingButton
-              loading={loading}
+              loading={isPending}
               type="submit"
               color="primary"
               variant="contained"

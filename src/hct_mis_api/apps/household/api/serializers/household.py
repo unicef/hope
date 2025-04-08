@@ -46,6 +46,7 @@ class HouseholdListSerializer(serializers.ModelSerializer):
             "total_cash_received",
             "total_cash_received_usd",
             "last_registration_date",
+            "first_registration_date",
             "currency",
             "has_duplicates",
             "sanction_list_possible_match",

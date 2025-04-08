@@ -35,6 +35,10 @@ export type HouseholdList = {
      */
     lastRegistrationDate: string;
     /**
+     * Household first registration date [sys]
+     */
+    firstRegistrationDate: string;
+    /**
      * Household currency
      *
      * * `` - None
