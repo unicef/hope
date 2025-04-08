@@ -5,7 +5,7 @@ import { ReactElement } from 'react';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface VerificationPlanDetailsChartProps {
-  verificationPlan: PaymentPlanDetail['verificationPlans']['edges'][0]['node'];
+  verificationPlan: PaymentPlanDetail['paymentVerificationPlans'][number];
 }
 
 const ChartContainer = styled.div`

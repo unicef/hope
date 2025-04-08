@@ -23,6 +23,7 @@ import {
   useDownloadPeriodicDataUpdateTemplate,
   useExportPeriodicDataUpdateTemplate,
 } from './PeriodicDataUpdatesTemplatesListActions';
+import { PaginatedPeriodicDataUpdateTemplateListList } from '@restgenerated/models/PaginatedPeriodicDataUpdateTemplateListList';
 
 const templatesHeadCells: HeadCell<PeriodicDataUpdateTemplateList>[] = [
   {
@@ -138,7 +139,7 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
     data: templatesData,
     isLoading,
     error,
-  } = useQuery({
+  } = useQuery<PaginatedPeriodicDataUpdateTemplateListList>({
     queryKey: [
       'periodicDataUpdateTemplates',
       businessAreaSlug,

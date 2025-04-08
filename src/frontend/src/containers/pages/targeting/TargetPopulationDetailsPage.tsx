@@ -14,6 +14,7 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { useBusinessAreaDataQuery } from '@generated/graphql';
+import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 
 export const TargetPopulationDetailsPage = (): ReactElement => {
   const { id } = useParams();
@@ -30,7 +31,7 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
     data: paymentPlan,
     isLoading: loading,
     error,
-  } = useQuery({
+  } = useQuery<TargetPopulationDetail>({
     queryKey: ['paymentPlan', businessArea, id, programId],
     queryFn: () =>
       RestService.restBusinessAreasProgramsTargetPopulationsRetrieve({

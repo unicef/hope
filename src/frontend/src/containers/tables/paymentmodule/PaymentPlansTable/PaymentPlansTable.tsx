@@ -11,6 +11,7 @@ import { error } from 'console';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { PaginatedPaymentPlanListList } from '@restgenerated/models/PaginatedPaymentPlanListList';
 
 interface PaymentPlansTableProps {
   filter;
@@ -40,20 +41,21 @@ function PaymentPlansTable({
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
-  const { data: paymentPlansData, isLoading } = useQuery({
-    queryKey: [
-      'businessAreasProgramsPaymentPlansList',
-      businessArea,
-      programId,
-      queryVariables,
-    ],
-    queryFn: () => {
-      return RestService.restBusinessAreasProgramsPaymentPlansList({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
-      });
-    },
-  });
+  const { data: paymentPlansData, isLoading } =
+    useQuery<PaginatedPaymentPlanListList>({
+      queryKey: [
+        'businessAreasProgramsPaymentPlansList',
+        businessArea,
+        programId,
+        queryVariables,
+      ],
+      queryFn: () => {
+        return RestService.restBusinessAreasProgramsPaymentPlansList({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+        });
+      },
+    });
 
   const replacements = {
     totalHouseholdsCount: (_beneficiaryGroup) =>

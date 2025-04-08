@@ -36,6 +36,7 @@ import { editProgramDetailsValidationSchema } from '@components/programs/CreateP
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 
 const DuplicateProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -50,7 +51,7 @@ const DuplicateProgramPage = (): ReactElement => {
   const { data: treeData, loading: treeLoading } = useAllAreasTreeQuery({
     variables: { businessArea },
   });
-  const { data: program, isLoading: loadingProgram } = useQuery({
+  const { data: program, isLoading: loadingProgram } = useQuery<ProgramDetail>({
     queryKey: ['businessAreaProgram', businessArea, id],
     queryFn: () =>
       RestService.restBusinessAreasProgramsRetrieve({
@@ -190,33 +191,33 @@ const DuplicateProgramPage = (): ReactElement => {
     startDate,
     endDate,
     sector,
-    data_collecting_type,
+    dataCollectingType,
     beneficiaryGroup,
     description,
     budget = '',
-    administrative_areas_of_implementation,
-    population_goal = 0,
-    cash_plus = false,
-    frequency_of_payments = 'REGULAR',
+    administrativeAreasOfImplementation,
+    populationGoal = 0,
+    cashPlus = false,
+    frequencyOfPayments = 'REGULAR',
     partners,
-    partner_access = ProgramPartnerAccess.AllPartnersAccess,
+    partnerAccess = ProgramPartnerAccess.AllPartnersAccess,
   } = program;
 
   const initialValues = {
     editMode: true,
     name: `Copy of Programme: (${name})`,
     programmeCode: '',
-    startDate: startDate,
-    endDate: endDate,
+    startDate,
+    endDate,
     sector,
-    dataCollectingTypeCode: data_collecting_type?.code,
+    dataCollectingTypeCode: dataCollectingType?.code,
     beneficiaryGroup: decodeIdString(beneficiaryGroup?.id),
     description,
     budget,
-    administrativeAreasOfImplementation: administrative_areas_of_implementation,
-    populationGoal: population_goal,
-    cashPlus: cash_plus,
-    frequencyOfPayments: frequency_of_payments,
+    administrativeAreasOfImplementation: administrativeAreasOfImplementation,
+    populationGoal,
+    cashPlus,
+    frequencyOfPayments,
     partners: partners
       .filter((partner) => isPartnerVisible(partner.name))
       .map((partner) => ({
@@ -224,7 +225,7 @@ const DuplicateProgramPage = (): ReactElement => {
         areas: partner.areas.map((area) => decodeIdString(area.id)),
         areaAccess: partner.areaAccess,
       })),
-    partnerAccess: partner_access,
+    partnerAccess: partnerAccess,
     pduFields: [],
   };
   initialValues.budget = program.budget === '0.00' ? '' : program.budget;

@@ -11,6 +11,7 @@ import { ImportedHouseholdTableRow } from './ImportedHouseholdTableRow';
 import { headCells as mergedHeadCells } from './MergedHouseholdTableHeadCells';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { PaginatedHouseholdListList } from '@restgenerated/models/PaginatedHouseholdListList';
 
 function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
   const { selectedProgram } = useProgramContext();
@@ -30,7 +31,7 @@ function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery<PaginatedHouseholdListList>({
     queryKey: [
       'businessAreasProgramsHouseholdsList',
       queryVariables,

@@ -11,6 +11,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useQuery } from '@tanstack/react-query';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { RestService } from '@restgenerated/services/RestService';
+import { PeriodicDataUpdateUploadDetail } from '@restgenerated/models/PeriodicDataUpdateUploadDetail';
 
 interface PeriodicDataUpdatesUploadDetailsDialogProps {
   open: boolean;
@@ -68,20 +69,21 @@ export const PeriodicDataUpdatesUploadDetailsDialog: FC<
 > = ({ open, onClose, uploadId }) => {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
-  const { data: uploadDetailsData, isLoading } = useQuery({
-    queryKey: [
-      'periodicDataUpdateUploadDetails',
-      businessArea,
-      programId,
-      uploadId,
-    ],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsRetrieve({
-        businessAreaSlug: businessArea,
-        id: uploadId,
-        programSlug: programId,
-      }),
-  });
+  const { data: uploadDetailsData, isLoading } =
+    useQuery<PeriodicDataUpdateUploadDetail>({
+      queryKey: [
+        'periodicDataUpdateUploadDetails',
+        businessArea,
+        programId,
+        uploadId,
+      ],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsRetrieve({
+          businessAreaSlug: businessArea,
+          id: uploadId,
+          programSlug: programId,
+        }),
+    });
 
   if (isLoading) return <LoadingComponent />;
   return (

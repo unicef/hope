@@ -21,6 +21,7 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { PaymentDetails } from '@components/paymentmodulepeople/PaymentDetails';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 function PaymentDetailsPage(): ReactElement {
   const { t } = useTranslation();
@@ -30,7 +31,7 @@ function PaymentDetailsPage(): ReactElement {
   });
   const { businessArea, programId } = useBaseUrl();
 
-  const { data: payment, isLoading: loading } = useQuery({
+  const { data: payment, isLoading: loading } = useQuery<PaymentPlanDetail>({
     queryKey: ['paymentPlan', businessArea, paymentId, programId],
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlansRetrieve({

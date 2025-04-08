@@ -11,7 +11,11 @@ import DeleteProgramCycle from '@containers/tables/ProgramCycle/DeleteProgramCyc
 import EditProgramCycle from '@containers/tables/ProgramCycle/EditProgramCycle';
 import { useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { fetchProgramCycles, ProgramCycle } from '@api/programCycleApi';
+import {
+  fetchProgramCycles,
+  PaginatedListResponse,
+  ProgramCycle,
+} from '@api/programCycleApi';
 import { BlackLink } from '@core/BlackLink';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
@@ -36,7 +40,9 @@ export const ProgramCyclesTableProgramDetails = ({
     program.status === Status791Enum.ACTIVE &&
     hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_CREATE, permissions);
 
-  const { data, error, isLoading } = useQuery({
+  const { data, error, isLoading } = useQuery<
+    PaginatedListResponse<ProgramCycle>
+  >({
     queryKey: ['programCycles', businessArea, program.id, queryVariables],
     queryFn: async () => {
       return fetchProgramCycles(businessArea, program.id, queryVariables);

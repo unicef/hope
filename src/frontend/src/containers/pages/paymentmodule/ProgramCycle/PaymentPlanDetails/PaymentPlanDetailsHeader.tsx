@@ -22,6 +22,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AdminButton } from '@core/AdminButton';
 import { RestService } from '@restgenerated/services/RestService';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 
 interface PaymentPlanDetailsHeaderProps {
   permissions: string[];
@@ -35,7 +36,7 @@ export const PaymentPlanDetailsHeader = ({
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
   const programCycleId = paymentPlan.programCycle?.id;
-  const { data: programCycleData } = useQuery({
+  const { data: programCycleData } = useQuery<ProgramCycleList>({
     queryKey: [
       'programCyclesDetails',
       businessArea,

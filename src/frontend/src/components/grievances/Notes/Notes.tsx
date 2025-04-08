@@ -20,6 +20,7 @@ import { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { Profile } from '@restgenerated/models/Profile';
 
 const Name = styled.span`
   font-size: 16px;
@@ -48,7 +49,7 @@ export function Notes({
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
 
-  const { data: meData, isLoading: meLoading } = useQuery({
+  const { data: meData, isLoading: meLoading } = useQuery<Profile>({
     queryKey: ['profile', businessArea, programId],
     queryFn: () => {
       return RestService.restUsersProfileRetrieve({

@@ -13,7 +13,8 @@ import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { headCells } from './LookUpHouseholdTableHeadCells';
 import { LookUpHouseholdTableRow } from './LookUpHouseholdTableRow';
-import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { PaginatedHouseholdListList } from '@restgenerated/models/PaginatedHouseholdListList';
+import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 
 interface LookUpHouseholdTableProps {
   businessArea: string;
@@ -91,7 +92,7 @@ export function LookUpHouseholdTable({
     data: dataHouseholdsProgram,
     isLoading: isLoadingHouseholdsProgram,
     error: errorHouseholdsProgram,
-  } = useQuery({
+  } = useQuery<PaginatedHouseholdListList>({
     queryKey: [
       'businessAreasProgramsHouseholdsList',
       queryVariables,
@@ -107,7 +108,7 @@ export function LookUpHouseholdTable({
     data: dataHouseholdsAllPrograms,
     isLoading: isLoadingHouseholdsAllPrograms,
     error: errorHouseholdsAllPrograms,
-  } = useQuery({
+  } = useQuery<PaginatedProgramListList>({
     queryKey: [
       'businessAreasHouseholdsList',
       queryVariables,
@@ -201,11 +202,11 @@ export function LookUpHouseholdTable({
 
   const renderTable = (): ReactElement => (
     <UniversalRestTable
-      renderRow={(row) =>
+      renderRow={(row: PaginatedHouseholdListList['results'][number]) =>
         row ? (
           <LookUpHouseholdTableRow
-            key={(row as any).id}
-            household={row as HouseholdDetail}
+            key={row.id}
+            household={row}
             radioChangeHandler={handleRadioChange}
             selectedHousehold={selectedHousehold}
             choicesData={choicesData}

@@ -16,6 +16,7 @@ import { FormikTextField } from '@shared/Formik/FormikTextField';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RestService } from '@restgenerated/services/RestService';
 import { useLocation } from 'react-router-dom';
+import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 
 interface ProgramFormPropTypes {
   values;
@@ -34,7 +35,7 @@ const ProgramForm = ({
   const { data: dataCollectionTypeChoicesData } =
     useDataCollectionTypeChoiceDataQuery();
 
-  const { data: beneficiaryGroupsData } = useQuery({
+  const { data: beneficiaryGroupsData } = useQuery<PaginatedProgramListList>({
     queryKey: ['beneficiaryGroups'],
     queryFn: () => RestService.restBeneficiaryGroupsList({}),
   });

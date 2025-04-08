@@ -11,6 +11,7 @@ import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { headCells } from './TargetPopulationForPeopleTableHeadCells';
 import { TargetPopulationForPeopleTableRow } from './TargetPopulationForPeopleTableRow';
+import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
 
 interface TargetPopulationProps {
   filter;
@@ -65,7 +66,7 @@ export function TargetPopulationForPeopleTable({
     data: targetPopulationsData,
     isLoading,
     error: targetPopulationsError,
-  } = useQuery({
+  } = useQuery<PaginatedTargetPopulationListList>({
     queryKey: [
       'businessAreasProgramsTargetPopulationsList',
       businessArea,
