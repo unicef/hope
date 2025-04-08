@@ -725,7 +725,7 @@ class PaymentPlanBulkActionSerializer(serializers.Serializer):
 class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerializer):
     background_action_status = serializers.CharField(source="get_background_action_status_display")
     program = ProgramSmallSerializer(read_only=True, source="program_cycle.program")
-    program_cycle = ProgramCycleSmallSerializer(source="program_cycle")
+    program_cycle = ProgramCycleSmallSerializer()
     targeting_criteria = TargetingCriteriaSerializer(read_only=True)
     steficon_rule_targeting = RuleCommitSerializer(read_only=True)
     delivery_mechanism = DeliveryMechanismSerializer(read_only=True)

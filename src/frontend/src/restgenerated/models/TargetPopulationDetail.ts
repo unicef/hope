@@ -2,7 +2,11 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { DeliveryMechanism } from './DeliveryMechanism';
+import type { FinancialServiceProvider } from './FinancialServiceProvider';
 import type { FollowUpPaymentPlan } from './FollowUpPaymentPlan';
+import type { ProgramCycleSmall } from './ProgramCycleSmall';
+import type { ProgramSmall } from './ProgramSmall';
 import type { RuleCommit } from './RuleCommit';
 import type { TargetingCriteria } from './TargetingCriteria';
 export type TargetPopulationDetail = {
@@ -63,8 +67,12 @@ export type TargetPopulationDetail = {
      * Payment Plan end date
      */
     endDate?: string | null;
-    program: string;
-    programCycle: string;
+    readonly program: ProgramSmall;
+    programCycle: ProgramCycleSmall;
+    /**
+     * Exclusion reason (Targeting level)
+     */
+    exclusionReason?: string | null;
     /**
      * Male Children Count [sys]
      */
@@ -83,6 +91,21 @@ export type TargetPopulationDetail = {
     femaleAdultsCount?: number;
     readonly targetingCriteria: TargetingCriteria;
     readonly steficonRuleTargeting: RuleCommit;
+    /**
+     * Written by a tool such as Engine Formula
+     */
+    vulnerabilityScoreMin?: string | null;
+    /**
+     * Written by a tool such as Engine Formula
+     */
+    vulnerabilityScoreMax?: string | null;
+    readonly deliveryMechanism: DeliveryMechanism;
+    readonly financialServiceProvider: FinancialServiceProvider;
+    readonly failedWalletValidationCollectorsIds: Array<string>;
+    /**
+     * record revision number
+     */
+    version?: number;
     readonly adminUrl: string;
 };
 

@@ -982,6 +982,8 @@ export class RestService {
         status,
         totalEntitledQuantityGte,
         totalEntitledQuantityLte,
+        updatedAtGte,
+        updatedAtLte,
     }: {
         businessAreaSlug: string,
         dispersionEndDateLte?: string,
@@ -1030,6 +1032,8 @@ export class RestService {
         status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityGte?: number,
         totalEntitledQuantityLte?: number,
+        updatedAtGte?: string,
+        updatedAtLte?: string,
     }): CancelablePromise<PaginatedPaymentPlanList> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -1051,6 +1055,8 @@ export class RestService {
                 'status': status,
                 'total_entitled_quantity__gte': totalEntitledQuantityGte,
                 'total_entitled_quantity__lte': totalEntitledQuantityLte,
+                'updated_at__gte': updatedAtGte,
+                'updated_at__lte': updatedAtLte,
             },
         });
     }
@@ -1989,6 +1995,8 @@ export class RestService {
         status,
         totalEntitledQuantityGte,
         totalEntitledQuantityLte,
+        updatedAtGte,
+        updatedAtLte,
     }: {
         businessAreaSlug: string,
         programSlug: string,
@@ -2038,6 +2046,8 @@ export class RestService {
         status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
         totalEntitledQuantityGte?: number,
         totalEntitledQuantityLte?: number,
+        updatedAtGte?: string,
+        updatedAtLte?: string,
     }): CancelablePromise<PaginatedPaymentPlanListList> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -2060,6 +2070,8 @@ export class RestService {
                 'status': status,
                 'total_entitled_quantity__gte': totalEntitledQuantityGte,
                 'total_entitled_quantity__lte': totalEntitledQuantityLte,
+                'updated_at__gte': updatedAtGte,
+                'updated_at__lte': updatedAtLte,
             },
         });
     }
@@ -3494,6 +3506,8 @@ export class RestService {
         totalHouseholdsCountLte,
         totalIndividualsCountGte,
         totalIndividualsCountLte,
+        updatedAtGte,
+        updatedAtLte,
     }: {
         businessAreaSlug: string,
         programSlug: string,
@@ -3543,6 +3557,8 @@ export class RestService {
         totalHouseholdsCountLte?: number,
         totalIndividualsCountGte?: number,
         totalIndividualsCountLte?: number,
+        updatedAtGte?: string,
+        updatedAtLte?: string,
     }): CancelablePromise<PaginatedTargetPopulationListList> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -3566,6 +3582,8 @@ export class RestService {
                 'total_households_count__lte': totalHouseholdsCountLte,
                 'total_individuals_count__gte': totalIndividualsCountGte,
                 'total_individuals_count__lte': totalIndividualsCountLte,
+                'updated_at__gte': updatedAtGte,
+                'updated_at__lte': updatedAtLte,
             },
         });
     }

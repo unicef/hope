@@ -201,10 +201,8 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
     def get_active_individuals_count(self, obj: Household) -> int:
         return obj.active_individuals.count()
 
-    def get_geopoint(self, obj: Household) -> Optional[tuple[float, float]]:
-        if obj.geopoint:
-            return obj.geopoint.x, obj.geopoint.y
-        return None
+    def get_geopoint(self, obj: Household) -> Optional[str]:
+        return obj.geopoint if obj.geopoint else None
 
     def get_import_id(self, obj: Household) -> str:
         if obj.detail_id:

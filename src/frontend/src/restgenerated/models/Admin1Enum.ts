@@ -3,24 +3,24 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * * `AF54` - Danielville
- * * `AF35` - East Justin
- * * `HR18` - Gambleborough
- * * `HR19` - New Maria
- * * `UA58` - Nicoleport
- * * `AF31` - North Marie
- * * `HR77` - Tracyfort
- * * `UA90` - West Phillipshire
- * * `UA95` - Westmouth
+ * * `AF96` - Ashleyland
+ * * `HR90` - East Michaelside
+ * * `UA90` - Gregoryside
+ * * `UA82` - Loriview
+ * * `AF79` - Mistyport
+ * * `HR94` - Perkinshaven
+ * * `UA10` - South Kathleen
+ * * `AF34` - Stevenshire
+ * * `HR89` - West Dawnview
  */
 export enum Admin1Enum {
-    AF54 = 'AF54',
-    AF35 = 'AF35',
-    HR18 = 'HR18',
-    HR19 = 'HR19',
-    UA58 = 'UA58',
-    AF31 = 'AF31',
-    HR77 = 'HR77',
+    AF96 = 'AF96',
+    HR90 = 'HR90',
     UA90 = 'UA90',
-    UA95 = 'UA95',
+    UA82 = 'UA82',
+    AF79 = 'AF79',
+    HR94 = 'HR94',
+    UA10 = 'UA10',
+    AF34 = 'AF34',
+    HR89 = 'HR89',
 }

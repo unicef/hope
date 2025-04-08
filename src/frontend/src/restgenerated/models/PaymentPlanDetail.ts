@@ -10,6 +10,7 @@ import type { FollowUpPaymentPlan } from './FollowUpPaymentPlan';
 import type { PaymentPlanSupportingDocument } from './PaymentPlanSupportingDocument';
 import type { PaymentVerificationPlan } from './PaymentVerificationPlan';
 import type { PaymentVerificationSummary } from './PaymentVerificationSummary';
+import type { ProgramCycleSmall } from './ProgramCycleSmall';
 import type { ProgramSmall } from './ProgramSmall';
 import type { RuleCommit } from './RuleCommit';
 export type PaymentPlanDetail = {
@@ -75,6 +76,7 @@ export type PaymentPlanDetail = {
      */
     endDate?: string | null;
     readonly program: ProgramSmall;
+    programCycle: ProgramCycleSmall;
     hasPaymentListExportFile: boolean;
     readonly hasFspDeliveryMechanismXlsxTemplate: boolean;
     importedFileName: string;
@@ -157,6 +159,7 @@ export type PaymentPlanDetail = {
     readonly eligiblePaymentsCount: number;
     readonly paymentVerificationSummary: PaymentVerificationSummary;
     readonly paymentVerificationPlans: Array<PaymentVerificationPlan>;
+    readonly paymentVerificationPlansCount: number;
     readonly adminUrl: string;
 };
 

@@ -118,6 +118,7 @@ export type { Profile as ProfileCamelCase } from './models/Profile';
 export type { ProgramAPI as ProgramAPICamelCase } from './models/ProgramAPI';
 export type { ProgramCycleCreate as ProgramCycleCreateCamelCase } from './models/ProgramCycleCreate';
 export type { ProgramCycleList as ProgramCycleListCamelCase } from './models/ProgramCycleList';
+export type { ProgramCycleSmall as ProgramCycleSmallCamelCase } from './models/ProgramCycleSmall';
 export type { ProgramCycleUpdate as ProgramCycleUpdateCamelCase } from './models/ProgramCycleUpdate';
 export type { ProgramDetail as ProgramDetailCamelCase } from './models/ProgramDetail';
 export type { ProgramGlobal as ProgramGlobalCamelCase } from './models/ProgramGlobal';

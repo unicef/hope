@@ -25,6 +25,7 @@ class PaymentPlanFilter(FilterSet):
             "dispersion_start_date": ["gte"],
             "dispersion_end_date": ["lte"],
             "is_follow_up": ["exact"],
+            "updated_at": ["gte", "lte"],
         }
 
     def filter_by_program(self, qs: QuerySet, name: str, value: str) -> QuerySet:
@@ -48,6 +49,7 @@ class TargetPopulationFilter(PaymentPlanFilter):
             "created_at": ["gte", "lte"],
             "total_households_count": ["gte", "lte"],
             "total_individuals_count": ["gte", "lte"],
+            "updated_at": ["gte", "lte"],
         }
 
     @staticmethod
