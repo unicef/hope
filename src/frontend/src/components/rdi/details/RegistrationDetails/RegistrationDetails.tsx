@@ -12,7 +12,6 @@ import {
   registrationDataImportStatusToColor,
 } from '@utils/utils';
 import {
-  RegistrationDataImportQuery,
   RegistrationDataImportStatus,
 } from '@generated/graphql';
 import { DedupeBox, OptionType } from '../DedupeBox';
@@ -85,12 +84,6 @@ function RegistrationDetails({
       options: registration?.goldenRecordPossibleDuplicatesCountAndPercentage,
     },
   ];
-  const renderImportedBy = (): string => {
-    if (registration?.importedBy) {
-      return `${registration?.importedBy?.firstName} ${registration?.importedBy?.lastName}`;
-    }
-    return '-';
-  };
 
   let numbersComponent: ReactElement;
   if (isSocialWorkerProgram) {
