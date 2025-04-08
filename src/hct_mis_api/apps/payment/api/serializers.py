@@ -139,7 +139,7 @@ class PaymentVerificationSummarySerializer(serializers.ModelSerializer):
 
 
 class PaymentVerificationSerializer(serializers.ModelSerializer):
-    status = serializers.CharField(source="get_status_display")
+    # status = serializers.CharField(source="get_status_display")
 
     class Meta:
         model = PaymentVerification
@@ -185,6 +185,7 @@ class FollowUpPaymentPlanSerializer(EncodedIdSerializerMixin):
             "status",
             "dispersion_start_date",
             "dispersion_end_date",
+            "is_follow_up",
         )
 
 
