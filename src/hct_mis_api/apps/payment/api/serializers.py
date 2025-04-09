@@ -7,8 +7,6 @@ from django.shortcuts import get_object_or_404
 
 from rest_framework import serializers
 
-from hct_mis_api.api.utils import EncodedIdSerializerMixin
-from hct_mis_api.apps.account.api.fields import Base64ModelField
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
@@ -16,7 +14,6 @@ from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.utils import (
     check_concurrency_version_in_mutation,
-    decode_id_string,
     to_choice_object,
 )
 from hct_mis_api.apps.household.api.serializers.household import (
@@ -54,7 +51,6 @@ from hct_mis_api.apps.targeting.api.serializers import TargetingCriteriaSerializ
 
 
 class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
-    id = Base64ModelField(model_name="PaymentPlanSupportingDocument")
     file = serializers.FileField(use_url=False)
 
     class Meta:
@@ -74,7 +70,7 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
 
     def validate(self, data: Dict) -> Dict:
         payment_plan_id = self.context["request"].parser_context["kwargs"]["payment_plan_id"]
-        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         data["payment_plan"] = payment_plan
         data["created_by"] = self.context["request"].user
         if payment_plan.status not in [PaymentPlan.Status.OPEN, PaymentPlan.Status.LOCKED]:
@@ -170,7 +166,7 @@ class PaymentVerificationPlanSerializer(serializers.ModelSerializer):
         )
 
 
-class FollowUpPaymentPlanSerializer(EncodedIdSerializerMixin):
+class FollowUpPaymentPlanSerializer(serializers.ModelSerializer):
     status = serializers.CharField(source="get_status_display")
 
     class Meta:
@@ -186,13 +182,12 @@ class FollowUpPaymentPlanSerializer(EncodedIdSerializerMixin):
 
 
 class PaymentPlanSerializer(serializers.ModelSerializer):
-    id = Base64ModelField(model_name="PaymentPlan")
     status = serializers.CharField(source="get_status_display")
     currency = serializers.CharField(source="get_currency_display")
     follow_ups = FollowUpPaymentPlanSerializer(many=True, read_only=True)
     program = serializers.CharField(source="program_cycle.program.name")
-    program_id = Base64ModelField(model_name="Program", source="program_cycle.program.id")
-    program_cycle_id = Base64ModelField(model_name="ProgramCycle")
+    program_id = serializers.UUIDField(source="program_cycle.program.id", read_only=True)
+    program_cycle_id = serializers.UUIDField(source="program_cycle.id", read_only=True)
     last_approval_process_by = serializers.SerializerMethodField()
 
     class Meta:
@@ -225,7 +220,6 @@ class PaymentPlanSerializer(serializers.ModelSerializer):
 
 
 class PaymentPlanListSerializer(serializers.ModelSerializer):
-    id = Base64ModelField(model_name="PaymentPlan")
     status = serializers.CharField(source="get_status_display")
     currency = serializers.CharField(source="get_currency_display")
     follow_ups = FollowUpPaymentPlanSerializer(many=True, read_only=True)
@@ -390,7 +384,7 @@ def _calculate_volume(payment_plan: "PaymentPlan", field: str) -> Optional[Decim
     ]
 
 
-class DeliveryMechanismSerializer(EncodedIdSerializerMixin):
+class DeliveryMechanismSerializer(serializers.ModelSerializer):
     class Meta:
         model = DeliveryMechanism
         fields = (
@@ -403,7 +397,7 @@ class DeliveryMechanismSerializer(EncodedIdSerializerMixin):
         )
 
 
-class VolumeByDeliveryMechanismSerializer(EncodedIdSerializerMixin):
+class VolumeByDeliveryMechanismSerializer(serializers.ModelSerializer):
     delivery_mechanism = DeliveryMechanismSerializer(read_only=True)
     volume = serializers.SerializerMethodField()
     volume_usd = serializers.SerializerMethodField()
@@ -435,7 +429,7 @@ class PaymentPlanExcludeBeneficiariesSerializer(serializers.Serializer):
 
 
 class PaymentPlanCreateUpdateSerializer(serializers.ModelSerializer):
-    id = Base64ModelField(model_name="PaymentPlan", read_only=True)
+    target_population_id = serializers.UUIDField()
     dispersion_start_date = serializers.DateField(required=True)
     dispersion_end_date = serializers.DateField(required=True)
     currency = serializers.ChoiceField(required=True, choices=CURRENCY_CHOICES)
@@ -450,7 +444,7 @@ class PaymentPlanCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = PaymentPlan
         fields = (
-            "id",
+            "target_population_id",
             "dispersion_start_date",
             "dispersion_end_date",
             "currency",
@@ -778,7 +772,7 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
 
 
 class PaymentListSerializer(serializers.ModelSerializer):
-    id = Base64ModelField(model_name="Payment")
+    id = serializers.UUIDField(read_only=True)
     status = serializers.CharField(source="get_status_display")
     household_unicef_id = serializers.CharField(source="household.unicef_id")
     household_size = serializers.IntegerField(source="household.size")
@@ -845,7 +839,6 @@ class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
 
 
 class TPHouseholdListSerializer(serializers.ModelSerializer):
-    id = Base64ModelField(model_name="Payment")
     household_unicef_id = serializers.CharField(source="household.unicef_id")
     hoh_full_name = serializers.SerializerMethodField()
     household_size = serializers.IntegerField(source="household.size")
@@ -865,13 +858,13 @@ class TPHouseholdListSerializer(serializers.ModelSerializer):
         return obj.head_of_household.full_name if obj.head_of_household else ""
 
 
-class TargetPopulationCreateSerializer(EncodedIdSerializerMixin):
+class TargetPopulationCreateSerializer(serializers.ModelSerializer):
     name = serializers.CharField(required=True)
-    program_cycle_id = Base64ModelField(model_name="ProgramCycle", required=True)
+    program_cycle_id = serializers.UUIDField(required=True)
     targeting_criteria = TargetingCriteriaSerializer(required=True)
     excluded_ids = serializers.CharField()
     exclusion_reason = serializers.CharField()
-    fsp_id = Base64ModelField(model_name="FinancialServiceProvider", required=False)
+    fsp_id = serializers.UUIDField(required=False)
     delivery_mechanism_code = serializers.CharField(required=False)
     vulnerability_score_min = serializers.DecimalField(required=False, max_digits=6, decimal_places=3)
     vulnerability_score_max = serializers.DecimalField(required=False, max_digits=6, decimal_places=3)
