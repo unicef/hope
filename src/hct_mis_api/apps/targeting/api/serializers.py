@@ -118,6 +118,7 @@ class TargetingCriteriaRuleSerializer(serializers.ModelSerializer):
 
 
 class TargetingCriteriaSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(read_only=True)
     rules = TargetingCriteriaRuleSerializer(many=True)
 
     class Meta:
