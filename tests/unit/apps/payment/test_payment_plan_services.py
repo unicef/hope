@@ -34,7 +34,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     prepare_payment_plan_task,
 )
 from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismDataFactory,
+    AccountFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
@@ -257,11 +257,11 @@ class TestPaymentPlanServices(APITestCase):
 
         hoh1 = IndividualFactory(household=None)
         hoh2 = IndividualFactory(household=None)
-        DeliveryMechanismDataFactory(
+        AccountFactory(
             individual=hoh1,
             account_type=AccountType.objects.get(key="bank"),
         )
-        DeliveryMechanismDataFactory(
+        AccountFactory(
             individual=hoh1,
             account_type=AccountType.objects.get(key="bank"),
         )

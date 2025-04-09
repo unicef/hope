@@ -21,7 +21,7 @@ from hct_mis_api.apps.household.fixtures import (
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
 from hct_mis_api.apps.payment.celery_tasks import prepare_payment_plan_task
 from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismDataFactory,
+    AccountFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
@@ -135,7 +135,7 @@ class TestPaymentSignature(APITestCase):
         dm_cash = DeliveryMechanism.objects.get(code="cash")
 
         for ind in [hoh1, hoh2]:
-            DeliveryMechanismDataFactory(individual=ind)
+            AccountFactory(individual=ind)
 
         program_cycle = program.cycles.first()
         program_cycle_id = self.id_to_base64(program_cycle.id, "ProgramCycleNode")

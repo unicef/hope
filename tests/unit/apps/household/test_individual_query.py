@@ -31,7 +31,7 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.household.models import DocumentType, Individual
 from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismDataFactory,
+    AccountFactory,
     generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import AccountType, DeliveryMechanism
@@ -849,7 +849,7 @@ class TestIndividualWithDeliveryMechanismsDataQuery(APITestCase):
             ],
         )
         cls.individual = individuals[0]
-        DeliveryMechanismDataFactory(
+        AccountFactory(
             individual=cls.individual,
             account_type=AccountType.objects.get(key="bank"),
             data={
@@ -858,7 +858,7 @@ class TestIndividualWithDeliveryMechanismsDataQuery(APITestCase):
                 "name_of_cardholder": "Marek",
             },
         )
-        DeliveryMechanismDataFactory(
+        AccountFactory(
             individual=cls.individual,
             account_type=AccountType.objects.get(key="mobile"),
             data={
@@ -885,7 +885,7 @@ class TestIndividualWithDeliveryMechanismsDataQuery(APITestCase):
             ),
         ]
     )
-    def test_individual_query_delivery_mechanisms_data(self, _: Any, permissions: List[Permissions]) -> None:
+    def test_individual_query_accounts(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         self.snapshot_graphql_request(

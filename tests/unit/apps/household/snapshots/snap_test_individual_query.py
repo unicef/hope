@@ -812,7 +812,7 @@ snapshots['TestIndividualQuery::test_query_individuals_by_search_without_search_
     ]
 }
 
-snapshots['TestIndividualWithDeliveryMechanismsDataQuery::test_individual_query_delivery_mechanisms_data_0_with_permissions 1'] = {
+snapshots['TestIndividualWithDeliveryMechanismsDataQuery::test_individual_query_accounts_0_with_permissions 1'] = {
     'data': {
         'individual': {
             'birthDate': '1943-07-30',
@@ -834,11 +834,11 @@ snapshots['TestIndividualWithDeliveryMechanismsDataQuery::test_individual_query_
     }
 }
 
-snapshots['TestIndividualWithDeliveryMechanismsDataQuery::test_individual_query_delivery_mechanisms_data_1_without_permissions 1'] = {
+snapshots['TestIndividualWithDeliveryMechanismsDataQuery::test_individual_query_accounts_1_without_permissions 1'] = {
     'data': {
         'individual': {
             'birthDate': '1943-07-30',
-            'deliveryMechanismsData': [
+            'accounts': [
             ],
             'familyName': 'Butler',
             'fullName': 'Benjamin Butler',

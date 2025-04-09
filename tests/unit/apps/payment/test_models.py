@@ -34,9 +34,9 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.payment.fields import DynamicChoiceArrayField, DynamicChoiceField
 from hct_mis_api.apps.payment.fixtures import (
+    AccountFactory,
     ApprovalFactory,
     ApprovalProcessFactory,
-    DeliveryMechanismDataFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
@@ -44,11 +44,11 @@ from hct_mis_api.apps.payment.fixtures import (
     generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import (
+    Account,
     AccountType,
     Approval,
     DeliveryMechanism,
     DeliveryMechanismConfig,
-    DeliveryMechanismData,
     FinancialServiceProviderXlsxTemplate,
     FspNameMapping,
     Payment,
@@ -858,7 +858,7 @@ class TestFinancialServiceProviderXlsxTemplate(TestCase):
         )
 
 
-class TestDeliveryMechanismDataModel(TestCase):
+class TestAccountModel(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
@@ -878,11 +878,11 @@ class TestDeliveryMechanismDataModel(TestCase):
         cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
 
     def test_str(self) -> None:
-        dmd = DeliveryMechanismDataFactory(individual=self.ind)
+        dmd = AccountFactory(individual=self.ind)
         self.assertEqual(str(dmd), f"{dmd.individual} - {dmd.account_type}")
 
     def test_get_associated_object(self) -> None:
-        dmd = DeliveryMechanismDataFactory(data={"test": "test"}, individual=self.ind)
+        dmd = AccountFactory(data={"test": "test"}, individual=self.ind)
         self.assertEqual(dmd.get_associated_object(FspNameMapping.SourceModel.ACCOUNT.value), dmd.data)
         self.assertEqual(
             dmd.get_associated_object(FspNameMapping.SourceModel.HOUSEHOLD.value), dmd.individual.household
@@ -890,7 +890,7 @@ class TestDeliveryMechanismDataModel(TestCase):
         self.assertEqual(dmd.get_associated_object(FspNameMapping.SourceModel.INDIVIDUAL.value), dmd.individual)
 
     def test_delivery_data(self) -> None:
-        dmd = DeliveryMechanismDataFactory(
+        dmd = AccountFactory(
             data={
                 "number": "test",
                 "expiry_date": "12.12.2024",
@@ -958,7 +958,7 @@ class TestDeliveryMechanismDataModel(TestCase):
         )
 
     def test_validate(self) -> None:
-        dmd = DeliveryMechanismDataFactory(
+        dmd = AccountFactory(
             data={
                 "number": "test",
                 "expiry_date": "12.12.2024",
@@ -990,10 +990,10 @@ class TestDeliveryMechanismDataModel(TestCase):
         self.assertEqual(dmd.validate(self.fsp, self.dm_atm_card), False)
 
     def test_validate_uniqueness(self) -> None:
-        DeliveryMechanismDataFactory(data={"name_of_cardholder": "test"}, individual=self.ind)
-        DeliveryMechanismData.update_unique_field = mock.Mock()  # type: ignore
-        DeliveryMechanismData.validate_uniqueness(DeliveryMechanismData.objects.all())
-        DeliveryMechanismData.update_unique_field.assert_called_once()
+        AccountFactory(data={"name_of_cardholder": "test"}, individual=self.ind)
+        Account.update_unique_field = mock.Mock()  # type: ignore
+        Account.validate_uniqueness(Account.objects.all())
+        Account.update_unique_field.assert_called_once()
 
     def test_update_unique_fields(self) -> None:
         account_type_bank = AccountType.objects.get(key="bank")
@@ -1003,7 +1003,7 @@ class TestDeliveryMechanismDataModel(TestCase):
         ]
         account_type_bank.save()
 
-        dmd_1 = DeliveryMechanismDataFactory(
+        dmd_1 = AccountFactory(
             data={"name_of_cardholder__atm_card": "test"}, individual=self.ind, account_type=account_type_bank
         )
         dmd_1.individual.seeing_disability = LOT_DIFFICULTY
@@ -1011,7 +1011,7 @@ class TestDeliveryMechanismDataModel(TestCase):
         self.assertIsNone(dmd_1.unique_key)
         self.assertEqual(dmd_1.is_unique, True)
 
-        dmd_2 = DeliveryMechanismDataFactory(
+        dmd_2 = AccountFactory(
             data={"name_of_cardholder__atm_card": "test2"}, individual=self.ind2, account_type=account_type_bank
         )
         dmd_2.individual.seeing_disability = LOT_DIFFICULTY

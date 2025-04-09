@@ -29,7 +29,7 @@ from hct_mis_api.apps.household.models import (
     PendingHousehold,
     PendingIndividual,
 )
-from hct_mis_api.apps.payment.models import AccountType, PendingDeliveryMechanismData
+from hct_mis_api.apps.payment.models import AccountType, PendingAccount
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
@@ -102,7 +102,7 @@ class AccountSerializer(serializers.ModelSerializer):
     data = serializers.JSONField(required=False, default=dict)  # type: ignore
 
     class Meta:
-        model = PendingDeliveryMechanismData
+        model = PendingAccount
         exclude = ["individual", "unique_key", "is_unique", "signature_hash"]
 
 
@@ -116,7 +116,7 @@ class IndividualSerializer(serializers.ModelSerializer):
     marital_status = serializers.CharField(allow_blank=True, required=False)
     documents = DocumentSerializer(many=True, required=False)
     birth_date = serializers.DateField(validators=[BirthDateValidator()])
-    delivery_mechanisms_data = AccountSerializer(many=True, required=False)
+    accounts = AccountSerializer(many=True, required=False)
 
     class Meta:
         model = PendingIndividual

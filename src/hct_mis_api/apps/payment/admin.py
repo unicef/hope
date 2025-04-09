@@ -22,9 +22,9 @@ from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.payment.models import (
+    Account,
     AccountType,
     DeliveryMechanism,
-    DeliveryMechanismData,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FspNameMapping,
@@ -550,7 +550,7 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
         return request.user.can_change_fsp()
 
 
-@admin.register(DeliveryMechanismData)
+@admin.register(Account)
 class DeliveryMechanismDataAdmin(HOPEModelAdminBase):
     list_display = ("individual", "get_business_area", "get_program", "account_type", "is_unique")
 
@@ -568,10 +568,10 @@ class DeliveryMechanismDataAdmin(HOPEModelAdminBase):
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("individual__program__business_area")
 
-    def get_business_area(self, obj: DeliveryMechanismData) -> BusinessArea:
+    def get_business_area(self, obj: Account) -> BusinessArea:
         return obj.individual.program.business_area
 
-    def get_program(self, obj: DeliveryMechanismData) -> Program:
+    def get_program(self, obj: Account) -> Program:
         return obj.individual.program
 
 

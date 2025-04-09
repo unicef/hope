@@ -1884,18 +1884,17 @@ class PaymentHouseholdSnapshot(TimeStampedUUIDModel):
     payment = models.OneToOneField(Payment, on_delete=models.CASCADE, related_name="household_snapshot")
 
 
-class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
+class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
     ACCOUNT_FIELD_PREFIX = "account__"
 
     individual = models.ForeignKey(
         "household.Individual",
         on_delete=models.CASCADE,
-        related_name="delivery_mechanisms_data",
+        related_name="accounts",
     )
     account_type = models.ForeignKey(
         "payment.AccountType",
         on_delete=models.PROTECT,
-        related_name="accounts",
         null=True,  # TODO MB make not nullable after migrations
         blank=True,
     )
@@ -1979,7 +1978,7 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
         return True
 
     @classmethod
-    def validate_uniqueness(cls, qs: QuerySet["DeliveryMechanismData"]) -> None:
+    def validate_uniqueness(cls, qs: QuerySet["Account"]) -> None:
         for dmd in qs:
             dmd.update_unique_field()
 
@@ -2007,13 +2006,13 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
         return self.account_type.unique_fields
 
 
-class PendingDeliveryMechanismData(DeliveryMechanismData):
+class PendingAccount(Account):
     objects: PendingManager = PendingManager()  # type: ignore
 
     class Meta:
         proxy = True
-        verbose_name = "Imported Delivery Mechanism Data"
-        verbose_name_plural = "Imported Delivery Mechanism Datas"
+        verbose_name = "Imported Account"
+        verbose_name_plural = "Imported Accounts"
 
 
 class DeliveryMechanism(TimeStampedUUIDModel):
