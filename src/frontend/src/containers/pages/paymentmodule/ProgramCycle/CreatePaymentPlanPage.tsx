@@ -25,7 +25,7 @@ export const CreatePaymentPlanPage = (): ReactElement => {
   const { businessArea, programId } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const permissions = usePermissions();
-  const { programCycleId, paymentPlanId } = useParams();
+  const { programCycleId } = useParams();
 
   const { mutateAsync: createPaymentPlan, isPending: loadingCreate } =
     useMutation({

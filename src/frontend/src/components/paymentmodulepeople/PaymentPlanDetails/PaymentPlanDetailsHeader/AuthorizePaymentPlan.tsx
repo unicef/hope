@@ -17,11 +17,13 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { FormikTextField } from '@shared/Formik/FormikTextField/FormikTextField';
 import { LoadingButton } from '@core/LoadingButton';
 import { GreyText } from '@core/GreyText';
-import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
-import { Action } from '@generated/graphql';
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { useProgramContext } from '../../../../programContext';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation } from '@tanstack/react-query';
+import { AcceptanceProcess } from '@restgenerated/models/AcceptanceProcess';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export interface AuthorizePaymentPlanProps {
   paymentPlan: PaymentPlanDetail;
@@ -33,15 +35,32 @@ export function AuthorizePaymentPlan({
   const { t } = useTranslation();
   const [authorizeDialogOpen, setAuthorizeDialogOpen] = useState(false);
   const { isActiveProgram } = useProgramContext();
+  const { businessArea, programId } = useBaseUrl();
 
   const { showMessage } = useSnackbar();
-  const { mutatePaymentPlanAction: authorize, loading: loadingAuthorize } =
-    usePaymentPlanAction(
-      Action.Authorize,
-      paymentPlan.id,
-      () => showMessage(t('Payment Plan has been authorized.')),
-      () => setAuthorizeDialogOpen(false),
-    );
+  const { mutateAsync: authorize, isPending: loadingAuthorize } = useMutation({
+    mutationFn: ({
+      businessAreaSlug,
+      id,
+      programSlug,
+      requestBody,
+    }: {
+      businessAreaSlug: string;
+      id: string;
+      programSlug: string;
+      requestBody: AcceptanceProcess;
+    }) =>
+      RestService.restBusinessAreasProgramsPaymentPlansAuthorizeCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+      }),
+    onSuccess: () => {
+      showMessage(t('Payment Plan has been authorized.'));
+      setAuthorizeDialogOpen(false);
+    },
+  });
   const initialValues = {
     comment: '',
   };
@@ -65,7 +84,14 @@ export function AuthorizePaymentPlan({
     <Formik
       initialValues={initialValues}
       onSubmit={(values, { resetForm }) => {
-        authorize(values.comment);
+        authorize({
+          businessAreaSlug: businessArea,
+          id: paymentPlan.id,
+          programSlug: programId,
+          requestBody: {
+            comment: values.comment,
+          },
+        });
         resetForm({});
       }}
       validationSchema={validationSchema}

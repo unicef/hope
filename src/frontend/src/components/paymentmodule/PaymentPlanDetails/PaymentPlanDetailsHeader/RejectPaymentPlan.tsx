@@ -22,6 +22,10 @@ import { ErrorButton } from '@core/ErrorButton';
 import { GreyText } from '@core/GreyText';
 import { LoadingButton } from '@core/LoadingButton';
 import { useProgramContext } from '../../../../programContext';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { AcceptanceProcess } from '@restgenerated/models/AcceptanceProcess';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation } from '@tanstack/react-query';
 
 export interface RejectPaymentPlanProps {
   paymentPlanId: string;
@@ -34,13 +38,31 @@ export function RejectPaymentPlan({
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
-  const { mutatePaymentPlanAction: reject, loading: loadingReject } =
-    usePaymentPlanAction(
-      Action.Reject,
-      paymentPlanId,
-      () => showMessage(t('Payment Plan has been rejected.')),
-      () => setRejectDialogOpen(false),
-    );
+  const { businessArea, programId } = useBaseUrl();
+
+  const { mutateAsync: reject, isPending: loadingReject } = useMutation({
+    mutationFn: ({
+      businessAreaSlug,
+      id,
+      programSlug,
+      requestBody,
+    }: {
+      businessAreaSlug: string;
+      id: string;
+      programSlug: string;
+      requestBody: AcceptanceProcess;
+    }) =>
+      RestService.restBusinessAreasProgramsPaymentPlansRejectCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+      }),
+    onSuccess: () => {
+      showMessage(t('Payment Plan has been rejected.'));
+      setRejectDialogOpen(false);
+    },
+  });
 
   const initialValues = {
     comment: '',
@@ -54,7 +76,14 @@ export function RejectPaymentPlan({
     <Formik
       initialValues={initialValues}
       onSubmit={(values, { resetForm }) => {
-        reject(values.comment);
+        reject({
+          businessAreaSlug: businessArea,
+          id: paymentPlanId,
+          programSlug: programId,
+          requestBody: {
+            comment: values.comment,
+          },
+        });
         setRejectDialogOpen(false);
         resetForm({});
       }}

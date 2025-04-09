@@ -1,3 +1,11 @@
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
+import { GreyText } from '@core/GreyText';
+import { LoadingButton } from '@core/LoadingButton';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   Box,
   Button,
@@ -6,22 +14,16 @@ import {
   DialogContent,
   DialogTitle,
 } from '@mui/material';
-import * as Yup from 'yup';
+import { AcceptanceProcess } from '@restgenerated/models/AcceptanceProcess';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { FormikTextField } from '@shared/Formik/FormikTextField/FormikTextField';
+import { useMutation } from '@tanstack/react-query';
 import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DialogContainer } from '@containers/dialogs/DialogContainer';
-import { DialogFooter } from '@containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { FormikTextField } from '@shared/Formik/FormikTextField/FormikTextField';
-import { LoadingButton } from '@core/LoadingButton';
-import { GreyText } from '@core/GreyText';
-import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
-import { Action } from '@generated/graphql';
-import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
+import * as Yup from 'yup';
 import { useProgramContext } from '../../../../programContext';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 export interface AuthorizePaymentPlanProps {
   paymentPlan: PaymentPlanDetail;
@@ -33,15 +35,32 @@ export function AuthorizePaymentPlan({
   const { t } = useTranslation();
   const [authorizeDialogOpen, setAuthorizeDialogOpen] = useState(false);
   const { isActiveProgram } = useProgramContext();
+  const { businessArea, programId } = useBaseUrl();
 
   const { showMessage } = useSnackbar();
-  const { mutatePaymentPlanAction: authorize, loading: loadingAuthorize } =
-    usePaymentPlanAction(
-      Action.Authorize,
-      paymentPlan.id,
-      () => showMessage(t('Payment Plan has been authorized.')),
-      () => setAuthorizeDialogOpen(false),
-    );
+  const { mutateAsync: authorize, isPending: loadingAuthorize } = useMutation({
+    mutationFn: ({
+      businessAreaSlug,
+      id,
+      programSlug,
+      requestBody,
+    }: {
+      businessAreaSlug: string;
+      id: string;
+      programSlug: string;
+      requestBody: AcceptanceProcess;
+    }) =>
+      RestService.restBusinessAreasProgramsPaymentPlansAuthorizeCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+      }),
+    onSuccess: () => {
+      showMessage(t('Payment Plan has been authorized.'));
+      setAuthorizeDialogOpen(false);
+    },
+  });
   const initialValues = {
     comment: '',
   };
@@ -66,7 +85,14 @@ export function AuthorizePaymentPlan({
     <Formik
       initialValues={initialValues}
       onSubmit={(values, { resetForm }) => {
-        authorize(values.comment);
+        authorize({
+          businessAreaSlug: businessArea,
+          id: paymentPlan.id,
+          programSlug: programId,
+          requestBody: {
+            comment: values.comment,
+          },
+        });
         resetForm({});
       }}
       validationSchema={validationSchema}
