@@ -438,17 +438,28 @@ class PaymentPlanExcludeBeneficiariesSerializer(serializers.Serializer):
         return value
 
 
-class PaymentPlanCreateUpdateSerializer(serializers.Serializer):
+class PaymentPlanCreateUpdateSerializer(serializers.ModelSerializer):
+    id = Base64ModelField(model_name="PaymentPlan", read_only=True)
     dispersion_start_date = serializers.DateField(required=True)
     dispersion_end_date = serializers.DateField(required=True)
     currency = serializers.ChoiceField(required=True, choices=CURRENCY_CHOICES)
-    version = serializers.IntegerField(required=False)
+    version = serializers.IntegerField(required=False, read_only=True)
 
     def validate_version(self, value: Optional[int]) -> Optional[int]:
         payment_plan = self.context.get("payment_plan")
         if payment_plan and value:
             check_concurrency_version_in_mutation(value, payment_plan)
         return value
+
+    class Meta:
+        model = PaymentPlan
+        fields = (
+            "id",
+            "dispersion_start_date",
+            "dispersion_end_date",
+            "currency",
+            "version",
+        )
 
 
 class PaymentPlanCreateFollowUpSerializer(serializers.Serializer):
