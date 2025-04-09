@@ -239,8 +239,16 @@ class PaymentPlanService:
         return self.payment_plan
 
     def lock_fsp(self) -> PaymentPlan:
+        dm = getattr(self.payment_plan, "delivery_mechanism", None)
+        fsp = getattr(self.payment_plan, "financial_service_provider", None)
+        if not dm or not fsp:
+            raise GraphQLError("Payment Plan doesn't have FSP / DeliveryMechanism assigned.")
+
         if self.payment_plan.eligible_payments.filter(financial_service_provider__isnull=True).exists():
-            raise GraphQLError("All Payments must have assigned FSP")
+            self.payment_plan.eligible_payments.update(
+                financial_service_provider=self.payment_plan.financial_service_provider,
+                delivery_type=self.payment_plan.delivery_mechanism,
+            )
 
         self.payment_plan.status_lock_fsp()
         self.payment_plan.save()
