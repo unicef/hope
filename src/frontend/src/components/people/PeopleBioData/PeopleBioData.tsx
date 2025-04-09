@@ -65,7 +65,7 @@ export const PeopleBioData = ({
 
   const mappedIndividualDocuments = individual?.documents?.edges?.map(
     (edge) => (
-      <Grid size={{ xs:3 }} key={edge.node.id}>
+      <Grid size={{ xs: 3 }} key={edge.node.id}>
         <Box flexDirection="column">
           <Box mb={1}>
             <LabelizedField label={edge.node.type.label}>
@@ -87,7 +87,7 @@ export const PeopleBioData = ({
   );
 
   const mappedIdentities = individual?.identities?.edges?.map((item) => (
-    <Grid size={{ xs:3 }} key={item.node.id}>
+    <Grid size={{ xs: 3 }} key={item.node.id}>
       <Box flexDirection="column">
         <Box mb={1}>
           <LabelizedField label={`${item.node.partner} ID`}>
@@ -212,11 +212,9 @@ export const PeopleBioData = ({
             {household?.admin4?.name}
           </LabelizedField>
         </Grid>
-        <Grid size={{ xs:6 }}>
+        <Grid size={{ xs: 6 }}>
           <LabelizedField label={t('Geolocation')}>
-            {household?.geopoint
-              ? `${household?.geopoint?.coordinates[0]}, ${household?.geopoint?.coordinates[1]}`
-              : '-'}
+            {household?.geopoint || '-'}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
@@ -390,7 +388,7 @@ export const PeopleBioData = ({
             </UniversalMoment>
           </LabelizedField>
         </Grid>
-        <Grid size={{ xs:6 }}>
+        <Grid size={{ xs: 6 }}>
           {individual?.household?.unicefId && (
             <LinkedGrievancesModal
               household={individual?.household}
