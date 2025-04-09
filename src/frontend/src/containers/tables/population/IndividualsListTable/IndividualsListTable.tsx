@@ -29,7 +29,7 @@ export function IndividualsListTable({
 }: IndividualsListTableProps): ReactElement {
   const { programId } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const initialQueryVariables = useMemo(
     () => ({
       age: JSON.stringify({ min: filter.ageMin, max: filter.ageMax }),
@@ -51,12 +51,12 @@ export function IndividualsListTable({
     [businessArea, filter, programId],
   );
   const replacements = {
-    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.member_label} ID`,
-    fullName: (_beneficiaryGroup) => _beneficiaryGroup?.member_label,
+    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
+    fullName: (_beneficiaryGroup) => _beneficiaryGroup?.memberLabel,
     household__unicef_id: (_beneficiaryGroup) =>
-      `${_beneficiaryGroup?.group_label} ID`,
+      `${_beneficiaryGroup?.groupLabel} ID`,
     relationship: (_beneficiaryGroup) =>
-      `Relationship to Head of ${_beneficiaryGroup?.group_label}`,
+      `Relationship to Head of ${_beneficiaryGroup?.groupLabel}`,
   };
 
   const adjustedHeadCells = adjustHeadCells(
@@ -90,7 +90,7 @@ export function IndividualsListTable({
   return (
     <TableWrapper>
       <UniversalRestTable
-        title={beneficiaryGroup?.member_label_plural}
+        title={beneficiaryGroup?.memberLabelPlural}
         headCells={adjustedHeadCells}
         rowsPerPageOptions={[10, 15, 20]}
         queryVariables={queryVariables}

@@ -28,7 +28,7 @@ export function LockPaymentPlan({
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const [lockDialogOpen, setLockDialogOpen] = useState(false);
   const { mutatePaymentPlanAction: lock, loading: loadingLock } =
     usePaymentPlanAction(
@@ -76,8 +76,8 @@ export function LockPaymentPlan({
                     : t('There are')}{' '}
                   {paymentPlan.paymentsConflictsCount}{' '}
                   {paymentPlan.paymentsConflictsCount === 1
-                    ? t(beneficiaryGroup?.group_label)
-                    : t(beneficiaryGroup?.group_label_plural)}{' '}
+                    ? t(beneficiaryGroup?.groupLabel)
+                    : t(beneficiaryGroup?.groupLabelPlural)}{' '}
                   {t('that will be ignored in this Payment Plan.')}
                 </GreyText>
               </Box>

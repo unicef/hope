@@ -20,14 +20,14 @@ const IndividualQuestionnaire = ({
   const selectedIndividualData =
     values.selectedIndividual || values.selectedHousehold.head_of_household;
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   return (
     <Grid container spacing={6}>
       {[
         {
           name: 'questionnaire_fullName',
-          label: t(`${beneficiaryGroup?.member_label} Full Name`),
+          label: t(`${beneficiaryGroup?.memberLabel} Full Name`),
           value: (
             <ContentLink
               href={`/${baseUrl}/population/individuals/${selectedIndividualData.id}`}

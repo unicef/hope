@@ -13,7 +13,7 @@ const GreyText = styled.p`
   color: #959698;
 `;
 interface UsersTableRowProps {
-  user: UserNode;
+  user;
 }
 
 export const UsersTableRow = ({ user }: UsersTableRowProps): ReactElement => {

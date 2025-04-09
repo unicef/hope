@@ -35,7 +35,7 @@ function LookUpTargetPopulationFiltersSurveys({
   const location = useLocation();
   const isAccountability = location.pathname.includes('accountability');
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
@@ -93,7 +93,7 @@ function LookUpTargetPopulationFiltersSurveys({
         </Grid>
         <Grid size={{ xs: 3 }}>
           <NumberTextField
-            topLabel={t(`Number of ${beneficiaryGroup?.group_label_plural}`)}
+            topLabel={t(`Number of ${beneficiaryGroup?.groupLabelPlural}`)}
             value={filter.totalHouseholdsCountMin}
             placeholder={t('From')}
             onChange={(e) =>

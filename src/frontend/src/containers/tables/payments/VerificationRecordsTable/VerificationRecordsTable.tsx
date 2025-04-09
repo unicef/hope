@@ -26,15 +26,15 @@ export function VerificationRecordsTable({
 }: VerificationRecordsTableProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const replacements = {
     payment_record__head_of_household__family_name: (_beneficiaryGroup) =>
-      `Head of ${_beneficiaryGroup?.group_label}`,
+      `Head of ${_beneficiaryGroup?.groupLabel}`,
     payment_record__household__unicef_id: (_beneficiaryGroup) =>
-      `${_beneficiaryGroup?.group_label} ID`,
+      `${_beneficiaryGroup?.groupLabel} ID`,
     payment_record__household__status: (_beneficiaryGroup) =>
-      `${_beneficiaryGroup?.group_label} Status`,
+      `${_beneficiaryGroup?.groupLabel} Status`,
   };
 
   const adjustedHeadCells = adjustHeadCells(

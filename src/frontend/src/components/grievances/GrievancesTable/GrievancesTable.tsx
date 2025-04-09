@@ -49,12 +49,12 @@ export const GrievancesTable = ({
 }: GrievancesTableProps): ReactElement => {
   const { businessArea, programId, isAllPrograms } = useBaseUrl();
   const { isSocialDctType, selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { t } = useTranslation();
 
   const replacements = {
     household_unicef_id: (_beneficiaryGroup) =>
-      `${_beneficiaryGroup?.group_label} ID`,
+      `${_beneficiaryGroup?.groupLabel} ID`,
   };
 
   const adjustedHeadCells = adjustHeadCells(

@@ -52,7 +52,7 @@ export function HouseholdDetails({
 }: HouseholdDetailsProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   return (
     <>
@@ -62,17 +62,17 @@ export function HouseholdDetails({
         </Title>
           <Grid container spacing={3}>
             <Grid size={{ xs: 3 }}>
-              <LabelizedField label={`${beneficiaryGroup?.group_label} Size`}>
+              <LabelizedField label={`${beneficiaryGroup?.groupLabel} Size`}>
                 {household?.size}
               </LabelizedField>
             </Grid>
             <Grid size={{ xs: 3 }}>
                <LabelizedField label={t('Residence Status')}>
-              {household?.residence_status}
+              {household?.residenceStatus}
             </LabelizedField>
             </Grid>
             <Grid size={{ xs: 6 }}>
-              <LabelizedField label={`Head of ${beneficiaryGroup?.group_label}`}>
+              <LabelizedField label={`Head of ${beneficiaryGroup?.groupLabel}`}>
                 <ContentLink
                   href={`/${baseUrl}/population/individuals/${household?.headOfHousehold?.id}`}
                 >
@@ -82,14 +82,14 @@ export function HouseholdDetails({
             </Grid>
             <Grid size={{ xs: 3 }}>
               <LabelizedField
-                label={t('FEMALE CHILD HEADED ' + beneficiaryGroup?.group_label)}
+                label={t('FEMALE CHILD HEADED ' + beneficiaryGroup?.groupLabel)}
               >
                 {household?.fchildHoh ? t('Yes') : t('No')}
               </LabelizedField>
             </Grid>
             <Grid size={{ xs: 3 }}>
               <LabelizedField
-                label={t('CHILD HEADED ' + beneficiaryGroup?.group_label)}
+                label={t('CHILD HEADED ' + beneficiaryGroup?.groupLabel)}
               >
                 {household?.childHoh ? t('Yes') : t('No')}
               </LabelizedField>
@@ -99,38 +99,39 @@ export function HouseholdDetails({
                 {household?.country}
               </LabelizedField>
             </Grid>
+          </Grid>
         <Grid container spacing={3}>
           <Grid size={{ xs: 3 }}>
-            <LabelizedField label={`${beneficiaryGroup?.group_label} Size`}>
+            <LabelizedField label={`${beneficiaryGroup?.groupLabel} Size`}>
               {household?.size}
             </LabelizedField>
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('Residence Status')}>
-              {household?.residence_status}
+              {household?.residenceStatus}
             </LabelizedField>
           </Grid>
           <Grid size={{ xs: 6 }}>
-            <LabelizedField label={`Head of ${beneficiaryGroup?.group_label}`}>
+            <LabelizedField label={`Head of ${beneficiaryGroup?.groupLabel}`}>
               <ContentLink
-                href={`/${baseUrl}/population/individuals/${household?.head_of_household?.id}`}
+                href={`/${baseUrl}/population/individuals/${household?.headOfHousehold?.id}`}
               >
-                {household?.head_of_household?.full_name}
+                {household?.headOfHousehold?.fullName}
               </ContentLink>
             </LabelizedField>
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField
-              label={t('FEMALE CHILD HEADED ' + beneficiaryGroup?.group_label)}
+              label={t('FEMALE CHILD HEADED ' + beneficiaryGroup?.groupLabel)}
             >
-              {household?.fchild_hoh ? t('Yes') : t('No')}
+              {household?.fchildHoh ? t('Yes') : t('No')}
             </LabelizedField>
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField
-              label={t('CHILD HEADED ' + beneficiaryGroup?.group_label)}
+              label={t('CHILD HEADED ' + beneficiaryGroup?.groupLabel)}
             >
-              {household?.child_hoh ? t('Yes') : t('No')}
+              {household?.childHoh ? t('Yes') : t('No')}
             </LabelizedField>
           </Grid>
           <Grid size={{ xs: 3 }}>
@@ -141,7 +142,7 @@ export function HouseholdDetails({
 
           <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('Country of Origin')}>
-              {household?.country_origin}
+              {household?.countryOrigin}
             </LabelizedField>
           </Grid>
           <Grid size={{ xs: 3 }}>
@@ -156,7 +157,7 @@ export function HouseholdDetails({
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('Zip code')}>
-              {household?.zip_code}
+              {household?.zipCode}
             </LabelizedField>
           </Grid>
           <Grid size={{ xs: 3 }}>
@@ -188,30 +189,30 @@ export function HouseholdDetails({
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('UNHCR CASE ID')}>
-              {household?.unhcr_id}
+              {household?.unhcrId}
             </LabelizedField>
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('LENGTH OF TIME SINCE ARRIVAL')}>
-              {household?.flex_fields?.months_displaced_h_f}
+              {household?.flexFields?.months_displaced_h_f}
             </LabelizedField>
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('NUMBER OF TIMES DISPLACED')}>
-              {household?.flex_fields?.number_times_displaced_h_f}
+              {household?.flexFields?.number_times_displaced_h_f}
             </LabelizedField>
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t(
-                'IS THIS A RETURNEE ' + beneficiaryGroup?.group_label + '?',
+                'IS THIS A RETURNEE ' + beneficiaryGroup?.groupLabel + '?',
               )}
             >
               {household?.returnee ? t('Yes') : t('No')}
             </LabelizedField>
           </Grid>
           <Grid size={{ xs: 3 }}>
-            {household?.unicef_id && (
+            {household?.unicefId && (
               <LinkedGrievancesModal
                 household={household}
                 baseUrl={baseUrl}
@@ -221,7 +222,7 @@ export function HouseholdDetails({
             )}
           </Grid>
           <Grid size={{ xs: 3 }}>
-            {household?.unicef_id && (
+            {household?.unicefId && (
               <LinkedGrievancesModal
                 household={household}
                 baseUrl={baseUrl}
@@ -232,7 +233,7 @@ export function HouseholdDetails({
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('Data Collecting Type')}>
-              {selectedProgram?.data_collecting_type?.label}
+              {selectedProgram?.dataCollectingType?.label}
             </LabelizedField>
           </Grid>
         </Grid>
@@ -281,7 +282,7 @@ export function HouseholdDetails({
               <LabelizedField label={t('Total Cash Received')}>
                 <BigValue>
                   {formatCurrencyWithSymbol(
-                    Number(household?.total_cash_received_usd),
+                    Number(household?.totalCashReceivedUsd),
                     'USD',
                   )}
                 </BigValue>

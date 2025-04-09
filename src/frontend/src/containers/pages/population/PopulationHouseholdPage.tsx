@@ -16,7 +16,7 @@ import { HouseholdTable } from '@containers/tables/population/HouseholdTable/Hou
 function PopulationHouseholdPage(): ReactElement {
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { data: choicesData, loading: choicesLoading } =
     useHouseholdChoiceDataQuery({
       fetchPolicy: 'cache-first',
@@ -53,7 +53,7 @@ function PopulationHouseholdPage(): ReactElement {
 
   return (
     <>
-      <PageHeader title={beneficiaryGroup?.group_label_plural} />
+      <PageHeader title={beneficiaryGroup?.groupLabelPlural} />
       <HouseholdFilters
         filter={filter}
         choicesData={choicesData}

@@ -23,7 +23,7 @@ const MockExampleProfile = () => {
       ) : (
         <div>
           <h4>Profile Details</h4>
-          {meData?.first_name} {meData?.last_name}
+          {meData?.firstName} {meData?.lastName}
         </div>
       )}
     </div>

@@ -16,7 +16,7 @@ export const ResultsForHouseholds = ({
 }: ResultsForHouseholdsProps) => {
   const { totalHouseholdsCount, totalIndividualsCount } = paymentPlan;
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   return (
     <Grid size={{ xs: 4 }}>
@@ -24,7 +24,7 @@ export const ResultsForHouseholds = ({
         <Grid size={{ xs: 6 }}>
           <SummaryBorder>
             <LabelizedField
-              label={`Total Number of ${beneficiaryGroup?.group_label_plural}`}
+              label={`Total Number of ${beneficiaryGroup?.groupLabelPlural}`}
             >
               <SummaryValue>{totalHouseholdsCount || '0'}</SummaryValue>
             </LabelizedField>
@@ -33,7 +33,7 @@ export const ResultsForHouseholds = ({
         <Grid size={{ xs: 6 }}>
           <SummaryBorder>
             <LabelizedField
-              label={`Targeted ${beneficiaryGroup?.member_label_plural}`}
+              label={`Targeted ${beneficiaryGroup?.memberLabelPlural}`}
             >
               <SummaryValue>{totalIndividualsCount || '0'}</SummaryValue>
             </LabelizedField>

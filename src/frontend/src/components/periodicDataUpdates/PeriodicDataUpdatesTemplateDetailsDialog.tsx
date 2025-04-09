@@ -79,7 +79,7 @@ export const PeriodicDataUpdatesTemplateDetailsDialog: FC<
               </TableRow>
             </TableHead>
             <TableBody>
-              {templateDetailsData?.rounds_data?.map((roundData, index) => (
+              {templateDetailsData?.roundsData?.map((roundData, index) => (
                 <TableRow key={index}>
                   <TableCell data-cy={`template-field-${index}`}>
                     {pduDataDict[roundData.field].label}
