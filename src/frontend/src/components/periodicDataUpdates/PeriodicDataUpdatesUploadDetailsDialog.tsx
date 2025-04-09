@@ -89,10 +89,10 @@ export const PeriodicDataUpdatesUploadDetailsDialog: FC<
       <DialogTitle>{t('Periodic Data Updates Errors')}</DialogTitle>
       <DialogContent>
         <NonFormErrorDisplay
-          nonFormErrors={uploadDetailsData?.errors_info?.non_form_errors}
+          nonFormErrors={uploadDetailsData?.errorsInfo?.non_form_errors}
         />
         <FormErrorDisplay
-          formErrors={uploadDetailsData?.errors_info?.form_errors}
+          formErrors={uploadDetailsData?.errorsInfo?.form_errors}
         />
       </DialogContent>
       <DialogActions>

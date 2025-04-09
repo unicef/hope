@@ -33,7 +33,7 @@ export function DeleteHouseholdGrievanceDetails({
   const { t } = useTranslation();
   const { baseUrl, isAllPrograms } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { data: choicesData, loading: choicesLoading } =
     useHouseholdChoiceDataQuery();
@@ -51,15 +51,15 @@ export function DeleteHouseholdGrievanceDetails({
     <ApproveBox>
       <Title>
         <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography variant="h6">{`${beneficiaryGroup?.group_label} to be withdrawn`}</Typography>
+          <Typography variant="h6">{`${beneficiaryGroup?.groupLabel} to be withdrawn`}</Typography>
           {approveStatus &&
             ticket.deleteHouseholdTicketDetails.reasonHousehold && (
               <Box display="flex" alignItems="center">
                 <Info />
                 <Box mr={2}>
                   <p>
-                    This {beneficiaryGroup?.group_label} is a duplicate of a{' '}
-                    {beneficiaryGroup?.group_label} ID:
+                    This {beneficiaryGroup?.groupLabel} is a duplicate of a{' '}
+                    {beneficiaryGroup?.groupLabel} ID:
                   </p>
                 </Box>
                 {!isAllPrograms ? (
@@ -97,7 +97,7 @@ export function DeleteHouseholdGrievanceDetails({
       </Title>
       <Grid container spacing={6}>
         <Grid size={{ xs: 3 }}>
-          <LabelizedField label={`${beneficiaryGroup?.group_label} Size`}>
+          <LabelizedField label={`${beneficiaryGroup?.groupLabel} Size`}>
             {ticket.household.size}
           </LabelizedField>
         </Grid>
@@ -107,7 +107,7 @@ export function DeleteHouseholdGrievanceDetails({
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
-          <LabelizedField label={`Head of ${beneficiaryGroup?.group_label}`}>
+          <LabelizedField label={`Head of ${beneficiaryGroup?.groupLabel}`}>
             <ContentLink
               href={`/${baseUrl}/population/individuals/${ticket.household.headOfHousehold.id}`}
             >

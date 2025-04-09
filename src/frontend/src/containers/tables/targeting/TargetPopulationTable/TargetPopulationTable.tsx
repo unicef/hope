@@ -42,7 +42,7 @@ export function TargetPopulationTable({
 }: TargetPopulationProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { businessArea, programId } = useBaseUrl();
   const initialVariables: AllTargetPopulationsQueryVariables = {
     name: filter.name,
@@ -62,7 +62,7 @@ export function TargetPopulationTable({
 
   const replacements = {
     total_households_count: (_beneficiaryGroup) =>
-      `Num. of ${_beneficiaryGroup?.group_labelPlural}`,
+      `Num. of ${_beneficiaryGroup?.groupLabelPlural}`,
   };
 
   const adjustedHeadCells = adjustHeadCells(

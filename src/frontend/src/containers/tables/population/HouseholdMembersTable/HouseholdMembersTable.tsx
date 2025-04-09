@@ -81,13 +81,13 @@ export const HouseholdMembersTable = ({
   );
 
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const replacements = {
-    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.member_label} ID`,
-    fullName: (_beneficiaryGroup) => `${_beneficiaryGroup?.member_label}`,
+    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
+    fullName: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel}`,
     relationship: (_beneficiaryGroup) =>
-      `Relationship to Head of ${_beneficiaryGroup?.group_label}`,
+      `Relationship to Head of ${_beneficiaryGroup?.groupLabel}`,
   };
 
   const adjustedHeadCells = adjustHeadCells(
@@ -129,10 +129,10 @@ export const HouseholdMembersTable = ({
 
   return (
     <UniversalRestTable
-      title={`${beneficiaryGroup?.group_label} Members`}
+      title={`${beneficiaryGroup?.groupLabel} Members`}
       allowSort={false}
       headCells={adjustedHeadCells}
-      data={data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)}
+      data={data} //.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
       error={error}
       isLoading={isLoading}
       queryVariables={queryVariables}
@@ -154,12 +154,12 @@ export const HouseholdMembersTable = ({
             <TableCell align="left">
               {renderTableCellContent(
                 <BlackLink to={`/${baseUrl}/population/individuals/${row.id}`}>
-                  {row.unicef_id}
+                  {row.unicefId}
                 </BlackLink>,
               )}
             </TableCell>
             <TableCell align="left">
-              {renderTableCellContent(row.full_name)}
+              {renderTableCellContent(row.fullName)}
             </TableCell>
             <TableCell align="left">
               <StatusBox
@@ -176,7 +176,7 @@ export const HouseholdMembersTable = ({
             </TableCell>
             <TableCell align="right">
               {renderTableCellContent(
-                <UniversalMoment>{row.birth_date}</UniversalMoment>,
+                <UniversalMoment>{row.birthDate}</UniversalMoment>,
               )}
             </TableCell>
             <TableCell align="left">

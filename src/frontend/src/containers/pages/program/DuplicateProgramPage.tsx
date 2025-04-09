@@ -187,36 +187,36 @@ const DuplicateProgramPage = (): ReactElement => {
 
   const {
     name,
-    start_date,
-    end_date,
+    startDate,
+    endDate,
     sector,
-    data_collecting_type,
-    beneficiary_group,
+    dataCollectingType,
+    beneficiaryGroup,
     description,
     budget = '',
-    administrative_areas_of_implementation,
-    population_goal = 0,
-    cash_plus = false,
-    frequency_of_payments = 'REGULAR',
+    administrativeAreasOfImplementation,
+    populationGoal = 0,
+    cashPlus = false,
+    frequencyOfPayments = 'REGULAR',
     partners,
-    partner_access = ProgramPartnerAccess.AllPartnersAccess,
+    partnerAccess = ProgramPartnerAccess.AllPartnersAccess,
   } = program;
 
   const initialValues = {
     editMode: true,
     name: `Copy of Programme: (${name})`,
     programmeCode: '',
-    startDate: start_date,
-    endDate: end_date,
+    startDate: startDate,
+    endDate: endDate,
     sector,
-    dataCollectingTypeCode: data_collecting_type?.code,
-    beneficiaryGroup: decodeIdString(beneficiary_group?.id),
+    dataCollectingTypeCode: dataCollectingType?.code,
+    beneficiaryGroup: decodeIdString(beneficiaryGroup?.id),
     description,
     budget,
-    administrativeAreasOfImplementation: administrative_areas_of_implementation,
-    populationGoal: population_goal,
-    cashPlus: cash_plus,
-    frequencyOfPayments: frequency_of_payments,
+    administrativeAreasOfImplementation: administrativeAreasOfImplementation,
+    populationGoal: populationGoal,
+    cashPlus: cashPlus,
+    frequencyOfPayments: frequencyOfPayments,
     partners: partners
       .filter((partner) => isPartnerVisible(partner.name))
       .map((partner) => ({
@@ -224,7 +224,7 @@ const DuplicateProgramPage = (): ReactElement => {
         areas: partner.areas.map((area) => decodeIdString(area.id)),
         areaAccess: partner.areaAccess,
       })),
-    partnerAccess: partner_access,
+    partnerAccess: partnerAccess,
     pduFields: [],
   };
   initialValues.budget = program.budget === '0.00' ? '' : program.budget;

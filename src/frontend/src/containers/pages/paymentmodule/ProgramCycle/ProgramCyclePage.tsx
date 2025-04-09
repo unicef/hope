@@ -27,7 +27,7 @@ export const ProgramCyclePage = (): ReactElement => {
   const permissions = usePermissions();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
@@ -38,7 +38,7 @@ export const ProgramCyclePage = (): ReactElement => {
 
   const replacements = {
     totalHouseholdsCount: (_beneficiaryGroup) =>
-      `Total ${_beneficiaryGroup?.group_labelPlural} Count`,
+      `Total ${_beneficiaryGroup?.groupLabelPlural} Count`,
   };
 
   const adjustedHeadCells = adjustHeadCells(

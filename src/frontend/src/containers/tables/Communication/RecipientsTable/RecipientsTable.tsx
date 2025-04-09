@@ -24,17 +24,17 @@ function RecipientsTable({
 }: RecipientsTableProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const initialVariables: AllAccountabilityCommunicationMessageRecipientsQueryVariables =
     {
       messageId: id,
     };
 
   const replacements = {
-    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.group_label} ID`,
+    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} ID`,
     head_of_household__full_name: (_beneficiaryGroup) =>
-      `Head of ${_beneficiaryGroup?.group_label}`,
-    size: (_beneficiaryGroup) => `${_beneficiaryGroup?.group_label} Size`,
+      `Head of ${_beneficiaryGroup?.groupLabel}`,
+    size: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} Size`,
   };
 
   const adjustedHeadCells = adjustHeadCells(

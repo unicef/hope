@@ -141,7 +141,7 @@ const PeopleDetailsPage = (): ReactElement => {
         }
         flags={
           <>
-            <IndividualFlags individual={individual} />
+            {/*<IndividualFlags individual={individual} />  TODO REST Refactor*/}
             <AdminButton adminUrl={individual?.adminUrl} />
           </>
         }

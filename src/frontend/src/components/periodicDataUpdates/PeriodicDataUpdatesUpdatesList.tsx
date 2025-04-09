@@ -112,10 +112,10 @@ export const PeriodicDataUpdatesUpdatesList = (): ReactElement => {
         {row.template}
       </TableCell>
       <TableCell data-cy={`update-created-at-${row.id}`}>
-        <UniversalMoment>{row.created_at}</UniversalMoment>
+        <UniversalMoment>{row.createdAt}</UniversalMoment>
       </TableCell>
       <TableCell data-cy={`update-created-by-${row.id}`}>
-        {row.created_by}
+        {row.createdBy}
       </TableCell>
       <TableCell data-cy={`update-details-${row.id}`}>
         {row.status === 'FAILED' ? (

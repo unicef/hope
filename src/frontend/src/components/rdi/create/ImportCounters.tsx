@@ -13,7 +13,7 @@ export function ImportCounters({
 }: ImportCountersPropTypes): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram, isSocialDctType } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   if (isSocialDctType) {
     return (
@@ -29,7 +29,7 @@ export function ImportCounters({
       <div data-cy="number-of-households">
         {numberOfHouseholds}{' '}
         {t(
-          `${beneficiaryGroup?.group_label}`
+          `${beneficiaryGroup?.groupLabel}`
             .concat(numberOfHouseholds > 1 ? 's' : '')
             .concat(' available to import'),
         )}
@@ -37,7 +37,7 @@ export function ImportCounters({
       <div data-cy="number-of-individuals">
         {numberOfIndividuals}{' '}
         {t(
-          `${beneficiaryGroup?.member_label}`
+          `${beneficiaryGroup?.memberLabel}`
             .concat(numberOfIndividuals > 1 ? 's' : '')
             .concat(' available to import'),
         )}

@@ -178,11 +178,11 @@ const AddFilterTargetingCriteriaDisplay = ({
   //   selectedProgram?.data_collecting_type?.collectorFiltersAvailable;
 
   let individualFiltersAvailable =
-    selectedProgram?.data_collecting_type?.individual_filters_available;
+    selectedProgram?.dataCollectingType?.individualFiltersAvailable;
   let householdFiltersAvailable =
-    selectedProgram?.data_collecting_type?.household_filters_available;
+    selectedProgram?.dataCollectingType?.householdFiltersAvailable;
   const isSocialWorkingProgram =
-    selectedProgram?.data_collecting_type?.type ===
+    selectedProgram?.dataCollectingType?.type ===
     DataCollectingTypeType.Social;
   // Allow use filters on non-migrated programs
   if (individualFiltersAvailable === undefined) {

@@ -17,6 +17,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { Status791Enum } from '@restgenerated/models/Status791Enum';
+import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 
 interface ProgramCyclesTableProgramDetailsProps {
   program: ProgramDetail;
@@ -45,7 +46,7 @@ export const ProgramCyclesTableProgramDetails = ({
 
   const canViewDetails = programId !== 'all';
 
-  const renderRow = (row: ProgramCycle): ReactElement => {
+  const renderRow = (row: ProgramCycleList): ReactElement => {
     const detailsUrl = `/${baseUrl}/payment-module/program-cycles/${row.id}`;
     const canEditProgramCycle =
       (row.status === 'Draft' || row.status === 'Active') &&
@@ -73,25 +74,25 @@ export const ProgramCyclesTableProgramDetails = ({
           align="right"
           data-cy="program-cycle-total-entitled-quantity"
         >
-          {row.total_entitled_quantity_usd || '-'}
+          {row.totalEntitledQuantityUsd || '-'}
         </TableCell>
         <TableCell
           align="right"
           data-cy="program-cycle-total-undelivered-quantity"
         >
-          {row.total_undelivered_quantity_usd || '-'}
+          {row.totalUndeliveredQuantityUsd || '-'}
         </TableCell>
         <TableCell
           align="right"
           data-cy="program-cycle-total-delivered-quantity"
         >
-          {row.total_delivered_quantity_usd || '-'}
+          {row.totalDeliveredQuantityUsd || '-'}
         </TableCell>
         <TableCell data-cy="program-cycle-start-date">
-          <UniversalMoment>{row.start_date}</UniversalMoment>
+          <UniversalMoment>{row.startDate}</UniversalMoment>
         </TableCell>
         <TableCell data-cy="program-cycle-end-date">
-          <UniversalMoment>{row.end_date}</UniversalMoment>
+          <UniversalMoment>{row.endDate}</UniversalMoment>
         </TableCell>
 
         <TableCell data-cy="program-cycle-details-btn">

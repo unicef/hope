@@ -63,8 +63,8 @@ export function LookUpProgrammesTableRowSurveys({
         />
       </TableCell>
       <TableCell align="left">
-        <UniversalMoment>{program.start_date}</UniversalMoment> -{' '}
-        <UniversalMoment>{program.end_date}</UniversalMoment>
+        <UniversalMoment>{program.startDate}</UniversalMoment> -{' '}
+        <UniversalMoment>{program.endDate}</UniversalMoment>
       </TableCell>
       <TableCell align="left">
         {programSectorChoiceDict[program.sector]}

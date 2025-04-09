@@ -44,7 +44,7 @@ function GrievancesDetails({
   const { t } = useTranslation();
   const { isAllPrograms } = useBaseUrl();
   const { selectedProgram, isSocialDctType } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const statusChoices: {
     [id: number]: string;
@@ -225,7 +225,7 @@ function GrievancesDetails({
                 size: 3,
               },
               !isAllPrograms && {
-                label: `${beneficiaryGroup?.group_label} ID`,
+                label: `${beneficiaryGroup?.groupLabel} ID`,
                 value: (
                   <span>
                     {ticket.household?.id &&
@@ -249,7 +249,7 @@ function GrievancesDetails({
                 label:
                   isAllPrograms || isSocialDctType
                     ? t('Target ID')
-                    : `${beneficiaryGroup?.member_label} ID`,
+                    : `${beneficiaryGroup?.memberLabel} ID`,
 
                 value:
                   isAllPrograms || isSocialDctType ? (

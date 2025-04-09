@@ -42,25 +42,25 @@ function Selection({
   );
 
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const dataChangeIssueTypes = [
-    { name: `${beneficiaryGroup?.group_label} Data Update`, value: '13' },
-    { name: `${beneficiaryGroup?.member_label} Data Update`, value: '14' },
+    { name: `${beneficiaryGroup?.groupLabel} Data Update`, value: '13' },
+    { name: `${beneficiaryGroup?.memberLabel} Data Update`, value: '14' },
   ];
 
   function replaceLabels(choices, _beneficiaryGroup) {
     if (!choices) return [];
     return choices.map((choice) => {
       let newName = choice.name;
-      if (_beneficiaryGroup?.member_label) {
+      if (_beneficiaryGroup?.memberLabel) {
         newName = newName.replace(
           /Individual/g,
-          _beneficiaryGroup.member_label,
+          _beneficiaryGroup.memberLabel,
         );
       }
-      if (_beneficiaryGroup?.group_label) {
-        newName = newName.replace(/Household/g, _beneficiaryGroup.group_label);
+      if (_beneficiaryGroup?.groupLabel) {
+        newName = newName.replace(/Household/g, _beneficiaryGroup.groupLabel);
       }
       return { ...choice, name: newName };
     });

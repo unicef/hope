@@ -38,7 +38,7 @@ export const PeopleListTableRow = ({
       data-cy="individual-table-row"
     >
       <TableCell align="left">
-        <IndividualFlags individual={individual} />
+        {/*<IndividualFlags individual={individual} /> TODO REST refactor*/}
       </TableCell>
       <TableCell align="left">
         <BlackLink to={individualDetailsPath}>{individual.unicefId}</BlackLink>
