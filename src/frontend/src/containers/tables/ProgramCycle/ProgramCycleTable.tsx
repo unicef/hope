@@ -11,7 +11,7 @@ import DeleteProgramCycle from '@containers/tables/ProgramCycle/DeleteProgramCyc
 import EditProgramCycle from '@containers/tables/ProgramCycle/EditProgramCycle';
 import { useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { fetchProgramCycles, ProgramCycle } from '@api/programCycleApi';
+import { fetchProgramCycles } from '@api/programCycleApi';
 import { BlackLink } from '@core/BlackLink';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
