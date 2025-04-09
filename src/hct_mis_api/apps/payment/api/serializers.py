@@ -861,6 +861,7 @@ class TPHouseholdListSerializer(serializers.ModelSerializer):
 
 
 class TargetPopulationCreateSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(read_only=True)
     name = serializers.CharField(required=True)
     program_cycle_id = serializers.UUIDField(required=True)
     targeting_criteria = TargetingCriteriaSerializer(required=True)
