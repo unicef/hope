@@ -420,7 +420,7 @@ class TestPaymentPlanList:
 
         self.pp.refresh_from_db()
         payment_plan = response_data[0]
-        assert self.pp.id == payment_plan["id"]
+        assert str(self.pp.id) == payment_plan["id"]
         assert payment_plan["unicef_id"] == self.pp.unicef_id
         assert payment_plan["name"] == self.pp.name
         assert payment_plan["status"] == self.pp.get_status_display()
@@ -711,7 +711,7 @@ class TestPaymentPlanFilter:
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
         assert len(response_data) == 1
-        assert response_data[0]["id"] == self.pp_finished.id
+        assert response_data[0]["id"] == str(self.pp_finished.id)
         assert response_data[0]["status"] == "Finished"
         assert response_data[0]["name"] == self.pp_finished.name
 
@@ -720,7 +720,7 @@ class TestPaymentPlanFilter:
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
         assert len(response_data) == 1
-        assert response_data[0]["id"] == self.pp.id
+        assert response_data[0]["id"] == str(self.pp.id)
         assert response_data[0]["status"] == "In Approval"
         assert response_data[0]["name"] == self.pp.name
 
@@ -922,7 +922,7 @@ class TestTargetPopulationList:
 
         self.tp.refresh_from_db()
         tp = response_data[0]
-        assert self.tp.id == tp["id"]
+        assert str(self.tp.id) == tp["id"]
         assert tp["name"] == "Test new TP"
         assert tp["status"] == self.tp.get_status_display()
         assert tp["total_households_count"] == self.tp.total_households_count
@@ -1026,7 +1026,7 @@ class TestTargetPopulationDetail:
         tp = response.json()
         self.tp.refresh_from_db()
 
-        assert tp["id"] == self.tp.id
+        assert tp["id"] == str(self.tp.id)
         assert tp["name"] == self.tp.name
         assert tp["program_cycle"]["title"] == self.cycle.title
         assert tp["program"]["name"] == self.program_active.name
@@ -1093,7 +1093,7 @@ class TestTargetPopulationFilter:
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
         assert len(response_data) == 1
-        assert response_data[0]["id"] == self.tp_locked.id
+        assert response_data[0]["id"] == str(self.tp_locked.id)
         assert response_data[0]["status"] == "Locked"
         assert response_data[0]["name"] == "LOCKED"
 
@@ -1102,7 +1102,7 @@ class TestTargetPopulationFilter:
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
         assert len(response_data) == 1
-        assert response_data[0]["id"] == self.tp_assigned.id
+        assert response_data[0]["id"] == str(self.tp_assigned.id)
         assert response_data[0]["name"] == "Assigned TP"
 
     def test_filter_by_program_cycle(self) -> None:
@@ -1587,9 +1587,8 @@ class TestPaymentPlanActions:
         url_kwargs_ba_program = {
             "business_area_slug": self.afghanistan.slug,
             "program_slug": self.program_active.slug,
-            "pk": pp_id,
         }
-        self.url_list = reverse("api:payments:payment-plans", kwargs=url_kwargs_ba_program)
+        self.url_list = reverse("api:payments:payment-plans-list", kwargs=url_kwargs_ba_program)
         self.url_lock = reverse("api:payments:payment-plans-lock", kwargs=url_kwargs)
         self.url_unlock = reverse("api:payments:payment-plans-unlock", kwargs=url_kwargs)
         self.url_exclude_hh = reverse("api:payments:payment-plans-exclude-beneficiaries", kwargs=url_kwargs)
@@ -1635,7 +1634,7 @@ class TestPaymentPlanActions:
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
-    def test_open_pp(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+    def test_create_pp(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         data = {
             "dispersion_start_date": "2025-02-01",
@@ -1653,9 +1652,9 @@ class TestPaymentPlanActions:
             assert "United States dollar" == resp_data["currency"]
             assert "Open" == resp_data["status"]
 
-    def test_open_pp_validation_errors(self, create_user_role_with_permissions: Any) -> None:
+    def test_create_pp_validation_errors(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(self.user, [Permissions.PM_CREATE], self.afghanistan, self.program_active)
-        response = self.client.post(self.url_list, {}, format="json")
+        response = self.client.post(self.url_list, {"target_population_id": str(self.pp.pk)}, format="json")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "dispersion_start_date" in response.json()
         assert "dispersion_end_date" in response.json()

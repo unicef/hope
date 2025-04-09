@@ -5,7 +5,6 @@ from django.db.models import Q, QuerySet
 import django_filters
 from django_filters import FilterSet
 
-from hct_mis_api.apps.core.utils import decode_id_string_required
 from hct_mis_api.apps.payment.models import PaymentPlan
 
 
@@ -29,10 +28,10 @@ class PaymentPlanFilter(FilterSet):
         }
 
     def filter_by_program(self, qs: QuerySet, name: str, value: str) -> QuerySet:
-        return qs.filter(program_cycle__program_id=decode_id_string_required(value))
+        return qs.filter(program_cycle__program_id=value)
 
     def filter_by_program_cycle(self, qs: QuerySet, name: str, value: str) -> QuerySet:
-        return qs.filter(program_cycle_id=decode_id_string_required(value))
+        return qs.filter(program_cycle_id=value)
 
     def search_filter(self, qs: QuerySet, name: str, value: str) -> "QuerySet[PaymentPlan]":
         return qs.filter(Q(id__icontains=value) | Q(unicef_id__icontains=value) | Q(name__istartswith=value))

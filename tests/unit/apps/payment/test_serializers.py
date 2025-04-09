@@ -8,7 +8,7 @@ from hct_mis_api.apps.account.models import Role, RoleAssignment, User
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import encode_id_base64_required, to_choice_object
+from hct_mis_api.apps.core.utils import to_choice_object
 from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.payment.api.serializers import (
@@ -57,7 +57,7 @@ class TPHouseholdListSerializerTest(TestCase):
         serializer = TPHouseholdListSerializer(instance=self.payment)
         data = serializer.data
 
-        self.assertEqual(data["id"], encode_id_base64_required(str(self.payment.id), "Payment"))
+        self.assertEqual(data["id"], str(self.payment.id))
         self.assertEqual(data["household_unicef_id"], self.hh1.unicef_id)
         self.assertEqual(data["hoh_full_name"], self.hoh.full_name)
         self.assertEqual(data["household_size"], 2)
@@ -98,7 +98,7 @@ class PaymentListSerializerTest(TestCase):
         serializer = PaymentListSerializer(instance=self.payment, context={"request": Mock(user=self.user)})
         data = serializer.data
 
-        self.assertEqual(data["id"], encode_id_base64_required(str(self.payment.id), "Payment"))
+        self.assertEqual(data["id"], str(self.payment.id))
         self.assertEqual(data["unicef_id"], self.payment.unicef_id)
         self.assertEqual(data["household_unicef_id"], self.hh1.unicef_id)
         self.assertEqual(data["household_size"], 2)
@@ -200,7 +200,7 @@ class PaymentPlanDetailSerializerTest(TestCase):
         serializer = PaymentPlanDetailSerializer(instance=self.pp, context={"request": Mock(user=self.user)})
         data = serializer.data
 
-        self.assertEqual(data["id"], encode_id_base64_required(str(self.pp.id), "PaymentPlan"))
+        self.assertEqual(data["id"], str(self.pp.id))
         self.assertEqual(data["reconciliation_summary"]["pending"], 1)
         self.assertEqual(data["reconciliation_summary"]["number_of_payments"], 1)
         self.assertEqual(data["excluded_households"], [])
