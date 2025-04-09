@@ -704,6 +704,8 @@ class PaymentPlanService:
                 currency=payment.currency,
                 entitlement_quantity=payment.entitlement_quantity,
                 entitlement_quantity_usd=payment.entitlement_quantity_usd,
+                financial_service_provider=self.payment_plan.financial_service_provider,
+                delivery_type=self.payment_plan.delivery_mechanism,
             )
             for payment in payments_to_copy
         ]
@@ -740,6 +742,8 @@ class PaymentPlanService:
             dispersion_end_date=dispersion_end_date,
             start_date=source_pp.start_date,
             end_date=source_pp.end_date,
+            delivery_mechanism=source_pp.delivery_mechanism,
+            financial_service_provider=source_pp.financial_service_provider,
         )
 
         transaction.on_commit(lambda: prepare_follow_up_payment_plan_task.delay(follow_up_pp.id))
