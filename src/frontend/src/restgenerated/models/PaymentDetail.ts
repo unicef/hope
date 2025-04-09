@@ -5,7 +5,7 @@
 import type { FollowUpPaymentPlan } from './FollowUpPaymentPlan';
 import type { PaymentVerification } from './PaymentVerification';
 export type PaymentDetail = {
-    id: string;
+    readonly id: string;
     unicefId?: string | null;
     householdUnicefId: string;
     householdSize: number;

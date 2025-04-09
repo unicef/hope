@@ -10,22 +10,40 @@ import { PaymentPlanTargeting } from '@components/paymentmodule/CreatePaymentPla
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
-import {
-  useAllTargetPopulationsQuery,
-  useUpdatePpMutation,
-} from '@generated/graphql';
+import { useAllTargetPopulationsQuery } from '@generated/graphql';
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useMutation } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 
 export const CreatePeoplePaymentPlanPage = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const [mutate, { loading: loadingCreate }] = useUpdatePpMutation();
+  const { paymentPlanId } = useParams();
+
+  const { mutateAsync: createPaymentPlan, isPending: loadingCreate } =
+    useMutation({
+      mutationFn: ({
+        businessAreaSlug,
+        programSlug,
+        requestBody,
+      }: {
+        businessAreaSlug: string;
+        programSlug: string;
+        requestBody;
+      }) =>
+        RestService.restBusinessAreasProgramsPaymentPlansCreate({
+          businessAreaSlug,
+          programSlug,
+          requestBody,
+        }),
+    });
+
   const { showMessage } = useSnackbar();
-  const { baseUrl, businessArea, programId } = useBaseUrl();
+  const { businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
   const { programCycleId } = useParams();
 
@@ -83,22 +101,24 @@ export const CreatePeoplePaymentPlanPage = (): ReactElement => {
       const dispersionEndDate = values.dispersionEndDate
         ? format(new Date(values.dispersionEndDate), 'yyyy-MM-dd')
         : null;
-      const { currency, paymentPlanId } = values;
 
-      const res = await mutate({
-        variables: {
-          currency,
-          paymentPlanId,
-          dispersionStartDate,
-          dispersionEndDate,
-        },
+      const requestBody = {
+        dispersionStartDate,
+        dispersionEndDate,
+        currency: values.currency,
+      };
+
+      const res = await createPaymentPlan({
+        businessAreaSlug: businessArea,
+        id: paymentPlanId,
+        programSlug: programId,
+        requestBody,
       });
+
       showMessage(t('Payment Plan Created'));
-      navigate(
-        `/${baseUrl}/payment-module/payment-plans/${res.data.updatePaymentPlan.paymentPlan.id}`,
-      );
+      navigate(`../${res.id}`);
     } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+      showMessage(e);
     }
   };
 

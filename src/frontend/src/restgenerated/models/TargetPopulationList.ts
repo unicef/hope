@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type TargetPopulationList = {
-    id: string;
+    readonly id: string;
     /**
      * Name
      */

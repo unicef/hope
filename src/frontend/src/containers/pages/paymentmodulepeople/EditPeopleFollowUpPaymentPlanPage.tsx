@@ -9,7 +9,6 @@ import {
   PaymentPlanBackgroundActionStatus,
   PaymentPlanStatus,
   useAllTargetPopulationsQuery,
-  useUpdatePpMutation,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -22,7 +21,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import * as Yup from 'yup';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
 
@@ -57,7 +56,26 @@ const EditPeopleFollowUpPaymentPlanPage = (): ReactElement => {
       refetchIntervalInBackground: true,
     });
 
-  const [mutate] = useUpdatePpMutation();
+  const { mutateAsync: updatePaymentPlan, isPending: loadingUpdate } =
+    useMutation({
+      mutationFn: ({
+        businessAreaSlug,
+        id: mutationId,
+        programSlug,
+        requestBody,
+      }: {
+        businessAreaSlug: string;
+        id: string;
+        programSlug: string;
+        requestBody;
+      }) =>
+        RestService.restBusinessAreasProgramsPaymentPlansPartialUpdate({
+          businessAreaSlug,
+          id: mutationId,
+          programSlug,
+          requestBody,
+        }),
+    });
   const { showMessage } = useSnackbar();
   const permissions = usePermissions();
 
@@ -110,23 +128,24 @@ const EditPeopleFollowUpPaymentPlanPage = (): ReactElement => {
   });
 
   const handleSubmit = async (values): Promise<void> => {
+    const requestBody = {
+      dispersionStartDate: values.dispersionStartDate,
+      dispersionEndDate: values.dispersionEndDate,
+      currency: values.currency?.value
+        ? values.currency.value
+        : values.currency,
+    };
     try {
-      const res = await mutate({
-        variables: {
-          paymentPlanId: values.paymentPlanId,
-          dispersionStartDate: values.dispersionStartDate,
-          dispersionEndDate: values.dispersionEndDate,
-          currency: values.currency?.value
-            ? values.currency.value
-            : values.currency,
-        },
+      const res = await updatePaymentPlan({
+        businessAreaSlug: businessArea,
+        id: paymentPlanId,
+        programSlug: programId,
+        requestBody,
       });
       showMessage(t('Follow-up Payment Plan Edited'));
-      navigate(
-        `/${baseUrl}/payment-module/followup-payment-plans/${res.data.updatePaymentPlan.paymentPlan.id}`,
-      );
+      navigate(`/${baseUrl}/payment-module/followup-payment-plans/${res.id}`);
     } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+      showMessage(e);
     }
   };
 
@@ -144,6 +163,7 @@ const EditPeopleFollowUpPaymentPlanPage = (): ReactElement => {
             handleSubmit={submitForm}
             baseUrl={baseUrl}
             permissions={permissions}
+            loadingUpdate={loadingUpdate}
           />
           <PaymentPlanTargeting
             allTargetPopulations={allTargetPopulationsData}

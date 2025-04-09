@@ -12,6 +12,7 @@ import { PageHeader } from '@core/PageHeader';
 import { StatusBox } from '@core/StatusBox';
 import { ReactElement } from 'react';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { LoadingButton } from '@components/core/LoadingButton';
 
 const StatusWrapper = styled.div`
   margin-left: 30px;
@@ -22,6 +23,7 @@ interface EditPaymentPlanHeaderProps {
   baseUrl: string;
   permissions: string[];
   paymentPlan: PaymentPlanDetail;
+  loadingUpdate: boolean;
 }
 
 export function EditPaymentPlanHeader({
@@ -29,6 +31,7 @@ export function EditPaymentPlanHeader({
   baseUrl,
   permissions,
   paymentPlan,
+  loadingUpdate,
 }: EditPaymentPlanHeaderProps): ReactElement {
   const { t } = useTranslation();
   const { id, isFollowUp } = paymentPlan;
@@ -79,9 +82,14 @@ export function EditPaymentPlanHeader({
             {t('Cancel')}
           </Button>
         </Box>
-        <Button variant="contained" color="primary" onClick={handleSubmit}>
+        <LoadingButton
+          loading={loadingUpdate}
+          variant="contained"
+          color="primary"
+          onClick={handleSubmit}
+        >
           {t('Save')}
-        </Button>
+        </LoadingButton>
       </Box>
     </PageHeader>
   );

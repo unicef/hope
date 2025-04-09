@@ -45,7 +45,21 @@ function ProgrammesTable({
       budget: JSON.stringify({ min: filter.budgetMin, max: filter.budgetMax }),
       dataCollectingType: filter.dataCollectingType,
     }),
-    [businessArea, filter, programId, isAllPrograms],
+    [
+      businessArea,
+      programId,
+      isAllPrograms,
+      filter.search,
+      filter.startDate,
+      filter.endDate,
+      filter.status,
+      filter.sector,
+      filter.numberOfHouseholdsMin,
+      filter.numberOfHouseholdsMax,
+      filter.budgetMin,
+      filter.budgetMax,
+      filter.dataCollectingType,
+    ],
   );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);

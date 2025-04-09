@@ -117,28 +117,28 @@ const EditProgramPage = (): ReactElement => {
 
   const {
     name,
-    programme_code,
+    programmeCode,
     startDate,
     endDate,
     sector,
-    data_collecting_type,
+    dataCollectingType,
     beneficiaryGroup,
     description,
     budget = '',
-    administrative_areas_of_implementation,
-    population_goal = '',
-    cash_plus = false,
-    frequency_of_payments = 'REGULAR',
+    administrativeAreasOfImplementation,
+    populationGoal = '',
+    cashPlus = false,
+    frequencyOfPayments = 'REGULAR',
     version,
     partners,
-    partner_access = ProgramPartnerAccess.AllPartnersAccess,
-    registration_imports_total_count,
-    pdu_fields,
-    target_populations_count,
+    partnerAccess = ProgramPartnerAccess.AllPartnersAccess,
+    registrationImportsTotalCount,
+    pduFields,
+    targetPopulationsCount,
   } = program;
 
-  const programHasRdi = registration_imports_total_count > 0;
-  const programHasTp = target_populations_count > 0;
+  const programHasRdi = registrationImportsTotalCount > 0;
+  const programHasTp = targetPopulationsCount > 0;
 
   const handleSubmitProgramDetails = async (values): Promise<void> => {
     const budgetValue = parseFloat(values.budget) ?? 0;
@@ -238,25 +238,25 @@ const EditProgramPage = (): ReactElement => {
   const initialValuesProgramDetails = {
     editMode: true,
     name,
-    programmeCode: programme_code,
+    programmeCode: programmeCode,
     startDate: startDate,
     endDate: endDate,
     sector,
-    dataCollectingTypeCode: data_collecting_type.code,
+    dataCollectingTypeCode: dataCollectingType.code,
     beneficiaryGroup: decodeIdString(beneficiaryGroup.id),
     description,
     budget,
-    administrativeAreasOfImplementation: administrative_areas_of_implementation,
-    populationGoal: population_goal,
-    cashPlus: cash_plus,
-    frequencyOfPayments: frequency_of_payments,
-    pduFields: pdu_fields,
+    administrativeAreasOfImplementation: administrativeAreasOfImplementation,
+    populationGoal: populationGoal,
+    cashPlus: cashPlus,
+    frequencyOfPayments: frequencyOfPayments,
+    pduFields: pduFields,
   };
 
   initialValuesProgramDetails.budget =
     program.budget === '0.00' ? '' : program.budget;
   initialValuesProgramDetails.populationGoal =
-    program.population_goal === 0 ? '' : program.population_goal;
+    program.populationGoal === 0 ? '' : program.populationGoal;
 
   const initialValuesPartners = {
     partners:
@@ -269,7 +269,7 @@ const EditProgramPage = (): ReactElement => {
               areaAccess: partner.areaAccess,
             }))
         : [],
-    partner_access,
+    partnerAccess,
   };
 
   const stepFields = [

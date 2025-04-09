@@ -4,7 +4,7 @@
 /* eslint-disable */
 import type { FollowUpPaymentPlan } from './FollowUpPaymentPlan';
 export type PaymentPlan = {
-    id: string;
+    readonly id: string;
     unicefId?: string | null;
     /**
      * Name
@@ -46,8 +46,8 @@ export type PaymentPlan = {
     isFollowUp?: boolean;
     readonly followUps: Array<FollowUpPaymentPlan>;
     program: string;
-    programId: string;
-    programCycleId: string;
+    readonly programId: string;
+    readonly programCycleId: string;
     readonly lastApprovalProcessDate: string | null;
     readonly lastApprovalProcessBy: string | null;
     readonly adminUrl: string;

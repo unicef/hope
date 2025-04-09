@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type TPHouseholdList = {
-    id: string;
+    readonly id: string;
     householdUnicefId: string;
     readonly hohFullName: string;
     householdSize: number;
