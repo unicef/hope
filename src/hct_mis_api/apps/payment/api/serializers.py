@@ -429,6 +429,7 @@ class PaymentPlanExcludeBeneficiariesSerializer(serializers.Serializer):
 
 
 class PaymentPlanCreateUpdateSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(read_only=True)
     target_population_id = serializers.UUIDField()
     dispersion_start_date = serializers.DateField(required=True)
     dispersion_end_date = serializers.DateField(required=True)
@@ -444,6 +445,7 @@ class PaymentPlanCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = PaymentPlan
         fields = (
+            "id",
             "target_population_id",
             "dispersion_start_date",
             "dispersion_end_date",
