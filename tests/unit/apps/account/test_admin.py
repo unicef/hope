@@ -26,7 +26,7 @@ from hct_mis_api.apps.account.fixtures import (
 from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment, User
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db()
 
 
 @pytest.fixture()

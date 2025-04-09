@@ -38,7 +38,7 @@ from tests.unit.apps.periodic_data_update.test_periodic_data_update_import_servi
     add_pdu_data_to_xlsx,
 )
 
-pytestmark = pytest.mark.django_db
+pytestmark = pytest.mark.django_db()
 
 
 @freezegun.freeze_time("2022-01-01")
