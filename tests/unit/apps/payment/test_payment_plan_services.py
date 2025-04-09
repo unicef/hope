@@ -961,12 +961,16 @@ class TestPaymentPlanServices(APITestCase):
             created_by=self.user,
             status=PaymentPlan.Status.LOCKED,
         )
-        PaymentFactory(
+        p = PaymentFactory(
             parent=payment_plan,
             program_id=self.program.id,
             business_area_id=payment_plan.business_area_id,
             status=Payment.PENDING_STATUSES,
             financial_service_provider=None,
+            entitlement_quantity=None,
+            entitlement_quantity_usd=None,
+            delivered_quantity=None,
+            delivered_quantity_usd=None,
         )
 
         with self.assertRaises(GraphQLError) as e:
@@ -975,6 +979,19 @@ class TestPaymentPlanServices(APITestCase):
             e.exception.message,
             "All Payments must have assigned FSP",
         )
+        p.financial_service_provider = self.fsp
+        p.save()
+
+        with self.assertRaises(GraphQLError) as e:
+            PaymentPlanService(payment_plan).lock_fsp()
+        self.assertEqual(
+            e.exception.message,
+            "All Payments must have entitlement quantity set.",
+        )
+        p.entitlement_quantity = 100
+        p.save()
+
+        PaymentPlanService(payment_plan).lock_fsp()
 
     def test_unlock_fsp(self) -> None:
         payment_plan = PaymentPlanFactory(
