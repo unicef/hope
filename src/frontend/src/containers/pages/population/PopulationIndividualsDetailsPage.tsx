@@ -6,7 +6,6 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { IndividualAdditionalRegistrationInformation } from '@components/population/IndividualAdditionalRegistrationInformation/IndividualAdditionalRegistrationInformation';
 import { IndividualBioData } from '@components/population/IndividualBioData/IndividualBioData';
 import { IndividualDeliveryMechanisms } from '@components/population/IndividualDeliveryMechanisms';
-import { IndividualFlags } from '@components/population/IndividualFlags';
 import { IndividualPhotoModal } from '@components/population/IndividualPhotoModal';
 import { ProgrammeTimeSeriesFields } from '@components/population/ProgrammeTimeSeriesFields';
 import { AdminButton } from '@core/AdminButton';
