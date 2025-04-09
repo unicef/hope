@@ -42,7 +42,6 @@ function ImportedIndividualsTable({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  // Wrap initialVariables in useMemo to avoid recreating it on every render
   const initialVariables = useMemo(() => ({
     rdiId,
     household,
