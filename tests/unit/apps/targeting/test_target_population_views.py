@@ -20,7 +20,7 @@ from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
-pytestmark = pytest.mark.django_db
+pytestmark = pytest.mark.django_db()
 
 
 @freezegun.freeze_time("2022-01-01")
