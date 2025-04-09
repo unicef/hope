@@ -37,7 +37,11 @@ from hct_mis_api.apps.core.utils import (
     decode_id_string,
     decode_id_string_required,
 )
-from hct_mis_api.apps.payment.api.caches import PaymentPlanKeyConstructor
+from hct_mis_api.apps.payment.api.caches import (
+    PaymentPlanKeyConstructor,
+    PaymentPlanListKeyConstructor,
+    TargetPopulationListKeyConstructor,
+)
 from hct_mis_api.apps.payment.api.filters import (
     PaymentPlanFilter,
     TargetPopulationFilter,
@@ -168,8 +172,8 @@ class PaymentPlanViewSet(
     def get_object(self) -> PaymentPlan:
         return get_object_or_404(PaymentPlan, id=decode_id_string(self.kwargs.get("pk")))
 
-    @etag_decorator(PaymentPlanKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=PaymentPlanKeyConstructor())
+    @etag_decorator(PaymentPlanListKeyConstructor)
+    @cache_response(timeout=config.REST_API_TTL, key_func=PaymentPlanListKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
@@ -767,8 +771,8 @@ class TargetPopulationViewSet(
     def get_object(self) -> PaymentPlan:
         return get_object_or_404(PaymentPlan, id=decode_id_string(self.kwargs.get("pk")))
 
-    @etag_decorator(PaymentPlanKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=PaymentPlanKeyConstructor())
+    @etag_decorator(TargetPopulationListKeyConstructor)
+    @cache_response(timeout=config.REST_API_TTL, key_func=TargetPopulationListKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 

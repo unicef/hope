@@ -1,4 +1,3 @@
-import base64
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
 
@@ -55,15 +54,12 @@ from hct_mis_api.apps.targeting.api.serializers import TargetingCriteriaSerializ
 
 
 class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
-    id = serializers.SerializerMethodField()
+    id = Base64ModelField(model_name="PaymentPlanSupportingDocument")
     file = serializers.FileField(use_url=False)
 
     class Meta:
         model = PaymentPlanSupportingDocument
         fields = ["id", "title", "file", "uploaded_at", "created_by"]
-
-    def get_id(self, obj: PaymentPlanSupportingDocument) -> str:
-        return base64.b64encode(f"PaymentPlanSupportingDocumentNode:{str(obj.id)}".encode()).decode()
 
     def validate_file(self, file: Any) -> Any:
         if file.size > PaymentPlanSupportingDocument.FILE_SIZE_LIMIT:

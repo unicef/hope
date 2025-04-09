@@ -53,5 +53,11 @@ class PaymentPlanProgramsPermissionsKeyBit(KeyBitBase):
 class PaymentPlanKeyConstructor(KeyConstructorMixin):
     managerial_payment_plan_list_versions = ManagerialPaymentPlanListVersionsKeyBit()
     permissions_to_programs = PaymentPlanProgramsPermissionsKeyBit()
+
+
+class PaymentPlanListKeyConstructor(KeyConstructorMixin):
     payment_plan_list = PaymentPlanListKeyBit()
+
+
+class TargetPopulationListKeyConstructor(KeyConstructorMixin):
     target_population_list = TargetPopulationListKeyBit()
