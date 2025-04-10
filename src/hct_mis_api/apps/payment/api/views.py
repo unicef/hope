@@ -56,6 +56,8 @@ from hct_mis_api.apps.payment.api.serializers import (
     PaymentPlanListSerializer,
     PaymentPlanSerializer,
     PaymentPlanSupportingDocumentSerializer,
+    PaymentVerificationDetailsSerializer,
+    PaymentVerificationListSerializer,
     SplitPaymentPlanSerializer,
     TargetPopulationApplyEngineFormulaSerializer,
     TargetPopulationCopySerializer,
@@ -106,6 +108,40 @@ class PaymentPlanMixin:
         "id",
         "^name",
     )
+
+
+class PaymentVerificationViewSet(
+    CountActionMixin,
+    ProgramMixin,
+    SerializerActionMixin,
+    PaymentPlanMixin,
+    DecodeIdForDetailMixin,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    BaseViewSet,
+):
+    program_model_field = "program_cycle__program"
+    queryset = PaymentPlan.objects.exclude(
+        status__in=(PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED)
+    ).order_by("unicef_id")
+    # http_method_names = ["get", "post", "patch", "delete"]
+    PERMISSIONS = [Permissions.PAYMENT_VERIFICATION_VIEW_LIST]
+    serializer_classes_by_action = {
+        "list": PaymentVerificationListSerializer,
+        "retrieve": PaymentVerificationDetailsSerializer,
+    }
+    permissions_by_action = {
+        "list": [Permissions.PAYMENT_VERIFICATION_VIEW_LIST],
+        "retrieve": [Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS],
+    }
+
+    def get_object(self) -> PaymentPlan:
+        return get_object_or_404(PaymentPlan, id=decode_id_string(self.kwargs.get("pk")))
+
+    @etag_decorator(PaymentPlanKeyConstructor)
+    @cache_response(timeout=config.REST_API_TTL, key_func=PaymentPlanKeyConstructor())
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().list(request, *args, **kwargs)
 
 
 class PaymentPlanViewSet(

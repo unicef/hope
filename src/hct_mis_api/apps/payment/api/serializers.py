@@ -137,6 +137,21 @@ class PaymentVerificationSerializer(serializers.ModelSerializer):
         fields = ("id", "status", "status_date", "received_amount")
 
 
+class PaymentVerificationPlanSmallSerializer(serializers.ModelSerializer):
+    status = serializers.CharField(source="get_status_display")
+    verification_channel = serializers.CharField(source="get_verification_channel_display")
+
+    class Meta:
+        model = PaymentVerificationPlan
+        fields = (
+            "id",
+            "status",
+            "verification_channel",
+            "activation_date",
+            "completion_date",
+        )
+
+
 class PaymentVerificationPlanSerializer(serializers.ModelSerializer):
     status = serializers.CharField(source="get_status_display")
     verification_channel = serializers.CharField(source="get_verification_channel_display")
@@ -177,6 +192,42 @@ class FollowUpPaymentPlanSerializer(serializers.ModelSerializer):
             "dispersion_start_date",
             "dispersion_end_date",
             "is_follow_up",
+        )
+
+
+class PaymentVerificationDetailsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = PaymentPlan
+        fields = ("id",)
+
+    # TODO:
+    # PaymentVerificationPlanNode >
+        # ageFilter.min
+        # ageFilter.max
+        # excludedAdminAreasFilter
+        # rapidProFlowId
+        # excludedAdminAreasFilter.length
+
+
+class PaymentVerificationListSerializer(serializers.ModelSerializer):
+    id = Base64ModelField(model_name="PaymentPlan")
+    currency = serializers.CharField(source="get_currency_display")
+    program_cycle_start_date = serializers.DateField(source="program_cycle.start_date")
+    program_cycle_end_date = serializers.DateField(source="program_cycle.start_date")
+    payment_verification_plans = PaymentVerificationPlanSmallSerializer()
+
+    class Meta:
+        model = PaymentPlan
+        fields = (
+            "id",
+            "unicef_id",
+            "payment_verification_plans",
+            "currency",
+            "total_delivered_quantity",
+            "program_cycle_start_date",
+            "program_cycle_end_date",
+            "updated_at",
         )
 
 
