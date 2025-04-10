@@ -1985,9 +1985,7 @@ class TestPaymentPlanActions:
         ApprovalProcessFactory(payment_plan=self.pp)
         self.pp.status = payment_plan_status
         self.pp.save()
-        response = self.client.post(
-            self.url_approval_process_reject, {"comment": "test123", "action": "REJECT"}, format="json"
-        )
+        response = self.client.post(self.url_approval_process_reject, {"comment": "test123"}, format="json")
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
             assert response.json()["status"] == "Locked FSP"
@@ -2009,9 +2007,7 @@ class TestPaymentPlanActions:
         ApprovalProcessFactory(payment_plan=self.pp)
         self.pp.status = PaymentPlan.Status.IN_APPROVAL
         self.pp.save()
-        response = self.client.post(
-            self.url_approval_process_approve, {"comment": "test123", "action": "APPROVE"}, format="json"
-        )
+        response = self.client.post(self.url_approval_process_approve, {"comment": "test123"}, format="json")
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
             assert response.json()["status"] == "In Authorization"
@@ -2033,9 +2029,7 @@ class TestPaymentPlanActions:
         ApprovalProcessFactory(payment_plan=self.pp)
         self.pp.status = PaymentPlan.Status.IN_AUTHORIZATION
         self.pp.save()
-        response = self.client.post(
-            self.url_approval_process_authorize, {"comment": "test123", "action": "AUTHORIZE"}, format="json"
-        )
+        response = self.client.post(self.url_approval_process_authorize, {"comment": "test123"}, format="json")
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
             assert response.json()["status"] == "In Review"
@@ -2057,9 +2051,7 @@ class TestPaymentPlanActions:
         ApprovalProcessFactory(payment_plan=self.pp)
         self.pp.status = PaymentPlan.Status.IN_REVIEW
         self.pp.save()
-        response = self.client.post(
-            self.url_approval_process_mark_as_released, {"comment": "test123", "action": "REVIEW"}, format="json"
-        )
+        response = self.client.post(self.url_approval_process_mark_as_released, {"comment": "test123"}, format="json")
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
             assert response.json()["status"] == "Accepted"

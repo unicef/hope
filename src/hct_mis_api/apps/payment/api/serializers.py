@@ -105,7 +105,6 @@ class XlsxErrorSerializer(serializers.Serializer):
 
 
 class AcceptanceProcessSerializer(serializers.Serializer):
-    action = serializers.ChoiceField(required=True, choices=PaymentPlan.Action)
     comment = serializers.CharField(required=False)
 
 

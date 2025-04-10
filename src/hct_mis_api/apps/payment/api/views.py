@@ -476,10 +476,9 @@ class PaymentPlanViewSet(
 
         reject_permission = _get_reject_permission(payment_plan.status)
         request.user.has_perm(reject_permission)
-
-        payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
-            input_data=request.data, user=request.user
-        )
+        data = dict(request.data)
+        data["action"] = PaymentPlan.Action.REJECT
+        payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(input_data=data, user=request.user)
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
@@ -496,9 +495,9 @@ class PaymentPlanViewSet(
     def approve(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
-        payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
-            input_data=request.data, user=request.user
-        )
+        data = dict(request.data)
+        data["action"] = PaymentPlan.Action.APPROVE
+        payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(input_data=data, user=request.user)
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
@@ -515,9 +514,9 @@ class PaymentPlanViewSet(
     def authorize(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
-        payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
-            input_data=request.data, user=request.user
-        )
+        data = dict(request.data)
+        data["action"] = PaymentPlan.Action.AUTHORIZE
+        payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(input_data=data, user=request.user)
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
@@ -534,9 +533,9 @@ class PaymentPlanViewSet(
     def mark_as_released(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
         old_payment_plan = copy_model_object(payment_plan)
-        payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
-            input_data=request.data, user=request.user
-        )
+        data = dict(request.data)
+        data["action"] = PaymentPlan.Action.REVIEW
+        payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(input_data=data, user=request.user)
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
