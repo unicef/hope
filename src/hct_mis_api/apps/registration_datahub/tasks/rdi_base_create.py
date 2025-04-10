@@ -3,6 +3,8 @@ from collections import defaultdict
 from functools import reduce
 from typing import Any, List
 
+from apps.payment.models import FinancialInstitution
+
 from hct_mis_api.apps.core.utils import (
     get_combined_attributes,
     serialize_flex_attributes,
@@ -79,11 +81,17 @@ class RdiBaseCreateTask:
         for _, data in self.accounts.items():
             individual = data.pop("individual")
             for account_type, values in data.items():
+                financial_institution_code = values.get("code", None)
                 imported_delivery_mechanism_data.append(
                     PendingAccount(
                         individual=individual,
                         account_type=account_types_dict[account_type],
-                        number=values.pop("number", None),
+                        number=values.get("number", None),
+                        financial_institution=FinancialInstitution.objects.filter(
+                            code=financial_institution_code
+                        ).first()
+                        if financial_institution_code
+                        else None,
                         data=values,
                         rdi_merge_status=MergeStatusModel.PENDING,
                     )
