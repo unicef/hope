@@ -111,12 +111,13 @@ class BusinessAreaAndProgramLastUpdatedKeyBit(KeyBitBase):
     KeyBit that validates the cache based on the latest `updated_at` and the number of objects in the queryset.
     It eliminates the need to create and maintain cache versions at the cost of an additional query to fetch
     the latest `updated_at` value and object count.
+    The cache is based also on the business area, program and their version.
     """
 
     specific_view_cache_key = ""
 
-    def _get_queryset(self, business_area_slug: Optional[Any], program_slug: Optional[Any]) -> QuerySet:
-        raise NotImplementedError
+    def _get_queryset(self, business_area_slug: Optional[Any], program_slug: Optional[Any], view_instance: Optional[Any]) -> QuerySet:
+        return view_instance.get_queryset()
 
     def get_data(
         self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
@@ -125,7 +126,7 @@ class BusinessAreaAndProgramLastUpdatedKeyBit(KeyBitBase):
         business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)
         program_slug = kwargs.get("program_slug")
 
-        queryset = self._get_queryset(business_area_slug, program_slug).aggregate(
+        queryset = self._get_queryset(business_area_slug, program_slug, view_instance).aggregate(
             latest_updated_at=Max("updated_at"), obj_count=Count("id")
         )
         latest_updated_at = queryset["latest_updated_at"]
