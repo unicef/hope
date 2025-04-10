@@ -204,11 +204,18 @@ class FollowUpPaymentPlanSerializer(EncodedIdSerializerMixin):
 
 
 class PaymentVerificationDetailsSerializer(serializers.ModelSerializer):
-    id = Base64ModelField(model_name="PaymentVerification")
 
     class Meta:
         model = PaymentPlan
         fields = ("id",)
+
+    # TODO:
+    # PaymentVerificationPlanNode >
+        # ageFilter.min
+        # ageFilter.max
+        # excludedAdminAreasFilter
+        # rapidProFlowId
+        # excludedAdminAreasFilter.length
 
 
 class PaymentVerificationListSerializer(serializers.ModelSerializer):

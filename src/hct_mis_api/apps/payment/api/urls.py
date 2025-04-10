@@ -50,7 +50,7 @@ program_nested_router.register(
     basename="payment-verifications",
 )
 # program_nested_router.register(
-#     r"payment-verifications/(?P<payment_plan_id>[^/.]+)/verifications",
+#     r"payment-verifications/(?P<payment_verification_id>[^/.]+)/verifications",
 #     VerificationViewSet,
 #     basename="verifications",
 # )

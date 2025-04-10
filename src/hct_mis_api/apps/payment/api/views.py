@@ -131,12 +131,8 @@ class PaymentVerificationViewSet(
         "retrieve": PaymentVerificationDetailsSerializer,
     }
     permissions_by_action = {
-        "list": [
-            Permissions.PAYMENT_VERIFICATION_VIEW_LIST,
-        ],
-        "retrieve": [
-            Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS,
-        ],
+        "list": [Permissions.PAYMENT_VERIFICATION_VIEW_LIST],
+        "retrieve": [Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS],
     }
 
     def get_object(self) -> PaymentPlan:
