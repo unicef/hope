@@ -21,23 +21,30 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { PaymentDetails } from '@components/paymentmodulepeople/PaymentDetails';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
 
 function PaymentDetailsPage(): ReactElement {
   const { t } = useTranslation();
-  const { paymentId } = useParams();
+  const { paymentPlanId, paymentId } = useParams();
   const { data: caData, loading: caLoading } = useCashAssistUrlPrefixQuery({
     fetchPolicy: 'cache-first',
   });
   const { businessArea, programId } = useBaseUrl();
 
-  const { data: payment, isLoading: loading } = useQuery<PaymentPlanDetail>({
-    queryKey: ['paymentPlan', businessArea, paymentId, programId],
+  const { data: payment, isLoading: loading } = useQuery<PaymentDetail>({
+    queryKey: [
+      'paymentPlan',
+      businessArea,
+      paymentId,
+      programId,
+      paymentPlanId,
+    ],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsPaymentPlansRetrieve({
+      RestService.restBusinessAreasProgramsPaymentPlansPaymentsRetrieve({
         businessAreaSlug: businessArea,
         id: paymentId,
         programSlug: programId,
+        paymentPlanId,
       }),
   });
 

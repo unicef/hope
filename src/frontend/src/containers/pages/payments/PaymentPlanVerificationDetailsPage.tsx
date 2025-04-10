@@ -108,9 +108,7 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
     permissions,
   );
 
-  const statesArray = paymentPlan.verification_plans?.edges?.map(
-    (v) => v.node.status,
-  );
+  const statesArray = paymentPlan.verificationPlans?.map((v) => v.status);
 
   const canSeeVerificationRecords = (): boolean => {
     const showTable =

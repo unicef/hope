@@ -23,7 +23,6 @@ from hct_mis_api.apps.account.fixtures import (
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import FileTemp
-from hct_mis_api.apps.core.utils import encode_id_base64, encode_id_base64_required
 from hct_mis_api.apps.payment.api.views import PaymentPlanManagerialViewSet
 from hct_mis_api.apps.payment.fixtures import (
     ApprovalFactory,
@@ -180,7 +179,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
             etag = response.headers["etag"]
 
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 12
+            assert len(ctx.captured_queries) == 8
 
         # Test that reoccurring request use cached data
         with CaptureQueriesContext(connection) as ctx:
@@ -188,7 +187,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
             etag_second_call = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
             assert etag_second_call == etag
-            assert len(ctx.captured_queries) == 12
+            assert len(ctx.captured_queries) == 8
 
     def test_list_payment_plans_approval_process_data(
         self,
@@ -264,10 +263,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
                 kwargs={"business_area_slug": self.afghanistan.slug},
             ),
             data={
-                "ids": [
-                    encode_id_base64(self.payment_plan1.id, "PaymentPlan"),
-                    encode_id_base64(self.payment_plan2.id, "PaymentPlan"),
-                ],
+                "ids": [self.payment_plan1.id, self.payment_plan2.id],
                 "action": PaymentPlan.Action.APPROVE.value,
                 "comment": "Test comment",
             },
@@ -424,7 +420,7 @@ class TestPaymentPlanList:
 
         self.pp.refresh_from_db()
         payment_plan = response_data[0]
-        assert encode_id_base64_required(self.pp.id, "PaymentPlan") == payment_plan["id"]
+        assert str(self.pp.id) == payment_plan["id"]
         assert payment_plan["unicef_id"] == self.pp.unicef_id
         assert payment_plan["name"] == self.pp.name
         assert payment_plan["status"] == self.pp.get_status_display()
@@ -454,7 +450,7 @@ class TestPaymentPlanList:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 1
-            assert len(ctx.captured_queries) == 23
+            assert len(ctx.captured_queries) == 15
 
         # second call get from cache
         with CaptureQueriesContext(connection) as ctx:
@@ -463,7 +459,7 @@ class TestPaymentPlanList:
             assert response.has_header("etag")
             etag_second_call = response.headers["etag"]
             assert etag == etag_second_call
-            assert len(ctx.captured_queries) == 14
+            assert len(ctx.captured_queries) == 6
         # upd PP
         self.pp.status = PaymentPlan.Status.IN_REVIEW
         self.pp.save()
@@ -475,14 +471,14 @@ class TestPaymentPlanList:
             new_etag = response.headers["etag"]
             assert json.loads(cache.get(new_etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 1
-            assert len(ctx.captured_queries) == 17
+            assert len(ctx.captured_queries) == 9
         with CaptureQueriesContext(connection) as ctx:
             response = self.client.get(self.pp_list_url)
             assert response.status_code == status.HTTP_200_OK
             assert response.has_header("etag")
             etag_second_call = response.headers["etag"]
             assert new_etag == etag_second_call
-            assert len(ctx.captured_queries) == 14
+            assert len(ctx.captured_queries) == 6
         # add new PP cache invalidate... new call
         PaymentPlanFactory(
             business_area=self.afghanistan,
@@ -497,14 +493,14 @@ class TestPaymentPlanList:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 2
-            assert len(ctx.captured_queries) == 19
+            assert len(ctx.captured_queries) == 11
         with CaptureQueriesContext(connection) as ctx:
             response = self.client.get(self.pp_list_url)
             assert response.status_code == status.HTTP_200_OK
             assert response.has_header("etag")
             etag_second_call = response.headers["etag"]
             assert etag == etag_second_call
-            assert len(ctx.captured_queries) == 14
+            assert len(ctx.captured_queries) == 6
 
         # delete PP
         self.pp.delete()
@@ -515,27 +511,27 @@ class TestPaymentPlanList:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 1
-            assert len(ctx.captured_queries) == 17
+            assert len(ctx.captured_queries) == 9
         with CaptureQueriesContext(connection) as ctx:
             response = self.client.get(self.pp_list_url)
             assert response.status_code == status.HTTP_200_OK
             assert response.has_header("etag")
             last_etag_second_call = response.headers["etag"]
             assert etag == last_etag_second_call
-            assert len(ctx.captured_queries) == 14
+            assert len(ctx.captured_queries) == 6
 
         # upd TP no changes in cache
         self.tp.status = PaymentPlan.Status.TP_LOCKED
         self.tp.save()
-        # cache will update because in TargetPopulationListKeyBit query set getting all PPs
+        # cache will not be updated because just TPs list updated
         with CaptureQueriesContext(connection) as ctx:
             response = self.client.get(self.pp_list_url)
             assert response.status_code == status.HTTP_200_OK
             assert len(response.json()["results"]) == 1
             assert response.has_header("etag")
             get_etag = response.headers["etag"]
-            assert get_etag != last_etag_second_call
-            assert len(ctx.captured_queries) == 17
+            assert get_etag == last_etag_second_call
+            assert len(ctx.captured_queries) == 6
 
 
 class TestPaymentPlanDetail:
@@ -552,7 +548,7 @@ class TestPaymentPlanDetail:
             status=PaymentPlan.Status.IN_APPROVAL,
             created_by=self.user,
         )
-        pp_id = encode_id_base64_required(self.pp.id, "PaymentPlan")
+        pp_id = str(self.pp.id)
         self.pp_detail_url = reverse(
             "api:payments:payment-plans-detail",
             kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program_active.slug, "pk": pp_id},
@@ -584,7 +580,7 @@ class TestPaymentPlanDetail:
         payment_plan = response.json()
         self.pp.refresh_from_db()
 
-        assert payment_plan["id"] == encode_id_base64_required(self.pp.id, "PaymentPlan")
+        assert payment_plan["id"] == str(self.pp.id)
         assert payment_plan["unicef_id"] == self.pp.unicef_id
         assert payment_plan["name"] == self.pp.name
         assert payment_plan["status"] == self.pp.get_status_display()
@@ -715,7 +711,7 @@ class TestPaymentPlanFilter:
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
         assert len(response_data) == 1
-        assert response_data[0]["id"] == encode_id_base64_required(self.pp_finished.id, "PaymentPlan")
+        assert response_data[0]["id"] == str(self.pp_finished.id)
         assert response_data[0]["status"] == "Finished"
         assert response_data[0]["name"] == self.pp_finished.name
 
@@ -724,7 +720,7 @@ class TestPaymentPlanFilter:
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
         assert len(response_data) == 1
-        assert response_data[0]["id"] == encode_id_base64_required(self.pp.id, "PaymentPlan")
+        assert response_data[0]["id"] == str(self.pp.id)
         assert response_data[0]["status"] == "In Approval"
         assert response_data[0]["name"] == self.pp.name
 
@@ -736,9 +732,7 @@ class TestPaymentPlanFilter:
             status=PaymentPlan.Status.ACCEPTED,
             created_by=self.user,
         )
-        response = self.client.get(
-            self.list_url, {"program_cycle": encode_id_base64_required(new_pp.program_cycle.id, "ProgramCycle")}
-        )
+        response = self.client.get(self.list_url, {"program_cycle": new_pp.program_cycle.id})
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
         assert len(response_data) == 1
@@ -928,7 +922,7 @@ class TestTargetPopulationList:
 
         self.tp.refresh_from_db()
         tp = response_data[0]
-        assert encode_id_base64_required(self.tp.id, "PaymentPlan") == tp["id"]
+        assert str(self.tp.id) == tp["id"]
         assert tp["name"] == "Test new TP"
         assert tp["status"] == self.tp.get_status_display()
         assert tp["total_households_count"] == self.tp.total_households_count
@@ -950,7 +944,7 @@ class TestTargetPopulationList:
 
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 23
+            assert len(ctx.captured_queries) == 15
 
         # Test that reoccurring requests use cached data
         with CaptureQueriesContext(connection) as ctx:
@@ -959,7 +953,7 @@ class TestTargetPopulationList:
 
             etag_second_call = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 14
+            assert len(ctx.captured_queries) == 6
             assert etag_second_call == etag
 
         # After update, it does not use the cached data
@@ -971,7 +965,7 @@ class TestTargetPopulationList:
 
             etag_call_after_update = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 17
+            assert len(ctx.captured_queries) == 9
 
             assert etag_call_after_update != etag
 
@@ -982,7 +976,7 @@ class TestTargetPopulationList:
 
             etag_call_after_update_second_call = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 14
+            assert len(ctx.captured_queries) == 6
             assert etag_call_after_update_second_call == etag_call_after_update
 
 
@@ -1000,7 +994,7 @@ class TestTargetPopulationDetail:
             status=PaymentPlan.Status.TP_LOCKED,
             created_by=self.user,
         )
-        tp_id = encode_id_base64_required(self.tp.id, "PaymentPlan")
+        tp_id = str(self.tp.id)
         self.tp_detail_url = reverse(
             "api:payments:target-populations-detail",
             kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program_active.slug, "pk": tp_id},
@@ -1032,7 +1026,7 @@ class TestTargetPopulationDetail:
         tp = response.json()
         self.tp.refresh_from_db()
 
-        assert tp["id"] == encode_id_base64_required(self.tp.id, "PaymentPlan")
+        assert tp["id"] == str(self.tp.id)
         assert tp["name"] == self.tp.name
         assert tp["program_cycle"]["title"] == self.cycle.title
         assert tp["program"]["name"] == self.program_active.name
@@ -1099,7 +1093,7 @@ class TestTargetPopulationFilter:
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
         assert len(response_data) == 1
-        assert response_data[0]["id"] == encode_id_base64_required(self.tp_locked.id, "PaymentPlan")
+        assert response_data[0]["id"] == str(self.tp_locked.id)
         assert response_data[0]["status"] == "Locked"
         assert response_data[0]["name"] == "LOCKED"
 
@@ -1108,7 +1102,7 @@ class TestTargetPopulationFilter:
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
         assert len(response_data) == 1
-        assert response_data[0]["id"] == encode_id_base64_required(self.tp_assigned.id, "PaymentPlan")
+        assert response_data[0]["id"] == str(self.tp_assigned.id)
         assert response_data[0]["name"] == "Assigned TP"
 
     def test_filter_by_program_cycle(self) -> None:
@@ -1119,9 +1113,7 @@ class TestTargetPopulationFilter:
             status=PaymentPlan.Status.TP_STEFICON_RUN,
             created_by=self.user,
         )
-        response = self.client.get(
-            self.list_url, {"program_cycle": encode_id_base64_required(new_tp.program_cycle.id, "ProgramCycle")}
-        )
+        response = self.client.get(self.list_url, {"program_cycle": new_tp.program_cycle.id})
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
         assert len(response_data) == 1
@@ -1219,7 +1211,7 @@ class TestTargetPopulationCreateUpdate:
             kwargs={
                 "business_area_slug": self.afghanistan.slug,
                 "program_slug": self.program_active.slug,
-                "pk": encode_id_base64_required(self.tp.pk, "PaymentPlan"),
+                "pk": self.tp.pk,
             },
         )
         self.client = api_client(self.user)
@@ -1257,7 +1249,7 @@ class TestTargetPopulationCreateUpdate:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         data = {
             "name": "New Payment Plan",
-            "program_cycle_id": encode_id_base64_required(self.cycle.id, "ProgramCycle"),
+            "program_cycle_id": self.cycle.id,
             "targeting_criteria": self.targeting_criteria,
             "excluded_ids": "IND-123",
             "exclusion_reason": "Just MMM Qwool Test",
@@ -1347,7 +1339,7 @@ class TestTargetPopulationActions:
             created_by=self.user,
             created_at="2022-02-24",
         )
-        tp_id = encode_id_base64_required(self.target_population.pk, "PaymentPlan")
+        tp_id = self.target_population.pk
         url_kwargs = {
             "business_area_slug": self.afghanistan.slug,
             "program_slug": self.program_active.slug,
@@ -1434,10 +1426,7 @@ class TestTargetPopulationActions:
     )
     def test_copy_tp(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
-        data = {
-            "name": "Copied TP test 123",
-            "program_cycle_id": encode_id_base64_required(self.cycle.pk, "ProgramCycle"),
-        }
+        data = {"name": "Copied TP test 123", "program_cycle_id": self.cycle.pk}
         response = self.client.post(self.url_copy, data, format="json")
 
         assert response.status_code == expected_status
@@ -1459,7 +1448,7 @@ class TestTargetPopulationActions:
         )
         data = {
             "name": "Copied TP AGAIN",
-            "program_cycle_id": encode_id_base64_required(cycle.pk, "ProgramCycle"),
+            "program_cycle_id": cycle.pk,
         }
         # TP with the same name already exists
         response = self.client.post(self.url_copy, data, format="json")
@@ -1498,7 +1487,7 @@ class TestTargetPopulationActions:
         self.target_population.status = PaymentPlan.Status.TP_LOCKED
         self.target_population.save()
         data = {
-            "engine_formula_rule_id": encode_id_base64_required(rule_for_tp.pk, "Rule"),
+            "engine_formula_rule_id": rule_for_tp.pk,
             "version": self.target_population.version,
         }
         response = self.client.post(self.url_apply_steficon, data, format="json")
@@ -1519,7 +1508,7 @@ class TestTargetPopulationActions:
         self.target_population.save()
 
         data = {
-            "engine_formula_rule_id": encode_id_base64_required(rule_for_tp.pk, "Rule"),
+            "engine_formula_rule_id": rule_for_tp.pk,
             "version": self.target_population.version,
         }
         response = self.client.post(self.url_apply_steficon, data, format="json")
@@ -1530,7 +1519,7 @@ class TestTargetPopulationActions:
         self.target_population.status = PaymentPlan.Status.TP_OPEN
         self.target_population.save()
         data = {
-            "engine_formula_rule_id": encode_id_base64_required(rule_for_tp.pk, "Rule"),
+            "engine_formula_rule_id": rule_for_tp.pk,
             "version": self.target_population.version,
         }
         response_2 = self.client.post(self.url_apply_steficon, data, format="json")
@@ -1558,7 +1547,7 @@ class TestTargetPopulationActions:
             status=PaymentPlan.Status.TP_OPEN,
             created_by=self.user,
         )
-        tp_id = encode_id_base64_required(tp.pk, "PaymentPlan")
+        tp_id = tp.pk
         delete_url = reverse(
             "api:payments:target-populations-detail",
             kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program_active.slug, "pk": tp_id},
@@ -1589,14 +1578,17 @@ class TestPaymentPlanActions:
             created_by=self.user,
             created_at="2022-02-24",
         )
-        pp_id = encode_id_base64_required(self.pp.pk, "PaymentPlan")
+        pp_id = self.pp.pk
         url_kwargs = {
             "business_area_slug": self.afghanistan.slug,
             "program_slug": self.program_active.slug,
             "pk": pp_id,
         }
-        self.url_details = reverse("api:payments:payment-plans-open", kwargs=url_kwargs)
-        self.url_open = reverse("api:payments:payment-plans-open", kwargs=url_kwargs)
+        url_kwargs_ba_program = {
+            "business_area_slug": self.afghanistan.slug,
+            "program_slug": self.program_active.slug,
+        }
+        self.url_list = reverse("api:payments:payment-plans-list", kwargs=url_kwargs_ba_program)
         self.url_lock = reverse("api:payments:payment-plans-lock", kwargs=url_kwargs)
         self.url_unlock = reverse("api:payments:payment-plans-unlock", kwargs=url_kwargs)
         self.url_exclude_hh = reverse("api:payments:payment-plans-exclude-beneficiaries", kwargs=url_kwargs)
@@ -1642,15 +1634,15 @@ class TestPaymentPlanActions:
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
-    def test_open_pp(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+    def test_create_pp(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         data = {
             "dispersion_start_date": "2025-02-01",
             "dispersion_end_date": "2099-03-01",
             "currency": "USD",
-            "version": self.pp.version,
+            "target_population_id": str(self.pp.id),
         }
-        response = self.client.post(self.url_open, data, format="json")
+        response = self.client.post(self.url_list, data, format="json")
 
         assert response.status_code == expected_status
         if expected_status == status.HTTP_201_CREATED:
@@ -1660,9 +1652,9 @@ class TestPaymentPlanActions:
             assert "United States dollar" == resp_data["currency"]
             assert "Open" == resp_data["status"]
 
-    def test_open_pp_validation_errors(self, create_user_role_with_permissions: Any) -> None:
+    def test_create_pp_validation_errors(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(self.user, [Permissions.PM_CREATE], self.afghanistan, self.program_active)
-        response = self.client.post(self.url_open, {}, format="json")
+        response = self.client.post(self.url_list, {"target_population_id": str(self.pp.pk)}, format="json")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "dispersion_start_date" in response.json()
         assert "dispersion_end_date" in response.json()
@@ -1721,7 +1713,7 @@ class TestPaymentPlanActions:
             status=PaymentPlan.Status.OPEN,
             created_by=self.user,
         )
-        pp_id = encode_id_base64_required(pp.pk, "PaymentPlan")
+        pp_id = str(pp.pk)
         delete_url = reverse(
             "api:payments:payment-plans-detail",
             kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program_active.slug, "pk": pp_id},
@@ -1795,7 +1787,7 @@ class TestPaymentPlanActions:
         self.pp.save()
         self.pp.refresh_from_db()
         data = {
-            "engine_formula_rule_id": encode_id_base64_required(rule_for_pp.pk, "Rule"),
+            "engine_formula_rule_id": str(rule_for_pp.pk),
             "version": self.pp.version,
         }
         response = self.client.post(self.url_apply_steficon, data, format="json")
@@ -1819,7 +1811,7 @@ class TestPaymentPlanActions:
         self.pp.save()
 
         data = {
-            "engine_formula_rule_id": encode_id_base64_required(rule_for_pp.pk, "Rule"),
+            "engine_formula_rule_id": str(rule_for_pp.pk),
             "version": self.pp.version,
         }
         response = self.client.post(self.url_apply_steficon, data, format="json")
@@ -1830,7 +1822,7 @@ class TestPaymentPlanActions:
         self.pp.status = PaymentPlan.Status.TP_OPEN
         self.pp.save()
         data = {
-            "engine_formula_rule_id": encode_id_base64_required(rule_for_pp.pk, "Rule"),
+            "engine_formula_rule_id": str(rule_for_pp.pk),
             "version": self.pp.version,
         }
         response_2 = self.client.post(self.url_apply_steficon, data, format="json")
@@ -1993,9 +1985,7 @@ class TestPaymentPlanActions:
         ApprovalProcessFactory(payment_plan=self.pp)
         self.pp.status = payment_plan_status
         self.pp.save()
-        response = self.client.post(
-            self.url_approval_process_reject, {"comment": "test123", "action": "REJECT"}, format="json"
-        )
+        response = self.client.post(self.url_approval_process_reject, {"comment": "test123"}, format="json")
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
             assert response.json()["status"] == "Locked FSP"
@@ -2017,9 +2007,7 @@ class TestPaymentPlanActions:
         ApprovalProcessFactory(payment_plan=self.pp)
         self.pp.status = PaymentPlan.Status.IN_APPROVAL
         self.pp.save()
-        response = self.client.post(
-            self.url_approval_process_approve, {"comment": "test123", "action": "APPROVE"}, format="json"
-        )
+        response = self.client.post(self.url_approval_process_approve, {"comment": "test123"}, format="json")
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
             assert response.json()["status"] == "In Authorization"
@@ -2041,9 +2029,7 @@ class TestPaymentPlanActions:
         ApprovalProcessFactory(payment_plan=self.pp)
         self.pp.status = PaymentPlan.Status.IN_AUTHORIZATION
         self.pp.save()
-        response = self.client.post(
-            self.url_approval_process_authorize, {"comment": "test123", "action": "AUTHORIZE"}, format="json"
-        )
+        response = self.client.post(self.url_approval_process_authorize, {"comment": "test123"}, format="json")
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
             assert response.json()["status"] == "In Review"
@@ -2065,9 +2051,7 @@ class TestPaymentPlanActions:
         ApprovalProcessFactory(payment_plan=self.pp)
         self.pp.status = PaymentPlan.Status.IN_REVIEW
         self.pp.save()
-        response = self.client.post(
-            self.url_approval_process_mark_as_released, {"comment": "test123", "action": "REVIEW"}, format="json"
-        )
+        response = self.client.post(self.url_approval_process_mark_as_released, {"comment": "test123"}, format="json")
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
             assert response.json()["status"] == "Accepted"
@@ -2107,9 +2091,7 @@ class TestPaymentPlanActions:
     def test_generate_xlsx_with_auth_code(
         self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
     ) -> None:
-        fsp_xlsx_template_id = encode_id_base64_required(
-            FinancialServiceProviderXlsxTemplateFactory().pk, "FinancialServiceProviderXlsxTemplate"
-        )
+        fsp_xlsx_template_id = FinancialServiceProviderXlsxTemplateFactory().pk
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         test_file = FileTemp.objects.create(
             object_id=self.pp.pk, content_type=get_content_type_for_model(self.pp), created_by=self.user

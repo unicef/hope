@@ -92,10 +92,10 @@ export const PaymentPlanDetailsHeader = ({
     permissions,
   );
   const canSplit =
-    hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.can_split;
+    hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
   const canSendToPaymentGateway =
     hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
-    paymentPlan.can_send_to_payment_gateway;
+    paymentPlan.canSendToPaymentGateway;
 
   let buttons: ReactElement | null = null;
   switch (paymentPlan.status) {

@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type PaymentList = {
-    id: string;
+    readonly id: string;
     unicefId?: string | null;
     householdUnicefId: string;
     householdSize: number;

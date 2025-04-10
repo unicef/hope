@@ -25,6 +25,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@mui/material';
 import { useSnackbar } from '@hooks/useSnackBar';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 
 interface ProgramCyclesTablePaymentModuleProps {
   program;
@@ -88,7 +89,7 @@ const ProgramCyclesTablePaymentModule = ({
     void refetch();
   }, [queryVariables, refetch]);
 
-  const finishAction = async (programCycle: ProgramCycle) => {
+  const finishAction = async (programCycle: ProgramCycleList) => {
     try {
       const decodedProgramCycleId = decodeIdString(programCycle.id);
       await finishMutation({ programCycleId: decodedProgramCycleId });
@@ -100,7 +101,7 @@ const ProgramCyclesTablePaymentModule = ({
     }
   };
 
-  const reactivateAction = async (programCycle: ProgramCycle) => {
+  const reactivateAction = async (programCycle: ProgramCycleList) => {
     try {
       const decodedProgramCycleId = decodeIdString(programCycle.id);
       await reactivateMutation({ programCycleId: decodedProgramCycleId });
@@ -112,7 +113,7 @@ const ProgramCyclesTablePaymentModule = ({
     }
   };
 
-  const renderRow = (row: ProgramCycle): ReactElement => (
+  const renderRow = (row: ProgramCycleList): ReactElement => (
     <ClickableTableRow key={row.id} data-cy="program-cycle-row">
       <TableCell data-cy="program-cycle-title">
         <BlackLink to={`./${row.id}`}>{row.title}</BlackLink>

@@ -49,7 +49,21 @@ export function IndividualsListTable({
       program: programId,
       rdiMergeStatus: IndividualRdiMergeStatus.Merged,
     }),
-    [businessArea, filter, programId],
+    [
+      businessArea,
+      programId,
+      filter.ageMin,
+      filter.ageMax,
+      filter.sex,
+      filter.search,
+      filter.documentType,
+      filter.documentNumber,
+      filter.admin2,
+      filter.flags,
+      filter.status,
+      filter.lastRegistrationDateMin,
+      filter.lastRegistrationDateMax,
+    ],
   );
   const replacements = {
     unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,

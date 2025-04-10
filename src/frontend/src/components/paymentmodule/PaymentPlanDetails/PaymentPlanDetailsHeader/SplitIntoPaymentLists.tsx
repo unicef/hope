@@ -1,15 +1,10 @@
-import { Field, Form, Formik } from 'formik';
-import { ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import * as Yup from 'yup';
-import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { useSplitPpMutation } from '@generated/graphql';
 import { LoadingButton } from '@core/LoadingButton';
-import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
+import ReorderIcon from '@mui/icons-material/Reorder';
 import {
   Button,
   Dialog,
@@ -18,8 +13,16 @@ import {
   DialogTitle,
   Grid2 as Grid,
 } from '@mui/material';
-import ReorderIcon from '@mui/icons-material/Reorder';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { SplitPaymentPlan } from '@restgenerated/models/SplitPaymentPlan';
+import { RestService } from '@restgenerated/services/RestService';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { useMutation } from '@tanstack/react-query';
+import { Field, Form, Formik } from 'formik';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import * as Yup from 'yup';
 
 interface FormValues {
   splitType: string;
@@ -41,9 +44,32 @@ export const SplitIntoPaymentLists = ({
   canSplit,
 }: SplitIntoPaymentListsProps): ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const { t } = useTranslation();
-  const [mutate, { loading }] = useSplitPpMutation();
   const { showMessage } = useSnackbar();
+  const { businessArea, programId } = useBaseUrl();
+  const { t } = useTranslation();
+  const { mutateAsync: mutate, isPending: loading } = useMutation({
+    mutationFn: ({
+      businessAreaSlug,
+      id,
+      programSlug,
+      requestBody,
+    }: {
+      businessAreaSlug: string;
+      id: string;
+      programSlug: string;
+      requestBody: SplitPaymentPlan;
+    }) =>
+      RestService.restBusinessAreasProgramsPaymentPlansSplitCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+      }),
+    onSuccess: () => {
+      showMessage(t('Payment Plan has been split successfully.'));
+      setDialogOpen(false);
+    },
+  });
 
   let minPaymentsNoMessage = 'Payments Number must be greater than 10';
   let maxPaymentsNoMessage = `Payments Number must be less than ${paymentPlan.eligiblePaymentsCount}`;
@@ -68,19 +94,19 @@ export const SplitIntoPaymentLists = ({
 
   const handleSplit = async (values): Promise<void> => {
     try {
-      const { errors } = await mutate({
-        variables: {
-          paymentPlanId: paymentPlan.id,
+      await mutate({
+        businessAreaSlug: businessArea,
+        id: paymentPlan.id,
+        programSlug: programId,
+        requestBody: {
           splitType: values.splitType,
           paymentsNo: values.paymentsNo,
         },
       });
-      if (!errors) {
-        setDialogOpen(false);
-        showMessage(t('Split was successful!'));
-      }
+      setDialogOpen(false);
+      showMessage(t('Split was successful!'));
     } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+      showMessage(e);
     }
   };
 

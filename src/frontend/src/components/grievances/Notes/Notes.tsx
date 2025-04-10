@@ -149,7 +149,7 @@ export function Notes({
                   <Grid size={{ xs: 10 }}>
                     <Grid size={{ xs: 12 }}>
                       <Box display="flex" justifyContent="space-between">
-                        <Name>{renderUserName(meData.me)}</Name>
+                        <Name>{renderUserName(meData)}</Name>
                       </Box>
                     </Grid>
                     <Grid size={{ xs: 12 }}>

@@ -16,7 +16,7 @@ import { FormikTextField } from '@shared/Formik/FormikTextField';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RestService } from '@restgenerated/services/RestService';
 import { useLocation } from 'react-router-dom';
-import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
+import { PaginatedBeneficiaryGroupList } from '@restgenerated/models/PaginatedBeneficiaryGroupList';
 
 interface ProgramFormPropTypes {
   values;
@@ -35,10 +35,11 @@ const ProgramForm = ({
   const { data: dataCollectionTypeChoicesData } =
     useDataCollectionTypeChoiceDataQuery();
 
-  const { data: beneficiaryGroupsData } = useQuery<PaginatedProgramListList>({
-    queryKey: ['beneficiaryGroups'],
-    queryFn: () => RestService.restBeneficiaryGroupsList({}),
-  });
+  const { data: beneficiaryGroupsData } =
+    useQuery<PaginatedBeneficiaryGroupList>({
+      queryKey: ['beneficiaryGroups'],
+      queryFn: () => RestService.restBeneficiaryGroupsList({}),
+    });
 
   const { setFieldValue } = useFormikContext();
 
@@ -67,11 +68,11 @@ const ProgramForm = ({
 
     if (dctType === 'SOCIAL') {
       filteredBeneficiaryGroups = beneficiaryGroupsData.results.filter(
-        (el) => el.master_detail === false,
+        (el) => el.masterDetail === false,
       );
     } else if (dctType === 'STANDARD') {
       filteredBeneficiaryGroups = beneficiaryGroupsData.results.filter(
-        (el) => el.master_detail === true,
+        (el) => el.masterDetail === true,
       );
     } else {
       filteredBeneficiaryGroups = beneficiaryGroupsData.results;

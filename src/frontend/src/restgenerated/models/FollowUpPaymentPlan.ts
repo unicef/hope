@@ -14,5 +14,9 @@ export type FollowUpPaymentPlan = {
      * Dispersion End Date
      */
     dispersionEndDate?: string | null;
+    /**
+     * Follow Up Payment Plan flag [sys]
+     */
+    isFollowUp?: boolean;
 };
 

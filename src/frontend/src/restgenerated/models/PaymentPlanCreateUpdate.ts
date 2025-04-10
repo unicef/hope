@@ -4,9 +4,10 @@
 /* eslint-disable */
 import type { CurrencyEnum } from './CurrencyEnum';
 export type PaymentPlanCreateUpdate = {
+    targetPopulationId: string;
     dispersionStartDate: string;
     dispersionEndDate: string;
     currency: CurrencyEnum;
-    version?: number;
+    readonly version: number;
 };
 
