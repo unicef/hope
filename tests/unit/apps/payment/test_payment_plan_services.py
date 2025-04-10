@@ -979,7 +979,7 @@ class TestPaymentPlanServices(APITestCase):
             e.exception.message,
             "Payment Plan doesn't have FSP / DeliveryMechanism assigned.",
         )
-        payment.financial_service_provider = self.fsp
+        payment_plan.financial_service_provider = self.fsp
         payment_plan.delivery_mechanism = self.dm_transfer_to_account
         payment.save()
 
