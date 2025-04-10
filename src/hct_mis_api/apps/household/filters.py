@@ -267,8 +267,7 @@ class HouseholdFilter(FilterSet):
         return qs.filter(rdi_merge_status=MergeStatusModel.MERGED)
 
     def admin_field_filter(self, qs: QuerySet, field_name: str, value: str) -> QuerySet:
-        encoded_value = decode_id_string(value)
-        return qs.filter(**{field_name: encoded_value})
+        return qs.filter(**{field_name: value})
 
 
 class IndividualFilter(FilterSet):
@@ -469,8 +468,7 @@ class IndividualFilter(FilterSet):
         return queryset
 
     def admin_field_filter(self, qs: QuerySet, field_name: str, value: str) -> QuerySet:
-        encoded_value = decode_id_string(value)
-        return qs.filter(**{field_name: encoded_value})
+        return qs.filter(**{field_name: value})
 
 
 class MergedHouseholdFilter(FilterSet):

@@ -67,14 +67,6 @@ from hct_mis_api.apps.utils.models import MergeStatusModel
 pytestmark = pytest.mark.django_db()
 
 
-def get_encoded_individual_id(individual: Individual) -> str:
-    return encode_id_base64_required(individual.id, "Individual")
-
-
-def get_encoded_household_id(household: Household) -> str:
-    return encode_id_base64_required(household.id, "Household")
-
-
 class TestIndividualList:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
@@ -203,16 +195,16 @@ class TestIndividualList:
         assert response_count.json()["count"] == 4
 
         response_ids = [result["id"] for result in response_results]
-        assert get_encoded_individual_id(self.individual1_1) in response_ids
-        assert get_encoded_individual_id(self.individual1_2) in response_ids
-        assert get_encoded_individual_id(self.individual2_1) in response_ids
-        assert get_encoded_individual_id(self.individual2_2) in response_ids
+        assert str(self.individual1_1.id) in response_ids
+        assert str(self.individual1_2.id) in response_ids
+        assert str(self.individual2_1.id) in response_ids
+        assert str(self.individual2_2.id) in response_ids
 
         for i, individual in enumerate(
             [self.individual1_1, self.individual1_2, self.individual2_1, self.individual2_2]
         ):
             individual_result = response_results[i]
-            assert individual_result["id"] == get_encoded_individual_id(individual)
+            assert individual_result["id"] == str(individual.id)
             assert individual_result["unicef_id"] == individual.unicef_id
             assert individual_result["full_name"] == individual.full_name
             assert individual_result["status"] == individual.status
@@ -220,7 +212,7 @@ class TestIndividualList:
             assert individual_result["age"] == individual.age
             assert individual_result["sex"] == individual.sex
             assert individual_result["household"] == {
-                "id": get_encoded_household_id(individual.household),
+                "id": str(individual.household.id),
                 "unicef_id": individual.household.unicef_id,
                 "admin2": individual.household.admin2.name,
             }
@@ -279,14 +271,14 @@ class TestIndividualList:
         assert len(response_results) == 6
 
         response_ids = [result["id"] for result in response_results]
-        assert get_encoded_individual_id(self.individual1_1) in response_ids
-        assert get_encoded_individual_id(self.individual1_2) in response_ids
-        assert get_encoded_individual_id(self.individual2_1) in response_ids
-        assert get_encoded_individual_id(self.individual2_2) in response_ids
-        assert get_encoded_individual_id(individual_without_areas1) in response_ids
-        assert get_encoded_individual_id(individual_without_areas2) in response_ids
-        assert get_encoded_individual_id(individual_different_areas1) not in response_ids
-        assert get_encoded_individual_id(individual_different_areas2) not in response_ids
+        assert str(self.individual1_1.id) in response_ids
+        assert str(self.individual1_2.id) in response_ids
+        assert str(self.individual2_1.id) in response_ids
+        assert str(self.individual2_2.id) in response_ids
+        assert str(individual_without_areas1.id) in response_ids
+        assert str(individual_without_areas2.id) in response_ids
+        assert str(individual_different_areas1.id) not in response_ids
+        assert str(individual_different_areas2.id) not in response_ids
 
     def test_individual_list_caching(
         self, create_user_role_with_permissions: Any, set_admin_area_limits_in_program: Any
@@ -587,14 +579,13 @@ class TestIndividualDetail:
             business_area=self.afghanistan,
             program=self.program,
         )
-        encoded_individual_id = get_encoded_individual_id(self.individual1)
         response = self.api_client.get(
             reverse(
                 self.detail_url_name,
                 kwargs={
                     "business_area_slug": self.afghanistan.slug,
                     "program_slug": self.program.slug,
-                    "pk": encoded_individual_id,
+                    "pk": str(self.individual1.id),
                 },
             )
         )
@@ -610,21 +601,20 @@ class TestIndividualDetail:
             business_area=self.afghanistan,
             program=self.program,
         )
-        encoded_individual_id = get_encoded_individual_id(self.individual1)
         response = self.api_client.get(
             reverse(
                 self.detail_url_name,
                 kwargs={
                     "business_area_slug": self.afghanistan.slug,
                     "program_slug": self.program.slug,
-                    "pk": encoded_individual_id,
+                    "pk": str(self.individual1.id),
                 },
             )
         )
         assert response.status_code == status.HTTP_200_OK
         data = response.data
 
-        assert data["id"] == encoded_individual_id
+        assert data["id"] == str(self.individual1.id)
         assert data["unicef_id"] == self.individual1.unicef_id
         assert data["full_name"] == self.individual1.full_name
         assert data["given_name"] == self.individual1.given_name
@@ -638,7 +628,7 @@ class TestIndividualDetail:
         assert data["work_status"] == self.individual1.work_status
         assert data["pregnant"] == self.individual1.pregnant
         assert data["household"] == {
-            "id": get_encoded_household_id(self.individual1.household),
+            "id": str(self.individual1.household.id),
             "unicef_id": self.individual1.household.unicef_id,
             "admin2": self.individual1.household.admin2.name,
         }
@@ -974,12 +964,12 @@ class TestIndividualGlobalViewSet:
         assert response_count.json()["count"] == 4
 
         result_ids = [result["id"] for result in response_results]
-        assert get_encoded_individual_id(self.individual_afghanistan1_1) in result_ids
-        assert get_encoded_individual_id(self.individual_afghanistan1_2) in result_ids
-        assert get_encoded_individual_id(self.individual_afghanistan2_1) in result_ids
-        assert get_encoded_individual_id(self.individual_afghanistan2_2) in result_ids
-        assert get_encoded_individual_id(self.individual_ukraine_1) not in result_ids
-        assert get_encoded_individual_id(self.individual_ukraine_2) not in result_ids
+        assert str(self.individual_afghanistan1_1.id) in result_ids
+        assert str(self.individual_afghanistan1_2.id) in result_ids
+        assert str(self.individual_afghanistan2_1.id) in result_ids
+        assert str(self.individual_afghanistan2_2.id) in result_ids
+        assert str(self.individual_ukraine_1.id) not in result_ids
+        assert str(self.individual_ukraine_2.id) not in result_ids
 
         for i, individual in enumerate(
             [
@@ -990,7 +980,7 @@ class TestIndividualGlobalViewSet:
             ]
         ):
             individual_result = response_results[i]
-            assert individual_result["id"] == get_encoded_individual_id(individual)
+            assert individual_result["id"] == str(individual.id)
             assert individual_result["unicef_id"] == individual.unicef_id
             assert individual_result["full_name"] == individual.full_name
             assert individual_result["status"] == individual.status
@@ -998,7 +988,7 @@ class TestIndividualGlobalViewSet:
             assert individual_result["age"] == individual.age
             assert individual_result["sex"] == individual.sex
             assert individual_result["household"] == {
-                "id": get_encoded_household_id(individual.household),
+                "id": str(individual.household.id),
                 "unicef_id": individual.household.unicef_id,
                 "admin2": individual.household.admin2.name,
             }
@@ -1021,12 +1011,12 @@ class TestIndividualGlobalViewSet:
         assert len(response_results) == 2
 
         result_ids = [result["id"] for result in response_results]
-        assert get_encoded_individual_id(self.individual_afghanistan1_1) in result_ids
-        assert get_encoded_individual_id(self.individual_afghanistan1_2) in result_ids
-        assert get_encoded_individual_id(self.individual_afghanistan2_1) not in result_ids
-        assert get_encoded_individual_id(self.individual_afghanistan2_2) not in result_ids
-        assert get_encoded_individual_id(self.individual_ukraine_1) not in result_ids
-        assert get_encoded_individual_id(self.individual_ukraine_2) not in result_ids
+        assert str(self.individual_afghanistan1_1.id) in result_ids
+        assert str(self.individual_afghanistan1_2.id) in result_ids
+        assert str(self.individual_afghanistan2_1.id) not in result_ids
+        assert str(self.individual_afghanistan2_2.id) not in result_ids
+        assert str(self.individual_ukraine_1.id) not in result_ids
+        assert str(self.individual_ukraine_2.id) not in result_ids
 
     def test_individual_global_list_area_limits(
         self, create_user_role_with_permissions: Any, set_admin_area_limits_in_program: Any
@@ -1073,16 +1063,16 @@ class TestIndividualGlobalViewSet:
         assert len(response_results) == 6
 
         result_ids = [result["id"] for result in response_results]
-        assert get_encoded_individual_id(self.individual_afghanistan1_1) in result_ids
-        assert get_encoded_individual_id(self.individual_afghanistan1_2) in result_ids
-        assert get_encoded_individual_id(self.individual_afghanistan2_1) in result_ids
-        assert get_encoded_individual_id(self.individual_afghanistan2_2) in result_ids
-        assert get_encoded_individual_id(individual_afghanistan_without_areas1) in result_ids
-        assert get_encoded_individual_id(individual_afghanistan_without_areas2) in result_ids
-        assert get_encoded_individual_id(individual_afghanistan_different_areas1) not in result_ids
-        assert get_encoded_individual_id(individual_afghanistan_different_areas2) not in result_ids
-        assert get_encoded_individual_id(self.individual_ukraine_1) not in result_ids
-        assert get_encoded_individual_id(self.individual_ukraine_2) not in result_ids
+        assert str(self.individual_afghanistan1_1.id) in result_ids
+        assert str(self.individual_afghanistan1_2.id) in result_ids
+        assert str(self.individual_afghanistan2_1.id) in result_ids
+        assert str(self.individual_afghanistan2_2.id) in result_ids
+        assert str(individual_afghanistan_without_areas1.id) in result_ids
+        assert str(individual_afghanistan_without_areas2.id) in result_ids
+        assert str(individual_afghanistan_different_areas1.id) not in result_ids
+        assert str(individual_afghanistan_different_areas2.id) not in result_ids
+        assert str(self.individual_ukraine_1.id) not in result_ids
+        assert str(self.individual_ukraine_2.id) not in result_ids
 
 
 class TestIndividualFilter:
@@ -1156,7 +1146,7 @@ class TestIndividualFilter:
         assert response.status_code == status.HTTP_200_OK, response.json()
         response_data = response.json()["results"]
         assert len(response_data) == 1
-        assert response_data[0]["id"] == get_encoded_individual_id(individual2)
+        assert response_data[0]["id"] == str(individual2.id)
         return response_data
 
     def test_filter_by_rdi_id(self) -> None:
@@ -1189,7 +1179,7 @@ class TestIndividualFilter:
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
         assert len(response_data) == 1
-        assert response_data[0]["id"] == get_encoded_individual_id(individual2)
+        assert response_data[0]["id"] == str(individual2.id)
 
     def test_filter_by_full_name(self) -> None:
         self._test_filter_individuals_in_list(
@@ -1211,17 +1201,17 @@ class TestIndividualFilter:
         assert response_male.status_code == status.HTTP_200_OK
         response_data_male = response_male.json()["results"]
         assert len(response_data_male) == 1
-        assert response_data_male[0]["id"] == get_encoded_individual_id(individual_m)
+        assert response_data_male[0]["id"] == str(individual_m.id)
 
         response_male_female = self.api_client.get(self.list_url, {"sex": ["MALE", "FEMALE"]})
         assert response_male_female.status_code == status.HTTP_200_OK
         response_data_male_female = response_male_female.json()["results"]
         assert len(response_data_male_female) == 2
         individuals_ids = [individual["id"] for individual in response_data_male_female]
-        assert get_encoded_individual_id(individual_m) in individuals_ids
-        assert get_encoded_individual_id(individual_f) in individuals_ids
-        assert get_encoded_individual_id(individual_o) not in individuals_ids
-        assert get_encoded_individual_id(individual_nc) not in individuals_ids
+        assert str(individual_m.id) in individuals_ids
+        assert str(individual_f.id) in individuals_ids
+        assert str(individual_o.id) not in individuals_ids
+        assert str(individual_nc.id) not in individuals_ids
 
     def test_filter_by_status(self) -> None:
         self._test_filter_individuals_in_list(
@@ -1246,11 +1236,11 @@ class TestIndividualFilter:
 
     def test_filter_by_excluded_id(self) -> None:
         individual1, individual2 = self._create_test_individuals()
-        response_excluded = self.api_client.get(self.list_url, {"excluded_id": get_encoded_individual_id(individual1)})
+        response_excluded = self.api_client.get(self.list_url, {"excluded_id": str(individual1.id)})
         assert response_excluded.status_code == status.HTTP_200_OK
         response_data_male = response_excluded.json()["results"]
         assert len(response_data_male) == 1
-        assert response_data_male[0]["id"] == get_encoded_individual_id(individual2)
+        assert response_data_male[0]["id"] == str(individual2.id)
 
     @pytest.mark.parametrize(
         "program_status,filter_value,expected_results",
@@ -1291,9 +1281,8 @@ class TestIndividualFilter:
         admin_type_2 = AreaTypeFactory(country=country, area_level=2, parent=admin_type_1)
         area1 = AreaFactory(parent=None, p_code="AF01", area_type=admin_type_1)
         area2 = AreaFactory(parent=area1, p_code="AF0101", area_type=admin_type_2)
-        encoded_id = encode_id_base64_required(area2.id, "Area")
         self._test_filter_individuals_in_list(
-            filters={filter_by_field: encoded_id},
+            filters={filter_by_field: str(area2.id)},
             household1_data={filter_by_field: area1},
             household2_data={filter_by_field: area2},
         )
@@ -1307,13 +1296,13 @@ class TestIndividualFilter:
         assert response_after.status_code == status.HTTP_200_OK
         response_data_after = response_after.json()["results"]
         assert len(response_data_after) == 1
-        assert response_data_after[0]["id"] == get_encoded_individual_id(individual2)
+        assert response_data_after[0]["id"] == str(individual2.id)
 
         response_before = self.api_client.get(self.list_url, {"last_registration_date_before": "2022-12-31"})
         assert response_before.status_code == status.HTTP_200_OK
         response_data_before = response_after.json()["results"]
         assert len(response_data_before) == 1
-        assert response_data_before[0]["id"] == get_encoded_individual_id(individual2)
+        assert response_data_before[0]["id"] == str(individual2.id)
         return response_data_before
 
     def test_filter_by_duplicates_only(self) -> None:
@@ -1355,7 +1344,7 @@ class TestIndividualFilter:
         response_data = response.json()["results"]
 
         assert len(response_data) == 1
-        assert response_data[0]["id"] == get_encoded_individual_id(individual2)
+        assert response_data[0]["id"] == str(individual2.id)
         return response_data
 
     @override_config(USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH=True)
@@ -1381,7 +1370,7 @@ class TestIndividualFilter:
         assert response.status_code == status.HTTP_200_OK, response.json()
         response_data = response.json()["results"]
         assert len(response_data) == 1
-        assert response_data[0]["id"] == get_encoded_individual_id(individual2)
+        assert response_data[0]["id"] == str(individual2.id)
         return response_data
 
     def test_filter_by_age(self) -> None:
@@ -1399,20 +1388,20 @@ class TestIndividualFilter:
             response_data_min = response_min.json()["results"]
             assert len(response_data_min) == 3
             individuals_ids_min = [individual["id"] for individual in response_data_min]
-            assert get_encoded_individual_id(individual_age_10) in individuals_ids_min
-            assert get_encoded_individual_id(individual_age_15) in individuals_ids_min
-            assert get_encoded_individual_id(individual_age_20) in individuals_ids_min
-            assert get_encoded_individual_id(individual_age_5) not in individuals_ids_min
+            assert str(individual_age_10.id) in individuals_ids_min
+            assert str(individual_age_15.id) in individuals_ids_min
+            assert str(individual_age_20.id) in individuals_ids_min
+            assert str(individual_age_5.id) not in individuals_ids_min
 
             response_max = self.api_client.get(self.list_url, {"age_max": 12})
             assert response_max.status_code == status.HTTP_200_OK
             response_data_max = response_max.json()["results"]
             assert len(response_data_max) == 2
             individuals_ids_max = [individual["id"] for individual in response_data_max]
-            assert get_encoded_individual_id(individual_age_5) in individuals_ids_max
-            assert get_encoded_individual_id(individual_age_10) in individuals_ids_max
-            assert get_encoded_individual_id(individual_age_15) not in individuals_ids_max
-            assert get_encoded_individual_id(individual_age_20) not in individuals_ids_max
+            assert str(individual_age_5.id) in individuals_ids_max
+            assert str(individual_age_10.id) in individuals_ids_max
+            assert str(individual_age_15.id) not in individuals_ids_max
+            assert str(individual_age_20.id) not in individuals_ids_max
 
             response_min_max = self.api_client.get(
                 self.list_url,
@@ -1422,7 +1411,7 @@ class TestIndividualFilter:
             response_data_min_max = response_min_max.json()["results"]
             assert len(response_data_min_max) == 1
             individuals_ids_min_max = [individual["id"] for individual in response_data_min_max]
-            assert get_encoded_individual_id(individual_age_10) in individuals_ids_min_max
-            assert get_encoded_individual_id(individual_age_5) not in individuals_ids_min_max
-            assert get_encoded_individual_id(individual_age_15) not in individuals_ids_min_max
-            assert get_encoded_individual_id(individual_age_20) not in individuals_ids_min_max
+            assert str(individual_age_10.id) in individuals_ids_min_max
+            assert str(individual_age_5.id) not in individuals_ids_min_max
+            assert str(individual_age_15.id) not in individuals_ids_min_max
+            assert str(individual_age_20.id) not in individuals_ids_min_max

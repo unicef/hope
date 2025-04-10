@@ -35,7 +35,6 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     Household,
-    Individual,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
@@ -44,14 +43,6 @@ from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 pytestmark = pytest.mark.django_db()
-
-
-def get_encoded_household_id(household: Household) -> str:
-    return encode_id_base64_required(household.id, "Household")
-
-
-def get_encoded_individual_id(individual: Individual) -> str:
-    return encode_id_base64_required(individual.id, "Individual")
 
 
 class TestHouseholdList:
@@ -128,12 +119,12 @@ class TestHouseholdList:
         assert response_count.json()["count"] == 2
 
         response_ids = [result["id"] for result in response_results]
-        assert get_encoded_household_id(self.household1) in response_ids
-        assert get_encoded_household_id(self.household2) in response_ids
+        assert str(self.household1.id) in response_ids
+        assert str(self.household2.id) in response_ids
 
         for i, household in enumerate([self.household1, self.household2]):
             household_result = response_results[i]
-            assert household_result["id"] == get_encoded_household_id(household)
+            assert household_result["id"] == str(household.id)
             assert household_result["unicef_id"] == household.unicef_id
             assert household_result["head_of_household"] == household.head_of_household.full_name
             assert household_result["admin1"] == household.admin1.name
@@ -244,11 +235,11 @@ class TestHouseholdList:
 
         response_ids = [result["id"] for result in response_results]
 
-        assert get_encoded_household_id(self.household1) in response_ids
-        assert get_encoded_household_id(self.household2) in response_ids
-        assert get_encoded_household_id(household_without_areas) in response_ids
+        assert str(self.household1.id) in response_ids
+        assert str(self.household2.id) in response_ids
+        assert str(household_without_areas.id) in response_ids
 
-        assert get_encoded_household_id(household_different_areas) not in response_ids
+        assert str(household_different_areas.id) not in response_ids
 
     def test_household_list_caching(
         self, create_user_role_with_permissions: Any, set_admin_area_limits_in_program: Any
@@ -383,23 +374,22 @@ class TestHouseholdDetail:
             business_area=self.afghanistan,
             program=self.program,
         )
-        encoded_household_id = encode_id_base64_required(self.household.id, "Household")
         response = self.api_client.get(
             reverse(
                 self.detail_url_name,
                 kwargs={
                     "business_area_slug": self.afghanistan.slug,
                     "program_slug": self.program.slug,
-                    "pk": encoded_household_id,
+                    "pk": str(self.household.id),
                 },
             )
         )
         assert response.status_code == status.HTTP_200_OK
         data = response.data
-        assert data["id"] == encoded_household_id
+        assert data["id"] == str(self.household.id)
         assert data["unicef_id"] == self.household.unicef_id
         assert data["head_of_household"] == {
-            "id": get_encoded_individual_id(self.individuals[0]),
+            "id": str(self.individuals[0].id),
             "full_name": self.individuals[0].full_name,
         }
         assert data["admin1"] == self.household.admin1.name
@@ -498,14 +488,13 @@ class TestHouseholdDetail:
             business_area=self.afghanistan,
             program=self.program,
         )
-        encoded_household_id = get_encoded_household_id(self.household)
         response = self.api_client.get(
             reverse(
                 self.detail_url_name,
                 kwargs={
                     "business_area_slug": self.afghanistan.slug,
                     "program_slug": self.program.slug,
-                    "pk": encoded_household_id,
+                    "pk": str(self.household.id),
                 },
             )
         )
@@ -521,14 +510,13 @@ class TestHouseholdDetail:
             business_area=self.afghanistan,
             program=program_other,
         )
-        encoded_household_id = get_encoded_household_id(self.household)
         response = self.api_client.get(
             reverse(
                 self.detail_url_name,
                 kwargs={
                     "business_area_slug": self.afghanistan.slug,
                     "program_slug": self.program.slug,
-                    "pk": encoded_household_id,
+                    "pk": str(self.household.id),
                 },
             )
         )
@@ -623,14 +611,13 @@ class TestHouseholdMembers:
             business_area=self.afghanistan,
             program=self.program,
         )
-        encoded_household_id = get_encoded_household_id(self.household1)
         response = self.api_client.get(
             reverse(
                 self.members_url_name,
                 kwargs={
                     "business_area_slug": self.afghanistan.slug,
                     "program_slug": self.program.slug,
-                    "pk": encoded_household_id,
+                    "pk": str(self.household1.id),
                 },
             )
         )
@@ -643,14 +630,13 @@ class TestHouseholdMembers:
             business_area=self.afghanistan,
             program=self.program,
         )
-        encoded_household_id = get_encoded_household_id(self.household1)
         response = self.api_client.get(
             reverse(
                 self.members_url_name,
                 kwargs={
                     "business_area_slug": self.afghanistan.slug,
                     "program_slug": self.program.slug,
-                    "pk": encoded_household_id,
+                    "pk": str(self.household1.id),
                 },
             )
         )
@@ -659,13 +645,13 @@ class TestHouseholdMembers:
         assert len(response_results) == 3
 
         response_ids = [result["id"] for result in response_results]
-        assert get_encoded_individual_id(self.individual1_1) in response_ids
-        assert get_encoded_individual_id(self.individual1_2) in response_ids
-        assert get_encoded_individual_id(self.individual2_1) in response_ids
-        assert get_encoded_individual_id(self.individual2_2) not in response_ids
+        assert str(self.individual1_1.id) in response_ids
+        assert str(self.individual1_2.id) in response_ids
+        assert str(self.individual2_1.id) in response_ids
+        assert str(self.individual2_2.id) not in response_ids
         assert response_results == [
             {
-                "id": get_encoded_individual_id(self.individual1_1),
+                "id": str(self.individual1_1),
                 "unicef_id": self.individual1_1.unicef_id,
                 "full_name": self.individual1_1.full_name,
                 "role": "PRIMARY",
@@ -674,13 +660,13 @@ class TestHouseholdMembers:
                 "birth_date": f"{self.individual1_1.birth_date:%Y-%m-%d}",
                 "sex": self.individual1_1.sex,
                 "household": {
-                    "id": get_encoded_household_id(self.household1),
+                    "id": str(self.household1.id),
                     "unicef_id": self.household1.unicef_id,
                     "admin2": "",
                 },
             },
             {
-                "id": get_encoded_individual_id(self.individual1_2),
+                "id": str(self.individual1_2.id),
                 "unicef_id": self.individual1_2.unicef_id,
                 "full_name": self.individual1_2.full_name,
                 "role": "NO_ROLE",
@@ -689,13 +675,13 @@ class TestHouseholdMembers:
                 "birth_date": f"{self.individual1_2.birth_date:%Y-%m-%d}",
                 "sex": self.individual1_2.sex,
                 "household": {
-                    "id": get_encoded_household_id(self.household1),
+                    "id": str(self.household1.id),
                     "unicef_id": self.household1.unicef_id,
                     "admin2": "",
                 },
             },
             {
-                "id": get_encoded_individual_id(self.individual2_1),
+                "id": str(self.individual2_1.id),
                 "unicef_id": self.individual2_1.unicef_id,
                 "full_name": self.individual2_1.full_name,
                 "role": "ALTERNATE",
@@ -704,7 +690,7 @@ class TestHouseholdMembers:
                 "birth_date": f"{self.individual2_1.birth_date:%Y-%m-%d}",
                 "sex": self.individual2_1.sex,
                 "household": {
-                    "id": get_encoded_household_id(self.household2),
+                    "id": str(self.household2.id),
                     "unicef_id": self.household2.unicef_id,
                     "admin2": "",
                 },
@@ -818,13 +804,13 @@ class TestHouseholdGlobalViewSet:
         assert response_count.json()["count"] == 2
 
         result_ids = [result["id"] for result in response_results]
-        assert get_encoded_household_id(self.household_afghanistan1) in result_ids
-        assert get_encoded_household_id(self.household_afghanistan2) in result_ids
-        assert get_encoded_household_id(self.household_ukraine) not in result_ids
+        assert str(self.household_afghanistan1.id) in result_ids
+        assert str(self.household_afghanistan2.id) in result_ids
+        assert str(self.household_ukraine.id) not in result_ids
 
         for i, household in enumerate([self.household_afghanistan1, self.household_afghanistan2]):
             household_result_first = response_results[i]
-            assert household_result_first["id"] == get_encoded_household_id(household)
+            assert household_result_first["id"] == str(household.id)
             assert household_result_first["unicef_id"] == household.unicef_id
             assert household_result_first["head_of_household"] == household.head_of_household.full_name
             assert household_result_first["admin1"] == household.admin1.name
@@ -858,9 +844,9 @@ class TestHouseholdGlobalViewSet:
         assert len(response_results) == 1
 
         result_ids = [result["id"] for result in response_results]
-        assert get_encoded_household_id(self.household_afghanistan1) in result_ids
-        assert get_encoded_household_id(self.household_afghanistan2) not in result_ids
-        assert get_encoded_household_id(self.household_ukraine) not in result_ids
+        assert str(self.household_afghanistan1.id) in result_ids
+        assert str(self.household_afghanistan2.id) not in result_ids
+        assert str(self.household_ukraine.id) not in result_ids
 
     @pytest.mark.parametrize(
         "permissions",
@@ -927,11 +913,11 @@ class TestHouseholdGlobalViewSet:
         assert len(response_results) == 3
 
         result_ids = [result["id"] for result in response_results]
-        assert get_encoded_household_id(self.household_afghanistan1) in result_ids
-        assert get_encoded_household_id(self.household_afghanistan2) in result_ids
-        assert get_encoded_household_id(household_afghanistan_without_areas) in result_ids
-        assert get_encoded_household_id(self.household_ukraine) not in result_ids
-        assert get_encoded_household_id(household_afghanistan_different_areas) not in result_ids
+        assert str(self.household_afghanistan1.id) in result_ids
+        assert str(self.household_afghanistan2.id) in result_ids
+        assert str(household_afghanistan_without_areas.id) in result_ids
+        assert str(self.household_ukraine.id) not in result_ids
+        assert str(household_afghanistan_different_areas.id) not in result_ids
 
 
 class TestHouseholdFilter:
@@ -1005,7 +991,7 @@ class TestHouseholdFilter:
         assert response.status_code == status.HTTP_200_OK, response.json()
         response_data = response.json()["results"]
         assert len(response_data) == 1
-        assert response_data[0]["id"] == get_encoded_household_id(household1)
+        assert response_data[0]["id"] == str(household1.id)
         return response_data
 
     def test_filter_by_rdi_id(self) -> None:
@@ -1066,7 +1052,7 @@ class TestHouseholdFilter:
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
         assert len(response_data) == 1
-        assert response_data[0]["id"] == get_encoded_household_id(household_passport1)
+        assert response_data[0]["id"] == str(household_passport1.id)
 
     def test_filter_by_address(self) -> None:
         self._test_filter_households_in_list(
@@ -1168,9 +1154,8 @@ class TestHouseholdFilter:
         admin_type_2 = AreaTypeFactory(country=country, area_level=2, parent=admin_type_1)
         area1 = AreaFactory(parent=None, p_code="AF01", area_type=admin_type_1)
         area2 = AreaFactory(parent=area1, p_code="AF0101", area_type=admin_type_2)
-        encoded_id = encode_id_base64_required(area1.id, "Area")
         self._test_filter_households_in_list(
-            filters={filter_by_field: encoded_id},
+            filters={filter_by_field: str(area1.id)},
             household1_data={filter_by_field: area1},
             household2_data={filter_by_field: area2},
         )
@@ -1229,7 +1214,7 @@ class TestHouseholdFilter:
         assert response.status_code == status.HTTP_200_OK, response.json()
         response_data = response.json()["results"]
         assert len(response_data) == 1
-        assert response_data[0]["id"] == get_encoded_household_id(household1)
+        assert response_data[0]["id"] == str(household1.id)
         return response_data
 
     @override_config(USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH=True)
@@ -1255,5 +1240,5 @@ class TestHouseholdFilter:
         assert response.status_code == status.HTTP_200_OK, response.json()
         response_data = response.json()["results"]
         assert len(response_data) == 1
-        assert response_data[0]["id"] == get_encoded_household_id(household1)
+        assert response_data[0]["id"] == str(household1.id)
         return response_data

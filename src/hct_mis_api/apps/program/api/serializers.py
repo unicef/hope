@@ -7,13 +7,10 @@ from django.utils.dateparse import parse_date
 from rest_framework import serializers
 from rest_framework.utils.serializer_helpers import ReturnDict
 
-from hct_mis_api.api.utils import EncodedIdSerializerMixin
-from hct_mis_api.apps.account.api.fields import Base64ModelField
 from hct_mis_api.apps.account.api.serializers import PartnerForProgramSerializer
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
 from hct_mis_api.apps.core.api.serializers import DataCollectingTypeSerializer
-from hct_mis_api.apps.core.utils import encode_id_base64_required
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 
@@ -44,7 +41,7 @@ def validate_cycle_timeframes_overlapping(
             raise serializers.ValidationError("Programme Cycles' timeframes must not overlap with the provided dates.")
 
 
-class ProgramCycleListSerializer(EncodedIdSerializerMixin):
+class ProgramCycleListSerializer(serializers.ModelSerializer):
     status = serializers.CharField(source="get_status_display")
     created_by = serializers.SerializerMethodField()
     start_date = serializers.DateField(format="%Y-%m-%d")
@@ -87,7 +84,7 @@ class ProgramCycleListSerializer(EncodedIdSerializerMixin):
         return obj.can_remove_cycle
 
 
-class ProgramCycleCreateSerializer(EncodedIdSerializerMixin):
+class ProgramCycleCreateSerializer(serializers.ModelSerializer):
     title = serializers.CharField(required=True)
     start_date = serializers.DateField(required=True)
     end_date = serializers.DateField(required=False)
@@ -155,7 +152,7 @@ class ProgramCycleCreateSerializer(EncodedIdSerializerMixin):
         return data
 
 
-class ProgramCycleUpdateSerializer(EncodedIdSerializerMixin):
+class ProgramCycleUpdateSerializer(serializers.ModelSerializer):
     title = serializers.CharField(required=False)
     start_date = serializers.DateField(required=False)
     end_date = serializers.DateField(required=False)
@@ -222,7 +219,7 @@ class ProgramCycleUpdateSerializer(EncodedIdSerializerMixin):
         return data
 
 
-class ProgramCycleDeleteSerializer(EncodedIdSerializerMixin):
+class ProgramCycleDeleteSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProgramCycle
         fields = ["id"]
@@ -243,7 +240,6 @@ class BeneficiaryGroupSerializer(serializers.ModelSerializer):
 
 
 class ProgramListSerializer(serializers.ModelSerializer):
-    id = Base64ModelField(model_name="Program")
     data_collecting_type = DataCollectingTypeSerializer()
     pdu_fields = serializers.SerializerMethodField()
     beneficiary_group = BeneficiaryGroupSerializer()
@@ -271,10 +267,7 @@ class ProgramListSerializer(serializers.ModelSerializer):
         extra_kwargs = {"status": {"help_text": "Status"}}  # for swagger purpose
 
     def get_pdu_fields(self, obj: Program) -> list[str]:
-        pdu_field_encoded_ids = []
-        for pdu_field in obj.pdu_fields.all():
-            pdu_field_encoded_ids.append(encode_id_base64_required(pdu_field, "FlexibleAttribute"))
-        return pdu_field_encoded_ids
+        return list(obj.pdu_fields.values_list("id", flat=True))
 
 
 class ProgramDetailSerializer(AdminUrlSerializerMixin, ProgramListSerializer):
