@@ -1,6 +1,9 @@
 import logging
 from typing import Any
 
+from django.db import transaction
+
+from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.decorators import action
@@ -10,7 +13,9 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework_extensions.cache.decorators import cache_response
 
+from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.api.mixins import (
@@ -20,9 +25,12 @@ from hct_mis_api.apps.core.api.mixins import (
     SerializerActionMixin,
 )
 from hct_mis_api.apps.core.utils import check_concurrency_version_in_mutation
-from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.household.documents import get_individual_doc
+from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.registration_data.api.caches import RDIKeyConstructor
 from hct_mis_api.apps.registration_data.api.serializers import (
+    RefuseRdiSerializer,
     RegistrationDataImportDetailSerializer,
     RegistrationDataImportListSerializer,
 )
@@ -32,6 +40,10 @@ from hct_mis_api.apps.registration_datahub.celery_tasks import (
     deduplication_engine_process,
     fetch_biometric_deduplication_results_and_process,
     merge_registration_data_import_task,
+    rdi_deduplication_task,
+)
+from hct_mis_api.apps.utils.elasticsearch_utils import (
+    remove_elasticsearch_documents_by_matching_ids,
 )
 
 logger = logging.getLogger(__name__)
@@ -49,6 +61,7 @@ class RegistrationDataImportViewSet(
     serializer_classes_by_action = {
         "list": RegistrationDataImportListSerializer,
         "retrieve": RegistrationDataImportDetailSerializer,
+        "refuse": RefuseRdiSerializer,
     }
     permissions_by_action = {
         "list": [
@@ -59,13 +72,15 @@ class RegistrationDataImportViewSet(
         ],
         "merge": [Permissions.RDI_MERGE_IMPORT],
         "erase": [Permissions.RDI_REFUSE_IMPORT],
+        "refuse": [Permissions.RDI_REFUSE_IMPORT],
+        "deduplicate": [Permissions.RDI_RERUN_DEDUPE],
+        "run_deduplication": [Permissions.RDI_RERUN_DEDUPE],
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = RegistrationDataImportFilter
 
-    #
-    # @etag_decorator(RDIKeyConstructor)
-    # @cache_response(timeout=config.REST_API_TTL, key_func=RDIKeyConstructor())
+    @etag_decorator(RDIKeyConstructor)
+    @cache_response(timeout=config.REST_API_TTL, key_func=RDIKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
@@ -89,6 +104,7 @@ class RegistrationDataImportViewSet(
         return Response(status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["post"])
+    @transaction.atomic
     def merge(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         rdi = self.get_object()
         old_rdi = RegistrationDataImport.objects.get(
@@ -113,6 +129,7 @@ class RegistrationDataImportViewSet(
         return Response(status=status.HTTP_200_OK, data={"message": "Registration Data Import Merge Scheduled"})
 
     @action(detail=True, methods=["post"])
+    @transaction.atomic
     def erase(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         rdi = self.get_object()
         old_rdi = RegistrationDataImport.objects.get(
@@ -133,6 +150,69 @@ class RegistrationDataImportViewSet(
         rdi.erased = True
         rdi.save()
 
+        log_create(
+            RegistrationDataImport.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            request.user,
+            rdi.program_id,
+            old_rdi,
+            rdi,
+        )
+        return Response(status=status.HTTP_200_OK, data={"message": "Registration Data Import Erased"})
+
+    @action(detail=True, methods=["post"])
+    @transaction.atomic
+    def refuse(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        rdi = self.get_object()
+        old_rdi = RegistrationDataImport.objects.get(
+            id=rdi.id,
+        )
+
+        if rdi.status != RegistrationDataImport.IN_REVIEW:
+            logger.warning("Only In Review Registration Data Import can be refused")
+            raise ValidationError("Only In Review Registration Data Import can be refused")
+
+        Household.all_objects.filter(registration_data_import=rdi).delete()
+        rdi.status = RegistrationDataImport.REFUSED_IMPORT
+        rdi.refuse_reason = serializer.validated_data["reason"]
+        rdi.save()
+        # TODO: Copied from mutation, but in my opinion it is wrong
+        individuals_to_remove = Individual.all_objects.filter(registration_data_import=rdi)
+        remove_elasticsearch_documents_by_matching_ids(
+            list(individuals_to_remove.values_list("id", flat=True)),
+            get_individual_doc(rdi.business_area.slug),
+        )
+
+        log_create(
+            RegistrationDataImport.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            request.user,
+            rdi.program_id,
+            old_rdi,
+            rdi,
+        )
+        return Response(status=status.HTTP_200_OK, data={"message": "Registration Data Import Refused"})
+
+    @action(detail=True, methods=["post"])
+    @transaction.atomic
+    def deduplicate(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        rdi = self.get_object()
+        old_rdi = RegistrationDataImport.objects.get(
+            id=rdi.id,
+        )
+
+        if rdi.status != RegistrationDataImport.DEDUPLICATION_FAILED:
+            logger.warning(
+                "Deduplication can only be called when Registration Data Import status is Deduplication Failed"
+            )
+            raise ValidationError(
+                "Deduplication can only be called when Registration Data Import status is Deduplication Failed"
+            )
+        rdi.status = RegistrationDataImport.DEDUPLICATION
+        rdi.save()
+        rdi_deduplication_task.delay(registration_data_import_id=str(rdi.id))
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING,
             "business_area",

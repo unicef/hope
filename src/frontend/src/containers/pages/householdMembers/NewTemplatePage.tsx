@@ -22,7 +22,7 @@ import { useProgramContext } from 'src/programContext';
 
 export const NewTemplatePage = (): ReactElement => {
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
@@ -74,7 +74,7 @@ export const NewTemplatePage = (): ReactElement => {
 
   const [activeStep, setActiveStep] = useState(0);
   const steps = [
-    `Filter ${isPeople ? 'People' : beneficiaryGroup?.member_label_plural}`,
+    `Filter ${isPeople ? 'People' : beneficiaryGroup?.memberLabelPlural}`,
     'Fields to Update',
   ];
 
@@ -125,7 +125,7 @@ export const NewTemplatePage = (): ReactElement => {
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: beneficiaryGroup?.member_label_plural,
+      title: beneficiaryGroup?.memberLabelPlural,
       to: `/${baseUrl}/population/individuals`,
     },
   ];

@@ -70,9 +70,9 @@ const UpdateProgramCycle = ({
         : schema,
     );
 
-  if (program.end_date) {
+  if (program.endDate) {
     endDate = endDate.max(
-      new Date(program.end_date),
+      new Date(program.endDate),
       t('End Date cannot be after Programme End Date'),
     );
   }

@@ -4,7 +4,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid,
+  Grid2 as Grid,
   IconButton,
   Table,
   TableBody,
@@ -258,6 +258,7 @@ interface CriteriaProps {
   householdIds: string;
   individualIds: string;
   deliveryMechanism;
+  financialServiceProvider;
   criteriaIndex: number;
   criteria;
 }
@@ -276,6 +277,7 @@ export function Criteria({
   householdIds,
   individualIds,
   deliveryMechanism,
+  financialServiceProvider,
   criteriaIndex,
   criteria,
 }: CriteriaProps): ReactElement {
@@ -285,7 +287,7 @@ export function Criteria({
   const [fspToDisplay, setFspToDisplay] = useState('');
   const { data: availableFspsForDeliveryMechanismData } =
     useAvailableFspsForDeliveryMechanismsQuery();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const [openHH, setOpenHH] = useState(false);
   const [openIND, setOpenIND] = useState(false);
   const [currentHouseholdIds, setCurrentHouseholdIds] = useState<string[]>([]);
@@ -325,12 +327,17 @@ export function Criteria({
         ?.fsps.map((el) => ({ name: el.name, value: el.id })) || [];
 
     const fspName =
-      deliveryMechanism?.fsp?.name ||
+      financialServiceProvider?.name ||
       mappedFsps?.find((el) => el.value === criteria.fsp)?.name;
 
     setDeliveryMechanismToDisplay(deliveryMechanismName);
     setFspToDisplay(fspName);
-  }, [deliveryMechanism, availableFspsForDeliveryMechanismData, criteria]);
+  }, [
+    deliveryMechanism,
+    financialServiceProvider,
+    availableFspsForDeliveryMechanismData,
+    criteria,
+  ]);
 
   if (!availableFspsForDeliveryMechanismData) return null;
 
@@ -382,13 +389,13 @@ export function Criteria({
     <CriteriaElement alternative={alternative} data-cy="criteria-container">
       {deliveryMechanismToDisplay && criteriaIndex === 0 && (
         <Grid container>
-          <Grid item xs={6}>
+          <Grid size={{ xs: 6 }}>
             <LabelizedField
               label={t('Delivery Mechanism')}
               value={deliveryMechanismToDisplay}
             />
           </Grid>
-          <Grid item xs={6}>
+          <Grid size={{ xs: 6 }}>
             <LabelizedField label={t('FSP')} value={fspToDisplay} />
           </Grid>
         </Grid>
@@ -396,7 +403,7 @@ export function Criteria({
       {householdIds && (
         <div>
           <Typography data-cy="household-ids-modal-title" variant="body1">
-            {t(`${beneficiaryGroup?.group_label} IDs selected`)}:
+            {t(`${beneficiaryGroup?.groupLabel} IDs selected`)}:
           </Typography>
           <BlueText
             onClick={() => handleOpenHouseholdIds(householdIds)}
@@ -410,7 +417,7 @@ export function Criteria({
       {individualIds && (
         <div>
           <Typography data-cy="individual-ids-modal-title" variant="body1">
-            {t(`${beneficiaryGroup?.group_label} IDs selected`)}:
+            {t(`${beneficiaryGroup?.groupLabel} IDs selected`)}:
           </Typography>
           <BlueText
             onClick={() => handleOpenIndividualIds(individualIds)}
@@ -479,7 +486,7 @@ export function Criteria({
       )}
       <Dialog open={openHH} onClose={handleClose} maxWidth="sm" fullWidth>
         <DialogTitle>
-          {t(`Selected ${beneficiaryGroup?.group_label_plural}`)}
+          {t(`Selected ${beneficiaryGroup?.groupLabelPlural}`)}
         </DialogTitle>
         <DialogContent>
           <Table>

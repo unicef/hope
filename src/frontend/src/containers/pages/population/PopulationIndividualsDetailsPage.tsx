@@ -6,7 +6,6 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { IndividualAdditionalRegistrationInformation } from '@components/population/IndividualAdditionalRegistrationInformation/IndividualAdditionalRegistrationInformation';
 import { IndividualBioData } from '@components/population/IndividualBioData/IndividualBioData';
 import { IndividualDeliveryMechanisms } from '@components/population/IndividualDeliveryMechanisms';
-import { IndividualFlags } from '@components/population/IndividualFlags';
 import { IndividualPhotoModal } from '@components/population/IndividualPhotoModal';
 import { ProgrammeTimeSeriesFields } from '@components/population/ProgrammeTimeSeriesFields';
 import { AdminButton } from '@core/AdminButton';
@@ -44,7 +43,7 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
   const { id } = useParams();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { t } = useTranslation();
 
   const { baseUrl, businessArea, programId } = useBaseUrl();
@@ -100,7 +99,7 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
 
   let breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: `${beneficiaryGroup?.group_label_plural}`,
+      title: `${beneficiaryGroup?.groupLabelPlural}`,
       to: `/${baseUrl}/population/individuals`,
     },
   ];
@@ -122,7 +121,7 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
   return (
     <>
       <PageHeader
-        title={`${t(`${beneficiaryGroup?.member_label} ID`)}: ${individual?.unicefId}`}
+        title={`${t(`${beneficiaryGroup?.memberLabel} ID`)}: ${individual?.unicefId}`}
         breadCrumbs={
           hasPermissions(
             PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST,
@@ -133,7 +132,7 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
         }
         flags={
           <>
-            <IndividualFlags individual={individual} />
+            {/*<IndividualFlags individual={individual} />  TODO REST refactor*/}
             <AdminButton adminUrl={individual?.adminUrl} />
           </>
         }

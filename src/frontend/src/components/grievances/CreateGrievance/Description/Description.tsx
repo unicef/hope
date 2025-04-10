@@ -82,7 +82,7 @@ function Description({
     fetchPolicy: 'network-only',
   });
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   // Set program value based on selected household or individual
   useEffect(() => {
@@ -127,7 +127,7 @@ function Description({
               {
                 label: t('Category'),
                 value: <span>{categoryChoices[values.category]}</span>,
-                size: 3,
+                size: 4,
               },
               showIssueType(values) && {
                 label: t('Issue Type'),
@@ -136,10 +136,10 @@ function Description({
                     {replaceLabels(selectedIssueType(values), beneficiaryGroup)}
                   </span>
                 ),
-                size: 9,
+                size: 8,
               },
               {
-                label: `${beneficiaryGroup?.group_label} ID`,
+                label: `${beneficiaryGroup?.groupLabel} ID`,
                 value: (
                   <span>
                     {values.selectedHousehold?.id &&
@@ -158,7 +158,7 @@ function Description({
                 size: 3,
               },
               {
-                label: `${beneficiaryGroup?.member_label} ID`,
+                label: `${beneficiaryGroup?.memberLabel} ID`,
                 value: (
                   <span>
                     {values.selectedIndividual?.id &&
@@ -323,7 +323,7 @@ function Description({
             <Title>
               <Typography variant="h6">
                 {t(
-                  'Documentation: upload of document: support documentation for the ticket',
+                  'Grievance Supporting Documents: upload of documents for the ticket',
                 )}
               </Typography>
             </Title>

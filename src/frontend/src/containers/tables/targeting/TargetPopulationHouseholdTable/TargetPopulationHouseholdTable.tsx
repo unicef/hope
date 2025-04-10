@@ -28,13 +28,13 @@ export function TargetPopulationHouseholdTable({
     ...variables,
   };
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const replacements = {
-    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.group_label} ID`,
+    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} ID`,
     head_of_household__full_name: (_beneficiaryGroup) =>
-      `Head of ${_beneficiaryGroup?.group_label}`,
-    size: (_beneficiaryGroup) => `${_beneficiaryGroup?.group_label} Size`,
+      `Head of ${_beneficiaryGroup?.groupLabel}`,
+    size: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} Size`,
   };
 
   const adjustedHeadCells = adjustHeadCells(
@@ -46,7 +46,7 @@ export function TargetPopulationHouseholdTable({
   return (
     <TableWrapper>
       <UniversalTable
-        title={t(`${beneficiaryGroup?.group_label_plural}`)}
+        title={t(`${beneficiaryGroup?.groupLabelPlural}`)}
         headCells={adjustedHeadCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={query}

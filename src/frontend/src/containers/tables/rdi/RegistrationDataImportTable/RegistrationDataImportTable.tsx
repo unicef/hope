@@ -1,21 +1,14 @@
 import { TableWrapper } from '@components/core/TableWrapper';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import {
-  AllRegistrationDataImportsQueryVariables,
-  RegistrationDataImportNode,
-  useAllRegistrationDataImportsQuery,
-  useDeduplicationFlagsQuery,
-} from '@generated/graphql';
+import { useDeduplicationFlagsQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { adjustHeadCells, dateToIsoString, decodeIdString } from '@utils/utils';
-import { ReactElement, useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
-import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './RegistrationDataImportTableHeadCells';
 import { RegistrationDataImportTableRow } from './RegistrationDataImportTableRow';
-import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { UniversalRestQueryTable } from '@components/rest/UniversalRestQueryTable/UniversalRestQueryTable';
 import { RestService } from '@restgenerated/services/RestService';
 
@@ -53,7 +46,8 @@ function RegistrationDataImportTable({
     fetchPolicy: 'cache-and-network',
   });
   const { businessArea, programId } = useBaseUrl();
-  const initialVariables = {
+
+  const initialVariables = useMemo(() => ({
     search: filter.search,
     importedBy: filter.importedBy
       ? decodeIdString(filter.importedBy)
@@ -72,7 +66,18 @@ function RegistrationDataImportTable({
       filter.sizeMin || filter.sizeMax
         ? JSON.stringify({ min: filter.sizeMin, max: filter.sizeMax })
         : undefined,
-  };
+  }), [
+    filter.importDateRangeMax,
+    filter.importDateRangeMin,
+    filter.importedBy,
+    filter.search,
+    filter.sizeMax,
+    filter.sizeMin,
+    filter.status,
+    businessArea,
+    programId,
+  ]);
+
   const [queryVariables, setQueryVariables] = useState(initialVariables);
 
   useEffect(() => {
@@ -85,11 +90,11 @@ function RegistrationDataImportTable({
 
   const replacements = {
     numberOfIndividuals: (_beneficiaryGroup) =>
-      `Num. of ${_beneficiaryGroup?.member_label_plural}`,
+      `Num. of ${_beneficiaryGroup?.memberLabelPlural}`,
     numberOfHouseholds: (_beneficiaryGroup) =>
-      `Num. of ${_beneficiaryGroup?.group_labelPlural}`,
+      `Num. of ${_beneficiaryGroup?.groupLabelPlural}`,
     household__unicef_id: (_beneficiaryGroup) =>
-      `${_beneficiaryGroup?.group_label} ID`,
+      `${_beneficiaryGroup?.groupLabel} ID`,
   };
 
   const adjustedHeadCells = adjustHeadCells(

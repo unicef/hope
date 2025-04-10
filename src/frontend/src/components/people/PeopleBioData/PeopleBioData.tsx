@@ -221,7 +221,7 @@ export const PeopleBioData = ({
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Data Collecting Type')}>
-            {selectedProgram?.data_collecting_type?.label}
+            {selectedProgram?.dataCollectingType?.label}
           </LabelizedField>
         </Grid>
       </>

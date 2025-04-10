@@ -41,7 +41,7 @@ function EditIndividualDataChange({
   const { t } = useTranslation();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'] =
@@ -75,7 +75,7 @@ function EditIndividualDataChange({
   if (!individual) {
     return (
       <div>
-        {t(`You have to select a ${beneficiaryGroup?.member_label} earlier`)}
+        {t(`You have to select a ${beneficiaryGroup?.memberLabel} earlier`)}
       </div>
     );
   }
@@ -98,43 +98,41 @@ function EditIndividualDataChange({
           <Title>
             <Typography variant="h6">{t('Bio Data')}</Typography>
           </Title>
-          <Grid container spacing={3}>
-            <FieldArray
-              name="individualDataUpdateFields"
-              render={(arrayHelpers) => (
-                <>
-                  {values.individualDataUpdateFields.map((item, index) => (
-                    <EditIndividualDataChangeFieldRow
-                      // eslint-disable-next-line react/no-array-index-key
-                      key={`${index}-${item?.fieldName}`}
-                      itemValue={item}
-                      index={index}
-                      individual={fullIndividual.individual}
-                      fields={
-                        addIndividualFieldsData.allAddIndividualsFieldsAttributes
-                      }
-                      notAvailableFields={notAvailableItems}
-                      onDelete={() => arrayHelpers.remove(index)}
-                      values={values}
-                    />
-                  ))}
-                  <Grid size={{ xs: 4 }}>
-                    <Button
-                      color="primary"
-                      onClick={() => {
-                        arrayHelpers.push({ fieldName: null, fieldValue: '' });
-                      }}
-                      startIcon={<AddCircleOutline />}
-                      data-cy="button-add-new-field"
-                      disabled={isEditTicket}
-                    >
-                      {t('Add new field')}
-                    </Button>
-                  </Grid>
-                </>
-              )}
-            />
-          </Grid>
+          <FieldArray
+            name="individualDataUpdateFields"
+            render={(arrayHelpers) => (
+              <>
+                {values.individualDataUpdateFields.map((item, index) => (
+                  <EditIndividualDataChangeFieldRow
+                    // eslint-disable-next-line react/no-array-index-key
+                    key={`${index}-${item?.fieldName}`}
+                    itemValue={item}
+                    index={index}
+                    individual={fullIndividual.individual}
+                    fields={
+                      addIndividualFieldsData.allAddIndividualsFieldsAttributes
+                    }
+                    notAvailableFields={notAvailableItems}
+                    onDelete={() => arrayHelpers.remove(index)}
+                    values={values}
+                  />
+                ))}
+                <Grid size={{ xs: 4 }}>
+                  <Button
+                    color="primary"
+                    onClick={() => {
+                      arrayHelpers.push({ fieldName: null, fieldValue: '' });
+                    }}
+                    startIcon={<AddCircleOutline />}
+                    data-cy="button-add-new-field"
+                    disabled={isEditTicket}
+                  >
+                    {t('Add new field')}
+                  </Button>
+                </Grid>
+              </>
+            )}
+          />
         </BoxWithBorders>
       )}
       <BoxWithBorders>

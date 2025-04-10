@@ -25,7 +25,7 @@ function PaymentPlansTable({
   const { t } = useTranslation();
   const { programId, businessArea } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const initialVariables: AllPaymentPlansForTableQueryVariables = {
     businessArea,
@@ -41,10 +41,10 @@ function PaymentPlansTable({
   };
   const replacements = {
     totalHouseholdsCount: (_beneficiaryGroup) =>
-      `Num. of ${_beneficiaryGroup?.group_labelPlural}`,
+      `Num. of ${_beneficiaryGroup?.groupLabelPlural}`,
   };
 
-  const adjustedHeadCells = adjustHeadCells(
+  const adjustedHeadCells = adjustHeadCells<PaymentPlanNode>(
     headCells,
     beneficiaryGroup,
     replacements,

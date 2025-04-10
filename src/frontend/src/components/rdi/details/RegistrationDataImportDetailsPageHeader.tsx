@@ -3,11 +3,6 @@ import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import {
-  RegistrationDetailedFragment,
-  useEraseRdiMutation,
-  useRefuseRdiMutation,
-} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { useConfirmation } from '@core/ConfirmationDialog';
@@ -21,8 +16,10 @@ import { AdminButton } from '@core/AdminButton';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RegistrationDataImportStatusEnum } from '@restgenerated/models/RegistrationDataImportStatusEnum';
 import { RegistrationDataImportDetail } from '@restgenerated/models/RegistrationDataImportDetail';
-import { useHopeDetailsQuery } from '@hooks/useActionMutation';
+import { useActionMutation } from '@hooks/useActionMutation';
 import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { RefuseRdi } from '@restgenerated/models/RefuseRdi';
 
 export interface RegistrationDataImportDetailsPageHeaderPropTypes {
   registration: RegistrationDataImportDetail;
@@ -45,15 +42,40 @@ const RegistrationDataImportDetailsPageHeader = ({
 }: RegistrationDataImportDetailsPageHeaderPropTypes): ReactElement => {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
+  const { businessAreaSlug, programSlug } = useBaseUrl();
   const confirm = useConfirmation();
   const navigate = useNavigate();
+  const client = useQueryClient();
   const { isActiveProgram } = useProgramContext();
-  const [refuseMutate, { loading: refuseLoading }] = useRefuseRdiMutation();
-  const { mutateAsync:eraseRdiMutate, isPending:eraseLoading } = useHopeDetailsQuery(
-    registration.id,
-    RestService.restBusinessAreasProgramsRegistrationDataImportsEraseCreate,
-    [RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve.name],
-  );
+  const { mutateAsync: refuseMutate, isPending: refuseLoading } = useMutation({
+    mutationFn: async (data: RefuseRdi) => {
+      return RestService.restBusinessAreasProgramsRegistrationDataImportsRefuseCreate(
+        {
+          id: registration.id,
+          businessAreaSlug,
+          programSlug,
+          requestBody: data,
+        },
+      );
+    },
+    onSuccess: () => {
+      client.invalidateQueries({
+        queryKey: [
+          RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve
+            .name,
+        ],
+      });
+    },
+  });
+  const { mutateAsync: eraseRdiMutate, isPending: eraseLoading } =
+    useActionMutation(
+      registration.id,
+      RestService.restBusinessAreasProgramsRegistrationDataImportsEraseCreate,
+      [
+        RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve
+          .name,
+      ],
+    );
   const [showRefuseRdiForm, setShowRefuseRdiForm] = useState(false);
 
   let buttons = null;

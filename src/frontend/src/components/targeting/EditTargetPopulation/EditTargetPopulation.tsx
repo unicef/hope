@@ -91,14 +91,14 @@ const EditTargetPopulation = ({
   const { baseUrl } = useBaseUrl();
   const { selectedProgram, isSocialDctType, isStandardDctType } =
     useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const handleValidate = (values): { targetingCriteria?: string } => {
     const { targetingCriteria, householdIds, individualIds } = values;
     const errors: { targetingCriteria?: string } = {};
     if (!targetingCriteria.length && !householdIds && !individualIds) {
       errors.targetingCriteria = t(
-        `You need to select at least one targeting criteria or ${beneficiaryGroup?.member_label} ID or ${beneficiaryGroup?.group_label} ID`,
+        `You need to select at least one targeting criteria or ${beneficiaryGroup?.memberLabel} ID or ${beneficiaryGroup?.groupLabel} ID`,
       );
     }
     return errors;
@@ -228,12 +228,12 @@ const EditTargetPopulation = ({
           >
             <Typography style={{ color: '#b1b1b5' }} variant="h6">
               {t(
-                `Save to see the list of ${beneficiaryGroup?.group_label_plural}`,
+                `Save to see the list of ${beneficiaryGroup?.groupLabelPlural}`,
               )}
             </Typography>
             <Typography style={{ color: '#b1b1b5' }} variant="subtitle1">
               {t(
-                `List of ${beneficiaryGroup?.group_label_plural} will be available after saving`,
+                `List of ${beneficiaryGroup?.groupLabelPlural} will be available after saving`,
               )}{' '}
             </Typography>
           </Box>

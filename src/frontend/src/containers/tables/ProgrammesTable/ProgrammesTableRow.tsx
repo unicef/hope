@@ -6,7 +6,6 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ProgrammeChoiceDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import TableCell from '@mui/material/TableCell';
-import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import {
   choicesToDict,
   formatCurrency,
@@ -14,9 +13,10 @@ import {
 } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ProgramList } from '@restgenerated/models/ProgramList';
 
 interface ProgrammesTableRowProps {
-  program: ProgramDetail;
+  program: ProgramList;
   choicesData: ProgrammeChoiceDataQuery;
 }
 
@@ -54,13 +54,13 @@ function ProgrammesTableRow({
           />
         </TableCell>
         <TableCell align="left">
-          <UniversalMoment>{program.start_date}</UniversalMoment> -{' '}
-          <UniversalMoment>{program.end_date}</UniversalMoment>
+          <UniversalMoment>{program.startDate}</UniversalMoment> -{' '}
+          <UniversalMoment>{program.endDate}</UniversalMoment>
         </TableCell>
         <TableCell align="left">
           {programSectorChoiceDict[program.sector]}
         </TableCell>
-        <TableCell align="right">{program.household_count}</TableCell>
+        <TableCell align="right">{program.householdCount}</TableCell>
         <TableCell align="right">
           {formatCurrency(Number(program.budget))}
         </TableCell>
