@@ -167,3 +167,190 @@ class TestUserProfile:
         assert profile_data["permissions_in_scope"] == {str(perm) for perm in [*self.role1.permissions, *self.role2.permissions, *self.role_p1.permissions, *self.role_p2.permissions]}
 
 
+class TestUserList:
+    @pytest.fixture(autouse=True)
+    def setup(self, api_client: Any) -> None:
+        self.afghanistan = create_afghanistan()
+        self.program = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
+
+        self.list_url = reverse(
+            "api:accounts:users-list",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+            },
+        )
+        self.count_url = reverse(
+            "api:accounts:users-count",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+            },
+        )
+
+        self.partner = PartnerFactory(name="TestPartner")
+        self.user = UserFactory(partner=self.partner, first_name="Alice")
+        self.api_client = api_client(self.user)
+
+        role = RoleFactory(name="TestRole", permissions=[Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS.value])
+        self.user1 = UserFactory(partner=self.partner, first_name="Bob")
+        RoleAssignmentFactory(user=self.user1, business_area=self.afghanistan, role=role)
+
+        self.user2 = UserFactory(partner=self.partner, first_name="Carol")
+        RoleAssignmentFactory(user=self.user2, business_area=self.afghanistan, program=self.program, role=role)
+
+        partner_with_role_1 = PartnerFactory(name="TestPartner1")
+        RoleAssignmentFactory(partner=partner_with_role_1, business_area=self.afghanistan, role=role)
+        self.user3 = UserFactory(partner=partner_with_role_1, first_name="Dave")
+
+        partner_with_role_2 = PartnerFactory(name="TestPartner2")
+        RoleAssignmentFactory(partner=partner_with_role_2, business_area=self.afghanistan, program=self.program,
+                              role=role)
+        self.user4 = UserFactory(partner=partner_with_role_2, first_name="Eve")
+
+
+        self.user_in_different_ba = UserFactory(
+            partner=self.partner, first_name="Frank"
+        )
+        RoleAssignmentFactory(
+            user=self.user_in_different_ba,
+            business_area=create_ukraine(),
+            role=role,
+        )
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.USER_MANAGEMENT_VIEW_LIST], status.HTTP_200_OK),
+            (ALL_GRIEVANCES_CREATE_MODIFY, status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+            ([Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_user_list_permissions(
+        self,
+        permissions: list,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
+    ) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=permissions,
+            business_area=self.afghanistan,
+            whole_business_area_access=True,
+        )
+
+        response = self.api_client.get(self.list_url)
+        assert response.status_code == expected_status
+
+    def test_user_list(
+        self,
+        create_user_role_with_permissions: Any,
+    ) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.USER_MANAGEMENT_VIEW_LIST],
+            business_area=self.afghanistan,
+            whole_business_area_access=True,
+        )
+
+        response = self.api_client.get(self.list_url)
+        assert response.status_code == status.HTTP_200_OK
+        response_results = response.json()["results"]
+        assert len(response_results) == 5
+
+        response_count = self.api_client.get(self.count_url)
+        assert response_count.status_code == status.HTTP_200_OK
+        assert response_count.json()["count"] == 5
+
+        for i, user in enumerate([self.user, self.user1, self.user2, self.user3, self.user4]):
+            user_result = response_results[i]
+            assert user_result["id"] == str(user.id)
+            assert user_result["first_name"] == user.first_name
+            assert user_result["last_name"] == user.last_name
+            assert user_result["email"] == user.email
+            assert user_result["username"] == user.username
+
+
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.USER_MANAGEMENT_VIEW_LIST], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_user_count(
+        self,
+        permissions: list,
+        expected_status: int,
+        create_user_role_with_permissions: Any,
+    ) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=permissions,
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+        response = self.api_client.get(self.count_url)
+        assert response.status_code == expected_status
+
+        if expected_status == status.HTTP_200_OK:
+            assert response.json()["count"] == 5
+
+    def test_user_list_caching(
+        self, create_user_role_with_permissions: Any, set_admin_area_limits_in_program: Any
+    ) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.USER_MANAGEMENT_VIEW_LIST],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.api_client.get(self.list_url)
+            assert response.status_code == status.HTTP_200_OK
+            assert response.has_header("etag")
+            etag = response.headers["etag"]
+            assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
+            assert len(response.json()["results"]) == 5
+            assert len(ctx.captured_queries) == 9
+
+        # no change - use cache
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.api_client.get(self.list_url)
+            assert response.status_code == status.HTTP_200_OK
+            assert response.has_header("etag")
+            etag_second_call = response.headers["etag"]
+            assert etag == etag_second_call
+            assert len(ctx.captured_queries) == 4
+
+        self.user2.first_name = "Zoe"
+        self.user2.save()
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.api_client.get(self.list_url)
+            assert response.status_code == status.HTTP_200_OK
+            assert response.has_header("etag")
+            etag_third_call = response.headers["etag"]
+            assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
+            assert etag_third_call not in [etag, etag_second_call]
+            # 4 queries are saved because of cached permissions calculations
+            assert len(ctx.captured_queries) == 5
+
+        self.user3.delete()
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.api_client.get(self.list_url)
+            assert response.status_code == status.HTTP_200_OK
+            assert response.has_header("etag")
+            etag_fourth_call = response.headers["etag"]
+            assert len(response.json()["results"]) == 4
+            assert etag_fourth_call not in [etag, etag_second_call, etag_third_call, etag_third_call]
+            assert len(ctx.captured_queries) == 5
+
+        # no change - use cache
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.api_client.get(self.list_url)
+            assert response.status_code == status.HTTP_200_OK
+            assert response.has_header("etag")
+            etag_fifth_call = response.headers["etag"]
+            assert etag_fifth_call == etag_fourth_call
+            assert len(ctx.captured_queries) == 4
