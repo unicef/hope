@@ -4,6 +4,7 @@
 /* eslint-disable */
 import type { CurrencyEnum } from './CurrencyEnum';
 export type PatchedPaymentPlanCreateUpdate = {
+    readonly id?: string;
     targetPopulationId?: string;
     dispersionStartDate?: string;
     dispersionEndDate?: string;

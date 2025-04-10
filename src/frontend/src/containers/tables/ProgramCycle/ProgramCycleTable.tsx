@@ -85,7 +85,7 @@ export const ProgramCyclesTableProgramDetails = ({
           align="right"
           data-cy="program-cycle-total-undelivered-quantity"
         >
-          {row.total_undelivered_quantity_usd || '-'}
+          {row.totalUndeliveredQuantityUsd || '-'}
         </TableCell>
         <TableCell
           align="right"

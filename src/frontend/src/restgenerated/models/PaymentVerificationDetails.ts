@@ -2,7 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type AcceptanceProcess = {
-    comment?: string;
+export type PaymentVerificationDetails = {
+    readonly id: string;
 };
 

@@ -22,7 +22,6 @@ import { RestService } from '@restgenerated/services/RestService';
 export const CreatePeoplePaymentPlanPage = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { paymentPlanId } = useParams();
 
   const { mutateAsync: createPaymentPlan, isPending: loadingCreate } =
     useMutation({
@@ -110,7 +109,6 @@ export const CreatePeoplePaymentPlanPage = (): ReactElement => {
 
       const res = await createPaymentPlan({
         businessAreaSlug: businessArea,
-        id: paymentPlanId,
         programSlug: programId,
         requestBody,
       });
