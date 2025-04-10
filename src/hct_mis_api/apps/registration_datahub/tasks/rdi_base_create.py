@@ -83,6 +83,7 @@ class RdiBaseCreateTask:
                     PendingAccount(
                         individual=individual,
                         account_type=account_types_dict[account_type],
+                        number=values.pop("number", None),
                         data=values,
                         rdi_merge_status=MergeStatusModel.PENDING,
                     )

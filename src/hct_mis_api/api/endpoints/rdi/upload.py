@@ -29,7 +29,11 @@ from hct_mis_api.apps.household.models import (
     PendingHousehold,
     PendingIndividual,
 )
-from hct_mis_api.apps.payment.models import AccountType, PendingAccount
+from hct_mis_api.apps.payment.models import (
+    AccountType,
+    FinancialInstitution,
+    PendingAccount,
+)
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
@@ -99,6 +103,10 @@ class DocumentSerializer(serializers.ModelSerializer):
 
 class AccountSerializer(serializers.ModelSerializer):
     account_type = serializers.SlugRelatedField(slug_field="key", required=True, queryset=AccountType.objects.all())
+    number = serializers.CharField(allow_blank=True, required=False)
+    financial_institution = serializers.SlugRelatedField(
+        slug_field="code", required=False, queryset=FinancialInstitution.objects.all()
+    )
     data = serializers.JSONField(required=False, default=dict)  # type: ignore
 
     class Meta:

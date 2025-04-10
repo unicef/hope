@@ -25,6 +25,8 @@ from hct_mis_api.apps.payment.models import (
     Account,
     AccountType,
     DeliveryMechanism,
+    DeliveryMechanismConfig,
+    FinancialInstitution,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FspNameMapping,
@@ -597,3 +599,51 @@ class PaymentPlanSupportingDocumentAdmin(HOPEModelAdminBase):
 class AccountTypeAdmin(HOPEModelAdminBase):
     list_display = ("key", "unique_fields", "payment_gateway_id")
     search_fields = ("key", "payment_gateway_id")
+
+
+@admin.register(FinancialInstitution)
+class FinancialInstitutionAdmin(HOPEModelAdminBase):
+    list_display = (
+        "code",
+        "description",
+        "type",
+        "country",
+    )
+    search_fields = ("code",)
+    list_filter = (
+        ("country", AutoCompleteFilter),
+        "type",
+    )
+    raw_id_fields = ("country",)
+
+
+class DeliveryMechanismConfigForm(forms.ModelForm):
+    required_fields = CommaSeparatedArrayField(required=False)
+
+    class Meta:
+        model = DeliveryMechanismConfig
+        fields = [
+            "required_fields",
+            "delivery_mechanism",
+            "fsp",
+            "country",
+        ]  # Add all fields you want to display in the admin
+
+
+@admin.register(DeliveryMechanismConfig)
+class DeliveryMechanismConfigAdmin(HOPEModelAdminBase):
+    form = DeliveryMechanismConfigForm
+
+    list_display = (
+        "id",
+        "delivery_mechanism",
+        "fsp",
+        "country",
+    )
+    search_fields = ("code",)
+    list_filter = (
+        ("delivery_mechanism", AutoCompleteFilter),
+        ("fsp", AutoCompleteFilter),
+        ("country", AutoCompleteFilter),
+    )
+    raw_id_fields = ("delivery_mechanism", "fsp", "country")

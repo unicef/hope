@@ -435,6 +435,7 @@ class PaymentGatewayService:
                 DeliveryMechanismConfig.objects.update_or_create(
                     delivery_mechanism=DeliveryMechanism.objects.get(payment_gateway_id=dm_id),
                     fsp=fsp,
+                    country=None,  # TODO create config for each country in configs data?
                     defaults=dict(required_fields=required_fields),
                 )
 

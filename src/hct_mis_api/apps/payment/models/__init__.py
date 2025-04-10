@@ -8,6 +8,7 @@ from hct_mis_api.apps.payment.models.payment import (
     AccountType,
     DeliveryMechanism,
     DeliveryMechanismConfig,
+    FinancialInstitution,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FlexFieldArrayField,
@@ -50,4 +51,5 @@ __all__ = [
     "FlexFieldArrayField",
     "build_summary",
     "DeliveryMechanismConfig",
+    "FinancialInstitution",
 ]
