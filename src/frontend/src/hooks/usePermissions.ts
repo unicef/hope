@@ -4,21 +4,18 @@ import { useBaseUrl } from './useBaseUrl';
 import { Profile } from '@restgenerated/models/Profile';
 
 export function usePermissions(): string[] {
-  const { businessArea, programId } = useBaseUrl();
+  const { businessAreaSlug, programSlug } = useBaseUrl();
   const {
     data: meData,
     isLoading: meDataLoading,
     error,
   } = useQuery<Profile>({
-    queryKey: ['profile', businessArea, programId],
+    queryKey: ['profile', businessAreaSlug, programSlug],
     queryFn: () => {
-      const params: { businessAreaSlug: string; programSlug?: string } = {
-        businessAreaSlug: businessArea,
-      };
-      if (programId !== 'all') {
-        params.programSlug = programId;
-      }
-      return RestService.restUsersProfileRetrieve(params);
+      return RestService.restBusinessAreasUsersProfileRetrieve({
+        businessAreaSlug,
+        program: programSlug === 'all' ? undefined : programSlug,
+      });
     },
   });
 

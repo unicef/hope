@@ -22,7 +22,6 @@ snapshots['TestCreateCommunicationMessage::test_create_accountability_communicat
                 },
                 'paymentPlan': None,
                 'randomSamplingArguments': '{"excluded_admin_areas": []}',
-                'registrationDataImport': None,
                 'sampleSize': 14,
                 'title': 'Test message'
             }
@@ -45,7 +44,6 @@ snapshots['TestCreateCommunicationMessage::test_create_accountability_communicat
                 },
                 'paymentPlan': None,
                 'randomSamplingArguments': None,
-                'registrationDataImport': None,
                 'sampleSize': 1,
                 'title': 'Test message'
             }
@@ -70,7 +68,6 @@ snapshots['TestCreateCommunicationMessage::test_create_accountability_communicat
                     'name': 'Test Message Payment Plan'
                 },
                 'randomSamplingArguments': '{"excluded_admin_areas": []}',
-                'registrationDataImport': None,
                 'sampleSize': 14,
                 'title': 'Test message'
             }
@@ -95,7 +92,6 @@ snapshots['TestCreateCommunicationMessage::test_create_accountability_communicat
                     'name': 'Test Message Payment Plan'
                 },
                 'randomSamplingArguments': None,
-                'registrationDataImport': None,
                 'sampleSize': 1,
                 'title': 'Test message'
             }

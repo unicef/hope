@@ -71,6 +71,8 @@ export type { PaginatedProjectList as PaginatedProjectListCamelCase } from './mo
 export type { PaginatedRegistrationDataImportListList as PaginatedRegistrationDataImportListListCamelCase } from './models/PaginatedRegistrationDataImportListList';
 export type { PaginatedRegistrationList as PaginatedRegistrationListCamelCase } from './models/PaginatedRegistrationList';
 export type { PaginatedTargetPopulationListList as PaginatedTargetPopulationListListCamelCase } from './models/PaginatedTargetPopulationListList';
+export type { PaginatedUserList as PaginatedUserListCamelCase } from './models/PaginatedUserList';
+export type { Partner as PartnerCamelCase } from './models/Partner';
 export { PartnerAccessEnum as PartnerAccessEnumCamelCase } from './models/PartnerAccessEnum';
 export type { PatchedProgramCycleUpdate as PatchedProgramCycleUpdateCamelCase } from './models/PatchedProgramCycleUpdate';
 export type { PatchedRDI as PatchedRDICamelCase } from './models/PatchedRDI';
@@ -119,7 +121,6 @@ export { Status791Enum as Status791EnumCamelCase } from './models/Status791Enum'
 export { SubtypeEnum as SubtypeEnumCamelCase } from './models/SubtypeEnum';
 export type { TargetPopulationList as TargetPopulationListCamelCase } from './models/TargetPopulationList';
 export type { User as UserCamelCase } from './models/User';
-export type { UserBusinessArea as UserBusinessAreaCamelCase } from './models/UserBusinessArea';
 export { WorkStatusEnum as WorkStatusEnumCamelCase } from './models/WorkStatusEnum';
 
 export { FieldsAttributesService } from './services/FieldsAttributesService';

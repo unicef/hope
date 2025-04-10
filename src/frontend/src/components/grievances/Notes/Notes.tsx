@@ -45,14 +45,14 @@ export function Notes({
   canAddNote: boolean;
 }): ReactElement {
   const { t } = useTranslation();
-  const { businessArea, programId } = useBaseUrl();
+  const { businessAreaSlug, programSlug } = useBaseUrl();
 
   const { data: meData, isLoading: meLoading } = useQuery({
-    queryKey: ['profile', businessArea, programId],
+    queryKey: ['profile', businessAreaSlug, programSlug],
     queryFn: () => {
-      return RestService.restUsersProfileRetrieve({
-        businessAreaSlug: businessArea,
-        programSlug: programId === 'all' ? undefined : programId,
+      return RestService.restBusinessAreasUsersProfileRetrieve({
+        businessAreaSlug,
+        program: programSlug === 'all' ? undefined : programSlug,
       });
     },
   });
