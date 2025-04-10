@@ -25,7 +25,7 @@ class UserBusinessAreaSerializer(serializers.ModelSerializer):
         )
 
     def get_permissions(self, obj: BusinessArea) -> list:
-        user = self.context["request"].user
+        user = self.context["user_obj"]
         if user:
             return user.permissions_in_business_area(obj.slug)
         return []
@@ -40,11 +40,18 @@ class RoleSerializer(serializers.ModelSerializer):
         exclude = ("id",)
 
 
+class PartnerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Partner
+        fields = ("id", "name")
+
+
 class ProfileSerializer(serializers.ModelSerializer):
-    permissions_in_scope = serializers.SerializerMethodField()
-    business_areas = UserBusinessAreaSerializer(many=True)
+    partner = PartnerSerializer()
     partner_roles = serializers.SerializerMethodField()
     user_roles = serializers.SerializerMethodField()
+    business_areas = serializers.SerializerMethodField()
+    permissions_in_scope = serializers.SerializerMethodField()
 
     class Meta:
         model = get_user_model()
@@ -55,6 +62,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "is_superuser",
+            "partner",
             "business_areas",
             "permissions_in_scope",
             "user_roles",
@@ -71,23 +79,25 @@ class ProfileSerializer(serializers.ModelSerializer):
         role_ids = user.role_assignments.order_by("business_area__slug").values_list("role_id", flat=True)
         return RoleSerializer(Role.objects.filter(id__in=role_ids), many=True).data
 
+    @staticmethod
+    def get_business_areas(user: User) -> ReturnDict:
+        return UserBusinessAreaSerializer(user.business_areas, context={"user_obj": user}, many=True).data
+
     def get_permissions_in_scope(self, user: User) -> set:
         request = self.context.get("request", {})
-        business_area_slug = request.query_params.get("business_area_slug")
+        business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
 
-        if program_slug := request.query_params.get("program_slug"):  # scope program
-            if program := Program.objects.filter(slug=program_slug, business_area__slug=business_area_slug).first():
+        if program_id := request.query_params.get("program"):  # scope program
+            if program := Program.objects.filter(id=program_id).first():
                 return user.permissions_in_business_area(business_area_slug, program.id)
             return set()
 
         return user.permissions_in_business_area(business_area_slug)
 
-
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
-        fields = ("first_name", "last_name", "email", "username")
-
+        fields = ("id", "first_name", "last_name", "email", "username")
 
 class PartnerForProgramSerializer(serializers.ModelSerializer):
     """

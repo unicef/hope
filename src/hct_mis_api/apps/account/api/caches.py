@@ -34,4 +34,3 @@ class UserListKeyConstructor(KeyConstructor):
     querystring = bits.QueryParamsKeyBit()
     params = bits.KwargsKeyBit()
     pagination = bits.PaginationKeyBit()
-
