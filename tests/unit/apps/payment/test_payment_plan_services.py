@@ -967,6 +967,10 @@ class TestPaymentPlanServices(APITestCase):
             business_area_id=payment_plan.business_area_id,
             status=Payment.PENDING_STATUSES,
             financial_service_provider=None,
+            entitlement_quantity=None,
+            entitlement_quantity_usd=None,
+            delivered_quantity=None,
+            delivered_quantity_usd=None,
         )
 
         with self.assertRaises(GraphQLError) as e:
@@ -975,12 +979,20 @@ class TestPaymentPlanServices(APITestCase):
             e.exception.message,
             "Payment Plan doesn't have FSP / DeliveryMechanism assigned.",
         )
-
         payment_plan.financial_service_provider = self.fsp
         payment_plan.delivery_mechanism = self.dm_transfer_to_account
-        payment_plan.save()
-        PaymentPlanService(payment_plan).lock_fsp()
+        payment.save()
 
+        with self.assertRaises(GraphQLError) as e:
+            PaymentPlanService(payment_plan).lock_fsp()
+        self.assertEqual(
+            e.exception.message,
+            "All Payments must have entitlement quantity set.",
+        )
+        payment.entitlement_quantity = 100
+        payment.save()
+
+        PaymentPlanService(payment_plan).lock_fsp()
         payment.refresh_from_db()
         self.assertEqual(payment.financial_service_provider, self.fsp)
 
