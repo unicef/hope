@@ -34,3 +34,8 @@ class DataCollectingTypeSerializer(serializers.ModelSerializer):
             "household_filters_available",
             "individual_filters_available",
         )
+
+
+class ChoiceSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    value = serializers.CharField()
