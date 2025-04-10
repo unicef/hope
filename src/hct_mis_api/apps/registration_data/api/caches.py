@@ -9,4 +9,4 @@ class RDIListVersionsKeyBit(BusinessAreaAndProgramKeyBitMixin):
 
 
 class RDIKeyConstructor(KeyConstructorMixin):
-    registration_data_import_list_versions = RDIListVersionsKeyBit()
+    registration_data_import_list_version = RDIListVersionsKeyBit()
