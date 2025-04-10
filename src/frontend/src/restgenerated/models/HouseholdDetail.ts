@@ -28,7 +28,7 @@ export type HouseholdDetail = {
     readonly linkedGrievances: Record<string, any>;
     readonly adminAreaTitle: string;
     readonly activeIndividualsCount: number;
-    readonly geopoint: Array<number> | null;
+    geopoint: string;
     readonly importId: string;
     readonly adminUrl: string;
     /**

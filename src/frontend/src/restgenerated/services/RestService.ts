@@ -29,6 +29,7 @@ import type { PaginatedProjectList } from '../models/PaginatedProjectList';
 import type { PaginatedRegistrationDataImportListList } from '../models/PaginatedRegistrationDataImportListList';
 import type { PaginatedRegistrationList } from '../models/PaginatedRegistrationList';
 import type { PaginatedTargetPopulationListList } from '../models/PaginatedTargetPopulationListList';
+import type { PaginatedUserList } from '../models/PaginatedUserList';
 import type { PatchedProgramCycleUpdate } from '../models/PatchedProgramCycleUpdate';
 import type { PatchedRDI } from '../models/PatchedRDI';
 import type { PaymentPlanBulkAction } from '../models/PaymentPlanBulkAction';
@@ -2794,6 +2795,136 @@ export class RestService {
         });
     }
     /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaginatedUserList
+     * @throws ApiError
+     */
+    public static restBusinessAreasUsersList({
+        businessAreaSlug,
+        isFeedbackCreator,
+        isMessageCreator,
+        isSurveyCreator,
+        isTicketCreator,
+        limit,
+        offset,
+        orderBy,
+        ordering,
+        partner,
+        program,
+        roles,
+        search,
+        status,
+    }: {
+        businessAreaSlug: string,
+        isFeedbackCreator?: boolean,
+        isMessageCreator?: boolean,
+        isSurveyCreator?: boolean,
+        isTicketCreator?: boolean,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `first_name` - First name
+         * * `-first_name` - First name (descending)
+         * * `last_name` - Last name
+         * * `-last_name` - Last name (descending)
+         * * `last_login` - Last login
+         * * `-last_login` - Last login (descending)
+         * * `status` - Status
+         * * `-status` - Status (descending)
+         * * `partner` - Partner
+         * * `-partner` - Partner (descending)
+         * * `email` - Email
+         * * `-email` - Email (descending)
+         */
+        orderBy?: Array<'-email' | '-first_name' | '-last_login' | '-last_name' | '-partner' | '-status' | 'email' | 'first_name' | 'last_login' | 'last_name' | 'partner' | 'status'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        partner?: Array<number>,
+        program?: string,
+        roles?: Array<string>,
+        search?: string,
+        /**
+         * * `ACTIVE` - Active
+         * * `INACTIVE` - Inactive
+         * * `INVITED` - Invited
+         */
+        status?: Array<'ACTIVE' | 'INACTIVE' | 'INVITED'>,
+    }): CancelablePromise<PaginatedUserList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/users/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'is_feedback_creator': isFeedbackCreator,
+                'is_message_creator': isMessageCreator,
+                'is_survey_creator': isSurveyCreator,
+                'is_ticket_creator': isTicketCreator,
+                'limit': limit,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'partner': partner,
+                'program': program,
+                'roles': roles,
+                'search': search,
+                'status': status,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasUsersCountRetrieve({
+        businessAreaSlug,
+    }: {
+        businessAreaSlug: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/users/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns Profile
+     * @throws ApiError
+     */
+    public static restBusinessAreasUsersProfileRetrieve({
+        businessAreaSlug,
+        program,
+    }: {
+        businessAreaSlug: string,
+        program?: string,
+    }): CancelablePromise<Profile> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/users/profile/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'program': program,
+            },
+        });
+    }
+    /**
      * @returns BusinessArea
      * @throws ApiError
      */
@@ -3141,26 +3272,6 @@ export class RestService {
                 'org_pk': orgPk,
                 'org_slug': orgSlug,
                 'programme_pk': programmePk,
-            },
-        });
-    }
-    /**
-     * @returns Profile
-     * @throws ApiError
-     */
-    public static restUsersProfileRetrieve({
-        businessAreaSlug,
-        programSlug,
-    }: {
-        businessAreaSlug?: string,
-        programSlug?: string,
-    }): CancelablePromise<Profile> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/rest/users/profile/',
-            query: {
-                'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
             },
         });
     }
