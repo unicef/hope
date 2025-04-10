@@ -2,6 +2,7 @@ import datetime
 from enum import Enum
 from typing import Any
 
+from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 
@@ -79,6 +80,7 @@ class TestProgramList:
         )
 
         self.program_not_allowed = ProgramFactory(business_area=self.afghanistan, name="Not Allowed Program")
+        cache.clear()
 
     @pytest.mark.parametrize(
         "permissions",

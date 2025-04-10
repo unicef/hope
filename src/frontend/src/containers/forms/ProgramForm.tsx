@@ -66,11 +66,11 @@ const ProgramForm = ({
 
     if (dctType === 'SOCIAL') {
       filteredBeneficiaryGroups = beneficiaryGroupsData.results.filter(
-        (el) => el.master_detail === false,
+        (el) => el.masterDetail === false,
       );
     } else if (dctType === 'STANDARD') {
       filteredBeneficiaryGroups = beneficiaryGroupsData.results.filter(
-        (el) => el.master_detail === true,
+        (el) => el.masterDetail === true,
       );
     } else {
       filteredBeneficiaryGroups = beneficiaryGroupsData.results;

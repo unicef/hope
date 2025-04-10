@@ -39,7 +39,7 @@ function PaymentsTable({
   const { baseUrl } = useBaseUrl();
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const [dialogPayment, setDialogPayment] = useState<
     AllPaymentsForTableQuery['allPayments']['edges'][number]['node'] | null
@@ -51,9 +51,9 @@ function PaymentsTable({
 
   const replacements = {
     household__unicef_id: (_beneficiaryGroup) =>
-      `${_beneficiaryGroup?.group_label} ${t('ID')}`,
+      `${_beneficiaryGroup?.groupLabel} ${t('ID')}`,
     household__size: (_beneficiaryGroup) =>
-      `${_beneficiaryGroup?.group_label} ${t('Size')}`,
+      `${_beneficiaryGroup?.groupLabel} ${t('Size')}`,
   };
 
   const adjustedHeadCells = adjustHeadCells(

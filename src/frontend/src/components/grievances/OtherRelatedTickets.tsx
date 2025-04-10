@@ -24,7 +24,7 @@ export function OtherRelatedTickets({
   const { baseUrl } = useBaseUrl();
   const { id } = useParams();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const [show, setShow] = useState(false);
   const { existingTickets, linkedTickets } = ticket;
@@ -83,7 +83,7 @@ export function OtherRelatedTickets({
       </Title>
       <Box display="flex" flexDirection="column">
         <LabelizedField
-          label={`For ${beneficiaryGroup?.group_label} ${ticket.household?.unicefId || '-'}`}
+          label={`For ${beneficiaryGroup?.groupLabel} ${ticket.household?.unicefId || '-'}`}
         >
           <>{renderIds(openExistingTickets)}</>
         </LabelizedField>
@@ -103,7 +103,7 @@ export function OtherRelatedTickets({
           <Box mb={3} mt={3}>
             <Typography>{t('Closed Tickets')}</Typography>
             <LabelizedField
-              label={`${t(`For ${beneficiaryGroup?.group_label}`)} ${ticket.household?.unicefId || '-'}`}
+              label={`${t(`For ${beneficiaryGroup?.groupLabel}`)} ${ticket.household?.unicefId || '-'}`}
             >
               <>{renderIds(closedExistingTickets)}</>
             </LabelizedField>

@@ -26,7 +26,7 @@ export function validate(
   if (category === GRIEVANCE_CATEGORIES.DATA_CHANGE) {
     if (issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL) {
       if (!values.selectedHousehold) {
-        errors.selectedHousehold = `${beneficiaryGroup?.group_label} is Required`;
+        errors.selectedHousehold = `${beneficiaryGroup?.groupLabel} is Required`;
       }
       if (values.individualData?.documents?.length) {
         values.individualData.documents
@@ -41,14 +41,14 @@ export function validate(
     }
     if (issueType === GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD) {
       if (!values.selectedHousehold) {
-        errors.selectedHousehold = `${beneficiaryGroup?.group_label} is Required`;
+        errors.selectedHousehold = `${beneficiaryGroup?.groupLabel} is Required`;
       }
       if (
         // xD
         values.selectedHousehold &&
         !values.householdDataUpdateFields?.[0]?.fieldName
       ) {
-        errors.householdDataUpdateFields = `${beneficiaryGroup?.group_label} Data Change is Required`;
+        errors.householdDataUpdateFields = `${beneficiaryGroup?.groupLabel} Data Change is Required`;
       }
       if (
         values.householdDataUpdateFields?.length &&
@@ -69,17 +69,17 @@ export function validate(
     }
     if (issueType === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL) {
       if (!values.selectedIndividual) {
-        errors.selectedIndividual = `${beneficiaryGroup?.member_label} is Required`;
+        errors.selectedIndividual = `${beneficiaryGroup?.memberLabel} is Required`;
       }
     }
     if (issueType === GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD) {
       if (!values.selectedHousehold) {
-        errors.selectedHousehold = `${beneficiaryGroup?.group_label} is Required`;
+        errors.selectedHousehold = `${beneficiaryGroup?.groupLabel} is Required`;
       }
     }
     if (issueType === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL) {
       if (!values.selectedIndividual) {
-        errors.selectedIndividual = `${beneficiaryGroup?.member_label} is Required`;
+        errors.selectedIndividual = `${beneficiaryGroup?.memberLabel} is Required`;
       }
       if (
         values.selectedIndividual &&
@@ -95,7 +95,7 @@ export function validate(
         !values.individualDataUpdatePaymentChannelsToEdit?.length &&
         !values.individualDataUpdateDeliveryMechanismDataToEdit?.length
       ) {
-        errors.individualDataUpdateFields = `${beneficiaryGroup?.member_label} Data Change is Required`;
+        errors.individualDataUpdateFields = `${beneficiaryGroup?.memberLabel} Data Change is Required`;
       }
       if (values.individualDataUpdateFields?.length) {
         values.individualDataUpdateFields.forEach((el) => {
@@ -215,7 +215,8 @@ export function validate(
       .filter((el) => el)
       .forEach((doc) => {
         if (!doc.name || !doc.file) {
-          errors.documentation = 'Documentation name and file are required';
+          errors.documentation =
+            'Grievance Supporting Document name and file are required';
         }
       });
   }
@@ -225,7 +226,7 @@ export function validate(
       .forEach((doc) => {
         if (!doc.name || !doc.file) {
           errors.documentationToUpdate =
-            'Documentation name and file are required';
+            'Grievance Supporting Document name and file are required';
         }
       });
   }
@@ -271,12 +272,12 @@ export function validateUsingSteps(
   if (category === GRIEVANCE_CATEGORIES.DATA_CHANGE) {
     if (issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL) {
       if (!values.selectedHousehold && activeStep === GrievanceSteps.Lookup) {
-        errors.selectedHousehold = `${beneficiaryGroup?.group_label} is Required`;
+        errors.selectedHousehold = `${beneficiaryGroup?.groupLabel} is Required`;
       }
     }
     if (issueType === GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD) {
       if (!values.selectedHousehold && activeStep === GrievanceSteps.Lookup) {
-        errors.selectedHousehold = `${beneficiaryGroup?.group_label} is Required`;
+        errors.selectedHousehold = `${beneficiaryGroup?.groupLabel} is Required`;
       }
       if (
         // xD
@@ -284,7 +285,7 @@ export function validateUsingSteps(
         !values.householdDataUpdateFields?.[0]?.fieldName &&
         activeStep === GrievanceSteps.Description
       ) {
-        errors.householdDataUpdateFields = `${beneficiaryGroup?.group_label} Data Change is Required`;
+        errors.householdDataUpdateFields = `${beneficiaryGroup?.groupLabel} Data Change is Required`;
       }
       if (
         values.householdDataUpdateFields?.length &&
@@ -305,12 +306,12 @@ export function validateUsingSteps(
     }
     if (issueType === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL) {
       if (!values.selectedIndividual && activeStep === GrievanceSteps.Lookup) {
-        errors.selectedIndividual = `${beneficiaryGroup?.member_label} is Required`;
+        errors.selectedIndividual = `${beneficiaryGroup?.memberLabel} is Required`;
       }
     }
     if (issueType === GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD) {
       if (!values.selectedHousehold && activeStep === GrievanceSteps.Lookup) {
-        errors.selectedHousehold = `${beneficiaryGroup?.group_label} is Required`;
+        errors.selectedHousehold = `${beneficiaryGroup?.groupLabel} is Required`;
       }
     }
     if (issueType === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL) {
@@ -329,7 +330,7 @@ export function validateUsingSteps(
         !values.individualDataUpdatePaymentChannelsToEdit?.length &&
         activeStep === GrievanceSteps.Description
       ) {
-        errors.individualDataUpdateFields = `${beneficiaryGroup?.member_label} Data Change is Required`;
+        errors.individualDataUpdateFields = `${beneficiaryGroup?.memberLabel} Data Change is Required`;
       }
       if (values.individualDataUpdateFields?.length) {
         values.individualDataUpdateFields.forEach((el) => {
@@ -470,7 +471,7 @@ export function validateUsingSteps(
     !values.selectedHousehold &&
     householdRequiredGrievanceTypes.includes(values.issueType)
   ) {
-    errors.selectedHousehold = `${beneficiaryGroup?.group_label} is Required`;
+    errors.selectedHousehold = `${beneficiaryGroup?.groupLabel} is Required`;
   }
   if (activeStep === GrievanceSteps.Lookup) {
     const individualRequiredIssueTypes = [
@@ -488,9 +489,9 @@ export function validateUsingSteps(
       values.issueType,
     );
     if (isIndividualRequired && !values.selectedIndividual) {
-      errors.selectedIndividual = `${beneficiaryGroup?.member_label} is Required`;
+      errors.selectedIndividual = `${beneficiaryGroup?.memberLabel} is Required`;
     } else if (isHouseholdRequired && !values.selectedHousehold) {
-      errors.selectedHousehold = `${beneficiaryGroup?.group_label} is Required`;
+      errors.selectedHousehold = `${beneficiaryGroup?.groupLabel} is Required`;
     }
   }
   if (
@@ -526,7 +527,8 @@ export function validateUsingSteps(
       .filter((el) => el)
       .forEach((doc) => {
         if (!doc.name || !doc.file) {
-          errors.documentation = 'Documentation name and file are required';
+          errors.documentation =
+            'Grievance Supporting Document name and file are required';
         }
       });
   }

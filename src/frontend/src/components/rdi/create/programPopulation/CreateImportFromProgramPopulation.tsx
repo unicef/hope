@@ -27,7 +27,7 @@ export const CreateImportFromProgramPopulationForm = ({
   const navigate = useNavigate();
   const [createImport] = useCreateRegistrationProgramPopulationImportMutation();
   const { selectedProgram, isSocialDctType } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const regex = isSocialDctType
     ? /^\s*(IND)-\d{2}-\d{4}\.\d{4}\s*$/
     : /^\s*(HH)-\d{2}-\d{4}\.\d{4}\s*$/;
@@ -172,8 +172,8 @@ export const CreateImportFromProgramPopulationForm = ({
             variant="outlined"
             label={t(
               isSocialDctType
-                ? `${beneficiaryGroup?.member_label_plural} IDs`
-                : `${beneficiaryGroup?.group_label_plural} IDs`,
+                ? `${beneficiaryGroup?.memberLabelPlural} IDs`
+                : `${beneficiaryGroup?.groupLabelPlural} IDs`,
             )}
             component={FormikTextField}
           />

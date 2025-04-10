@@ -44,7 +44,7 @@ function ExcludeSection({
     excludeHouseholdError,
   } = paymentPlan;
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const initialExcludedIds = paymentPlan?.excludedHouseholds?.map(
     (el) => el.unicefId,
@@ -68,7 +68,7 @@ function ExcludeSection({
 
   const getTooltipText = (): string => {
     if (!hasOpenOrLockedStatus) {
-      return `${beneficiaryGroup?.group_label_plural} can only be excluded from a Payment Plan in status open or locked`;
+      return `${beneficiaryGroup?.groupLabelPlural} can only be excluded from a Payment Plan in status open or locked`;
     }
     if (!hasExcludePermission) {
       return t('Permission denied');
@@ -116,7 +116,7 @@ function ExcludeSection({
       });
       if (!error) {
         showMessage(
-          `${beneficiaryGroup?.group_label_plural} exclusion started`,
+          `${beneficiaryGroup?.groupLabelPlural} exclusion started`,
         );
         setExclusionsOpen(false);
       }
@@ -313,7 +313,7 @@ function ExcludeSection({
             <Grid size={{ xs: 6 }}>
               <Box mr={2}>
                 <StyledTextField
-                  label={`${beneficiaryGroup?.group_label_plural} Ids`}
+                  label={`${beneficiaryGroup?.groupLabelPlural} Ids`}
                   data-cy="input-households-ids"
                   value={idsValue}
                   onChange={handleIdsChange}
@@ -372,8 +372,8 @@ function ExcludeSection({
                 <GreyText>
                   {`${numberOfExcluded} ${
                     numberOfExcluded === 1
-                      ? `${beneficiaryGroup?.group_label}`
-                      : `${beneficiaryGroup?.group_label_plural}`
+                      ? `${beneficiaryGroup?.groupLabel}`
+                      : `${beneficiaryGroup?.groupLabelPlural}`
                   } excluded`}
                 </GreyText>
               </Box>

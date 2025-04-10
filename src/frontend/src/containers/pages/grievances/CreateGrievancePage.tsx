@@ -83,7 +83,7 @@ const CreateGrievancePage = (): ReactElement => {
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const [activeStep, setActiveStep] = useState(GrievanceSteps.Selection);
   const [validateData, setValidateData] = useState(false);
@@ -237,13 +237,13 @@ const CreateGrievancePage = (): ReactElement => {
   let steps = isSocialDctType
     ? [
         'Category Selection',
-        `${beneficiaryGroup?.member_label} Look up`,
+        `${beneficiaryGroup?.memberLabel} Look up`,
         'Identity Verification',
         'Description',
       ]
     : [
         'Category Selection',
-        `${beneficiaryGroup?.group_label}/${beneficiaryGroup?.member_label} Look up`,
+        `${beneficiaryGroup?.groupLabel}/${beneficiaryGroup?.memberLabel} Look up`,
         'Identity Verification',
         'Description',
       ];

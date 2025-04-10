@@ -9,4 +9,4 @@ class TPListVersionsKeyBit(BusinessAreaAndProgramKeyBitMixin):
 
 
 class TPKeyConstructor(KeyConstructorMixin):
-    target_population_list_versions = TPListVersionsKeyBit()
+    target_population_list_version = TPListVersionsKeyBit()

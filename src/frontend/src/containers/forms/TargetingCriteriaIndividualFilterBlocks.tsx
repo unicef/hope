@@ -86,11 +86,11 @@ export function TargetingCriteriaIndividualFilterBlocks({
   const shouldShowAndDivider =
     blockIndex + 1 < values.individualsFiltersBlocks.length;
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   return (
     <div>
-      {`Set ${beneficiaryGroup?.member_label} Criteria`}
+      {`Set ${beneficiaryGroup?.memberLabel} Criteria`}
       <FieldArray
         name={`individualsFiltersBlocks[${blockIndex}].individualBlockFilters`}
         render={(arrayHelpers) => (

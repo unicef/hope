@@ -45,7 +45,7 @@ export const NeedsAdjudicationTable = ({
   const { baseUrl, isAllPrograms } = useBaseUrl();
   const { isActiveProgram, isSocialDctType } = useProgramContext();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const details = ticket?.needsAdjudicationTicketDetails;
 
@@ -205,11 +205,11 @@ export const NeedsAdjudicationTable = ({
             {t('Uniqueness')}
           </TableCell>
           <TableCell data-cy="table-cell-individual-id" align="left">
-            {beneficiaryGroup?.member_label} ID
+            {beneficiaryGroup?.memberLabel} ID
           </TableCell>
           {!isSocialDctType && (
             <TableCell data-cy="table-cell-household-id" align="left">
-              {beneficiaryGroup?.group_label} ID
+              {beneficiaryGroup?.groupLabel} ID
             </TableCell>
           )}
           <TableCell data-cy="table-cell-full-name" align="left">

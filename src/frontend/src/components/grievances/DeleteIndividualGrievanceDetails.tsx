@@ -38,7 +38,7 @@ export function DeleteIndividualGrievanceDetails({
   const { showMessage } = useSnackbar();
   const confirm = useConfirmation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const isForApproval = ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
   const isHeadOfHousehold =
@@ -157,11 +157,11 @@ export function DeleteIndividualGrievanceDetails({
   const allLabels = [...labels, ...documentLabels];
 
   let dialogText = t(
-    `You did not approve the following ${beneficiaryGroup?.member_label} to be withdrawn. Are you sure you want to continue?`,
+    `You did not approve the following ${beneficiaryGroup?.memberLabel} to be withdrawn. Are you sure you want to continue?`,
   );
   if (!ticket.deleteIndividualTicketDetails.approveStatus) {
     dialogText = t(
-      `You are approving the following ${beneficiaryGroup?.member_label} to be withdrawn. Are you sure you want to continue?`,
+      `You are approving the following ${beneficiaryGroup?.memberLabel} to be withdrawn. Are you sure you want to continue?`,
     );
   }
   return (
@@ -169,7 +169,7 @@ export function DeleteIndividualGrievanceDetails({
       <Title>
         <Box display="flex" justifyContent="space-between">
           <Typography variant="h6">
-            {t(`${beneficiaryGroup?.member_label} to be withdrawn`)}
+            {t(`${beneficiaryGroup?.memberLabel} to be withdrawn`)}
           </Typography>
           {canApproveDataChange && (
             <Button

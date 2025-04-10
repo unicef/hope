@@ -34,7 +34,7 @@ export function HouseholdDetails({
   const residenceChoicesDict = choicesToDict(
     choicesData.residenceStatusChoices,
   );
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   return (
     <ContainerColumnWithBorder>
@@ -44,7 +44,7 @@ export function HouseholdDetails({
       <Overview>
         <Grid container spacing={6}>
           <Grid size={{ xs: 3 }}>
-            <LabelizedField label={`${beneficiaryGroup?.group_label} Size`}>
+            <LabelizedField label={`${beneficiaryGroup?.groupLabel} Size`}>
               {household.size}
             </LabelizedField>
           </Grid>
@@ -64,7 +64,7 @@ export function HouseholdDetails({
             </LabelizedField>
           </Grid>
           <Grid size={{ xs: 3 }}>
-            <LabelizedField label={`Head of ${beneficiaryGroup?.group_label}`}>
+            <LabelizedField label={`Head of ${beneficiaryGroup?.groupLabel}`}>
               <ContentLink
                 href={`/${baseUrl}/registration-data-import/individual/${household.headOfHousehold.id}`}
               >
@@ -94,7 +94,7 @@ export function HouseholdDetails({
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('Data Collecting Type')}>
-              {selectedProgram?.data_collecting_type?.label}
+              {selectedProgram?.dataCollectingType?.label}
             </LabelizedField>
           </Grid>
         </Grid>

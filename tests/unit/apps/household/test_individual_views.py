@@ -64,7 +64,7 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
-pytestmark = pytest.mark.django_db
+pytestmark = pytest.mark.django_db()
 
 
 def get_encoded_individual_id(individual: Individual) -> str:
@@ -305,7 +305,7 @@ class TestIndividualList:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 4
-            assert len(ctx.captured_queries) == 17
+            assert len(ctx.captured_queries) == 21
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
@@ -323,10 +323,10 @@ class TestIndividualList:
             assert response.status_code == status.HTTP_200_OK
             assert response.has_header("etag")
             etag_third_call = response.headers["etag"]
-            assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
+            assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
             assert etag_third_call not in [etag, etag_second_call]
             # 5 queries are saved because of cached permissions calculations
-            assert len(ctx.captured_queries) == 12
+            assert len(ctx.captured_queries) == 16
 
         set_admin_area_limits_in_program(self.partner, self.program, [self.area1])
         with CaptureQueriesContext(connection) as ctx:
@@ -334,9 +334,9 @@ class TestIndividualList:
             assert response.status_code == status.HTTP_200_OK
             assert response.has_header("etag")
             etag_changed_areas = response.headers["etag"]
-            assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
+            assert json.loads(cache.get(etag_changed_areas)[0].decode("utf8")) == response.json()
             assert etag_changed_areas not in [etag, etag_second_call, etag_third_call]
-            assert len(ctx.captured_queries) == 12
+            assert len(ctx.captured_queries) == 16
 
         self.individual1_1.delete()
         with CaptureQueriesContext(connection) as ctx:
@@ -346,7 +346,7 @@ class TestIndividualList:
             etag_fourth_call = response.headers["etag"]
             assert len(response.json()["results"]) == 3
             assert etag_fourth_call not in [etag, etag_second_call, etag_third_call, etag_changed_areas]
-            assert len(ctx.captured_queries) == 12
+            assert len(ctx.captured_queries) == 15
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
@@ -652,6 +652,7 @@ class TestIndividualDetail:
             "number_of_individuals": self.registration_data_import.number_of_individuals,
             "number_of_households": self.registration_data_import.number_of_households,
             "imported_by": {
+                "id": str(self.registration_data_import.imported_by.id),
                 "first_name": self.registration_data_import.imported_by.first_name,
                 "last_name": self.registration_data_import.imported_by.last_name,
                 "email": self.registration_data_import.imported_by.email,

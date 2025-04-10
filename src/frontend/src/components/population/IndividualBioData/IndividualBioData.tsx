@@ -48,7 +48,7 @@ export const IndividualBioData = ({
 }: IndividualBioDataProps): ReactElement => {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const relationshipChoicesDict = choicesToDict(
     choicesData.relationshipChoices,
@@ -103,7 +103,7 @@ export const IndividualBioData = ({
 
   const mappedRoles = (
     <Grid size={{ xs: 3 }}>
-      <LabelizedField label={`Linked ${beneficiaryGroup?.group_label_plural}`}>
+      <LabelizedField label={`Linked ${beneficiaryGroup?.groupLabelPlural}`}>
         {individual?.householdsAndRoles?.length
           ? individual?.householdsAndRoles?.map((item) => (
               <Box key={item.id}>
@@ -235,7 +235,7 @@ export const IndividualBioData = ({
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
-          <LabelizedField label={`${beneficiaryGroup?.group_label} ID`}>
+          <LabelizedField label={`${beneficiaryGroup?.groupLabel} ID`}>
             {individual?.household?.id ? (
               <ContentLink
                 href={`/${baseUrl}/population/household/${individual?.household?.id}`}
@@ -254,7 +254,7 @@ export const IndividualBioData = ({
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField
-            label={`Relationship to Head Of ${beneficiaryGroup?.group_label}`}
+            label={`Relationship to Head Of ${beneficiaryGroup?.groupLabel}`}
           >
             {relationshipChoicesDict[individual?.relationship]}
           </LabelizedField>

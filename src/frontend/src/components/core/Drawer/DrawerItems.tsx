@@ -138,9 +138,9 @@ export const DrawerItems = ({
           item.secondaryActions = item.secondaryActions.map(
             (action, actionIndex) => {
               if (actionIndex === 0) {
-                action.name = _beneficiaryGroup.group_label_plural;
+                action.name = _beneficiaryGroup.groupLabelPlural;
               } else if (actionIndex === 1) {
-                action.name = _beneficiaryGroup.member_label_plural;
+                action.name = _beneficiaryGroup.memberLabelPlural;
               }
               return action;
             },
@@ -153,7 +153,7 @@ export const DrawerItems = ({
 
   const preparedMenuItems = beneficiaryGroupTransformator(
     prepareMenuItems(menuItems),
-    selectedProgram?.beneficiary_group,
+    selectedProgram?.beneficiaryGroup,
   );
 
   const { isAccountabilityApplicable } = businessAreaData.businessArea;
