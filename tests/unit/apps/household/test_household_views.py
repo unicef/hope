@@ -285,7 +285,7 @@ class TestHouseholdList:
             assert response.status_code == status.HTTP_200_OK
             assert response.has_header("etag")
             etag_third_call = response.headers["etag"]
-            assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
+            assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
             assert etag_third_call not in [etag, etag_second_call]
             # 4 queries are saved because of cached permissions calculations
             assert len(ctx.captured_queries) == 12
@@ -296,7 +296,7 @@ class TestHouseholdList:
             assert response.status_code == status.HTTP_200_OK
             assert response.has_header("etag")
             etag_changed_areas = response.headers["etag"]
-            assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
+            assert json.loads(cache.get(etag_changed_areas)[0].decode("utf8")) == response.json()
             assert etag_changed_areas not in [etag, etag_second_call, etag_third_call]
             assert len(ctx.captured_queries) == 12
 
