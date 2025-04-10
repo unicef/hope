@@ -136,7 +136,7 @@ class PaymentVerificationViewSet(
     }
 
     def get_object(self) -> PaymentPlan:
-        return get_object_or_404(PaymentPlan, id=decode_id_string(self.kwargs.get("pk")))
+        return get_object_or_404(PaymentPlan, id=self.kwargs.get("pk"))
 
     @etag_decorator(PaymentPlanKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=PaymentPlanKeyConstructor())
@@ -446,8 +446,7 @@ class PaymentPlanViewSet(
             raise ValidationError("Import in progress")
 
         serializer = self.get_serializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
         file = serializer.validated_data["file"]
         with transaction.atomic():
             import_service = XlsxPaymentPlanImportService(payment_plan, file)

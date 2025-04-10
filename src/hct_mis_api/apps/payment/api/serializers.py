@@ -120,6 +120,14 @@ class SplitPaymentPlanSerializer(serializers.Serializer):
 class PaymentPlanImportFileSerializer(serializers.Serializer):
     file = serializers.FileField(use_url=False, required=True)
 
+    def validate_file(self, file: Any) -> Any:
+        allowed_extensions = ["xlsx"]
+        extension = file.name.split(".")[-1].lower()
+        if extension not in allowed_extensions:
+            raise serializers.ValidationError("Unsupported file type.")
+
+        return file
+
 
 class PaymentVerificationSummarySerializer(serializers.ModelSerializer):
     status = serializers.CharField(source="get_status_display")
@@ -138,15 +146,15 @@ class PaymentVerificationSerializer(serializers.ModelSerializer):
 
 
 class PaymentVerificationPlanSmallSerializer(serializers.ModelSerializer):
-    status = serializers.CharField(source="get_status_display")
-    verification_channel = serializers.CharField(source="get_verification_channel_display")
+    # status = serializers.CharField(source="get_status_display")
+    # verification_channel = serializers.CharField(source="get_verification_channel_display")
 
     class Meta:
         model = PaymentVerificationPlan
         fields = (
             "id",
             "status",
-            "verification_channel",
+            # "verification_channel",
             "activation_date",
             "completion_date",
         )
