@@ -211,7 +211,6 @@ class PaymentVerificationDetailsSerializer(serializers.ModelSerializer):
 
 
 class PaymentVerificationListSerializer(serializers.ModelSerializer):
-    id = Base64ModelField(model_name="PaymentPlan")
     currency = serializers.CharField(source="get_currency_display")
     program_cycle_start_date = serializers.DateField(source="program_cycle.start_date")
     program_cycle_end_date = serializers.DateField(source="program_cycle.start_date")
