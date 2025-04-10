@@ -250,6 +250,9 @@ class PaymentPlanService:
                 delivery_type=self.payment_plan.delivery_mechanism,
             )
 
+        if self.payment_plan.eligible_payments.filter(entitlement_quantity__isnull=True).exists():
+            raise GraphQLError("All Payments must have entitlement quantity set.")
+
         self.payment_plan.status_lock_fsp()
         self.payment_plan.save()
 
