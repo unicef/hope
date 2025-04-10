@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type PaymentPlanSupportingDocument = {
-    readonly id: string;
+    readonly id: number;
     title: string;
     file: string;
     readonly uploadedAt: string;

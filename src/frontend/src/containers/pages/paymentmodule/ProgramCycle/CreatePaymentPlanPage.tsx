@@ -25,24 +25,21 @@ export const CreatePaymentPlanPage = (): ReactElement => {
   const { businessArea, programId } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const permissions = usePermissions();
-  const { programCycleId, paymentPlanId } = useParams();
+  const { programCycleId } = useParams();
 
   const { mutateAsync: createPaymentPlan, isPending: loadingCreate } =
     useMutation({
       mutationFn: ({
         businessAreaSlug,
-        id,
         programSlug,
         requestBody,
       }: {
         businessAreaSlug: string;
-        id: string;
         programSlug: string;
         requestBody;
       }) =>
-        RestService.restBusinessAreasProgramsPaymentPlansOpenCreate({
+        RestService.restBusinessAreasProgramsPaymentPlansCreate({
           businessAreaSlug,
-          id,
           programSlug,
           requestBody,
         }),
@@ -111,7 +108,6 @@ export const CreatePaymentPlanPage = (): ReactElement => {
 
       const res = await createPaymentPlan({
         businessAreaSlug: businessArea,
-        id: paymentPlanId,
         programSlug: programId,
         requestBody,
       });

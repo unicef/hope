@@ -24,7 +24,7 @@ function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
         ? HouseholdRdiMergeStatus.Merged
         : HouseholdRdiMergeStatus.Pending,
     }),
-    [rdi, businessArea, isMerged, programId],
+    [rdi.id, businessArea, programId, isMerged],
   );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);

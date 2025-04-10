@@ -25,6 +25,7 @@ import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
 
 const Overview = styled(Paper)`
   margin: 20px;
@@ -33,7 +34,7 @@ const Overview = styled(Paper)`
 `;
 
 interface PaymentDetailsProps {
-  payment: PaymentQuery['payment'];
+  payment: PaymentDetail;
   canViewActivityLog: boolean;
   canViewHouseholdDetails: boolean;
 }

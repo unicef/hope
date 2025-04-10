@@ -67,14 +67,12 @@ export function CreateFollowUpPaymentPlan({
         programSlug: string;
         requestBody;
       }) =>
-        RestService.restBusinessAreasProgramsPaymentPlansCreateFollowUpPaymentPlanCreate(
-          {
-            businessAreaSlug,
-            id: paymentPlanId,
-            programSlug,
-            requestBody,
-          },
-        ),
+        RestService.restBusinessAreasProgramsPaymentPlansCreateFollowUpCreate({
+          businessAreaSlug,
+          id: paymentPlanId,
+          programSlug,
+          requestBody,
+        }),
     });
 
   if (permissions === null) return null;
@@ -128,11 +126,9 @@ export function CreateFollowUpPaymentPlan({
       });
       setDialogOpen(false);
       showMessage(t('Payment Plan Created'));
-      navigate(
-        `/${baseUrl}/payment-module/followup-payment-plans/${res.data.createFollowUpPaymentPlan.paymentPlan.id}`,
-      );
+      navigate(`/${baseUrl}/payment-module/followup-payment-plans/${res.id}`);
     } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+      showMessage(e);
     }
   };
 
@@ -245,7 +241,7 @@ export function CreateFollowUpPaymentPlan({
                         label={t('Dispersion Start Date')}
                         component={FormikDateField}
                         required
-                        disabled={loading}
+                        disabled={loadingCreate}
                         fullWidth
                         decoratorEnd={
                           <CalendarTodayRoundedIcon color="disabled" />
@@ -285,7 +281,7 @@ export function CreateFollowUpPaymentPlan({
                   {t('Cancel')}
                 </Button>
                 <LoadingButton
-                  loading={loading}
+                  loading={loadingCreate}
                   type="submit"
                   color="primary"
                   variant="contained"

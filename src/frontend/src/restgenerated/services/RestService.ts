@@ -2077,6 +2077,31 @@ export class RestService {
     }
     /**
      * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaymentPlanCreateUpdate
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlansCreate({
+        businessAreaSlug,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        requestBody: PaymentPlanCreateUpdate,
+    }): CancelablePromise<PaymentPlanCreateUpdate> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaginatedPaymentListList
      * @throws ApiError
      */
@@ -2352,7 +2377,7 @@ export class RestService {
     }): CancelablePromise<TargetPopulationApplyEngineFormula> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/apply_engine_formula/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/apply-engine-formula/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
@@ -2429,7 +2454,7 @@ export class RestService {
      * @returns PaymentPlanCreateFollowUp
      * @throws ApiError
      */
-    public static restBusinessAreasProgramsPaymentPlansCreateFollowUpPaymentPlanCreate({
+    public static restBusinessAreasProgramsPaymentPlansCreateFollowUpCreate({
         businessAreaSlug,
         id,
         programSlug,
@@ -2445,7 +2470,7 @@ export class RestService {
     }): CancelablePromise<PaymentPlanCreateFollowUp> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/create_follow_up_payment_plan/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/create-follow-up/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
@@ -2474,7 +2499,7 @@ export class RestService {
     }): CancelablePromise<PaymentPlan> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/entitlement_export_xlsx/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/entitlement-export-xlsx/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
@@ -2503,7 +2528,7 @@ export class RestService {
     }): CancelablePromise<PaymentPlanImportFile> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/entitlement_import_xlsx/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/entitlement-import-xlsx/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
@@ -2534,7 +2559,7 @@ export class RestService {
     }): CancelablePromise<PaymentPlanExcludeBeneficiaries> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/exclude_beneficiaries/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/exclude-beneficiaries/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
@@ -2563,7 +2588,7 @@ export class RestService {
     }): CancelablePromise<PaymentPlan> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/export_pdf_payment_plan_summary/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/export-pdf-payment-plan-summary/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
@@ -2592,7 +2617,7 @@ export class RestService {
     }): CancelablePromise<PaymentPlanExportAuthCode> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/generate_xlsx_with_auth_code/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/generate-xlsx-with-auth-code/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
@@ -2648,7 +2673,7 @@ export class RestService {
     }): CancelablePromise<PaymentPlan> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/lock_fsp/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/lock-fsp/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
@@ -2677,38 +2702,7 @@ export class RestService {
     }): CancelablePromise<AcceptanceProcess> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/mark_as_released/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'id': id,
-                'program_slug': programSlug,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
-    /**
-     * Adds a count action to the viewset that returns the count of the queryset.
-     * @returns PaymentPlanCreateUpdate
-     * @throws ApiError
-     */
-    public static restBusinessAreasProgramsPaymentPlansOpenCreate({
-        businessAreaSlug,
-        id,
-        programSlug,
-        requestBody,
-    }: {
-        businessAreaSlug: string,
-        /**
-         * A UUID string identifying this Payment Plan.
-         */
-        id: string,
-        programSlug: string,
-        requestBody: PaymentPlanCreateUpdate,
-    }): CancelablePromise<PaymentPlanCreateUpdate> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/open/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/mark-as-released/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
@@ -2737,7 +2731,7 @@ export class RestService {
     }): CancelablePromise<PaymentPlan> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/reconciliation_export_xlsx/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/reconciliation-export-xlsx/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
@@ -2766,7 +2760,7 @@ export class RestService {
     }): CancelablePromise<PaymentPlanImportFile> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/reconciliation_import_xlsx/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/reconciliation-import-xlsx/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
@@ -2826,7 +2820,7 @@ export class RestService {
     }): CancelablePromise<PaymentPlan> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/send_for_approval/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/send-for-approval/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
@@ -2853,7 +2847,7 @@ export class RestService {
     }): CancelablePromise<PaymentPlan> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/send_to_payment_gateway/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/send-to-payment-gateway/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
@@ -2880,7 +2874,7 @@ export class RestService {
     }): CancelablePromise<PaymentPlan> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/send_xlsx_password/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/send-xlsx-password/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
@@ -2965,7 +2959,7 @@ export class RestService {
     }): CancelablePromise<PaymentPlan> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/unlock_fsp/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/unlock-fsp/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
@@ -3826,7 +3820,7 @@ export class RestService {
     }): CancelablePromise<TargetPopulationApplyEngineFormula> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/{id}/apply_engine_formula/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/{id}/apply-engine-formula/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
@@ -3913,7 +3907,7 @@ export class RestService {
     }): CancelablePromise<PaymentPlan> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/{id}/mark_ready/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/{id}/mark-ready/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,

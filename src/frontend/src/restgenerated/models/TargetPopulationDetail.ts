@@ -10,7 +10,7 @@ import type { ProgramSmall } from './ProgramSmall';
 import type { RuleCommit } from './RuleCommit';
 import type { TargetingCriteria } from './TargetingCriteria';
 export type TargetPopulationDetail = {
-    id: string;
+    readonly id: string;
     unicefId?: string | null;
     /**
      * Name

@@ -14,7 +14,7 @@ import type { ProgramCycleSmall } from './ProgramCycleSmall';
 import type { ProgramSmall } from './ProgramSmall';
 import type { RuleCommit } from './RuleCommit';
 export type PaymentPlanDetail = {
-    id: string;
+    readonly id: string;
     unicefId?: string | null;
     /**
      * Name
