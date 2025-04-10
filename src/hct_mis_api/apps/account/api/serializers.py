@@ -94,10 +94,12 @@ class ProfileSerializer(serializers.ModelSerializer):
 
         return user.permissions_in_business_area(business_area_slug)
 
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         fields = ("id", "first_name", "last_name", "email", "username")
+
 
 class PartnerForProgramSerializer(serializers.ModelSerializer):
     """

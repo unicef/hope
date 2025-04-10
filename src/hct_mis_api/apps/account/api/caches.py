@@ -1,6 +1,6 @@
 from typing import Any
 
-from django.db.models import Max, Count
+from django.db.models import Count, Max
 
 from rest_framework_extensions.key_constructor import bits
 from rest_framework_extensions.key_constructor.bits import KeyBitBase
@@ -22,11 +22,10 @@ class UserListVersionsKeyBit(KeyBitBase):
         latest_updated_at = queryset["latest_updated_at"]
         obj_count = queryset["obj_count"]
 
-        key = (
-            f"{business_area_slug}:{business_area_version}:user-list:{latest_updated_at}:{obj_count}"
-        )
+        key = f"{business_area_slug}:{business_area_version}:user-list:{latest_updated_at}:{obj_count}"
 
         return key
+
 
 class UserListKeyConstructor(KeyConstructor):
     user_list_version = UserListVersionsKeyBit()

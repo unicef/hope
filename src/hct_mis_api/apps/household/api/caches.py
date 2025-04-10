@@ -1,6 +1,4 @@
-from typing import Any, Optional
-
-from django.db.models import QuerySet
+from typing import Any
 
 from rest_framework_extensions.key_constructor.bits import KeyBitBase
 
@@ -8,7 +6,6 @@ from hct_mis_api.api.caches import (
     BusinessAreaAndProgramLastUpdatedKeyBit,
     KeyConstructorMixin,
 )
-from hct_mis_api.apps.household.models import Household, Individual
 
 
 class HouseholdListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):

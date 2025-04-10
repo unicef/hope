@@ -116,7 +116,9 @@ class BusinessAreaAndProgramLastUpdatedKeyBit(KeyBitBase):
 
     specific_view_cache_key = ""
 
-    def _get_queryset(self, business_area_slug: Optional[Any], program_slug: Optional[Any], view_instance: Optional[Any]) -> QuerySet:
+    def _get_queryset(
+        self, business_area_slug: Optional[Any], program_slug: Optional[Any], view_instance: Optional[Any]
+    ) -> QuerySet:
         return view_instance.get_queryset()
 
     def get_data(
