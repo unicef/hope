@@ -27,7 +27,7 @@ export const PaymentPlansTable = ({
 }: PaymentPlansTableProps): ReactElement => {
   const { programId, businessArea } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const initialVariables: AllPaymentPlansForTableQueryVariables = {
     businessArea,
@@ -45,10 +45,10 @@ export const PaymentPlansTable = ({
 
   const replacements = {
     totalHouseholdsCount: (_beneficiaryGroup) =>
-      `Num. of ${_beneficiaryGroup?.group_labelPlural}`,
+      `Num. of ${_beneficiaryGroup?.groupLabelPlural}`,
   };
 
-  const adjustedHeadCells = adjustHeadCells(
+  const adjustedHeadCells = adjustHeadCells<AllPaymentPlansForTableQuery['allPaymentPlans']['edges'][0]['node']>(
     headCells,
     beneficiaryGroup,
     replacements,

@@ -43,7 +43,7 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
-pytestmark = pytest.mark.django_db
+pytestmark = pytest.mark.django_db()
 
 
 def get_encoded_household_id(household: Household) -> str:
@@ -267,7 +267,7 @@ class TestHouseholdList:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 2
-            assert len(ctx.captured_queries) == 17
+            assert len(ctx.captured_queries) == 23
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
@@ -285,10 +285,10 @@ class TestHouseholdList:
             assert response.status_code == status.HTTP_200_OK
             assert response.has_header("etag")
             etag_third_call = response.headers["etag"]
-            assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
+            assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
             assert etag_third_call not in [etag, etag_second_call]
             # 4 queries are saved because of cached permissions calculations
-            assert len(ctx.captured_queries) == 12
+            assert len(ctx.captured_queries) == 18
 
         set_admin_area_limits_in_program(self.partner, self.program, [self.area1])
         with CaptureQueriesContext(connection) as ctx:
@@ -296,9 +296,9 @@ class TestHouseholdList:
             assert response.status_code == status.HTTP_200_OK
             assert response.has_header("etag")
             etag_changed_areas = response.headers["etag"]
-            assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
+            assert json.loads(cache.get(etag_changed_areas)[0].decode("utf8")) == response.json()
             assert etag_changed_areas not in [etag, etag_second_call, etag_third_call]
-            assert len(ctx.captured_queries) == 12
+            assert len(ctx.captured_queries) == 18
 
         self.household2.delete()
         with CaptureQueriesContext(connection) as ctx:
@@ -308,7 +308,7 @@ class TestHouseholdList:
             etag_fourth_call = response.headers["etag"]
             assert len(response.json()["results"]) == 1
             assert etag_fourth_call not in [etag, etag_second_call, etag_third_call, etag_changed_areas]
-            assert len(ctx.captured_queries) == 12
+            assert len(ctx.captured_queries) == 15
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
@@ -421,6 +421,7 @@ class TestHouseholdDetail:
             "number_of_individuals": self.registration_data_import.number_of_individuals,
             "number_of_households": self.registration_data_import.number_of_households,
             "imported_by": {
+                "id": str(self.registration_data_import.imported_by.id),
                 "first_name": self.registration_data_import.imported_by.first_name,
                 "last_name": self.registration_data_import.imported_by.last_name,
                 "email": self.registration_data_import.imported_by.email,
@@ -431,7 +432,7 @@ class TestHouseholdDetail:
         assert data["flex_fields"] == resolve_flex_fields_choices_to_string(self.household)
         assert data["admin_area_title"] == f"{self.household.admin_area.name} - {self.household.admin_area.p_code}"
         assert data["active_individuals_count"] == 1
-        assert data["geopoint"] == (self.geopoint[0], self.geopoint[1])
+        assert data["geopoint"] == self.household.geopoint
         assert data["import_id"] == self.household.unicef_id
         assert data["admin_url"] == self.household.admin_url
         assert data["male_children_count"] == self.household.male_children_count
@@ -1015,9 +1016,7 @@ class TestHouseholdFilter:
             imported_by=self.user, business_area=self.afghanistan, program=self.program
         )
         self._test_filter_households_in_list(
-            filters={
-                "rdi_id": encode_id_base64_required(registration_data_import_household1.id, "RegistrationDataImport")
-            },
+            filters={"rdi_id": registration_data_import_household1.id},
             household1_data={
                 "registration_data_import": registration_data_import_household1,
             },

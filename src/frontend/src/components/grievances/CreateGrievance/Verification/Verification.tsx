@@ -28,7 +28,7 @@ export interface VerificationProps {
 function Verification({ values }: VerificationProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram, isSocialDctType } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   return (
     <BoxWithBorders>
@@ -42,7 +42,7 @@ function Verification({ values }: VerificationProps): ReactElement {
         {values.selectedHousehold && !isSocialDctType && (
           <Box py={4}>
             <Typography variant="subtitle2">
-              {`${beneficiaryGroup?.group_label} Questionnaire`}
+              {`${beneficiaryGroup?.groupLabel} Questionnaire`}
             </Typography>
             <Box py={4}>
               <HouseholdQuestionnaire values={values} />
@@ -52,7 +52,7 @@ function Verification({ values }: VerificationProps): ReactElement {
         {values.selectedIndividual && (
           <>
             <Typography variant="subtitle2">
-              {`${beneficiaryGroup?.member_label} Questionnaire`}
+              {`${beneficiaryGroup?.memberLabel} Questionnaire`}
             </Typography>
             <Box py={4}>
               <IndividualQuestionnaire values={values} />

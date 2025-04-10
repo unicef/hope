@@ -1266,6 +1266,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         ("collector_name", _("Collector Name")),
         ("alternate_collector_full_name", _("Alternate collector Full Name")),
         ("alternate_collector_given_name", _("Alternate collector Given Name")),
+        ("alternate_collector_family_name", _("Alternate collector Family Name")),
         ("alternate_collector_middle_name", _("Alternate collector Middle Name")),
         ("alternate_collector_phone_no", _("Alternate collector phone number")),
         ("alternate_collector_document_numbers", _("Alternate collector Document numbers")),
@@ -1431,6 +1432,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "alternate_collector_full_name": (alternate_collector, "full_name"),
             "alternate_collector_given_name": (alternate_collector, "given_name"),
             "alternate_collector_middle_name": (alternate_collector, "middle_name"),
+            "alternate_collector_family_name": (alternate_collector, "family_name"),
             "alternate_collector_sex": (alternate_collector, "sex"),
             "alternate_collector_phone_no": (alternate_collector, "phone_no"),
             "alternate_collector_document_numbers": (alternate_collector, "document_number"),
@@ -2062,6 +2064,9 @@ class AccountType(models.Model):
     unique_fields = ArrayField(default=list, base_field=models.CharField(max_length=255))
     payment_gateway_id = models.CharField(max_length=255, blank=True, null=True)
 
+    def __str__(self) -> str:
+        return self.key
+
     @classmethod
     def get_targeting_field_names(cls) -> List[str]:
         return [
@@ -2082,6 +2087,9 @@ class FspNameMapping(models.Model):
     hope_name = models.CharField(max_length=255)  # default copy of external name
     source = models.CharField(max_length=30, choices=SourceModel.choices, default=SourceModel.ACCOUNT)
     fsp = models.ForeignKey(FinancialServiceProvider, on_delete=models.CASCADE, related_name="names_mappings")
+
+    def __str__(self) -> str:
+        return self.external_name  # pragma: no cover
 
 
 class PaymentPlanSupportingDocument(models.Model):

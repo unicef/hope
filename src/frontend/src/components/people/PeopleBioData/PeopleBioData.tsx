@@ -214,14 +214,12 @@ export const PeopleBioData = ({
         </Grid>
         <Grid size={{ xs: 6 }}>
           <LabelizedField label={t('Geolocation')}>
-            {household?.geopoint
-              ? `${household?.geopoint?.coordinates[0]}, ${household?.geopoint?.coordinates[1]}`
-              : '-'}
+            {household?.geopoint || '-'}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Data Collecting Type')}>
-            {selectedProgram?.data_collecting_type?.label}
+            {selectedProgram?.dataCollectingType?.label}
           </LabelizedField>
         </Grid>
       </>

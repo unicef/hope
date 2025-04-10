@@ -37,7 +37,7 @@ export function ReassignRoleUnique({
   const { showMessage } = useSnackbar();
   const [mutate] = useReassignRoleGrievanceMutation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   return (
     <Formik
@@ -77,7 +77,7 @@ export function ReassignRoleUnique({
           data-cy="button-submit"
           variant="contained"
         >
-          {t(`Reassign To Unique ${beneficiaryGroup?.member_label}`)}
+          {t(`Reassign To Unique ${beneficiaryGroup?.memberLabel}`)}
         </ReassignRoleButton>
       )}
     </Formik>

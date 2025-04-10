@@ -59,7 +59,7 @@ export function WarningTooltipTable({
 }: WarningTooltipTableProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   if (!payment) return null;
   const mappedPaymentPlanRows = (): ReactElement[] => {
@@ -139,7 +139,7 @@ export function WarningTooltipTable({
           </Grid>
         </GreyBox>
         <Box mt={10} mb={10} display="flex">
-          {`${beneficiaryGroup?.group_label} ID`}{' '}
+          {`${beneficiaryGroup?.groupLabel} ID`}{' '}
           <Bold>{payment.household?.unicefId}</Bold>{' '}
           {t('is also included in the following Payment Plans')}:
         </Box>

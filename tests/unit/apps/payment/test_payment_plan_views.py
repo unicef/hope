@@ -26,7 +26,7 @@ from hct_mis_api.apps.payment.fixtures import (
 from hct_mis_api.apps.payment.models import Approval, PaymentPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
-pytestmark = pytest.mark.django_db
+pytestmark = pytest.mark.django_db()
 
 
 class PaymentPlanTestMixin:

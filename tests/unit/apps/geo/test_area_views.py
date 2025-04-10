@@ -18,7 +18,7 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.utils import encode_id_base64_required
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 
-pytestmark = pytest.mark.django_db
+pytestmark = pytest.mark.django_db()
 
 
 class TestAreaViews:

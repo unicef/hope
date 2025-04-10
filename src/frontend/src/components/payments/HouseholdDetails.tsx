@@ -10,23 +10,23 @@ import { ReactElement } from 'react';
 export const HouseholdDetails = ({ household }): ReactElement => {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   return (
     <Overview>
       <Title>
-        <Typography variant="h6">{beneficiaryGroup?.group_label}</Typography>
+        <Typography variant="h6">{beneficiaryGroup?.groupLabel}</Typography>
       </Title>
       <Grid container spacing={3}>
         <Grid size={{ xs: 3 }}>
           <LabelizedField
-            label={`${beneficiaryGroup?.group_label} ID`}
+            label={`${beneficiaryGroup?.groupLabel} ID`}
             value={household.unicefId}
           />
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField
-            label={`HEAD OF ${beneficiaryGroup?.group_label}`}
+            label={`HEAD OF ${beneficiaryGroup?.groupLabel}`}
             value={household.headOfHousehold.fullName}
           />
         </Grid>

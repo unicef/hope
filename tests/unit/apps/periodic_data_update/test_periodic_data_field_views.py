@@ -23,7 +23,7 @@ from hct_mis_api.apps.core.fixtures import (
 from hct_mis_api.apps.core.models import PeriodicFieldData
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
-pytestmark = pytest.mark.django_db
+pytestmark = pytest.mark.django_db()
 
 
 @freezegun.freeze_time("2022-01-01")

@@ -102,7 +102,7 @@ const EditGrievancePage = (): ReactElement => {
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
   const { id } = useParams();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const {
     data: ticketData,
@@ -398,7 +398,7 @@ const EditGrievancePage = (): ReactElement => {
                       <Grid container size={{ xs: 12 }}>
                         <Grid size={{ xs: 3 }}>
                           <LabelizedField
-                            label={`${beneficiaryGroup?.group_label}`}
+                            label={`${beneficiaryGroup?.groupLabel}`}
                           >
                             <span>
                               {ticket.household?.id &&
@@ -538,7 +538,7 @@ const EditGrievancePage = (): ReactElement => {
                           <Title>
                             <Typography variant="h6">
                               {t(
-                                'Documentation: upload of document: support documentation for the ticket',
+                                'Grievance Supporting Documents: upload of document: support documentation for the ticket',
                               )}
                             </Typography>
                           </Title>

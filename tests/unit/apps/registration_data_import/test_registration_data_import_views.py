@@ -135,36 +135,56 @@ class TestRegistrationDataImportViews:
         assert len(response_json) == 3
 
         assert {
-            "id": id_to_base64(self.rdi1.id, "RegistrationDataImport"),
+            "id": str(self.rdi1.id),
             "name": self.rdi1.name,
             "status": self.rdi1.get_status_display(),
             "imported_by": self.rdi1.imported_by.get_full_name(),
             "data_source": self.rdi1.get_data_source_display(),
             "created_at": "2022-01-01T00:00:00Z",
+            "erased": self.rdi1.erased,
+            "import_date": "2022-01-01T00:00:00Z",
+            "number_of_households": self.rdi1.number_of_households,
+            "number_of_individuals": self.rdi1.number_of_individuals,
+            "biometric_deduplicated": self.rdi1.biometric_deduplicated,
         } in response_json
         assert {
-            "id": id_to_base64(self.rdi2.id, "RegistrationDataImport"),
+            "id": str(self.rdi2.id),
             "name": self.rdi2.name,
             "status": self.rdi2.get_status_display(),
             "imported_by": self.rdi2.imported_by.get_full_name(),
             "data_source": self.rdi2.get_data_source_display(),
             "created_at": "2022-01-01T00:00:00Z",
+            "erased": self.rdi2.erased,
+            "import_date": "2022-01-01T00:00:00Z",
+            "number_of_households": self.rdi2.number_of_households,
+            "number_of_individuals": self.rdi2.number_of_individuals,
+            "biometric_deduplicated": self.rdi2.biometric_deduplicated,
         } in response_json
         assert {
-            "id": id_to_base64(self.rdi3.id, "RegistrationDataImport"),
+            "id": str(self.rdi3.id),
             "name": self.rdi3.name,
             "status": self.rdi3.get_status_display(),
             "imported_by": self.rdi3.imported_by.get_full_name(),
             "data_source": self.rdi3.get_data_source_display(),
             "created_at": "2022-01-01T00:00:00Z",
+            "erased": self.rdi3.erased,
+            "import_date": "2022-01-01T00:00:00Z",
+            "number_of_households": self.rdi3.number_of_households,
+            "number_of_individuals": self.rdi3.number_of_individuals,
+            "biometric_deduplicated": self.rdi3.biometric_deduplicated,
         } in response_json
         assert {
-            "id": id_to_base64(self.rdi_program2.id, "RegistrationDataImport"),
+            "id": str(self.rdi_program2.id),
             "name": self.rdi_program2.name,
             "status": self.rdi1.get_status_display(),
             "imported_by": self.rdi1.imported_by.get_full_name(),
             "data_source": self.rdi1.get_data_source_display(),
             "created_at": "2022-01-01T00:00:00Z",
+            "erased": self.rdi1.erased,
+            "import_date": "2022-01-01T00:00:00Z",
+            "number_of_households": self.rdi1.number_of_households,
+            "number_of_individuals": self.rdi1.number_of_individuals,
+            "biometric_deduplicated": self.rdi1.biometric_deduplicated,
         } not in response_json
 
     def test_list_registration_data_imports_filter(
@@ -201,7 +221,7 @@ class TestRegistrationDataImportViews:
             self.afghanistan,
             self.program1,
         )
-        response = self.client.get(self.url_list, {"name": "RDI A"})
+        response = self.client.get(self.url_list, {"search": "RDI A"})
         assert response.status_code == status.HTTP_200_OK
 
         response_json = response.json()["results"]

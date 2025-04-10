@@ -40,7 +40,7 @@ export function HouseholdFilters({
 }: HouseholdFiltersProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const navigate = useNavigate();
   const location = useLocation();
   const { isAllPrograms } = useBaseUrl();
@@ -124,7 +124,7 @@ export function HouseholdFilters({
         </Grid>
         <Grid size={{ xs: 3 }}>
           <NumberTextField
-            topLabel={`${beneficiaryGroup?.group_label} ${t('Size')}`}
+            topLabel={`${beneficiaryGroup?.groupLabel} ${t('Size')}`}
             value={filter.householdSizeMin}
             placeholder={t('From')}
             icon={<GroupIcon />}

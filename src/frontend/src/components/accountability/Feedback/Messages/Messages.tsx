@@ -109,7 +109,7 @@ function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
     newNote: Yup.string().required(t('Note cannot be empty')),
   });
 
-  const myName = `${meData.first_name || meData.email}`;
+  const myName = `${meData.firstName || meData.email}`;
 
   return (
     <Grid size={{ xs: 8 }}>

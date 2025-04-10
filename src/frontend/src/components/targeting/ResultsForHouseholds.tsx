@@ -61,7 +61,7 @@ function ResultsForHouseholds({
 }: ResultsProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const [openDialog, setOpenDialog] = useState(false);
   const handleOpen = () => {
     if (targetPopulation?.failedWalletValidationCollectorsIds?.length > 0) {
@@ -211,7 +211,7 @@ function ResultsForHouseholds({
                 <Grid size={{ xs: 6 }}>
                   <SummaryBorder>
                     <LabelizedField
-                      label={`Total Number of ${beneficiaryGroup?.group_label_plural}`}
+                      label={`Total Number of ${beneficiaryGroup?.groupLabelPlural}`}
                     >
                       <SummaryValue data-cy="total-number-of-households-count">
                         {targetPopulation.totalHouseholdsCount || '0'}
@@ -222,7 +222,7 @@ function ResultsForHouseholds({
                 <Grid size={{ xs: 6 }}>
                   <SummaryBorder>
                     <LabelizedField
-                      label={`Targeted ${beneficiaryGroup?.member_label_plural}`}
+                      label={`Targeted ${beneficiaryGroup?.memberLabelPlural}`}
                     >
                       <SummaryValue>
                         {targetPopulation.totalIndividualsCount || '0'}

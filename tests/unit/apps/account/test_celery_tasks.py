@@ -23,7 +23,7 @@ from hct_mis_api.apps.account.signals import _invalidate_user_permissions_cache
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
-pytestmark = pytest.mark.django_db
+pytestmark = pytest.mark.django_db()
 
 
 class TestInvalidatePermissionsCacheForUserIfExpiredRoleTask:

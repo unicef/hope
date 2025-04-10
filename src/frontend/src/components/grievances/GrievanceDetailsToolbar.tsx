@@ -75,7 +75,7 @@ export const GrievanceDetailsToolbar = ({
   const confirm = useConfirmation();
   const navigate = useNavigate();
   const { isActiveProgram, selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiary_group;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -194,7 +194,7 @@ export const GrievanceDetailsToolbar = ({
       confirmationMessage = '';
     } else if (isDeduplicationCategory) {
       confirmationMessage = t(
-        `By continuing you acknowledge that ${beneficiaryGroup?.member_label_plural} in this ticket were reviewed and all were deemed either distinct or duplicates in the system.`,
+        `By continuing you acknowledge that ${beneficiaryGroup?.memberLabelPlural} in this ticket were reviewed and all were deemed either distinct or duplicates in the system.`,
       );
     }
     return confirmationMessage;
@@ -249,7 +249,7 @@ export const GrievanceDetailsToolbar = ({
 
     if (notApprovedSystemFlaggingChanges) {
       additionalContent = t(
-        `By continuing you acknowledge that ${beneficiaryGroup?.member_label_plural} in this ticket were compared with the sanction list. No matches were found`,
+        `By continuing you acknowledge that ${beneficiaryGroup?.memberLabelPlural} in this ticket were compared with the sanction list. No matches were found`,
       );
     }
 
@@ -260,7 +260,7 @@ export const GrievanceDetailsToolbar = ({
       householdHasOneIndividual
     ) {
       additionalContent += t(
-        `When you close this ticket, the ${beneficiaryGroup?.group_label} that this ${beneficiaryGroup?.member_label} is a member of will be deactivated.`,
+        `When you close this ticket, the ${beneficiaryGroup?.groupLabel} that this ${beneficiaryGroup?.memberLabel} is a member of will be deactivated.`,
       );
     }
 
@@ -293,7 +293,7 @@ export const GrievanceDetailsToolbar = ({
       title={t('Duplicate Document Conflict')}
       buttonText={t('Close Ticket')}
       message={t(
-        `The ${beneficiaryGroup?.member_label_plural} have matching document numbers. HOPE requires that document numbers are unique. Please resolve before closing the ticket.`,
+        `The ${beneficiaryGroup?.memberLabelPlural} have matching document numbers. HOPE requires that document numbers are unique. Please resolve before closing the ticket.`,
       )}
     />
   ) : (
