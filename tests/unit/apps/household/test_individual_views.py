@@ -323,7 +323,7 @@ class TestIndividualList:
             assert response.status_code == status.HTTP_200_OK
             assert response.has_header("etag")
             etag_third_call = response.headers["etag"]
-            assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
+            assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
             assert etag_third_call not in [etag, etag_second_call]
             # 5 queries are saved because of cached permissions calculations
             assert len(ctx.captured_queries) == 16
@@ -334,7 +334,7 @@ class TestIndividualList:
             assert response.status_code == status.HTTP_200_OK
             assert response.has_header("etag")
             etag_changed_areas = response.headers["etag"]
-            assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
+            assert json.loads(cache.get(etag_changed_areas)[0].decode("utf8")) == response.json()
             assert etag_changed_areas not in [etag, etag_second_call, etag_third_call]
             assert len(ctx.captured_queries) == 16
 
@@ -652,6 +652,7 @@ class TestIndividualDetail:
             "number_of_individuals": self.registration_data_import.number_of_individuals,
             "number_of_households": self.registration_data_import.number_of_households,
             "imported_by": {
+                "id": str(self.registration_data_import.imported_by.id),
                 "first_name": self.registration_data_import.imported_by.first_name,
                 "last_name": self.registration_data_import.imported_by.last_name,
                 "email": self.registration_data_import.imported_by.email,
