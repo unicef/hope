@@ -131,10 +131,14 @@ class PaymentPlanImportFileSerializer(serializers.Serializer):
 
 class PaymentVerificationSummarySerializer(serializers.ModelSerializer):
     status = serializers.CharField(source="get_status_display")
+    number_of_verification_plans = serializers.SerializerMethodField()
 
     class Meta:
         model = PaymentVerificationSummary
-        fields = ("id", "status", "activation_date", "completion_date")
+        fields = ("id", "status", "activation_date", "completion_date", "number_of_verification_plans")
+
+    def get_number_of_verification_plans(self, obj: PaymentVerificationSummary) -> int:
+        return obj.payment_plan.payment_verification_plans.count()
 
 
 class PaymentVerificationSerializer(serializers.ModelSerializer):
@@ -169,6 +173,7 @@ class PaymentVerificationPlanSerializer(serializers.ModelSerializer):
         model = PaymentVerificationPlan
         fields = (
             "id",
+            "unicef_id",
             "status",
             "verification_channel",
             "sampling",
@@ -204,10 +209,35 @@ class FollowUpPaymentPlanSerializer(serializers.ModelSerializer):
 
 
 class PaymentVerificationDetailsSerializer(serializers.ModelSerializer):
+    payment_verification_plans = PaymentVerificationPlanSerializer(many=True)
+    payment_verification_summary = PaymentVerificationSummarySerializer()
+    program_cycle_start_date = serializers.DateField(source="program_cycle.start_date")
+    program_cycle_end_date = serializers.DateField(source="program_cycle.start_date")
+    program_name = serializers.CharField(source="program_cycle.program.name")
+    available_payment_records_count = serializers.SerializerMethodField()
+    eligible_payments_count = serializers.SerializerMethodField()
+    bank_reconciliation_success = serializers.IntegerField()
+    bank_reconciliation_error = serializers.IntegerField()
+    can_create_payment_verification_plan = serializers.BooleanField()
+
+
 
     class Meta:
         model = PaymentPlan
-        fields = ("id",)
+        fields = (
+            "id",
+            "unicef_id",
+            "program_name",
+            "program_cycle_start_date",
+            "program_cycle_end_date",
+            "available_payment_records_count",
+            "eligible_payments_count",
+            "bank_reconciliation_success",
+            "bank_reconciliation_error",
+            "can_create_payment_verification_plan",
+            "payment_verification_plans",
+            "payment_verification_summary",
+        )
 
     # TODO:
     # PaymentVerificationPlanNode >
@@ -217,23 +247,30 @@ class PaymentVerificationDetailsSerializer(serializers.ModelSerializer):
         # rapidProFlowId
         # excludedAdminAreasFilter.length
 
+    def get_available_payment_records_count(self, payment_plan: PaymentPlan) -> int:
+        return payment_plan.payment_items.filter(
+            status__in=Payment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0
+        ).count()
+
+    def get_eligible_payments_count(self, obj: PaymentPlan) -> int:
+        return obj.eligible_payments.count()
+
 
 class PaymentVerificationListSerializer(serializers.ModelSerializer):
-    currency = serializers.CharField(source="get_currency_display")
     program_cycle_start_date = serializers.DateField(source="program_cycle.start_date")
     program_cycle_end_date = serializers.DateField(source="program_cycle.start_date")
-    payment_verification_plans = PaymentVerificationPlanSmallSerializer()
+    verification_status = serializers.CharField(source="payment_verification_summary.status")
 
     class Meta:
         model = PaymentPlan
         fields = (
             "id",
             "unicef_id",
-            "payment_verification_plans",
             "currency",
             "total_delivered_quantity",
             "program_cycle_start_date",
             "program_cycle_end_date",
+            "verification_status",
             "updated_at",
         )
 
@@ -552,9 +589,9 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     steficon_rule = RuleCommitSerializer(read_only=True)
     source_payment_plan = FollowUpPaymentPlanSerializer(read_only=True)
     eligible_payments_count = serializers.SerializerMethodField()
-    payment_verification_summary = PaymentVerificationSummarySerializer(read_only=True)
-    payment_verification_plans = PaymentVerificationPlanSerializer(many=True, read_only=True)
-    payment_verification_plans_count = serializers.SerializerMethodField()
+    # payment_verification_summary = PaymentVerificationSummarySerializer(read_only=True)
+    # payment_verification_plans = PaymentVerificationPlanSerializer(many=True, read_only=True)
+    # payment_verification_plans_count = serializers.SerializerMethodField()
 
     class Meta(PaymentPlanListSerializer.Meta):
         fields = PaymentPlanListSerializer.Meta.fields + (  # type: ignore
@@ -608,9 +645,9 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "source_payment_plan",
             "exchange_rate",
             "eligible_payments_count",
-            "payment_verification_summary",
-            "payment_verification_plans",
-            "payment_verification_plans_count",
+            # "payment_verification_summary",
+            # "payment_verification_plans",
+            # "payment_verification_plans_count",
             "admin_url",
         )
 
@@ -838,6 +875,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
     snapshot_collector_full_name = serializers.SerializerMethodField(help_text="Get from Household Snapshot")
     fsp_name = serializers.SerializerMethodField()
     fsp_auth_code = serializers.SerializerMethodField()
+    # add payment_verifications = PaymentVerification
 
     class Meta:
         model = Payment

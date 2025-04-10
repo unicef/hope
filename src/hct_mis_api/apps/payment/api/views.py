@@ -121,7 +121,7 @@ class PaymentVerificationViewSet(
     BaseViewSet,
 ):
     program_model_field = "program_cycle__program"
-    queryset = PaymentPlan.objects.exclude(
+    queryset = PaymentPlan.objects.filter(
         status__in=(PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED)
     ).order_by("unicef_id")
     # http_method_names = ["get", "post", "patch", "delete"]
@@ -129,6 +129,7 @@ class PaymentVerificationViewSet(
     serializer_classes_by_action = {
         "list": PaymentVerificationListSerializer,
         "retrieve": PaymentVerificationDetailsSerializer,
+        "verifications": PaymentListSerializer,
     }
     permissions_by_action = {
         "list": [Permissions.PAYMENT_VERIFICATION_VIEW_LIST],
@@ -138,10 +139,20 @@ class PaymentVerificationViewSet(
     def get_object(self) -> PaymentPlan:
         return get_object_or_404(PaymentPlan, id=self.kwargs.get("pk"))
 
-    @etag_decorator(PaymentPlanKeyConstructor)
-    @cache_response(timeout=config.REST_API_TTL, key_func=PaymentPlanKeyConstructor())
+    # @etag_decorator(PaymentVerificationListKeyConstructor)
+    # @cache_response(timeout=config.REST_API_TTL, key_func=PaymentVerificationListKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
+
+    @action(detail=True, methods=["get"], PERMISSIONS=[Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS])
+    def verifications(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan = self.get_object()
+        # data=request.data, context={"payment_plan": payment_plan}
+        serializer = self.get_serializer(data=payment_plan.payment_items(), many=True)
+        return Response(
+            data=serializer.data,
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class PaymentPlanViewSet(

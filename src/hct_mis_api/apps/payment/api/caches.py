@@ -31,7 +31,7 @@ class PaymentVerificationListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
     specific_view_cache_key = "payment_verifications_list"
 
     def _get_queryset(self, business_area_slug: Optional[Any], program_slug: Optional[Any]) -> QuerySet:
-        return PaymentPlan.objects.exclude(
+        return PaymentPlan.objects.filter(
             status__in=(PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED)
         ).filter(
             program_cycle__program__slug=program_slug,
@@ -73,4 +73,7 @@ class PaymentPlanListKeyConstructor(KeyConstructorMixin):
 
 class TargetPopulationListKeyConstructor(KeyConstructorMixin):
     target_population_list = TargetPopulationListKeyBit()
+
+
+class PaymentVerificationListKeyConstructor(KeyConstructorMixin):
     payment_verification_list = PaymentVerificationListKeyBit()
