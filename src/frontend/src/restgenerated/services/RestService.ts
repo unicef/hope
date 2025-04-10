@@ -22,6 +22,7 @@ import type { PaginatedOrganizationList } from '../models/PaginatedOrganizationL
 import type { PaginatedPaymentListList } from '../models/PaginatedPaymentListList';
 import type { PaginatedPaymentPlanList } from '../models/PaginatedPaymentPlanList';
 import type { PaginatedPaymentPlanListList } from '../models/PaginatedPaymentPlanListList';
+import type { PaginatedPaymentVerificationListList } from '../models/PaginatedPaymentVerificationListList';
 import type { PaginatedPeriodicDataUpdateTemplateListList } from '../models/PaginatedPeriodicDataUpdateTemplateListList';
 import type { PaginatedPeriodicDataUpdateUploadListList } from '../models/PaginatedPeriodicDataUpdateUploadListList';
 import type { PaginatedPeriodicFieldList } from '../models/PaginatedPeriodicFieldList';
@@ -48,6 +49,7 @@ import type { PaymentPlanExcludeBeneficiaries } from '../models/PaymentPlanExclu
 import type { PaymentPlanExportAuthCode } from '../models/PaymentPlanExportAuthCode';
 import type { PaymentPlanImportFile } from '../models/PaymentPlanImportFile';
 import type { PaymentPlanSupportingDocument } from '../models/PaymentPlanSupportingDocument';
+import type { PaymentVerificationDetails } from '../models/PaymentVerificationDetails';
 import type { PeriodicDataUpdateTemplateCreate } from '../models/PeriodicDataUpdateTemplateCreate';
 import type { PeriodicDataUpdateTemplateDetail } from '../models/PeriodicDataUpdateTemplateDetail';
 import type { PeriodicDataUpdateUpload } from '../models/PeriodicDataUpdateUpload';
@@ -2404,7 +2406,7 @@ export class RestService {
          */
         id: string,
         programSlug: string,
-        requestBody: AcceptanceProcess,
+        requestBody?: AcceptanceProcess,
     }): CancelablePromise<AcceptanceProcess> {
         return __request(OpenAPI, {
             method: 'POST',
@@ -2435,7 +2437,7 @@ export class RestService {
          */
         id: string,
         programSlug: string,
-        requestBody: AcceptanceProcess,
+        requestBody?: AcceptanceProcess,
     }): CancelablePromise<AcceptanceProcess> {
         return __request(OpenAPI, {
             method: 'POST',
@@ -2698,7 +2700,7 @@ export class RestService {
          */
         id: string,
         programSlug: string,
-        requestBody: AcceptanceProcess,
+        requestBody?: AcceptanceProcess,
     }): CancelablePromise<AcceptanceProcess> {
         return __request(OpenAPI, {
             method: 'POST',
@@ -2787,7 +2789,7 @@ export class RestService {
          */
         id: string,
         programSlug: string,
-        requestBody: AcceptanceProcess,
+        requestBody?: AcceptanceProcess,
     }): CancelablePromise<AcceptanceProcess> {
         return __request(OpenAPI, {
             method: 'POST',
@@ -2982,6 +2984,155 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaginatedPaymentVerificationListList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentVerificationsList({
+        businessAreaSlug,
+        programSlug,
+        dispersionEndDateLte,
+        dispersionStartDateGte,
+        isFollowUp,
+        limit,
+        name,
+        offset,
+        ordering,
+        program,
+        programCycle,
+        search,
+        status,
+        totalEntitledQuantityGte,
+        totalEntitledQuantityLte,
+        updatedAtGte,
+        updatedAtLte,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        dispersionEndDateLte?: string,
+        dispersionStartDateGte?: string,
+        isFollowUp?: boolean,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        name?: string,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        program?: string,
+        programCycle?: string,
+        /**
+         * A search term.
+         */
+        search?: string,
+        /**
+         * Status [sys]
+         *
+         * * `TP_OPEN` - Open
+         * * `TP_LOCKED` - Locked
+         * * `PROCESSING` - Processing
+         * * `STEFICON_WAIT` - Steficon Wait
+         * * `STEFICON_RUN` - Steficon Run
+         * * `STEFICON_COMPLETED` - Steficon Completed
+         * * `STEFICON_ERROR` - Steficon Error
+         * * `DRAFT` - Draft
+         * * `PREPARING` - Preparing
+         * * `OPEN` - Open
+         * * `LOCKED` - Locked
+         * * `LOCKED_FSP` - Locked FSP
+         * * `IN_APPROVAL` - In Approval
+         * * `IN_AUTHORIZATION` - In Authorization
+         * * `IN_REVIEW` - In Review
+         * * `ACCEPTED` - Accepted
+         * * `FINISHED` - Finished
+         */
+        status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        totalEntitledQuantityGte?: number,
+        totalEntitledQuantityLte?: number,
+        updatedAtGte?: string,
+        updatedAtLte?: string,
+    }): CancelablePromise<PaginatedPaymentVerificationListList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            query: {
+                'dispersion_end_date__lte': dispersionEndDateLte,
+                'dispersion_start_date__gte': dispersionStartDateGte,
+                'is_follow_up': isFollowUp,
+                'limit': limit,
+                'name': name,
+                'offset': offset,
+                'ordering': ordering,
+                'program': program,
+                'program_cycle': programCycle,
+                'search': search,
+                'status': status,
+                'total_entitled_quantity__gte': totalEntitledQuantityGte,
+                'total_entitled_quantity__lte': totalEntitledQuantityLte,
+                'updated_at__gte': updatedAtGte,
+                'updated_at__lte': updatedAtLte,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaymentVerificationDetails
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentVerificationsRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<PaymentVerificationDetails> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentVerificationsCountRetrieve({
+        businessAreaSlug,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,

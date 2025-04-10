@@ -1,3 +1,20 @@
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { LabelizedField } from '@core/LabelizedField';
+import { LoadingButton } from '@core/LoadingButton';
+import { LoadingComponent } from '@core/LoadingComponent';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
+import {
+  PaymentPlanBackgroundActionStatus,
+  PaymentPlanDocument,
+  PaymentPlanStatus,
+  useAllSteficonRulesQuery,
+  useSetSteficonRuleOnPpListMutation,
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { GetApp } from '@mui/icons-material';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 import {
   Box,
   Button,
@@ -8,31 +25,16 @@ import {
   Select,
   Typography,
 } from '@mui/material';
-import { GetApp } from '@mui/icons-material';
-import AttachFileIcon from '@mui/icons-material/AttachFile';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { useSnackbar } from '@hooks/useSnackBar';
-import {
-  PaymentPlanBackgroundActionStatus,
-  PaymentPlanDocument,
-  PaymentPlanStatus,
-  useAllSteficonRulesQuery,
-  useExportXlsxPpListMutation,
-  useSetSteficonRuleOnPpListMutation,
-} from '@generated/graphql';
-import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
-import { LabelizedField } from '@core/LabelizedField';
-import { LoadingButton } from '@core/LoadingButton';
-import { LoadingComponent } from '@core/LoadingComponent';
-import { Title } from '@core/Title';
-import { UniversalMoment } from '@core/UniversalMoment';
+import { useProgramContext } from '../../../../programContext';
 import { BigValue } from '../../../rdi/details/RegistrationDetails/RegistrationDetails';
 import { ImportXlsxPaymentPlanPaymentList } from '../ImportXlsxPaymentPlanPaymentList/ImportXlsxPaymentPlanPaymentList';
-import { useProgramContext } from '../../../../programContext';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const GreyText = styled.p`
   color: #9e9e9e;
@@ -100,6 +102,7 @@ export function Entitlement({
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
+  const { businessArea, programId } = useBaseUrl();
 
   const [steficonRuleValue, setSteficonRuleValue] = useState<string>(
     paymentPlan.steficonRule?.id || '',
@@ -122,8 +125,30 @@ export function Entitlement({
     variables: { enabled: true, deprecated: false, type: 'PAYMENT_PLAN' },
     fetchPolicy: 'network-only',
   });
-  const [mutateExport, { loading: loadingExport }] =
-    useExportXlsxPpListMutation();
+  const { mutateAsync: mutateExport, isPending: loadingExport } = useMutation({
+    mutationFn: ({
+      businessAreaSlug,
+      id,
+      programSlug,
+    }: {
+      businessAreaSlug: string;
+      id: string;
+      programSlug: string;
+    }) =>
+      RestService.restBusinessAreasProgramsPaymentPlansReconciliationExportXlsxRetrieve(
+        {
+          businessAreaSlug,
+          id,
+          programSlug,
+        },
+      ),
+    onSuccess: () => {
+      showMessage(t('Exporting XLSX started. Please check your email.'));
+    },
+    onError: (e) => {
+      showMessage(e.message);
+    },
+  });
 
   if (!steficonData) {
     return null;
@@ -264,20 +289,13 @@ export function Entitlement({
                   color="primary"
                   startIcon={<GetApp />}
                   data-cy="button-export-xlsx"
-                  onClick={async () => {
-                    try {
-                      await mutateExport({
-                        variables: {
-                          paymentPlanId: paymentPlan.id,
-                        },
-                      });
-                      showMessage(
-                        t('Exporting XLSX started. Please check your email.'),
-                      );
-                    } catch (e) {
-                      e.graphQLErrors.map((x) => showMessage(x.message));
-                    }
-                  }}
+                  onClick={() =>
+                    mutateExport({
+                      businessAreaSlug: businessArea,
+                      programSlug: programId,
+                      id: paymentPlan.id,
+                    })
+                  }
                 >
                   {t('Export Xlsx')}
                 </LoadingButton>

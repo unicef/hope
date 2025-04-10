@@ -2,10 +2,10 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { PaymentPlanBulkActionActionEnum } from './PaymentPlanBulkActionActionEnum';
+import type { ActionEnum } from './ActionEnum';
 export type PaymentPlanBulkAction = {
     ids: Array<string>;
-    action: PaymentPlanBulkActionActionEnum;
+    action: ActionEnum;
     comment?: string;
 };
 

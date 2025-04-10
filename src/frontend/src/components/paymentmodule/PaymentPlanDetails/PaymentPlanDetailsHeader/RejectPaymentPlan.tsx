@@ -1,3 +1,12 @@
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
+import { ErrorButton } from '@core/ErrorButton';
+import { GreyText } from '@core/GreyText';
+import { LoadingButton } from '@core/LoadingButton';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   Box,
   Button,
@@ -6,26 +15,15 @@ import {
   DialogContent,
   DialogTitle,
 } from '@mui/material';
+import { AcceptanceProcess } from '@restgenerated/models/AcceptanceProcess';
+import { RestService } from '@restgenerated/services/RestService';
+import { FormikTextField } from '@shared/Formik/FormikTextField/FormikTextField';
+import { useMutation } from '@tanstack/react-query';
 import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
-import { DialogContainer } from '@containers/dialogs/DialogContainer';
-import { DialogFooter } from '@containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { FormikTextField } from '@shared/Formik/FormikTextField/FormikTextField';
-import { Action } from '@generated/graphql';
-import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
-import { ErrorButton } from '@core/ErrorButton';
-import { GreyText } from '@core/GreyText';
-import { LoadingButton } from '@core/LoadingButton';
 import { useProgramContext } from '../../../../programContext';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { AcceptanceProcess } from '@restgenerated/models/AcceptanceProcess';
-import { RestService } from '@restgenerated/services/RestService';
-import { useMutation } from '@tanstack/react-query';
 
 export interface RejectPaymentPlanProps {
   paymentPlanId: string;
