@@ -652,6 +652,7 @@ class TestIndividualDetail:
             "number_of_individuals": self.registration_data_import.number_of_individuals,
             "number_of_households": self.registration_data_import.number_of_households,
             "imported_by": {
+                "id": str(self.registration_data_import.imported_by.id),
                 "first_name": self.registration_data_import.imported_by.first_name,
                 "last_name": self.registration_data_import.imported_by.last_name,
                 "email": self.registration_data_import.imported_by.email,
