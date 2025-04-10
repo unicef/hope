@@ -23,7 +23,6 @@ from hct_mis_api.apps.core.fixtures import (
     create_afghanistan,
     create_ukraine,
 )
-from hct_mis_api.apps.core.utils import encode_id_base64_required
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.household.fixtures import (
     HouseholdFactory,
@@ -122,14 +121,14 @@ class TestProgramList:
         assert response_count.json()["count"] == 1
 
         program_ids = [program["id"] for program in response_data]
-        assert encode_id_base64_required(self.program.id, "Program") in program_ids
-        assert encode_id_base64_required(self.program_in_ukraine.id, "Program") not in program_ids
-        assert encode_id_base64_required(self.program_with_dct_deprecated.id, "Program") not in program_ids
-        assert encode_id_base64_required(self.program_with_unknown_dct.id, "Program") not in program_ids
-        assert encode_id_base64_required(self.program_not_allowed.id, "Program") not in program_ids
+        assert str(self.program.id) in program_ids
+        assert str(self.program_in_ukraine.id) not in program_ids
+        assert str(self.program_with_dct_deprecated.id) not in program_ids
+        assert str(self.program_with_unknown_dct.id) not in program_ids
+        assert str(self.program_not_allowed.id) not in program_ids
 
         program_data1 = response_data[0]
-        assert program_data1["id"] == encode_id_base64_required(self.program.id, "Program")
+        assert program_data1["id"] == str(self.program.id)
         assert program_data1["programme_code"] == self.program.programme_code
         assert program_data1["slug"] == self.program.slug
         assert program_data1["name"] == self.program.name
@@ -170,8 +169,8 @@ class TestProgramList:
         )
         assert beneficiary_group_program_data1["master_detail"] == self.program.beneficiary_group.master_detail
 
-        assert encode_id_base64_required(self.pdu_field1, "FlexibleAttribute") in program_data1["pdu_fields"]
-        assert encode_id_base64_required(self.pdu_field2, "FlexibleAttribute") in program_data1["pdu_fields"]
+        assert str(self.pdu_field1) in program_data1["pdu_fields"]
+        assert str(self.pdu_field2) in program_data1["pdu_fields"]
         assert len(program_data1["pdu_fields"]) == 2
 
     @pytest.mark.parametrize(
@@ -245,10 +244,10 @@ class TestProgramList:
         response_data = response.json()["results"]
         assert len(response_data) == 4
 
-        assert response_data[0]["id"] == encode_id_base64_required(program_draft_first.id, "Program")
-        assert response_data[1]["id"] == encode_id_base64_required(program_draft_second.id, "Program")
-        assert response_data[2]["id"] == encode_id_base64_required(self.program.id, "Program")
-        assert response_data[3]["id"] == encode_id_base64_required(program_finished.id, "Program")
+        assert response_data[0]["id"] == str(program_draft_first.id)
+        assert response_data[1]["id"] == str(program_draft_second.id)
+        assert response_data[2]["id"] == str(self.program.id)
+        assert response_data[3]["id"] == str(program_finished.id)
 
     def test_program_list_caching(self, create_user_role_with_permissions: Any) -> None:
         no_queries_not_cached_no_permissions = 11
@@ -374,7 +373,7 @@ class TestProgramDetail:
         partner_unicef_hq = Partner.objects.get(name="UNICEF HQ")
         partner_unicef_in_afg = Partner.objects.get(name="UNICEF Partner for afghanistan")
 
-        assert response_data["id"] == encode_id_base64_required(self.program.id, "Program")
+        assert response_data["id"] == str(self.program.id)
         assert response_data["programme_code"] == self.program.programme_code
         assert response_data["slug"] == self.program.slug
         assert response_data["name"] == self.program.name
@@ -404,8 +403,8 @@ class TestProgramDetail:
         }
         assert response_data["status"] == self.program.status
         assert response_data["pdu_fields"] == [
-            encode_id_base64_required(self.pdu_field1, "FlexibleAttribute"),
-            encode_id_base64_required(self.pdu_field2, "FlexibleAttribute"),
+            str(self.pdu_field1),
+            str(self.pdu_field2),
         ]
         assert response_data["household_count"] == self.program.household_count
 
@@ -422,11 +421,11 @@ class TestProgramDetail:
                 "area_access": "BUSINESS_AREA",
                 "areas": [
                     {
-                        "id": encode_id_base64_required(self.area1.id, "Area"),
+                        "id": str(self.area1.id),
                         "level": self.area1.area_type.level,
                     },
                     {
-                        "id": encode_id_base64_required(self.area2.id, "Area"),
+                        "id": str(self.area2.id),
                         "level": self.area2.area_type.level,
                     },
                 ],
@@ -437,7 +436,7 @@ class TestProgramDetail:
                 "area_access": "ADMIN_AREA",
                 "areas": [
                     {
-                        "id": encode_id_base64_required(self.area1.id, "Area"),
+                        "id": str(self.area1.id),
                         "level": self.area1.area_type.level,
                     }
                 ],
@@ -448,11 +447,11 @@ class TestProgramDetail:
                 "area_access": "BUSINESS_AREA",
                 "areas": [
                     {
-                        "id": encode_id_base64_required(self.area1.id, "Area"),
+                        "id": str(self.area1.id),
                         "level": self.area1.area_type.level,
                     },
                     {
-                        "id": encode_id_base64_required(self.area2.id, "Area"),
+                        "id": str(self.area2.id),
                         "level": self.area2.area_type.level,
                     },
                 ],
@@ -463,11 +462,11 @@ class TestProgramDetail:
                 "area_access": "BUSINESS_AREA",
                 "areas": [
                     {
-                        "id": encode_id_base64_required(self.area1.id, "Area"),
+                        "id": str(self.area1.id),
                         "level": self.area1.area_type.level,
                     },
                     {
-                        "id": encode_id_base64_required(self.area2.id, "Area"),
+                        "id": str(self.area2.id),
                         "level": self.area2.area_type.level,
                     },
                 ],
@@ -549,7 +548,7 @@ class TestProgramFilter:
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
         assert len(response_data) == 1
-        assert response_data[0]["id"] == encode_id_base64_required(program1.id, "Program")
+        assert response_data[0]["id"] == str(program1.id)
         return response_data
 
     def test_filter_by_status(self) -> None:
@@ -606,7 +605,7 @@ class TestProgramFilter:
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
         assert len(response_data) == 1
-        assert response_data[0]["id"] == encode_id_base64_required(program2.id, "Program")
+        assert response_data[0]["id"] == str(program2.id)
 
     def test_filter_by_beneficiary_group_match(self) -> None:
         beneficiary_group1 = BeneficiaryGroupFactory(name="Group1")
@@ -634,7 +633,7 @@ class TestProgramFilter:
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
         assert len(response_data) == 1
-        assert response_data[0]["id"] == encode_id_base64_required(program3.id, "Program")
+        assert response_data[0]["id"] == str(program3.id)
 
     def test_filter_by_search(self) -> None:
         program1 = ProgramFactory(business_area=self.afghanistan, name="Health Program")
@@ -650,7 +649,7 @@ class TestProgramFilter:
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()["results"]
         assert len(response_data) == 1
-        assert response_data[0]["id"] == encode_id_base64_required(program1.id, "Program")
+        assert response_data[0]["id"] == str(program1.id)
 
     def test_filter_number_of_households(self) -> None:
         program1 = ProgramFactory(business_area=self.afghanistan)
@@ -668,13 +667,13 @@ class TestProgramFilter:
         assert response_min.status_code == status.HTTP_200_OK
         response_data_min = response_min.json()["results"]
         assert len(response_data_min) == 1
-        assert response_data_min[0]["id"] == encode_id_base64_required(program1.id, "Program")
+        assert response_data_min[0]["id"] == str(program1.id)
 
         response_max = self.client.get(self.list_url, {"number_of_households_max": 4})
         assert response_max.status_code == status.HTTP_200_OK
         response_data_max = response_max.json()["results"]
         assert len(response_data_max) == 1
-        assert response_data_max[0]["id"] == encode_id_base64_required(program2.id, "Program")
+        assert response_data_max[0]["id"] == str(program2.id)
 
     def test_filter_number_of_households_with_tp_in_program(self) -> None:
         def _create_hhs_for_pp(program: Program, payment_plan: PaymentPlan, no_hhs: int) -> list:
@@ -760,24 +759,24 @@ class TestProgramFilter:
         response_data_min = response_min.json()["results"]
         assert len(response_data_min) == 3
         program_ids_min = [program["id"] for program in response_data_min]
-        assert encode_id_base64_required(program1.id, "Program") in program_ids_min
-        assert encode_id_base64_required(program3.id, "Program") in program_ids_min
-        assert encode_id_base64_required(program4.id, "Program") in program_ids_min
+        assert str(program1.id) in program_ids_min
+        assert str(program3.id) in program_ids_min
+        assert str(program4.id) in program_ids_min
 
-        assert encode_id_base64_required(program2.id, "Program") not in program_ids_min
-        assert encode_id_base64_required(program5.id, "Program") not in program_ids_min
+        assert str(program2.id) not in program_ids_min
+        assert str(program5.id) not in program_ids_min
 
         response_max = self.client.get(self.list_url, {"number_of_households_with_tp_in_program_max": 5})
         assert response_max.status_code == status.HTTP_200_OK
         response_data_max = response_max.json()["results"]
         assert len(response_data_max) == 3
         program_ids_max = [program["id"] for program in response_data_max]
-        assert encode_id_base64_required(program1.id, "Program") in program_ids_max
-        assert encode_id_base64_required(program2.id, "Program") in program_ids_max
-        assert encode_id_base64_required(program5.id, "Program") in program_ids_max
+        assert str(program1.id) in program_ids_max
+        assert str(program2.id) in program_ids_max
+        assert str(program5.id) in program_ids_max
 
-        assert encode_id_base64_required(program3.id, "Program") not in program_ids_max
-        assert encode_id_base64_required(program4.id, "Program") not in program_ids_max
+        assert str(program3.id) not in program_ids_max
+        assert str(program4.id) not in program_ids_max
 
         response_min_max = self.client.get(
             self.list_url,
@@ -787,4 +786,4 @@ class TestProgramFilter:
         response_data_min_max = response_min_max.json()["results"]
         assert len(response_data_min_max) == 1
         program_ids_min_max = [program["id"] for program in response_data_min_max]
-        assert encode_id_base64_required(program1.id, "Program") in program_ids_min_max
+        assert str(program1.id) in program_ids_min_max

@@ -404,7 +404,7 @@ class TestHouseholdDetail:
         assert data["total_cash_received_usd"] == self.household.total_cash_received_usd
         assert data["has_duplicates"] is True
         assert data["registration_data_import"] == {
-            "id": encode_id_base64_required(self.registration_data_import.id, "RegistrationDataImport"),
+            "id": str(self.registration_data_import.id),
             "name": self.registration_data_import.name,
             "status": self.registration_data_import.status,
             "import_date": f"{self.registration_data_import.import_date:%Y-%m-%dT%H:%M:%S.%fZ}",

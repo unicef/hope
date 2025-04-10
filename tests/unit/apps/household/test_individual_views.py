@@ -635,7 +635,7 @@ class TestIndividualDetail:
         assert data["role"] == ROLE_PRIMARY
         assert data["relationship"] == self.individual1.relationship
         assert data["registration_data_import"] == {
-            "id": encode_id_base64_required(self.registration_data_import.id, "RegistrationDataImport"),
+            "id": str(self.registration_data_import.id),
             "name": self.registration_data_import.name,
             "status": self.registration_data_import.status,
             "import_date": f"{self.registration_data_import.import_date:%Y-%m-%dT%H:%M:%S.%fZ}",
@@ -654,7 +654,7 @@ class TestIndividualDetail:
         assert data["preferred_language"] == self.individual1.preferred_language
         assert data["roles_in_households"] == [
             {
-                "id": encode_id_base64_required(self.role_primary.id, "IndividualRoleInHousehold"),
+                "id": str(self.role_primary.id),
                 "household": {
                     "id": encode_id_base64_required(self.household.id, "Household"),
                     "unicef_id": self.household.unicef_id,
