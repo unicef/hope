@@ -17,11 +17,9 @@ import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import {
   HouseholdNode,
-  IndividualNode,
   useAllIndividualsFlexFieldsAttributesQuery,
   useGrievancesChoiceDataQuery,
   useHouseholdChoiceDataQuery,
-  useIndividualQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -41,6 +39,8 @@ import { IndividualDeliveryMechanisms } from '@components/population/IndividualD
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import PaymentsPeopleTable from '@containers/tables/payments/PaymentsPeopleTable/PaymentsPeopleTable';
 import { RestService } from '@restgenerated/services/RestService';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import { error } from 'console';
 
 const Container = styled.div`
   padding: 20px 20px 00px 20px;
@@ -70,12 +70,16 @@ const PeopleDetailsPage = (): ReactElement => {
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
 
-  const { data, loading, error } = useIndividualQuery({
-    variables: {
-      id,
-    },
-    fetchPolicy: 'cache-and-network',
-  });
+  const { data: individual, isLoading: loadingIndividual } =
+    useQuery<IndividualDetail>({
+      queryKey: ['businessAreaProgramIndividual', businessArea, programId, id],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsIndividualsRetrieve({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          id: id,
+        }),
+    });
 
   const { data: choicesData, loading: choicesLoading } =
     useHouseholdChoiceDataQuery();
@@ -98,7 +102,7 @@ const PeopleDetailsPage = (): ReactElement => {
     });
 
   if (
-    loading ||
+    loadingIndividual ||
     choicesLoading ||
     flexFieldsDataLoading ||
     grievancesChoicesLoading ||
@@ -109,7 +113,7 @@ const PeopleDetailsPage = (): ReactElement => {
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
   if (
-    !data ||
+    !individual ||
     !choicesData ||
     !flexFieldsData ||
     !grievancesChoices ||
@@ -124,7 +128,6 @@ const PeopleDetailsPage = (): ReactElement => {
     },
   ];
 
-  const { individual } = data;
   const household = individual?.household;
 
   return (
@@ -148,96 +151,91 @@ const PeopleDetailsPage = (): ReactElement => {
       >
         <Box mr={2}>
           {individual?.photo ? (
-            <IndividualPhotoModal individual={individual as IndividualNode} />
+            <IndividualPhotoModal individual={individual} />
           ) : null}
         </Box>
       </PageHeader>
 
-        <Container>
-          <PeopleBioData
-            baseUrl={baseUrl}
-            businessArea={businessArea}
-            individual={individual as IndividualNode}
-            choicesData={choicesData}
-            grievancesChoices={grievancesChoices}
+      <Container>
+        <PeopleBioData
+          baseUrl={baseUrl}
+          businessArea={businessArea}
+          individual={individual}
+          choicesData={choicesData}
+          grievancesChoices={grievancesChoices}
+        />
+        <IndividualDeliveryMechanisms individual={individual} />
+        <IndividualAdditionalRegistrationInformation
+          flexFieldsData={flexFieldsData}
+          individual={individual}
+        />
+        <Box mb={4}>
+          <ProgrammeTimeSeriesFields
+            individual={individual}
+            periodicFieldsData={periodicFieldsData}
           />
-          <IndividualDeliveryMechanisms
-            individual={individual as IndividualNode}
-          />
-          <IndividualAdditionalRegistrationInformation
-            flexFieldsData={flexFieldsData}
-            individual={individual as IndividualNode}
-          />
-          <Box mb={4}>
-            <ProgrammeTimeSeriesFields
-              individual={individual as IndividualNode}
-              periodicFieldsData={periodicFieldsData}
-            />
-          </Box>
-          <OverviewPaper>
-            <Title>
-              <Typography variant="h6">{t('Benefits')}</Typography>
-            </Title>
-            <Grid container>
-              <Grid size={{ xs: 3 }}>
-                <LabelizedField label={t('Cash received')}>
-                  {household?.deliveredQuantities?.length ? (
-                    <Box mb={2}>
-                      <Grid container>
-                        <Grid size={{ xs:6 }}>
-                          <Box display="flex" flexDirection="column">
-                            {household?.deliveredQuantities?.map((item) => (
-                              <Box
-                                key={`${item.currency}-${item.totalDeliveredQuantity}`}
-                              >
-                                {item.currency === 'USD'
-                                  ? formatCurrencyWithSymbol(
-                                      item.totalDeliveredQuantity,
-                                      item.currency,
-                                    )
-                                  : `(${formatCurrencyWithSymbol(
-                                      item.totalDeliveredQuantity,
-                                      item.currency,
-                                    )})`}
-                              </Box>
-                            ))}
-                          </Box>
-                        </Grid>
+        </Box>
+        <OverviewPaper>
+          <Title>
+            <Typography variant="h6">{t('Benefits')}</Typography>
+          </Title>
+          <Grid container>
+            <Grid size={{ xs: 3 }}>
+              <LabelizedField label={t('Cash received')}>
+                {household?.deliveredQuantities?.length ? (
+                  <Box mb={2}>
+                    <Grid container>
+                      <Grid size={{ xs: 6 }}>
+                        <Box display="flex" flexDirection="column">
+                          {household?.deliveredQuantities?.map((item) => (
+                            <Box
+                              key={`${item.currency}-${item.totalDeliveredQuantity}`}
+                            >
+                              {item.currency === 'USD'
+                                ? formatCurrencyWithSymbol(
+                                    item.totalDeliveredQuantity,
+                                    item.currency,
+                                  )
+                                : `(${formatCurrencyWithSymbol(
+                                    item.totalDeliveredQuantity,
+                                    item.currency,
+                                  )})`}
+                            </Box>
+                          ))}
+                        </Box>
                       </Grid>
-                    </Box>
-                  ) : (
-                    <>-</>
-                  )}
-                </LabelizedField>
-              </Grid>
-              <Grid size={{ xs: 3 }}>
-                <BigValueContainer>
-                  <LabelizedField label={t('Total Cash Received')}>
-                    <BigValue>
-                      {formatCurrencyWithSymbol(
-                        household?.totalCashReceivedUsd,
-                        'USD',
-                      )}
-                    </BigValue>
-                  </LabelizedField>
-                </BigValueContainer>
-              </Grid>
+                    </Grid>
+                  </Box>
+                ) : (
+                  <>-</>
+                )}
+              </LabelizedField>
             </Grid>
-          </OverviewPaper>
-          {hasPermissions(
-            PERMISSIONS.PM_VIEW_PAYMENT_LIST,
-            permissions,
-          ) && (
-            <PaymentsPeopleTable
-              openInNewTab
-              household={household as HouseholdNode}
-              businessArea={businessArea}
-              canViewPaymentRecordDetails={hasPermissions(
-                PERMISSIONS.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS,
-                permissions,
-              )}
-            />
-          )}
+            <Grid size={{ xs: 3 }}>
+              <BigValueContainer>
+                <LabelizedField label={t('Total Cash Received')}>
+                  <BigValue>
+                    {formatCurrencyWithSymbol(
+                      household?.totalCashReceivedUsd,
+                      'USD',
+                    )}
+                  </BigValue>
+                </LabelizedField>
+              </BigValueContainer>
+            </Grid>
+          </Grid>
+        </OverviewPaper>
+        {hasPermissions(PERMISSIONS.PM_VIEW_PAYMENT_LIST, permissions) && (
+          <PaymentsPeopleTable
+            openInNewTab
+            household={household}
+            businessArea={businessArea}
+            canViewPaymentRecordDetails={hasPermissions(
+              PERMISSIONS.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS,
+              permissions,
+            )}
+          />
+        )}
 
         <Overview>
           <Title>

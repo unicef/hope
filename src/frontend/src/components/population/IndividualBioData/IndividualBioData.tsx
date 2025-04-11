@@ -12,7 +12,6 @@ import {
   GrievancesChoiceDataQuery,
   HouseholdChoiceDataQuery,
   IndividualDisability,
-  IndividualNode,
 } from '@generated/graphql';
 import { ContentLink } from '@core/ContentLink';
 import { LabelizedField } from '@core/LabelizedField';
@@ -22,6 +21,7 @@ import { DocumentPopulationPhotoModal } from '../DocumentPopulationPhotoModal';
 import { LinkedGrievancesModal } from '../LinkedGrievancesModal/LinkedGrievancesModal';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement, ReactNode } from 'react';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}
@@ -33,7 +33,7 @@ const BorderBox = styled.div`
 `;
 
 interface IndividualBioDataProps {
-  individual: IndividualNode;
+  individual: IndividualDetail;
   baseUrl: string;
   businessArea: string;
   choicesData: HouseholdChoiceDataQuery;

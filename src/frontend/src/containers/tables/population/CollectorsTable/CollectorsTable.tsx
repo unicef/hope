@@ -5,7 +5,6 @@ import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { Order, TableComponent } from '@components/core/Table/TableComponent';
 import {
   HouseholdChoiceDataQuery,
-  IndividualNode,
   IndividualRoleInHouseholdRole,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';

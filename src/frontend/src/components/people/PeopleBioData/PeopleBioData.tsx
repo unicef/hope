@@ -12,7 +12,6 @@ import {
   GrievancesChoiceDataQuery,
   HouseholdChoiceDataQuery,
   IndividualDisability,
-  IndividualNode,
 } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
@@ -21,6 +20,7 @@ import { DocumentPopulationPhotoModal } from '../../population/DocumentPopulatio
 import { LinkedGrievancesModal } from '../../population/LinkedGrievancesModal/LinkedGrievancesModal';
 import { useProgramContext } from '../../../programContext';
 import { ReactElement, ReactNode } from 'react';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}
@@ -32,7 +32,7 @@ const BorderBox = styled.div`
 `;
 
 interface PeopleBioDataProps {
-  individual: IndividualNode;
+  individual: IndividualDetail;
   baseUrl: string;
   businessArea: string;
   choicesData: HouseholdChoiceDataQuery;
@@ -194,29 +194,27 @@ export const PeopleBioData = ({
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Administrative Level 1')}>
-            {household?.admin1?.name}
+            {household?.admin1}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Administrative Level 2')}>
-            {household?.admin2?.name}
+            {household?.admin2}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Administrative Level 3')}>
-            {household?.admin3?.name}
+            {household?.admin3}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Administrative Level 4')}>
-            {household?.admin4?.name}
+            {household?.admin4}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 6 }}>
           <LabelizedField label={t('Geolocation')}>
-            {household?.geopoint
-              ? `${household?.geopoint?.coordinates[0]}, ${household?.geopoint?.coordinates[1]}`
-              : '-'}
+            {household?.geopoint}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>

@@ -10,8 +10,8 @@ import { UniversalRestTable } from '@components/rest/UniversalRestTable/Universa
 import { error } from 'console';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { PaginatedPaymentPlanListList } from '@restgenerated/models/PaginatedPaymentPlanListList';
+import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
 
 interface PaymentPlansTableProps {
   filter;
@@ -72,13 +72,13 @@ function PaymentPlansTable({
     <UniversalRestTable
       defaultOrderBy="-createdAt"
       title={t('Payment Plans')}
-      headCells={adjustedHeadCells}
+      headCells={adjustedHeadCells as any}
       data={paymentPlansData}
       isLoading={isLoading}
       error={error}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
-      renderRow={(row: PaymentPlanDetail) => (
+      renderRow={(row: PaymentPlanList) => (
         <PaymentPlanTableRow
           key={row.id}
           plan={row}

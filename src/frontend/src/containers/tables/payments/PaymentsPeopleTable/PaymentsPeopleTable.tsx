@@ -11,9 +11,10 @@ import { headCells } from './PaymentsPeopleTableHeadCells';
 import { PaymentsPeopleTableRow } from './PaymentsPeopleTableRow';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 interface PaymentsPeopleTableProps {
-  household?: HouseholdNode;
+  household?: HouseholdDetail;
   openInNewTab?: boolean;
   businessArea: string;
   canViewPaymentRecordDetails: boolean;

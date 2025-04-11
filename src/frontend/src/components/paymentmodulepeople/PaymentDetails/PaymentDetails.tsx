@@ -49,7 +49,7 @@ export function PaymentDetails({
   const { programId } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-  let paymentVerification: PaymentQuery['payment']['verification'] = null;
+  let paymentVerification: PaymentDetail['verification'] = null;
   if (
     payment.verification &&
     payment.verification.status !== PaymentVerificationStatus.Pending

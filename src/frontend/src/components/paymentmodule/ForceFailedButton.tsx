@@ -41,7 +41,7 @@ export function ForceFailedButton({
         RestService.restBusinessAreasProgramsPaymentPlansPaymentsMarkAsFailedRetrieve(
           {
             businessAreaSlug,
-            id,
+            paymentId: id,
             paymentPlanId: ppId,
             programSlug,
           },

@@ -35,6 +35,7 @@ import { UniversalActivityLogTablePaymentVerification } from '../../tables/Unive
 import { VerificationsTable } from '../../tables/payments/VerificationRecordsTable';
 import { VerificationRecordsFilters } from '../../tables/payments/VerificationRecordsTable/VerificationRecordsFilters';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
 
 const Container = styled.div`
   display: flex;
@@ -77,15 +78,16 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
     getFilterFromQueryParams(location, initialFilter),
   );
 
-  const { data: paymentPlan, isLoading } = useQuery<PaymentPlanDetail>({
-    queryKey: ['paymentPlan', businessArea, paymentPlanId, programId],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsPaymentPlansRetrieve({
-        businessAreaSlug: businessArea,
-        id: paymentPlanId,
-        programSlug: programId,
-      }),
-  });
+  const { data: paymentPlan, isLoading } =
+    useQuery<PaymentVerificationPlanDetails>({
+      queryKey: ['paymentPlan', businessArea, paymentPlanId, programId],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsPaymentVerificationsRetrieve({
+          businessAreaSlug: businessArea,
+          id: paymentPlanId,
+          programSlug: programId,
+        }),
+    });
 
   const { data: choicesData, loading: choicesLoading } =
     useCashPlanVerificationSamplingChoicesQuery();

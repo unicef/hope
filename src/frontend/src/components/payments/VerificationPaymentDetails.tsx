@@ -20,7 +20,7 @@ import { IndividualDetails } from '@components/payments/IndividualDetails';
 import { ReactElement } from 'react';
 
 interface VerificationPaymentDetailsProps {
-  payment: PaymentQuery['payment'];
+  payment: PaymentDetail;
   canViewActivityLog: boolean;
 }
 
