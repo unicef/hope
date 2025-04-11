@@ -41,7 +41,7 @@ export const PeoplePaymentDetailsPage = (): ReactElement => {
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlansPaymentsRetrieve({
         businessAreaSlug: businessArea,
-        id: paymentId,
+        paymentId: paymentId,
         programSlug: programId,
         paymentPlanId,
       }),
