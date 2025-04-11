@@ -169,8 +169,8 @@ class TestProgramList:
         )
         assert beneficiary_group_program_data1["master_detail"] == self.program.beneficiary_group.master_detail
 
-        assert str(self.pdu_field1) in program_data1["pdu_fields"]
-        assert str(self.pdu_field2) in program_data1["pdu_fields"]
+        assert str(self.pdu_field1.id) in program_data1["pdu_fields"]
+        assert str(self.pdu_field2.id) in program_data1["pdu_fields"]
         assert len(program_data1["pdu_fields"]) == 2
 
     @pytest.mark.parametrize(
@@ -403,8 +403,8 @@ class TestProgramDetail:
         }
         assert response_data["status"] == self.program.status
         assert response_data["pdu_fields"] == [
-            str(self.pdu_field1),
-            str(self.pdu_field2),
+            str(self.pdu_field1.id),
+            str(self.pdu_field2.id),
         ]
         assert response_data["household_count"] == self.program.household_count
 
