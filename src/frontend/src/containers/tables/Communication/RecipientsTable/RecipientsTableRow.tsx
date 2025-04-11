@@ -7,7 +7,11 @@ import { AnonTableCell } from '@components/core/Table/AnonTableCell';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { choicesToDict, householdStatusToColor } from '@utils/utils';
-import { HouseholdNode, useHouseholdChoiceDataQuery } from '@generated/graphql';
+import {
+  HouseholdNode,
+  IndividualNode,
+  useHouseholdChoiceDataQuery,
+} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
 

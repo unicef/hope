@@ -21,6 +21,7 @@ import { LinkedGrievancesModal } from '../../population/LinkedGrievancesModal/Li
 import { useProgramContext } from '../../../programContext';
 import { ReactElement, ReactNode } from 'react';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import { DisabilityEnum } from '@restgenerated/models/DisabilityEnum';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}
@@ -63,38 +64,36 @@ export const PeopleBioData = ({
     choicesData.residenceStatusChoices,
   );
 
-  const mappedIndividualDocuments = individual?.documents?.edges?.map(
-    (edge) => (
-      <Grid size={{ xs: 3 }} key={edge.node.id}>
-        <Box flexDirection="column">
-          <Box mb={1}>
-            <LabelizedField label={edge.node.type.label}>
-              {edge.node.photo ? (
-                <DocumentPopulationPhotoModal
-                  documentNumber={edge.node.documentNumber}
-                  documentId={edge.node.id}
-                  individual={individual}
-                />
-              ) : (
-                edge.node.documentNumber
-              )}
-            </LabelizedField>
-          </Box>
-          <LabelizedField label="issued">{edge.node.country}</LabelizedField>
-        </Box>
-      </Grid>
-    ),
-  );
-
-  const mappedIdentities = individual?.identities?.edges?.map((item) => (
-    <Grid size={{ xs: 3 }} key={item.node.id}>
+  const mappedIndividualDocuments = individual?.documents?.map((doc) => (
+    <Grid size={{ xs: 3 }} key={doc.id}>
       <Box flexDirection="column">
         <Box mb={1}>
-          <LabelizedField label={`${item.node.partner} ID`}>
-            {item.node.number}
+          <LabelizedField label={doc.type.label}>
+            {doc.photo ? (
+              <DocumentPopulationPhotoModal
+                documentNumber={doc.documentNumber}
+                documentId={doc.id}
+                individual={individual}
+              />
+            ) : (
+              doc.documentNumber
+            )}
           </LabelizedField>
         </Box>
-        <LabelizedField label="issued">{item.node.country}</LabelizedField>
+        <LabelizedField label="issued">{doc.country}</LabelizedField>
+      </Box>
+    </Grid>
+  ));
+
+  const mappedIdentities = individual?.identities?.edges?.map((item) => (
+    <Grid size={{ xs: 3 }} key={item.id}>
+      <Box flexDirection="column">
+        <Box mb={1}>
+          <LabelizedField label={`${item.partner} ID`}>
+            {item.number}
+          </LabelizedField>
+        </Box>
+        <LabelizedField label="issued">{item.country}</LabelizedField>
       </Box>
     </Grid>
   ));
@@ -342,7 +341,7 @@ export const PeopleBioData = ({
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Disability')}>
-            {individual?.disability === IndividualDisability.Disabled
+            {individual?.disability === DisabilityEnum.DISABLED
               ? 'Disabled'
               : 'Not Disabled'}
           </LabelizedField>

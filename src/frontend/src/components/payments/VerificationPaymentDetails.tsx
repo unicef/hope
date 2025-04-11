@@ -7,7 +7,6 @@ import {
   paymentStatusToColor,
   verificationRecordsStatusToColor,
 } from '@utils/utils';
-import { PaymentQuery } from '@generated/graphql';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LabelizedField } from '@core/LabelizedField';
 import { StatusBox } from '@core/StatusBox';
@@ -18,6 +17,7 @@ import { HouseholdDetails } from '@components/payments/HouseholdDetails';
 import { useProgramContext } from '../../programContext';
 import { IndividualDetails } from '@components/payments/IndividualDetails';
 import { ReactElement } from 'react';
+import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
 
 interface VerificationPaymentDetailsProps {
   payment: PaymentDetail;
