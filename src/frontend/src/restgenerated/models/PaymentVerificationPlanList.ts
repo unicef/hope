@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { CurrencyEnum } from './CurrencyEnum';
-export type PaymentVerificationList = {
+export type PaymentVerificationPlanList = {
     readonly id: string;
     unicefId?: string | null;
     /**

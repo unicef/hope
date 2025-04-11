@@ -17,6 +17,7 @@ export type PaymentList = {
     deliveredQuantity?: string | null;
     deliveryDate?: string | null;
     status: string;
+    currency?: string | null;
     readonly fspAuthCode: string;
 };
 

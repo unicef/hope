@@ -2,10 +2,10 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { PaymentVerificationList } from './PaymentVerificationList';
-export type PaginatedPaymentVerificationListList = {
+import type { PaymentVerificationPlanList } from './PaymentVerificationPlanList';
+export type PaginatedPaymentVerificationPlanListList = {
     next?: string | null;
     previous?: string | null;
-    results: Array<PaymentVerificationList>;
+    results: Array<PaymentVerificationPlanList>;
 };
 

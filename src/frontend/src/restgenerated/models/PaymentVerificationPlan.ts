@@ -21,5 +21,6 @@ export type PaymentVerificationPlan = {
     xlsxFileExporting?: boolean;
     xlsxFileImported?: boolean;
     error?: string | null;
+    readonly adminUrl: string;
 };
 

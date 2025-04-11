@@ -19,6 +19,7 @@ export type PaymentDetail = {
     deliveredQuantity?: string | null;
     deliveryDate?: string | null;
     status: string;
+    currency?: string | null;
     readonly fspAuthCode: string;
     parent: FollowUpPaymentPlan;
     paymentVerifications: PaymentVerification;

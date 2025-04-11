@@ -71,7 +71,7 @@ export type { PaginatedOrganizationList as PaginatedOrganizationListCamelCase } 
 export type { PaginatedPaymentListList as PaginatedPaymentListListCamelCase } from './models/PaginatedPaymentListList';
 export type { PaginatedPaymentPlanList as PaginatedPaymentPlanListCamelCase } from './models/PaginatedPaymentPlanList';
 export type { PaginatedPaymentPlanListList as PaginatedPaymentPlanListListCamelCase } from './models/PaginatedPaymentPlanListList';
-export type { PaginatedPaymentVerificationListList as PaginatedPaymentVerificationListListCamelCase } from './models/PaginatedPaymentVerificationListList';
+export type { PaginatedPaymentVerificationPlanListList as PaginatedPaymentVerificationPlanListListCamelCase } from './models/PaginatedPaymentVerificationPlanListList';
 export type { PaginatedPeriodicDataUpdateTemplateListList as PaginatedPeriodicDataUpdateTemplateListListCamelCase } from './models/PaginatedPeriodicDataUpdateTemplateListList';
 export type { PaginatedPeriodicDataUpdateUploadListList as PaginatedPeriodicDataUpdateUploadListListCamelCase } from './models/PaginatedPeriodicDataUpdateUploadListList';
 export type { PaginatedPeriodicFieldList as PaginatedPeriodicFieldListCamelCase } from './models/PaginatedPeriodicFieldList';
@@ -102,9 +102,9 @@ export type { PaymentPlanImportFile as PaymentPlanImportFileCamelCase } from './
 export type { PaymentPlanList as PaymentPlanListCamelCase } from './models/PaymentPlanList';
 export type { PaymentPlanSupportingDocument as PaymentPlanSupportingDocumentCamelCase } from './models/PaymentPlanSupportingDocument';
 export type { PaymentVerification as PaymentVerificationCamelCase } from './models/PaymentVerification';
-export type { PaymentVerificationDetails as PaymentVerificationDetailsCamelCase } from './models/PaymentVerificationDetails';
-export type { PaymentVerificationList as PaymentVerificationListCamelCase } from './models/PaymentVerificationList';
 export type { PaymentVerificationPlan as PaymentVerificationPlanCamelCase } from './models/PaymentVerificationPlan';
+export type { PaymentVerificationPlanDetails as PaymentVerificationPlanDetailsCamelCase } from './models/PaymentVerificationPlanDetails';
+export type { PaymentVerificationPlanList as PaymentVerificationPlanListCamelCase } from './models/PaymentVerificationPlanList';
 export { PaymentVerificationStatusEnum as PaymentVerificationStatusEnumCamelCase } from './models/PaymentVerificationStatusEnum';
 export type { PaymentVerificationSummary as PaymentVerificationSummaryCamelCase } from './models/PaymentVerificationSummary';
 export type { PeriodicDataUpdateTemplateCreate as PeriodicDataUpdateTemplateCreateCamelCase } from './models/PeriodicDataUpdateTemplateCreate';

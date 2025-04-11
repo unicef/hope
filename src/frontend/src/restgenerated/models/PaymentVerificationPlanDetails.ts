@@ -4,7 +4,7 @@
 /* eslint-disable */
 import type { PaymentVerificationPlan } from './PaymentVerificationPlan';
 import type { PaymentVerificationSummary } from './PaymentVerificationSummary';
-export type PaymentVerificationDetails = {
+export type PaymentVerificationPlanDetails = {
     readonly id: string;
     unicefId?: string | null;
     programName: string;
