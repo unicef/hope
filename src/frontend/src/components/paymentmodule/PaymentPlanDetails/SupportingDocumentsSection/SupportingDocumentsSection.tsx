@@ -176,14 +176,14 @@ export const SupportingDocumentsSection = ({
     _businessArea: string,
     _programId: string,
     paymentPlanId: string,
-    fileId: string,
+    fileId: number,
   ) => {
     try {
       await deleteSupportingDocument(
         _businessArea,
         _programId,
         paymentPlanId,
-        fileId,
+        fileId.toString(),
       );
       setDocuments(documents.filter((doc) => doc.id !== fileId));
       showMessage(t('File deleted successfully.'));
@@ -200,7 +200,7 @@ export const SupportingDocumentsSection = ({
   );
 
   const handleSupportingDocumentDownloadClick = (
-    fileId: string,
+    fileId: number,
     fileName: string,
   ) => {
     downloadSupportingDocument({
