@@ -101,11 +101,10 @@ export type { PaymentPlanExportAuthCode as PaymentPlanExportAuthCodeCamelCase } 
 export type { PaymentPlanImportFile as PaymentPlanImportFileCamelCase } from './models/PaymentPlanImportFile';
 export type { PaymentPlanList as PaymentPlanListCamelCase } from './models/PaymentPlanList';
 export type { PaymentPlanSupportingDocument as PaymentPlanSupportingDocumentCamelCase } from './models/PaymentPlanSupportingDocument';
-export type { PaymentVerification as PaymentVerificationCamelCase } from './models/PaymentVerification';
+export type { PaymentVerificationDetails as PaymentVerificationDetailsCamelCase } from './models/PaymentVerificationDetails';
 export type { PaymentVerificationPlan as PaymentVerificationPlanCamelCase } from './models/PaymentVerificationPlan';
 export type { PaymentVerificationPlanDetails as PaymentVerificationPlanDetailsCamelCase } from './models/PaymentVerificationPlanDetails';
 export type { PaymentVerificationPlanList as PaymentVerificationPlanListCamelCase } from './models/PaymentVerificationPlanList';
-export { PaymentVerificationStatusEnum as PaymentVerificationStatusEnumCamelCase } from './models/PaymentVerificationStatusEnum';
 export type { PaymentVerificationSummary as PaymentVerificationSummaryCamelCase } from './models/PaymentVerificationSummary';
 export type { PeriodicDataUpdateTemplateCreate as PeriodicDataUpdateTemplateCreateCamelCase } from './models/PeriodicDataUpdateTemplateCreate';
 export type { PeriodicDataUpdateTemplateDetail as PeriodicDataUpdateTemplateDetailCamelCase } from './models/PeriodicDataUpdateTemplateDetail';

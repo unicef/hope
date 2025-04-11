@@ -872,6 +872,15 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
         )
 
 
+class PaymentVerificationDetailsSerializer(serializers.ModelSerializer):
+    payment_verification_plan_unicef_id = serializers.CharField(source="payment_verification_plan.unicef_id")
+    verification_channel = serializers.CharField(source="payment_verification_plan.verification_channel")
+
+    class Meta:
+        model = PaymentVerification
+        fields = ("id", "received_amount", "payment_verification_plan_unicef_id", "verification_channel")
+
+
 class PaymentListSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=True)
     status = serializers.CharField(source="get_status_display")
@@ -883,6 +892,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
     snapshot_collector_full_name = serializers.SerializerMethodField(help_text="Get from Household Snapshot")
     fsp_name = serializers.SerializerMethodField()
     fsp_auth_code = serializers.SerializerMethodField()
+    payment_verifications = PaymentVerificationDetailsSerializer(many=True)
 
     class Meta:
         model = Payment
@@ -904,6 +914,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
             "hoh_full_name",
             "collector_phone_no",
             "collector_phone_no_alt",
+            "payment_verifications",
         )
 
     @classmethod
@@ -926,8 +937,9 @@ class PaymentListSerializer(serializers.ModelSerializer):
         return obj.financial_service_provider.name if obj.financial_service_provider else ""
 
     def get_fsp_auth_code(self, obj: Payment) -> str:
+        if not hasattr(self.context, "request"):
+            return ""
         user = self.context.get("request").user
-
         if not user.has_perm(
             Permissions.PM_VIEW_FSP_AUTH_CODE.value,
             obj.program or obj.business_area,
@@ -938,19 +950,16 @@ class PaymentListSerializer(serializers.ModelSerializer):
 
 class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
     parent = FollowUpPaymentPlanSerializer()
-    payment_verifications = PaymentVerificationSerializer()
 
     class Meta(PaymentListSerializer.Meta):
         fields = PaymentListSerializer.Meta.fields + (  # type: ignore
             "parent",
-            "payment_verifications",
             "admin_url",
         )
 
 
 class VerificationDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
     status = serializers.CharField(source="get_status_display")
-    payment = PaymentDetailSerializer()
 
     class Meta:
         model = PaymentVerification
@@ -959,7 +968,6 @@ class VerificationDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSer
             "admin_url",
             "status",
             "received_amount",
-            "payment",
         )
 
 

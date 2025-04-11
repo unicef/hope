@@ -155,11 +155,10 @@ class PaymentVerificationViewSet(
     def verifications(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """return list of verification records"""
         payment_plan = self.get_object()
-        # data=request.data, context={"payment_plan": payment_plan}
-        serializer = self.get_serializer(data=payment_plan.payment_items(), many=True)
+        serializer = PaymentListSerializer(payment_plan.payment_items.all(), many=True)
         return Response(
             data=serializer.data,
-            status=status.HTTP_201_CREATED,
+            status=status.HTTP_200_OK,
         )
 
 

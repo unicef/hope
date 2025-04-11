@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { FollowUpPaymentPlan } from './FollowUpPaymentPlan';
-import type { PaymentVerification } from './PaymentVerification';
+import type { PaymentVerificationDetails } from './PaymentVerificationDetails';
 export type PaymentDetail = {
     readonly id: string;
     unicefId?: string | null;
@@ -25,8 +25,8 @@ export type PaymentDetail = {
     hohFullName: string;
     collectorPhoneNo: string;
     collectorPhoneNoAlt: string;
+    paymentVerifications: Array<PaymentVerificationDetails>;
     parent: FollowUpPaymentPlan;
-    paymentVerifications: PaymentVerification;
     readonly adminUrl: string;
 };
 
