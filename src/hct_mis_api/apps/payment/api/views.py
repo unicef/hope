@@ -68,6 +68,7 @@ from hct_mis_api.apps.payment.api.serializers import (
     TargetPopulationCreateSerializer,
     TargetPopulationDetailSerializer,
     TPHouseholdListSerializer,
+    VerificationDetailSerializer,
     XlsxErrorSerializer,
 )
 from hct_mis_api.apps.payment.celery_tasks import (
@@ -84,6 +85,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
     PaymentPlanSplit,
     PaymentPlanSupportingDocument,
+    PaymentVerification,
 )
 from hct_mis_api.apps.payment.services.mark_as_failed import (
     mark_as_failed,
@@ -160,6 +162,17 @@ class PaymentVerificationViewSet(
             data=serializer.data,
             status=status.HTTP_200_OK,
         )
+
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="verifications/(?P<verification_id>[^/.]+)",
+        PERMISSIONS=[Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS],
+    )
+    def verification_details(self, request: Request, verification_id: str, *args: Any, **kwargs: Any) -> Response:
+        payment_verification = get_object_or_404(PaymentVerification, id=verification_id)
+        serializer = VerificationDetailSerializer(payment_verification, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class PaymentPlanViewSet(

@@ -960,6 +960,8 @@ class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
 
 class VerificationDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
     status = serializers.CharField(source="get_status_display")
+    payment = PaymentDetailSerializer()
+    payment_verification_plan = PaymentVerificationPlanSerializer()
 
     class Meta:
         model = PaymentVerification
@@ -968,6 +970,8 @@ class VerificationDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSer
             "admin_url",
             "status",
             "received_amount",
+            "payment",
+            "payment_verification_plan",
         )
 
 
