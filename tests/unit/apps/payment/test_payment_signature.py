@@ -128,6 +128,10 @@ class TestPaymentSignature(APITestCase):
         hoh2 = IndividualFactory(household=None, program=program)
         hh1 = HouseholdFactory(head_of_household=hoh1, program=program)
         hh2 = HouseholdFactory(head_of_household=hoh2, program=program)
+        hoh1.household = hh1
+        hoh1.save()
+        hoh2.household = hh2
+        hoh2.save()
         IndividualRoleInHouseholdFactory(household=hh1, individual=hoh1, role=ROLE_PRIMARY)
         IndividualRoleInHouseholdFactory(household=hh2, individual=hoh2, role=ROLE_PRIMARY)
         IndividualFactory.create_batch(4, household=hh1)
