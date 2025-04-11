@@ -17,7 +17,6 @@ from hct_mis_api.apps.core.api.mixins import (
     BaseViewSet,
     BusinessAreaVisibilityMixin,
     CountActionMixin,
-    DecodeIdForDetailMixin,
     ProgramVisibilityMixin,
     SerializerActionMixin,
 )
@@ -46,7 +45,6 @@ from hct_mis_api.apps.program.models import Program
 class HouseholdViewSet(
     ProgramVisibilityMixin,
     SerializerActionMixin,
-    DecodeIdForDetailMixin,
     CountActionMixin,
     RetrieveModelMixin,
     ListModelMixin,
@@ -152,7 +150,6 @@ class HouseholdGlobalViewSet(
 class IndividualViewSet(
     ProgramVisibilityMixin,
     SerializerActionMixin,
-    DecodeIdForDetailMixin,
     CountActionMixin,
     RetrieveModelMixin,
     ListModelMixin,

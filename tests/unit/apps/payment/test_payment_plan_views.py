@@ -30,7 +30,7 @@ pytestmark = pytest.mark.django_db()
 
 
 class PaymentPlanTestMixin:
-    def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory, id_to_base64: Callable) -> None:
+    def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory) -> None:
         self.partner = PartnerFactory(name="TestPartner")
         self.user = UserFactory(partner=self.partner)
         self.client = api_client(self.user)
@@ -61,8 +61,8 @@ class PaymentPlanTestMixin:
 
 
 class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
-    def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory, id_to_base64: Callable) -> None:
-        super().set_up(api_client, afghanistan, id_to_base64)
+    def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory) -> None:
+        super().set_up(api_client, afghanistan)
         self.url = reverse(
             "api:payments:payment-plans-managerial-list", kwargs={"business_area_slug": self.afghanistan.slug}
         )
@@ -81,9 +81,8 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
 
         create_user_role_with_permissions(
             self.user,
@@ -100,7 +99,6 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
         create_partner_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
         def _test_list() -> Any:
             """
@@ -115,7 +113,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
             assert self.payment_plan3.unicef_id not in [response_json[0]["unicef_id"], response_json[1]["unicef_id"]]
             return response
 
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
@@ -160,9 +158,8 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         approval_process = ApprovalProcessFactory(
             payment_plan=self.payment_plan1,
             sent_for_approval_date=timezone.datetime(2021, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
@@ -245,9 +242,8 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
         create_partner_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [
@@ -281,9 +277,8 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
         create_partner_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
@@ -319,13 +314,13 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
 
 #  commented until we have payment plans used via API
 # class TestPaymentPlanList(PaymentPlanTestMixin):
-#     def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory, id_to_base64: Callable) -> None:
-#         super().set_up(api_client, afghanistan, id_to_base64)
+#     def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory) -> None:
+#         super().set_up(api_client, afghanistan)
 #         self.url = reverse(
 #             "api:payments:payment-plans-list",
 #             kwargs={
 #                 "business_area": self.afghanistan.slug,
-#                 "program_id": id_to_base64(self.program1.id, "Program"),
+#                 "program_id": str(self.program1.id),
 #             },
 #         )
 #
@@ -345,9 +340,8 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
 #         api_client: Callable,
 #         afghanistan: BusinessAreaFactory,
 #         create_user_role_with_permissions: Callable,
-#         id_to_base64: Callable,
 #     ) -> None:
-#         self.set_up(api_client, afghanistan, id_to_base64)
+#         self.set_up(api_client, afghanistan)
 #         create_user_role_with_permissions(
 #             self.user,
 #             permissions,
@@ -363,9 +357,8 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
 #         afghanistan: BusinessAreaFactory,
 #         create_user_role_with_permissions: Callable,
 #         update_partner_access_to_program: Callable,
-#         id_to_base64: Callable,
 #     ) -> None:
-#         self.set_up(api_client, afghanistan, id_to_base64)
+#         self.set_up(api_client, afghanistan)
 #         create_user_role_with_permissions(
 #             self.user,
 #             [Permissions.PM_VIEW_LIST, Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
