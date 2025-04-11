@@ -784,10 +784,9 @@ class TestIndividualDetail:
                 "document_number": self.tax_id.document_number,
             },
         ]
-
         assert data["identities"] == [
             {
-                "id": str(self.identity.id),
+                "id": self.identity.id,
                 "country": {
                     "id": str(self.country.id),
                     "name": self.country.name,

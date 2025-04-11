@@ -648,7 +648,7 @@ class TestHouseholdMembers:
         assert str(self.individual2_2.id) not in response_ids
         assert response_results == [
             {
-                "id": str(self.individual1_1),
+                "id": str(self.individual1_1.id),
                 "unicef_id": self.individual1_1.unicef_id,
                 "full_name": self.individual1_1.full_name,
                 "role": "PRIMARY",
