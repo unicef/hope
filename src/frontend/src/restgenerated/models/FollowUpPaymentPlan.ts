@@ -18,5 +18,9 @@ export type FollowUpPaymentPlan = {
      * Follow Up Payment Plan flag [sys]
      */
     isFollowUp?: boolean;
+    /**
+     * Name
+     */
+    name?: string | null;
 };
 

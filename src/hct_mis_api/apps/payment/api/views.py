@@ -290,6 +290,7 @@ class PaymentPlanViewSet(
         )
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @extend_schema(request=PaymentPlanExcludeBeneficiariesSerializer, responses={200: PaymentPlanDetailSerializer})
     @action(detail=True, methods=["post"], url_path="exclude-beneficiaries")
     def exclude_beneficiaries(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
@@ -300,26 +301,24 @@ class PaymentPlanViewSet(
         serializer = self.get_serializer(
             data=request.data,
         )
-        if serializer.is_valid():
-            payment_plan_exclude_beneficiaries.delay(
-                str(payment_plan.id),
-                serializer.validated_data["excluded_households_ids"],
-                serializer.validated_data.get("exclusion_reason", ""),
-            )
+        serializer.is_valid(raise_exception=True)
+        payment_plan_exclude_beneficiaries.delay(
+            str(payment_plan.id),
+            serializer.validated_data["excluded_households_ids"],
+            serializer.validated_data.get("exclusion_reason", ""),
+        )
 
-            payment_plan.background_action_status_excluding_beneficiaries()
-            payment_plan.exclude_household_error = ""
-            payment_plan.save(update_fields=["background_action_status", "exclude_household_error"])
+        payment_plan.background_action_status_excluding_beneficiaries()
+        payment_plan.exclude_household_error = ""
+        payment_plan.save(update_fields=["background_action_status", "exclude_household_error"])
 
-            payment_plan.refresh_from_db()
+        payment_plan.refresh_from_db()
 
-            response_serializer = PaymentPlanDetailSerializer(payment_plan, context={"request": request})
-            return Response(
-                data=response_serializer.data,
-                status=status.HTTP_200_OK,
-            )
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        response_serializer = PaymentPlanDetailSerializer(payment_plan, context={"request": request})
+        return Response(
+            data=response_serializer.data,
+            status=status.HTTP_200_OK,
+        )
 
     @action(detail=True, methods=["get"], PERMISSIONS=[Permissions.PM_LOCK_AND_UNLOCK])
     def lock(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -389,6 +388,7 @@ class PaymentPlanViewSet(
         )
         return Response(status=status.HTTP_200_OK, data={"message": "Payment Plan FSP unlocked"})
 
+    @extend_schema(request=TargetPopulationApplyEngineFormulaSerializer, responses={200: PaymentPlanDetailSerializer})
     @action(detail=True, methods=["post"], url_path="apply-engine-formula")
     def apply_engine_formula(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
@@ -450,6 +450,7 @@ class PaymentPlanViewSet(
             data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data, status=status.HTTP_200_OK
         )
 
+    @extend_schema(request=PaymentPlanImportFileSerializer, responses={200: PaymentPlanDetailSerializer})
     @action(
         detail=True,
         methods=["post"],
@@ -696,6 +697,7 @@ class PaymentPlanViewSet(
             data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data, status=status.HTTP_200_OK
         )
 
+    @extend_schema(request=PaymentPlanImportFileSerializer, responses={200: PaymentPlanDetailSerializer})
     @action(detail=True, methods=["post"], url_path="reconciliation-import-xlsx")
     def reconciliation_import_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()

@@ -2457,7 +2457,7 @@ export class RestService {
     }
     /**
      * Adds a count action to the viewset that returns the count of the queryset.
-     * @returns TargetPopulationApplyEngineFormula
+     * @returns PaymentPlanDetail
      * @throws ApiError
      */
     public static restBusinessAreasProgramsPaymentPlansApplyEngineFormulaCreate({
@@ -2473,7 +2473,7 @@ export class RestService {
         id: string,
         programSlug: string,
         requestBody: TargetPopulationApplyEngineFormula,
-    }): CancelablePromise<TargetPopulationApplyEngineFormula> {
+    }): CancelablePromise<PaymentPlanDetail> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/apply-engine-formula/',
@@ -2608,7 +2608,7 @@ export class RestService {
     }
     /**
      * Adds a count action to the viewset that returns the count of the queryset.
-     * @returns PaymentPlanImportFile
+     * @returns PaymentPlanDetail
      * @throws ApiError
      */
     public static restBusinessAreasProgramsPaymentPlansEntitlementImportXlsxCreate({
@@ -2624,7 +2624,7 @@ export class RestService {
         id: string,
         programSlug: string,
         requestBody: PaymentPlanImportFile,
-    }): CancelablePromise<PaymentPlanImportFile> {
+    }): CancelablePromise<PaymentPlanDetail> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/entitlement-import-xlsx/',
@@ -2639,7 +2639,7 @@ export class RestService {
     }
     /**
      * Adds a count action to the viewset that returns the count of the queryset.
-     * @returns PaymentPlanExcludeBeneficiaries
+     * @returns PaymentPlanDetail
      * @throws ApiError
      */
     public static restBusinessAreasProgramsPaymentPlansExcludeBeneficiariesCreate({
@@ -2655,7 +2655,7 @@ export class RestService {
         id: string,
         programSlug: string,
         requestBody: PaymentPlanExcludeBeneficiaries,
-    }): CancelablePromise<PaymentPlanExcludeBeneficiaries> {
+    }): CancelablePromise<PaymentPlanDetail> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/exclude-beneficiaries/',
@@ -2840,7 +2840,7 @@ export class RestService {
     }
     /**
      * Adds a count action to the viewset that returns the count of the queryset.
-     * @returns PaymentPlanImportFile
+     * @returns PaymentPlanDetail
      * @throws ApiError
      */
     public static restBusinessAreasProgramsPaymentPlansReconciliationImportXlsxCreate({
@@ -2856,7 +2856,7 @@ export class RestService {
         id: string,
         programSlug: string,
         requestBody: PaymentPlanImportFile,
-    }): CancelablePromise<PaymentPlanImportFile> {
+    }): CancelablePromise<PaymentPlanDetail> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/reconciliation-import-xlsx/',

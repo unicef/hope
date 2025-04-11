@@ -206,6 +206,7 @@ class FollowUpPaymentPlanSerializer(serializers.ModelSerializer):
             "dispersion_start_date",
             "dispersion_end_date",
             "is_follow_up",
+            "name",
         )
 
 
@@ -876,10 +877,12 @@ class PaymentListSerializer(serializers.ModelSerializer):
     status = serializers.CharField(source="get_status_display")
     household_unicef_id = serializers.CharField(source="household.unicef_id")
     household_size = serializers.IntegerField(source="household.size")
+    hoh_full_name = serializers.CharField(source="head_of_household.full_name")
+    collector_phone_no = serializers.CharField(source="collector.phone_no")
+    collector_phone_no_alt = serializers.CharField(source="collector.phone_no_alternative")
     snapshot_collector_full_name = serializers.SerializerMethodField(help_text="Get from Household Snapshot")
     fsp_name = serializers.SerializerMethodField()
     fsp_auth_code = serializers.SerializerMethodField()
-    # add payment_verifications = PaymentVerification
 
     class Meta:
         model = Payment
@@ -894,9 +897,13 @@ class PaymentListSerializer(serializers.ModelSerializer):
             "entitlement_quantity",
             "delivered_quantity",
             "delivery_date",
+            "delivery_type",
             "status",
             "currency",
             "fsp_auth_code",
+            "hoh_full_name",
+            "collector_phone_no",
+            "collector_phone_no_alt",
         )
 
     @classmethod
@@ -941,10 +948,19 @@ class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
         )
 
 
-# class VerificationSerializer(AdminUrlMixin, serializers.ModelSerializer):
-#     pass
-#     def get_fsp_name(self, obj: Payment) -> str:
-#         return obj.financial_service_provider.name if obj.financial_service_provider else ""
+class VerificationDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
+    status = serializers.CharField(source="get_status_display")
+    payment = PaymentDetailSerializer()
+
+    class Meta:
+        model = PaymentVerification
+        fields = (
+            "id",
+            "admin_url",
+            "status",
+            "received_amount",
+            "payment",
+        )
 
 
 class VerificationListSerializer(serializers.ModelSerializer):

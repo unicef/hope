@@ -18,9 +18,13 @@ export type PaymentDetail = {
     entitlementQuantity?: string | null;
     deliveredQuantity?: string | null;
     deliveryDate?: string | null;
+    deliveryType?: string | null;
     status: string;
     currency?: string | null;
     readonly fspAuthCode: string;
+    hohFullName: string;
+    collectorPhoneNo: string;
+    collectorPhoneNoAlt: string;
     parent: FollowUpPaymentPlan;
     paymentVerifications: PaymentVerification;
     readonly adminUrl: string;
