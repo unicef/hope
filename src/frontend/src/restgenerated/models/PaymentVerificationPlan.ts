@@ -4,6 +4,7 @@
 /* eslint-disable */
 export type PaymentVerificationPlan = {
     readonly id: string;
+    unicefId?: string | null;
     status: string;
     verificationChannel: string;
     sampling: string;

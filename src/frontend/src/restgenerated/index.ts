@@ -105,8 +105,6 @@ export type { PaymentVerification as PaymentVerificationCamelCase } from './mode
 export type { PaymentVerificationDetails as PaymentVerificationDetailsCamelCase } from './models/PaymentVerificationDetails';
 export type { PaymentVerificationList as PaymentVerificationListCamelCase } from './models/PaymentVerificationList';
 export type { PaymentVerificationPlan as PaymentVerificationPlanCamelCase } from './models/PaymentVerificationPlan';
-export type { PaymentVerificationPlanSmall as PaymentVerificationPlanSmallCamelCase } from './models/PaymentVerificationPlanSmall';
-export { PaymentVerificationPlanSmallStatusEnum as PaymentVerificationPlanSmallStatusEnumCamelCase } from './models/PaymentVerificationPlanSmallStatusEnum';
 export { PaymentVerificationStatusEnum as PaymentVerificationStatusEnumCamelCase } from './models/PaymentVerificationStatusEnum';
 export type { PaymentVerificationSummary as PaymentVerificationSummaryCamelCase } from './models/PaymentVerificationSummary';
 export type { PeriodicDataUpdateTemplateCreate as PeriodicDataUpdateTemplateCreateCamelCase } from './models/PeriodicDataUpdateTemplateCreate';
@@ -144,6 +142,7 @@ export { RegistrationDataImportStatusEnum as RegistrationDataImportStatusEnumCam
 export { RegistrationMethodEnum as RegistrationMethodEnumCamelCase } from './models/RegistrationMethodEnum';
 export { RelationshipEnum as RelationshipEnumCamelCase } from './models/RelationshipEnum';
 export { ResidenceStatusEnum as ResidenceStatusEnumCamelCase } from './models/ResidenceStatusEnum';
+export type { RevertMarkPaymentAsFailed as RevertMarkPaymentAsFailedCamelCase } from './models/RevertMarkPaymentAsFailed';
 export type { Rule as RuleCamelCase } from './models/Rule';
 export type { RuleCommit as RuleCommitCamelCase } from './models/RuleCommit';
 export { RuleTypeEnum as RuleTypeEnumCamelCase } from './models/RuleTypeEnum';

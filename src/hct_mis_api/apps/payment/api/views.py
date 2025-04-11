@@ -1,5 +1,6 @@
 import logging
 import mimetypes
+from datetime import datetime
 from typing import Any, Optional
 from zipfile import BadZipFile
 
@@ -19,6 +20,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_extensions.cache.decorators import cache_response
 
+from hct_mis_api.apps.payment.services.mark_as_failed import mark_as_failed, revert_mark_as_failed
 from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.activity_log.models import log_create
@@ -64,7 +66,7 @@ from hct_mis_api.apps.payment.api.serializers import (
     TargetPopulationCreateSerializer,
     TargetPopulationDetailSerializer,
     TPHouseholdListSerializer,
-    XlsxErrorSerializer,
+    XlsxErrorSerializer, RevertMarkPaymentAsFailedSerializer,
 )
 from hct_mis_api.apps.payment.celery_tasks import (
     export_pdf_payment_plan_summary,
@@ -1173,6 +1175,7 @@ class PaymentViewSet(
     serializer_classes_by_action = {
         "list": PaymentListSerializer,
         "retrieve": PaymentDetailSerializer,
+        "revert_mark_as_failed": RevertMarkPaymentAsFailedSerializer,
     }
     permissions_by_action = {
         "list": [
@@ -1182,6 +1185,51 @@ class PaymentViewSet(
             Permissions.PM_VIEW_DETAILS,
         ],
     }
+
+    def get_object(self) -> Payment:
+        payment_id = self.kwargs.get("id")
+        return get_object_or_404(Payment, id=payment_id)
+
+    @action(detail=True, methods=["get"], PERMISSIONS=[Permissions.PM_MARK_PAYMENT_AS_FAILED], url_path="mark-as-failed")
+    def mark_as_failed(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment = self.get_object()
+        old_payment = copy_model_object(payment)
+        mark_as_failed(payment)
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=request.user,
+            programs=payment.parent.program.pk,
+            old_object=old_payment,
+            new_object=payment,
+        )
+        return Response(
+            data=PaymentDetailSerializer(payment, context={"request": request}).data, status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, methods=["post"], PERMISSIONS=[Permissions.PM_MARK_PAYMENT_AS_FAILED],
+            serializer_class=PaymentDetailSerializer,
+            url_path="revert-mark-as-failed")
+    def revert_mark_as_failed(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment = self.get_object()
+        old_payment = copy_model_object(payment)
+        serializer = self.get_serializer_class()
+        serializer.is_valid(raise_exception=True)
+        delivered_quantity = serializer.validated_data.get("delivered_quantity")
+        delivery_date = serializer.validated_data.get("delivery_date")
+        delivery_date = datetime.combine(delivery_date, datetime.min.time())
+        revert_mark_as_failed(payment, delivered_quantity, delivery_date)
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=request.user,
+            programs=payment.parent.program.pk,
+            old_object=old_payment,
+            new_object=payment,
+        )
+        return Response(
+            data=PaymentDetailSerializer(payment, context={"request": request}).data, status=status.HTTP_200_OK
+        )
 
 
 class TPHouseholdViewSet(

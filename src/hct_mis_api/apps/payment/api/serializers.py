@@ -521,6 +521,10 @@ class PaymentPlanExcludeBeneficiariesSerializer(serializers.Serializer):
             raise serializers.ValidationError("Duplicate IDs are not allowed.")
         return value
 
+class RevertMarkPaymentAsFailedSerializer(serializers.Serializer):
+    delivered_quantity = serializers.FloatField(required=True)
+    delivery_date = serializers.DateField(required=True)
+
 
 class PaymentPlanCreateUpdateSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=True)

@@ -40,6 +40,7 @@ import type { PatchedProgramCycleUpdate } from '../models/PatchedProgramCycleUpd
 import type { PatchedRDI } from '../models/PatchedRDI';
 import type { PatchedTargetPopulationCreate } from '../models/PatchedTargetPopulationCreate';
 import type { PaymentDetail } from '../models/PaymentDetail';
+import type { PaymentList } from '../models/PaymentList';
 import type { PaymentPlan } from '../models/PaymentPlan';
 import type { PaymentPlanBulkAction } from '../models/PaymentPlanBulkAction';
 import type { PaymentPlanCreateFollowUp } from '../models/PaymentPlanCreateFollowUp';
@@ -65,6 +66,7 @@ import type { RDI } from '../models/RDI';
 import type { RDINested } from '../models/RDINested';
 import type { RefuseRdi } from '../models/RefuseRdi';
 import type { RegistrationDataImportDetail } from '../models/RegistrationDataImportDetail';
+import type { RevertMarkPaymentAsFailed } from '../models/RevertMarkPaymentAsFailed';
 import type { SplitPaymentPlan } from '../models/SplitPaymentPlan';
 import type { TargetPopulationApplyEngineFormula } from '../models/TargetPopulationApplyEngineFormula';
 import type { TargetPopulationCopy } from '../models/TargetPopulationCopy';
@@ -971,15 +973,20 @@ export class RestService {
      */
     public static restBusinessAreasPaymentsPaymentPlansManagerialList({
         businessAreaSlug,
+        deliveryMechanism,
         dispersionEndDateLte,
         dispersionStartDateGte,
+        fsp,
         isFollowUp,
         limit,
         name,
         offset,
         ordering,
+        paymentVerificationSummaryStatus,
         program,
         programCycle,
+        programCycleEndDate,
+        programCycleStartDate,
         search,
         status,
         totalEntitledQuantityGte,
@@ -988,8 +995,32 @@ export class RestService {
         updatedAtLte,
     }: {
         businessAreaSlug: string,
+        /**
+         * * `772b5b6c-d52c-459f-8f27-5b8e9e079de0` - Issue special knowledge.
+         * * `7ce22852-5235-4621-955e-fa7ae6d89890` - Analysis somebody.
+         * * `86bbe206-6483-4dc5-8278-abe2bdf67638` - History sport.
+         * * `atm_card` - ATM Card
+         * * `bb28813e-04bf-4315-877f-1de4616b0825` - Wear tonight unit.
+         * * `cardless_cash_withdrawal` - Cardless cash withdrawal
+         * * `cash` - Cash
+         * * `cash_by_fsp` - Cash by FSP
+         * * `cash_over_the_counter` - Cash over the counter
+         * * `cb457fbf-f7fc-4ddb-b249-24b0278d135e` - Purpose style piece election skin.
+         * * `cheque` - Cheque
+         * * `deposit_to_card` - Deposit to Card
+         * * `fe631423-472f-401a-aa0b-ce171e356c80` - Executive along day.
+         * * `mobile_money` - Mobile Money
+         * * `pre-paid_card` - Pre-paid card
+         * * `referral` - Referral
+         * * `transfer` - Transfer
+         * * `transfer_to_account` - Transfer to Account
+         * * `transfer_to_digital_wallet` - Transfer to Digital Wallet
+         * * `voucher` - Voucher
+         */
+        deliveryMechanism?: Array<'772b5b6c-d52c-459f-8f27-5b8e9e079de0' | '7ce22852-5235-4621-955e-fa7ae6d89890' | '86bbe206-6483-4dc5-8278-abe2bdf67638' | 'atm_card' | 'bb28813e-04bf-4315-877f-1de4616b0825' | 'cardless_cash_withdrawal' | 'cash' | 'cash_by_fsp' | 'cash_over_the_counter' | 'cb457fbf-f7fc-4ddb-b249-24b0278d135e' | 'cheque' | 'deposit_to_card' | 'fe631423-472f-401a-aa0b-ce171e356c80' | 'mobile_money' | 'pre-paid_card' | 'referral' | 'transfer' | 'transfer_to_account' | 'transfer_to_digital_wallet' | 'voucher'>,
         dispersionEndDateLte?: string,
         dispersionStartDateGte?: string,
+        fsp?: string,
         isFollowUp?: boolean,
         /**
          * Number of results to return per page.
@@ -1004,8 +1035,16 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        /**
+         * * `ACTIVE` - Active
+         * * `FINISHED` - Finished
+         * * `PENDING` - Pending
+         */
+        paymentVerificationSummaryStatus?: 'ACTIVE' | 'FINISHED' | 'PENDING',
         program?: string,
         programCycle?: string,
+        programCycleEndDate?: string,
+        programCycleStartDate?: string,
         /**
          * A search term.
          */
@@ -1044,15 +1083,20 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
             },
             query: {
+                'delivery_mechanism': deliveryMechanism,
                 'dispersion_end_date__lte': dispersionEndDateLte,
                 'dispersion_start_date__gte': dispersionStartDateGte,
+                'fsp': fsp,
                 'is_follow_up': isFollowUp,
                 'limit': limit,
                 'name': name,
                 'offset': offset,
                 'ordering': ordering,
+                'payment_verification_summary_status': paymentVerificationSummaryStatus,
                 'program': program,
                 'program_cycle': programCycle,
+                'program_cycle_end_date': programCycleEndDate,
+                'program_cycle_start_date': programCycleStartDate,
                 'search': search,
                 'status': status,
                 'total_entitled_quantity__gte': totalEntitledQuantityGte,
@@ -1984,15 +2028,20 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansList({
         businessAreaSlug,
         programSlug,
+        deliveryMechanism,
         dispersionEndDateLte,
         dispersionStartDateGte,
+        fsp,
         isFollowUp,
         limit,
         name,
         offset,
         ordering,
+        paymentVerificationSummaryStatus,
         program,
         programCycle,
+        programCycleEndDate,
+        programCycleStartDate,
         search,
         status,
         totalEntitledQuantityGte,
@@ -2002,8 +2051,32 @@ export class RestService {
     }: {
         businessAreaSlug: string,
         programSlug: string,
+        /**
+         * * `772b5b6c-d52c-459f-8f27-5b8e9e079de0` - Issue special knowledge.
+         * * `7ce22852-5235-4621-955e-fa7ae6d89890` - Analysis somebody.
+         * * `86bbe206-6483-4dc5-8278-abe2bdf67638` - History sport.
+         * * `atm_card` - ATM Card
+         * * `bb28813e-04bf-4315-877f-1de4616b0825` - Wear tonight unit.
+         * * `cardless_cash_withdrawal` - Cardless cash withdrawal
+         * * `cash` - Cash
+         * * `cash_by_fsp` - Cash by FSP
+         * * `cash_over_the_counter` - Cash over the counter
+         * * `cb457fbf-f7fc-4ddb-b249-24b0278d135e` - Purpose style piece election skin.
+         * * `cheque` - Cheque
+         * * `deposit_to_card` - Deposit to Card
+         * * `fe631423-472f-401a-aa0b-ce171e356c80` - Executive along day.
+         * * `mobile_money` - Mobile Money
+         * * `pre-paid_card` - Pre-paid card
+         * * `referral` - Referral
+         * * `transfer` - Transfer
+         * * `transfer_to_account` - Transfer to Account
+         * * `transfer_to_digital_wallet` - Transfer to Digital Wallet
+         * * `voucher` - Voucher
+         */
+        deliveryMechanism?: Array<'772b5b6c-d52c-459f-8f27-5b8e9e079de0' | '7ce22852-5235-4621-955e-fa7ae6d89890' | '86bbe206-6483-4dc5-8278-abe2bdf67638' | 'atm_card' | 'bb28813e-04bf-4315-877f-1de4616b0825' | 'cardless_cash_withdrawal' | 'cash' | 'cash_by_fsp' | 'cash_over_the_counter' | 'cb457fbf-f7fc-4ddb-b249-24b0278d135e' | 'cheque' | 'deposit_to_card' | 'fe631423-472f-401a-aa0b-ce171e356c80' | 'mobile_money' | 'pre-paid_card' | 'referral' | 'transfer' | 'transfer_to_account' | 'transfer_to_digital_wallet' | 'voucher'>,
         dispersionEndDateLte?: string,
         dispersionStartDateGte?: string,
+        fsp?: string,
         isFollowUp?: boolean,
         /**
          * Number of results to return per page.
@@ -2018,8 +2091,16 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        /**
+         * * `ACTIVE` - Active
+         * * `FINISHED` - Finished
+         * * `PENDING` - Pending
+         */
+        paymentVerificationSummaryStatus?: 'ACTIVE' | 'FINISHED' | 'PENDING',
         program?: string,
         programCycle?: string,
+        programCycleEndDate?: string,
+        programCycleStartDate?: string,
         /**
          * A search term.
          */
@@ -2059,15 +2140,20 @@ export class RestService {
                 'program_slug': programSlug,
             },
             query: {
+                'delivery_mechanism': deliveryMechanism,
                 'dispersion_end_date__lte': dispersionEndDateLte,
                 'dispersion_start_date__gte': dispersionStartDateGte,
+                'fsp': fsp,
                 'is_follow_up': isFollowUp,
                 'limit': limit,
                 'name': name,
                 'offset': offset,
                 'ordering': ordering,
+                'payment_verification_summary_status': paymentVerificationSummaryStatus,
                 'program': program,
                 'program_cycle': programCycle,
+                'program_cycle_end_date': programCycleEndDate,
+                'program_cycle_start_date': programCycleStartDate,
                 'search': search,
                 'status': status,
                 'total_entitled_quantity__gte': totalEntitledQuantityGte,
@@ -2168,6 +2254,70 @@ export class RestService {
                 'payment_plan_id': paymentPlanId,
                 'program_slug': programSlug,
             },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlansPaymentsMarkAsFailedRetrieve({
+        businessAreaSlug,
+        id,
+        paymentPlanId,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this payment.
+         */
+        id: string,
+        paymentPlanId: string,
+        programSlug: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_id}/payments/{id}/mark-as-failed/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'payment_plan_id': paymentPlanId,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns RevertMarkPaymentAsFailed
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlansPaymentsRevertMarkAsFailedCreate({
+        businessAreaSlug,
+        id,
+        paymentPlanId,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this payment.
+         */
+        id: string,
+        paymentPlanId: string,
+        programSlug: string,
+        requestBody: RevertMarkPaymentAsFailed,
+    }): CancelablePromise<RevertMarkPaymentAsFailed> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_id}/payments/{id}/revert-mark-as-failed/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'payment_plan_id': paymentPlanId,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
     /**
@@ -2998,15 +3148,20 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentVerificationsList({
         businessAreaSlug,
         programSlug,
+        deliveryMechanism,
         dispersionEndDateLte,
         dispersionStartDateGte,
+        fsp,
         isFollowUp,
         limit,
         name,
         offset,
         ordering,
+        paymentVerificationSummaryStatus,
         program,
         programCycle,
+        programCycleEndDate,
+        programCycleStartDate,
         search,
         status,
         totalEntitledQuantityGte,
@@ -3016,8 +3171,32 @@ export class RestService {
     }: {
         businessAreaSlug: string,
         programSlug: string,
+        /**
+         * * `772b5b6c-d52c-459f-8f27-5b8e9e079de0` - Issue special knowledge.
+         * * `7ce22852-5235-4621-955e-fa7ae6d89890` - Analysis somebody.
+         * * `86bbe206-6483-4dc5-8278-abe2bdf67638` - History sport.
+         * * `atm_card` - ATM Card
+         * * `bb28813e-04bf-4315-877f-1de4616b0825` - Wear tonight unit.
+         * * `cardless_cash_withdrawal` - Cardless cash withdrawal
+         * * `cash` - Cash
+         * * `cash_by_fsp` - Cash by FSP
+         * * `cash_over_the_counter` - Cash over the counter
+         * * `cb457fbf-f7fc-4ddb-b249-24b0278d135e` - Purpose style piece election skin.
+         * * `cheque` - Cheque
+         * * `deposit_to_card` - Deposit to Card
+         * * `fe631423-472f-401a-aa0b-ce171e356c80` - Executive along day.
+         * * `mobile_money` - Mobile Money
+         * * `pre-paid_card` - Pre-paid card
+         * * `referral` - Referral
+         * * `transfer` - Transfer
+         * * `transfer_to_account` - Transfer to Account
+         * * `transfer_to_digital_wallet` - Transfer to Digital Wallet
+         * * `voucher` - Voucher
+         */
+        deliveryMechanism?: Array<'772b5b6c-d52c-459f-8f27-5b8e9e079de0' | '7ce22852-5235-4621-955e-fa7ae6d89890' | '86bbe206-6483-4dc5-8278-abe2bdf67638' | 'atm_card' | 'bb28813e-04bf-4315-877f-1de4616b0825' | 'cardless_cash_withdrawal' | 'cash' | 'cash_by_fsp' | 'cash_over_the_counter' | 'cb457fbf-f7fc-4ddb-b249-24b0278d135e' | 'cheque' | 'deposit_to_card' | 'fe631423-472f-401a-aa0b-ce171e356c80' | 'mobile_money' | 'pre-paid_card' | 'referral' | 'transfer' | 'transfer_to_account' | 'transfer_to_digital_wallet' | 'voucher'>,
         dispersionEndDateLte?: string,
         dispersionStartDateGte?: string,
+        fsp?: string,
         isFollowUp?: boolean,
         /**
          * Number of results to return per page.
@@ -3032,8 +3211,16 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        /**
+         * * `ACTIVE` - Active
+         * * `FINISHED` - Finished
+         * * `PENDING` - Pending
+         */
+        paymentVerificationSummaryStatus?: 'ACTIVE' | 'FINISHED' | 'PENDING',
         program?: string,
         programCycle?: string,
+        programCycleEndDate?: string,
+        programCycleStartDate?: string,
         /**
          * A search term.
          */
@@ -3073,15 +3260,20 @@ export class RestService {
                 'program_slug': programSlug,
             },
             query: {
+                'delivery_mechanism': deliveryMechanism,
                 'dispersion_end_date__lte': dispersionEndDateLte,
                 'dispersion_start_date__gte': dispersionStartDateGte,
+                'fsp': fsp,
                 'is_follow_up': isFollowUp,
                 'limit': limit,
                 'name': name,
                 'offset': offset,
                 'ordering': ordering,
+                'payment_verification_summary_status': paymentVerificationSummaryStatus,
                 'program': program,
                 'program_cycle': programCycle,
+                'program_cycle_end_date': programCycleEndDate,
+                'program_cycle_start_date': programCycleStartDate,
                 'search': search,
                 'status': status,
                 'total_entitled_quantity__gte': totalEntitledQuantityGte,
@@ -3111,6 +3303,33 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaymentList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentVerificationsVerificationsRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<PaymentList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/verifications/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
@@ -3747,12 +3966,17 @@ export class RestService {
         programSlug,
         createdAtGte,
         createdAtLte,
+        deliveryMechanism,
+        fsp,
         limit,
         name,
         offset,
         ordering,
+        paymentVerificationSummaryStatus,
         program,
         programCycle,
+        programCycleEndDate,
+        programCycleStartDate,
         search,
         status,
         totalHouseholdsCountGte,
@@ -3767,6 +3991,30 @@ export class RestService {
         createdAtGte?: string,
         createdAtLte?: string,
         /**
+         * * `772b5b6c-d52c-459f-8f27-5b8e9e079de0` - Issue special knowledge.
+         * * `7ce22852-5235-4621-955e-fa7ae6d89890` - Analysis somebody.
+         * * `86bbe206-6483-4dc5-8278-abe2bdf67638` - History sport.
+         * * `atm_card` - ATM Card
+         * * `bb28813e-04bf-4315-877f-1de4616b0825` - Wear tonight unit.
+         * * `cardless_cash_withdrawal` - Cardless cash withdrawal
+         * * `cash` - Cash
+         * * `cash_by_fsp` - Cash by FSP
+         * * `cash_over_the_counter` - Cash over the counter
+         * * `cb457fbf-f7fc-4ddb-b249-24b0278d135e` - Purpose style piece election skin.
+         * * `cheque` - Cheque
+         * * `deposit_to_card` - Deposit to Card
+         * * `fe631423-472f-401a-aa0b-ce171e356c80` - Executive along day.
+         * * `mobile_money` - Mobile Money
+         * * `pre-paid_card` - Pre-paid card
+         * * `referral` - Referral
+         * * `transfer` - Transfer
+         * * `transfer_to_account` - Transfer to Account
+         * * `transfer_to_digital_wallet` - Transfer to Digital Wallet
+         * * `voucher` - Voucher
+         */
+        deliveryMechanism?: Array<'772b5b6c-d52c-459f-8f27-5b8e9e079de0' | '7ce22852-5235-4621-955e-fa7ae6d89890' | '86bbe206-6483-4dc5-8278-abe2bdf67638' | 'atm_card' | 'bb28813e-04bf-4315-877f-1de4616b0825' | 'cardless_cash_withdrawal' | 'cash' | 'cash_by_fsp' | 'cash_over_the_counter' | 'cb457fbf-f7fc-4ddb-b249-24b0278d135e' | 'cheque' | 'deposit_to_card' | 'fe631423-472f-401a-aa0b-ce171e356c80' | 'mobile_money' | 'pre-paid_card' | 'referral' | 'transfer' | 'transfer_to_account' | 'transfer_to_digital_wallet' | 'voucher'>,
+        fsp?: string,
+        /**
          * Number of results to return per page.
          */
         limit?: number,
@@ -3779,8 +4027,16 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        /**
+         * * `ACTIVE` - Active
+         * * `FINISHED` - Finished
+         * * `PENDING` - Pending
+         */
+        paymentVerificationSummaryStatus?: 'ACTIVE' | 'FINISHED' | 'PENDING',
         program?: string,
         programCycle?: string,
+        programCycleEndDate?: string,
+        programCycleStartDate?: string,
         /**
          * A search term.
          */
@@ -3823,12 +4079,17 @@ export class RestService {
             query: {
                 'created_at__gte': createdAtGte,
                 'created_at__lte': createdAtLte,
+                'delivery_mechanism': deliveryMechanism,
+                'fsp': fsp,
                 'limit': limit,
                 'name': name,
                 'offset': offset,
                 'ordering': ordering,
+                'payment_verification_summary_status': paymentVerificationSummaryStatus,
                 'program': program,
                 'program_cycle': programCycle,
+                'program_cycle_end_date': programCycleEndDate,
+                'program_cycle_start_date': programCycleStartDate,
                 'search': search,
                 'status': status,
                 'total_households_count__gte': totalHouseholdsCountGte,
