@@ -3,7 +3,6 @@ from typing import Dict
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 
-from hct_mis_api.apps.account.api.fields import Base64ModelField
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.utils import resolve_flex_fields_choices_to_string
 from hct_mis_api.apps.geo.models import Country
@@ -25,8 +24,6 @@ from hct_mis_api.apps.payment.models import DeliveryMechanismData
 
 
 class DocumentTypeSerializer(serializers.ModelSerializer):
-    id = Base64ModelField(model_name="DocumentType")
-
     class Meta:
         model = DocumentType
         fields = (
@@ -47,7 +44,6 @@ class CountrySerializer(serializers.ModelSerializer):
 
 
 class DocumentSerializer(serializers.ModelSerializer):
-    id = Base64ModelField(model_name="Document")
     type = DocumentTypeSerializer()
     country = CountrySerializer()
 
@@ -62,7 +58,6 @@ class DocumentSerializer(serializers.ModelSerializer):
 
 
 class IndividualIdentitySerializer(serializers.ModelSerializer):
-    id = Base64ModelField(model_name="IndividualIdentity")
     country = CountrySerializer()
 
     class Meta:
@@ -75,8 +70,6 @@ class IndividualIdentitySerializer(serializers.ModelSerializer):
 
 
 class BankAccountInfoSerializer(serializers.ModelSerializer):
-    id = Base64ModelField(model_name="BankAccountInfo")
-
     class Meta:
         model = BankAccountInfo
         fields = (
@@ -89,7 +82,6 @@ class BankAccountInfoSerializer(serializers.ModelSerializer):
 
 
 class DeliveryMechanismDataSerializer(serializers.ModelSerializer):
-    id = Base64ModelField(model_name="DeliveryMechanismData")
     name = serializers.SerializerMethodField()
     individual_tab_data = serializers.SerializerMethodField()
 
@@ -109,7 +101,6 @@ class DeliveryMechanismDataSerializer(serializers.ModelSerializer):
 
 
 class HouseholdSimpleSerializer(serializers.ModelSerializer):
-    id = Base64ModelField(model_name="Household")
     admin2 = serializers.CharField(source="admin2.name", default="")
 
     class Meta:
@@ -122,7 +113,6 @@ class HouseholdSimpleSerializer(serializers.ModelSerializer):
 
 
 class IndividualRoleInHouseholdSerializer(serializers.ModelSerializer):
-    id = Base64ModelField(model_name="IndividualRoleInHousehold")
     household = HouseholdSimpleSerializer()
 
     class Meta:
@@ -135,8 +125,6 @@ class IndividualRoleInHouseholdSerializer(serializers.ModelSerializer):
 
 
 class LinkedGrievanceTicketSerializer(serializers.ModelSerializer):
-    id = Base64ModelField(model_name="GrievanceTicket")
-
     class Meta:
         model = GrievanceTicket
         fields = (
@@ -147,7 +135,6 @@ class LinkedGrievanceTicketSerializer(serializers.ModelSerializer):
 
 
 class IndividualListSerializer(serializers.ModelSerializer):
-    id = Base64ModelField(model_name="Individual")
     household = HouseholdSimpleSerializer()
     role = SerializerMethodField()
 
@@ -163,7 +150,6 @@ class IndividualListSerializer(serializers.ModelSerializer):
 
 
 class IndividualDetailSerializer(serializers.ModelSerializer):
-    id = Base64ModelField(model_name="Individual")
     household = HouseholdSimpleSerializer()
     role = serializers.SerializerMethodField()
     registration_data_import = RegistrationDataImportSerializer()

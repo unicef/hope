@@ -25,7 +25,7 @@ pytestmark = pytest.mark.django_db
 
 @freezegun.freeze_time("2022-01-01")
 class TestRegistrationDataImportViews:
-    def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory, id_to_base64: Callable) -> None:
+    def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory) -> None:
         self.partner = PartnerFactory(name="TestPartner")
         self.user = UserFactory(partner=self.partner)
         self.client = api_client(self.user)
@@ -99,9 +99,8 @@ class TestRegistrationDataImportViews:
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
         create_partner_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
 
         if is_permission_in_correct_program:
             create_user_role_with_permissions(self.user, user_permissions, self.afghanistan, self.program1)
@@ -119,9 +118,8 @@ class TestRegistrationDataImportViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.RDI_VIEW_LIST],
@@ -192,9 +190,8 @@ class TestRegistrationDataImportViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.RDI_VIEW_LIST],
@@ -212,9 +209,8 @@ class TestRegistrationDataImportViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.RDI_VIEW_LIST],
@@ -232,9 +228,8 @@ class TestRegistrationDataImportViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.RDI_VIEW_LIST],
