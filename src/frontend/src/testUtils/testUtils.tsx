@@ -4,8 +4,7 @@ import { render, RenderOptions } from '@testing-library/react';
 import { Formik } from 'formik';
 import noop from 'lodash/noop';
 import { TestProviders } from './testProviders';
-import { ProgramStatus } from '@generated/graphql';
-import { MockLink } from '@apollo/client/testing';
+import { Status791Enum } from '@restgenerated/models/Status791Enum';
 
 const customRender = (
   ui: ReactElement,
@@ -13,7 +12,11 @@ const customRender = (
 ) =>
   render(
     <>
-      <BrowserRouter>
+      <BrowserRouter
+        future={{
+          v7_startTransition: true,
+        }}
+      >
         <Formik initialValues={{}} onSubmit={noop}>
           {ui}
         </Formik>
@@ -26,7 +29,7 @@ const customRender = (
   );
 
 export * from '@testing-library/react';
-export { customRender as render };
+export { customRender as renderWithProviders };
 
 let m_w = 123456789;
 let m_z = 987654321;
@@ -48,41 +51,33 @@ export const random = () => {
   return result;
 };
 
-export class ApolloLoadingLink extends MockLink {
-  constructor() {
-    super([]);
-  }
-
-  request() {
-    return null;
-  }
-}
-
 export const fakeContextProgram = {
   selectedProgram: {
     id: '1',
     name: 'someName',
-    status: ProgramStatus.Active,
-    pduFields: null,
-    dataCollectingType: {
-      id: '1',
-      householdFiltersAvailable: true,
-      individualFiltersAvailable: true,
+    programme_code: 'A123',
+    status: 'ACTIVE' as Status791Enum,
+    pdu_fields: null,
+    program_code: 'A123',
+    data_collecting_type: {
+      id: 1,
+      household_filters_available: true,
+      individual_filters_available: true,
       label: 'data collecting type',
       code: '123',
       type: 'full',
       children: null,
     },
-    beneficiaryGroup: {
+    beneficiary_group: {
       id: '2',
-      createdAt: '2023-01-01T00:00:00Z',
-      updatedAt: '2023-01-01T00:00:00Z',
+      created_at: '2023-01-01T00:00:00Z',
+      updated_at: '2023-01-01T00:00:00Z',
       name: 'Population',
       groupLabel: 'Household',
       groupLabelPlural: 'Households',
       memberLabel: 'Individual',
       memberLabelPlural: 'Individuals',
-      masterDetail: true,
+      master_detail: true,
     },
   },
   setSelectedProgram: () => {},

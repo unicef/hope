@@ -1,4 +1,3 @@
-import { fetchPeriodicFields } from '@api/periodicDataUpdateApi';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
@@ -7,7 +6,6 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { IndividualAdditionalRegistrationInformation } from '@components/population/IndividualAdditionalRegistrationInformation/IndividualAdditionalRegistrationInformation';
 import { IndividualBioData } from '@components/population/IndividualBioData/IndividualBioData';
 import { IndividualDeliveryMechanisms } from '@components/population/IndividualDeliveryMechanisms';
-import { IndividualFlags } from '@components/population/IndividualFlags';
 import { IndividualPhotoModal } from '@components/population/IndividualPhotoModal';
 import { ProgrammeTimeSeriesFields } from '@components/population/ProgrammeTimeSeriesFields';
 import { AdminButton } from '@core/AdminButton';
@@ -30,6 +28,7 @@ import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
+import { RestService } from '@restgenerated/services/RestService';
 
 const Container = styled.div`
   padding: 20px;
@@ -70,7 +69,11 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
     useQuery({
       queryKey: ['periodicFields', businessArea, programId],
       queryFn: () =>
-        fetchPeriodicFields(businessArea, programId, { limit: 1000 }),
+        RestService.restBusinessAreasProgramsPeriodicFieldsList({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          limit: 1000,
+        }),
     });
 
   if (
@@ -129,7 +132,7 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
         }
         flags={
           <>
-            <IndividualFlags individual={individual} />
+            {/*<IndividualFlags individual={individual} />  TODO REST refactor*/}
             <AdminButton adminUrl={individual?.adminUrl} />
           </>
         }

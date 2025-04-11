@@ -5,6 +5,8 @@ from unittest.mock import Mock
 
 from django.http import JsonResponse
 
+import pytest
+
 from hct_mis_api.api.endpoints.rdi.upload import RDINestedSerializer
 from hct_mis_api.api.utils import humanize_errors
 
@@ -24,6 +26,7 @@ HOUSEHOLD = {
 }
 
 
+@pytest.mark.django_db
 class ValidatorTest(TestCase):
     maxDiff = None
 

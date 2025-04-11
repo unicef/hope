@@ -8,6 +8,7 @@ import {
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box } from '@mui/material';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import { getFilterFromQueryParams } from '@utils/utils';
 import get from 'lodash/get';
@@ -39,7 +40,7 @@ export function LookUpHouseholdIndividualSelectionDetail({
   onValueChange;
   initialValues;
   selectedIndividual;
-  selectedHousehold;
+  selectedHousehold: HouseholdDetail;
   setSelectedIndividual;
   setSelectedHousehold;
   redirectedFromRelatedTicket?: boolean;

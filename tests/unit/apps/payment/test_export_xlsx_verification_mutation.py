@@ -68,7 +68,9 @@ class TestXlsxVerificationExport(APITestCase):
         ]
     )
     def test_export_xlsx_cash_plan_payment_verification(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
 
         self.snapshot_graphql_request(
             request_string=self.EXPORT_MUTATION,

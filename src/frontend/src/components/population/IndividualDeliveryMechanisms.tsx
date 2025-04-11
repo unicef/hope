@@ -50,7 +50,7 @@ export const IndividualDeliveryMechanisms: FC<
         {individual.deliveryMechanismsData.map((mechanism, index) => {
           const tabData = JSON.parse(mechanism.individualTabData);
           return (
-            <Grid size={{ xs:12 }} key={index}>
+            <Grid size={{ xs: 12 }} key={index}>
               <Typography variant="h6">{mechanism.name}</Typography>
               <Grid container spacing={3}>
                 {Object.entries(tabData).map(([key, value], idx) => (

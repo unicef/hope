@@ -115,7 +115,9 @@ function ExcludeSection({
         awaitRefetchQueries: true,
       });
       if (!error) {
-        showMessage(`${beneficiaryGroup?.groupLabelPlural} exclusion started`);
+        showMessage(
+          `${beneficiaryGroup?.groupLabelPlural} exclusion started`,
+        );
         setExclusionsOpen(false);
       }
     } catch (e) {

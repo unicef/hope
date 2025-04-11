@@ -20,12 +20,12 @@ from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
-pytestmark = pytest.mark.django_db
+pytestmark = pytest.mark.django_db()
 
 
 @freezegun.freeze_time("2022-01-01")
 class TestTargetPopulationViews:
-    def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory, id_to_base64: Callable) -> None:
+    def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory) -> None:
         self.partner = PartnerFactory(name="TestPartner")
         self.user = UserFactory(partner=self.partner)
         self.client = api_client(self.user)
@@ -61,8 +61,8 @@ class TestTargetPopulationViews:
         self.url_list = reverse(
             "api:targeting:target-populations-list",
             kwargs={
-                "business_area": self.afghanistan.slug,
-                "program_id": id_to_base64(self.program1.id, "Program"),
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program1.slug,
             },
         )
 
@@ -99,18 +99,19 @@ class TestTargetPopulationViews:
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
         create_partner_role_with_permissions: Callable,
-        update_partner_access_to_program: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             permissions,
             self.afghanistan,
         )
-        create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
         if access_to_program:
-            update_partner_access_to_program(self.partner, self.program1)
+            create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program1)
+            create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan, self.program1)
+        else:
+            create_user_role_with_permissions(self.user, permissions, self.afghanistan)
+            create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
 
         response = self.client.get(self.url_list)
         assert response.status_code == expected_status
@@ -120,9 +121,8 @@ class TestTargetPopulationViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.TARGETING_VIEW_LIST],
@@ -135,28 +135,28 @@ class TestTargetPopulationViews:
         response_json = response.json()["results"]
         assert len(response_json) == 3
         assert {
-            "id": id_to_base64(self.tp1.id, "PaymentPlan"),
+            "id": str(self.tp1.id),
             "name": self.tp1.name,
             "status": self.tp1.get_status_display(),
             "created_by": self.tp1.created_by.get_full_name(),
             "created_at": "2022-01-01T00:00:00Z",
         } in response_json
         assert {
-            "id": id_to_base64(self.tp2.id, "PaymentPlan"),
+            "id": str(self.tp2.id),
             "name": self.tp2.name,
             "status": self.tp2.get_status_display(),
             "created_by": self.tp2.created_by.get_full_name(),
             "created_at": "2022-01-01T00:00:00Z",
         } in response_json
         assert {
-            "id": id_to_base64(self.tp3.id, "PaymentPlan"),
+            "id": str(self.tp3.id),
             "name": self.tp3.name,
             "status": "Assigned",
             "created_by": self.tp3.created_by.get_full_name(),
             "created_at": "2022-01-01T00:00:00Z",
         } in response_json
         assert {
-            "id": id_to_base64(self.tp_program2.id, "PaymentPlan"),
+            "id": str(self.tp_program2.id),
             "name": self.tp_program2.name,
             "created_by": self.tp1.created_by.get_full_name(),
             "status": "Assigned",
@@ -168,9 +168,8 @@ class TestTargetPopulationViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.TARGETING_VIEW_LIST],
@@ -188,9 +187,8 @@ class TestTargetPopulationViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.TARGETING_VIEW_LIST],
@@ -208,9 +206,8 @@ class TestTargetPopulationViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.TARGETING_VIEW_LIST],
@@ -223,7 +220,7 @@ class TestTargetPopulationViews:
 
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 12
+            assert len(ctx.captured_queries) == 14
 
         # Test that reoccurring requests use cached data
         with CaptureQueriesContext(connection) as ctx:
@@ -232,7 +229,7 @@ class TestTargetPopulationViews:
 
             etag_second_call = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 5
+            assert len(ctx.captured_queries) == 4
 
             assert etag_second_call == etag
 
@@ -245,7 +242,7 @@ class TestTargetPopulationViews:
 
             etag_call_after_update = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 12
+            assert len(ctx.captured_queries) == 8
 
             assert etag_call_after_update != etag
 
@@ -256,6 +253,6 @@ class TestTargetPopulationViews:
 
             etag_call_after_update_second_call = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 5
+            assert len(ctx.captured_queries) == 4
 
             assert etag_call_after_update_second_call == etag_call_after_update

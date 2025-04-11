@@ -11,10 +11,11 @@ import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { useQuery } from '@tanstack/react-query';
-import { fetchBeneficiaryGroups } from '@api/programsApi';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { RestService } from '@restgenerated/services/RestService';
+import { useLocation } from 'react-router-dom';
 
 interface ProgramFormPropTypes {
   values;
@@ -26,13 +27,16 @@ const ProgramForm = ({
   programHasRdi,
 }: ProgramFormPropTypes): ReactElement => {
   const { t } = useTranslation();
+  const location = useLocation();
+  const isEditProgram = location.pathname.includes('edit');
+
   const { data } = useProgrammeChoiceDataQuery();
   const { data: dataCollectionTypeChoicesData } =
     useDataCollectionTypeChoiceDataQuery();
 
   const { data: beneficiaryGroupsData } = useQuery({
     queryKey: ['beneficiaryGroups'],
-    queryFn: async () => fetchBeneficiaryGroups(),
+    queryFn: () => RestService.restBeneficiaryGroupsList({}),
   });
 
   const { setFieldValue } = useFormikContext();
@@ -62,11 +66,11 @@ const ProgramForm = ({
 
     if (dctType === 'SOCIAL') {
       filteredBeneficiaryGroups = beneficiaryGroupsData.results.filter(
-        (el) => el.master_detail === false,
+        (el) => el.masterDetail === false,
       );
     } else if (dctType === 'STANDARD') {
       filteredBeneficiaryGroups = beneficiaryGroupsData.results.filter(
-        (el) => el.master_detail === true,
+        (el) => el.masterDetail === true,
       );
     } else {
       filteredBeneficiaryGroups = beneficiaryGroupsData.results;
@@ -89,7 +93,7 @@ const ProgramForm = ({
   return (
     <Form>
       <Grid container spacing={3}>
-        <Grid size={{ xs:6 }}>
+        <Grid size={{ xs: 6 }}>
           <Field
             name="name"
             label={t('Programme Name')}
@@ -101,7 +105,7 @@ const ProgramForm = ({
             data-cy="input-programme-name"
           />
         </Grid>
-        <Grid size={{ xs:6 }}>
+        <Grid size={{ xs: 6 }}>
           <Field
             name="programmeCode"
             label={t('Programme Code')}
@@ -111,9 +115,10 @@ const ProgramForm = ({
             component={FormikTextField}
             maxLength={4}
             data-cy="input-programme-code"
+            disabled={isEditProgram}
           />
         </Grid>
-        <Grid size={{ xs:6 }}>
+        <Grid size={{ xs: 6 }}>
           <Field
             name="startDate"
             label={t('Start Date')}
@@ -124,7 +129,7 @@ const ProgramForm = ({
             data-cy="input-start-date"
           />
         </Grid>
-        <Grid size={{ xs:6 }}>
+        <Grid size={{ xs: 6 }}>
           <Field
             name="endDate"
             label={t('End Date')}
@@ -138,7 +143,7 @@ const ProgramForm = ({
             data-cy="input-end-date"
           />
         </Grid>
-        <Grid size={{ xs:6 }}>
+        <Grid size={{ xs: 6 }}>
           <Field
             name="sector"
             label={t('Sector')}
@@ -150,7 +155,7 @@ const ProgramForm = ({
             data-cy="input-sector"
           />
         </Grid>
-        <Grid size={{ xs:6 }}>
+        <Grid size={{ xs: 6 }}>
           <Field
             name="dataCollectingTypeCode"
             label={t('Data Collecting Type')}
@@ -166,7 +171,7 @@ const ProgramForm = ({
             data-cy="input-data-collecting-type"
           />
         </Grid>
-        <Grid size={{ xs:6 }}>
+        <Grid size={{ xs: 6 }}>
           <Tooltip
             title={
               !values.dataCollectingTypeCode
@@ -206,7 +211,7 @@ const ProgramForm = ({
             data-cy="input-description"
           />
         </Grid>
-        <Grid size={{ xs:6 }}>
+        <Grid size={{ xs: 6 }}>
           <Field
             name="budget"
             label={t('Budget (USD)')}
@@ -218,7 +223,7 @@ const ProgramForm = ({
             data-cy="input-budget"
           />
         </Grid>
-        <Grid size={{ xs:6 }}>
+        <Grid size={{ xs: 6 }}>
           <Field
             name="administrativeAreasOfImplementation"
             label={t('Administrative Areas of Implementation')}
@@ -229,7 +234,7 @@ const ProgramForm = ({
             data-cy="input-admin-area"
           />
         </Grid>
-        <Grid size={{ xs:6 }}>
+        <Grid size={{ xs: 6 }}>
           <Field
             name="populationGoal"
             label={t('Population Goal (# of Individuals)')}
@@ -240,8 +245,8 @@ const ProgramForm = ({
             data-cy="input-population-goal"
           />
         </Grid>
-        <Grid size={{ xs:6 }} />
-        <Grid size={{ xs:6 }}>
+        <Grid size={{ xs: 6 }} />
+        <Grid size={{ xs: 6 }}>
           <Field
             name="cashPlus"
             label={t('Cash+')}
@@ -250,8 +255,8 @@ const ProgramForm = ({
             data-cy="input-cash-plus"
           />
         </Grid>
-        <Grid size={{ xs:6 }} />
-        <Grid size={{ xs:6 }}>
+        <Grid size={{ xs: 6 }} />
+        <Grid size={{ xs: 6 }}>
           <Field
             name="frequencyOfPayments"
             label={t('Frequency of Payment')}

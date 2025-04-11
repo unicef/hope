@@ -228,6 +228,9 @@ class Permissions(Enum):
     UPLOAD_STORAGE_FILE = auto()
     DOWNLOAD_STORAGE_FILE = auto()
 
+    # Beneficiary Group
+    BENEFICIARY_GROUP_VIEW_LIST = auto()
+
     # Communication
     ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST = auto()
     ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS = auto()
@@ -320,6 +323,8 @@ class AllowAuthenticated(BasePermission):
 
 
 def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: Any) -> bool:
+    from hct_mis_api.apps.program.models import Program
+
     if not user.is_authenticated:
         return False
 
@@ -333,8 +338,14 @@ def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: A
     )
     if business_area is None:
         return False
-    program_id = get_program_id_from_headers(kwargs)
-    return any(user.has_permission(permission.name, business_area, program_id) for permission in permissions)
+    program = None
+    if program_slug := kwargs.get("program"):
+        program = Program.objects.filter(slug=program_slug, business_area=business_area).first()
+    elif kwargs.get("Program"):  # TODO: GraphQL - remove after GraphQL complete removal
+        program = Program.objects.filter(id=get_program_id_from_headers(kwargs)).first()
+    obj = program or business_area
+
+    return any(user.has_perm(permission.name, obj) for permission in permissions)
 
 
 def hopePermissionClass(permission: Permissions) -> Type[BasePermission]:
@@ -405,13 +416,16 @@ class BaseNodePermissionMixin:
         is_owner: bool,
         owner_permission: str,
     ) -> None:
+        from hct_mis_api.apps.program.models import Program
+
         user = info.context.user
         business_area = object_instance.business_area
-        program_id = get_program_id_from_headers(info.context.headers)
+        program = Program.objects.filter(id=get_program_id_from_headers(info.context.headers)).first()
+        scope = program or business_area
         if not user.is_authenticated or not (
-            user.has_permission(general_permission, business_area, program_id)
-            or (is_creator and user.has_permission(creator_permission, business_area, program_id))
-            or (is_owner and user.has_permission(owner_permission, business_area, program_id))
+            user.has_perm(general_permission, scope)
+            or (is_creator and user.has_perm(creator_permission, scope))
+            or (is_owner and user.has_perm(owner_permission, scope))
         ):
             raise PermissionDenied("Permission Denied")
 
@@ -542,6 +556,8 @@ class BaseMutationPermissionMixin:
         business_area_arg: Union[str, BusinessArea],
         raise_error: bool = True,
     ) -> bool:
+        from hct_mis_api.apps.program.models import Program
+
         cls.is_authenticated(info)
         permissions: Iterable = (permission,) if not isinstance(permission, list) else permission
         if isinstance(business_area_arg, BusinessArea):
@@ -552,12 +568,13 @@ class BaseMutationPermissionMixin:
             business_area = BusinessArea.objects.filter(slug=business_area_arg).first()
             if business_area is None:
                 return cls.raise_permission_denied_error(raise_error=raise_error)
-        program_id = get_program_id_from_headers(info.context.headers)
+        program = Program.objects.filter(id=get_program_id_from_headers(info.context.headers)).first()
+
         if not any(
             [
                 permission.name
                 for permission in permissions
-                if info.context.user.has_permission(permission.name, business_area, program_id)
+                if info.context.user.has_perm(permission.name, program or business_area)
             ]
         ):
             return cls.raise_permission_denied_error(raise_error=raise_error)

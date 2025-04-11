@@ -41,7 +41,10 @@ class TestExcludeHouseholds(APITestCase):
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.create_user_role_with_permissions(
-            cls.user, [Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP], cls.business_area
+            cls.user,
+            [Permissions.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP],
+            cls.business_area,
+            whole_business_area_access=True,
         )
         cls.program = RealProgramFactory()
         cls.program_cycle = cls.program.cycles.first()

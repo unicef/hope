@@ -3,13 +3,13 @@
 /* tslint:disable */
 /* eslint-disable */
 export type BusinessArea = {
-    readonly id: string;
+    id: string;
     name: string;
     code: string;
-    long_name: string;
+    longName: string;
     slug: string;
     parent?: string | null;
-    is_split?: boolean;
+    isSplit?: boolean;
     active?: boolean;
 };
 

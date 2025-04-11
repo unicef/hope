@@ -88,7 +88,7 @@ class TestChangeProgramStatus(APITestCase):
         )
         ProgramCycle.objects.filter(program=program).update(status=ProgramCycle.FINISHED)
 
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, program)
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,

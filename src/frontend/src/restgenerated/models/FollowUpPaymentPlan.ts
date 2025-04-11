@@ -4,6 +4,6 @@
 /* eslint-disable */
 export type FollowUpPaymentPlan = {
     readonly id: string;
-    unicef_id?: string | null;
+    unicefId?: string | null;
 };
 

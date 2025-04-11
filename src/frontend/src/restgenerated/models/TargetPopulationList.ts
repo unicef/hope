@@ -4,9 +4,12 @@
 /* eslint-disable */
 export type TargetPopulationList = {
     readonly id: string;
-    name: string;
-    status: string;
-    created_by?: string;
-    readonly created_at: string;
+    /**
+     * Name
+     */
+    name?: string | null;
+    readonly status: string;
+    createdBy?: string;
+    readonly createdAt: string;
 };
 

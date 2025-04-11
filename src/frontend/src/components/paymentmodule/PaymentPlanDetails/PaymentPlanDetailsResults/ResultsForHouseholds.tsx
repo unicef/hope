@@ -21,7 +21,7 @@ export const ResultsForHouseholds = ({
   return (
     <Grid size={{ xs: 4 }}>
       <Grid container spacing={0} justifyContent="flex-end">
-        <Grid size={{ xs:6 }}>
+        <Grid size={{ xs: 6 }}>
           <SummaryBorder>
             <LabelizedField
               label={`Total Number of ${beneficiaryGroup?.groupLabelPlural}`}
@@ -30,7 +30,7 @@ export const ResultsForHouseholds = ({
             </LabelizedField>
           </SummaryBorder>
         </Grid>
-        <Grid size={{ xs:6 }}>
+        <Grid size={{ xs: 6 }}>
           <SummaryBorder>
             <LabelizedField
               label={`Targeted ${beneficiaryGroup?.memberLabelPlural}`}

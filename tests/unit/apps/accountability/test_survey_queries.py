@@ -60,7 +60,7 @@ class TestSurveyQueries(APITestCase):
         SurveyFactory(title="Test survey", program=cls.program, payment_plan=cls.payment_plan, created_by=cls.user)
 
     def test_query_list_without_permissions(self) -> None:
-        self.create_user_role_with_permissions(self.user, [], self.business_area)
+        self.create_user_role_with_permissions(self.user, [], self.business_area, self.program)
 
         self.snapshot_graphql_request(
             request_string=self.QUERY_LIST,
@@ -130,7 +130,9 @@ class TestSurveyQueries(APITestCase):
         ]
     )
     def test_single_survey(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
         survey = SurveyFactory(title="Test survey single", payment_plan=self.payment_plan, created_by=self.user)
 
         self.snapshot_graphql_request(

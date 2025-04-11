@@ -30,8 +30,11 @@ class TestGeoApp(WebTest):
     def setUp(self) -> None:
         self.site = AdminSite()
         self.admin = AreaAdmin(Area, self.site)
+        unicef_partner, _ = Partner.objects.get_or_create(name="UNICEF")
         self.client.force_login(
-            User.objects.get_or_create(username="testuser", partner=Partner.objects.get_or_create(name="UNICEF")[0])[0]
+            User.objects.get_or_create(
+                username="testuser", partner=Partner.objects.get_or_create(name="UNICEF HQ", parent=unicef_partner)[0]
+            )[0]
         )
 
     def test_modeladmin_str(self) -> None:

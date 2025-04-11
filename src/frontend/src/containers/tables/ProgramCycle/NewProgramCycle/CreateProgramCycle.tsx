@@ -14,7 +14,6 @@ import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogActions } from '@containers/dialogs/DialogActions';
 import { LoadingButton } from '@core/LoadingButton';
 import { useTranslation } from 'react-i18next';
-import { ProgramQuery } from '@generated/graphql';
 import { Field, Form, Formik, FormikValues } from 'formik';
 import { GreyText } from '@core/GreyText';
 import Grid from '@mui/material/Grid2';
@@ -31,9 +30,10 @@ import type { DefaultError } from '@tanstack/query-core';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 
 interface CreateProgramCycleProps {
-  program: ProgramQuery['program'];
+  program: ProgramDetail;
   onClose: () => void;
   onSubmit: () => void;
   step?: string;

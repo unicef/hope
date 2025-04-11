@@ -67,7 +67,7 @@ export const IndividualBioData = ({
 
   const mappedIndividualDocuments = individual?.documents?.edges?.map(
     (edge) => (
-      <Grid size={{ xs:3 }} key={edge.node.id}>
+      <Grid size={{ xs: 3 }} key={edge.node.id}>
         <Box flexDirection="column">
           <Box mb={1}>
             <LabelizedField label={edge.node.type.label}>
@@ -89,7 +89,7 @@ export const IndividualBioData = ({
   );
 
   const mappedIdentities = individual?.identities?.edges?.map((item) => (
-    <Grid size={{ xs:3 }} key={item.node.id}>
+    <Grid size={{ xs: 3 }} key={item.node.id}>
       <Box flexDirection="column">
         <Box mb={1}>
           <LabelizedField label={`${item.node.partner} ID`}>
@@ -355,7 +355,7 @@ export const IndividualBioData = ({
             </UniversalMoment>
           </LabelizedField>
         </Grid>
-        <Grid size={{ xs:6 }}>
+        <Grid size={{ xs: 6 }}>
           {individual?.household?.unicefId && (
             <LinkedGrievancesModal
               household={individual?.household}
