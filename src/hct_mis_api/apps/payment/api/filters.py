@@ -5,8 +5,11 @@ from django.db.models import Q, QuerySet
 import django_filters
 from django_filters import FilterSet
 
-from hct_mis_api.apps.payment.models import PaymentVerificationSummary, DeliveryMechanism
-from hct_mis_api.apps.payment.models import PaymentPlan
+from hct_mis_api.apps.payment.models import (
+    DeliveryMechanism,
+    PaymentPlan,
+    PaymentVerificationSummary,
+)
 
 
 class PaymentPlanFilter(FilterSet):
@@ -18,7 +21,9 @@ class PaymentPlanFilter(FilterSet):
     program_cycle = django_filters.CharFilter(method="filter_by_program_cycle")
     name = django_filters.CharFilter(field_name="name", lookup_expr="startswith")
     fsp = django_filters.CharFilter(field_name="financial_service_provider__name")
-    delivery_mechanism = django_filters.MultipleChoiceFilter(field_name="delivery_mechanism__code", choices=DeliveryMechanism.get_choices())
+    delivery_mechanism = django_filters.MultipleChoiceFilter(
+        field_name="delivery_mechanism__code", choices=DeliveryMechanism.get_choices()
+    )
     payment_verification_summary_status = django_filters.ChoiceFilter(
         field_name="payment_verification_summary__status",
         choices=PaymentVerificationSummary.STATUS_CHOICES,

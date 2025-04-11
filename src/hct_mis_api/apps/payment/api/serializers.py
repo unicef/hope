@@ -220,8 +220,6 @@ class PaymentVerificationDetailsSerializer(serializers.ModelSerializer):
     bank_reconciliation_error = serializers.IntegerField()
     can_create_payment_verification_plan = serializers.BooleanField()
 
-
-
     class Meta:
         model = PaymentPlan
         fields = (
@@ -241,11 +239,11 @@ class PaymentVerificationDetailsSerializer(serializers.ModelSerializer):
 
     # TODO:
     # PaymentVerificationPlanNode >
-        # ageFilter.min
-        # ageFilter.max
-        # excludedAdminAreasFilter
-        # rapidProFlowId
-        # excludedAdminAreasFilter.length
+    # ageFilter.min
+    # ageFilter.max
+    # excludedAdminAreasFilter
+    # rapidProFlowId
+    # excludedAdminAreasFilter.length
 
     def get_available_payment_records_count(self, payment_plan: PaymentPlan) -> int:
         return payment_plan.payment_items.filter(
@@ -520,6 +518,7 @@ class PaymentPlanExcludeBeneficiariesSerializer(serializers.Serializer):
         if len(value) != len(set(value)):
             raise serializers.ValidationError("Duplicate IDs are not allowed.")
         return value
+
 
 class RevertMarkPaymentAsFailedSerializer(serializers.Serializer):
     delivered_quantity = serializers.FloatField(required=True)
@@ -893,6 +892,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
             "fsp_name",
             "entitlement_quantity",
             "delivered_quantity",
+            "delivery_date",
             "status",
             "fsp_auth_code",
         )

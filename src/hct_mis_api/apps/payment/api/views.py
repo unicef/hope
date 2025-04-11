@@ -1,6 +1,7 @@
 import logging
 import mimetypes
 from datetime import datetime
+from decimal import Decimal
 from typing import Any, Optional
 from zipfile import BadZipFile
 
@@ -20,7 +21,6 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_extensions.cache.decorators import cache_response
 
-from hct_mis_api.apps.payment.services.mark_as_failed import mark_as_failed, revert_mark_as_failed
 from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.activity_log.models import log_create
@@ -60,13 +60,14 @@ from hct_mis_api.apps.payment.api.serializers import (
     PaymentPlanSupportingDocumentSerializer,
     PaymentVerificationDetailsSerializer,
     PaymentVerificationListSerializer,
+    RevertMarkPaymentAsFailedSerializer,
     SplitPaymentPlanSerializer,
     TargetPopulationApplyEngineFormulaSerializer,
     TargetPopulationCopySerializer,
     TargetPopulationCreateSerializer,
     TargetPopulationDetailSerializer,
     TPHouseholdListSerializer,
-    XlsxErrorSerializer, RevertMarkPaymentAsFailedSerializer,
+    XlsxErrorSerializer,
 )
 from hct_mis_api.apps.payment.celery_tasks import (
     export_pdf_payment_plan_summary,
@@ -82,6 +83,10 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
     PaymentPlanSplit,
     PaymentPlanSupportingDocument,
+)
+from hct_mis_api.apps.payment.services.mark_as_failed import (
+    mark_as_failed,
+    revert_mark_as_failed,
 )
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_import_service import (
@@ -1170,7 +1175,7 @@ class PaymentViewSet(
     mixins.ListModelMixin,
     BaseViewSet,
 ):
-    queryset = Payment.objects.all()
+    lookup_field = "payment_id"
     PERMISSIONS = [Permissions.PM_VIEW_DETAILS, Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS]
     serializer_classes_by_action = {
         "list": PaymentListSerializer,
@@ -1187,46 +1192,37 @@ class PaymentViewSet(
     }
 
     def get_object(self) -> Payment:
-        payment_id = self.kwargs.get("id")
+        payment_id = self.kwargs["payment_id"]
         return get_object_or_404(Payment, id=payment_id)
 
-    @action(detail=True, methods=["get"], PERMISSIONS=[Permissions.PM_MARK_PAYMENT_AS_FAILED], url_path="mark-as-failed")
+    def get_queryset(self) -> QuerySet:
+        return Payment.objects.filter(parent_id=self.kwargs["payment_plan_id"])
+
+    @action(
+        detail=True, methods=["get"], PERMISSIONS=[Permissions.PM_MARK_PAYMENT_AS_FAILED], url_path="mark-as-failed"
+    )
     def mark_as_failed(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment = self.get_object()
-        old_payment = copy_model_object(payment)
         mark_as_failed(payment)
-        log_create(
-            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
-            business_area_field="business_area",
-            user=request.user,
-            programs=payment.parent.program.pk,
-            old_object=old_payment,
-            new_object=payment,
-        )
         return Response(
             data=PaymentDetailSerializer(payment, context={"request": request}).data, status=status.HTTP_200_OK
         )
 
-    @action(detail=True, methods=["post"], PERMISSIONS=[Permissions.PM_MARK_PAYMENT_AS_FAILED],
-            serializer_class=PaymentDetailSerializer,
-            url_path="revert-mark-as-failed")
+    @action(
+        detail=True,
+        methods=["post"],
+        PERMISSIONS=[Permissions.PM_MARK_PAYMENT_AS_FAILED],
+        serializer_class=PaymentDetailSerializer,
+        url_path="revert-mark-as-failed",
+    )
     def revert_mark_as_failed(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment = self.get_object()
-        old_payment = copy_model_object(payment)
-        serializer = self.get_serializer_class()
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         delivered_quantity = serializer.validated_data.get("delivered_quantity")
         delivery_date = serializer.validated_data.get("delivery_date")
         delivery_date = datetime.combine(delivery_date, datetime.min.time())
-        revert_mark_as_failed(payment, delivered_quantity, delivery_date)
-        log_create(
-            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
-            business_area_field="business_area",
-            user=request.user,
-            programs=payment.parent.program.pk,
-            old_object=old_payment,
-            new_object=payment,
-        )
+        revert_mark_as_failed(payment, Decimal(delivered_quantity), delivery_date)
         return Response(
             data=PaymentDetailSerializer(payment, context={"request": request}).data, status=status.HTTP_200_OK
         )
