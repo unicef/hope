@@ -53,6 +53,7 @@ const EditFeedbackPage = (): ReactElement => {
   const { showMessage } = useSnackbar();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const { data: feedbackData, loading: feedbackDataLoading } = useFeedbackQuery(
     {
       variables: { id },

@@ -34,6 +34,7 @@ export function DeleteHouseholdGrievanceDetails({
   const { baseUrl, isAllPrograms } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const { data: choicesData, loading: choicesLoading } =
     useHouseholdChoiceDataQuery();
 
@@ -147,9 +148,7 @@ export function DeleteHouseholdGrievanceDetails({
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Geolocation')}>
-            {ticket.household.geopoint
-              ? `${ticket.household.geopoint.coordinates[0]}, ${ticket.household.geopoint.coordinates[1]}`
-              : '-'}
+            {ticket.household?.geopoint || '-'}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>

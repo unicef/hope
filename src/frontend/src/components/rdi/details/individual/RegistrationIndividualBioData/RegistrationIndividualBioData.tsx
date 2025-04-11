@@ -41,6 +41,7 @@ export function RegistrationIndividualBioData({
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const relationshipChoicesDict = choicesToDict(
     choicesData.relationshipChoices,
   );

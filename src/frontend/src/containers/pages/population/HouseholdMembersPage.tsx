@@ -25,6 +25,7 @@ export const HouseholdMembersPage = (): ReactElement => {
   const location = useLocation();
   const { programHasPdu, selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const { businessArea } = useBaseUrl();
   const isNewTemplateJustCreated =
     location.state?.isNewTemplateJustCreated || false;

@@ -83,6 +83,7 @@ function Description({
   });
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   // Set program value based on selected household or individual
   useEffect(() => {
     if (values.selectedHousehold?.program?.id) {

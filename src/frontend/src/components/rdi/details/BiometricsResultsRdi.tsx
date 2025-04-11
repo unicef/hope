@@ -69,6 +69,7 @@ const BiometricsResultsRdi = ({
 
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const [loadIndividual1Data] = useIndividualLazyQuery({
     variables: {
       id: individual1?.id,

@@ -7,11 +7,7 @@ import { LabelizedField } from '@core/LabelizedField';
 import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
-import {
-  PaymentQuery,
-  PaymentStatus,
-  PaymentVerificationStatus,
-} from '@generated/graphql';
+import { PaymentStatus, PaymentVerificationStatus } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Grid2 as Grid, Paper, Typography } from '@mui/material';
 import { PaymentDetail } from '@restgenerated/models/PaymentDetail';

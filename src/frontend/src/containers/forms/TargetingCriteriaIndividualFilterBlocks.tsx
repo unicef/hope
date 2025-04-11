@@ -87,6 +87,7 @@ export function TargetingCriteriaIndividualFilterBlocks({
     blockIndex + 1 < values.individualsFiltersBlocks.length;
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   return (
     <div>
       {`Set ${beneficiaryGroup?.memberLabel} Criteria`}

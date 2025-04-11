@@ -11,7 +11,6 @@ import {
 import {
   GrievancesChoiceDataQuery,
   HouseholdChoiceDataQuery,
-  IndividualDisability,
 } from '@generated/graphql';
 import { ContentLink } from '@core/ContentLink';
 import { LabelizedField } from '@core/LabelizedField';
@@ -50,6 +49,7 @@ export const IndividualBioData = ({
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const relationshipChoicesDict = choicesToDict(
     choicesData.relationshipChoices,
   );

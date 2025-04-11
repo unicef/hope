@@ -46,6 +46,7 @@ export const NeedsAdjudicationTable = ({
   const { isActiveProgram, isSocialDctType } = useProgramContext();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const details = ticket?.needsAdjudicationTicketDetails;
 
   const handleSelect = (id: string) => {

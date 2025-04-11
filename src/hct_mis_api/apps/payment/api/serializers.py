@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404
 
 from rest_framework import serializers
 
+<<<<<<< HEAD
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
@@ -192,6 +193,10 @@ class PaymentVerificationPlanSerializer(AdminUrlSerializerMixin, serializers.Mod
             "error",
             "admin_url",
         )
+=======
+from hct_mis_api.apps.core.utils import decode_id_string
+from hct_mis_api.apps.payment.models import PaymentPlan, PaymentPlanSupportingDocument
+>>>>>>> long-term/rest-api-refactor
 
 
 class FollowUpPaymentPlanSerializer(serializers.ModelSerializer):
@@ -210,6 +215,7 @@ class FollowUpPaymentPlanSerializer(serializers.ModelSerializer):
         )
 
 
+<<<<<<< HEAD
 class PaymentVerificationPlanDetailsSerializer(serializers.ModelSerializer):
     payment_verification_plans = PaymentVerificationPlanSerializer(many=True)
     payment_verification_summary = PaymentVerificationSummarySerializer()
@@ -276,12 +282,19 @@ class PaymentVerificationPlanListSerializer(serializers.ModelSerializer):
 
 
 class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
+=======
+class PaymentPlanSerializer(serializers.ModelSerializer):
+>>>>>>> long-term/rest-api-refactor
     status = serializers.CharField(source="get_status_display")
     currency = serializers.CharField(source="get_currency_display")
     follow_ups = FollowUpPaymentPlanSerializer(many=True, read_only=True)
     program = serializers.CharField(source="program_cycle.program.name")
+<<<<<<< HEAD
     program_id = serializers.UUIDField(source="program_cycle.program.id", read_only=True)
     program_cycle_id = serializers.UUIDField(source="program_cycle.id", read_only=True)
+=======
+    program_id = serializers.CharField(source="program_cycle.program.id")
+>>>>>>> long-term/rest-api-refactor
     last_approval_process_by = serializers.SerializerMethodField()
 
     class Meta:

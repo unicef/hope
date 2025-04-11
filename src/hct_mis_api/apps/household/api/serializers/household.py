@@ -1,8 +1,7 @@
-from typing import Dict, Optional
+from typing import Dict
 
 from rest_framework import serializers
 
-from hct_mis_api.apps.account.api.fields import Base64ModelField
 from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
 from hct_mis_api.apps.core.utils import resolve_flex_fields_choices_to_string
 from hct_mis_api.apps.grievance.models import GrievanceTicket
@@ -22,7 +21,6 @@ from hct_mis_api.apps.household.models import (
 
 
 class HouseholdListSerializer(serializers.ModelSerializer):
-    id = Base64ModelField(model_name="Household")
     head_of_household = serializers.CharField(source="head_of_household.full_name")
     admin1 = serializers.CharField(source="admin1.name", default="")
     admin2 = serializers.CharField(source="admin2.name", default="")
@@ -58,8 +56,6 @@ class HouseholdListSerializer(serializers.ModelSerializer):
 
 
 class HeadOfHouseholdSerializer(serializers.ModelSerializer):
-    id = Base64ModelField(model_name="Individual")
-
     class Meta:
         model = Individual
         fields = (
@@ -69,7 +65,6 @@ class HeadOfHouseholdSerializer(serializers.ModelSerializer):
 
 
 class HouseholdMemberSerializer(serializers.ModelSerializer):
-    id = Base64ModelField(model_name="Individual")
     role = serializers.SerializerMethodField()
     household = HouseholdSimpleSerializer()
 
@@ -95,7 +90,6 @@ class HouseholdMemberSerializer(serializers.ModelSerializer):
 
 
 class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
-    id = Base64ModelField(model_name="Household")
     head_of_household = HeadOfHouseholdSerializer()
     admin1 = serializers.CharField(source="admin1.name", default="")
     admin2 = serializers.CharField(source="admin2.name", default="")
@@ -112,7 +106,7 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
     linked_grievances = serializers.SerializerMethodField()
     admin_area_title = serializers.SerializerMethodField()
     active_individuals_count = serializers.SerializerMethodField()
-    geopoint = serializers.SerializerMethodField()
+    geopoint = serializers.CharField()
     import_id = serializers.SerializerMethodField()
 
     class Meta:
@@ -202,9 +196,12 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
     def get_active_individuals_count(self, obj: Household) -> int:
         return obj.active_individuals.count()
 
+<<<<<<< HEAD
     def get_geopoint(self, obj: Household) -> Optional[str]:
         return obj.geopoint if obj.geopoint else None
 
+=======
+>>>>>>> long-term/rest-api-refactor
     def get_import_id(self, obj: Household) -> str:
         if obj.detail_id:
             return f"{obj.unicef_id} (Detail id {obj.detail_id})"

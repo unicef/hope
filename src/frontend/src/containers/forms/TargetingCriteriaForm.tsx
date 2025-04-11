@@ -218,6 +218,7 @@ export const TargetingCriteriaForm = ({
   );
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const { data, loading } = useCachedIndividualFieldsQuery(
     businessArea,
     programId,

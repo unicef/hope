@@ -35,6 +35,7 @@ function PaymentsHouseholdTable({
   };
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const replacements = {
     headOfHousehold: (_beneficiaryGroup) =>
       `Head of ${_beneficiaryGroup?.groupLabel}`,

@@ -90,6 +90,7 @@ export const PeriodicDataUpdatesUploadDetailsDialog: FC<
     <Dialog open={open} onClose={onClose} scroll="paper">
       <DialogTitle>{t('Periodic Data Updates Errors')}</DialogTitle>
       <DialogContent>
+        {/* //TODO: check if it is just errorsInfo */}
         <NonFormErrorDisplay nonFormErrors={uploadDetailsData?.errorsInfo} />
         <FormErrorDisplay formErrors={uploadDetailsData?.errorsInfo} />
       </DialogContent>

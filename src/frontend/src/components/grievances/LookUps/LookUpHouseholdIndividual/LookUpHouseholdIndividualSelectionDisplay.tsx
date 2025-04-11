@@ -34,6 +34,7 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
 }: LookUpHouseholdIndividualSelectionDisplayProps): React.ReactElement => {
   const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const handleRemove = (type): void => {
     if (type === Types.household) {
       onValueChange('selectedHousehold', null);

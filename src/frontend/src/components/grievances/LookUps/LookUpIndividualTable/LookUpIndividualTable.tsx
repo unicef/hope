@@ -55,6 +55,7 @@ export function LookUpIndividualTable({
   const { programId, isAllPrograms } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const handleRadioChange = (individual): void => {
     setSelectedIndividual(individual);
 

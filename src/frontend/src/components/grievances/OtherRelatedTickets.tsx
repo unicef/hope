@@ -25,6 +25,7 @@ export function OtherRelatedTickets({
   const { id } = useParams();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const [show, setShow] = useState(false);
   const { existingTickets, linkedTickets } = ticket;
 

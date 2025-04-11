@@ -4,7 +4,6 @@ import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { PeopleBioData } from '@components/people/PeopleBioData/PeopleBioData';
 import { IndividualAdditionalRegistrationInformation } from '@components/population/IndividualAdditionalRegistrationInformation/IndividualAdditionalRegistrationInformation';
-import { IndividualFlags } from '@components/population/IndividualFlags';
 import { IndividualPhotoModal } from '@components/population/IndividualPhotoModal';
 import { ProgrammeTimeSeriesFields } from '@components/population/ProgrammeTimeSeriesFields';
 import {
@@ -16,7 +15,6 @@ import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import {
-  HouseholdNode,
   useAllIndividualsFlexFieldsAttributesQuery,
   useGrievancesChoiceDataQuery,
   useHouseholdChoiceDataQuery,
@@ -144,7 +142,7 @@ const PeopleDetailsPage = (): ReactElement => {
         }
         flags={
           <>
-            <IndividualFlags individual={individual} />
+            {/*<IndividualFlags individual={individual} />  TODO REST Refactor*/}
             <AdminButton adminUrl={individual?.adminUrl} />
           </>
         }

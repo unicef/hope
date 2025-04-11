@@ -42,6 +42,7 @@ export const CreateProgramPage = (): ReactElement => {
   const { baseUrl, businessArea } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const { data: treeData, loading: treeLoading } = useAllAreasTreeQuery({
     variables: { businessArea },
   });

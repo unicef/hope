@@ -1,14 +1,13 @@
 from django.urls import include, path
 
-from rest_framework.routers import SimpleRouter
-
 from hct_mis_api.apps.account.api.views import UserViewSet
+from hct_mis_api.apps.core.api.urls import get_business_area_nested_router
 
 app_name = "account"
 
-router = SimpleRouter()
-router.register("users", UserViewSet, basename="users")
+business_area_nested_router = get_business_area_nested_router()
+business_area_nested_router.register("users", UserViewSet, basename="users")
 
 urlpatterns = [
-    path("", include(router.urls)),
+    path("", include(business_area_nested_router.urls)),
 ]

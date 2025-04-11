@@ -90,6 +90,7 @@ const EditTargetPopulation = ({
   const { selectedProgram, isSocialDctType, isStandardDctType } =
     useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const handleValidate = (values): { targetingCriteria?: string } => {
     const { targetingCriteria, householdIds, individualIds } = values;
     const errors: { targetingCriteria?: string } = {};

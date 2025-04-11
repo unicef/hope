@@ -33,6 +33,24 @@ export const PAYMENT_PLAN_QUERY = gql`
         volume
         volumeUsd
       }
+      availableFundsCommitments {
+        fundsCommitmentNumber
+        fundsCommitmentItems {
+          paymentPlan {
+            id
+            name
+          }
+          fundsCommitmentItem
+          recSerialNumber
+        }
+      }
+      fundsCommitments {
+        fundsCommitmentNumber
+        fundsCommitmentItems {
+          fundsCommitmentItem
+          recSerialNumber
+        }
+      }
       deliveryMechanism {
         id
         name
@@ -276,9 +294,9 @@ export const PAYMENT_PLAN_QUERY = gql`
       }
       unsuccessfulPaymentsCount
       supportingDocuments {
-        id
-        title
-        file
+          id
+          title
+          file
       }
       targetingCriteria {
         __typename

@@ -21,6 +21,7 @@ const IndividualQuestionnaire = ({
     values.selectedIndividual || values.selectedHousehold.headOfHousehold;
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   return (
     <Grid container spacing={6}>
       {[

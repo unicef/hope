@@ -70,6 +70,7 @@ export function CreateFollowUpPaymentPlan({
   const { isActiveProgram, selectedProgram } = useProgramContext();
   const { showMessage } = useSnackbar();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const { id, totalWithdrawnHouseholdsCount, unsuccessfulPaymentsCount } =
     paymentPlan;
 

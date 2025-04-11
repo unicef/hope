@@ -11,6 +11,7 @@ export const IndividualDetails = ({ individual }): ReactElement => {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   return (
     <Overview>
       <Title>

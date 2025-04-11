@@ -15,10 +15,9 @@ from hct_mis_api.apps.account.fixtures import (
     UserFactory,
 )
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.utils import encode_id_base64_required
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 
-pytestmark = pytest.mark.django_db
+pytestmark = pytest.mark.django_db()
 
 
 class TestAreaViews:
@@ -130,37 +129,37 @@ class TestAreaViews:
         response_json = response.json()["results"]
         assert len(response_json) == 6
         assert {
-            "id": encode_id_base64_required(self.area_1_area_type_1.id, "Area"),
+            "id": str(self.area_1_area_type_1.id),
             "name": self.area_1_area_type_1.name,
             "p_code": self.area_1_area_type_1.p_code,
         } in response_json
         assert {
-            "id": encode_id_base64_required(self.area_2_area_type_1.id, "Area"),
+            "id": str(self.area_2_area_type_1.id),
             "name": self.area_2_area_type_1.name,
             "p_code": self.area_2_area_type_1.p_code,
         } in response_json
         assert {
-            "id": encode_id_base64_required(self.area_1_area_type_2.id, "Area"),
+            "id": str(self.area_1_area_type_2.id),
             "name": self.area_1_area_type_2.name,
             "p_code": self.area_1_area_type_2.p_code,
         } in response_json
         assert {
-            "id": encode_id_base64_required(self.area_2_area_type_2.id, "Area"),
+            "id": str(self.area_2_area_type_2.id),
             "name": self.area_2_area_type_2.name,
             "p_code": self.area_2_area_type_2.p_code,
         } in response_json
         assert {
-            "id": encode_id_base64_required(self.area_1_area_type_afg_2.id, "Area"),
+            "id": str(self.area_1_area_type_afg_2.id),
             "name": self.area_1_area_type_afg_2.name,
             "p_code": self.area_1_area_type_afg_2.p_code,
         } in response_json
         assert {
-            "id": encode_id_base64_required(self.area_2_area_type_afg_2.id, "Area"),
+            "id": str(self.area_2_area_type_afg_2.id),
             "name": self.area_2_area_type_afg_2.name,
             "p_code": self.area_2_area_type_afg_2.p_code,
         } in response_json
         assert {
-            "id": encode_id_base64_required(self.area_other.id, "Area"),
+            "id": str(self.area_other.id),
             "name": self.area_other.name,
             "p_code": self.area_other.p_code,
         } not in response_json
@@ -184,22 +183,22 @@ class TestAreaViews:
         response_json_1 = response_level_1.json()["results"]
         assert len(response_json_1) == 4
         assert {
-            "id": encode_id_base64_required(self.area_1_area_type_1.id, "Area"),
+            "id": str(self.area_1_area_type_1.id),
             "name": self.area_1_area_type_1.name,
             "p_code": self.area_1_area_type_1.p_code,
         } in response_json_1
         assert {
-            "id": encode_id_base64_required(self.area_2_area_type_1.id, "Area"),
+            "id": str(self.area_2_area_type_1.id),
             "name": self.area_2_area_type_1.name,
             "p_code": self.area_2_area_type_1.p_code,
         } in response_json_1
         assert {
-            "id": encode_id_base64_required(self.area_1_area_type_afg_2.id, "Area"),
+            "id": str(self.area_1_area_type_afg_2.id),
             "name": self.area_1_area_type_afg_2.name,
             "p_code": self.area_1_area_type_afg_2.p_code,
         } in response_json_1
         assert {
-            "id": encode_id_base64_required(self.area_2_area_type_afg_2.id, "Area"),
+            "id": str(self.area_2_area_type_afg_2.id),
             "name": self.area_2_area_type_afg_2.name,
             "p_code": self.area_2_area_type_afg_2.p_code,
         } in response_json_1

@@ -14,7 +14,9 @@ from hct_mis_api.apps.household.models import Household, Individual
 class HouseholdListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
     specific_view_cache_key = "household_list"
 
-    def _get_queryset(self, business_area_slug: Optional[Any], program_slug: Optional[Any]) -> QuerySet:
+    def _get_queryset(
+        self, business_area_slug: Optional[Any], program_slug: Optional[Any], view_instance: Optional[Any]
+    ) -> QuerySet:
         return Household.objects.filter(
             program__slug=program_slug,
             business_area__slug=business_area_slug,
@@ -24,7 +26,9 @@ class HouseholdListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
 class IndividualListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
     specific_view_cache_key = "individual_list"
 
-    def _get_queryset(self, business_area_slug: Optional[Any], program_slug: Optional[Any]) -> QuerySet:
+    def _get_queryset(
+        self, business_area_slug: Optional[Any], program_slug: Optional[Any], view_instance: Optional[Any]
+    ) -> QuerySet:
         return Individual.objects.filter(
             program__slug=program_slug,
             business_area__slug=business_area_slug,

@@ -76,6 +76,7 @@ export const GrievanceDetailsToolbar = ({
   const navigate = useNavigate();
   const { isActiveProgram, selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Grievance and Feedback'),

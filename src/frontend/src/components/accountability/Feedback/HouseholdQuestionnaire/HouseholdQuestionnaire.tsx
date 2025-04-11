@@ -20,6 +20,7 @@ function HouseholdQuestionnaire({
   const selectedHouseholdData = values.selectedHousehold;
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   return (
     <Grid container spacing={6}>
       {[

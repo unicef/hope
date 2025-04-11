@@ -23,12 +23,12 @@ from hct_mis_api.apps.core.fixtures import (
 from hct_mis_api.apps.core.models import PeriodicFieldData
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
-pytestmark = pytest.mark.django_db
+pytestmark = pytest.mark.django_db()
 
 
 @freezegun.freeze_time("2022-01-01")
 class TestPeriodicFieldViews:
-    def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory, id_to_base64: Callable) -> None:
+    def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory) -> None:
         self.partner = PartnerFactory(name="TestPartner")
         self.user = UserFactory(partner=self.partner)
         self.client = api_client(self.user)
@@ -62,9 +62,8 @@ class TestPeriodicFieldViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.PDU_VIEW_LIST_AND_DETAILS],
@@ -77,7 +76,7 @@ class TestPeriodicFieldViews:
         response_json = response.json()["results"]
         assert len(response_json) == 3
         assert {
-            "id": id_to_base64((self.periodic_field1.id), "FlexibleAttribute"),
+            "id": str(self.periodic_field1.id),
             "name": self.periodic_field1.name,
             "label": self.periodic_field1.label["English(EN)"],
             "pdu_data": {
@@ -87,7 +86,7 @@ class TestPeriodicFieldViews:
             },
         } in response_json
         assert {
-            "id": id_to_base64(self.periodic_field2.id, "FlexibleAttribute"),
+            "id": str(self.periodic_field2.id),
             "name": self.periodic_field2.name,
             "label": self.periodic_field2.label["English(EN)"],
             "pdu_data": {
@@ -97,7 +96,7 @@ class TestPeriodicFieldViews:
             },
         } in response_json
         assert {
-            "id": id_to_base64(self.periodic_field3.id, "FlexibleAttribute"),
+            "id": str(self.periodic_field3.id),
             "name": self.periodic_field3.name,
             "label": self.periodic_field3.label["English(EN)"],
             "pdu_data": {
@@ -107,7 +106,7 @@ class TestPeriodicFieldViews:
             },
         } in response_json
         assert {
-            "id": id_to_base64(self.periodic_field_data_program2.id, "FlexibleAttribute"),
+            "id": str(self.periodic_field_data_program2.id),
             "name": self.periodic_field_program2.name,
             "label": self.periodic_field_program2.label["English(EN)"],
             "pdu_data": {
@@ -122,9 +121,8 @@ class TestPeriodicFieldViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.PDU_VIEW_LIST_AND_DETAILS],

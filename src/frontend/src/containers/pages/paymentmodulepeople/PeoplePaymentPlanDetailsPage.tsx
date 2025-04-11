@@ -2,6 +2,7 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { FspSection } from '@components/paymentmodule/PaymentPlanDetails/FspSection';
+import FundsCommitmentSection from '@components/paymentmodule/PaymentPlanDetails/FundsCommitment/FundsCommitmentSection';
 import { PaymentPlanDetailsHeader } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader';
 import { ReconciliationSummary } from '@components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
 import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
@@ -18,6 +19,7 @@ import {
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
@@ -26,7 +28,6 @@ import { ReactElement } from 'react';
 import { useParams } from 'react-router-dom';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 export const PeoplePaymentPlanDetailsPage = (): ReactElement => {
   const { paymentPlanId } = useParams();
@@ -75,6 +76,11 @@ export const PeoplePaymentPlanDetailsPage = (): ReactElement => {
     status === PaymentPlanStatus.Accepted ||
     status === PaymentPlanStatus.Finished;
 
+  const shouldDisplayFundsCommitment = status === PaymentPlanStatus.InReview;
+
+  const { paymentPlan } = data;
+  if (!paymentPlan) return null;
+
   return (
     <Box display="flex" flexDirection="column">
       <PaymentPlanDetailsHeader
@@ -86,6 +92,9 @@ export const PeoplePaymentPlanDetailsPage = (): ReactElement => {
       {status !== PaymentPlanStatus.Preparing && (
         <>
           <AcceptanceProcess paymentPlan={paymentPlan} />
+          {shouldDisplayFundsCommitment && (
+            <FundsCommitmentSection paymentPlan={paymentPlan} />
+          )}
           {shouldDisplayEntitlement && (
             <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
           )}

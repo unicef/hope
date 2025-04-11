@@ -11,7 +11,6 @@ import {
 import {
   GrievancesChoiceDataQuery,
   HouseholdChoiceDataQuery,
-  IndividualDisability,
 } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';

@@ -47,6 +47,7 @@ export const ReassignRoleBox = ({
   const { baseUrl } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   let { individual } = ticket;
   let { household } = ticket;
   let reassignData;

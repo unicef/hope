@@ -42,6 +42,7 @@ export const NeedsAdjudicationDetailsOld = ({
   const { isActiveProgram } = useProgramContext();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const [approve] = useApproveNeedsAdjudicationMutation({
     refetchQueries: () => [
       {

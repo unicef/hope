@@ -67,8 +67,9 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaRuleFactory,
 )
 
+pytestmark = pytest.mark.django_db()
 
-@pytest.mark.django_db(transaction=True)
+
 class TestBasePaymentPlanModel:
     def test_get_last_approval_process_data_in_approval(self, afghanistan: BusinessAreaFactory) -> None:
         payment_plan = PaymentPlanFactory(business_area=afghanistan, status=PaymentPlan.Status.IN_APPROVAL)

@@ -62,6 +62,7 @@ export function DedupeBiographicalBiometricResults({
   const { baseUrl } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const createBiographicalData = (
     unicefId: string,
     fullName: string,
