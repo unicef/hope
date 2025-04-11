@@ -2,7 +2,6 @@ import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AllPaymentsForTableQueryVariables,
-  HouseholdNode,
   PaymentNode,
   useAllPaymentsForTableQuery,
 } from '@generated/graphql';
@@ -13,9 +12,10 @@ import { useProgramContext } from 'src/programContext';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { headCells } from './PaymentsHouseholdTableHeadCells';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 interface PaymentsHouseholdTableProps {
-  household?: HouseholdNode;
+  household?: HouseholdDetail;
   openInNewTab?: boolean;
   businessArea: string;
   canViewPaymentRecordDetails: boolean;

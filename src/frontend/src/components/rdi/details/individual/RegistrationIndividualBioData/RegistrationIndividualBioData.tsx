@@ -8,10 +8,7 @@ import {
   renderBoolean,
   sexToCapitalize,
 } from '@utils/utils';
-import {
-  HouseholdChoiceDataQuery,
-  IndividualDetailedFragment,
-} from '@generated/graphql';
+import { HouseholdChoiceDataQuery } from '@generated/graphql';
 import { ContentLink } from '@core/ContentLink';
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
@@ -20,6 +17,7 @@ import { DocumentRegistrationPhotoModal } from '../DocumentRegistrationPhotoModa
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}
@@ -31,7 +29,7 @@ const BorderBox = styled.div`
 `;
 
 interface RegistrationIndividualBioDataProps {
-  individual: IndividualDetailedFragment;
+  individual: IndividualDetail;
   choicesData: HouseholdChoiceDataQuery;
 }
 

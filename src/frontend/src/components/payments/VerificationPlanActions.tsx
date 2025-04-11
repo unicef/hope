@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
   CashPlanVerificationSamplingChoicesQuery,
-  PaymentPlanQuery,
   PaymentVerificationPlanStatus,
   PaymentVerificationPlanVerificationChannel,
   useExportXlsxPaymentVerificationPlanFileMutation,
@@ -22,15 +21,16 @@ import { EditVerificationPlan } from './EditVerificationPlan';
 import { FinishVerificationPlan } from './FinishVerificationPlan';
 import { ImportXlsx } from './ImportXlsx';
 import { ReactElement } from 'react';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const StyledLink = styled.a`
   text-decoration: none;
 `;
 
 interface VerificationPlanActionsProps {
-  verificationPlan: PaymentPlanQuery['paymentPlan']['verificationPlans']['edges'][0]['node'];
+  verificationPlan: PaymentPlanDetail['paymentVerificationPlans'][number];
   samplingChoicesData: CashPlanVerificationSamplingChoicesQuery;
-  planNode: PaymentPlanQuery['paymentPlan'];
+  planNode: PaymentPlanDetail;
 }
 
 export function VerificationPlanActions({

@@ -1,25 +1,25 @@
+import { RelatedFollowUpPaymentPlans } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails/RelatedFollowUpPaymentPlans';
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { FieldBorder } from '@core/FieldBorder';
+import { LabelizedField } from '@core/LabelizedField';
+import { OverviewContainer } from '@core/OverviewContainer';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
+import { Info } from '@mui/icons-material';
 import {
   Box,
   Grid2 as Grid,
   IconButton,
   Tooltip,
   Typography,
-} from '@mui/material';import { useTranslation } from 'react-i18next';
+} from '@mui/material';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { renderUserName } from '@utils/utils';
-import { PaymentPlanQuery } from '@generated/graphql';
-import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
-import { LabelizedField } from '@core/LabelizedField';
-import { OverviewContainer } from '@core/OverviewContainer';
-import { Title } from '@core/Title';
-import { UniversalMoment } from '@core/UniversalMoment';
-import { FieldBorder } from '@core/FieldBorder';
-import { RelatedFollowUpPaymentPlans } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails/RelatedFollowUpPaymentPlans';
-import { Info } from '@mui/icons-material';
 import { ReactElement } from 'react';
-
+import { useTranslation } from 'react-i18next';
 interface PaymentPlanDetailsProps {
   baseUrl: string;
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export const PaymentPlanDetails = ({

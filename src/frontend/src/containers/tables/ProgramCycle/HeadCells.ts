@@ -41,7 +41,7 @@ const headCells: HeadCell<ProgramCycleList>[] = [
     dataCy: 'head-cell-total-delivered-quantity_usd',
   },
   {
-    id: 'start_date',
+    id: 'startDate',
     numeric: false,
     disablePadding: false,
     label: 'Start Date',

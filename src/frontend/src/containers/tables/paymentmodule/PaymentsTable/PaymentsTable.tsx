@@ -7,7 +7,6 @@ import { ImportXlsxPaymentPlanPaymentListPerFsp } from '@components/paymentmodul
 import {
   AllPaymentsForTableQuery,
   AllPaymentsForTableQueryVariables,
-  PaymentPlanQuery,
   PaymentPlanStatus,
   useAllPaymentsForTableQuery,
 } from '@generated/graphql';
@@ -19,13 +18,14 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
 import { adjustHeadCells } from '@utils/utils';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const StyledBox = styled(Box)`
   background-color: #fff;
 `;
 interface PaymentsTableProps {
   businessArea: string;
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
   permissions: string[];
   canViewDetails?: boolean;
 }

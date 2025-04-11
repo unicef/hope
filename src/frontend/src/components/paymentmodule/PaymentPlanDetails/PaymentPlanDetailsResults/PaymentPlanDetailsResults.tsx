@@ -1,7 +1,6 @@
 import { Grid2 as Grid, Typography } from '@mui/material';
 import { Pie } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
-import { PaymentPlanQuery } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import { PaperContainer } from '../../../targeting/PaperContainer';
 import { FieldBorder } from '@core/FieldBorder';
@@ -15,9 +14,10 @@ import {
 import { ResultsForHouseholds } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults/ResultsForHouseholds';
 import { ResultsForPeople } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults/ResultsForPeople';
 import { ReactElement } from 'react';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface PaymentPlanDetailsResultsProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export const PaymentPlanDetailsResults = ({
@@ -45,7 +45,7 @@ export const PaymentPlanDetailsResults = ({
         <Grid container>
           <Grid size={{ xs: 4 }}>
             <Grid container spacing={3} justifyContent="flex-start">
-              <Grid size={{ xs:6 }}>
+              <Grid size={{ xs: 6 }}>
                 <FieldBorder color={colors.femaleChildren}>
                   <LabelizedField
                     label={t('Female Children')}
@@ -53,7 +53,7 @@ export const PaymentPlanDetailsResults = ({
                   />
                 </FieldBorder>
               </Grid>
-              <Grid size={{ xs:6 }}>
+              <Grid size={{ xs: 6 }}>
                 <FieldBorder color={colors.femaleAdult}>
                   <LabelizedField
                     label={t('Female Adults')}
@@ -61,7 +61,7 @@ export const PaymentPlanDetailsResults = ({
                   />
                 </FieldBorder>
               </Grid>
-              <Grid size={{ xs:6 }}>
+              <Grid size={{ xs: 6 }}>
                 <FieldBorder color={colors.maleChildren}>
                   <LabelizedField
                     label={t('Male Children')}
@@ -69,7 +69,7 @@ export const PaymentPlanDetailsResults = ({
                   />
                 </FieldBorder>
               </Grid>
-              <Grid size={{ xs:6 }}>
+              <Grid size={{ xs: 6 }}>
                 <FieldBorder color={colors.maleAdult}>
                   <LabelizedField
                     label={t('Male Adults')}

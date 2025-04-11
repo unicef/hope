@@ -13,6 +13,7 @@ import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useProgramContext } from 'src/programContext';
 import { headCells } from './IndividualsListTableHeadCells';
 import { IndividualsListTableRow } from './IndividualsListTableRow';
+import { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
 
 interface IndividualsListTableProps {
   filter;
@@ -48,7 +49,21 @@ export function IndividualsListTable({
       program: programId,
       rdiMergeStatus: IndividualRdiMergeStatus.Merged,
     }),
-    [businessArea, filter, programId],
+    [
+      businessArea,
+      programId,
+      filter.ageMin,
+      filter.ageMax,
+      filter.sex,
+      filter.search,
+      filter.documentType,
+      filter.documentNumber,
+      filter.admin2,
+      filter.flags,
+      filter.status,
+      filter.lastRegistrationDateMin,
+      filter.lastRegistrationDateMax,
+    ],
   );
   const replacements = {
     unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
@@ -71,7 +86,7 @@ export function IndividualsListTable({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery<PaginatedIndividualListList>({
     queryKey: [
       'businessAreasProgramsHouseholdsList',
       queryVariables,

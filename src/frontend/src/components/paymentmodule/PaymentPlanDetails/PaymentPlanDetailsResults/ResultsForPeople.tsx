@@ -1,4 +1,3 @@
-import { PaymentPlanQuery } from '@generated/graphql';
 import { useTranslation } from 'react-i18next';
 import { Grid2 as Grid } from '@mui/material';
 import {
@@ -6,9 +5,10 @@ import {
   SummaryValue,
 } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults/Styles';
 import { LabelizedField } from '@core/LabelizedField';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface ResultsForPeopleProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export const ResultsForPeople = ({ paymentPlan }: ResultsForPeopleProps) => {

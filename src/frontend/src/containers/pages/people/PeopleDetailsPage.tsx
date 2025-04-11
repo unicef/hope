@@ -15,12 +15,9 @@ import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import {
-  HouseholdNode,
-  IndividualNode,
   useAllIndividualsFlexFieldsAttributesQuery,
   useGrievancesChoiceDataQuery,
   useHouseholdChoiceDataQuery,
-  useIndividualQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -40,6 +37,8 @@ import { IndividualDeliveryMechanisms } from '@components/population/IndividualD
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import PaymentsPeopleTable from '@containers/tables/payments/PaymentsPeopleTable/PaymentsPeopleTable';
 import { RestService } from '@restgenerated/services/RestService';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import { error } from 'console';
 
 const Container = styled.div`
   padding: 20px 20px 00px 20px;
@@ -69,12 +68,16 @@ const PeopleDetailsPage = (): ReactElement => {
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
 
-  const { data, loading, error } = useIndividualQuery({
-    variables: {
-      id,
-    },
-    fetchPolicy: 'cache-and-network',
-  });
+  const { data: individual, isLoading: loadingIndividual } =
+    useQuery<IndividualDetail>({
+      queryKey: ['businessAreaProgramIndividual', businessArea, programId, id],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsIndividualsRetrieve({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          id: id,
+        }),
+    });
 
   const { data: choicesData, loading: choicesLoading } =
     useHouseholdChoiceDataQuery();
@@ -97,7 +100,7 @@ const PeopleDetailsPage = (): ReactElement => {
     });
 
   if (
-    loading ||
+    loadingIndividual ||
     choicesLoading ||
     flexFieldsDataLoading ||
     grievancesChoicesLoading ||
@@ -108,7 +111,7 @@ const PeopleDetailsPage = (): ReactElement => {
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
   if (
-    !data ||
+    !individual ||
     !choicesData ||
     !flexFieldsData ||
     !grievancesChoices ||
@@ -123,7 +126,6 @@ const PeopleDetailsPage = (): ReactElement => {
     },
   ];
 
-  const { individual } = data;
   const household = individual?.household;
 
   return (
@@ -147,7 +149,7 @@ const PeopleDetailsPage = (): ReactElement => {
       >
         <Box mr={2}>
           {individual?.photo ? (
-            <IndividualPhotoModal individual={individual as IndividualNode} />
+            <IndividualPhotoModal individual={individual} />
           ) : null}
         </Box>
       </PageHeader>
@@ -156,20 +158,18 @@ const PeopleDetailsPage = (): ReactElement => {
         <PeopleBioData
           baseUrl={baseUrl}
           businessArea={businessArea}
-          individual={individual as IndividualNode}
+          individual={individual}
           choicesData={choicesData}
           grievancesChoices={grievancesChoices}
         />
-        <IndividualDeliveryMechanisms
-          individual={individual as IndividualNode}
-        />
+        <IndividualDeliveryMechanisms individual={individual} />
         <IndividualAdditionalRegistrationInformation
           flexFieldsData={flexFieldsData}
-          individual={individual as IndividualNode}
+          individual={individual}
         />
         <Box mb={4}>
           <ProgrammeTimeSeriesFields
-            individual={individual as IndividualNode}
+            individual={individual}
             periodicFieldsData={periodicFieldsData}
           />
         </Box>
@@ -226,7 +226,7 @@ const PeopleDetailsPage = (): ReactElement => {
         {hasPermissions(PERMISSIONS.PM_VIEW_PAYMENT_LIST, permissions) && (
           <PaymentsPeopleTable
             openInNewTab
-            household={household as HouseholdNode}
+            household={household}
             businessArea={businessArea}
             canViewPaymentRecordDetails={hasPermissions(
               PERMISSIONS.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS,

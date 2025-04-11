@@ -40,6 +40,7 @@ import { omit } from 'lodash';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 
 const EditProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -56,7 +57,7 @@ const EditProgramPage = (): ReactElement => {
     variables: { businessArea },
   });
 
-  const { data: program, isLoading: loadingProgram } = useQuery({
+  const { data: program, isLoading: loadingProgram } = useQuery<ProgramDetail>({
     queryKey: ['businessAreaProgram', businessArea, id],
     queryFn: () =>
       RestService.restBusinessAreasProgramsRetrieve({

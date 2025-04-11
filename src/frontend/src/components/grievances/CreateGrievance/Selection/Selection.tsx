@@ -54,10 +54,7 @@ function Selection({
     return choices.map((choice) => {
       let newName = choice.name;
       if (_beneficiaryGroup?.memberLabel) {
-        newName = newName.replace(
-          /Individual/g,
-          _beneficiaryGroup.memberLabel,
-        );
+        newName = newName.replace(/Individual/g, _beneficiaryGroup.memberLabel);
       }
       if (_beneficiaryGroup?.groupLabel) {
         newName = newName.replace(/Household/g, _beneficiaryGroup.groupLabel);

@@ -12,13 +12,16 @@ import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
 import {
-  IndividualNode,
   useAllIndividualsFlexFieldsAttributesQuery,
   useHouseholdChoiceDataQuery,
-  useIndividualQuery,
 } from '@generated/graphql';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { error } from 'console';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const Container = styled.div`
   padding: 20px;
@@ -33,25 +36,30 @@ const PeopleRegistrationDetailsPage = (): ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
+  const { businessArea, programId } = useBaseUrl();
 
   const { data: flexFieldsData, loading: flexFieldsDataLoading } =
     useAllIndividualsFlexFieldsAttributesQuery();
-  const { data, loading, error } = useIndividualQuery({
-    variables: {
-      id,
-    },
-    fetchPolicy: 'cache-and-network',
-  });
+  const { data: individual, isLoading: loadingIndividual } =
+    useQuery<IndividualDetail>({
+      queryKey: ['businessAreaProgramIndividual', businessArea, programId, id],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsIndividualsRetrieve({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          id: id,
+        }),
+    });
+
   const { data: choicesData, loading: choicesLoading } =
     useHouseholdChoiceDataQuery();
 
-  if (loading || choicesLoading || flexFieldsDataLoading)
+  if (loadingIndividual || choicesLoading || flexFieldsDataLoading)
     return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
-  if (!data || !choicesData || !flexFieldsData || permissions === null)
+  if (!individual || !choicesData || !flexFieldsData || permissions === null)
     return null;
 
-  const { individual } = data;
   const breadCrumbsItems: BreadCrumbsItem[] = [
     ...(hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions)
       ? [
@@ -74,7 +82,7 @@ const PeopleRegistrationDetailsPage = (): ReactElement => {
         breadCrumbs={breadCrumbsItems}
       >
         {individual.photo ? (
-          <IndividualPhotoModal individual={individual as IndividualNode} />
+          <IndividualPhotoModal individual={individual} />
         ) : null}
       </PageHeader>
       <Container>

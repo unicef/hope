@@ -1,3 +1,8 @@
+import { Pointer } from '@components/core/Pointer';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { FieldBorder } from '@core/FieldBorder';
+import { LabelizedField } from '@core/LabelizedField';
+import { PaymentPlanBuildStatus } from '@generated/graphql';
 import {
   Button,
   Dialog,
@@ -9,17 +14,13 @@ import {
   ListItem,
   Typography,
 } from '@mui/material';
-import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import { PaymentPlanBuildStatus, PaymentPlanQuery } from '@generated/graphql';
-import { MiśTheme } from '../../theme';
-import { FieldBorder } from '@core/FieldBorder';
-import { LabelizedField } from '@core/LabelizedField';
-import { PaperContainer } from './PaperContainer';
-import { useProgramContext } from 'src/programContext';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 import { ReactElement, useState } from 'react';
-import { Pointer } from '@components/core/Pointer';
+import { useTranslation } from 'react-i18next';
+import { useProgramContext } from 'src/programContext';
+import styled from 'styled-components';
+import { MiśTheme } from '../../theme';
+import { PaperContainer } from './PaperContainer';
 
 const colors = {
   femaleChildren: '#5F02CF',
@@ -53,7 +54,7 @@ const SummaryValue = styled.div`
 `;
 
 interface ResultsProps {
-  targetPopulation: PaymentPlanQuery['paymentPlan'];
+  targetPopulation: TargetPopulationDetail;
 }
 
 function ResultsForHouseholds({
@@ -70,7 +71,7 @@ function ResultsForHouseholds({
   };
   const handleClose = () => setOpenDialog(false);
 
-  if (targetPopulation.buildStatus !== PaymentPlanBuildStatus.Ok) {
+  if (targetPopulation.backgroundActionStatus !== PaymentPlanBuildStatus.Ok) {
     return null;
   }
 

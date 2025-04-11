@@ -1,17 +1,17 @@
-import { ReactElement } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  AllPaymentPlansForTableQueryVariables,
-  PaymentPlanNode,
-  useAllPaymentPlansForTableQuery,
-} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { UniversalTable } from '../../UniversalTable';
 import { PaymentPlanTableRow } from './PaymentPlanTableRow';
 import { headCells } from './PaymentPlansHeadCells';
 import { useProgramContext } from 'src/programContext';
 import { adjustHeadCells } from '@utils/utils';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
+import { error } from 'console';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { PaginatedPaymentPlanListList } from '@restgenerated/models/PaginatedPaymentPlanListList';
+import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
 
 interface PaymentPlansTableProps {
   filter;
@@ -26,8 +26,7 @@ function PaymentPlansTable({
   const { programId, businessArea } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-
-  const initialVariables: AllPaymentPlansForTableQueryVariables = {
+  const initialQueryVariables = {
     businessArea,
     search: filter.search,
     status: filter.status,
@@ -39,26 +38,47 @@ function PaymentPlansTable({
     program: programId,
     isPaymentPlan: true,
   };
+
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+
+  const { data: paymentPlansData, isLoading } =
+    useQuery<PaginatedPaymentPlanListList>({
+      queryKey: [
+        'businessAreasProgramsPaymentPlansList',
+        businessArea,
+        programId,
+        queryVariables,
+      ],
+      queryFn: () => {
+        return RestService.restBusinessAreasProgramsPaymentPlansList({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+        });
+      },
+    });
+
   const replacements = {
     totalHouseholdsCount: (_beneficiaryGroup) =>
       `Num. of ${_beneficiaryGroup?.groupLabelPlural}`,
   };
 
-  const adjustedHeadCells = adjustHeadCells<PaymentPlanNode>(
+  const adjustedHeadCells = adjustHeadCells(
     headCells,
     beneficiaryGroup,
     replacements,
   );
 
   return (
-    <UniversalTable<PaymentPlanNode, AllPaymentPlansForTableQueryVariables>
+    <UniversalRestTable
       defaultOrderBy="-createdAt"
       title={t('Payment Plans')}
-      headCells={adjustedHeadCells}
-      query={useAllPaymentPlansForTableQuery}
-      queriedObjectName="allPaymentPlans"
-      initialVariables={initialVariables}
-      renderRow={(row) => (
+      headCells={adjustedHeadCells as any}
+      data={paymentPlansData}
+      isLoading={isLoading}
+      error={error}
+      queryVariables={queryVariables}
+      setQueryVariables={setQueryVariables}
+      renderRow={(row: PaymentPlanList) => (
         <PaymentPlanTableRow
           key={row.id}
           plan={row}

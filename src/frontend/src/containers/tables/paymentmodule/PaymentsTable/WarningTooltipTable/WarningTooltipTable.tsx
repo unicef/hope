@@ -23,12 +23,12 @@ import { paymentPlanStatusToColor } from '@utils/utils';
 import {
   AllPaymentsForTableQuery,
   PaymentConflictDataNode,
-  PaymentPlanQuery,
 } from '@generated/graphql';
 import { DialogFooter } from '../../../../dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../../dialogs/DialogTitleWrapper';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const StyledTable = styled(Table)`
   min-width: 100px;
@@ -43,7 +43,7 @@ const GreyBox = styled(Box)`
 `;
 
 interface WarningTooltipTableProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
   payment: AllPaymentsForTableQuery['allPayments']['edges'][number]['node'];
   setDialogOpen: (dialogOpen: boolean) => void;
   baseUrl: string;

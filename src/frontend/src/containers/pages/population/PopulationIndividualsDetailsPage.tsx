@@ -10,11 +10,9 @@ import { IndividualPhotoModal } from '@components/population/IndividualPhotoModa
 import { ProgrammeTimeSeriesFields } from '@components/population/ProgrammeTimeSeriesFields';
 import { AdminButton } from '@core/AdminButton';
 import {
-  IndividualNode,
   useAllIndividualsFlexFieldsAttributesQuery,
   useGrievancesChoiceDataQuery,
   useHouseholdChoiceDataQuery,
-  useIndividualQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -29,6 +27,8 @@ import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { RestService } from '@restgenerated/services/RestService';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import { error } from 'console';
 
 const Container = styled.div`
   padding: 20px;
@@ -49,12 +49,16 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
 
-  const { data, loading, error } = useIndividualQuery({
-    variables: {
-      id,
-    },
-    fetchPolicy: 'cache-and-network',
-  });
+  const { data: individual, isLoading: loadingIndividual } =
+    useQuery<IndividualDetail>({
+      queryKey: ['businessAreaProgramIndividual', businessArea, programId, id],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsIndividualsRetrieve({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          id: id,
+        }),
+    });
 
   const { data: choicesData, loading: choicesLoading } =
     useHouseholdChoiceDataQuery();
@@ -77,7 +81,7 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
     });
 
   if (
-    loading ||
+    loadingIndividual ||
     choicesLoading ||
     flexFieldsDataLoading ||
     grievancesChoicesLoading ||
@@ -88,7 +92,7 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
   if (
-    !data ||
+    !individual ||
     !choicesData ||
     !flexFieldsData ||
     !grievancesChoices ||
@@ -116,8 +120,6 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
     ];
   }
 
-  const { individual } = data;
-
   return (
     <>
       <PageHeader
@@ -139,7 +141,7 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
       >
         <Box mr={2}>
           {individual?.photo ? (
-            <IndividualPhotoModal individual={individual as IndividualNode} />
+            <IndividualPhotoModal individual={individual} />
           ) : null}
         </Box>
       </PageHeader>
@@ -147,19 +149,17 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
         <IndividualBioData
           baseUrl={baseUrl}
           businessArea={businessArea}
-          individual={individual as IndividualNode}
+          individual={individual}
           choicesData={choicesData}
           grievancesChoices={grievancesChoices}
         />
-        <IndividualDeliveryMechanisms
-          individual={individual as IndividualNode}
-        />
+        <IndividualDeliveryMechanisms individual={individual} />
         <IndividualAdditionalRegistrationInformation
           flexFieldsData={flexFieldsData}
-          individual={individual as IndividualNode}
+          individual={individual}
         />
         <ProgrammeTimeSeriesFields
-          individual={individual as IndividualNode}
+          individual={individual}
           periodicFieldsData={periodicFieldsData}
         />
         {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (

@@ -21,13 +21,14 @@ import GrievancesApproveSection from '@components/grievances/GrievancesApproveSe
 import GrievancesDetails from '@components/grievances/GrievancesDetails/GrievancesDetails';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { Profile } from '@restgenerated/models/Profile';
 
 const GrievancesDetailsPage = (): ReactElement => {
   const { id } = useParams();
   const { businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
-  const { data: currentUserData, isLoading: currentUserDataLoading } = useQuery(
-    {
+  const { data: currentUserData, isLoading: currentUserDataLoading } =
+    useQuery<Profile>({
       queryKey: ['profile', businessArea, programId],
       queryFn: () => {
         return RestService.restUsersProfileRetrieve({
@@ -35,8 +36,7 @@ const GrievancesDetailsPage = (): ReactElement => {
           programSlug: programId === 'all' ? undefined : programId,
         });
       },
-    },
-  );
+    });
 
   const { data, loading, error } = useGrievanceTicketQuery({
     variables: { id },

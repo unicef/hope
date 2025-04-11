@@ -12,6 +12,7 @@ import { PaymentPlansTable } from '@containers/pages/paymentmodule/ProgramCycle/
 import { PaymentPlansFilters } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansFilters';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RestService } from '@restgenerated/services/RestService';
+import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 
 const initialFilter = {
   search: '',
@@ -31,7 +32,7 @@ export const ProgramCycleDetailsPage = (): ReactElement => {
 
   const decodedProgramCycleId = decodeIdString(programCycleId);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useQuery<ProgramCycleList>({
     queryKey: [
       'programCyclesDetails',
       businessArea,

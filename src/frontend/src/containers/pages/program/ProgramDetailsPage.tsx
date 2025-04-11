@@ -20,6 +20,7 @@ import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { ProgramDetailsPageHeader } from '../headers/ProgramDetailsPageHeader';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 
 const Container = styled.div`
   && {
@@ -55,7 +56,7 @@ function ProgramDetailsPage(): ReactElement {
     data: program,
     isLoading: loading,
     error,
-  } = useQuery({
+  } = useQuery<ProgramDetail>({
     queryKey: ['businessAreaProgram', businessArea, id],
     queryFn: () =>
       RestService.restBusinessAreasProgramsRetrieve({

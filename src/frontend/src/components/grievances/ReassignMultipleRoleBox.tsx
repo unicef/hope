@@ -77,9 +77,7 @@ export function ReassignMultipleRoleBox({
                   <>{capitalize(householdAndRole.role)} Collector</>
                 </LabelizedField>
                 <LabelizedField
-                  label={t(
-                    `${beneficiaryGroup?.memberLabel.toUpperCase()} ID`,
-                  )}
+                  label={t(`${beneficiaryGroup?.memberLabel.toUpperCase()} ID`)}
                 >
                   <ContentLink
                     href={`/${baseUrl}/population/individuals/${householdAndRole.individual.id}`}

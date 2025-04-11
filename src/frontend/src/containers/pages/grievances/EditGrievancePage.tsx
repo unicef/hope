@@ -81,6 +81,7 @@ import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { Profile } from '@restgenerated/models/Profile';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -115,8 +116,8 @@ const EditGrievancePage = (): ReactElement => {
     fetchPolicy: 'cache-and-network',
   });
 
-  const { data: currentUserData, isLoading: currentUserDataLoading } = useQuery(
-    {
+  const { data: currentUserData, isLoading: currentUserDataLoading } =
+    useQuery<Profile>({
       queryKey: ['profile', businessArea, programId],
       queryFn: () => {
         return RestService.restUsersProfileRetrieve({
@@ -124,8 +125,7 @@ const EditGrievancePage = (): ReactElement => {
           programSlug: programId === 'all' ? undefined : programId,
         });
       },
-    },
-  );
+    });
 
   const { data: choicesData, loading: choicesLoading } =
     useGrievancesChoiceDataQuery();

@@ -36,6 +36,7 @@ import { editProgramDetailsValidationSchema } from '@components/programs/CreateP
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 
 const DuplicateProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -50,7 +51,7 @@ const DuplicateProgramPage = (): ReactElement => {
   const { data: treeData, loading: treeLoading } = useAllAreasTreeQuery({
     variables: { businessArea },
   });
-  const { data: program, isLoading: loadingProgram } = useQuery({
+  const { data: program, isLoading: loadingProgram } = useQuery<ProgramDetail>({
     queryKey: ['businessAreaProgram', businessArea, id],
     queryFn: () =>
       RestService.restBusinessAreasProgramsRetrieve({
@@ -206,17 +207,17 @@ const DuplicateProgramPage = (): ReactElement => {
     editMode: true,
     name: `Copy of Programme: (${name})`,
     programmeCode: '',
-    startDate: startDate,
-    endDate: endDate,
+    startDate,
+    endDate,
     sector,
     dataCollectingTypeCode: dataCollectingType?.code,
     beneficiaryGroup: decodeIdString(beneficiaryGroup?.id),
     description,
     budget,
     administrativeAreasOfImplementation: administrativeAreasOfImplementation,
-    populationGoal: populationGoal,
-    cashPlus: cashPlus,
-    frequencyOfPayments: frequencyOfPayments,
+    populationGoal,
+    cashPlus,
+    frequencyOfPayments,
     partners: partners
       .filter((partner) => isPartnerVisible(partner.name))
       .map((partner) => ({

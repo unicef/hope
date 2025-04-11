@@ -17,9 +17,7 @@ function EmptyTargetingCriteria(): ReactElement {
   return (
     <PaperContainer>
       <Typography variant="h6">
-        {t(
-          `Target Population Entries (${beneficiaryGroup?.groupLabelPlural})`,
-        )}
+        {t(`Target Population Entries (${beneficiaryGroup?.groupLabelPlural})`)}
       </Typography>
       <Label>{t('Add targeting criteria to see results.')}</Label>
     </PaperContainer>

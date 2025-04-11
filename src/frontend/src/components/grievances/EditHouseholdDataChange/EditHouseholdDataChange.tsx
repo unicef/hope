@@ -35,7 +35,7 @@ function EditHouseholdDataChange({
     data: fullHousehold,
     isLoading: fullHouseholdLoading,
     refetch: refetchHousehold,
-  } = useQuery({
+  } = useQuery<HouseholdDetail>({
     queryKey: ['household', businessArea, household.id, programId],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsRetrieve({

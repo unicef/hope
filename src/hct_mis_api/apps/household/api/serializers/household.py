@@ -196,9 +196,26 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
     def get_active_individuals_count(self, obj: Household) -> int:
         return obj.active_individuals.count()
 
+<<<<<<< HEAD
+    def get_geopoint(self, obj: Household) -> Optional[str]:
+        return obj.geopoint if obj.geopoint else None
+
+=======
+>>>>>>> long-term/rest-api-refactor
     def get_import_id(self, obj: Household) -> str:
         if obj.detail_id:
             return f"{obj.unicef_id} (Detail id {obj.detail_id})"
         if obj.enumerator_rec_id:
             return f"{obj.unicef_id} (Enumerator ID {obj.enumerator_rec_id})"
         return obj.unicef_id
+
+
+class HouseholdSmallSerializer(serializers.ModelSerializer):
+    id = Base64ModelField(model_name="Household")
+
+    class Meta:
+        model = Household
+        fields = (
+            "id",
+            "unicef_id",
+        )
