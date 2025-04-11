@@ -21,7 +21,6 @@ from hct_mis_api.apps.core.fixtures import (
     create_ukraine,
 )
 from hct_mis_api.apps.core.models import PeriodicFieldData
-from hct_mis_api.apps.core.utils import encode_id_base64_required
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
 from hct_mis_api.apps.household.fixtures import (
@@ -656,16 +655,16 @@ class TestIndividualDetail:
             {
                 "id": str(self.role_primary.id),
                 "household": {
-                    "id": encode_id_base64_required(self.household.id, "Household"),
+                    "id": str(self.household.id),
                     "unicef_id": self.household.unicef_id,
                     "admin2": self.household.admin2.name,
                 },
                 "role": ROLE_PRIMARY,
             },
             {
-                "id": encode_id_base64_required(self.role_alternate.id, "IndividualRoleInHousehold"),
+                "id": str(self.role_alternate.id),
                 "household": {
-                    "id": encode_id_base64_required(self.household2.id, "Household"),
+                    "id": str(self.household2.id),
                     "unicef_id": self.household2.unicef_id,
                     "admin2": "",
                 },
@@ -701,9 +700,9 @@ class TestIndividualDetail:
 
         assert data["documents"] == [
             {
-                "id": encode_id_base64_required(self.national_id.id, "Document"),
+                "id": str(self.national_id.id),
                 "type": {
-                    "id": encode_id_base64_required(self.national_id_type.id, "DocumentType"),
+                    "id": str(self.national_id_type.id),
                     "label": self.national_id_type.label,
                     "key": self.national_id_type.key,
                 },
@@ -715,9 +714,9 @@ class TestIndividualDetail:
                 "document_number": self.national_id.document_number,
             },
             {
-                "id": encode_id_base64_required(self.national_passport.id, "Document"),
+                "id": str(self.national_passport.id),
                 "type": {
-                    "id": encode_id_base64_required(self.national_passport_type.id, "DocumentType"),
+                    "id": str(self.national_passport_type.id),
                     "label": self.national_passport_type.label,
                     "key": self.national_passport_type.key,
                 },
@@ -729,9 +728,9 @@ class TestIndividualDetail:
                 "document_number": self.national_passport.document_number,
             },
             {
-                "id": encode_id_base64_required(self.birth_certificate.id, "Document"),
+                "id": str(self.birth_certificate.id),
                 "type": {
-                    "id": encode_id_base64_required(self.birth_certificate_type.id, "DocumentType"),
+                    "id": str(self.birth_certificate_type.id),
                     "label": self.birth_certificate_type.label,
                     "key": self.birth_certificate_type.key,
                 },
@@ -743,9 +742,9 @@ class TestIndividualDetail:
                 "document_number": self.birth_certificate.document_number,
             },
             {
-                "id": encode_id_base64_required(self.disability_card.id, "Document"),
+                "id": str(self.disability_card.id),
                 "type": {
-                    "id": encode_id_base64_required(self.disability_card_type.id, "DocumentType"),
+                    "id": str(self.disability_card_type.id),
                     "label": self.disability_card_type.label,
                     "key": self.disability_card_type.key,
                 },
@@ -757,9 +756,9 @@ class TestIndividualDetail:
                 "document_number": self.disability_card.document_number,
             },
             {
-                "id": encode_id_base64_required(self.drivers_license.id, "Document"),
+                "id": str(self.drivers_license.id),
                 "type": {
-                    "id": encode_id_base64_required(self.drivers_license_type.id, "DocumentType"),
+                    "id": str(self.drivers_license_type.id),
                     "label": self.drivers_license_type.label,
                     "key": self.drivers_license_type.key,
                 },
@@ -771,9 +770,9 @@ class TestIndividualDetail:
                 "document_number": self.drivers_license.document_number,
             },
             {
-                "id": encode_id_base64_required(self.tax_id.id, "Document"),
+                "id": str(self.tax_id.id),
                 "type": {
-                    "id": encode_id_base64_required(self.tax_id_type.id, "DocumentType"),
+                    "id": str(self.tax_id_type.id),
                     "label": self.tax_id_type.label,
                     "key": self.tax_id_type.key,
                 },
@@ -788,7 +787,7 @@ class TestIndividualDetail:
 
         assert data["identities"] == [
             {
-                "id": encode_id_base64_required(self.identity.id, "IndividualIdentity"),
+                "id": str(self.identity.id),
                 "country": {
                     "id": str(self.country.id),
                     "name": self.country.name,
@@ -800,7 +799,7 @@ class TestIndividualDetail:
 
         assert data["bank_account_info"] == [
             {
-                "id": encode_id_base64_required(self.bank_account_info.id, "BankAccountInfo"),
+                "id": str(self.bank_account_info.id),
                 "bank_name": self.bank_account_info.bank_name,
                 "bank_account_number": self.bank_account_info.bank_account_number,
                 "account_holder_name": self.bank_account_info.account_holder_name,
@@ -810,7 +809,7 @@ class TestIndividualDetail:
 
         assert data["delivery_mechanisms_data"] == [
             {
-                "id": encode_id_base64_required(self.dm_atm_card_data.id, "DeliveryMechanismData"),
+                "id": str(self.dm_atm_card_data.id),
                 "name": self.account_type_bank.label,
                 "individual_tab_data": {
                     "card_number": "123",
@@ -819,7 +818,7 @@ class TestIndividualDetail:
                 },
             },
             {
-                "id": encode_id_base64_required(self.dm_mobile_money_data.id, "DeliveryMechanismData"),
+                "id": str(self.dm_mobile_money_data.id),
                 "name": self.account_type_mobile.label,
                 "individual_tab_data": {
                     "service_provider_code": "ABC",
@@ -831,7 +830,7 @@ class TestIndividualDetail:
 
         assert data["linked_grievances"] == [
             {
-                "id": encode_id_base64_required(self.grievance_ticket.id, "GrievanceTicket"),
+                "id": str(self.grievance_ticket.id),
                 "category": self.grievance_ticket.category,
                 "status": self.grievance_ticket.status,
             }

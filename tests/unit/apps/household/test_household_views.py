@@ -16,7 +16,6 @@ from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import create_afghanistan, create_ukraine
 from hct_mis_api.apps.core.utils import (
-    encode_id_base64_required,
     resolve_flex_fields_choices_to_string,
 )
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
@@ -466,7 +465,7 @@ class TestHouseholdDetail:
         assert data["program_registration_id"] == self.household.program_registration_id
         assert data["linked_grievances"] == [
             {
-                "id": encode_id_base64_required(self.grievance_ticket.id, "GrievanceTicket"),
+                "id": str(self.grievance_ticket.id),
                 "category": self.grievance_ticket.category,
                 "status": self.grievance_ticket.status,
             }
