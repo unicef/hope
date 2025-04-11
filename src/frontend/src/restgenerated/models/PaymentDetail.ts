@@ -17,6 +17,7 @@ export type PaymentDetail = {
     readonly fspName: string;
     entitlementQuantity?: string | null;
     deliveredQuantity?: string | null;
+    deliveryDate?: string | null;
     status: string;
     readonly fspAuthCode: string;
     parent: FollowUpPaymentPlan;

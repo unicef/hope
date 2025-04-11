@@ -254,27 +254,25 @@ class PaymentPlanViewSet(
         payment_plan = self.get_object()
         user = request.user
         serializer = self.get_serializer(data=request.data, context={"payment_plan": payment_plan})
-        if serializer.is_valid():
-            follow_up_pp = PaymentPlanService(payment_plan).create_follow_up(
-                user,
-                serializer.validated_data["dispersion_start_date"],
-                serializer.validated_data["dispersion_end_date"],
-            )
-            log_create(
-                mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
-                business_area_field="business_area",
-                user=user,
-                programs=follow_up_pp.program,
-                old_object=None,
-                new_object=follow_up_pp,
-            )
-            response_serializer = PaymentPlanDetailSerializer(follow_up_pp, context={"request": request})
-            return Response(
-                data=response_serializer.data,
-                status=status.HTTP_201_CREATED,
-            )
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        follow_up_pp = PaymentPlanService(payment_plan).create_follow_up(
+            user,
+            serializer.validated_data["dispersion_start_date"],
+            serializer.validated_data["dispersion_end_date"],
+        )
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=user,
+            programs=follow_up_pp.program,
+            old_object=None,
+            new_object=follow_up_pp,
+        )
+        response_serializer = PaymentPlanDetailSerializer(follow_up_pp, context={"request": request})
+        return Response(
+            data=response_serializer.data,
+            status=status.HTTP_201_CREATED,
+        )
 
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()

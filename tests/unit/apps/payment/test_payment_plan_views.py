@@ -1626,6 +1626,7 @@ class TestPaymentPlanActions:
             "api:payments:payment-plans-reconciliation-import-xlsx", kwargs=url_kwargs
         )
         self.url_pp_split = reverse("api:payments:payment-plans-split", kwargs=url_kwargs)
+        self.url_create_follow_up = reverse("api:payments:payment-plans-create-follow-up", kwargs=url_kwargs)
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -2301,3 +2302,32 @@ class TestPaymentPlanActions:
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
             assert "id" in response.json()
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.PM_CREATE], status.HTTP_201_CREATED),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_create_follow_up(
+        self, permissions: list, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        PaymentFactory(parent=self.pp, status=Payment.STATUS_FORCE_FAILED)
+
+        response = self.client.post(
+            self.url_create_follow_up,
+            {"dispersion_start_date": "2024-01-01", "dispersion_end_date": "2026-01-01"},
+            format="json",
+        )
+        assert response.status_code == expected_status
+
+        if expected_status == status.HTTP_201_CREATED:
+            assert "id" in response.json()
+            assert response.json()["is_follow_up"] is True
+            assert "id" in response.json()["source_payment_plan"]
+            assert response.json()["name"] == "DRAFT PP Follow Up"
+            assert response.json()["dispersion_start_date"] == "2024-01-01"
+            assert response.json()["dispersion_end_date"] == "2026-01-01"
+            assert response.json()["currency"] == self.pp.get_currency_display()

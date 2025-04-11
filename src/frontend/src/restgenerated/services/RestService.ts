@@ -995,29 +995,7 @@ export class RestService {
         updatedAtLte,
     }: {
         businessAreaSlug: string,
-        /**
-         * * `772b5b6c-d52c-459f-8f27-5b8e9e079de0` - Issue special knowledge.
-         * * `7ce22852-5235-4621-955e-fa7ae6d89890` - Analysis somebody.
-         * * `86bbe206-6483-4dc5-8278-abe2bdf67638` - History sport.
-         * * `atm_card` - ATM Card
-         * * `bb28813e-04bf-4315-877f-1de4616b0825` - Wear tonight unit.
-         * * `cardless_cash_withdrawal` - Cardless cash withdrawal
-         * * `cash` - Cash
-         * * `cash_by_fsp` - Cash by FSP
-         * * `cash_over_the_counter` - Cash over the counter
-         * * `cb457fbf-f7fc-4ddb-b249-24b0278d135e` - Purpose style piece election skin.
-         * * `cheque` - Cheque
-         * * `deposit_to_card` - Deposit to Card
-         * * `fe631423-472f-401a-aa0b-ce171e356c80` - Executive along day.
-         * * `mobile_money` - Mobile Money
-         * * `pre-paid_card` - Pre-paid card
-         * * `referral` - Referral
-         * * `transfer` - Transfer
-         * * `transfer_to_account` - Transfer to Account
-         * * `transfer_to_digital_wallet` - Transfer to Digital Wallet
-         * * `voucher` - Voucher
-         */
-        deliveryMechanism?: Array<'772b5b6c-d52c-459f-8f27-5b8e9e079de0' | '7ce22852-5235-4621-955e-fa7ae6d89890' | '86bbe206-6483-4dc5-8278-abe2bdf67638' | 'atm_card' | 'bb28813e-04bf-4315-877f-1de4616b0825' | 'cardless_cash_withdrawal' | 'cash' | 'cash_by_fsp' | 'cash_over_the_counter' | 'cb457fbf-f7fc-4ddb-b249-24b0278d135e' | 'cheque' | 'deposit_to_card' | 'fe631423-472f-401a-aa0b-ce171e356c80' | 'mobile_money' | 'pre-paid_card' | 'referral' | 'transfer' | 'transfer_to_account' | 'transfer_to_digital_wallet' | 'voucher'>,
+        deliveryMechanism?: Array<string>,
         dispersionEndDateLte?: string,
         dispersionStartDateGte?: string,
         fsp?: string,
@@ -2051,29 +2029,7 @@ export class RestService {
     }: {
         businessAreaSlug: string,
         programSlug: string,
-        /**
-         * * `772b5b6c-d52c-459f-8f27-5b8e9e079de0` - Issue special knowledge.
-         * * `7ce22852-5235-4621-955e-fa7ae6d89890` - Analysis somebody.
-         * * `86bbe206-6483-4dc5-8278-abe2bdf67638` - History sport.
-         * * `atm_card` - ATM Card
-         * * `bb28813e-04bf-4315-877f-1de4616b0825` - Wear tonight unit.
-         * * `cardless_cash_withdrawal` - Cardless cash withdrawal
-         * * `cash` - Cash
-         * * `cash_by_fsp` - Cash by FSP
-         * * `cash_over_the_counter` - Cash over the counter
-         * * `cb457fbf-f7fc-4ddb-b249-24b0278d135e` - Purpose style piece election skin.
-         * * `cheque` - Cheque
-         * * `deposit_to_card` - Deposit to Card
-         * * `fe631423-472f-401a-aa0b-ce171e356c80` - Executive along day.
-         * * `mobile_money` - Mobile Money
-         * * `pre-paid_card` - Pre-paid card
-         * * `referral` - Referral
-         * * `transfer` - Transfer
-         * * `transfer_to_account` - Transfer to Account
-         * * `transfer_to_digital_wallet` - Transfer to Digital Wallet
-         * * `voucher` - Voucher
-         */
-        deliveryMechanism?: Array<'772b5b6c-d52c-459f-8f27-5b8e9e079de0' | '7ce22852-5235-4621-955e-fa7ae6d89890' | '86bbe206-6483-4dc5-8278-abe2bdf67638' | 'atm_card' | 'bb28813e-04bf-4315-877f-1de4616b0825' | 'cardless_cash_withdrawal' | 'cash' | 'cash_by_fsp' | 'cash_over_the_counter' | 'cb457fbf-f7fc-4ddb-b249-24b0278d135e' | 'cheque' | 'deposit_to_card' | 'fe631423-472f-401a-aa0b-ce171e356c80' | 'mobile_money' | 'pre-paid_card' | 'referral' | 'transfer' | 'transfer_to_account' | 'transfer_to_digital_wallet' | 'voucher'>,
+        deliveryMechanism?: Array<string>,
         dispersionEndDateLte?: string,
         dispersionStartDateGte?: string,
         fsp?: string,
@@ -2233,24 +2189,21 @@ export class RestService {
      */
     public static restBusinessAreasProgramsPaymentPlansPaymentsRetrieve({
         businessAreaSlug,
-        id,
+        paymentId,
         paymentPlanId,
         programSlug,
     }: {
         businessAreaSlug: string,
-        /**
-         * A UUID string identifying this payment.
-         */
-        id: string,
+        paymentId: string,
         paymentPlanId: string,
         programSlug: string,
     }): CancelablePromise<PaymentDetail> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_id}/payments/{id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_id}/payments/{payment_id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'id': id,
+                'payment_id': paymentId,
                 'payment_plan_id': paymentPlanId,
                 'program_slug': programSlug,
             },
@@ -2263,24 +2216,21 @@ export class RestService {
      */
     public static restBusinessAreasProgramsPaymentPlansPaymentsMarkAsFailedRetrieve({
         businessAreaSlug,
-        id,
+        paymentId,
         paymentPlanId,
         programSlug,
     }: {
         businessAreaSlug: string,
-        /**
-         * A UUID string identifying this payment.
-         */
-        id: string,
+        paymentId: string,
         paymentPlanId: string,
         programSlug: string,
     }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_id}/payments/{id}/mark-as-failed/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_id}/payments/{payment_id}/mark-as-failed/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'id': id,
+                'payment_id': paymentId,
                 'payment_plan_id': paymentPlanId,
                 'program_slug': programSlug,
             },
@@ -2293,26 +2243,23 @@ export class RestService {
      */
     public static restBusinessAreasProgramsPaymentPlansPaymentsRevertMarkAsFailedCreate({
         businessAreaSlug,
-        id,
+        paymentId,
         paymentPlanId,
         programSlug,
         requestBody,
     }: {
         businessAreaSlug: string,
-        /**
-         * A UUID string identifying this payment.
-         */
-        id: string,
+        paymentId: string,
         paymentPlanId: string,
         programSlug: string,
         requestBody: RevertMarkPaymentAsFailed,
     }): CancelablePromise<RevertMarkPaymentAsFailed> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_id}/payments/{id}/revert-mark-as-failed/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{payment_plan_id}/payments/{payment_id}/revert-mark-as-failed/',
             path: {
                 'business_area_slug': businessAreaSlug,
-                'id': id,
+                'payment_id': paymentId,
                 'payment_plan_id': paymentPlanId,
                 'program_slug': programSlug,
             },
@@ -3171,29 +3118,7 @@ export class RestService {
     }: {
         businessAreaSlug: string,
         programSlug: string,
-        /**
-         * * `772b5b6c-d52c-459f-8f27-5b8e9e079de0` - Issue special knowledge.
-         * * `7ce22852-5235-4621-955e-fa7ae6d89890` - Analysis somebody.
-         * * `86bbe206-6483-4dc5-8278-abe2bdf67638` - History sport.
-         * * `atm_card` - ATM Card
-         * * `bb28813e-04bf-4315-877f-1de4616b0825` - Wear tonight unit.
-         * * `cardless_cash_withdrawal` - Cardless cash withdrawal
-         * * `cash` - Cash
-         * * `cash_by_fsp` - Cash by FSP
-         * * `cash_over_the_counter` - Cash over the counter
-         * * `cb457fbf-f7fc-4ddb-b249-24b0278d135e` - Purpose style piece election skin.
-         * * `cheque` - Cheque
-         * * `deposit_to_card` - Deposit to Card
-         * * `fe631423-472f-401a-aa0b-ce171e356c80` - Executive along day.
-         * * `mobile_money` - Mobile Money
-         * * `pre-paid_card` - Pre-paid card
-         * * `referral` - Referral
-         * * `transfer` - Transfer
-         * * `transfer_to_account` - Transfer to Account
-         * * `transfer_to_digital_wallet` - Transfer to Digital Wallet
-         * * `voucher` - Voucher
-         */
-        deliveryMechanism?: Array<'772b5b6c-d52c-459f-8f27-5b8e9e079de0' | '7ce22852-5235-4621-955e-fa7ae6d89890' | '86bbe206-6483-4dc5-8278-abe2bdf67638' | 'atm_card' | 'bb28813e-04bf-4315-877f-1de4616b0825' | 'cardless_cash_withdrawal' | 'cash' | 'cash_by_fsp' | 'cash_over_the_counter' | 'cb457fbf-f7fc-4ddb-b249-24b0278d135e' | 'cheque' | 'deposit_to_card' | 'fe631423-472f-401a-aa0b-ce171e356c80' | 'mobile_money' | 'pre-paid_card' | 'referral' | 'transfer' | 'transfer_to_account' | 'transfer_to_digital_wallet' | 'voucher'>,
+        deliveryMechanism?: Array<string>,
         dispersionEndDateLte?: string,
         dispersionStartDateGte?: string,
         fsp?: string,
@@ -3990,29 +3915,7 @@ export class RestService {
         programSlug: string,
         createdAtGte?: string,
         createdAtLte?: string,
-        /**
-         * * `772b5b6c-d52c-459f-8f27-5b8e9e079de0` - Issue special knowledge.
-         * * `7ce22852-5235-4621-955e-fa7ae6d89890` - Analysis somebody.
-         * * `86bbe206-6483-4dc5-8278-abe2bdf67638` - History sport.
-         * * `atm_card` - ATM Card
-         * * `bb28813e-04bf-4315-877f-1de4616b0825` - Wear tonight unit.
-         * * `cardless_cash_withdrawal` - Cardless cash withdrawal
-         * * `cash` - Cash
-         * * `cash_by_fsp` - Cash by FSP
-         * * `cash_over_the_counter` - Cash over the counter
-         * * `cb457fbf-f7fc-4ddb-b249-24b0278d135e` - Purpose style piece election skin.
-         * * `cheque` - Cheque
-         * * `deposit_to_card` - Deposit to Card
-         * * `fe631423-472f-401a-aa0b-ce171e356c80` - Executive along day.
-         * * `mobile_money` - Mobile Money
-         * * `pre-paid_card` - Pre-paid card
-         * * `referral` - Referral
-         * * `transfer` - Transfer
-         * * `transfer_to_account` - Transfer to Account
-         * * `transfer_to_digital_wallet` - Transfer to Digital Wallet
-         * * `voucher` - Voucher
-         */
-        deliveryMechanism?: Array<'772b5b6c-d52c-459f-8f27-5b8e9e079de0' | '7ce22852-5235-4621-955e-fa7ae6d89890' | '86bbe206-6483-4dc5-8278-abe2bdf67638' | 'atm_card' | 'bb28813e-04bf-4315-877f-1de4616b0825' | 'cardless_cash_withdrawal' | 'cash' | 'cash_by_fsp' | 'cash_over_the_counter' | 'cb457fbf-f7fc-4ddb-b249-24b0278d135e' | 'cheque' | 'deposit_to_card' | 'fe631423-472f-401a-aa0b-ce171e356c80' | 'mobile_money' | 'pre-paid_card' | 'referral' | 'transfer' | 'transfer_to_account' | 'transfer_to_digital_wallet' | 'voucher'>,
+        deliveryMechanism?: Array<string>,
         fsp?: string,
         /**
          * Number of results to return per page.
