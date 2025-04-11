@@ -1,31 +1,29 @@
-import React, { useState } from 'react';
+import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
+import { LoadingButton } from '@components/core/LoadingButton';
+import { Title } from '@components/core/Title';
+import { useAssignFundsCommitmentsPaymentPlanMutation } from '@generated/graphql';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { Close } from '@mui/icons-material';
 import {
   Box,
-  Typography,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   Checkbox,
-  ListItemText,
-  SelectChangeEvent,
+  FormControl,
   IconButton,
   InputAdornment,
-  Tooltip,
+  InputLabel,
+  ListItemText,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
   styled,
+  Tooltip,
+  Typography,
 } from '@mui/material';
-import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
-import { Title } from '@components/core/Title';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { t } from 'i18next';
-import {
-  PaymentPlanQuery,
-  useAssignFundsCommitmentsPaymentPlanMutation,
-} from '@generated/graphql';
-import { LoadingButton } from '@components/core/LoadingButton';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { usePermissions } from '@hooks/usePermissions';
+import React, { useState } from 'react';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
-import { Close } from '@mui/icons-material';
 
 const EndInputAdornment = styled(InputAdornment)`
   margin-right: 10px;
@@ -36,7 +34,7 @@ const XIcon = styled(Close)`
 `;
 
 interface FundsCommitmentSectionProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
