@@ -35,7 +35,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividualIdentity,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanismData
+from hct_mis_api.apps.payment.models import Account
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.registration_data.models import (
     ImportData,
@@ -261,7 +261,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             head_of_households_mapping = {}
             households_to_create = []
         self._handle_collectors(collectors_to_create, individuals_ids_hash_dict)
-        self._create_delivery_mechanisms_data()
+        self._create_accounts()
 
         rdi_mis = RegistrationDataImport.objects.get(id=self.registration_data_import.id)
         rdi_mis.status = RegistrationDataImport.IN_REVIEW
@@ -360,7 +360,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                                 self._cast_and_assign(i_value, i_field, household_obj)
                             except Exception as e:
                                 self._handle_exception("Household", i_field, e)
-                        elif i_field.startswith(DeliveryMechanismData.ACCOUNT_FIELD_PREFIX):
+                        elif i_field.startswith(Account.ACCOUNT_FIELD_PREFIX):
                             self._handle_delivery_mechanism_fields(
                                 i_value, i_field, int(f"{household_count}{ind_count}"), individual_obj
                             )

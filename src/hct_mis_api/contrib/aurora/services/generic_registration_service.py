@@ -21,7 +21,11 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import AccountType, PendingDeliveryMechanismData
+from hct_mis_api.apps.payment.models import (
+    AccountType,
+    FinancialInstitution,
+    PendingAccount,
+)
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.contrib.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
@@ -267,15 +271,15 @@ class GenericRegistrationService(BaseRegistrationService):
                     self._create_object_and_validate(document_data, PendingDocument, DocumentForm)
 
             if account_data:
-                PendingDeliveryMechanismData.objects.create(
+                financial_institution_code = account_data["data"].get("code", None)
+                PendingAccount.objects.create(
                     individual_id=individual.id,
                     account_type=AccountType.objects.get(key="bank"),
-                    data={
-                        "bank_account_number": account_data["data"].get("number", ""),
-                        "bank_name": account_data["data"].get("name", ""),
-                        "uba_code": account_data["data"].get("uba_code", ""),
-                        "account_holder_name": account_data["data"].get("holder_name", ""),
-                    },
+                    number=account_data["data"].get("number", None),
+                    financial_institution=FinancialInstitution.objects.filter(code=financial_institution_code).first()
+                    if financial_institution_code
+                    else None,
+                    **account_data,
                 )
 
             if self.get_boolean(extra_data.get(PRIMARY_COLLECTOR, False)):

@@ -41,7 +41,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividualIdentity,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanismData
+from hct_mis_api.apps.payment.models import Account
 from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_import_service import (
     PeriodicDataUpdateImportService,
 )
@@ -553,7 +553,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                         header = header_cell.value
                         if header in self._pdu_column_names:
                             continue
-                        elif header.startswith(DeliveryMechanismData.ACCOUNT_FIELD_PREFIX):
+                        elif header.startswith(Account.ACCOUNT_FIELD_PREFIX):
                             self._handle_delivery_mechanism_fields(cell.value, header, cell.row, obj_to_create)
                             continue
 
@@ -696,7 +696,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             self._create_identities()
             self._create_collectors()
             self._create_bank_accounts_infos()
-            self._create_delivery_mechanisms_data()
+            self._create_accounts()
             rdi.bulk_update_household_size()
 
     def execute_individuals_additional_steps(self, individuals: list[PendingIndividual]) -> None:

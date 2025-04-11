@@ -165,7 +165,7 @@ def get_individual_snapshot(individual: Individual, payment: Optional[Payment] =
     if is_hh_collector and payment:
         individual_data["accounts_data"] = {
             dmd.account_type.key: dmd.delivery_data(payment.financial_service_provider, payment.delivery_type)
-            for dmd in individual.delivery_mechanisms_data.all()
+            for dmd in individual.accounts.all()
         }
 
     return individual_data

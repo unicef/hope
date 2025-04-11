@@ -22,9 +22,11 @@ from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.payment.models import (
+    Account,
     AccountType,
     DeliveryMechanism,
-    DeliveryMechanismData,
+    DeliveryMechanismConfig,
+    FinancialInstitution,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FspNameMapping,
@@ -550,7 +552,7 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
         return request.user.can_change_fsp()
 
 
-@admin.register(DeliveryMechanismData)
+@admin.register(Account)
 class DeliveryMechanismDataAdmin(HOPEModelAdminBase):
     list_display = ("individual", "get_business_area", "get_program", "account_type", "is_unique")
 
@@ -568,10 +570,10 @@ class DeliveryMechanismDataAdmin(HOPEModelAdminBase):
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("individual__program__business_area")
 
-    def get_business_area(self, obj: DeliveryMechanismData) -> BusinessArea:
+    def get_business_area(self, obj: Account) -> BusinessArea:
         return obj.individual.program.business_area
 
-    def get_program(self, obj: DeliveryMechanismData) -> Program:
+    def get_program(self, obj: Account) -> Program:
         return obj.individual.program
 
 
@@ -597,3 +599,51 @@ class PaymentPlanSupportingDocumentAdmin(HOPEModelAdminBase):
 class AccountTypeAdmin(HOPEModelAdminBase):
     list_display = ("key", "unique_fields", "payment_gateway_id")
     search_fields = ("key", "payment_gateway_id")
+
+
+@admin.register(FinancialInstitution)
+class FinancialInstitutionAdmin(HOPEModelAdminBase):
+    list_display = (
+        "code",
+        "description",
+        "type",
+        "country",
+    )
+    search_fields = ("code",)
+    list_filter = (
+        ("country", AutoCompleteFilter),
+        "type",
+    )
+    raw_id_fields = ("country",)
+
+
+class DeliveryMechanismConfigForm(forms.ModelForm):
+    required_fields = CommaSeparatedArrayField(required=False)
+
+    class Meta:
+        model = DeliveryMechanismConfig
+        fields = [
+            "required_fields",
+            "delivery_mechanism",
+            "fsp",
+            "country",
+        ]  # Add all fields you want to display in the admin
+
+
+@admin.register(DeliveryMechanismConfig)
+class DeliveryMechanismConfigAdmin(HOPEModelAdminBase):
+    form = DeliveryMechanismConfigForm
+
+    list_display = (
+        "id",
+        "delivery_mechanism",
+        "fsp",
+        "country",
+    )
+    search_fields = ("code",)
+    list_filter = (
+        ("delivery_mechanism", AutoCompleteFilter),
+        ("fsp", AutoCompleteFilter),
+        ("country", AutoCompleteFilter),
+    )
+    raw_id_fields = ("delivery_mechanism", "fsp", "country")

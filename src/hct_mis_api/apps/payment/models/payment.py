@@ -1884,21 +1884,42 @@ class PaymentHouseholdSnapshot(TimeStampedUUIDModel):
     payment = models.OneToOneField(Payment, on_delete=models.CASCADE, related_name="household_snapshot")
 
 
-class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
+class FinancialInstitution(TimeStampedUUIDModel):
+    class FinancialInstitutionType(models.TextChoices):
+        BANK = "bank", "Bank"
+        TELCO = "telco", "Telco"
+        OTHER = "other", "Other"
+
+    code = models.CharField(
+        max_length=30,
+        unique=True,
+    )
+    description = models.CharField(max_length=255, blank=True, null=True)
+    type = models.CharField(max_length=30, choices=FinancialInstitutionType.choices)
+    country = models.ForeignKey(Country, on_delete=models.PROTECT)
+
+
+class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
     ACCOUNT_FIELD_PREFIX = "account__"
 
     individual = models.ForeignKey(
         "household.Individual",
         on_delete=models.CASCADE,
-        related_name="delivery_mechanisms_data",
+        related_name="accounts",
     )
     account_type = models.ForeignKey(
         "payment.AccountType",
         on_delete=models.PROTECT,
-        related_name="accounts",
         null=True,  # TODO MB make not nullable after migrations
         blank=True,
     )
+    financial_institution = models.ForeignKey(
+        "payment.FinancialInstitution",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+    )
+    number = models.CharField(max_length=256, blank=True, null=True)
     data = JSONField(default=dict, blank=True, encoder=DjangoJSONEncoder)
     unique_key = models.CharField(max_length=256, blank=True, null=True, unique=True, editable=False)  # type: ignore
     is_unique = models.BooleanField(default=True)
@@ -1936,7 +1957,12 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
         delivery_data = {}
 
         fsp_names_mappings = {x.external_name: x for x in fsp.names_mappings.all()}
-        dm_config = DeliveryMechanismConfig.objects.filter(fsp=fsp, delivery_mechanism=delivery_mechanism).first()
+        dm_configs = DeliveryMechanismConfig.objects.filter(fsp=fsp, delivery_mechanism=delivery_mechanism)
+        collector_country = self.individual.household.country
+        if collector_country and (country_config := dm_configs.filter(country=collector_country).first()):
+            dm_config = country_config
+        else:
+            dm_config = dm_configs.first()
         if not dm_config:
             return {}
 
@@ -1957,7 +1983,12 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
 
     def validate(self, fsp: "FinancialServiceProvider", delivery_mechanism: "DeliveryMechanism") -> bool:
         fsp_names_mappings = {x.external_name: x for x in fsp.names_mappings.all()}
-        dm_config = DeliveryMechanismConfig.objects.filter(fsp=fsp, delivery_mechanism=delivery_mechanism).first()
+        dm_configs = DeliveryMechanismConfig.objects.filter(fsp=fsp, delivery_mechanism=delivery_mechanism)
+        collector_country = self.individual.household.country
+        if collector_country and (country_config := dm_configs.filter(country=collector_country).first()):
+            dm_config = country_config
+        else:
+            dm_config = dm_configs.first()
         if not dm_config:
             logger.error(f"DeliveryMechanismConfig not found for {fsp}, {delivery_mechanism}")
             return True
@@ -1979,7 +2010,7 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
         return True
 
     @classmethod
-    def validate_uniqueness(cls, qs: QuerySet["DeliveryMechanismData"]) -> None:
+    def validate_uniqueness(cls, qs: QuerySet["Account"]) -> None:
         for dmd in qs:
             dmd.update_unique_field()
 
@@ -2007,13 +2038,13 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
         return self.account_type.unique_fields
 
 
-class PendingDeliveryMechanismData(DeliveryMechanismData):
+class PendingAccount(Account):
     objects: PendingManager = PendingManager()  # type: ignore
 
     class Meta:
         proxy = True
-        verbose_name = "Imported Delivery Mechanism Data"
-        verbose_name_plural = "Imported Delivery Mechanism Datas"
+        verbose_name = "Imported Account"
+        verbose_name_plural = "Imported Accounts"
 
 
 class DeliveryMechanism(TimeStampedUUIDModel):
@@ -2056,6 +2087,9 @@ class DeliveryMechanismConfig(models.Model):
     fsp = models.ForeignKey(FinancialServiceProvider, on_delete=models.PROTECT)
     country = models.ForeignKey(Country, on_delete=models.PROTECT, null=True, blank=True)
     required_fields = ArrayField(default=list, base_field=models.CharField(max_length=255))
+
+    def __str__(self) -> str:
+        return f"{self.delivery_mechanism.code} - {self.fsp.name}"
 
 
 class AccountType(models.Model):

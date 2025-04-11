@@ -23,7 +23,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanismData
+from hct_mis_api.apps.payment.models import Account
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDataImport
@@ -88,7 +88,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
             try:
                 if header_cell.value in self._pdu_column_names:
                     continue
-                elif header_cell.value.startswith(f"pp_{DeliveryMechanismData.ACCOUNT_FIELD_PREFIX}"):
+                elif header_cell.value.startswith(f"pp_{Account.ACCOUNT_FIELD_PREFIX}"):
                     self._handle_delivery_mechanism_fields(cell.value, header_cell.value, cell.row, obj_to_create)
                     continue
 
@@ -281,7 +281,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         self._create_identities()
         self._create_collectors()
         self._create_bank_accounts_infos()
-        self._create_delivery_mechanisms_data()
+        self._create_accounts()
 
     @transaction.atomic()
     def execute(

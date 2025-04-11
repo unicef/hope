@@ -34,7 +34,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     prepare_payment_plan_task,
 )
 from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismDataFactory,
+    AccountFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
@@ -257,16 +257,20 @@ class TestPaymentPlanServices(APITestCase):
 
         hoh1 = IndividualFactory(household=None)
         hoh2 = IndividualFactory(household=None)
-        DeliveryMechanismDataFactory(
+        AccountFactory(
             individual=hoh1,
             account_type=AccountType.objects.get(key="bank"),
         )
-        DeliveryMechanismDataFactory(
+        AccountFactory(
             individual=hoh1,
             account_type=AccountType.objects.get(key="bank"),
         )
         hh1 = HouseholdFactory(head_of_household=hoh1, program=program, business_area=self.business_area)
         hh2 = HouseholdFactory(head_of_household=hoh2, program=program, business_area=self.business_area)
+        hoh1.household = hh1
+        hoh1.save()
+        hoh2.household = hh2
+        hoh2.save()
         IndividualRoleInHouseholdFactory(household=hh1, individual=hoh1, role=ROLE_PRIMARY)
         IndividualRoleInHouseholdFactory(household=hh2, individual=hoh2, role=ROLE_PRIMARY)
         IndividualFactory.create_batch(4, household=hh1)
@@ -305,13 +309,13 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp.total_households_count, 0)
         self.assertEqual(pp.total_individuals_count, 0)
         self.assertEqual(pp.payment_items.count(), 0)
-        with self.assertNumQueries(90):
+        with self.assertNumQueries(112):
             prepare_payment_plan_task.delay(str(pp.id))
         pp.refresh_from_db()
         self.assertEqual(pp.status, PaymentPlan.Status.TP_OPEN)
         self.assertEqual(pp.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_OK)
         self.assertEqual(pp.total_households_count, 2)
-        self.assertEqual(pp.total_individuals_count, 4)
+        self.assertEqual(pp.total_individuals_count, 6)
         self.assertEqual(pp.payment_items.count(), 2)
 
     @freeze_time("2020-10-10")

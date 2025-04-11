@@ -5,7 +5,7 @@ from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.geo.models import Area, AreaType, Country
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import MALE, Document, DocumentType, Individual
-from hct_mis_api.apps.payment.models import DeliveryMechanism, DeliveryMechanismData
+from hct_mis_api.apps.payment.models import Account, DeliveryMechanism
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.universal_update_script.celery_tasks import (
@@ -121,11 +121,11 @@ def individual(
 
 
 @pytest.fixture()
-def wallet(individual: Individual, delivery_mechanism: DeliveryMechanism) -> DeliveryMechanismData:
-    return DeliveryMechanismData.objects.create(
+def wallet(individual: Individual, delivery_mechanism: DeliveryMechanism) -> Account:
+    return Account.objects.create(
         individual=individual,
         data={"phone_number": "1234567890"},
-        rdi_merge_status=DeliveryMechanismData.MERGED,
+        rdi_merge_status=Account.MERGED,
     )
 
 
@@ -151,7 +151,7 @@ class TestUniversalIndividualUpdateCeleryTasks:
         admin2: Area,
         document_national_id: Document,
         delivery_mechanism: DeliveryMechanism,
-        wallet: DeliveryMechanismData,
+        wallet: Account,
     ) -> None:
         universal_update = UniversalUpdate(program=program)
         universal_update.unicef_ids = individual.unicef_id

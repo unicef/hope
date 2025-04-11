@@ -305,7 +305,7 @@ export function formatCriteriaFilters(filters) {
         break;
       case 'STRING':
         comparisonMethod = 'CONTAINS';
-        if (each.associatedWith === 'DeliveryMechanismData') {
+        if (each.associatedWith === 'Account') {
           comparisonMethod = 'EQUALS';
         }
         values = [each.value];
@@ -419,7 +419,7 @@ interface Result {
 
 function mapFilterToVariable(filter: Filter): Result {
   let preparedArguments = [];
-  if (filter?.associatedWith === 'DeliveryMechanismData') {
+  if (filter?.associatedWith === 'Account') {
     preparedArguments = filter.isNull ? [null] : filter.arguments;
   } else {
     preparedArguments = filter.isNull
