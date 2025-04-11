@@ -97,7 +97,7 @@ class TestPeriodicFieldViews:
         } in response_json
         assert {
             "id": str(self.periodic_field3.id),
-            "name": self.periotrdic_field3.name,
+            "name": self.periodic_field3.name,
             "label": self.periodic_field3.label["English(EN)"],
             "pdu_data": {
                 "subtype": self.periodic_field3.pdu_data.subtype,
