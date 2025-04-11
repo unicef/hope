@@ -164,7 +164,7 @@ class PaymentVerificationPlanSmallSerializer(serializers.ModelSerializer):
         )
 
 
-class PaymentVerificationPlanSerializer(serializers.ModelSerializer):
+class PaymentVerificationPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
     status = serializers.CharField(source="get_status_display")
     verification_channel = serializers.CharField(source="get_verification_channel_display")
     sampling = serializers.CharField(source="get_sampling_display")
@@ -190,6 +190,7 @@ class PaymentVerificationPlanSerializer(serializers.ModelSerializer):
             "xlsx_file_exporting",
             "xlsx_file_imported",
             "error",
+            "admin_url",
         )
 
 
@@ -208,7 +209,7 @@ class FollowUpPaymentPlanSerializer(serializers.ModelSerializer):
         )
 
 
-class PaymentVerificationDetailsSerializer(serializers.ModelSerializer):
+class PaymentVerificationPlanDetailsSerializer(serializers.ModelSerializer):
     payment_verification_plans = PaymentVerificationPlanSerializer(many=True)
     payment_verification_summary = PaymentVerificationSummarySerializer()
     program_cycle_start_date = serializers.DateField(source="program_cycle.start_date")
@@ -254,7 +255,7 @@ class PaymentVerificationDetailsSerializer(serializers.ModelSerializer):
         return obj.eligible_payments.count()
 
 
-class PaymentVerificationListSerializer(serializers.ModelSerializer):
+class PaymentVerificationPlanListSerializer(serializers.ModelSerializer):
     program_cycle_start_date = serializers.DateField(source="program_cycle.start_date")
     program_cycle_end_date = serializers.DateField(source="program_cycle.start_date")
     verification_status = serializers.CharField(source="payment_verification_summary.status")
@@ -273,7 +274,7 @@ class PaymentVerificationListSerializer(serializers.ModelSerializer):
         )
 
 
-class PaymentPlanSerializer(serializers.ModelSerializer):
+class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
     status = serializers.CharField(source="get_status_display")
     currency = serializers.CharField(source="get_currency_display")
     follow_ups = FollowUpPaymentPlanSerializer(many=True, read_only=True)
@@ -894,6 +895,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
             "delivered_quantity",
             "delivery_date",
             "status",
+            "currency",
             "fsp_auth_code",
         )
 
@@ -937,6 +939,50 @@ class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
             "payment_verifications",
             "admin_url",
         )
+
+
+# class VerificationSerializer(AdminUrlMixin, serializers.ModelSerializer):
+#     pass
+#     def get_fsp_name(self, obj: Payment) -> str:
+#         return obj.financial_service_provider.name if obj.financial_service_provider else ""
+
+
+class VerificationListSerializer(serializers.ModelSerializer):
+    status = serializers.CharField(source="get_status_display")
+    verification_channel = serializers.CharField(source="payment_verification_plan.verification_channel")
+    verification_plan_unicef_id = serializers.CharField(source="payment_verification_plan.unief_id")
+    household_unicef_id = serializers.CharField(source="payment.household.unicef_id")
+    household_size = serializers.IntegerField(source="household.size")
+    snapshot_collector_full_name = serializers.SerializerMethodField(help_text="Get from Household Snapshot")
+    payment = PaymentListSerializer(read_only=True)
+
+    # add payment_verifications = PaymentVerification
+
+    class Meta:
+        model = PaymentVerification
+        fields = (
+            "id",
+            "status",
+            "verification_channel",
+            "verification_plan_unicef_id",
+            "received_amount",
+        )
+
+    @classmethod
+    def get_collector_field(cls, payment: "Payment", field_name: str) -> Optional[str]:
+        """return primary_collector or alternate_collector field value or None"""
+        if household_snapshot := getattr(payment, "household_snapshot", None):
+            household_snapshot_data = household_snapshot.snapshot_data
+            collector_data = (
+                household_snapshot_data.get("primary_collector")
+                or household_snapshot_data.get("alternate_collector")
+                or dict()
+            )
+            return collector_data.get(field_name)
+        return None
+
+    def get_snapshot_collector_full_name(self, obj: Payment) -> Any:
+        return PaymentListSerializer.get_collector_field(obj, "full_name")
 
 
 class TPHouseholdListSerializer(serializers.ModelSerializer):

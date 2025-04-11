@@ -12,6 +12,7 @@ from django.utils import timezone
 
 from constance import config
 from django_filters import rest_framework as filters
+from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
@@ -58,8 +59,8 @@ from hct_mis_api.apps.payment.api.serializers import (
     PaymentPlanListSerializer,
     PaymentPlanSerializer,
     PaymentPlanSupportingDocumentSerializer,
-    PaymentVerificationDetailsSerializer,
-    PaymentVerificationListSerializer,
+    PaymentVerificationPlanDetailsSerializer,
+    PaymentVerificationPlanListSerializer,
     RevertMarkPaymentAsFailedSerializer,
     SplitPaymentPlanSerializer,
     TargetPopulationApplyEngineFormulaSerializer,
@@ -131,11 +132,10 @@ class PaymentVerificationViewSet(
     queryset = PaymentPlan.objects.filter(
         status__in=(PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED)
     ).order_by("unicef_id")
-    # http_method_names = ["get", "post", "patch", "delete"]
     PERMISSIONS = [Permissions.PAYMENT_VERIFICATION_VIEW_LIST]
     serializer_classes_by_action = {
-        "list": PaymentVerificationListSerializer,
-        "retrieve": PaymentVerificationDetailsSerializer,
+        "list": PaymentVerificationPlanListSerializer,
+        "retrieve": PaymentVerificationPlanDetailsSerializer,
         "verifications": PaymentListSerializer,
     }
     permissions_by_action = {
@@ -153,6 +153,7 @@ class PaymentVerificationViewSet(
 
     @action(detail=True, methods=["get"], PERMISSIONS=[Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS])
     def verifications(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """return list of verification records"""
         payment_plan = self.get_object()
         # data=request.data, context={"payment_plan": payment_plan}
         serializer = self.get_serializer(data=payment_plan.payment_items(), many=True)
@@ -249,6 +250,7 @@ class PaymentPlanViewSet(
             status=status.HTTP_201_CREATED,
         )
 
+    @extend_schema(request=PaymentPlanCreateFollowUpSerializer, responses={201: PaymentPlanDetailSerializer})
     @action(detail=True, methods=["post"], url_path="create-follow-up")
     def create_follow_up(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
