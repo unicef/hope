@@ -811,7 +811,7 @@ class TestIndividualWithDeliveryMechanismsDataQuery(APITestCase):
         familyName
         phoneNo
         birthDate
-        deliveryMechanismsData {
+        accounts {
             name
             individualTabData
         }

@@ -142,10 +142,10 @@ class TestNigeriaPeopleRegistrationService(TestCase):
         self.assertEqual(
             account.data,
             {
-                "bank_account_number": "2087008012",
-                "bank_name": "United Bank for Africa",
+                "number": "2087008012",
+                "name": "United Bank for Africa",
                 "uba_code": "000004",
-                "account_holder_name": "xxxx",
+                "holder_name": "xxxx",
             },
         )
         self.assertEqual(account.account_type.key, "bank")
