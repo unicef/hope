@@ -3,24 +3,24 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * * `HR13` - Austintown
- * * `HR80` - Duncanborough
- * * `UA52` - Lake Michael
- * * `UA32` - New Annaville
- * * `HR20` - New Anthony
- * * `AF69` - Port Kelsey
- * * `AF47` - Port Lynnstad
- * * `UA75` - South Michael
- * * `AF39` - West Susan
+ * * `AF96` - Ashleyland
+ * * `HR90` - East Michaelside
+ * * `UA90` - Gregoryside
+ * * `UA82` - Loriview
+ * * `AF79` - Mistyport
+ * * `HR94` - Perkinshaven
+ * * `UA10` - South Kathleen
+ * * `AF34` - Stevenshire
+ * * `HR89` - West Dawnview
  */
 export enum Admin1Enum {
-    HR13 = 'HR13',
-    HR80 = 'HR80',
-    UA52 = 'UA52',
-    UA32 = 'UA32',
-    HR20 = 'HR20',
-    AF69 = 'AF69',
-    AF47 = 'AF47',
-    UA75 = 'UA75',
-    AF39 = 'AF39',
+    AF96 = 'AF96',
+    HR90 = 'HR90',
+    UA90 = 'UA90',
+    UA82 = 'UA82',
+    AF79 = 'AF79',
+    HR94 = 'HR94',
+    UA10 = 'UA10',
+    AF34 = 'AF34',
+    HR89 = 'HR89',
 }

@@ -2,9 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type AreaList = {
-    readonly id: string;
-    name: string;
-    pCode?: string | null;
+export type Age = {
+    min: number;
+    max: number;
 };
 

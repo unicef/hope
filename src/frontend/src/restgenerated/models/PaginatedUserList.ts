@@ -2,10 +2,10 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { Rule } from './Rule';
-export type PaginatedRuleList = {
+import type { User } from './User';
+export type PaginatedUserList = {
     next?: string | null;
     previous?: string | null;
-    results: Array<Rule>;
+    results: Array<User>;
 };
 

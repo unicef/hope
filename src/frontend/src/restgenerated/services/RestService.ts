@@ -32,10 +32,11 @@ import type { PaginatedProgramListList } from '../models/PaginatedProgramListLis
 import type { PaginatedProjectList } from '../models/PaginatedProjectList';
 import type { PaginatedRegistrationDataImportListList } from '../models/PaginatedRegistrationDataImportListList';
 import type { PaginatedRegistrationList } from '../models/PaginatedRegistrationList';
-import type { PaginatedRuleList } from '../models/PaginatedRuleList';
 import type { PaginatedTargetPopulationListList } from '../models/PaginatedTargetPopulationListList';
 import type { PaginatedTPHouseholdListList } from '../models/PaginatedTPHouseholdListList';
+import type { PaginatedUserList } from '../models/PaginatedUserList';
 import type { PatchedPaymentPlanCreateUpdate } from '../models/PatchedPaymentPlanCreateUpdate';
+import type { PatchedPaymentVerificationPlanCreate } from '../models/PatchedPaymentVerificationPlanCreate';
 import type { PatchedProgramCycleUpdate } from '../models/PatchedProgramCycleUpdate';
 import type { PatchedRDI } from '../models/PatchedRDI';
 import type { PatchedTargetPopulationCreate } from '../models/PatchedTargetPopulationCreate';
@@ -50,6 +51,7 @@ import type { PaymentPlanExcludeBeneficiaries } from '../models/PaymentPlanExclu
 import type { PaymentPlanExportAuthCode } from '../models/PaymentPlanExportAuthCode';
 import type { PaymentPlanImportFile } from '../models/PaymentPlanImportFile';
 import type { PaymentPlanSupportingDocument } from '../models/PaymentPlanSupportingDocument';
+import type { PaymentVerificationPlanCreate } from '../models/PaymentVerificationPlanCreate';
 import type { PaymentVerificationPlanDetails } from '../models/PaymentVerificationPlanDetails';
 import type { PeriodicDataUpdateTemplateCreate } from '../models/PeriodicDataUpdateTemplateCreate';
 import type { PeriodicDataUpdateTemplateDetail } from '../models/PeriodicDataUpdateTemplateDetail';
@@ -3236,6 +3238,71 @@ export class RestService {
         });
     }
     /**
+     * Create Payment Verification Plan
+     * @returns PaymentVerificationPlanDetails
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentVerificationsCreateVerificationPlanCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+        requestBody: PaymentVerificationPlanCreate,
+    }): CancelablePromise<PaymentVerificationPlanDetails> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/create-verification-plan/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaymentVerificationPlanDetails
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentVerificationsUpdateVerificationPlanPartialUpdate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        verificationPlanId,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+        verificationPlanId: string,
+        requestBody?: PatchedPaymentVerificationPlanCreate,
+    }): CancelablePromise<PaymentVerificationPlanDetails> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/update-verification-plan/{verification_plan_id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+                'verification_plan_id': verificationPlanId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
      * return list of verification records
      * @returns PaymentList
      * @throws ApiError
@@ -4515,6 +4582,136 @@ export class RestService {
         });
     }
     /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaginatedUserList
+     * @throws ApiError
+     */
+    public static restBusinessAreasUsersList({
+        businessAreaSlug,
+        isFeedbackCreator,
+        isMessageCreator,
+        isSurveyCreator,
+        isTicketCreator,
+        limit,
+        offset,
+        orderBy,
+        ordering,
+        partner,
+        program,
+        roles,
+        search,
+        status,
+    }: {
+        businessAreaSlug: string,
+        isFeedbackCreator?: boolean,
+        isMessageCreator?: boolean,
+        isSurveyCreator?: boolean,
+        isTicketCreator?: boolean,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `first_name` - First name
+         * * `-first_name` - First name (descending)
+         * * `last_name` - Last name
+         * * `-last_name` - Last name (descending)
+         * * `last_login` - Last login
+         * * `-last_login` - Last login (descending)
+         * * `status` - Status
+         * * `-status` - Status (descending)
+         * * `partner` - Partner
+         * * `-partner` - Partner (descending)
+         * * `email` - Email
+         * * `-email` - Email (descending)
+         */
+        orderBy?: Array<'-email' | '-first_name' | '-last_login' | '-last_name' | '-partner' | '-status' | 'email' | 'first_name' | 'last_login' | 'last_name' | 'partner' | 'status'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        partner?: Array<number>,
+        program?: string,
+        roles?: Array<string>,
+        search?: string,
+        /**
+         * * `ACTIVE` - Active
+         * * `INACTIVE` - Inactive
+         * * `INVITED` - Invited
+         */
+        status?: Array<'ACTIVE' | 'INACTIVE' | 'INVITED'>,
+    }): CancelablePromise<PaginatedUserList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/users/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'is_feedback_creator': isFeedbackCreator,
+                'is_message_creator': isMessageCreator,
+                'is_survey_creator': isSurveyCreator,
+                'is_ticket_creator': isTicketCreator,
+                'limit': limit,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'partner': partner,
+                'program': program,
+                'roles': roles,
+                'search': search,
+                'status': status,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasUsersCountRetrieve({
+        businessAreaSlug,
+    }: {
+        businessAreaSlug: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/users/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns Profile
+     * @throws ApiError
+     */
+    public static restBusinessAreasUsersProfileRetrieve({
+        businessAreaSlug,
+        program,
+    }: {
+        businessAreaSlug: string,
+        program?: string,
+    }): CancelablePromise<Profile> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/users/profile/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'program': program,
+            },
+        });
+    }
+    /**
      * @returns BusinessArea
      * @throws ApiError
      */
@@ -4594,7 +4791,7 @@ export class RestService {
         });
     }
     /**
-     * @returns PaginatedRuleList
+     * @returns any No response body
      * @throws ApiError
      */
     public static restEngineRulesList({
@@ -4626,7 +4823,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
-    }): CancelablePromise<PaginatedRuleList> {
+    }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/engine-rules/',
@@ -4920,26 +5117,6 @@ export class RestService {
                 'org_pk': orgPk,
                 'org_slug': orgSlug,
                 'programme_pk': programmePk,
-            },
-        });
-    }
-    /**
-     * @returns Profile
-     * @throws ApiError
-     */
-    public static restUsersProfileRetrieve({
-        businessAreaSlug,
-        programSlug,
-    }: {
-        businessAreaSlug?: string,
-        programSlug?: string,
-    }): CancelablePromise<Profile> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/rest/users/profile/',
-            query: {
-                'business_area_slug': businessAreaSlug,
-                'program_slug': programSlug,
             },
         });
     }

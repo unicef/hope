@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type User = {
+    readonly id: string;
     firstName?: string;
     lastName?: string;
     email: string;
