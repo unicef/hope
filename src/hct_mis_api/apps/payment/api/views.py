@@ -22,6 +22,8 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_extensions.cache.decorators import cache_response
 
+from hct_mis_api.apps.payment.models import PaymentVerificationPlan
+from hct_mis_api.apps.payment.services.verification_plan_crud_services import VerificationPlanCrudServices
 from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.activity_log.models import log_create
@@ -39,7 +41,7 @@ from hct_mis_api.apps.core.utils import check_concurrency_version_in_mutation
 from hct_mis_api.apps.payment.api.caches import (
     PaymentPlanKeyConstructor,
     PaymentPlanListKeyConstructor,
-    TargetPopulationListKeyConstructor,
+    TargetPopulationListKeyConstructor, PaymentVerificationListKeyConstructor,
 )
 from hct_mis_api.apps.payment.api.filters import (
     PaymentPlanFilter,
@@ -69,7 +71,7 @@ from hct_mis_api.apps.payment.api.serializers import (
     TargetPopulationDetailSerializer,
     TPHouseholdListSerializer,
     VerificationDetailSerializer,
-    XlsxErrorSerializer,
+    XlsxErrorSerializer, PaymentVerificationPlanCreateSerializer,
 )
 from hct_mis_api.apps.payment.celery_tasks import (
     export_pdf_payment_plan_summary,
@@ -138,21 +140,79 @@ class PaymentVerificationViewSet(
     serializer_classes_by_action = {
         "list": PaymentVerificationPlanListSerializer,
         "retrieve": PaymentVerificationPlanDetailsSerializer,
+        "create_payment_verification_plan": PaymentVerificationPlanCreateSerializer,
+        # "update": "",
+        # "activate": "",
+        # "finish": "",
+        # DiscardPaymentVerificationPlan
+        # InvalidPaymentVerificationPlan
+        # DeletePaymentVerificationPlan
         "verifications": PaymentListSerializer,
     }
     permissions_by_action = {
         "list": [Permissions.PAYMENT_VERIFICATION_VIEW_LIST],
         "retrieve": [Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS],
+        "create_payment_verification_plan": [Permissions.PAYMENT_VERIFICATION_CREATE],
     }
 
     def get_object(self) -> PaymentPlan:
         return get_object_or_404(PaymentPlan, id=self.kwargs.get("pk"))
 
-    # @etag_decorator(PaymentVerificationListKeyConstructor)
-    # @cache_response(timeout=config.REST_API_TTL, key_func=PaymentVerificationListKeyConstructor())
+    @etag_decorator(PaymentVerificationListKeyConstructor)
+    @cache_response(timeout=config.REST_API_TTL, key_func=PaymentVerificationListKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
+    @extend_schema(request=PaymentVerificationPlanCreateSerializer, responses={201: PaymentVerificationPlanDetailsSerializer})
+    @action(detail=True, methods=["post"], url_path="create-verification-plan")
+    def create_payment_verification_plan(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Create Payment Verification Plan"""
+        payment_plan = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        verification_plan = VerificationPlanCrudServices.create(payment_plan, serializer.validated_data)
+        log_create(
+            PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            request.user,
+            payment_plan.program,
+            None,
+            verification_plan,
+        )
+        payment_plan.refresh_from_db()
+        return Response(
+            data=PaymentVerificationPlanDetailsSerializer(payment_plan).data,
+            status=status.HTTP_200_OK,
+        )
+
+    @extend_schema(request=PaymentVerificationPlanCreateSerializer,
+                   responses={201: PaymentVerificationPlanDetailsSerializer})
+    @action(detail=True, methods=["patch"],
+            url_path="update-verification-plan/(?P<verification_plan_id>[^/.]+)")
+    def update_payment_verification_plan(self, request: Request, verification_plan_id: str, *args: Any, **kwargs: Any) -> Response:
+        # TODO: fix it
+        payment_plan = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        # verification_plan_id
+        serializer.is_valid(raise_exception=True)
+
+        verification_plan = VerificationPlanCrudServices.create(payment_plan, serializer.validated_data)
+        log_create(
+            PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            request.user,
+            payment_plan.program,
+            None,
+            verification_plan,
+        )
+        payment_plan.refresh_from_db()
+        return Response(
+            data=PaymentVerificationPlanDetailsSerializer(payment_plan).data,
+            status=status.HTTP_200_OK,
+        )
+
+    # verification
     @action(detail=True, methods=["get"], PERMISSIONS=[Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS])
     def verifications(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """return list of verification records"""

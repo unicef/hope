@@ -1013,6 +1013,35 @@ class VerificationListSerializer(serializers.ModelSerializer):
         return PaymentListSerializer.get_collector_field(obj, "full_name")
 
 
+class FullListSerializer(serializers.Serializer):
+    excluded_admin_areas = serializers.ListField(child=serializers.CharField())
+
+
+class AgeSerializer(serializers.Serializer):
+    min = serializers.IntegerField()
+    max = serializers.IntegerField()
+
+
+class RandomSamplingSerializer(serializers.Serializer):
+    confidence_interval = serializers.FloatField(required=True)
+    margin_of_error = serializers.FloatField(required=True)
+    excluded_admin_areas = serializers.ListField(child=serializers.CharField())
+    age = AgeSerializer()
+    sex = serializers.CharField()
+
+
+class RapidProSerializer(serializers.Serializer):
+    flow_id = serializers.CharField(required=True)
+
+
+class PaymentVerificationPlanCreateSerializer(serializers.Serializer):
+    sampling = serializers.CharField(required=True)
+    verification_channel = serializers.CharField(required=True)
+    full_list_arguments = FullListSerializer()
+    random_sampling_arguments = RandomSamplingSerializer()
+    rapid_pro_arguments = RapidProSerializer()
+
+
 class TPHouseholdListSerializer(serializers.ModelSerializer):
     household_unicef_id = serializers.CharField(source="household.unicef_id")
     hoh_full_name = serializers.SerializerMethodField()
