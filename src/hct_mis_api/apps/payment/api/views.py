@@ -22,8 +22,6 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_extensions.cache.decorators import cache_response
 
-from hct_mis_api.apps.payment.models import PaymentVerificationPlan
-from hct_mis_api.apps.payment.services.verification_plan_crud_services import VerificationPlanCrudServices
 from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.activity_log.models import log_create
@@ -32,7 +30,6 @@ from hct_mis_api.apps.core.api.mixins import (
     BaseViewSet,
     BusinessAreaProgramsAccessMixin,
     CountActionMixin,
-    DecodeIdForDetailMixin,
     ProgramMixin,
     SerializerActionMixin,
 )
@@ -41,7 +38,8 @@ from hct_mis_api.apps.core.utils import check_concurrency_version_in_mutation
 from hct_mis_api.apps.payment.api.caches import (
     PaymentPlanKeyConstructor,
     PaymentPlanListKeyConstructor,
-    TargetPopulationListKeyConstructor, PaymentVerificationListKeyConstructor,
+    PaymentVerificationListKeyConstructor,
+    TargetPopulationListKeyConstructor,
 )
 from hct_mis_api.apps.payment.api.filters import (
     PaymentPlanFilter,
@@ -61,6 +59,7 @@ from hct_mis_api.apps.payment.api.serializers import (
     PaymentPlanListSerializer,
     PaymentPlanSerializer,
     PaymentPlanSupportingDocumentSerializer,
+    PaymentVerificationPlanCreateSerializer,
     PaymentVerificationPlanDetailsSerializer,
     PaymentVerificationPlanListSerializer,
     RevertMarkPaymentAsFailedSerializer,
@@ -71,7 +70,7 @@ from hct_mis_api.apps.payment.api.serializers import (
     TargetPopulationDetailSerializer,
     TPHouseholdListSerializer,
     VerificationDetailSerializer,
-    XlsxErrorSerializer, PaymentVerificationPlanCreateSerializer,
+    XlsxErrorSerializer,
 )
 from hct_mis_api.apps.payment.celery_tasks import (
     export_pdf_payment_plan_summary,
@@ -88,12 +87,16 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlanSplit,
     PaymentPlanSupportingDocument,
     PaymentVerification,
+    PaymentVerificationPlan,
 )
 from hct_mis_api.apps.payment.services.mark_as_failed import (
     mark_as_failed,
     revert_mark_as_failed,
 )
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
+from hct_mis_api.apps.payment.services.verification_plan_crud_services import (
+    VerificationPlanCrudServices,
+)
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_import_service import (
     XlsxPaymentPlanImportService,
 )
@@ -127,7 +130,6 @@ class PaymentVerificationViewSet(
     ProgramMixin,
     SerializerActionMixin,
     PaymentPlanMixin,
-    DecodeIdForDetailMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
     BaseViewSet,
@@ -163,7 +165,9 @@ class PaymentVerificationViewSet(
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
-    @extend_schema(request=PaymentVerificationPlanCreateSerializer, responses={201: PaymentVerificationPlanDetailsSerializer})
+    @extend_schema(
+        request=PaymentVerificationPlanCreateSerializer, responses={201: PaymentVerificationPlanDetailsSerializer}
+    )
     @action(detail=True, methods=["post"], url_path="create-verification-plan")
     def create_payment_verification_plan(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Create Payment Verification Plan"""
@@ -186,11 +190,13 @@ class PaymentVerificationViewSet(
             status=status.HTTP_200_OK,
         )
 
-    @extend_schema(request=PaymentVerificationPlanCreateSerializer,
-                   responses={201: PaymentVerificationPlanDetailsSerializer})
-    @action(detail=True, methods=["patch"],
-            url_path="update-verification-plan/(?P<verification_plan_id>[^/.]+)")
-    def update_payment_verification_plan(self, request: Request, verification_plan_id: str, *args: Any, **kwargs: Any) -> Response:
+    @extend_schema(
+        request=PaymentVerificationPlanCreateSerializer, responses={201: PaymentVerificationPlanDetailsSerializer}
+    )
+    @action(detail=True, methods=["patch"], url_path="update-verification-plan/(?P<verification_plan_id>[^/.]+)")
+    def update_payment_verification_plan(
+        self, request: Request, verification_plan_id: str, *args: Any, **kwargs: Any
+    ) -> Response:
         # TODO: fix it
         payment_plan = self.get_object()
         serializer = self.get_serializer(data=request.data)
@@ -240,7 +246,6 @@ class PaymentPlanViewSet(
     ProgramMixin,
     SerializerActionMixin,
     PaymentPlanMixin,
-    DecodeIdForDetailMixin,
     mixins.RetrieveModelMixin,
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
@@ -863,7 +868,6 @@ class TargetPopulationViewSet(
     ProgramMixin,
     SerializerActionMixin,
     PaymentPlanMixin,
-    DecodeIdForDetailMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
@@ -1244,7 +1248,6 @@ class PaymentPlanSupportingDocumentViewSet(
 class PaymentViewSet(
     CountActionMixin,
     SerializerActionMixin,
-    DecodeIdForDetailMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
     BaseViewSet,
@@ -1305,7 +1308,6 @@ class PaymentViewSet(
 class TPHouseholdViewSet(
     CountActionMixin,
     SerializerActionMixin,
-    DecodeIdForDetailMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
     BaseViewSet,

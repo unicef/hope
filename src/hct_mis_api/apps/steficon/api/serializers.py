@@ -1,8 +1,9 @@
-from hct_mis_api.api.utils import EncodedIdSerializerMixin
+from rest_framework import serializers
+
 from hct_mis_api.apps.steficon.models import Rule, RuleCommit
 
 
-class RuleSerializer(EncodedIdSerializerMixin):
+class RuleSerializer(serializers.Serializer):
     class Meta:
         model = Rule
         fields = (
@@ -13,7 +14,7 @@ class RuleSerializer(EncodedIdSerializerMixin):
         )
 
 
-class RuleCommitSerializer(EncodedIdSerializerMixin):
+class RuleCommitSerializer(serializers.Serializer):
     rule = RuleSerializer(read_only=True)
 
     class Meta:

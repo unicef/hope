@@ -245,20 +245,15 @@ class PaymentPlanService:
         dm = getattr(self.payment_plan, "delivery_mechanism", None)
         fsp = getattr(self.payment_plan, "financial_service_provider", None)
         if not dm or not fsp:
-            raise GraphQLError("Payment Plan doesn't have FSP / DeliveryMechanism assigned.")
+            raise ValidationError("Payment Plan doesn't have FSP / DeliveryMechanism assigned.")
 
         if self.payment_plan.eligible_payments.filter(financial_service_provider__isnull=True).exists():
-<<<<<<< HEAD
-            raise ValidationError("All Payments must have assigned FSP")
-=======
             self.payment_plan.eligible_payments.update(
                 financial_service_provider=self.payment_plan.financial_service_provider,
                 delivery_type=self.payment_plan.delivery_mechanism,
             )
-
         if self.payment_plan.eligible_payments.filter(entitlement_quantity__isnull=True).exists():
-            raise GraphQLError("All Payments must have entitlement quantity set.")
->>>>>>> long-term/rest-api-refactor
+            raise ValidationError("All Payments must have entitlement quantity set.")
 
         self.payment_plan.status_lock_fsp()
         self.payment_plan.save()

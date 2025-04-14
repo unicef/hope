@@ -983,7 +983,7 @@ class TestPaymentPlanServices(APITestCase):
         payment_plan.delivery_mechanism = self.dm_transfer_to_account
         payment.save()
 
-        with self.assertRaises(GraphQLError) as e:
+        with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan).lock_fsp()
         self.assertEqual(
             e.exception.message,
