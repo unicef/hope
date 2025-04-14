@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestChartTotalTransferredCashByCountry::test_resolving_chart_0_with_permission 1'] = {
@@ -56,7 +57,7 @@ snapshots['TestChartTotalTransferredCashByCountry::test_resolving_chart_1_withou
                     'line': 3
                 }
             ],
-            'message': 'Permission Denied',
+            'message': "[ErrorDetail(string='Permission Denied', code='invalid')]",
             'path': [
                 'chartTotalTransferredCashByCountry'
             ]

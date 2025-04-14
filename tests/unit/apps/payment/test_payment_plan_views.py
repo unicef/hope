@@ -1482,7 +1482,7 @@ class TestTargetPopulationActions:
         self.target_population.status = PaymentPlan.Status.TP_LOCKED
         self.target_population.save()
         data = {
-            "engine_formula_rule_id": rule_for_tp.pk,
+            "engine_formula_rule_id": str(rule_for_tp.pk),
             "version": self.target_population.version,
         }
         response = self.client.post(self.url_apply_steficon, data, format="json")
@@ -1492,6 +1492,7 @@ class TestTargetPopulationActions:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
             assert "id" in resp_data
+            print("===>>> ", resp_data["steficon_rule_targeting"])  # TODO: FIX ME
             assert "TARGETING" in resp_data["steficon_rule_targeting"]["rule"]["type"]
 
     def test_apply_engine_formula_tp_validation_errors(self, create_user_role_with_permissions: Any) -> None:

@@ -1068,37 +1068,35 @@ class TargetPopulationViewSet(
         serializer = self.get_serializer(
             data=request.data,
         )
-        if serializer.is_valid():
-            engine_formula_rule_id = serializer.validated_data["engine_formula_rule_id"]
-            if version := serializer.validated_data.get("version"):
-                check_concurrency_version_in_mutation(version, tp)
-            engine_rule = get_object_or_404(Rule, id=engine_formula_rule_id)
-            # tp vulnerability_score
-            if tp.status not in PaymentPlan.CAN_RUN_ENGINE_FORMULA_FOR_VULNERABILITY_SCORE:
-                raise ValidationError(f"Not allowed to run engine formula within status {tp.status}.")
-            if not engine_rule.enabled or engine_rule.deprecated:
-                raise ValidationError("This engine rule is not enabled or is deprecated.")
-            old_tp = copy_model_object(tp)
-            rule_commit = engine_rule.latest
-            tp.steficon_rule_targeting = rule_commit
-            tp.status = PaymentPlan.Status.TP_STEFICON_WAIT
-            tp.save()
-            payment_plan_apply_steficon_hh_selection.delay(str(tp.pk), str(engine_rule.pk))
-            log_create(
-                mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
-                business_area_field="business_area",
-                user=request.user,
-                programs=tp.program.pk,
-                old_object=old_tp,
-                new_object=tp,
-            )
-            response_serializer = TargetPopulationDetailSerializer(tp, context={"request": request})
-            return Response(
-                data=response_serializer.data,
-                status=status.HTTP_200_OK,
-            )
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        engine_formula_rule_id = serializer.validated_data["engine_formula_rule_id"]
+        if version := serializer.validated_data.get("version"):
+            check_concurrency_version_in_mutation(version, tp)
+        engine_rule = get_object_or_404(Rule, id=engine_formula_rule_id)
+        # tp vulnerability_score
+        if tp.status not in PaymentPlan.CAN_RUN_ENGINE_FORMULA_FOR_VULNERABILITY_SCORE:
+            raise ValidationError(f"Not allowed to run engine formula within status {tp.status}.")
+        if not engine_rule.enabled or engine_rule.deprecated:
+            raise ValidationError("This engine rule is not enabled or is deprecated.")
+        old_tp = copy_model_object(tp)
+        rule_commit = engine_rule.latest
+        tp.steficon_rule_targeting = rule_commit
+        tp.status = PaymentPlan.Status.TP_STEFICON_WAIT
+        tp.save()
+        payment_plan_apply_steficon_hh_selection.delay(str(tp.pk), str(engine_rule.pk))
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=request.user,
+            programs=tp.program.pk,
+            old_object=old_tp,
+            new_object=tp,
+        )
+        response_serializer = TargetPopulationDetailSerializer(tp, context={"request": request})
+        return Response(
+            data=response_serializer.data,
+            status=status.HTTP_200_OK,
+        )
 
 
 class PaymentPlanManagerialViewSet(
