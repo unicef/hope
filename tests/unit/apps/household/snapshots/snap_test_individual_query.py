@@ -816,7 +816,7 @@ snapshots['TestIndividualWithDeliveryMechanismsDataQuery::test_individual_query_
     'data': {
         'individual': {
             'birthDate': '1943-07-30',
-            'deliveryMechanismsData': [
+            'accounts': [
                 {
                     'individualTabData': '{"card_expiry_date": "2022-01-01", "card_number": "123", "name_of_cardholder": "Marek"}',
                     'name': 'Bank'

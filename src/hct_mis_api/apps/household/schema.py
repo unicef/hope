@@ -214,7 +214,12 @@ class AccountsNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.account_type.label
 
     def resolve_individual_tab_data(self, info: Any) -> dict:
-        return dict(sorted(self.data.items()))
+        data = dict(sorted(self.data.items()))
+        if self.number:
+            data["number"] = self.number
+        if self.financial_institution:
+            data["financial_institution"] = self.financial_institution.code
+        return data
 
     class Meta:
         model = Account

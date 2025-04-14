@@ -1979,6 +1979,11 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
             else:
                 delivery_data[field] = getattr(associated_object, internal_field, None)
 
+        if self.number:
+            delivery_data["number"] = self.number
+        if self.financial_institution:
+            delivery_data["financial_institution"] = self.financial_institution.code
+
         return delivery_data
 
     def validate(self, fsp: "FinancialServiceProvider", delivery_mechanism: "DeliveryMechanism") -> bool:
