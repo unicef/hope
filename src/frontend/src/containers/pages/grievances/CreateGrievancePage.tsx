@@ -84,6 +84,7 @@ const CreateGrievancePage = (): ReactElement => {
   const { showMessage } = useSnackbar();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const [activeStep, setActiveStep] = useState(GrievanceSteps.Selection);
   const [validateData, setValidateData] = useState(false);
 

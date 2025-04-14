@@ -27,6 +27,7 @@ import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { error } from 'console';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import FundsCommitmentSection from '@components/paymentmodule/PaymentPlanDetails/FundsCommitment/FundsCommitmentSection';
 
 const PaymentPlanDetailsPage = (): ReactElement => {
   const { paymentPlanId } = useParams();
@@ -75,6 +76,10 @@ const PaymentPlanDetailsPage = (): ReactElement => {
     status === PaymentPlanStatus.Accepted ||
     status === PaymentPlanStatus.Finished;
 
+  const shouldDisplayFundsCommitment = status === PaymentPlanStatus.InReview;
+
+  if (!paymentPlan) return null;
+
   return (
     <Box display="flex" flexDirection="column">
       <PaymentPlanDetailsHeader
@@ -85,6 +90,9 @@ const PaymentPlanDetailsPage = (): ReactElement => {
       {status !== PaymentPlanStatus.Preparing && (
         <>
           <AcceptanceProcess paymentPlan={paymentPlan} />
+          {shouldDisplayFundsCommitment && (
+            <FundsCommitmentSection paymentPlan={paymentPlan} />
+          )}
           {shouldDisplayEntitlement && (
             <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
           )}

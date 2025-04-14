@@ -29,6 +29,7 @@ export function TargetPopulationHouseholdTable({
   };
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const replacements = {
     unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} ID`,
     head_of_household__full_name: (_beneficiaryGroup) =>

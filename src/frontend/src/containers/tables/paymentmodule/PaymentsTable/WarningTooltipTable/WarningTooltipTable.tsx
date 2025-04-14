@@ -60,6 +60,7 @@ export function WarningTooltipTable({
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   if (!payment) return null;
   const mappedPaymentPlanRows = (): ReactElement[] => {
     const {

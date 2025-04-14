@@ -148,6 +148,7 @@ function CreateFeedbackPage(): ReactElement {
   const { showMessage } = useSnackbar();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const steps = [
     'Category Selection',
     `${beneficiaryGroup?.groupLabel}/${beneficiaryGroup?.memberLabel} Look up`,

@@ -67,6 +67,7 @@ export function HouseholdImportedIndividualsTable({
   const [orderDirection, setOrderDirection] = useState('asc');
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const allIndividuals = household.individuals.edges.map((edge) => edge.node);
   if (orderBy) {
     if (orderDirection === 'asc') {

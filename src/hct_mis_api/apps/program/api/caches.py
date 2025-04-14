@@ -1,6 +1,4 @@
-from typing import Any, Optional
-
-from django.db.models import QuerySet
+from typing import Any
 
 from rest_framework_extensions.key_constructor import bits
 from rest_framework_extensions.key_constructor.bits import KeyBitBase
@@ -12,21 +10,14 @@ from hct_mis_api.api.caches import (
     KeyConstructorMixin,
     get_or_create_cache_key,
 )
-from hct_mis_api.apps.program.models import ProgramCycle
 
 
 class ProgramCycleListVersionsKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
     specific_view_cache_key = "program_cycle_list"
 
-    def _get_queryset(self, business_area_slug: Optional[Any], program_slug: Optional[Any]) -> QuerySet:
-        return ProgramCycle.objects.filter(
-            program__slug=program_slug,
-            program__business_area__slug=business_area_slug,
-        )
-
 
 class ProgramCycleKeyConstructor(KeyConstructorMixin):
-    program_cycle_list_versions = ProgramCycleListVersionsKeyBit()
+    program_cycle_list_version = ProgramCycleListVersionsKeyBit()
 
 
 class BeneficiaryGroupListVersionsKeyBit(KeyBitBase):
@@ -38,7 +29,7 @@ class BeneficiaryGroupListVersionsKeyBit(KeyBitBase):
 
 
 class BeneficiaryGroupKeyConstructor(KeyConstructor):
-    beneficiary_group_list_versions = BeneficiaryGroupListVersionsKeyBit()
+    beneficiary_group_list_version = BeneficiaryGroupListVersionsKeyBit()
     unique_method_id = bits.UniqueMethodIdKeyBit()
     querystring = bits.QueryParamsKeyBit()
     params = bits.KwargsKeyBit()

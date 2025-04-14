@@ -82,6 +82,7 @@ export const HouseholdMembersTable = ({
 
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const replacements = {
     unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
     fullName: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel}`,
@@ -131,7 +132,7 @@ export const HouseholdMembersTable = ({
       title={`${beneficiaryGroup?.groupLabel} Members`}
       allowSort={false}
       headCells={adjustedHeadCells}
-      data={data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)}
+      data={data} //.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
       error={error}
       isLoading={isLoading}
       queryVariables={queryVariables}

@@ -43,6 +43,7 @@ function Selection({
 
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const dataChangeIssueTypes = [
     { name: `${beneficiaryGroup?.groupLabel} Data Update`, value: '13' },
     { name: `${beneficiaryGroup?.memberLabel} Data Update`, value: '14' },

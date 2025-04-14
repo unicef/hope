@@ -56,6 +56,7 @@ export const CollectorsTable = ({
   };
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const replacements = {
     fullName: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel}`,
     relationship: (_beneficiaryGroup) =>

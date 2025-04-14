@@ -50,6 +50,6 @@ class AreaTypeListVersionsKeyBit(KeyBitBase):
 
 
 class AreaKeyConstructor(KeyConstructorMixin):
-    area_list_versions = AreaListVersionsKeyBit()
+    area_list_version = AreaListVersionsKeyBit()
     country_list_version = CountryListVersionsKeyBit()
     area_type_list_version = AreaTypeListVersionsKeyBit()

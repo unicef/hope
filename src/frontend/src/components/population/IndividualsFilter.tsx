@@ -48,6 +48,7 @@ export function IndividualsFilter({
   const { isAllPrograms } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
       initialFilter,

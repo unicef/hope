@@ -126,6 +126,7 @@ function AddIndividualDataChange({
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const { data, loading } = useAllAddIndividualFieldsQuery();
   if (loading) {
     return <LoadingComponent />;

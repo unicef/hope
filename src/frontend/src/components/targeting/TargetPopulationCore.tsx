@@ -37,6 +37,7 @@ export const TargetPopulationCore = ({
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   if (!targetPopulation) return null;
 
   const ResultComponent = targetPopulation.program.isSocialWorkerProgram

@@ -28,6 +28,7 @@ function FeedbackDetails({
   const { baseUrl, isAllPrograms } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   return (
     <Grid size={{ xs: 12 }}>
       <ContainerColumnWithBorder>

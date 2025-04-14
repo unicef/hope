@@ -14,6 +14,7 @@ export function ImportCounters({
   const { t } = useTranslation();
   const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   if (isSocialDctType) {
     return (
       <>

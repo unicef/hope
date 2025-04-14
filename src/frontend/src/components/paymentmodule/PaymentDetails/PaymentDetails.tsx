@@ -7,13 +7,10 @@ import { LabelizedField } from '@core/LabelizedField';
 import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
-import {
-  PaymentQuery,
-  PaymentStatus,
-  PaymentVerificationStatus,
-} from '@generated/graphql';
+import { PaymentStatus, PaymentVerificationStatus } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Grid2 as Grid, Paper, Typography } from '@mui/material';
+import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
 import {
   formatCurrencyWithSymbol,
   getPhoneNoLabel,
@@ -33,7 +30,7 @@ const Overview = styled(Paper)`
 `;
 
 interface PaymentDetailsProps {
-  payment: PaymentQuery['payment'];
+  payment: PaymentDetail;
   canViewActivityLog: boolean;
   canViewHouseholdDetails: boolean;
 }
@@ -47,7 +44,7 @@ function PaymentDetails({
   const { businessArea, programId } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-  let paymentVerification: PaymentQuery['payment']['verification'] = null;
+  let paymentVerification: PaymentDetail['verification'] = null;
   if (
     payment.verification &&
     payment.verification.status !== PaymentVerificationStatus.Pending

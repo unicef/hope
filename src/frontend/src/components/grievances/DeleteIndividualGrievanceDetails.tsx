@@ -39,6 +39,7 @@ export function DeleteIndividualGrievanceDetails({
   const confirm = useConfirmation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const isForApproval = ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
   const isHeadOfHousehold =
     ticket?.individual?.id === ticket?.household?.headOfHousehold?.id;

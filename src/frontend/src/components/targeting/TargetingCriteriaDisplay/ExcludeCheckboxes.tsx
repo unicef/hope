@@ -29,6 +29,7 @@ const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   return (
     <Box mt={3} p={3}>
       {isDetailsPage ? (

@@ -1,3 +1,11 @@
+import { RelatedFollowUpPaymentPlans } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails/RelatedFollowUpPaymentPlans';
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { FieldBorder } from '@core/FieldBorder';
+import { LabelizedField } from '@core/LabelizedField';
+import { OverviewContainer } from '@core/OverviewContainer';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
+import { Info } from '@mui/icons-material';
 import {
   Box,
   Grid2 as Grid,
@@ -5,19 +13,10 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { useTranslation } from 'react-i18next';
-import { renderUserName } from '@utils/utils';
-import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
-import { LabelizedField } from '@core/LabelizedField';
-import { OverviewContainer } from '@core/OverviewContainer';
-import { Title } from '@core/Title';
-import { UniversalMoment } from '@core/UniversalMoment';
-import { FieldBorder } from '@core/FieldBorder';
-import { RelatedFollowUpPaymentPlans } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails/RelatedFollowUpPaymentPlans';
-import { Info } from '@mui/icons-material';
-import { ReactElement } from 'react';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
-
+import { renderUserName } from '@utils/utils';
+import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
 interface PaymentPlanDetailsProps {
   baseUrl: string;
   paymentPlan: PaymentPlanDetail;

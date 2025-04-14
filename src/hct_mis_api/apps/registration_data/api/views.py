@@ -3,6 +3,7 @@ from typing import Any
 
 from django.db import transaction
 
+from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.decorators import action
@@ -12,7 +13,9 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework_extensions.cache.decorators import cache_response
 
+from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.api.mixins import (
@@ -25,6 +28,7 @@ from hct_mis_api.apps.core.utils import check_concurrency_version_in_mutation
 from hct_mis_api.apps.household.documents import get_individual_doc
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.registration_data.api.caches import RDIKeyConstructor
 from hct_mis_api.apps.registration_data.api.serializers import (
     RefuseRdiSerializer,
     RegistrationDataImportDetailSerializer,
@@ -75,9 +79,8 @@ class RegistrationDataImportViewSet(
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = RegistrationDataImportFilter
 
-    #
-    # @etag_decorator(RDIKeyConstructor)
-    # @cache_response(timeout=config.REST_API_TTL, key_func=RDIKeyConstructor())
+    @etag_decorator(RDIKeyConstructor)
+    @cache_response(timeout=config.REST_API_TTL, key_func=RDIKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 

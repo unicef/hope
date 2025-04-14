@@ -27,6 +27,7 @@ export function VerificationRecordsTable({
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const replacements = {
     payment_record__head_of_household__family_name: (_beneficiaryGroup) =>
       `Head of ${_beneficiaryGroup?.groupLabel}`,

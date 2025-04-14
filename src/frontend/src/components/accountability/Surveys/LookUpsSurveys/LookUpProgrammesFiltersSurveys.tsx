@@ -33,6 +33,7 @@ function LookUpProgrammesFiltersSurveys({
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
       initialFilter,

@@ -31,7 +31,7 @@ from hct_mis_api.apps.universal_update_script.universal_individual_update_servic
     UniversalIndividualUpdateService,
 )
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db()
 
 
 @pytest.fixture()

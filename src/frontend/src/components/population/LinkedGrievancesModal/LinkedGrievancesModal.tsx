@@ -66,6 +66,7 @@ export function LinkedGrievancesModal({
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const { data: grievances } = useAllGrievanceTicketQuery({
     variables: { businessArea, household: household.unicefId },
     notifyOnNetworkStatusChange: true,

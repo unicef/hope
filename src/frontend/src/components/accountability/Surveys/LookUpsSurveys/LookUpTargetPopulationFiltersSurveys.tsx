@@ -36,6 +36,7 @@ function LookUpTargetPopulationFiltersSurveys({
   const isAccountability = location.pathname.includes('accountability');
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
       initialFilter,

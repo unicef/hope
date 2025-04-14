@@ -51,6 +51,7 @@ export function CreateFollowUpPaymentPlan({
   const { showMessage } = useSnackbar();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const { id, totalWithdrawnHouseholdsCount, unsuccessfulPaymentsCount } =
     paymentPlan;
 

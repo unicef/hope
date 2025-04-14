@@ -31,6 +31,7 @@ function AddIndividualGrievanceDetails({
   const [mutate] = useApproveAddIndividualDataChangeMutation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const confirm = useConfirmation();
   const { showMessage } = useSnackbar();
   if (loading) {

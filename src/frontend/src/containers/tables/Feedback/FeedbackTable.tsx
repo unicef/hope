@@ -26,6 +26,7 @@ function FeedbackTable({
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const { isAllPrograms, programId } = useBaseUrl();
   const initialVariables: AllFeedbacksQueryVariables = {
     feedbackId: filter.feedbackId,

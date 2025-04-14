@@ -99,6 +99,7 @@ export function LookUpHouseholdIndividualSelectionDetail({
 
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const { data: programsData, loading: programsLoading } =
     useAllProgramsForChoicesQuery({
       variables: { businessArea, first: 100 },

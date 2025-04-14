@@ -15,6 +15,7 @@ export function PaymentVerificationSection({
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   if (!data) return null;
 
   const renderContacted = () => {

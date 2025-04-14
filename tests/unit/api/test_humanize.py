@@ -26,7 +26,7 @@ HOUSEHOLD = {
 }
 
 
-@pytest.mark.django_db(transaction=True)
+@pytest.mark.django_db
 class ValidatorTest(TestCase):
     maxDiff = None
 

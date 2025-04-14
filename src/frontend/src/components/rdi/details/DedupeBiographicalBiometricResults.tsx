@@ -5,7 +5,6 @@ import { BlackLink } from '@core/BlackLink';
 import {
   DeduplicationEngineSimilarityPairIndividualNode,
   DeduplicationResultNode,
-  IndividualDetailedFragment,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import {
@@ -26,6 +25,7 @@ import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { MiśTheme } from '../../../theme';
 import BiometricsResultsRdi from './BiometricsResultsRdi';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 
 const Error = styled.span`
   color: ${({ theme }: { theme: MiśTheme }) => theme.hctPalette.red};
@@ -43,7 +43,7 @@ const StyledTable = styled(Table)`
 `;
 
 interface DedupeBiographicalBiometricResultsProps {
-  individual: IndividualDetailedFragment;
+  individual: IndividualDetail;
   status: string;
   results: Array<DeduplicationResultNode>;
   biometricResults: Array<DeduplicationEngineSimilarityPairIndividualNode>;
@@ -62,6 +62,7 @@ export function DedupeBiographicalBiometricResults({
   const { baseUrl } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const createBiographicalData = (
     unicefId: string,
     fullName: string,

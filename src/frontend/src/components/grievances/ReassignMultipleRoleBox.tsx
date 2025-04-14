@@ -43,6 +43,7 @@ export function ReassignMultipleRoleBox({
   const { baseUrl } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const reassignData = JSON.parse(
     ticket.needsAdjudicationTicketDetails.roleReassignData,
   );

@@ -25,7 +25,7 @@ pytestmark = pytest.mark.django_db
 
 @freezegun.freeze_time("2022-01-01")
 class TestRegistrationDataImportViews:
-    def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory, id_to_base64: Callable) -> None:
+    def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory) -> None:
         self.partner = PartnerFactory(name="TestPartner")
         self.user = UserFactory(partner=self.partner)
         self.client = api_client(self.user)
@@ -99,9 +99,8 @@ class TestRegistrationDataImportViews:
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
         create_partner_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
 
         if is_permission_in_correct_program:
             create_user_role_with_permissions(self.user, user_permissions, self.afghanistan, self.program1)
@@ -119,9 +118,8 @@ class TestRegistrationDataImportViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.RDI_VIEW_LIST],
@@ -135,36 +133,56 @@ class TestRegistrationDataImportViews:
         assert len(response_json) == 3
 
         assert {
-            "id": id_to_base64(self.rdi1.id, "RegistrationDataImport"),
+            "id": str(self.rdi1.id),
             "name": self.rdi1.name,
             "status": self.rdi1.get_status_display(),
             "imported_by": self.rdi1.imported_by.get_full_name(),
             "data_source": self.rdi1.get_data_source_display(),
             "created_at": "2022-01-01T00:00:00Z",
+            "erased": self.rdi1.erased,
+            "import_date": "2022-01-01T00:00:00Z",
+            "number_of_households": self.rdi1.number_of_households,
+            "number_of_individuals": self.rdi1.number_of_individuals,
+            "biometric_deduplicated": self.rdi1.biometric_deduplicated,
         } in response_json
         assert {
-            "id": id_to_base64(self.rdi2.id, "RegistrationDataImport"),
+            "id": str(self.rdi2.id),
             "name": self.rdi2.name,
             "status": self.rdi2.get_status_display(),
             "imported_by": self.rdi2.imported_by.get_full_name(),
             "data_source": self.rdi2.get_data_source_display(),
             "created_at": "2022-01-01T00:00:00Z",
+            "erased": self.rdi2.erased,
+            "import_date": "2022-01-01T00:00:00Z",
+            "number_of_households": self.rdi2.number_of_households,
+            "number_of_individuals": self.rdi2.number_of_individuals,
+            "biometric_deduplicated": self.rdi2.biometric_deduplicated,
         } in response_json
         assert {
-            "id": id_to_base64(self.rdi3.id, "RegistrationDataImport"),
+            "id": str(self.rdi3.id),
             "name": self.rdi3.name,
             "status": self.rdi3.get_status_display(),
             "imported_by": self.rdi3.imported_by.get_full_name(),
             "data_source": self.rdi3.get_data_source_display(),
             "created_at": "2022-01-01T00:00:00Z",
+            "erased": self.rdi3.erased,
+            "import_date": "2022-01-01T00:00:00Z",
+            "number_of_households": self.rdi3.number_of_households,
+            "number_of_individuals": self.rdi3.number_of_individuals,
+            "biometric_deduplicated": self.rdi3.biometric_deduplicated,
         } in response_json
         assert {
-            "id": id_to_base64(self.rdi_program2.id, "RegistrationDataImport"),
+            "id": str(self.rdi_program2.id),
             "name": self.rdi_program2.name,
             "status": self.rdi1.get_status_display(),
             "imported_by": self.rdi1.imported_by.get_full_name(),
             "data_source": self.rdi1.get_data_source_display(),
             "created_at": "2022-01-01T00:00:00Z",
+            "erased": self.rdi1.erased,
+            "import_date": "2022-01-01T00:00:00Z",
+            "number_of_households": self.rdi1.number_of_households,
+            "number_of_individuals": self.rdi1.number_of_individuals,
+            "biometric_deduplicated": self.rdi1.biometric_deduplicated,
         } not in response_json
 
     def test_list_registration_data_imports_filter(
@@ -172,9 +190,8 @@ class TestRegistrationDataImportViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.RDI_VIEW_LIST],
@@ -192,16 +209,15 @@ class TestRegistrationDataImportViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.RDI_VIEW_LIST],
             self.afghanistan,
             self.program1,
         )
-        response = self.client.get(self.url_list, {"name": "RDI A"})
+        response = self.client.get(self.url_list, {"search": "RDI A"})
         assert response.status_code == status.HTTP_200_OK
 
         response_json = response.json()["results"]
@@ -212,9 +228,8 @@ class TestRegistrationDataImportViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.RDI_VIEW_LIST],

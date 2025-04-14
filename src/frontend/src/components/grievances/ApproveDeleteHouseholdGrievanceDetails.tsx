@@ -50,6 +50,7 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
     ticket.deleteHouseholdTicketDetails;
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const validationSchema = Yup.object().shape({
     reasonHhId: Yup.string().when(
       'withdrawReason',

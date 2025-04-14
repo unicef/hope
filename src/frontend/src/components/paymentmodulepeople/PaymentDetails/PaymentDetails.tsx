@@ -1,11 +1,7 @@
 import { Grid2 as Grid, Paper, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import {
-  PaymentQuery,
-  PaymentStatus,
-  PaymentVerificationStatus,
-} from '@generated/graphql';
+import { PaymentStatus, PaymentVerificationStatus } from '@generated/graphql';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import { useBusinessArea } from '@hooks/useBusinessArea';
 import {
@@ -49,7 +45,7 @@ export function PaymentDetails({
   const { programId } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-  let paymentVerification: PaymentQuery['payment']['verification'] = null;
+  let paymentVerification: PaymentDetail['verification'] = null;
   if (
     payment.verification &&
     payment.verification.status !== PaymentVerificationStatus.Pending

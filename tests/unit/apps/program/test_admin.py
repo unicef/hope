@@ -14,7 +14,7 @@ from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db()
 
 
 class ProgramAdminTest(WebTest):

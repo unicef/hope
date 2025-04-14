@@ -35,6 +35,7 @@ export function HouseholdDetails({
     choicesData.residenceStatusChoices,
   );
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   return (
     <ContainerColumnWithBorder>
       <Title>

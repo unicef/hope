@@ -6,8 +6,9 @@ from rest_framework.response import Response
 
 from hct_mis_api.api.caches import etag_decorator
 
+pytestmark = pytest.mark.django_db()
 
-@pytest.mark.django_db(transaction=True)
+
 class TestEtagDecorator:
     class DummyEtagConstructorClass:
         def __init__(self, *args: Any, **kwargs: Any) -> None:

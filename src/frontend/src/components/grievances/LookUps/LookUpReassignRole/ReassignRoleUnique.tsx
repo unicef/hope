@@ -38,6 +38,7 @@ export function ReassignRoleUnique({
   const [mutate] = useReassignRoleGrievanceMutation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   return (
     <Formik
       initialValues={{

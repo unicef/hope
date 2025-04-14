@@ -3,6 +3,7 @@ import { Box, Grid2 as Grid } from '@mui/material';
 import { ReactElement } from 'react';
 import { useProgramContext } from 'src/programContext';
 import { BlueText, LightGrey, StyledBox } from '../LookUpStyles';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 export function LookUpReassignRoleDisplay({
   selectedHousehold,
@@ -10,9 +11,7 @@ export function LookUpReassignRoleDisplay({
   setLookUpDialogOpen,
   disabled,
 }: {
-  selectedHousehold;
-  //TODO: add correct type
-  // selectedHousehold: HouseholdDetail;
+  selectedHousehold: HouseholdDetail;
   selectedIndividual;
   setLookUpDialogOpen;
   disabled?: boolean;

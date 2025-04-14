@@ -3264,6 +3264,36 @@ export class RestService {
     }
     /**
      * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaymentPlan
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentVerificationsVerificationsRetrieve2({
+        businessAreaSlug,
+        id,
+        programSlug,
+        verificationId,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+        verificationId: string,
+    }): CancelablePromise<PaymentPlan> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/verifications/{verification_id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+                'verification_id': verificationId,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns CountResponse
      * @throws ApiError
      */

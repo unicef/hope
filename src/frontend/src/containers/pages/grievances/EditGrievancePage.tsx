@@ -104,6 +104,7 @@ const EditGrievancePage = (): ReactElement => {
   const { showMessage } = useSnackbar();
   const { id } = useParams();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const {
     data: ticketData,
     loading: ticketLoading,
