@@ -114,8 +114,10 @@ class PaymentListSerializerTest(TestCase):
         role, created = Role.objects.update_or_create(
             name="Role with Permissions", defaults={"permissions": [Permissions.PM_VIEW_FSP_AUTH_CODE.value]}
         )
+        request = Mock()
+        request.user = user_1
         user_role, _ = RoleAssignment.objects.get_or_create(user=user_1, role=role, business_area=self.business_area)
-        serializer = PaymentListSerializer(instance=self.payment, context={"request": Mock(user=user_1)})
+        serializer = PaymentListSerializer(instance=self.payment, context={"request": request})
         data = serializer.data
 
         self.assertEqual(data["fsp_auth_code"], "AUTH_123")

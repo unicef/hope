@@ -445,6 +445,10 @@ class TestDashboardQueries(APITestCase):
         )
 
     def test_table_total_cash_transferred_by_administrative_area_for_people_for_global_business_area(self) -> None:
+        # business_area = BusinessArea.objects.get(slug="global")
+        # self.create_user_role_with_permissions(
+        #     self.user, [Permissions.DASHBOARD_VIEW_COUNTRY], business_area, whole_business_area_access=True
+        # )
         self.snapshot_graphql_request(
             request_string=self.QUERY_TABLE_TOTAL_CASH_TRANSFERRED_BY_ADMINISTRATIVE_AREA_FOR_PEOPLE,
             variables={"businessAreaSlug": "global", "year": 2021},

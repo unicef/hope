@@ -937,9 +937,9 @@ class PaymentListSerializer(serializers.ModelSerializer):
         return obj.financial_service_provider.name if obj.financial_service_provider else ""
 
     def get_fsp_auth_code(self, obj: Payment) -> str:
-        if not hasattr(self.context, "request"):
+        if "request" not in self.context:
             return ""
-        user = self.context.get("request").user
+        user = self.context["request"].user
         if not user.has_perm(
             Permissions.PM_VIEW_FSP_AUTH_CODE.value,
             obj.program or obj.business_area,

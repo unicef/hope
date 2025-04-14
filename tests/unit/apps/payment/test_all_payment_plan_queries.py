@@ -508,8 +508,8 @@ class TestPaymentPlanQueries(APITestCase):
                 "dispersionStartDate": self.pp_conflicted.dispersion_start_date,
                 "dispersionEndDate": self.pp_conflicted.dispersion_end_date,
             },
-            {"programCycle": encode_id_base64(self.pp.program_cycle.pk, "ProgramCycleNode")},
-            {"programCycle": encode_id_base64(just_random_program_cycle.pk, "ProgramCycleNode")},
+            {"programCycle": str(self.pp.program_cycle.pk)},
+            {"programCycle": str(just_random_program_cycle.pk)},
             {"search": self.pp.unicef_id},
             {"status": self.pp.status},
             {"serviceProvider": "test"},
@@ -520,7 +520,7 @@ class TestPaymentPlanQueries(APITestCase):
                 context={"user": self.user},
                 variables={
                     "businessArea": "afghanistan",
-                    "program": encode_id_base64(self.pp.program.pk, "Program"),
+                    "program": str(self.pp.program.pk),
                     **filter_data,
                 },
             )
@@ -532,7 +532,7 @@ class TestPaymentPlanQueries(APITestCase):
             context={"user": self.user},
             variables={
                 "businessArea": "afghanistan",
-                "program": encode_id_base64(self.pp.program.pk, "Program"),
+                "program": str(self.pp.program.pk),
                 **{"deliveryTypes": ["cash", "referral"]},
             },
         )
@@ -546,7 +546,7 @@ class TestPaymentPlanQueries(APITestCase):
             context={"user": self.user},
             variables={
                 "businessArea": "afghanistan",
-                "sourcePaymentPlanId": encode_id_base64(self.pp.id, "PaymentPlan"),
+                "sourcePaymentPlanId": self.pp.id,
             },
         )
 
@@ -558,7 +558,7 @@ class TestPaymentPlanQueries(APITestCase):
             context={"user": self.user},
             variables={
                 "businessArea": "afghanistan",
-                "paymentPlanId": encode_id_base64(self.pp_conflicted.pk, "PaymentPlan"),
+                "paymentPlanId": self.pp_conflicted.pk,
             },
         )
 
@@ -976,7 +976,7 @@ class TestPaymentPlanQueries(APITestCase):
             context={"user": self.user},
             variables={
                 "businessArea": "afghanistan",
-                "program": encode_id_base64(self.pp.program.pk, "Program"),
+                "program": self.pp.program.pk,
                 "status": ["TP_OPEN", "ASSIGNED"],
             },
         )
@@ -985,7 +985,7 @@ class TestPaymentPlanQueries(APITestCase):
             context={"user": self.user},
             variables={
                 "businessArea": "afghanistan",
-                "program": encode_id_base64(self.pp.program.pk, "Program"),
+                "program": self.pp.program.pk,
                 "status": ["TP_OPEN"],
             },
         )
@@ -1036,11 +1036,10 @@ class TestPaymentPlanQueries(APITestCase):
             delivery_mechanism=self.cash_dm,
         )
 
-        encoded_payment_plan_id = encode_id_base64(payment_plan.id, "PaymentPlan")
         self.snapshot_graphql_request(
             request_string=self.PAYMENT_PLAN_QUERY,
             context={"user": user},
-            variables={"businessArea": "afghanistan", "id": encoded_payment_plan_id},
+            variables={"businessArea": "afghanistan", "id": str(payment_plan.id)},
         )
 
     @freeze_time("2020-10-10")
@@ -1050,7 +1049,7 @@ class TestPaymentPlanQueries(APITestCase):
             context={"user": self.user},
             variables={
                 "businessArea": "afghanistan",
-                "householdId": encode_id_base64(self.p1.household_id, "Household"),
+                "householdId": str(self.p1.household_id),
             },
         )
 
