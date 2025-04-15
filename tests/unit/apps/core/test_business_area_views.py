@@ -117,7 +117,7 @@ class TestBusinessAreaList:
 
     def test_business_area_list_caching(self, create_user_role_with_permissions: Any) -> None:
         with CaptureQueriesContext(connection) as ctx:
-            response = self.api_client.get(self.list_url)
+            response = self.client.get(self.list_url)
             assert response.status_code == status.HTTP_200_OK
             assert response.has_header("etag")
             etag = response.headers["etag"]
@@ -127,7 +127,7 @@ class TestBusinessAreaList:
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
-            response = self.api_client.get(self.list_url)
+            response = self.client.get(self.list_url)
             assert response.status_code == status.HTTP_200_OK
             assert response.has_header("etag")
             etag_second_call = response.headers["etag"]
@@ -137,7 +137,7 @@ class TestBusinessAreaList:
         self.afghanistan.active = False
         self.afghanistan.save()
         with CaptureQueriesContext(connection) as ctx:
-            response = self.api_client.get(self.list_url)
+            response = self.client.get(self.list_url)
             assert response.status_code == status.HTTP_200_OK
             assert response.has_header("etag")
             etag_third_call = response.headers["etag"]
@@ -153,7 +153,7 @@ class TestBusinessAreaList:
             whole_business_area_access=True,
         )
         with CaptureQueriesContext(connection) as ctx:
-            response = self.api_client.get(self.list_url)
+            response = self.client.get(self.list_url)
             assert response.status_code == status.HTTP_200_OK
             assert response.has_header("etag")
             etag_fourth_call = response.headers["etag"]
@@ -164,7 +164,7 @@ class TestBusinessAreaList:
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
-            response = self.api_client.get(self.list_url)
+            response = self.client.get(self.list_url)
             assert response.status_code == status.HTTP_200_OK
             assert response.has_header("etag")
             etag_fifth_call = response.headers["etag"]
@@ -181,7 +181,7 @@ class TestBusinessAreaDetail:
     ) -> None:
         self.afghanistan = BusinessAreaFactory(slug="afghanistan")
         self.detail_url_name = "api:core:business-areas-detail"
-        self.user = UserFactory(partner=self.partner)
+        self.user = UserFactory()
         self.client = api_client(self.user)
 
         create_user_role_with_permissions(

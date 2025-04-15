@@ -11,8 +11,8 @@ class BusinessAreaListVersionKeyBit(KeyBitBase):
     def get_data(
         self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
     ) -> str:
-        queryset = view_instance.get_queryset().aggregate(latest_updated_at=Max("updated_at"))
-        latest_updated_at = queryset["latest_updated_at"]
+        queryset = view_instance.get_queryset()
+        latest_updated_at = queryset.aggregate(latest_updated_at=Max("updated_at"))["latest_updated_at"]
         available_business_areas = queryset.values_list("id", flat=True)
         key = f"business_area_list:{latest_updated_at}:{available_business_areas}"
         return key
