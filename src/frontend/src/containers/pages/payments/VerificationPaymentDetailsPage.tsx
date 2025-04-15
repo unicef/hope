@@ -18,23 +18,34 @@ import { isPermissionDeniedError } from '@utils/utils';
 import { AdminButton } from '@core/AdminButton';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { error } from 'console';
 
 function VerificationPaymentDetailsPage(): ReactElement {
   const { t } = useTranslation();
-  const { id } = useParams();
+  const { businessArea, programId } = useBaseUrl();
+  const { paymentPlanId, paymentId } = useParams();
   const permissions = usePermissions();
-  const { data, loading, error } = usePaymentQuery({
-    variables: { id },
-    fetchPolicy: 'cache-and-network',
+  const { data: payment, isLoading: loading } = useQuery<PaymentDetail>({
+    queryKey: ['payment', businessArea, paymentId, programId, paymentPlanId],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsRetrieve2(
+        {
+          businessAreaSlug: businessArea,
+          paymentId: paymentId,
+          programSlug: programId,
+          paymentPlanId,
+        },
+      ),
   });
   const { data: choicesData, loading: choicesLoading } =
     usePaymentVerificationChoicesQuery();
   const { baseUrl } = useBaseUrl();
   if (loading || choicesLoading) return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
-  if (!data || !choicesData || permissions === null) return null;
-
-  const { payment } = data;
+  if (!payment || !choicesData || permissions === null) return null;
 
   const { verificationPlans } = payment?.parent || {};
   const verificationPlansAmount = verificationPlans?.edges.length;

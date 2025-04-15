@@ -34,7 +34,6 @@ import { useProgramContext } from '../../../programContext';
 import { UniversalActivityLogTablePaymentVerification } from '../../tables/UniversalActivityLogTablePaymentVerification';
 import { VerificationsTable } from '../../tables/payments/VerificationRecordsTable';
 import { VerificationRecordsFilters } from '../../tables/payments/VerificationRecordsTable/VerificationRecordsFilters';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
 
 const Container = styled.div`
@@ -110,7 +109,9 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
     permissions,
   );
 
-  const statesArray = paymentPlan.verificationPlans?.map((v) => v.status);
+  const statesArray = paymentPlan.paymentVerificationPlans?.map(
+    (v) => v.status,
+  );
 
   const canSeeVerificationRecords = (): boolean => {
     const showTable =
@@ -125,7 +126,7 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
     !canSeeVerificationRecords() && !canSeeCreationMessage();
 
   const isFinished =
-    paymentPlan?.payment_verification_summary?.status === 'FINISHED';
+    paymentPlan?.paymentVerificationSummary?.status === 'FINISHED';
 
   const { isFollowUp } = paymentPlan;
 
@@ -155,7 +156,7 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
           <CreateVerificationPlan
             cashOrPaymentPlanId={paymentPlan.id}
             canCreatePaymentVerificationPlan={
-              paymentPlan.can_create_payment_verification_plan
+              paymentPlan.canCreatePaymentVerificationPlan
             }
             version={paymentPlan.version}
             isPaymentPlan={true}
@@ -215,13 +216,13 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
       <Container>
         <VerificationPlansSummary planNode={paymentPlan} />
       </Container>
-      {paymentPlan.verification_plans?.edges?.length
-        ? paymentPlan.verification_plans.edges.map((edge) => (
+      {paymentPlan.paymentVerificationPlans?.length
+        ? paymentPlan.paymentVerificationPlans.map((plan) => (
             <VerificationPlanDetails
-              key={edge.node.id}
+              key={plan.id}
               samplingChoicesData={choicesData}
-              verificationPlan={edge.node}
-              planNode={paymentPlan}
+              verificationPlan={plan}
+              planNode={plan}
             />
           ))
         : null}
@@ -233,7 +234,7 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
             initialFilter={initialFilter}
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
-            verifications={paymentPlan.verification_plans}
+            verifications={paymentPlan.paymentVerificationPlans}
           />
           <TableWrapper>{renderVerificationsTable()}</TableWrapper>
         </>
@@ -248,7 +249,7 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
           {t('To see more details please create Verification Plan')}
         </BottomTitle>
       ) : null}
-      {paymentPlan.verification_plans?.[0]?.id &&
+      {paymentPlan.paymentVerificationPlans?.[0]?.id &&
         hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
           <UniversalActivityLogTablePaymentVerification
             objectId={paymentPlan.id}

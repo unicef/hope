@@ -6,10 +6,10 @@ import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { ReactElement } from 'react';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
 
 interface VerificationPlansSummaryProps {
-  planNode: PaymentPlanDetail;
+  planNode: PaymentVerificationPlanDetails;
 }
 
 export function VerificationPlansSummary({

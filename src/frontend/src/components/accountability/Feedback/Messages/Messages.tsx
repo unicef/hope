@@ -51,9 +51,9 @@ function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
   const { data: meData, isLoading: meLoading } = useQuery<Profile>({
     queryKey: ['profile', businessArea, programId],
     queryFn: () => {
-      return RestService.restUsersProfileRetrieve({
+      return RestService.restBusinessAreasUsersProfileRetrieve({
         businessAreaSlug: businessArea,
-        programSlug: programId,
+        program: programId,
       });
     },
   });

@@ -31,9 +31,9 @@ const GrievancesDetailsPage = (): ReactElement => {
     useQuery<Profile>({
       queryKey: ['profile', businessArea, programId],
       queryFn: () => {
-        return RestService.restUsersProfileRetrieve({
+        return RestService.restBusinessAreasUsersProfileRetrieve({
           businessAreaSlug: businessArea,
-          programSlug: programId === 'all' ? undefined : programId,
+          program: programId === 'all' ? undefined : programId,
         });
       },
     });

@@ -22,20 +22,19 @@ import { FinishVerificationPlan } from './FinishVerificationPlan';
 import { ImportXlsx } from './ImportXlsx';
 import { ReactElement } from 'react';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
 
 const StyledLink = styled.a`
   text-decoration: none;
 `;
 
 interface VerificationPlanActionsProps {
-  verificationPlan: PaymentPlanDetail['paymentVerificationPlans'][number];
-  samplingChoicesData: CashPlanVerificationSamplingChoicesQuery;
+  verificationPlan: PaymentVerificationPlanDetails['paymentVerificationPlans'][number];
   planNode: PaymentPlanDetail;
 }
 
 export function VerificationPlanActions({
   verificationPlan,
-  samplingChoicesData,
   planNode,
 }: VerificationPlanActionsProps): ReactElement {
   const { t } = useTranslation();
@@ -48,7 +47,7 @@ export function VerificationPlanActions({
   const [mutateInvalid, { loading: loadingInvalid }] =
     useInvalidPaymentVerificationPlanMutation();
 
-  if (!verificationPlan || !samplingChoicesData || !permissions) return null;
+  if (!verificationPlan || !permissions) return null;
 
   const isPending =
     verificationPlan.status === PaymentVerificationPlanStatus.Pending;

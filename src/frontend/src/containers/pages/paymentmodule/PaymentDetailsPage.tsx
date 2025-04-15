@@ -32,13 +32,7 @@ function PaymentDetailsPage(): ReactElement {
   const { businessArea, programId } = useBaseUrl();
 
   const { data: payment, isLoading: loading } = useQuery<PaymentDetail>({
-    queryKey: [
-      'paymentPlan',
-      businessArea,
-      paymentId,
-      programId,
-      paymentPlanId,
-    ],
+    queryKey: ['payment', businessArea, paymentId, programId, paymentPlanId],
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlansPaymentsRetrieve({
         businessAreaSlug: businessArea,

@@ -105,7 +105,7 @@ export function Entitlement({
   const { businessArea, programId } = useBaseUrl();
 
   const [steficonRuleValue, setSteficonRuleValue] = useState<string>(
-    paymentPlan.steficonRule?.id || '',
+    paymentPlan.steficonRule?.id ? String(paymentPlan.steficonRule.id) : '',
   );
   const options = {
     refetchQueries: () => [

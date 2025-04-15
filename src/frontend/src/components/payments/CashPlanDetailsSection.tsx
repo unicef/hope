@@ -9,7 +9,7 @@ import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
 
 const ChartContainer = styled.div`
   width: 100%;
@@ -23,7 +23,7 @@ const BorderLeftBox = styled.div`
 `;
 
 interface CashPlanDetailsSectionProps {
-  planNode: PaymentPlanDetail;
+  planNode: PaymentVerificationPlanDetails;
 }
 
 export function CashPlanDetailsSection({
@@ -54,8 +54,8 @@ export function CashPlanDetailsSection({
               {
                 label: t('PROGRAMME NAME'),
                 value: (
-                  <BlackLink to={`/${baseUrl}/details/${planNode.program.id}`}>
-                    {planNode.program.name}
+                  <BlackLink to={`/${baseUrl}/details/${planNode.programId}`}>
+                    {planNode.programName}
                   </BlackLink>
                 ),
               },
@@ -65,11 +65,19 @@ export function CashPlanDetailsSection({
               },
               {
                 label: t('START DATE'),
-                value: <UniversalMoment>{planNode.startDate}</UniversalMoment>,
+                value: (
+                  <UniversalMoment>
+                    {planNode.programCycleStartDate}
+                  </UniversalMoment>
+                ),
               },
               {
                 label: t('END DATE'),
-                value: <UniversalMoment>{planNode.endDate}</UniversalMoment>,
+                value: (
+                  <UniversalMoment>
+                    {planNode.programCycleEndDate}
+                  </UniversalMoment>
+                ),
               },
             ].map((el) => (
               <Grid size={{ xs: 3 }} key={el.label}>

@@ -69,9 +69,9 @@ export const AppBar = ({ open, handleDrawerOpen }): ReactElement => {
   const { data: meData } = useQuery<Profile>({
     queryKey: ['profile', businessArea, programId],
     queryFn: () => {
-      return RestService.restUsersProfileRetrieve({
+      return RestService.restBusinessAreasUsersProfileRetrieve({
         businessAreaSlug: businessArea,
-        programSlug: programId === 'all' ? undefined : programId,
+        program: programId === 'all' ? undefined : programId,
       });
     },
   });

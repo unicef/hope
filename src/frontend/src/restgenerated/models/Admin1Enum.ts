@@ -14,13 +14,13 @@
  * * `AF69` - Williamside
  */
 export enum Admin1Enum {
-    AF45 = 'AF45',
-    UA71 = 'UA71',
-    AF57 = 'AF57',
-    HR31 = 'HR31',
-    HR85 = 'HR85',
-    UA20 = 'UA20',
-    UA17 = 'UA17',
-    HR93 = 'HR93',
-    AF69 = 'AF69',
+  AF45 = 'AF45',
+  UA71 = 'UA71',
+  AF57 = 'AF57',
+  HR31 = 'HR31',
+  HR85 = 'HR85',
+  UA20 = 'UA20',
+  UA17 = 'UA17',
+  HR93 = 'HR93',
+  AF69 = 'AF69',
 }

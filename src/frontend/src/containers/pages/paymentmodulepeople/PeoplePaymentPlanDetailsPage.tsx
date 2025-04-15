@@ -78,7 +78,6 @@ export const PeoplePaymentPlanDetailsPage = (): ReactElement => {
 
   const shouldDisplayFundsCommitment = status === PaymentPlanStatus.InReview;
 
-  const { paymentPlan } = data;
   if (!paymentPlan) return null;
 
   return (

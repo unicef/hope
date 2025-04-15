@@ -1,8 +1,7 @@
 import { Box, Grid2 as Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { CashPlanVerificationSamplingChoicesQuery } from '@generated/graphql';
-import { choicesToDict, paymentVerificationStatusToColor } from '@utils/utils';
+import { paymentVerificationStatusToColor } from '@utils/utils';
 import { LabelizedField } from '@core/LabelizedField';
 import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
@@ -12,6 +11,7 @@ import { VerificationPlanDetailsChart } from './VerificationPlanChart';
 import { AdminButton } from '@core/AdminButton';
 import { ReactElement } from 'react';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
 
 const Container = styled.div`
   display: flex;
@@ -27,21 +27,16 @@ const Container = styled.div`
 `;
 
 interface VerificationPlanDetailsProps {
-  verificationPlan: PaymentPlanDetail['paymentVerificationPlans'][number];
-  samplingChoicesData: CashPlanVerificationSamplingChoicesQuery;
+  verificationPlan: PaymentVerificationPlanDetails['paymentVerificationPlans'][number];
   planNode: PaymentPlanDetail;
 }
 
 export function VerificationPlanDetails({
   verificationPlan,
-  samplingChoicesData,
   planNode,
 }: VerificationPlanDetailsProps): ReactElement {
   const { t } = useTranslation();
 
-  const samplingChoicesDict = choicesToDict(
-    samplingChoicesData.cashPlanVerificationSamplingChoices,
-  );
   return (
     <Container>
       <Box display="flex" alignItems="center" justifyContent="space-between">
@@ -56,7 +51,6 @@ export function VerificationPlanDetails({
         </Title>
         <VerificationPlanActions
           verificationPlan={verificationPlan}
-          samplingChoicesData={samplingChoicesData}
           planNode={planNode}
         />
       </Box>
@@ -75,7 +69,7 @@ export function VerificationPlanDetails({
             {[
               {
                 label: t('SAMPLING'),
-                value: samplingChoicesDict[verificationPlan.sampling],
+                value: verificationPlan.sampling,
               },
               {
                 label: t('RESPONDED'),

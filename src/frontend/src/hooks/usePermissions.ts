@@ -12,13 +12,13 @@ export function usePermissions(): string[] {
   } = useQuery<Profile>({
     queryKey: ['profile', businessArea, programId],
     queryFn: () => {
-      const params: { businessAreaSlug: string; programSlug?: string } = {
+      const params: { businessAreaSlug: string; program?: string } = {
         businessAreaSlug: businessArea,
       };
       if (programId !== 'all') {
-        params.programSlug = programId;
+        params.program = programId;
       }
-      return RestService.restUsersProfileRetrieve(params);
+      return RestService.restBusinessAreasUsersProfileRetrieve(params);
     },
   });
 
