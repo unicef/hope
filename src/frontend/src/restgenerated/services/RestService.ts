@@ -3338,25 +3338,25 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentVerificationsVerificationsRetrieve2({
         businessAreaSlug,
         id,
+        paymentId,
         programSlug,
-        verificationId,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Payment Plan.
          */
         id: string,
+        paymentId: string,
         programSlug: string,
-        verificationId: string,
     }): CancelablePromise<PaymentPlan> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/verifications/{verification_id}/',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/verifications/{payment_id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
+                'payment_id': paymentId,
                 'program_slug': programSlug,
-                'verification_id': verificationId,
             },
         });
     }

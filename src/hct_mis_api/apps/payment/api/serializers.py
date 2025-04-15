@@ -241,6 +241,8 @@ class PaymentVerificationPlanDetailsSerializer(serializers.ModelSerializer):
             "can_create_payment_verification_plan",
             "payment_verification_plans",
             "payment_verification_summary",
+            "is_follow_up",
+            "version",
         )
 
     # TODO:
@@ -984,7 +986,6 @@ class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
 
 class VerificationDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
     status = serializers.CharField(source="get_status_display")
-    payment = PaymentDetailSerializer()
     payment_verification_plan = PaymentVerificationPlanSerializer()
 
     class Meta:

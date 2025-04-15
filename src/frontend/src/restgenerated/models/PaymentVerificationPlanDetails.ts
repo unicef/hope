@@ -18,5 +18,13 @@ export type PaymentVerificationPlanDetails = {
     canCreatePaymentVerificationPlan: boolean;
     paymentVerificationPlans: Array<PaymentVerificationPlan>;
     paymentVerificationSummary: PaymentVerificationSummary;
+    /**
+     * Follow Up Payment Plan flag [sys]
+     */
+    isFollowUp?: boolean;
+    /**
+     * record revision number
+     */
+    version?: number;
 };
 
