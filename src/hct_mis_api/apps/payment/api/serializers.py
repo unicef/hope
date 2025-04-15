@@ -1067,6 +1067,23 @@ class PaymentVerificationPlanCreateSerializer(serializers.Serializer):
     rapid_pro_arguments = RapidProSerializer()
 
 
+class PaymentVerificationPlanActivateSerializer(serializers.Serializer):
+    payment_verification_plan_id = serializers.CharField(required=True)
+    version = serializers.CharField(required=False)
+
+
+class PaymentVerificationPlanImportSerializer(serializers.Serializer):
+    payment_verification_plan_id = serializers.CharField(required=True)
+    file = serializers.FileField(use_url=False, required=True)
+
+
+class PaymentVerificationUpdateSerializer(serializers.Serializer):
+    payment_verification_id = serializers.CharField(required=True)
+    received_amount = serializers.FloatField(required=False)
+    received = serializers.BooleanField(required=True)
+    version = serializers.CharField(required=False)
+
+
 class TPHouseholdListSerializer(serializers.ModelSerializer):
     household_unicef_id = serializers.CharField(source="household.unicef_id")
     hoh_full_name = serializers.SerializerMethodField()

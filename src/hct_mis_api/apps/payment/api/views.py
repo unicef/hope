@@ -59,9 +59,12 @@ from hct_mis_api.apps.payment.api.serializers import (
     PaymentPlanListSerializer,
     PaymentPlanSerializer,
     PaymentPlanSupportingDocumentSerializer,
+    PaymentVerificationPlanActivateSerializer,
     PaymentVerificationPlanCreateSerializer,
     PaymentVerificationPlanDetailsSerializer,
+    PaymentVerificationPlanImportSerializer,
     PaymentVerificationPlanListSerializer,
+    PaymentVerificationUpdateSerializer,
     RevertMarkPaymentAsFailedSerializer,
     SplitPaymentPlanSerializer,
     TargetPopulationApplyEngineFormulaSerializer,
@@ -69,10 +72,10 @@ from hct_mis_api.apps.payment.api.serializers import (
     TargetPopulationCreateSerializer,
     TargetPopulationDetailSerializer,
     TPHouseholdListSerializer,
-    VerificationDetailSerializer,
     XlsxErrorSerializer,
 )
 from hct_mis_api.apps.payment.celery_tasks import (
+    create_payment_verification_plan_xlsx,
     export_pdf_payment_plan_summary,
     import_payment_plan_payment_list_from_xlsx,
     payment_plan_apply_engine_rule,
@@ -97,11 +100,18 @@ from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanS
 from hct_mis_api.apps.payment.services.verification_plan_crud_services import (
     VerificationPlanCrudServices,
 )
+from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
+    VerificationPlanStatusChangeServices,
+)
+from hct_mis_api.apps.payment.utils import calculate_counts, from_received_to_status
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_import_service import (
     XlsxPaymentPlanImportService,
 )
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
+)
+from hct_mis_api.apps.payment.xlsx.xlsx_verification_import_service import (
+    XlsxVerificationImportService,
 )
 from hct_mis_api.apps.program.models import ProgramCycle
 from hct_mis_api.apps.steficon.models import Rule
@@ -143,18 +153,30 @@ class PaymentVerificationViewSet(
         "list": PaymentVerificationPlanListSerializer,
         "retrieve": PaymentVerificationPlanDetailsSerializer,
         "create_payment_verification_plan": PaymentVerificationPlanCreateSerializer,
-        # "update": "",
-        # "activate": "",
-        # "finish": "",
-        # DiscardPaymentVerificationPlan
-        # InvalidPaymentVerificationPlan
-        # DeletePaymentVerificationPlan
+        "update_payment_verification_plan": PaymentVerificationPlanCreateSerializer,
+        "activate_payment_verification_plan": PaymentVerificationPlanActivateSerializer,
+        "finish_payment_verification_plan": PaymentVerificationPlanActivateSerializer,
+        "discard_payment_verification_plan": PaymentVerificationPlanActivateSerializer,
+        "invalid_payment_verification_plan": PaymentVerificationPlanActivateSerializer,
+        "delete_payment_verification_plan": PaymentVerificationPlanActivateSerializer,
+        "export_xlsx_payment_verification_plan": PaymentVerificationPlanDetailsSerializer,
+        "import_xlsx_payment_verification_plan": PaymentVerificationPlanImportSerializer,
         "verifications": PaymentListSerializer,
+        "verifications_update": PaymentVerificationUpdateSerializer,
     }
     permissions_by_action = {
         "list": [Permissions.PAYMENT_VERIFICATION_VIEW_LIST],
         "retrieve": [Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS],
         "create_payment_verification_plan": [Permissions.PAYMENT_VERIFICATION_CREATE],
+        "update_payment_verification_plan": [Permissions.PAYMENT_VERIFICATION_UPDATE],
+        "activate_payment_verification_plan": [Permissions.PAYMENT_VERIFICATION_ACTIVATE],
+        "finish_payment_verification_plan": [Permissions.PAYMENT_VERIFICATION_FINISH],
+        "discard_payment_verification_plan": [Permissions.PAYMENT_VERIFICATION_DISCARD],
+        "invalid_payment_verification_plan": [Permissions.PAYMENT_VERIFICATION_INVALID],
+        "delete_payment_verification_plan": [Permissions.PAYMENT_VERIFICATION_DELETE],
+        "export_xlsx_payment_verification_plan": [Permissions.PAYMENT_VERIFICATION_EXPORT],
+        "import_xlsx_payment_verification_plan": [Permissions.PAYMENT_VERIFICATION_IMPORT],
+        "verifications_update": [Permissions.PAYMENT_VERIFICATION_VERIFY],
     }
 
     def get_object(self) -> PaymentPlan:
@@ -187,7 +209,7 @@ class PaymentVerificationViewSet(
         payment_plan.refresh_from_db()
         return Response(
             data=PaymentVerificationPlanDetailsSerializer(payment_plan).data,
-            status=status.HTTP_200_OK,
+            status=status.HTTP_201_CREATED,
         )
 
     @extend_schema(
@@ -215,7 +237,206 @@ class PaymentVerificationViewSet(
         payment_plan.refresh_from_db()
         return Response(
             data=PaymentVerificationPlanDetailsSerializer(payment_plan).data,
-            status=status.HTTP_200_OK,
+            status=status.HTTP_201_CREATED,
+        )
+
+    # @extend_schema(
+    #     request=PaymentVerificationPlanCreateSerializer, responses={201: PaymentVerificationPlanDetailsSerializer}
+    # )
+    @action(detail=True, methods=["post"], url_path="activate-verification-plan/(?P<verification_plan_id>[^/.]+)")
+    def activate_payment_verification_plan(
+        self, request: Request, verification_plan_id: str, *args: Any, **kwargs: Any
+    ) -> Response:
+        payment_plan = self.get_object()
+        payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=verification_plan_id)
+        check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification_plan)
+
+        old_payment_verification_plan = copy_model_object(payment_verification_plan)
+
+        payment_verification_plan = VerificationPlanStatusChangeServices(payment_verification_plan).activate()
+        log_create(
+            PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            request.user,
+            getattr(payment_verification_plan.get_program, "pk", None),
+            old_payment_verification_plan,
+            payment_verification_plan,
+        )
+        return Response(
+            data=PaymentVerificationPlanDetailsSerializer(payment_plan).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+    # @extend_schema(
+    #     request=PaymentVerificationPlanCreateSerializer, responses={201: PaymentVerificationPlanDetailsSerializer}
+    # )
+    @action(detail=True, methods=["post"], url_path="finish-verification-plan/(?P<verification_plan_id>[^/.]+)")
+    def finish_payment_verification_plan(
+        self, request: Request, verification_plan_id: str, *args: Any, **kwargs: Any
+    ) -> Response:
+        payment_plan = self.get_object()
+        payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=verification_plan_id)
+        check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification_plan)
+        old_payment_verification_plan = copy_model_object(payment_verification_plan)
+
+        if payment_verification_plan.status != PaymentVerificationPlan.STATUS_ACTIVE:
+            raise ValidationError("You can finish only ACTIVE verification")
+        VerificationPlanStatusChangeServices(payment_verification_plan).finish()
+        payment_verification_plan.refresh_from_db()
+        log_create(
+            PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            request.user,
+            getattr(payment_verification_plan.get_program, "pk", None),
+            old_payment_verification_plan,
+            payment_verification_plan,
+        )
+        return Response(
+            data=PaymentVerificationPlanDetailsSerializer(payment_plan).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+    # @extend_schema(
+    #     request=PaymentVerificationPlanCreateSerializer, responses={201: PaymentVerificationPlanDetailsSerializer}
+    # )
+    @action(detail=True, methods=["post"], url_path="discard-verification-plan/(?P<verification_plan_id>[^/.]+)")
+    def discard_payment_verification_plan(
+        self, request: Request, verification_plan_id: str, *args: Any, **kwargs: Any
+    ) -> Response:
+        payment_plan = self.get_object()
+        payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=verification_plan_id)
+        check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification_plan)
+
+        old_payment_verification_plan = copy_model_object(payment_verification_plan)
+
+        payment_verification_plan = VerificationPlanStatusChangeServices(payment_verification_plan).discard()
+        log_create(
+            PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            request.user,
+            getattr(payment_verification_plan.get_program, "pk", None),
+            old_payment_verification_plan,
+            payment_verification_plan,
+        )
+        return Response(
+            data=PaymentVerificationPlanDetailsSerializer(payment_plan).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+    # @extend_schema(
+    #     request=PaymentVerificationPlanCreateSerializer, responses={201: PaymentVerificationPlanDetailsSerializer}
+    # )
+    @action(detail=True, methods=["post"], url_path="invalid-verification-plan/(?P<verification_plan_id>[^/.]+)")
+    def invalid_payment_verification_plan(
+        self, request: Request, verification_plan_id: str, *args: Any, **kwargs: Any
+    ) -> Response:
+        payment_plan = self.get_object()
+        payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=verification_plan_id)
+        # serializer
+        check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification_plan)
+        old_payment_verification_plan = copy_model_object(payment_verification_plan)
+
+        payment_verification_plan = VerificationPlanStatusChangeServices(payment_verification_plan).mark_invalid()
+        log_create(
+            PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            request.user,
+            getattr(payment_verification_plan.get_program, "pk", None),
+            old_payment_verification_plan,
+            payment_verification_plan,
+        )
+        return Response(
+            data=PaymentVerificationPlanDetailsSerializer(payment_plan).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+    # @extend_schema(
+    #     request=PaymentVerificationPlanCreateSerializer, responses={201: PaymentVerificationPlanDetailsSerializer}
+    # )
+    @action(detail=True, methods=["post"], url_path="delete-verification-plan/(?P<verification_plan_id>[^/.]+)")
+    def delete_payment_verification_plan(
+        self, request: Request, verification_plan_id: str, *args: Any, **kwargs: Any
+    ) -> Response:
+        payment_plan = self.get_object()
+        payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=verification_plan_id)
+        # serializer
+        program_id = getattr(payment_verification_plan.get_program, "pk", None)
+
+        check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification_plan)
+
+        old_payment_verification_plan = copy_model_object(payment_verification_plan)
+
+        VerificationPlanCrudServices.delete(payment_verification_plan)
+        log_create(
+            PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            request.user,
+            program_id,
+            old_payment_verification_plan,
+            None,
+        )
+        return Response(
+            data=PaymentVerificationPlanDetailsSerializer(payment_plan).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+    @action(detail=True, methods=["get"], url_path="export-xlsx/(?P<verification_plan_id>[^/.]+)")
+    def export_xlsx_payment_verification_plan(
+        self, request: Request, verification_plan_id: str, *args: Any, **kwargs: Any
+    ) -> Response:
+        payment_plan = self.get_object()
+        payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=verification_plan_id)
+        # serializer
+        if payment_verification_plan.status != PaymentVerificationPlan.STATUS_ACTIVE:
+            raise ValidationError("You can only export verification for active CashPlan verification")
+        if payment_verification_plan.verification_channel != PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX:
+            raise ValidationError("You can only export verification when XLSX channel is selected")
+        if payment_verification_plan.xlsx_file_exporting:
+            raise ValidationError("Exporting xlsx file is already started. Please wait")
+        if payment_verification_plan.has_xlsx_payment_verification_plan_file:
+            raise ValidationError("Xlsx file is already created")
+
+        payment_verification_plan.xlsx_file_exporting = True
+        payment_verification_plan.save()
+        create_payment_verification_plan_xlsx.delay(verification_plan_id, request.user.pk)
+        return Response(
+            data=PaymentVerificationPlanDetailsSerializer(payment_plan).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+    # @extend_schema(
+    #     request=PaymentVerificationPlanCreateSerializer, responses={201: PaymentVerificationPlanDetailsSerializer}
+    # )
+    @action(detail=True, methods=["post"], url_path="import-xlsx/(?P<verification_plan_id>[^/.]+)")
+    def import_xlsx_payment_verification_plan(
+        self, request: Request, verification_plan_id: str, *args: Any, **kwargs: Any
+    ) -> Response:
+        payment_plan = self.get_object()
+        payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=verification_plan_id)
+
+        # payment_plan = graphene.Field(GenericPaymentPlanNode)
+        #     errors = graphene.List(XlsxErrorNode)
+        # serializer
+        file = ""  # get from serializer
+        if payment_verification_plan.status != PaymentVerificationPlan.STATUS_ACTIVE:
+            raise ValidationError("You can only import verification for active CashPlan verification")
+        if payment_verification_plan.verification_channel != PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX:
+            raise ValidationError("You can only import verification when XLSX channel is selected")
+        import_service = XlsxVerificationImportService(payment_verification_plan, file)
+        import_service.open_workbook()
+        import_service.validate()
+        if len(import_service.errors):
+            # add new serializer
+            return Response(import_service.errors, status=status.HTTP_400_BAD_REQUEST)
+            # return ImportXlsxPaymentVerificationPlanFile(None, import_service.errors)
+        import_service.import_verifications()
+        calculate_counts(payment_verification_plan)
+        payment_verification_plan.xlsx_file_imported = True
+        payment_verification_plan.save()
+        # return ImportXlsxPaymentVerificationPlanFile(payment_verification_plan.payment_plan, import_service.errors)
+        return Response(
+            data=PaymentVerificationPlanDetailsSerializer(payment_plan).data,
+            status=status.HTTP_201_CREATED,
         )
 
     # verification
@@ -238,6 +459,62 @@ class PaymentVerificationViewSet(
     def verification_details(self, request: Request, verification_id: str, *args: Any, **kwargs: Any) -> Response:
         payment = get_object_or_404(Payment, id=verification_id)
         serializer = PaymentDetailSerializer(payment, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="verifications/(?P<payment_id>[^/.]+)",
+        PERMISSIONS=[Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS],
+    )
+    def verifications_update(self, request: Request, verification_id: str, *args: Any, **kwargs: Any) -> Response:
+        # payment = get_object_or_404(Payment, id=verification_id)
+        payment_verification = get_object_or_404(PaymentVerification, id=verification_id)
+        check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification)
+        serializer = self.get_serializer()
+        received_amount = ""
+        received = ""
+        old_payment_verification = copy_model_object(payment_verification)
+        if (
+            payment_verification.payment_verification_plan.verification_channel
+            != PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
+        ):
+            raise ValidationError("You can only update status of payment verification for MANUAL verification method")
+        if payment_verification.payment_verification_plan.status != PaymentVerificationPlan.STATUS_ACTIVE:
+            logger.warning(
+                f"You can only update status of payment verification for {PaymentVerificationPlan.STATUS_ACTIVE} cash plan verification"
+            )
+            raise ValidationError(
+                f"You can only update status of payment verification for {PaymentVerificationPlan.STATUS_ACTIVE} cash plan verification"
+            )
+        if not payment_verification.is_manually_editable:
+            raise ValidationError("You can only edit payment verification in first 10 minutes")
+        delivered_amount = payment_verification.payment.delivered_quantity
+
+        if received is None and received_amount is not None and received_amount == 0:
+            raise ValidationError("You can't set received_amount {received_amount} and not set received to NO")
+        if received is None and received_amount is not None:
+            raise ValidationError("You can't set received_amount {received_amount} and not set received to YES")
+        elif received_amount == 0 and received:
+            raise ValidationError("If 'Amount Received' equals to 0, please set status as 'Not Received'")
+        elif received_amount is not None and received_amount != 0 and not received:
+            raise ValidationError(f"If received_amount({received_amount}) is not 0, you should set received to YES")
+
+        payment_verification.status = from_received_to_status(received, received_amount, delivered_amount)
+        payment_verification.status_date = timezone.now()
+        payment_verification.received_amount = received_amount
+        payment_verification.save()
+        payment_verification_plan = payment_verification.payment_verification_plan
+        calculate_counts(payment_verification_plan)
+        payment_verification_plan.save()
+        log_create(
+            PaymentVerification.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            request.user,
+            getattr(payment_verification_plan.get_program, "pk", None),
+            old_payment_verification,
+            payment_verification,
+        )
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
