@@ -1899,6 +1899,18 @@ class FinancialInstitution(TimeStampedUUIDModel):
     country = models.ForeignKey(Country, on_delete=models.PROTECT)
 
 
+class FinancialInstitutionMapping(TimeStampedUUIDModel):
+    financial_service_provider = models.ForeignKey(FinancialServiceProvider, on_delete=models.CASCADE)
+    financial_institution = models.ForeignKey(FinancialInstitution, on_delete=models.CASCADE)
+    code = models.CharField(max_length=30)
+
+    class Meta:
+        unique_together = ("financial_service_provider", "financial_institution")
+
+    def __str__(self):
+        return f"{self.financial_institution} to {self.financial_service_provider}: {self.code}"
+
+
 class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
     ACCOUNT_FIELD_PREFIX = "account__"
 
