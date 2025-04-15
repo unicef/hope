@@ -3,7 +3,6 @@ import { GetApp } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
-  CashPlanVerificationSamplingChoicesQuery,
   PaymentVerificationPlanStatus,
   PaymentVerificationPlanVerificationChannel,
   useExportXlsxPaymentVerificationPlanFileMutation,
@@ -21,8 +20,8 @@ import { EditVerificationPlan } from './EditVerificationPlan';
 import { FinishVerificationPlan } from './FinishVerificationPlan';
 import { ImportXlsx } from './ImportXlsx';
 import { ReactElement } from 'react';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
+import { PaymentVerificationPlan } from '@restgenerated/models/PaymentVerificationPlan';
 
 const StyledLink = styled.a`
   text-decoration: none;
@@ -30,7 +29,7 @@ const StyledLink = styled.a`
 
 interface VerificationPlanActionsProps {
   verificationPlan: PaymentVerificationPlanDetails['paymentVerificationPlans'][number];
-  planNode: PaymentPlanDetail;
+  planNode: PaymentVerificationPlan;
 }
 
 export function VerificationPlanActions({
@@ -110,7 +109,6 @@ export function VerificationPlanActions({
               <EditVerificationPlan
                 paymentVerificationPlanNode={verificationPlan}
                 cashOrPaymentPlanId={planNode.id}
-                isPaymentPlan={planNode.__typename === 'PaymentPlanNode'}
               />
             )}
             {canActivate && (

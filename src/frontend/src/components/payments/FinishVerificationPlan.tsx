@@ -16,10 +16,10 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { getPercentage } from '@utils/utils';
 import { useFinishPaymentVerificationPlanMutation } from '@generated/graphql';
 import { useProgramContext } from '../../programContext';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
 
 export interface FinishVerificationPlanProps {
-  verificationPlan: PaymentPlanDetail['paymentVerificationPlans'][number];
+  verificationPlan: PaymentVerificationPlanDetails['paymentVerificationPlans'][number];
 }
 
 export function FinishVerificationPlan({

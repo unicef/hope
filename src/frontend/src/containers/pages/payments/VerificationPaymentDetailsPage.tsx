@@ -2,7 +2,6 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import {
   PaymentVerificationPlanStatus,
-  usePaymentQuery,
   usePaymentVerificationChoicesQuery,
 } from '@generated/graphql';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
@@ -34,9 +33,9 @@ function VerificationPaymentDetailsPage(): ReactElement {
       RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsRetrieve2(
         {
           businessAreaSlug: businessArea,
+          id: paymentPlanId,
           paymentId: paymentId,
           programSlug: programId,
-          paymentPlanId,
         },
       ),
   });

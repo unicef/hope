@@ -38,8 +38,13 @@ const EditTargetPopulation = ({
 }: EditTargetPopulationProps): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+
   const targetingCriteriaCopy =
-    paymentPlan.targetingCriteria?.rules.map((rule) => ({ ...rule })) || [];
+    paymentPlan.targetingCriteria?.rules.map((rule) => ({
+      ...rule,
+      fsp: undefined,
+      deliveryMechanism: undefined,
+    })) || [];
 
   if (targetingCriteriaCopy.length > 0) {
     targetingCriteriaCopy[0].deliveryMechanism =

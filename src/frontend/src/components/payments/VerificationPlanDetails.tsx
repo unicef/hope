@@ -1,17 +1,17 @@
-import { Box, Grid2 as Grid, Typography } from '@mui/material';
-import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import { paymentVerificationStatusToColor } from '@utils/utils';
+import { AdminButton } from '@core/AdminButton';
 import { LabelizedField } from '@core/LabelizedField';
 import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
+import { Box, Grid2 as Grid, Typography } from '@mui/material';
+import { PaymentVerificationPlan } from '@restgenerated/models/PaymentVerificationPlan';
+import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
+import { paymentVerificationStatusToColor } from '@utils/utils';
+import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { VerificationPlanActions } from './VerificationPlanActions';
 import { VerificationPlanDetailsChart } from './VerificationPlanChart';
-import { AdminButton } from '@core/AdminButton';
-import { ReactElement } from 'react';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
-import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
 
 const Container = styled.div`
   display: flex;
@@ -28,7 +28,7 @@ const Container = styled.div`
 
 interface VerificationPlanDetailsProps {
   verificationPlan: PaymentVerificationPlanDetails['paymentVerificationPlans'][number];
-  planNode: PaymentPlanDetail;
+  planNode: PaymentVerificationPlan;
 }
 
 export function VerificationPlanDetails({

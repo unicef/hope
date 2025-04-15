@@ -85,7 +85,7 @@ const UpdateProgramCycle = ({
   } = {
     id: programCycle.id,
     title: programCycle.title,
-    startDate: programCycle.startDate,
+    startDate: programCycle.start_date,
     end_date: undefined,
   };
 
@@ -111,7 +111,7 @@ const UpdateProgramCycle = ({
     try {
       await mutateAsync({
         title: programCycle.title,
-        startDate: programCycle.startDate,
+        start_date: programCycle.start_date,
         end_date: values.endDate,
       });
       showMessage(t('Programme Cycle Updated'));

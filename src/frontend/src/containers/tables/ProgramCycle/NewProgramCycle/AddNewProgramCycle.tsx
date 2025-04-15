@@ -1,3 +1,4 @@
+import { ProgramCycle } from '@api/programCycleApi';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import CreateProgramCycle from '@containers/tables/ProgramCycle/NewProgramCycle/CreateProgramCycle';
 import UpdateProgramCycle from '@containers/tables/ProgramCycle/NewProgramCycle/UpdateProgramCycle';
@@ -11,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 
 interface AddNewProgramCycleProps {
   program: ProgramDetail;
-  lastProgramCycle?: ProgramCycleDetail;
+  lastProgramCycle?: ProgramCycle;
 }
 
 const AddNewProgramCycle = ({
@@ -42,7 +43,7 @@ const AddNewProgramCycle = ({
   };
 
   const stepsToRender = [];
-  if (lastProgramCycle.endDate) {
+  if (lastProgramCycle.end_date) {
     stepsToRender.push(
       <CreateProgramCycle
         program={program}

@@ -40,6 +40,7 @@ import { LoadingButton } from '@core/LoadingButton';
 import { TabPanel } from '@core/TabPanel';
 import { RapidProFlowsLoader } from './RapidProFlowsLoader';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
 
 const StyledTabs = styled(Tabs)`
   && {
@@ -110,15 +111,13 @@ function prepareVariables(
 }
 
 export interface Props {
-  paymentVerificationPlanNode: PaymentPlanDetail['paymentVerificationPlans'][number];
+  paymentVerificationPlanNode: PaymentVerificationPlanDetails['paymentVerificationPlans'][number];
   cashOrPaymentPlanId: string;
-  isPaymentPlan: boolean;
 }
 
 export const EditVerificationPlan = ({
   paymentVerificationPlanNode,
   cashOrPaymentPlanId,
-  isPaymentPlan,
 }: Props): ReactElement => {
   const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { t } = useTranslation();
@@ -256,7 +255,7 @@ export const EditVerificationPlan = ({
                 'RapidPro is not set up in your country, please contact your Roll Out Focal Point',
               ),
 
-              lastSuccessfulPage: `/${baseUrl}/payment-verification/${isPaymentPlan ? 'payment-plan' : 'cash-plan'}/${cashOrPaymentPlanId}`,
+              lastSuccessfulPage: `/${baseUrl}/payment-verification/payment-plan/${cashOrPaymentPlanId}`,
             },
           });
         }
