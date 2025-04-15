@@ -1008,13 +1008,16 @@ class TestAccountModelUniqueField(TransactionTestCase):
         self.ind.save()
         self.ind2.household = self.hh
         self.ind2.save()
-
-        account_type_bank = AccountType.objects.get(key="bank")
-        account_type_bank.unique_fields = [
-            "seeing_disability",
-            "name_of_cardholder__atm_card",
-        ]
-        account_type_bank.save()
+        account_type_bank = AccountType.objects.create(
+            key="bank",
+            label="Bank",
+            unique_fields=[
+                "number",
+                "seeing_disability",
+                "name_of_cardholder__atm_card",
+            ],
+            payment_gateway_id="123",
+        )
 
         dmd_1 = AccountFactory(
             data={"name_of_cardholder__atm_card": "test"}, individual=self.ind, account_type=account_type_bank
