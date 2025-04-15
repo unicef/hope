@@ -89,16 +89,16 @@ class TestBusinessAreaList:
         response_data = response.json()["results"]
         assert len(response_data) == 5
         business_area_ids = {ba["id"] for ba in response_data}
-        assert self.afghanistan.id in business_area_ids
-        assert self.ukraine.id in business_area_ids
-        assert self.syria.id in business_area_ids
-        assert self.croatia.id in business_area_ids
-        assert self.somalia.id in business_area_ids
-        assert self.sudan.id not in business_area_ids
+        assert str(self.afghanistan.id) in business_area_ids
+        assert str(self.ukraine.id) in business_area_ids
+        assert str(self.syria.id) in business_area_ids
+        assert str(self.croatia.id) in business_area_ids
+        assert str(self.somalia.id) in business_area_ids
+        assert str(self.sudan.id) not in business_area_ids
 
         available_business_areas = BusinessArea.objects.filter(id__in=business_area_ids).order_by("id")
         for i, business_area in enumerate(available_business_areas):
-            assert response_data[i]["id"] == business_area.id
+            assert response_data[i]["id"] == str(business_area.id)
             assert response_data[i]["name"] == business_area.name
             assert response_data[i]["code"] == business_area.code
             assert response_data[i]["long_name"] == business_area.long_name
@@ -123,7 +123,7 @@ class TestBusinessAreaList:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 5
-            assert len(ctx.captured_queries) == 10
+            assert len(ctx.captured_queries) == 6
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
@@ -132,7 +132,7 @@ class TestBusinessAreaList:
             assert response.has_header("etag")
             etag_second_call = response.headers["etag"]
             assert etag == etag_second_call
-            assert len(ctx.captured_queries) == 10
+            assert len(ctx.captured_queries) == 4
 
         self.afghanistan.active = False
         self.afghanistan.save()
@@ -144,7 +144,7 @@ class TestBusinessAreaList:
             assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
             assert etag_third_call not in [etag, etag_second_call]
             # 4 queries are saved because of cached permissions calculations
-            assert len(ctx.captured_queries) == 18
+            assert len(ctx.captured_queries) == 6
 
         create_user_role_with_permissions(
             self.user,
@@ -160,7 +160,7 @@ class TestBusinessAreaList:
             assert json.loads(cache.get(etag_fourth_call)[0].decode("utf8")) == response.json()
             assert etag_fourth_call not in [etag, etag_second_call, etag_third_call]
             assert len(response.json()["results"]) == 6
-            assert len(ctx.captured_queries) == 18
+            assert len(ctx.captured_queries) == 4
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
@@ -169,7 +169,7 @@ class TestBusinessAreaList:
             assert response.has_header("etag")
             etag_fifth_call = response.headers["etag"]
             assert etag_fifth_call == etag_fourth_call
-            assert len(ctx.captured_queries) == 10
+            assert len(ctx.captured_queries) == 4
 
 
 class TestBusinessAreaDetail:
@@ -194,7 +194,7 @@ class TestBusinessAreaDetail:
     def test_business_area_detail(
         self,
     ) -> None:
-        response = self.client.get(reverse(self.detail_url_name, kwargs={"business_area_slug": self.afghanistan.slug}))
+        response = self.client.get(reverse(self.detail_url_name, kwargs={"pk": str(self.afghanistan.id)}))
         assert response.status_code == status.HTTP_200_OK
 
         response_data = response.json()
@@ -272,21 +272,21 @@ class TestBusinessAreaFilter:
         response_data_active = response_active.json()["results"]
         assert len(response_data_active) == 4
         business_area_ids = {ba["id"] for ba in response_data_active}
-        assert self.afghanistan.id in business_area_ids
-        assert self.ukraine.id in business_area_ids
-        assert self.syria.id in business_area_ids
-        assert self.croatia.id in business_area_ids
-        assert self.sudan.id not in business_area_ids
-        assert self.somalia.id not in business_area_ids
+        assert str(self.afghanistan.id) in business_area_ids
+        assert str(self.ukraine.id) in business_area_ids
+        assert str(self.syria.id) in business_area_ids
+        assert str(self.croatia.id) in business_area_ids
+        assert str(self.sudan.id) not in business_area_ids
+        assert str(self.somalia.id) not in business_area_ids
 
         response_inactive = self.client.get(self.list_url, {"active": False})
         assert response_inactive.status_code == status.HTTP_200_OK
         response_data_inactive = response_inactive.json()["results"]
         assert len(response_data_inactive) == 2
         business_area_ids = {ba["id"] for ba in response_data_inactive}
-        assert self.somalia.id in business_area_ids
-        assert self.afghanistan.id not in business_area_ids
-        assert self.ukraine.id not in business_area_ids
-        assert self.syria.id not in business_area_ids
-        assert self.croatia.id not in business_area_ids
-        assert self.sudan.id not in business_area_ids
+        assert str(self.somalia.id) in business_area_ids
+        assert str(self.afghanistan.id) not in business_area_ids
+        assert str(self.ukraine.id) not in business_area_ids
+        assert str(self.syria.id) not in business_area_ids
+        assert str(self.croatia.id) not in business_area_ids
+        assert str(self.sudan.id) not in business_area_ids
