@@ -87,8 +87,8 @@ class ProfileSerializer(serializers.ModelSerializer):
         request = self.context.get("request", {})
         business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
 
-        if program_id := request.query_params.get("program"):  # scope program
-            if program := Program.objects.filter(id=program_id).first():
+        if program_slug := request.query_params.get("program"):  # scope program
+            if program := Program.objects.filter(slug=program_slug).first():
                 return user.permissions_in_business_area(business_area_slug, program.id)
             return set()
 

@@ -71,7 +71,7 @@ function ReportingPage(): ReactElement {
       />
       <ReportingTable
         filter={appliedFilter}
-        businessArea={businessArea}
+        businessArea={businessAreaSlug}
         choicesData={choicesData}
         meData={meData}
       />
