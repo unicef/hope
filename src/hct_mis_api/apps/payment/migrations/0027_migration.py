@@ -22,6 +22,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name='account',
-            constraint=models.UniqueConstraint(condition=models.Q(('active', True), ('unique_key__isnull', False)), fields=('unique_key', 'active'), name='unique_active_wallet'),
+            constraint=models.UniqueConstraint(condition=models.Q(('active', True), ('unique_key__isnull', False), ('is_unique', True)), fields=('unique_key', 'active', 'is_unique'), name='unique_active_wallet'),
         ),
     ]

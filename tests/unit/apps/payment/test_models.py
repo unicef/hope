@@ -1008,15 +1008,18 @@ class TestAccountModelUniqueField(TransactionTestCase):
         self.ind.save()
         self.ind2.household = self.hh
         self.ind2.save()
-        account_type_bank = AccountType.objects.create(
+
+        account_type_bank, _ = AccountType.objects.update_or_create(
             key="bank",
             label="Bank",
-            unique_fields=[
-                "number",
-                "seeing_disability",
-                "name_of_cardholder__atm_card",
-            ],
-            payment_gateway_id="123",
+            defaults=dict(
+                unique_fields=[
+                    "number",
+                    "seeing_disability",
+                    "name_of_cardholder__atm_card",
+                ],
+                payment_gateway_id="123",
+            ),
         )
 
         dmd_1 = AccountFactory(
@@ -1040,11 +1043,11 @@ class TestAccountModelUniqueField(TransactionTestCase):
         self.assertIsNotNone(dmd_1.unique_key)
         self.assertEqual(dmd_1.is_unique, True)
 
-        dmd_2.data["name_of_cardholder__atm_card"] = "test"
+        dmd_2.data = {**dmd_2.data, "name_of_cardholder__atm_card": "test"}
         dmd_2.save()
         dmd_2.update_unique_field()
         dmd_2.refresh_from_db()
-        self.assertIsNone(dmd_2.unique_key)
+        self.assertIsNotNone(dmd_2.unique_key)
         self.assertEqual(dmd_2.is_unique, False)
 
 

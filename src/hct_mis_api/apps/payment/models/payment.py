@@ -1937,7 +1937,7 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
         constraints = [
             models.UniqueConstraint(
                 fields=("unique_key", "active"),
-                condition=Q(active=True) & Q(unique_key__isnull=False),
+                condition=Q(active=True) & Q(unique_key__isnull=False) & Q(is_unique=False),
                 name="unique_active_wallet",
             ),
         ]
@@ -2037,6 +2037,8 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
             if not self.unique_fields:
                 self.is_unique = True
                 self.unique_key = None
+                self.save(update_fields=["unique_key", "is_unique"])
+                return
 
             sha256 = hashlib.sha256()
             sha256.update(self.individual.program.name.encode("utf-8"))
