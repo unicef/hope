@@ -1921,8 +1921,9 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
     )
     number = models.CharField(max_length=256, blank=True, null=True)
     data = JSONField(default=dict, blank=True, encoder=DjangoJSONEncoder)
-    unique_key = models.CharField(max_length=256, blank=True, null=True, unique=True, editable=False)  # type: ignore
+    unique_key = models.CharField(max_length=256, blank=True, null=True, editable=False)  # type: ignore
     is_unique = models.BooleanField(default=True)
+    active = models.BooleanField(default=True)  # False for duplicated/withdrawn individual
 
     signature_fields = (
         "data",
@@ -1931,6 +1932,15 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
 
     objects = MergedManager()
     all_objects = models.Manager()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=("unique_key", "active"),
+                condition=Q(active=True) & Q(unique_key__isnull=False),
+                name="unique_active_wallet",
+            ),
+        ]
 
     def __str__(self) -> str:
         return f"{self.individual} - {self.account_type}"
@@ -1950,6 +1960,9 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
 
         for field in unique_fields:
             delivery_data[field] = self.data.get(field, None)
+
+        if self.number:
+            delivery_data["number"] = self.number
 
         return delivery_data
 
@@ -2021,6 +2034,10 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
 
     def update_unique_field(self) -> None:
         if hasattr(self, "unique_fields") and isinstance(self.unique_fields, (list, tuple)):
+            if not self.unique_fields:
+                self.is_unique = True
+                self.unique_key = None
+
             sha256 = hashlib.sha256()
             sha256.update(self.individual.program.name.encode("utf-8"))
             sha256.update(self.account_type.key.encode("utf-8"))
@@ -2032,11 +2049,12 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
             self.unique_key = sha256.hexdigest()
             try:
                 with transaction.atomic():
-                    self.save(update_fields=["unique_key"])
+                    self.is_unique = True
+                    self.save(update_fields=["unique_key", "is_unique"])
             except IntegrityError:
                 with transaction.atomic():
                     self.is_unique = False
-                    self.save(update_fields=["is_unique"])
+                    self.save(update_fields=["unique_key", "is_unique"])
 
     @property
     def unique_fields(self) -> List[str]:
