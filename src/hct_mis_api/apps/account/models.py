@@ -202,7 +202,11 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         if RoleAssignment.objects.filter(
             Q(user=self) | Q(partner__user=self), business_area_id=business_area_id, program=None
         ).exists():
-            programs_ids = Program.objects.filter(business_area_id=business_area_id).values_list("id", flat=True)
+            programs_ids = (
+                Program.objects.filter(business_area_id=business_area_id)
+                .order_by("program_id")
+                .values_list("id", flat=True)
+            )
         else:
             programs_ids = (
                 RoleAssignment.objects.filter(
