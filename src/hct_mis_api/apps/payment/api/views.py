@@ -1079,8 +1079,7 @@ class TargetPopulationViewSet(
         if not engine_rule.enabled or engine_rule.deprecated:
             raise ValidationError("This engine rule is not enabled or is deprecated.")
         old_tp = copy_model_object(tp)
-        rule_commit = engine_rule.latest
-        tp.steficon_rule_targeting = rule_commit
+        tp.steficon_rule_targeting = engine_rule.latest
         tp.status = PaymentPlan.Status.TP_STEFICON_WAIT
         tp.save()
         payment_plan_apply_steficon_hh_selection.delay(str(tp.pk), str(engine_rule.pk))

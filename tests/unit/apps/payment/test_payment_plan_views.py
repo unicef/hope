@@ -1492,7 +1492,6 @@ class TestTargetPopulationActions:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
             assert "id" in resp_data
-            print("===>>> ", resp_data["steficon_rule_targeting"])  # TODO: FIX ME
             assert "TARGETING" in resp_data["steficon_rule_targeting"]["rule"]["type"]
 
     def test_apply_engine_formula_tp_validation_errors(self, create_user_role_with_permissions: Any) -> None:
@@ -1841,8 +1840,10 @@ class TestPaymentPlanActions:
     def test_pp_fsp_lock(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
         self.pp.status = PaymentPlan.Status.LOCKED
+        self.pp.financial_service_provider = FinancialServiceProviderFactory()
+        self.pp.delivery_mechanism = DeliveryMechanismFactory()
         self.pp.save()
-        PaymentFactory(parent=self.pp)
+        PaymentFactory(parent=self.pp, entitlement_quantity=999)
         response = self.client.get(self.url_lock_fsp)
 
         assert response.status_code == expected_status
