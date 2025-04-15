@@ -207,3 +207,86 @@ class TestBusinessAreaDetail:
         assert response_data["parent"] == self.afghanistan.parent
         assert response_data["is_split"] == self.afghanistan.is_split
         assert response_data["active"] == self.afghanistan.active
+
+
+class TestBusinessAreaFilter:
+    @pytest.fixture(autouse=True)
+    def setup(
+        self, api_client: Any, create_user_role_with_permissions: Any, create_partner_role_with_permissions: Any
+    ) -> None:
+        self.afghanistan = BusinessAreaFactory(slug="afghanistan", active=True)
+        self.ukraine = BusinessAreaFactory(slug="ukraine", active=True)
+        self.syria = BusinessAreaFactory(slug="syria", active=True)
+        self.croatia = BusinessAreaFactory(slug="croatia", active=True)
+        self.sudan = BusinessAreaFactory(slug="sudan", active=True)
+        self.somalia = BusinessAreaFactory(slug="somalia", active=False)
+        self.list_url = reverse(
+            "api:core:business-areas-list",
+        )
+        self.count_url = reverse(
+            "api:core:business-areas-count",
+        )
+        self.partner = PartnerFactory(name="TestPartner")
+
+        self.user = UserFactory(partner=self.partner)
+        self.client = api_client(self.user)
+
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+            self.afghanistan,
+            whole_business_area_access=True,
+        )
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+            self.ukraine,
+            program=ProgramFactory(
+                business_area=self.ukraine,
+            ),
+        )
+        create_partner_role_with_permissions(
+            self.user,
+            [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+            self.syria,
+            whole_business_area_access=True,
+        )
+        create_partner_role_with_permissions(
+            self.user,
+            [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+            self.croatia,
+            program=ProgramFactory(
+                business_area=self.croatia,
+            ),
+        )
+        create_partner_role_with_permissions(
+            self.user,
+            [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+            self.somalia,
+            whole_business_area_access=True,
+        )
+
+    def test_filter_by_active(self) -> None:
+        response_active = self.client.get(self.list_url, {"active": True})
+        assert response_active.status_code == status.HTTP_200_OK
+        response_data_active = response_active.json()["results"]
+        assert len(response_data_active) == 4
+        business_area_ids = {ba["id"] for ba in response_data_active}
+        assert self.afghanistan.id in business_area_ids
+        assert self.ukraine.id in business_area_ids
+        assert self.syria.id in business_area_ids
+        assert self.croatia.id in business_area_ids
+        assert self.sudan.id not in business_area_ids
+        assert self.somalia.id not in business_area_ids
+
+        response_inactive = self.client.get(self.list_url, {"active": False})
+        assert response_inactive.status_code == status.HTTP_200_OK
+        response_data_inactive = response_inactive.json()["results"]
+        assert len(response_data_inactive) == 2
+        business_area_ids = {ba["id"] for ba in response_data_inactive}
+        assert self.somalia.id in business_area_ids
+        assert self.afghanistan.id not in business_area_ids
+        assert self.ukraine.id not in business_area_ids
+        assert self.syria.id not in business_area_ids
+        assert self.croatia.id not in business_area_ids
+        assert self.sudan.id not in business_area_ids
