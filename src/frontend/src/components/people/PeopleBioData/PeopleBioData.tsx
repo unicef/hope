@@ -1,26 +1,26 @@
-import { Box, Grid2 as Grid, Paper, Typography } from '@mui/material';
-import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import {
-  choicesToDict,
-  formatAge,
-  getPhoneNoLabel,
-  renderBoolean,
-  sexToCapitalize,
-} from '@utils/utils';
+import { LabelizedField } from '@core/LabelizedField';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
 import {
   GrievancesChoiceDataQuery,
   HouseholdChoiceDataQuery,
 } from '@generated/graphql';
-import { LabelizedField } from '@core/LabelizedField';
-import { Title } from '@core/Title';
-import { UniversalMoment } from '@core/UniversalMoment';
+import { Box, Grid2 as Grid, Paper, Typography } from '@mui/material';
+import { DisabilityEnum } from '@restgenerated/models/DisabilityEnum';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import {
+  choicesToDict,
+  formatAge,
+  renderBoolean,
+  sexToCapitalize,
+} from '@utils/utils';
+import { ReactElement, ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { useProgramContext } from '../../../programContext';
 import { DocumentPopulationPhotoModal } from '../../population/DocumentPopulationPhotoModal';
 import { LinkedGrievancesModal } from '../../population/LinkedGrievancesModal/LinkedGrievancesModal';
-import { useProgramContext } from '../../../programContext';
-import { ReactElement, ReactNode } from 'react';
-import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
-import { DisabilityEnum } from '@restgenerated/models/DisabilityEnum';
+import { ObservedDisabilityEnum } from '@restgenerated/models/ObservedDisabilityEnum';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}
@@ -52,15 +52,9 @@ export const PeopleBioData = ({
   );
   const workStatusChoicesDict = choicesToDict(choicesData.workStatusChoices);
   const roleChoicesDict = choicesToDict(choicesData.roleChoices);
-  const observedDisabilityChoicesDict = choicesToDict(
-    choicesData.observedDisabilityChoices,
-  );
+
   const severityOfDisabilityChoicesDict = choicesToDict(
     choicesData.severityOfDisabilityChoices,
-  );
-
-  const residenceChoicesDict = choicesToDict(
-    choicesData.residenceStatusChoices,
   );
 
   const mappedIndividualDocuments = individual?.documents?.map((doc) => (
@@ -162,37 +156,45 @@ export const PeopleBioData = ({
       <>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Residence Status')}>
-            {residenceChoicesDict[household?.residenceStatus]}
+            {/* //TODO: */}
+            {/* {residenceChoicesDict[household?.residenceStatus]} */}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Country')}>
-            {household?.country}
+            {/* //TODO: */}
+            {/* {household?.country} */}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Country of Origin')}>
-            {household.countryOrigin}
+            {/* //TODO: */}
+            {/* {household.countryOrigin} */}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Address')}>
-            {household.address}
+            {/* //TODO: */}
+            {/* {household.address} */}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Vilage')}>
-            {household.village}
+            {/* //TODO: */}
+            {/* {household.village} */}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Zip Code')}>
-            {household.zipCode}
+            {/* //TODO: */}
+            {/* {household.zipCode} */}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Administrative Level 1')}>
-            {household?.admin1}
+            {/* //TODO: */}
+
+            {/* {household?.admin1} */}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
@@ -201,18 +203,22 @@ export const PeopleBioData = ({
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
-          <LabelizedField label={t('Administrative Level 3')}>
+          {/* //TODO: */}
+          {/* <LabelizedField label={t('Administrative Level 3')}>
             {household?.admin3}
-          </LabelizedField>
+          </LabelizedField> */}
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Administrative Level 4')}>
-            {household?.admin4}
+            {/* //TODO: */}
+            {/* {household?.admin4} */}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 6 }}>
           <LabelizedField label={t('Geolocation')}>
-            {household?.geopoint}
+            {/* //TODO: */}
+
+            {/* {household?.geopoint} */}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
@@ -301,9 +307,7 @@ export const PeopleBioData = ({
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Observed disabilities')}>
-            {individual?.observedDisability
-              .map((choice) => observedDisabilityChoicesDict[choice])
-              .join(', ')}
+            {ObservedDisabilityEnum[individual?.observedDisability]}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
@@ -362,16 +366,18 @@ export const PeopleBioData = ({
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
-          <LabelizedField label={t('Phone Number')}>
+          {/* //TODO: */}
+          {/* <LabelizedField label={t('Phone Number')}>
             {getPhoneNoLabel(individual?.phoneNo, individual?.phoneNoValid)}
-          </LabelizedField>
+          </LabelizedField> */}
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Alternative Phone Number')}>
-            {getPhoneNoLabel(
+            {/* //TODO: */}
+            {/* {getPhoneNoLabel(
               individual?.phoneNoAlternative,
               individual?.phoneNoAlternativeValid,
-            )}
+            )} */}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 12 }}>

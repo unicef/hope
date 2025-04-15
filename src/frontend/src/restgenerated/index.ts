@@ -108,10 +108,13 @@ export type { PaymentPlanList as PaymentPlanListCamelCase } from './models/Payme
 export type { PaymentPlanSupportingDocument as PaymentPlanSupportingDocumentCamelCase } from './models/PaymentPlanSupportingDocument';
 export type { PaymentVerificationDetails as PaymentVerificationDetailsCamelCase } from './models/PaymentVerificationDetails';
 export type { PaymentVerificationPlan as PaymentVerificationPlanCamelCase } from './models/PaymentVerificationPlan';
+export type { PaymentVerificationPlanActivate as PaymentVerificationPlanActivateCamelCase } from './models/PaymentVerificationPlanActivate';
 export type { PaymentVerificationPlanCreate as PaymentVerificationPlanCreateCamelCase } from './models/PaymentVerificationPlanCreate';
 export type { PaymentVerificationPlanDetails as PaymentVerificationPlanDetailsCamelCase } from './models/PaymentVerificationPlanDetails';
+export type { PaymentVerificationPlanImport as PaymentVerificationPlanImportCamelCase } from './models/PaymentVerificationPlanImport';
 export type { PaymentVerificationPlanList as PaymentVerificationPlanListCamelCase } from './models/PaymentVerificationPlanList';
 export type { PaymentVerificationSummary as PaymentVerificationSummaryCamelCase } from './models/PaymentVerificationSummary';
+export type { PaymentVerificationUpdate as PaymentVerificationUpdateCamelCase } from './models/PaymentVerificationUpdate';
 export type { PeriodicDataUpdateTemplateCreate as PeriodicDataUpdateTemplateCreateCamelCase } from './models/PeriodicDataUpdateTemplateCreate';
 export type { PeriodicDataUpdateTemplateDetail as PeriodicDataUpdateTemplateDetailCamelCase } from './models/PeriodicDataUpdateTemplateDetail';
 export type { PeriodicDataUpdateTemplateList as PeriodicDataUpdateTemplateListCamelCase } from './models/PeriodicDataUpdateTemplateList';

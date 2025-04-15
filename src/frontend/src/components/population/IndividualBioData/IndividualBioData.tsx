@@ -4,7 +4,6 @@ import styled from 'styled-components';
 import {
   choicesToDict,
   formatAge,
-  getPhoneNoLabel,
   renderBoolean,
   sexToCapitalize,
 } from '@utils/utils';
@@ -22,6 +21,7 @@ import { useProgramContext } from 'src/programContext';
 import { ReactElement, ReactNode } from 'react';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { DisabilityEnum } from '@restgenerated/models/DisabilityEnum';
+import { ObservedDisabilityEnum } from '@restgenerated/models/ObservedDisabilityEnum';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}
@@ -58,9 +58,7 @@ export const IndividualBioData = ({
   );
   const workStatusChoicesDict = choicesToDict(choicesData.workStatusChoices);
   const roleChoicesDict = choicesToDict(choicesData.roleChoices);
-  const observedDisabilityChoicesDict = choicesToDict(
-    choicesData.observedDisabilityChoices,
-  );
+
   const severityOfDisabilityChoicesDict = choicesToDict(
     choicesData.severityOfDisabilityChoices,
   );
@@ -102,13 +100,14 @@ export const IndividualBioData = ({
   const mappedRoles = (
     <Grid size={{ xs: 3 }}>
       <LabelizedField label={`Linked ${beneficiaryGroup?.groupLabelPlural}`}>
-        {individual?.householdsAndRoles?.length
+        {/* //TODO: */}
+        {/* {individual?.householdsAndRoles?.length
           ? individual?.householdsAndRoles?.map((item) => (
               <Box key={item.id}>
                 {item.household.unicefId} -{roleChoicesDict[item.role]}
               </Box>
             ))
-          : '-'}
+          : '-'} */}
       </LabelizedField>
     </Grid>
   );
@@ -268,9 +267,7 @@ export const IndividualBioData = ({
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Observed disabilities')}>
-            {individual?.observedDisability
-              .map((choice) => observedDisabilityChoicesDict[choice])
-              .join(', ')}
+            {ObservedDisabilityEnum[individual?.observedDisability]}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
@@ -329,17 +326,19 @@ export const IndividualBioData = ({
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
-          <LabelizedField label={t('Phone Number')}>
+          {/* //TODO: */}
+          {/* <LabelizedField label={t('Phone Number')}>
             {getPhoneNoLabel(individual?.phoneNo, individual?.phoneNoValid)}
-          </LabelizedField>
+          </LabelizedField> */}
         </Grid>
         <Grid size={{ xs: 3 }}>
-          <LabelizedField label={t('Alternative Phone Number')}>
+          {/* //TODO: */}
+          {/* <LabelizedField label={t('Alternative Phone Number')}>
             {getPhoneNoLabel(
               individual?.phoneNoAlternative,
               individual?.phoneNoAlternativeValid,
             )}
-          </LabelizedField>
+          </LabelizedField> */}
         </Grid>
         <Grid size={{ xs: 12 }}>
           <BorderBox />

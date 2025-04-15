@@ -1,33 +1,33 @@
-import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
-import {
-  PaymentVerificationPlanStatus,
-  usePaymentVerificationChoicesQuery,
-} from '@generated/graphql';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { VerificationPaymentDetails } from '@components/payments/VerificationPaymentDetails';
 import { VerifyManual } from '@components/payments/VerifyManual';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { AdminButton } from '@core/AdminButton';
+import {
+  PaymentVerificationPlanStatus,
+  usePaymentVerificationChoicesQuery,
+} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
-import { isPermissionDeniedError } from '@utils/utils';
-import { AdminButton } from '@core/AdminButton';
-import { ReactElement } from 'react';
-import withErrorBoundary from '@components/core/withErrorBoundary';
-import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
+import { PaymentPlan } from '@restgenerated/models/PaymentPlan';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { isPermissionDeniedError } from '@utils/utils';
 import { error } from 'console';
+import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 
 function VerificationPaymentDetailsPage(): ReactElement {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
   const { paymentPlanId, paymentId } = useParams();
   const permissions = usePermissions();
-  const { data: payment, isLoading: loading } = useQuery<PaymentDetail>({
+  const { data: payment, isLoading: loading } = useQuery<PaymentPlan>({
     queryKey: ['payment', businessArea, paymentId, programId, paymentPlanId],
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsRetrieve2(

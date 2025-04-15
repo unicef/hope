@@ -220,7 +220,6 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
         ? paymentPlan.paymentVerificationPlans.map((plan) => (
             <VerificationPlanDetails
               key={plan.id}
-              samplingChoicesData={choicesData}
               verificationPlan={plan}
               planNode={plan}
             />

@@ -52,8 +52,11 @@ import type { PaymentPlanExcludeBeneficiaries } from '../models/PaymentPlanExclu
 import type { PaymentPlanExportAuthCode } from '../models/PaymentPlanExportAuthCode';
 import type { PaymentPlanImportFile } from '../models/PaymentPlanImportFile';
 import type { PaymentPlanSupportingDocument } from '../models/PaymentPlanSupportingDocument';
+import type { PaymentVerificationPlanActivate } from '../models/PaymentVerificationPlanActivate';
 import type { PaymentVerificationPlanCreate } from '../models/PaymentVerificationPlanCreate';
 import type { PaymentVerificationPlanDetails } from '../models/PaymentVerificationPlanDetails';
+import type { PaymentVerificationPlanImport } from '../models/PaymentVerificationPlanImport';
+import type { PaymentVerificationUpdate } from '../models/PaymentVerificationUpdate';
 import type { PeriodicDataUpdateTemplateCreate } from '../models/PeriodicDataUpdateTemplateCreate';
 import type { PeriodicDataUpdateTemplateDetail } from '../models/PeriodicDataUpdateTemplateDetail';
 import type { PeriodicDataUpdateUpload } from '../models/PeriodicDataUpdateUpload';
@@ -3239,6 +3242,40 @@ export class RestService {
         });
     }
     /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaymentVerificationPlanActivate
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentVerificationsActivateVerificationPlanCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        verificationPlanId,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+        verificationPlanId: string,
+        requestBody: PaymentVerificationPlanActivate,
+    }): CancelablePromise<PaymentVerificationPlanActivate> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/activate-verification-plan/{verification_plan_id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+                'verification_plan_id': verificationPlanId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
      * Create Payment Verification Plan
      * @returns PaymentVerificationPlanDetails
      * @throws ApiError
@@ -3264,6 +3301,206 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
                 'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaymentVerificationPlanActivate
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentVerificationsDeleteVerificationPlanCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        verificationPlanId,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+        verificationPlanId: string,
+        requestBody: PaymentVerificationPlanActivate,
+    }): CancelablePromise<PaymentVerificationPlanActivate> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/delete-verification-plan/{verification_plan_id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+                'verification_plan_id': verificationPlanId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaymentVerificationPlanActivate
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentVerificationsDiscardVerificationPlanCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        verificationPlanId,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+        verificationPlanId: string,
+        requestBody: PaymentVerificationPlanActivate,
+    }): CancelablePromise<PaymentVerificationPlanActivate> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/discard-verification-plan/{verification_plan_id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+                'verification_plan_id': verificationPlanId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaymentVerificationPlanDetails
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentVerificationsExportXlsxRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+        verificationPlanId,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+        verificationPlanId: string,
+    }): CancelablePromise<PaymentVerificationPlanDetails> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/export-xlsx/{verification_plan_id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+                'verification_plan_id': verificationPlanId,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaymentVerificationPlanActivate
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentVerificationsFinishVerificationPlanCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        verificationPlanId,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+        verificationPlanId: string,
+        requestBody: PaymentVerificationPlanActivate,
+    }): CancelablePromise<PaymentVerificationPlanActivate> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/finish-verification-plan/{verification_plan_id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+                'verification_plan_id': verificationPlanId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaymentVerificationPlanImport
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentVerificationsImportXlsxCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        verificationPlanId,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+        verificationPlanId: string,
+        requestBody: PaymentVerificationPlanImport,
+    }): CancelablePromise<PaymentVerificationPlanImport> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/import-xlsx/{verification_plan_id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+                'verification_plan_id': verificationPlanId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaymentVerificationPlanActivate
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentVerificationsInvalidVerificationPlanCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        verificationPlanId,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+        verificationPlanId: string,
+        requestBody: PaymentVerificationPlanActivate,
+    }): CancelablePromise<PaymentVerificationPlanActivate> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/invalid-verification-plan/{verification_plan_id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+                'verification_plan_id': verificationPlanId,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -3358,6 +3595,40 @@ export class RestService {
                 'payment_id': paymentId,
                 'program_slug': programSlug,
             },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaymentVerificationUpdate
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentVerificationsVerificationsCreate({
+        businessAreaSlug,
+        id,
+        paymentId,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        paymentId: string,
+        programSlug: string,
+        requestBody: PaymentVerificationUpdate,
+    }): CancelablePromise<PaymentVerificationUpdate> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/verifications/{payment_id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'payment_id': paymentId,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
     /**

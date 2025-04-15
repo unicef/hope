@@ -6,9 +6,7 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { IndividualAdditionalRegistrationInformation } from '@components/population/IndividualAdditionalRegistrationInformation/IndividualAdditionalRegistrationInformation';
 import { IndividualBioData } from '@components/population/IndividualBioData/IndividualBioData';
 import { IndividualDeliveryMechanisms } from '@components/population/IndividualDeliveryMechanisms';
-import { IndividualPhotoModal } from '@components/population/IndividualPhotoModal';
 import { ProgrammeTimeSeriesFields } from '@components/population/ProgrammeTimeSeriesFields';
-import { AdminButton } from '@core/AdminButton';
 import {
   useAllIndividualsFlexFieldsAttributesQuery,
   useGrievancesChoiceDataQuery,
@@ -135,14 +133,16 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
         flags={
           <>
             {/*<IndividualFlags individual={individual} />  TODO REST refactor*/}
-            <AdminButton adminUrl={individual?.adminUrl} />
+            {/* //TODO: Rest refactor */}
+            {/* <AdminButton adminUrl={individual?.adminUrl} /> */}
           </>
         }
       >
         <Box mr={2}>
-          {individual?.photo ? (
+          {/* //TODO: Rest refactor */}
+          {/* {individual?.photo ? (
             <IndividualPhotoModal individual={individual} />
-          ) : null}
+          ) : null} */}
         </Box>
       </PageHeader>
       <Container>

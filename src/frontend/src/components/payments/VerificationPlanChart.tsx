@@ -2,10 +2,10 @@ import { Doughnut } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { ReactElement } from 'react';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
 
 interface VerificationPlanDetailsChartProps {
-  verificationPlan: PaymentPlanDetail['paymentVerificationPlans'][number];
+  verificationPlan: PaymentVerificationPlanDetails['paymentVerificationPlans'][number];
 }
 
 const ChartContainer = styled.div`
