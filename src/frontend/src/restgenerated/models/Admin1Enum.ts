@@ -3,24 +3,24 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * * `AF45` - East Veronicashire
- * * `UA71` - Moodyhaven
- * * `AF57` - New Mckenzie
- * * `HR31` - New Micheleville
- * * `HR85` - Port Rebeccashire
- * * `UA20` - Vincentbury
- * * `UA17` - West Adam
- * * `HR93` - West Allen
- * * `AF69` - Williamside
+ * * `AF18` - East Aliciastad
+ * * `AF10` - East Sonyafurt
+ * * `HR83` - East Tiffany
+ * * `UA57` - Mccannland
+ * * `AF30` - Michaelburgh
+ * * `UA90` - Millerfurt
+ * * `UA97` - North Richard
+ * * `HR70` - West Emilyland
+ * * `HR37` - West Matthewchester
  */
 export enum Admin1Enum {
-  AF45 = 'AF45',
-  UA71 = 'UA71',
-  AF57 = 'AF57',
-  HR31 = 'HR31',
-  HR85 = 'HR85',
-  UA20 = 'UA20',
-  UA17 = 'UA17',
-  HR93 = 'HR93',
-  AF69 = 'AF69',
+    AF18 = 'AF18',
+    AF10 = 'AF10',
+    HR83 = 'HR83',
+    UA57 = 'UA57',
+    AF30 = 'AF30',
+    UA90 = 'UA90',
+    UA97 = 'UA97',
+    HR70 = 'HR70',
+    HR37 = 'HR37',
 }
