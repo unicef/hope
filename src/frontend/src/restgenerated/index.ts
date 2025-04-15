@@ -83,6 +83,7 @@ export type { PaginatedProgramListList as PaginatedProgramListListCamelCase } fr
 export type { PaginatedProjectList as PaginatedProjectListCamelCase } from './models/PaginatedProjectList';
 export type { PaginatedRegistrationDataImportListList as PaginatedRegistrationDataImportListListCamelCase } from './models/PaginatedRegistrationDataImportListList';
 export type { PaginatedRegistrationList as PaginatedRegistrationListCamelCase } from './models/PaginatedRegistrationList';
+export type { PaginatedRuleList as PaginatedRuleListCamelCase } from './models/PaginatedRuleList';
 export type { PaginatedTargetPopulationListList as PaginatedTargetPopulationListListCamelCase } from './models/PaginatedTargetPopulationListList';
 export type { PaginatedTPHouseholdListList as PaginatedTPHouseholdListListCamelCase } from './models/PaginatedTPHouseholdListList';
 export type { PaginatedUserList as PaginatedUserListCamelCase } from './models/PaginatedUserList';
@@ -149,6 +150,9 @@ export { RegistrationMethodEnum as RegistrationMethodEnumCamelCase } from './mod
 export { RelationshipEnum as RelationshipEnumCamelCase } from './models/RelationshipEnum';
 export { ResidenceStatusEnum as ResidenceStatusEnumCamelCase } from './models/ResidenceStatusEnum';
 export type { RevertMarkPaymentAsFailed as RevertMarkPaymentAsFailedCamelCase } from './models/RevertMarkPaymentAsFailed';
+export type { Rule as RuleCamelCase } from './models/Rule';
+export type { RuleCommit as RuleCommitCamelCase } from './models/RuleCommit';
+export { RuleTypeEnum as RuleTypeEnumCamelCase } from './models/RuleTypeEnum';
 export { ScopeEnum as ScopeEnumCamelCase } from './models/ScopeEnum';
 export { SectorEnum as SectorEnumCamelCase } from './models/SectorEnum';
 export { SeeingDisabilityEnum as SeeingDisabilityEnumCamelCase } from './models/SeeingDisabilityEnum';

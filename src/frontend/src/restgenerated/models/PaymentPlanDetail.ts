@@ -10,6 +10,7 @@ import type { FollowUpPaymentPlan } from './FollowUpPaymentPlan';
 import type { PaymentPlanSupportingDocument } from './PaymentPlanSupportingDocument';
 import type { ProgramCycleSmall } from './ProgramCycleSmall';
 import type { ProgramSmall } from './ProgramSmall';
+import type { RuleCommit } from './RuleCommit';
 export type PaymentPlanDetail = {
     readonly id: string;
     unicefId?: string | null;
@@ -147,12 +148,14 @@ export type PaymentPlanDetail = {
      * Female Adults Count [sys]
      */
     femaleAdultsCount?: number;
+    readonly steficonRule: RuleCommit;
     readonly sourcePaymentPlan: FollowUpPaymentPlan;
     /**
      * Exchange Rate [sys]
      */
     exchangeRate?: string | null;
     readonly eligiblePaymentsCount: number;
+    readonly fundsCommitments: Record<string, any> | null;
     readonly adminUrl: string;
 };
 

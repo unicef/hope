@@ -1,7 +1,7 @@
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
 
-from django.db.models import Count, Q, Sum
+from django.db.models import Count, Prefetch, Q, Sum
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 
@@ -48,6 +48,8 @@ from hct_mis_api.apps.program.api.serializers import (
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.steficon.api.serializers import RuleCommitSerializer
 from hct_mis_api.apps.targeting.api.serializers import TargetingCriteriaSerializer
+from hct_mis_api.contrib.api.serializers.vision import FundsCommitmentSerializer
+from hct_mis_api.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
 
 
 class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
@@ -594,6 +596,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     steficon_rule = RuleCommitSerializer(read_only=True)
     source_payment_plan = FollowUpPaymentPlanSerializer(read_only=True)
     eligible_payments_count = serializers.SerializerMethodField()
+    funds_commitments = serializers.SerializerMethodField()
     # payment_verification_summary = PaymentVerificationSummarySerializer(read_only=True)
     # payment_verification_plans = PaymentVerificationPlanSerializer(many=True, read_only=True)
     # payment_verification_plans_count = serializers.SerializerMethodField()
@@ -650,6 +653,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "source_payment_plan",
             "exchange_rate",
             "eligible_payments_count",
+            "funds_commitments",
             # "payment_verification_summary",
             # "payment_verification_plans",
             # "payment_verification_plans_count",
@@ -817,6 +821,24 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
 
     def get_payment_verification_plans_count(self, obj: PaymentPlan) -> int:
         return obj.payment_verification_plans.count()
+
+    def get_funds_commitments(self, obj: PaymentPlan) -> Optional[Dict[str, Any]]:
+        available_items_qs = FundsCommitmentItem.objects.filter(payment_plan=obj, office=obj.business_area)
+        # Prefetch related items grouped by `funds_commitment_group`
+        group = (
+            FundsCommitmentGroup.objects.filter(funds_commitment_items__in=available_items_qs)
+            .distinct()
+            .prefetch_related(Prefetch("funds_commitment_items", queryset=available_items_qs, to_attr="filtered_items"))
+        ).first()
+
+        if group:
+            return FundsCommitmentSerializer(
+                {
+                    "funds_commitment_number": group.funds_commitment_number,
+                    "funds_commitment_items": group.filtered_items,
+                }
+            ).data
+        return None
 
 
 class PaymentPlanBulkActionSerializer(serializers.Serializer):

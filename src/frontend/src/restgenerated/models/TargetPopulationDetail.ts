@@ -7,6 +7,7 @@ import type { FinancialServiceProvider } from './FinancialServiceProvider';
 import type { FollowUpPaymentPlan } from './FollowUpPaymentPlan';
 import type { ProgramCycleSmall } from './ProgramCycleSmall';
 import type { ProgramSmall } from './ProgramSmall';
+import type { RuleCommit } from './RuleCommit';
 import type { TargetingCriteria } from './TargetingCriteria';
 export type TargetPopulationDetail = {
     readonly id: string;
@@ -89,6 +90,7 @@ export type TargetPopulationDetail = {
      */
     femaleAdultsCount?: number;
     readonly targetingCriteria: TargetingCriteria;
+    readonly steficonRuleTargeting: RuleCommit;
     /**
      * Written by a tool such as Engine Formula
      */

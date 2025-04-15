@@ -32,6 +32,7 @@ import type { PaginatedProgramListList } from '../models/PaginatedProgramListLis
 import type { PaginatedProjectList } from '../models/PaginatedProjectList';
 import type { PaginatedRegistrationDataImportListList } from '../models/PaginatedRegistrationDataImportListList';
 import type { PaginatedRegistrationList } from '../models/PaginatedRegistrationList';
+import type { PaginatedRuleList } from '../models/PaginatedRuleList';
 import type { PaginatedTargetPopulationListList } from '../models/PaginatedTargetPopulationListList';
 import type { PaginatedTPHouseholdListList } from '../models/PaginatedTPHouseholdListList';
 import type { PaginatedUserList } from '../models/PaginatedUserList';
@@ -4791,7 +4792,7 @@ export class RestService {
         });
     }
     /**
-     * @returns any No response body
+     * @returns PaginatedRuleList
      * @throws ApiError
      */
     public static restEngineRulesList({
@@ -4823,7 +4824,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
-    }): CancelablePromise<any> {
+    }): CancelablePromise<PaginatedRuleList> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/engine-rules/',
