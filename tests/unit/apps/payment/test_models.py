@@ -10,7 +10,7 @@ from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db import models
 from django.db.utils import IntegrityError
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
 from django.utils import timezone
 
 import pytest
@@ -995,7 +995,20 @@ class TestAccountModel(TestCase):
         Account.validate_uniqueness(Account.objects.all())
         Account.update_unique_field.assert_called_once()
 
+
+class TestAccountModelUniqueField(TransactionTestCase):
     def test_update_unique_fields(self) -> None:
+        create_afghanistan()
+        self.program1 = ProgramFactory()
+        self.user = UserFactory.create()
+        self.ind = IndividualFactory(household=None, program=self.program1)
+        self.ind2 = IndividualFactory(household=None, program=self.program1)
+        self.hh = HouseholdFactory(head_of_household=self.ind)
+        self.ind.household = self.hh
+        self.ind.save()
+        self.ind2.household = self.hh
+        self.ind2.save()
+
         account_type_bank = AccountType.objects.get(key="bank")
         account_type_bank.unique_fields = [
             "seeing_disability",
@@ -1022,11 +1035,13 @@ class TestAccountModel(TestCase):
         dmd_1.update_unique_field()
         dmd_1.refresh_from_db()
         self.assertIsNotNone(dmd_1.unique_key)
+        self.assertEqual(dmd_1.is_unique, True)
 
         dmd_2.data["name_of_cardholder__atm_card"] = "test"
         dmd_2.save()
         dmd_2.update_unique_field()
         dmd_2.refresh_from_db()
+        self.assertIsNone(dmd_2.unique_key)
         self.assertEqual(dmd_2.is_unique, False)
 
 
