@@ -61,13 +61,13 @@ class TestBusinessAreaList:
             ),
         )
         create_partner_role_with_permissions(
-            self.user,
+            self.partner,
             [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
             self.syria,
             whole_business_area_access=True,
         )
         create_partner_role_with_permissions(
-            self.user,
+            self.partner,
             [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
             self.croatia,
             program=ProgramFactory(
@@ -75,7 +75,7 @@ class TestBusinessAreaList:
             ),
         )
         create_partner_role_with_permissions(
-            self.user,
+            self.partner,
             [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
             self.somalia,
             whole_business_area_access=True,
@@ -246,13 +246,13 @@ class TestBusinessAreaFilter:
             ),
         )
         create_partner_role_with_permissions(
-            self.user,
+            self.partner,
             [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
             self.syria,
             whole_business_area_access=True,
         )
         create_partner_role_with_permissions(
-            self.user,
+            self.partner,
             [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
             self.croatia,
             program=ProgramFactory(
@@ -260,7 +260,7 @@ class TestBusinessAreaFilter:
             ),
         )
         create_partner_role_with_permissions(
-            self.user,
+            self.partner,
             [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
             self.somalia,
             whole_business_area_access=True,

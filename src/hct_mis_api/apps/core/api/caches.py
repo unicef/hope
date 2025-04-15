@@ -13,7 +13,7 @@ class BusinessAreaListVersionKeyBit(KeyBitBase):
     ) -> str:
         queryset = view_instance.get_queryset().aggregate(latest_updated_at=Max("updated_at"))
         latest_updated_at = queryset["latest_updated_at"]
-        available_business_areas = queryset.order_by("id").values_list("id", flat=True)
+        available_business_areas = queryset.values_list("id", flat=True)
         key = f"business_area_list:{latest_updated_at}:{available_business_areas}"
         return key
 

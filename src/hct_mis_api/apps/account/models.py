@@ -119,7 +119,9 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
             return self._program_ids_for_business_area_cache[business_area_id]
 
         if self.role_assignments.filter(business_area_id=business_area_id, program=None).exists():
-            programs_ids = Program.objects.filter(business_area_id=business_area_id).values_list("id", flat=True)
+            programs_ids = (
+                Program.objects.filter(business_area_id=business_area_id).order_by("id").values_list("id", flat=True)
+            )
         else:
             programs_ids = (
                 self.role_assignments.filter(business_area_id=business_area_id)
@@ -203,9 +205,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             Q(user=self) | Q(partner__user=self), business_area_id=business_area_id, program=None
         ).exists():
             programs_ids = (
-                Program.objects.filter(business_area_id=business_area_id)
-                .order_by("program_id")
-                .values_list("id", flat=True)
+                Program.objects.filter(business_area_id=business_area_id).order_by("id").values_list("id", flat=True)
             )
         else:
             programs_ids = (
