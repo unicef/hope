@@ -218,6 +218,7 @@ class PaymentVerificationPlanDetailsSerializer(serializers.ModelSerializer):
     program_cycle_start_date = serializers.DateField(source="program_cycle.start_date")
     program_cycle_end_date = serializers.DateField(source="program_cycle.start_date")
     program_name = serializers.CharField(source="program_cycle.program.name")
+    program_id = serializers.CharField(source="program_cycle.program_id")
     available_payment_records_count = serializers.SerializerMethodField()
     eligible_payments_count = serializers.SerializerMethodField()
     bank_reconciliation_success = serializers.IntegerField()
@@ -230,6 +231,7 @@ class PaymentVerificationPlanDetailsSerializer(serializers.ModelSerializer):
             "id",
             "unicef_id",
             "program_name",
+            "program_id",
             "program_cycle_start_date",
             "program_cycle_end_date",
             "available_payment_records_count",
