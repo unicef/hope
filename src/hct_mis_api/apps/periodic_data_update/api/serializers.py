@@ -4,7 +4,6 @@ from django.shortcuts import get_object_or_404
 
 from rest_framework import serializers
 
-from hct_mis_api.api.utils import EncodedIdSerializerMixin
 from hct_mis_api.apps.core.models import (
     BusinessArea,
     FlexibleAttribute,
@@ -120,7 +119,7 @@ class PeriodicFieldDataSerializer(serializers.ModelSerializer):
         fields = ("subtype", "number_of_rounds", "rounds_names")
 
 
-class PeriodicFieldSerializer(EncodedIdSerializerMixin):
+class PeriodicFieldSerializer(serializers.ModelSerializer):
     pdu_data = PeriodicFieldDataSerializer()
     label = serializers.SerializerMethodField()  # type: ignore
 

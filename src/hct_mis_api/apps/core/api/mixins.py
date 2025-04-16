@@ -16,7 +16,6 @@ from urllib3 import Retry
 
 from hct_mis_api.apps.account.api.permissions import BaseRestPermission
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import decode_id_string
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.program.models import Program
@@ -227,13 +226,6 @@ class CustomSerializerMixin:
         ):
             return serializer_class
         return super().get_serializer_class()
-
-
-class DecodeIdForDetailMixin:
-    def get_object(self) -> Any:
-        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
-        self.kwargs[lookup_url_kwarg] = decode_id_string(self.kwargs[lookup_url_kwarg])
-        return super().get_object()
 
 
 class BaseViewSet(GenericViewSet):
