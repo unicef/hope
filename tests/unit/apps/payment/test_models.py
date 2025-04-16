@@ -10,7 +10,7 @@ from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db import models
 from django.db.utils import IntegrityError
-from django.test import TestCase, TransactionTestCase
+from django.test import TestCase, TransactionTestCase, tag
 from django.utils import timezone
 
 import pytest
@@ -996,6 +996,7 @@ class TestAccountModel(TestCase):
         Account.update_unique_field.assert_called_once()
 
 
+@tag("isolated")
 class TestAccountModelUniqueField(TransactionTestCase):
     def test_update_unique_fields(self) -> None:
         create_afghanistan()
