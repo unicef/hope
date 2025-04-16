@@ -8,9 +8,9 @@ from django import forms
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
-from django.db import models
+from django.db import models, transaction
 from django.db.utils import IntegrityError
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase, tag
 from django.utils import timezone
 
 import pytest
@@ -49,6 +49,7 @@ from hct_mis_api.apps.payment.models import (
     Approval,
     DeliveryMechanism,
     DeliveryMechanismConfig,
+    FinancialInstitution,
     FinancialServiceProviderXlsxTemplate,
     FspNameMapping,
     Payment,
@@ -876,6 +877,9 @@ class TestAccountModel(TestCase):
         cls.fsp = FinancialServiceProviderFactory()
         generate_delivery_mechanisms()
         cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
+        cls.financial_institution = FinancialInstitution.objects.create(
+            code="ABC", type=FinancialInstitution.FinancialInstitutionType.BANK
+        )
 
     def test_str(self) -> None:
         dmd = AccountFactory(individual=self.ind)
@@ -892,12 +896,13 @@ class TestAccountModel(TestCase):
     def test_delivery_data(self) -> None:
         dmd = AccountFactory(
             data={
-                "number": "test",
                 "expiry_date": "12.12.2024",
                 "name_of_cardholder": "Marek",
             },
             individual=self.ind,
             account_type=AccountType.objects.get(key="bank"),
+            number="test",
+            financial_institution=self.financial_institution,
         )
 
         fsp2 = FinancialServiceProviderFactory()  # no dm config
@@ -954,6 +959,7 @@ class TestAccountModel(TestCase):
                 "custom_ind_name": f"{dmd.individual.full_name} Custom",
                 "custom_hh_address": f"{self.hh.address} Custom",
                 "address": self.hh.address,
+                "financial_institution": "ABC",
             },
         )
 
@@ -995,16 +1001,39 @@ class TestAccountModel(TestCase):
         Account.validate_uniqueness(Account.objects.all())
         Account.update_unique_field.assert_called_once()
 
+
+@tag("isolated")
+class TestAccountModelUniqueField(TransactionTestCase):
     def test_update_unique_fields(self) -> None:
-        account_type_bank = AccountType.objects.get(key="bank")
-        account_type_bank.unique_fields = [
-            "seeing_disability",
-            "name_of_cardholder__atm_card",
-        ]
-        account_type_bank.save()
+        create_afghanistan()
+        self.program1 = ProgramFactory()
+        self.user = UserFactory.create()
+        self.ind = IndividualFactory(household=None, program=self.program1)
+        self.ind2 = IndividualFactory(household=None, program=self.program1)
+        self.hh = HouseholdFactory(head_of_household=self.ind)
+        self.ind.household = self.hh
+        self.ind.save()
+        self.ind2.household = self.hh
+        self.ind2.save()
+
+        account_type_bank, _ = AccountType.objects.update_or_create(
+            key="bank",
+            label="Bank",
+            defaults=dict(
+                unique_fields=[
+                    "number",
+                    "seeing_disability",
+                    "name_of_cardholder__atm_card",
+                ],
+                payment_gateway_id="123",
+            ),
+        )
 
         dmd_1 = AccountFactory(
-            data={"name_of_cardholder__atm_card": "test"}, individual=self.ind, account_type=account_type_bank
+            data={"name_of_cardholder__atm_card": "test"},
+            individual=self.ind,
+            account_type=account_type_bank,
+            number="123",
         )
         dmd_1.individual.seeing_disability = LOT_DIFFICULTY
         dmd_1.individual.save()
@@ -1012,21 +1041,28 @@ class TestAccountModel(TestCase):
         self.assertEqual(dmd_1.is_unique, True)
 
         dmd_2 = AccountFactory(
-            data={"name_of_cardholder__atm_card": "test2"}, individual=self.ind2, account_type=account_type_bank
+            data={"name_of_cardholder__atm_card": "test2"},
+            individual=self.ind2,
+            account_type=account_type_bank,
+            number="123",
         )
         dmd_2.individual.seeing_disability = LOT_DIFFICULTY
         dmd_2.individual.save()
         self.assertIsNone(dmd_2.unique_key)
         self.assertEqual(dmd_2.is_unique, True)
 
-        dmd_1.update_unique_field()
+        with transaction.atomic():
+            dmd_1.update_unique_field()
         dmd_1.refresh_from_db()
         self.assertIsNotNone(dmd_1.unique_key)
+        self.assertEqual(dmd_1.is_unique, True)
 
-        dmd_2.data["name_of_cardholder__atm_card"] = "test"
+        dmd_2.data = {**dmd_2.data, "name_of_cardholder__atm_card": "test"}
         dmd_2.save()
-        dmd_2.update_unique_field()
+        with transaction.atomic():
+            dmd_2.update_unique_field()
         dmd_2.refresh_from_db()
+        self.assertIsNotNone(dmd_2.unique_key)
         self.assertEqual(dmd_2.is_unique, False)
 
 

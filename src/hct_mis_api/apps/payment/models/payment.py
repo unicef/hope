@@ -1896,7 +1896,7 @@ class FinancialInstitution(TimeStampedUUIDModel):
     )
     description = models.CharField(max_length=255, blank=True, null=True)
     type = models.CharField(max_length=30, choices=FinancialInstitutionType.choices)
-    country = models.ForeignKey(Country, on_delete=models.PROTECT)
+    country = models.ForeignKey(Country, on_delete=models.PROTECT, blank=True, null=True)
 
 
 class FinancialInstitutionMapping(TimeStampedUUIDModel):
@@ -1907,7 +1907,7 @@ class FinancialInstitutionMapping(TimeStampedUUIDModel):
     class Meta:
         unique_together = ("financial_service_provider", "financial_institution")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.financial_institution} to {self.financial_service_provider}: {self.code}"
 
 
@@ -1933,8 +1933,9 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
     )
     number = models.CharField(max_length=256, blank=True, null=True)
     data = JSONField(default=dict, blank=True, encoder=DjangoJSONEncoder)
-    unique_key = models.CharField(max_length=256, blank=True, null=True, unique=True, editable=False)  # type: ignore
+    unique_key = models.CharField(max_length=256, blank=True, null=True, editable=False)  # type: ignore
     is_unique = models.BooleanField(default=True)
+    active = models.BooleanField(default=True)  # False for duplicated/withdrawn individual
 
     signature_fields = (
         "data",
@@ -1943,6 +1944,15 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
 
     objects = MergedManager()
     all_objects = models.Manager()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=("unique_key", "active"),
+                condition=Q(active=True) & Q(unique_key__isnull=False) & Q(is_unique=False),
+                name="unique_active_wallet",
+            ),
+        ]
 
     def __str__(self) -> str:
         return f"{self.individual} - {self.account_type}"
@@ -1962,6 +1972,9 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
 
         for field in unique_fields:
             delivery_data[field] = self.data.get(field, None)
+
+        if self.number:
+            delivery_data["number"] = self.number
 
         return delivery_data
 
@@ -2033,6 +2046,12 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
 
     def update_unique_field(self) -> None:
         if hasattr(self, "unique_fields") and isinstance(self.unique_fields, (list, tuple)):
+            if not self.unique_fields:
+                self.is_unique = True
+                self.unique_key = None
+                self.save(update_fields=["unique_key", "is_unique"])
+                return
+
             sha256 = hashlib.sha256()
             sha256.update(self.individual.program.name.encode("utf-8"))
             sha256.update(self.account_type.key.encode("utf-8"))
@@ -2044,11 +2063,12 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
             self.unique_key = sha256.hexdigest()
             try:
                 with transaction.atomic():
-                    self.save(update_fields=["unique_key"])
+                    self.is_unique = True
+                    self.save(update_fields=["unique_key", "is_unique"])
             except IntegrityError:
                 with transaction.atomic():
                     self.is_unique = False
-                    self.save(update_fields=["is_unique"])
+                    self.save(update_fields=["unique_key", "is_unique"])
 
     @property
     def unique_fields(self) -> List[str]:
@@ -2106,7 +2126,7 @@ class DeliveryMechanismConfig(models.Model):
     required_fields = ArrayField(default=list, base_field=models.CharField(max_length=255))
 
     def __str__(self) -> str:
-        return f"{self.delivery_mechanism.code} - {self.fsp.name}"
+        return f"{self.delivery_mechanism.code} - {self.fsp.name}"  # pragma: no cover
 
 
 class AccountType(models.Model):
