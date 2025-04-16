@@ -56,7 +56,7 @@ function PaymentDetails({
     PaymentStatus.NotDistributed,
     PaymentStatus.ForceFailed,
     PaymentStatus.TransactionErroneous,
-  ].includes(payment.status);
+  ].includes(payment.status as PaymentStatus);
 
   return (
     <>
@@ -215,10 +215,7 @@ function PaymentDetails({
             />
           </Grid>
           <Grid size={{ xs: 3 }}>
-            <LabelizedField
-              label={t('FSP')}
-              value={payment.fspName}
-            />
+            <LabelizedField label={t('FSP')} value={payment.fspName} />
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField
