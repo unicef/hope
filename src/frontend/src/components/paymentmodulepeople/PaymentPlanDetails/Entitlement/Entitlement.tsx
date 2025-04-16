@@ -6,10 +6,7 @@ import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import {
   PaymentPlanBackgroundActionStatus,
-  PaymentPlanDocument,
   PaymentPlanStatus,
-  useAllSteficonRulesQuery,
-  useSetSteficonRuleOnPpListMutation,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -25,9 +22,10 @@ import {
   Select,
   Typography,
 } from '@mui/material';
+import { PaginatedRuleList } from '@restgenerated/models/PaginatedRuleList';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -35,6 +33,7 @@ import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useProgramContext } from '../../../../programContext';
 import { BigValue } from '../../../rdi/details/RegistrationDetails/RegistrationDetails';
 import { ImportXlsxPaymentPlanPaymentList } from '../ImportXlsxPaymentPlanPaymentList/ImportXlsxPaymentPlanPaymentList';
+import { ApplyEngineFormula } from '@restgenerated/models/ApplyEngineFormula';
 
 const GreyText = styled.p`
   color: #9e9e9e;
@@ -103,28 +102,55 @@ export function Entitlement({
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
   const { businessArea, programId } = useBaseUrl();
+  const queryClient = useQueryClient();
 
   const [steficonRuleValue, setSteficonRuleValue] = useState<string>(
     paymentPlan.steficonRule?.id ? String(paymentPlan.steficonRule.id) : '',
   );
-  const options = {
-    refetchQueries: () => [
-      {
-        query: PaymentPlanDocument,
-        variables: {
-          id: paymentPlan.id,
-        },
+
+  const { mutateAsync: setSteficonRule, isPending: loadingSetSteficonRule } =
+    useMutation({
+      mutationFn: ({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+      }: {
+        businessAreaSlug: string;
+        id: string;
+        programSlug: string;
+        requestBody: ApplyEngineFormula;
+      }) =>
+        RestService.restBusinessAreasProgramsPaymentPlansApplyEngineFormulaCreate(
+          {
+            businessAreaSlug,
+            id,
+            programSlug,
+            requestBody,
+          },
+        ),
+      onSuccess: () => {
+        showMessage(t('Formula is executing, please wait until completed'));
+        queryClient.invalidateQueries({
+          queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+        });
       },
-    ],
-  };
+      onError: (e) => {
+        showMessage(e.message);
+      },
+    });
 
-  const [setSteficonRule, { loading: loadingSetSteficonRule }] =
-    useSetSteficonRuleOnPpListMutation(options);
+  const { data: steficonData, isLoading: loading } =
+    useQuery<PaginatedRuleList>({
+      queryKey: ['engineRules'],
+      queryFn: () =>
+        RestService.restEngineRulesList({
+          type: 'PAYMENT_PLAN',
+          deprecated: false,
+          enabled: true,
+        }),
+    });
 
-  const { data: steficonData, loading } = useAllSteficonRulesQuery({
-    variables: { enabled: true, deprecated: false, type: 'PAYMENT_PLAN' },
-    fetchPolicy: 'network-only',
-  });
   const { mutateAsync: mutateExport, isPending: loadingExport } = useMutation({
     mutationFn: ({
       businessAreaSlug,
@@ -208,13 +234,13 @@ export function Entitlement({
                   data-cy="input-entitlement-formula"
                   onChange={(event) => setSteficonRuleValue(event.target.value)}
                 >
-                  {steficonData.allSteficonRules?.edges?.map((each, index) => (
+                  {steficonData?.results?.map((each, index) => (
                     <MenuItem
                       data-cy={`select-option-${index}`}
-                      key={each.node.id}
-                      value={each.node.id}
+                      key={each.id}
+                      value={each.id}
                     >
-                      {each.node.name}
+                      {each.name}
                     </MenuItem>
                   ))}
                 </Select>
@@ -237,9 +263,11 @@ export function Entitlement({
                   onClick={async () => {
                     try {
                       await setSteficonRule({
-                        variables: {
-                          paymentPlanId: paymentPlan.id,
-                          steficonRuleId: steficonRuleValue,
+                        programSlug: programId,
+                        businessAreaSlug: businessArea,
+                        id: paymentPlan.id,
+                        requestBody: {
+                          engineFormulaRuleId: steficonRuleValue,
                           version: paymentPlan.version,
                         },
                       });
@@ -247,7 +275,7 @@ export function Entitlement({
                         t('Formula is executing, please wait until completed'),
                       );
                     } catch (e) {
-                      e.graphQLErrors.map((x) => showMessage(x.message));
+                      showMessage(e.message);
                     }
                   }}
                 >

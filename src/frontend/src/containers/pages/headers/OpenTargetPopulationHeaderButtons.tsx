@@ -1,6 +1,4 @@
-import { Action } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
 import { useSnackbar } from '@hooks/useSnackBar';
 import {
   Delete,
@@ -9,6 +7,9 @@ import {
   RefreshRounded,
 } from '@mui/icons-material';
 import { Box, Button, IconButton } from '@mui/material';
+import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation } from '@tanstack/react-query';
 import { t } from 'i18next';
 import { ReactElement, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -16,7 +17,6 @@ import { useProgramContext } from '../../../programContext';
 import { DeleteTargetPopulation } from '../../dialogs/targetPopulation/DeleteTargetPopulation';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { LockTargetPopulationDialog } from '../../dialogs/targetPopulation/LockTargetPopulationDialog';
-import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 
 export interface InProgressTargetPopulationHeaderButtonsPropTypes {
   targetPopulation: TargetPopulationDetail;
@@ -37,13 +37,27 @@ export function OpenTargetPopulationHeaderButtons({
   const { showMessage } = useSnackbar();
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
   const { isActiveProgram } = useProgramContext();
 
-  const { mutatePaymentPlanAction: rebuild, loading: loadingRebuild } =
-    usePaymentPlanAction(Action.TpRebuild, targetPopulation.id, () =>
-      showMessage(t('Payment Plan has been rebuilt.')),
-    );
+  const { mutateAsync: rebuild, isPending: loadingRebuild } = useMutation({
+    mutationFn: ({
+      businessAreaSlug,
+      programSlug,
+      id,
+    }: {
+      businessAreaSlug: string;
+      programSlug: string;
+      id: string;
+    }) =>
+      RestService.restBusinessAreasProgramsTargetPopulationsRebuildRetrieve({
+        businessAreaSlug,
+        programSlug,
+        id,
+      }),
+    onSuccess: () => showMessage(t('Payment Plan has been rebuilt.')),
+    onError: (e) => showMessage(e.message),
+  });
 
   return (
     <Box display="flex" alignItems="center">
@@ -88,7 +102,13 @@ export function OpenTargetPopulationHeaderButtons({
             color="primary"
             disabled={loadingRebuild || !isActiveProgram}
             startIcon={<RefreshRounded />}
-            onClick={() => rebuild()}
+            onClick={() =>
+              rebuild({
+                businessAreaSlug: businessArea,
+                programSlug: programId,
+                id: targetPopulation.id,
+              })
+            }
           >
             Rebuild
           </Button>
