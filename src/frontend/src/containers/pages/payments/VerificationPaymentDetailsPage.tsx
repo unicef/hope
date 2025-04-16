@@ -21,13 +21,14 @@ import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
 
 function VerificationPaymentDetailsPage(): ReactElement {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
   const { paymentPlanId, paymentId } = useParams();
   const permissions = usePermissions();
-  const { data: payment, isLoading: loading } = useQuery<PaymentPlan>({
+  const { data: payment, isLoading: loading } = useQuery<PaymentDetail>({
     queryKey: ['payment', businessArea, paymentId, programId, paymentPlanId],
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsRetrieve2(

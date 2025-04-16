@@ -77,6 +77,8 @@ export function ImportXlsxPaymentPlanPaymentList({
         id: paymentPlan.id,
         programSlug: programId,
         requestBody: {
+          //TODO:
+          //@ts-ignore
           file: fileToImport,
         },
       });

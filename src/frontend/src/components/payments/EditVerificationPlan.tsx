@@ -139,8 +139,8 @@ export const EditVerificationPlan = ({
     confidenceInterval:
       paymentVerificationPlanNode.confidenceInterval * 100 || 95,
     marginOfError: paymentVerificationPlanNode.marginOfError * 100 || 5,
-    filterAgeMin: paymentVerificationPlanNode.ageFilter?.min || '',
-    filterAgeMax: paymentVerificationPlanNode.ageFilter?.max || '',
+    filterAgeMin: paymentVerificationPlanNode.ageFilterMin || '',
+    filterAgeMax: paymentVerificationPlanNode.ageFilterMax || '',
     filterSex: paymentVerificationPlanNode.sexFilter || '',
     excludedAdminAreasFull:
       paymentVerificationPlanNode.excludedAdminAreasFilter || [],
@@ -151,8 +151,8 @@ export const EditVerificationPlan = ({
     adminCheckbox:
       paymentVerificationPlanNode.excludedAdminAreasFilter?.length !== 0,
     ageCheckbox:
-      Boolean(paymentVerificationPlanNode.ageFilter?.min) ||
-      Boolean(paymentVerificationPlanNode.ageFilter?.max) ||
+      Boolean(paymentVerificationPlanNode.ageFilterMin) ||
+      Boolean(paymentVerificationPlanNode.ageFilterMax) ||
       false,
     sexCheckbox: Boolean(paymentVerificationPlanNode.sexFilter) || false,
   };
