@@ -18,7 +18,7 @@ from django_filters import (
 from django_filters import rest_framework as filters
 
 from hct_mis_api.apps.core.exceptions import SearchException
-from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
+from hct_mis_api.apps.core.utils import CustomOrderingFilter
 from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
 from hct_mis_api.apps.household.models import (
     DUPLICATE,
@@ -267,8 +267,7 @@ class HouseholdFilter(FilterSet):
         return qs.filter(rdi_merge_status=MergeStatusModel.MERGED)
 
     def admin_field_filter(self, qs: QuerySet, field_name: str, value: str) -> QuerySet:
-        encoded_value = decode_id_string(value)
-        return qs.filter(**{field_name: encoded_value})
+        return qs.filter(**{field_name: value})
 
 
 class IndividualFilter(FilterSet):
@@ -445,7 +444,7 @@ class IndividualFilter(FilterSet):
         return qs.filter(q_obj).distinct()
 
     def filter_excluded_id(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
-        return qs.exclude(id=decode_id_string(value))
+        return qs.exclude(id=value)
 
     def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> "QuerySet[Individual]":
         if value is True:
@@ -469,8 +468,7 @@ class IndividualFilter(FilterSet):
         return queryset
 
     def admin_field_filter(self, qs: QuerySet, field_name: str, value: str) -> QuerySet:
-        encoded_value = decode_id_string(value)
-        return qs.filter(**{field_name: encoded_value})
+        return qs.filter(**{field_name: value})
 
 
 class MergedHouseholdFilter(FilterSet):
