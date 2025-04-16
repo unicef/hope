@@ -2,7 +2,6 @@ from rest_framework.reverse import reverse
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import encode_id_base64_required
 from tests.unit.api.base import HOPEApiTestCase
 
 
@@ -42,7 +41,7 @@ class APIBusinessAreaTests(HOPEApiTestCase):
         self.assertEqual(len(response.json()["results"]), 3)
         self.assertIn(
             {
-                "id": encode_id_base64_required(self.business_area.id, "BusinessArea"),
+                "id": str(self.business_area.id),
                 "name": self.business_area.name,
                 "code": self.business_area.code,
                 "long_name": self.business_area.long_name,
@@ -55,7 +54,7 @@ class APIBusinessAreaTests(HOPEApiTestCase):
         )
         self.assertIn(
             {
-                "id": encode_id_base64_required(business_area1.id, "BusinessArea"),
+                "id": str(business_area1.id),
                 "name": business_area1.name,
                 "code": business_area1.code,
                 "long_name": business_area1.long_name,
@@ -68,7 +67,7 @@ class APIBusinessAreaTests(HOPEApiTestCase):
         )
         self.assertIn(
             {
-                "id": encode_id_base64_required(business_area2.id, "BusinessArea"),
+                "id": str(business_area2.id),
                 "name": business_area2.name,
                 "code": business_area2.code,
                 "long_name": business_area2.long_name,

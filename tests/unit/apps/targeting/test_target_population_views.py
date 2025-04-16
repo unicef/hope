@@ -121,7 +121,6 @@ class TestTargetPopulationViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
         self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
@@ -136,28 +135,28 @@ class TestTargetPopulationViews:
         response_json = response.json()["results"]
         assert len(response_json) == 3
         assert {
-            "id": id_to_base64(self.tp1.id, "PaymentPlan"),
+            "id": str(self.tp1.id),
             "name": self.tp1.name,
             "status": self.tp1.get_status_display(),
             "created_by": self.tp1.created_by.get_full_name(),
             "created_at": "2022-01-01T00:00:00Z",
         } in response_json
         assert {
-            "id": id_to_base64(self.tp2.id, "PaymentPlan"),
+            "id": str(self.tp2.id),
             "name": self.tp2.name,
             "status": self.tp2.get_status_display(),
             "created_by": self.tp2.created_by.get_full_name(),
             "created_at": "2022-01-01T00:00:00Z",
         } in response_json
         assert {
-            "id": id_to_base64(self.tp3.id, "PaymentPlan"),
+            "id": str(self.tp3.id),
             "name": self.tp3.name,
             "status": "Assigned",
             "created_by": self.tp3.created_by.get_full_name(),
             "created_at": "2022-01-01T00:00:00Z",
         } in response_json
         assert {
-            "id": id_to_base64(self.tp_program2.id, "PaymentPlan"),
+            "id": str(self.tp_program2.id),
             "name": self.tp_program2.name,
             "created_by": self.tp1.created_by.get_full_name(),
             "status": "Assigned",
@@ -169,7 +168,6 @@ class TestTargetPopulationViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
         self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
@@ -189,7 +187,6 @@ class TestTargetPopulationViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
         self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
@@ -209,7 +206,6 @@ class TestTargetPopulationViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
         self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
