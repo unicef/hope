@@ -8,7 +8,7 @@ from django import forms
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
-from django.db import models
+from django.db import models, transaction
 from django.db.utils import IntegrityError
 from django.test import TestCase, TransactionTestCase, tag
 from django.utils import timezone
@@ -1039,14 +1039,16 @@ class TestAccountModelUniqueField(TransactionTestCase):
         self.assertIsNone(dmd_2.unique_key)
         self.assertEqual(dmd_2.is_unique, True)
 
-        dmd_1.update_unique_field()
+        with transaction.atomic():
+            dmd_1.update_unique_field()
         dmd_1.refresh_from_db()
         self.assertIsNotNone(dmd_1.unique_key)
         self.assertEqual(dmd_1.is_unique, True)
 
         dmd_2.data = {**dmd_2.data, "name_of_cardholder__atm_card": "test"}
         dmd_2.save()
-        dmd_2.update_unique_field()
+        with transaction.atomic():
+            dmd_2.update_unique_field()
         dmd_2.refresh_from_db()
         self.assertIsNotNone(dmd_2.unique_key)
         self.assertEqual(dmd_2.is_unique, False)
