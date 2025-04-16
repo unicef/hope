@@ -1075,29 +1075,23 @@ class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
     def get_debit_card_issuer(self, obj: Payment) -> str:
         return get_debit_card_issuer(obj.collector)
 
-    #     def resolve_snapshot_collector_full_name(self, info: Any) -> Any:
-    #         return PaymentNode.get_collector_field(self, "full_name")
-    #
-    #     def resolve_snapshot_collector_delivery_phone_no(self, info: Any) -> Any:
-    #         return PaymentNode.get_collector_field(self, "payment_delivery_phone_no")
-    #
     def get_snapshot_collector_bank_name(self, obj: Payment) -> Optional[str]:
-        if bank_account_info := self.get_collector_field(obj, "bank_account_info"):
+        if bank_account_info := self.collector_field(obj, "bank_account_info"):
             return bank_account_info.get("bank_name")
         return None
 
     def get_snapshot_collector_bank_account_number(self, obj: Payment) -> Optional[str]:
-        if bank_account_info := self.get_collector_field(obj, "bank_account_info"):
+        if bank_account_info := self.collector_field(obj, "bank_account_info"):
             return bank_account_info.get("bank_account_number")
         return None
 
     def get_snapshot_collector_debit_card_number(self, obj: Payment) -> Optional[str]:
-        if bank_account_info := self.get_collector_field(obj, "bank_account_info"):
+        if bank_account_info := self.collector_field(obj, "bank_account_info"):
             return bank_account_info.get("debit_card_number")
         return None
 
     @staticmethod
-    def get_collector_field(payment: "Payment", field_name: str) -> Union[None, str, Dict]:
+    def collector_field(payment: "Payment", field_name: str) -> Union[None, str, Dict]:
         """return primary_collector or alternate_collector field value or None"""
         if household_snapshot := getattr(payment, "household_snapshot", None):
             household_snapshot_data = household_snapshot.snapshot_data
