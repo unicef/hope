@@ -38,6 +38,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerification,
     PaymentVerificationPlan,
 )
+from hct_mis_api.apps.payment.models.payment import FinancialInstitutionMapping
 from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
@@ -647,3 +648,24 @@ class DeliveryMechanismConfigAdmin(HOPEModelAdminBase):
         ("country", AutoCompleteFilter),
     )
     raw_id_fields = ("delivery_mechanism", "fsp", "country")
+
+
+@admin.register(FinancialInstitutionMapping)
+class FinancialInstitutionMappingAdmin(HOPEModelAdminBase):
+    list_display = (
+        "financial_institution",
+        "financial_service_provider",
+        "code",
+    )
+    search_fields = (
+        "code",
+        "finanacial_institution____code",
+        "finanacial_institution__description",
+        "financial_service_provider__name",
+        "financial_service_provider__vision_vendor_number",
+    )
+    list_filter = (
+        ("financial_institution", AutoCompleteFilter),
+        ("financial_service_provider", AutoCompleteFilter),
+    )
+    raw_id_fields = ("financial_institution", "financial_service_provider")
