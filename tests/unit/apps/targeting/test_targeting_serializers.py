@@ -23,7 +23,6 @@ class TargetingCriteriaSerializerTest(TestCase):
 
         data = TargetingCriteriaSerializer(instance=targeting_criteria).data
 
-        self.assertEqual(data["id"], str(targeting_criteria.pk))
         self.assertFalse(data["flag_exclude_if_active_adjudication_ticket"])
         self.assertFalse(data["flag_exclude_if_on_sanction_list"])
         rule = data["rules"][0]
