@@ -48,6 +48,7 @@ import type { PushPeople } from '../models/PushPeople';
 import type { RDI } from '../models/RDI';
 import type { RDINested } from '../models/RDINested';
 import type { RefuseRdi } from '../models/RefuseRdi';
+import type { RegistrationDataImportCreate } from '../models/RegistrationDataImportCreate';
 import type { RegistrationDataImportDetail } from '../models/RegistrationDataImportDetail';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -2418,6 +2419,31 @@ export class RestService {
                 'total_households_count_with_valid_phone_no_max': totalHouseholdsCountWithValidPhoneNoMax,
                 'total_households_count_with_valid_phone_no_min': totalHouseholdsCountWithValidPhoneNoMin,
             },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns RegistrationDataImportDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsRegistrationDataImportsCreate({
+        businessAreaSlug,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        requestBody: RegistrationDataImportCreate,
+    }): CancelablePromise<RegistrationDataImportDetail> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
     /**

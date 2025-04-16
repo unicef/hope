@@ -9,7 +9,7 @@ import type { PartnerAccessEnum } from './PartnerAccessEnum';
 import type { SectorEnum } from './SectorEnum';
 import type { Status791Enum } from './Status791Enum';
 export type ProgramDetail = {
-    id: string;
+    readonly id: string;
     /**
      * Program code
      */

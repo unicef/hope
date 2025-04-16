@@ -3,60 +3,60 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * * `HR2986` - Carneychester
- * * `HR2972` - Port Kimberly
- * * `HR2944` - Robinsonfort
- * * `AF4789` - Hinesburgh
- * * `AF4768` - West Briannaton
- * * `AF4752` - West Brookemouth
- * * `HR7725` - Lake Glendaburgh
- * * `HR7787` - Perezmouth
- * * `HR7773` - Smithfurt
- * * `AF7011` - Aprilfort
- * * `AF7079` - East Shelly
- * * `AF7093` - Tylerland
- * * `UA3712` - Courtneyville
- * * `UA3743` - East Melissafort
- * * `UA3751` - Moorechester
- * * `AF3776` - East Jeff
- * * `AF3746` - Port James
- * * `AF3755` - Reedberg
- * * `HR7864` - Christinabury
- * * `HR7861` - Lisafurt
- * * `HR7822` - New Amy
- * * `UA9491` - Johnsonland
- * * `UA9454` - Port Thomasborough
- * * `UA9463` - Wrightborough
- * * `UA7177` - Allenside
- * * `UA7120` - New Donaldside
- * * `UA7141` - North David
+ * * `HR6230` - Alvaradoside
+ * * `HR6277` - Levineborough
+ * * `HR6262` - West Pedro
+ * * `AF4722` - North Jessica
+ * * `AF4796` - North Sherri
+ * * `AF4765` - Woodardton
+ * * `HR8965` - Cherylfurt
+ * * `HR8939` - East Michaelborough
+ * * `HR8951` - New Timothy
+ * * `AF4193` - Brownside
+ * * `AF4195` - Garyberg
+ * * `AF4115` - South Kelly
+ * * `AF8917` - Lake Andrew
+ * * `AF8944` - Pierceburgh
+ * * `AF8981` - South Danielburgh
+ * * `UA5824` - Andersonside
+ * * `UA5810` - Briannahaven
+ * * `UA5853` - Lake Jadestad
+ * * `UA2395` - Margaretstad
+ * * `UA2332` - Port Karenside
+ * * `UA2352` - Port Rhonda
+ * * `HR4771` - East Robertbury
+ * * `HR4711` - North Troybury
+ * * `HR4743` - Port Shawn
+ * * `UA1011` - Christinaton
+ * * `UA1010` - Johnside
+ * * `UA1091` - Marilynland
  */
 export enum Admin2Enum {
-    HR2986 = 'HR2986',
-    HR2972 = 'HR2972',
-    HR2944 = 'HR2944',
-    AF4789 = 'AF4789',
-    AF4768 = 'AF4768',
-    AF4752 = 'AF4752',
-    HR7725 = 'HR7725',
-    HR7787 = 'HR7787',
-    HR7773 = 'HR7773',
-    AF7011 = 'AF7011',
-    AF7079 = 'AF7079',
-    AF7093 = 'AF7093',
-    UA3712 = 'UA3712',
-    UA3743 = 'UA3743',
-    UA3751 = 'UA3751',
-    AF3776 = 'AF3776',
-    AF3746 = 'AF3746',
-    AF3755 = 'AF3755',
-    HR7864 = 'HR7864',
-    HR7861 = 'HR7861',
-    HR7822 = 'HR7822',
-    UA9491 = 'UA9491',
-    UA9454 = 'UA9454',
-    UA9463 = 'UA9463',
-    UA7177 = 'UA7177',
-    UA7120 = 'UA7120',
-    UA7141 = 'UA7141',
+    HR6230 = 'HR6230',
+    HR6277 = 'HR6277',
+    HR6262 = 'HR6262',
+    AF4722 = 'AF4722',
+    AF4796 = 'AF4796',
+    AF4765 = 'AF4765',
+    HR8965 = 'HR8965',
+    HR8939 = 'HR8939',
+    HR8951 = 'HR8951',
+    AF4193 = 'AF4193',
+    AF4195 = 'AF4195',
+    AF4115 = 'AF4115',
+    AF8917 = 'AF8917',
+    AF8944 = 'AF8944',
+    AF8981 = 'AF8981',
+    UA5824 = 'UA5824',
+    UA5810 = 'UA5810',
+    UA5853 = 'UA5853',
+    UA2395 = 'UA2395',
+    UA2332 = 'UA2332',
+    UA2352 = 'UA2352',
+    HR4771 = 'HR4771',
+    HR4711 = 'HR4711',
+    HR4743 = 'HR4743',
+    UA1011 = 'UA1011',
+    UA1010 = 'UA1010',
+    UA1091 = 'UA1091',
 }

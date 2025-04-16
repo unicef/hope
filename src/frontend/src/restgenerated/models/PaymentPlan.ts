@@ -4,7 +4,7 @@
 /* eslint-disable */
 import type { FollowUpPaymentPlan } from './FollowUpPaymentPlan';
 export type PaymentPlan = {
-    id: string;
+    readonly id: string;
     unicefId?: string | null;
     /**
      * Name

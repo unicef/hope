@@ -1,40 +1,30 @@
 import TableCell from '@mui/material/TableCell';
 import { useNavigate } from 'react-router-dom';
-import {
-  HouseholdChoiceDataQuery,
-  IndividualBiometricDeduplicationBatchStatus,
-  IndividualBiometricDeduplicationGoldenRecordStatus,
-} from '@generated/graphql';
 import { BlackLink } from '@components/core/BlackLink';
 import { AnonTableCell } from '@components/core/Table/AnonTableCell';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { choicesToDict, sexToCapitalize } from '@utils/utils';
+import { sexToCapitalize } from '@utils/utils';
 import { ReactElement } from 'react';
 import { DedupeBiographicalBiometricResults } from '@components/rdi/details/DedupeBiographicalBiometricResults';
+import { IndividualList } from '@restgenerated/models/IndividualList';
+import { BiometricDeduplicationGoldenRecordStatusEnum } from '@restgenerated/models/BiometricDeduplicationGoldenRecordStatusEnum';
+import { BiometricDeduplicationBatchStatusEnum } from '@restgenerated/models/BiometricDeduplicationBatchStatusEnum';
+import { DeduplicationBatchStatusEnum } from '@restgenerated/models/DeduplicationBatchStatusEnum';
+import { DeduplicationGoldenRecordStatusEnum } from '@restgenerated/models/DeduplicationGoldenRecordStatusEnum';
 
 interface ImportedIndividualsTableRowProps {
-  individual;
-  choices: HouseholdChoiceDataQuery;
+  individual: IndividualList;
   rdi;
 }
 
 export function ImportedIndividualsTableRow({
   individual,
-  choices,
   rdi,
 }: ImportedIndividualsTableRowProps): ReactElement {
   const navigate = useNavigate();
   const { baseUrl, businessArea } = useBaseUrl();
-
-  const relationshipChoicesDict = choicesToDict(choices.relationshipChoices);
-  const deduplicationBatchDict = choicesToDict(
-    choices.deduplicationBatchStatusChoices,
-  );
-  const deduplicationGoldenDict = choicesToDict(
-    choices.deduplicationGoldenRecordStatusChoices,
-  );
 
   const individualDetailsPath = `/${baseUrl}/population/individuals/${individual.id}`;
 
@@ -47,33 +37,52 @@ export function ImportedIndividualsTableRow({
     });
   };
 
-  const WORST_STATUS_PRIORITY = [
-    IndividualBiometricDeduplicationGoldenRecordStatus.Duplicate,
-    IndividualBiometricDeduplicationBatchStatus.DuplicateInBatch,
-    IndividualBiometricDeduplicationGoldenRecordStatus.NeedsAdjudication,
-    IndividualBiometricDeduplicationBatchStatus.SimilarInBatch,
-    IndividualBiometricDeduplicationGoldenRecordStatus.NotProcessed,
-    IndividualBiometricDeduplicationBatchStatus.NotProcessed,
-    IndividualBiometricDeduplicationGoldenRecordStatus.Postpone,
-    IndividualBiometricDeduplicationGoldenRecordStatus.Unique,
-    IndividualBiometricDeduplicationBatchStatus.UniqueInBatch,
+  const WORST_STATUS_PRIORITY: (
+    | BiometricDeduplicationGoldenRecordStatusEnum
+    | BiometricDeduplicationBatchStatusEnum
+    | DeduplicationBatchStatusEnum
+    | DeduplicationGoldenRecordStatusEnum
+  )[] = [
+    BiometricDeduplicationGoldenRecordStatusEnum.DUPLICATE,
+    BiometricDeduplicationBatchStatusEnum.DUPLICATE_IN_BATCH,
+    BiometricDeduplicationGoldenRecordStatusEnum.NEEDS_ADJUDICATION,
+    BiometricDeduplicationBatchStatusEnum.SIMILAR_IN_BATCH,
+    BiometricDeduplicationGoldenRecordStatusEnum.NOT_PROCESSED,
+    BiometricDeduplicationBatchStatusEnum.NOT_PROCESSED,
+    BiometricDeduplicationGoldenRecordStatusEnum.POSTPONE,
+    BiometricDeduplicationGoldenRecordStatusEnum.UNIQUE,
+    BiometricDeduplicationBatchStatusEnum.UNIQUE_IN_BATCH,
   ];
 
   function renderDeduplicationStatus(
     goldenRecordStatus:
-      | IndividualBiometricDeduplicationGoldenRecordStatus
-      | IndividualBiometricDeduplicationBatchStatus,
+      | BiometricDeduplicationGoldenRecordStatusEnum
+      | DeduplicationGoldenRecordStatusEnum
+      | BiometricDeduplicationBatchStatusEnum
+      | DeduplicationBatchStatusEnum,
     batchStatus:
-      | IndividualBiometricDeduplicationGoldenRecordStatus
-      | IndividualBiometricDeduplicationBatchStatus,
+      | BiometricDeduplicationBatchStatusEnum
+      | DeduplicationBatchStatusEnum
+      | BiometricDeduplicationGoldenRecordStatusEnum
+      | DeduplicationGoldenRecordStatusEnum,
     dict,
   ): string {
-    const statuses = [goldenRecordStatus, batchStatus];
-    statuses.sort(
-      (a, b) =>
-        WORST_STATUS_PRIORITY.indexOf(a) - WORST_STATUS_PRIORITY.indexOf(b),
-    );
-    return dict[statuses[0]];
+    const indexGoldenRecordStatus =
+      WORST_STATUS_PRIORITY.indexOf(goldenRecordStatus);
+    const indexBatchStatus = WORST_STATUS_PRIORITY.indexOf(batchStatus);
+    if (indexGoldenRecordStatus === -1 && indexBatchStatus === -1) {
+      return '';
+    }
+    if (indexGoldenRecordStatus === -1) {
+      return dict[batchStatus];
+    }
+    if (indexBatchStatus === -1) {
+      return dict[goldenRecordStatus];
+    }
+    if (indexGoldenRecordStatus < indexBatchStatus) {
+      return dict[goldenRecordStatus];
+    }
+    return dict[batchStatus];
   }
 
   return (
@@ -89,9 +98,7 @@ export function ImportedIndividualsTableRow({
       </TableCell>
       <AnonTableCell>{individual.fullName}</AnonTableCell>
       <TableCell align="left">{individual.role}</TableCell>
-      <TableCell align="left">
-        {relationshipChoicesDict[individual.relationship]}
-      </TableCell>
+      <TableCell align="left">{individual.relationshipDisplay}</TableCell>
       <TableCell align="left">
         <UniversalMoment>{individual.birthDate}</UniversalMoment>
       </TableCell>
@@ -103,7 +110,12 @@ export function ImportedIndividualsTableRow({
             status={renderDeduplicationStatus(
               individual.deduplicationBatchStatus,
               individual.biometricDeduplicationBatchStatus,
-              deduplicationBatchDict,
+              {
+                [individual.deduplicationBatchStatus]:
+                  individual.deduplicationBatchStatusDisplay,
+                [individual.biometricDeduplicationBatchStatus]:
+                  individual.biometricDeduplicationBatchStatusDisplay,
+              },
             )}
             results={individual.deduplicationBatchResults}
             biometricResults={individual.biometricDeduplicationBatchResults}
@@ -114,18 +126,28 @@ export function ImportedIndividualsTableRow({
           renderDeduplicationStatus(
             individual.deduplicationBatchStatus,
             individual.biometricDeduplicationBatchStatus,
-            deduplicationBatchDict,
+            {
+              [individual.deduplicationBatchStatus]:
+                individual.deduplicationBatchStatusDisplay,
+              [individual.biometricDeduplicationBatchStatus]:
+                individual.biometricDeduplicationBatchStatusDisplay,
+            },
           )
         )}
       </TableCell>
       <TableCell align="left">
         {individual.biometricDeduplicationGoldenRecordResults?.length ||
-        individual.deduplicationGoldenRecordsResults?.length ? (
+        individual.deduplicationGoldenRecordResults?.length ? (
           <DedupeBiographicalBiometricResults
             status={renderDeduplicationStatus(
               individual.deduplicationGoldenRecordStatus,
               individual.biometricDeduplicationGoldenRecordStatus,
-              deduplicationGoldenDict,
+              {
+                [individual.deduplicationGoldenRecordStatus]:
+                  individual.deduplicationGoldenRecordStatusDisplay,
+                [individual.biometricDeduplicationGoldenRecordStatus]:
+                  individual.biometricDeduplicationGoldenRecordStatusDisplay,
+              },
             )}
             results={individual.deduplicationGoldenRecordResults}
             biometricResults={
@@ -135,9 +157,14 @@ export function ImportedIndividualsTableRow({
           />
         ) : (
           renderDeduplicationStatus(
-            individual.deduplicationGoldenRecordResults,
-            individual.biometricDeduplicationGoldenRecordResults,
-            deduplicationGoldenDict,
+            individual.deduplicationGoldenRecordStatus,
+            individual.biometricDeduplicationGoldenRecordStatus,
+            {
+              [individual.deduplicationGoldenRecordStatus]:
+                individual.deduplicationGoldenRecordStatusDisplay,
+              [individual.biometricDeduplicationGoldenRecordStatus]:
+                individual.biometricDeduplicationGoldenRecordStatusDisplay,
+            },
           )
         )}
       </TableCell>

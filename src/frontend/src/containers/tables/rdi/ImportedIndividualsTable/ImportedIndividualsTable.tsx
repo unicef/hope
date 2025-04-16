@@ -1,11 +1,10 @@
 import {
   AllIndividualsQueryVariables,
-  HouseholdChoiceDataQuery,
   IndividualMinimalFragment,
   IndividualRdiMergeStatus,
 } from '@generated/graphql';
 import { Box, Checkbox, FormControlLabel, Grid2 as Grid } from '@mui/material';
-import { ReactElement, useEffect, useState, useMemo } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { headCells as importedIndividualHeadCells } from './ImportedIndividualsTableHeadCells';
 import { ImportedIndividualsTableRow } from './ImportedIndividualsTableRow';
 import { useProgramContext } from 'src/programContext';
@@ -24,7 +23,6 @@ interface ImportedIndividualsTableProps {
   rowsPerPageOptions?: number[];
   isOnPaper?: boolean;
   businessArea: string;
-  choicesData: HouseholdChoiceDataQuery;
   isMerged: boolean;
 }
 
@@ -35,23 +33,25 @@ function ImportedIndividualsTable({
   household,
   showCheckbox,
   businessArea,
-  choicesData,
   isMerged,
 }: ImportedIndividualsTableProps): ReactElement {
   const [showDuplicates, setShowDuplicates] = useState(false);
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const initialVariables = useMemo(() => ({
-    rdiId,
-    household,
-    duplicatesOnly: showDuplicates,
-    businessArea,
-    rdiMergeStatus: isMerged
-      ? IndividualRdiMergeStatus.Merged
-      : IndividualRdiMergeStatus.Pending,
-  }), [rdiId, household, showDuplicates, businessArea, isMerged]);
-  
+  const initialVariables = useMemo(
+    () => ({
+      rdiId,
+      household,
+      duplicatesOnly: showDuplicates,
+      businessArea,
+      rdiMergeStatus: isMerged
+        ? IndividualRdiMergeStatus.Merged
+        : IndividualRdiMergeStatus.Pending,
+    }),
+    [rdiId, household, showDuplicates, businessArea, isMerged],
+  );
+
   const [queryVariables, setQueryVariables] = useState(initialVariables);
 
   useEffect(() => {
@@ -108,7 +108,6 @@ function ImportedIndividualsTable({
           setQueryVariables={setQueryVariables}
           renderRow={(row) => (
             <ImportedIndividualsTableRow
-              choices={choicesData}
               key={row.id}
               individual={row}
               rdi={rdi}
@@ -124,7 +123,6 @@ function ImportedIndividualsTable({
           headCells={adjustedImportedIndividualsHeadCells}
           renderRow={(row) => (
             <ImportedIndividualsTableRow
-              choices={choicesData}
               key={row.id}
               individual={row}
               rdi={rdi}

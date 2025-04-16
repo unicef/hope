@@ -3,24 +3,24 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * * `HR29` - Howardfurt
- * * `AF47` - Jacksonton
- * * `HR77` - North Robertview
- * * `AF70` - North Stephaniehaven
- * * `UA37` - Parkerchester
- * * `AF37` - Port Gloria
- * * `HR78` - South Danielle
- * * `UA94` - South Jorgeshire
- * * `UA71` - South Robert
+ * * `HR62` - Brockmouth
+ * * `AF47` - Brownview
+ * * `HR89` - East Jennifer
+ * * `AF41` - Joseview
+ * * `AF89` - New Josephburgh
+ * * `UA58` - Parkfurt
+ * * `UA23` - Port Charles
+ * * `HR47` - Robertshaven
+ * * `UA10` - Teresaberg
  */
 export enum Admin1Enum {
-    HR29 = 'HR29',
+    HR62 = 'HR62',
     AF47 = 'AF47',
-    HR77 = 'HR77',
-    AF70 = 'AF70',
-    UA37 = 'UA37',
-    AF37 = 'AF37',
-    HR78 = 'HR78',
-    UA94 = 'UA94',
-    UA71 = 'UA71',
+    HR89 = 'HR89',
+    AF41 = 'AF41',
+    AF89 = 'AF89',
+    UA58 = 'UA58',
+    UA23 = 'UA23',
+    HR47 = 'HR47',
+    UA10 = 'UA10',
 }
