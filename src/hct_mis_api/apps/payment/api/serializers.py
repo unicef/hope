@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from django.db.models import Count, Prefetch, Q, Sum
 from django.db.models.functions import Coalesce
@@ -12,14 +12,20 @@ from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
+from hct_mis_api.apps.core.field_attributes.lookup_functions import (
+    get_debit_card_issuer,
+    get_debit_card_number,
+)
 from hct_mis_api.apps.core.utils import (
     check_concurrency_version_in_mutation,
     to_choice_object,
 )
 from hct_mis_api.apps.household.api.serializers.household import (
+    HouseholdDetailSerializer,
     HouseholdSmallSerializer,
 )
 from hct_mis_api.apps.household.api.serializers.individual import (
+    IndividualDetailSerializer,
     IndividualSmallSerializer,
 )
 from hct_mis_api.apps.household.models import Household, Individual
@@ -246,6 +252,7 @@ class PaymentVerificationPlanDetailsSerializer(serializers.ModelSerializer):
     bank_reconciliation_success = serializers.IntegerField()
     bank_reconciliation_error = serializers.IntegerField()
     can_create_payment_verification_plan = serializers.BooleanField()
+    # verificationPlansTotalCount
 
     class Meta:
         model = PaymentPlan
@@ -623,8 +630,9 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     source_payment_plan = FollowUpPaymentPlanSerializer(read_only=True)
     eligible_payments_count = serializers.SerializerMethodField()
     funds_commitments = serializers.SerializerMethodField()
+    available_funds_commitments = serializers.SerializerMethodField()
+    payment_verification_plans = PaymentVerificationPlanSerializer(many=True, read_only=True)
     # payment_verification_summary = PaymentVerificationSummarySerializer(read_only=True)
-    # payment_verification_plans = PaymentVerificationPlanSerializer(many=True, read_only=True)
     # payment_verification_plans_count = serializers.SerializerMethodField()
 
     class Meta(PaymentPlanListSerializer.Meta):
@@ -680,8 +688,9 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "exchange_rate",
             "eligible_payments_count",
             "funds_commitments",
+            "available_funds_commitments",
             # "payment_verification_summary",
-            # "payment_verification_plans",
+            "payment_verification_plans",
             # "payment_verification_plans_count",
             "admin_url",
         )
@@ -866,6 +875,28 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             ).data
         return None
 
+    def get_available_funds_commitments(self, obj: PaymentPlan) -> List[Dict[str, Any]]:
+        available_items_qs = FundsCommitmentItem.objects.filter(
+            Q(payment_plan__isnull=True) | Q(payment_plan=obj), office=obj.business_area
+        )
+
+        # Prefetch related items grouped by `funds_commitment_group`
+        groups = (
+            FundsCommitmentGroup.objects.filter(funds_commitment_items__in=available_items_qs)
+            .distinct()
+            .prefetch_related(Prefetch("funds_commitment_items", queryset=available_items_qs, to_attr="filtered_items"))
+        )
+
+        return [
+            FundsCommitmentSerializer(
+                {
+                    "funds_commitment_number": group.funds_commitment_number,
+                    "funds_commitment_items": group.filtered_items,
+                }
+            ).data
+            for group in groups
+        ]
+
 
 class PaymentPlanBulkActionSerializer(serializers.Serializer):
     ids = serializers.ListField(child=serializers.CharField())
@@ -920,13 +951,20 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
         )
 
 
-class PaymentVerificationDetailsSerializer(serializers.ModelSerializer):
+class PaymentVerificationDetailsSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
     payment_verification_plan_unicef_id = serializers.CharField(source="payment_verification_plan.unicef_id")
     verification_channel = serializers.CharField(source="payment_verification_plan.verification_channel")
 
     class Meta:
         model = PaymentVerification
-        fields = ("id", "received_amount", "payment_verification_plan_unicef_id", "verification_channel")
+        fields = (
+            "id",
+            "received_amount",
+            "status",
+            "payment_verification_plan_unicef_id",
+            "verification_channel",
+            "admin_url",
+        )
 
 
 class PaymentListSerializer(serializers.ModelSerializer):
@@ -940,7 +978,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
     snapshot_collector_full_name = serializers.SerializerMethodField(help_text="Get from Household Snapshot")
     fsp_name = serializers.SerializerMethodField()
     fsp_auth_code = serializers.SerializerMethodField()
-    payment_verifications = PaymentVerificationDetailsSerializer(many=True)
+    verification = serializers.SerializerMethodField()
 
     class Meta:
         model = Payment
@@ -962,7 +1000,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
             "hoh_full_name",
             "collector_phone_no",
             "collector_phone_no_alt",
-            "payment_verifications",
+            "verification",
         )
 
     @classmethod
@@ -995,15 +1033,81 @@ class PaymentListSerializer(serializers.ModelSerializer):
             return ""
         return obj.fsp_auth_code or ""
 
+    def get_verification(self, obj: Payment) -> Dict[str, Any]:
+        return PaymentVerificationDetailsSerializer(obj.payment_verifications.first()).data
+
 
 class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
-    parent = FollowUpPaymentPlanSerializer()
+    parent = PaymentPlanDetailSerializer()
+    source_payment = PaymentListSerializer()
+    household = HouseholdDetailSerializer()
+    delivery_mechanism = DeliveryMechanismSerializer()
+    collector = IndividualDetailSerializer()
+    snapshot_collector_debit_card_number = serializers.SerializerMethodField()
+    snapshot_collector_bank_account_number = serializers.SerializerMethodField()
+    snapshot_collector_bank_name = serializers.SerializerMethodField()
+    debit_card_number = serializers.SerializerMethodField()
+    debit_card_issuer = serializers.SerializerMethodField()
 
     class Meta(PaymentListSerializer.Meta):
         fields = PaymentListSerializer.Meta.fields + (  # type: ignore
             "parent",
             "admin_url",
+            "source_payment",
+            "household",
+            "delivery_mechanism",
+            "collector",
+            "reason_for_unsuccessful_payment",
+            "additional_document_number",
+            "additional_document_type",
+            "additional_collector_name",
+            "transaction_reference_id",
+            "snapshot_collector_bank_account_number",
+            "snapshot_collector_bank_name",
+            "snapshot_collector_debit_card_number",
+            "debit_card_number",
+            "debit_card_issuer",
         )
+
+    def get_debit_card_number(self, obj: Payment) -> str:
+        return get_debit_card_number(obj.collector)
+
+    def get_debit_card_issuer(self, obj: Payment) -> str:
+        return get_debit_card_issuer(obj.collector)
+
+    #     def resolve_snapshot_collector_full_name(self, info: Any) -> Any:
+    #         return PaymentNode.get_collector_field(self, "full_name")
+    #
+    #     def resolve_snapshot_collector_delivery_phone_no(self, info: Any) -> Any:
+    #         return PaymentNode.get_collector_field(self, "payment_delivery_phone_no")
+    #
+    def get_snapshot_collector_bank_name(self, obj: Payment) -> Optional[str]:
+        if bank_account_info := self.get_collector_field(obj, "bank_account_info"):
+            return bank_account_info.get("bank_name")
+        return None
+
+    def get_snapshot_collector_bank_account_number(self, obj: Payment) -> Optional[str]:
+        if bank_account_info := self.get_collector_field(obj, "bank_account_info"):
+            return bank_account_info.get("bank_account_number")
+        return None
+
+    def get_snapshot_collector_debit_card_number(self, obj: Payment) -> Optional[str]:
+        if bank_account_info := self.get_collector_field(obj, "bank_account_info"):
+            return bank_account_info.get("debit_card_number")
+        return None
+
+    @staticmethod
+    def get_collector_field(payment: "Payment", field_name: str) -> Union[None, str, Dict]:
+        """return primary_collector or alternate_collector field value or None"""
+        if household_snapshot := getattr(payment, "household_snapshot", None):
+            household_snapshot_data = household_snapshot.snapshot_data
+            collector_data = (
+                household_snapshot_data.get("primary_collector")
+                or household_snapshot_data.get("alternate_collector")
+                or dict()
+            )
+            return collector_data.get(field_name)
+        return None
 
 
 class VerificationDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):

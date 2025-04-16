@@ -12,7 +12,6 @@ import {
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
-import { PaymentPlan } from '@restgenerated/models/PaymentPlan';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
@@ -47,10 +46,10 @@ function VerificationPaymentDetailsPage(): ReactElement {
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
   if (!payment || !choicesData || permissions === null) return null;
 
-  const { verificationPlans } = payment?.parent || {};
-  const verificationPlansAmount = verificationPlans?.edges.length;
+  const { paymentVerificationPlans } = payment?.parent || {};
+  const verificationPlansAmount = paymentVerificationPlans?.length;
   const verification =
-    verificationPlans.edges[verificationPlansAmount - 1].node;
+    paymentVerificationPlans[verificationPlansAmount - 1];
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     ...(hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions)

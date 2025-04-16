@@ -2,8 +2,11 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { FollowUpPaymentPlan } from './FollowUpPaymentPlan';
-import type { PaymentVerificationDetails } from './PaymentVerificationDetails';
+import type { DeliveryMechanism } from './DeliveryMechanism';
+import type { HouseholdDetail } from './HouseholdDetail';
+import type { IndividualDetail } from './IndividualDetail';
+import type { PaymentList } from './PaymentList';
+import type { PaymentPlanDetail } from './PaymentPlanDetail';
 export type PaymentDetail = {
     readonly id: string;
     unicefId?: string | null;
@@ -25,8 +28,31 @@ export type PaymentDetail = {
     hohFullName: string;
     collectorPhoneNo: string;
     collectorPhoneNoAlt: string;
-    paymentVerifications: Array<PaymentVerificationDetails>;
-    parent: FollowUpPaymentPlan;
+    readonly verification: Record<string, any>;
+    parent: PaymentPlanDetail;
     readonly adminUrl: string;
+    sourcePayment: PaymentList;
+    household: HouseholdDetail;
+    deliveryMechanism: DeliveryMechanism;
+    collector: IndividualDetail;
+    reasonForUnsuccessfulPayment?: string | null;
+    /**
+     * Use this field for reconciliation data
+     */
+    additionalDocumentNumber?: string | null;
+    /**
+     * Use this field for reconciliation data
+     */
+    additionalDocumentType?: string | null;
+    /**
+     * Use this field for reconciliation data when funds are collected by someone other than the designated collector or the alternate collector
+     */
+    additionalCollectorName?: string | null;
+    transactionReferenceId?: string | null;
+    readonly snapshotCollectorBankAccountNumber: string | null;
+    readonly snapshotCollectorBankName: string | null;
+    readonly snapshotCollectorDebitCardNumber: string | null;
+    readonly debitCardNumber: string;
+    readonly debitCardIssuer: string;
 };
 

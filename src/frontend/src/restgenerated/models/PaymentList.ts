@@ -2,7 +2,6 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { PaymentVerificationDetails } from './PaymentVerificationDetails';
 export type PaymentList = {
     readonly id: string;
     unicefId?: string | null;
@@ -24,6 +23,6 @@ export type PaymentList = {
     hohFullName: string;
     collectorPhoneNo: string;
     collectorPhoneNoAlt: string;
-    paymentVerifications: Array<PaymentVerificationDetails>;
+    readonly verification: Record<string, any>;
 };
 

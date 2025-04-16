@@ -108,7 +108,7 @@ export function PaymentDetails({
           <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('DISTRIBUTION MODALITY')}
-              value={payment.distributionModality}
+              value={payment.parent?.unicefId}
             />
           </Grid>
           <Grid size={{ xs: 3 }}>
@@ -212,13 +212,13 @@ export function PaymentDetails({
           <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('DELIVERY MECHANISM')}
-              value={payment.deliveryType.name}
+              value={payment.deliveryMechanism?.name}
             />
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('FSP')}
-              value={payment.serviceProvider?.fullName}
+              value={payment.fspName}
             />
           </Grid>
           <Grid size={{ xs: 3 }}>
@@ -242,7 +242,7 @@ export function PaymentDetails({
               value={payment.snapshotCollectorBankAccountNumber}
             />
           </Grid>
-          {payment.deliveryType?.name === 'Deposit to Card' && (
+          {payment.deliveryMechanism?.name === 'Deposit to Card' && (
             <>
               <Grid size={{ xs: 3 }}>
                 <LabelizedField

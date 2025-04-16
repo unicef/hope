@@ -56,7 +56,7 @@ export function VerificationPaymentDetails({
           <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('DISTRIBUTION MODALITY')}
-              value={payment.distributionModality}
+              value={payment.parent.unicefId}
             />
           </Grid>
         </Grid>
@@ -113,7 +113,7 @@ export function VerificationPaymentDetails({
           <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('DELIVERY TYPE')}
-              value={payment.deliveryType?.name}
+              value={payment.deliveryMechanism?.name}
             />
           </Grid>
           <Grid size={{ xs: 3 }}>
@@ -125,14 +125,14 @@ export function VerificationPaymentDetails({
           <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('FSP')}
-              value={payment.serviceProvider.fullName}
+              value={payment.fspName}
             />
           </Grid>
         </Grid>
       </Overview>
       {canViewActivityLog && (
         <UniversalActivityLogTable
-          objectId={payment.parent.verificationPlans.edges[0].node.id}
+          objectId={payment.parent.paymentVerificationPlans[0].id}
         />
       )}
     </>

@@ -107,7 +107,6 @@ export type { PaymentPlanExportAuthCode as PaymentPlanExportAuthCodeCamelCase } 
 export type { PaymentPlanImportFile as PaymentPlanImportFileCamelCase } from './models/PaymentPlanImportFile';
 export type { PaymentPlanList as PaymentPlanListCamelCase } from './models/PaymentPlanList';
 export type { PaymentPlanSupportingDocument as PaymentPlanSupportingDocumentCamelCase } from './models/PaymentPlanSupportingDocument';
-export type { PaymentVerificationDetails as PaymentVerificationDetailsCamelCase } from './models/PaymentVerificationDetails';
 export type { PaymentVerificationPlan as PaymentVerificationPlanCamelCase } from './models/PaymentVerificationPlan';
 export type { PaymentVerificationPlanActivate as PaymentVerificationPlanActivateCamelCase } from './models/PaymentVerificationPlanActivate';
 export type { PaymentVerificationPlanCreate as PaymentVerificationPlanCreateCamelCase } from './models/PaymentVerificationPlanCreate';

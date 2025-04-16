@@ -66,7 +66,7 @@ export function VerificationPlansSummary({
                 dataCy="summary-number-of-plans"
                 label={t('Number of Verification Plans')}
               >
-                {planNode.verificationPlansTotalCount}
+                {planNode.paymentVerificationPlans.length}
               </LabelizedField>
             </Box>
           </Grid>
