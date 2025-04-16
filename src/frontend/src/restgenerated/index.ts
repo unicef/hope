@@ -11,6 +11,7 @@ export { Admin2Enum as Admin2EnumCamelCase } from './models/Admin2Enum';
 export { Admin3Enum as Admin3EnumCamelCase } from './models/Admin3Enum';
 export { Admin4Enum as Admin4EnumCamelCase } from './models/Admin4Enum';
 export type { Age as AgeCamelCase } from './models/Age';
+export type { ApplyEngineFormula as ApplyEngineFormulaCamelCase } from './models/ApplyEngineFormula';
 export type { ApprovalProcess as ApprovalProcessCamelCase } from './models/ApprovalProcess';
 export type { Area as AreaCamelCase } from './models/Area';
 export type { AreaList as AreaListCamelCase } from './models/AreaList';
@@ -173,7 +174,6 @@ export type { TargetingCriteriaRule as TargetingCriteriaRuleCamelCase } from './
 export type { TargetingCriteriaRuleFilter as TargetingCriteriaRuleFilterCamelCase } from './models/TargetingCriteriaRuleFilter';
 export type { TargetingIndividualBlockRuleFilter as TargetingIndividualBlockRuleFilterCamelCase } from './models/TargetingIndividualBlockRuleFilter';
 export type { TargetingIndividualRuleFilterBlock as TargetingIndividualRuleFilterBlockCamelCase } from './models/TargetingIndividualRuleFilterBlock';
-export type { TargetPopulationApplyEngineFormula as TargetPopulationApplyEngineFormulaCamelCase } from './models/TargetPopulationApplyEngineFormula';
 export type { TargetPopulationCopy as TargetPopulationCopyCamelCase } from './models/TargetPopulationCopy';
 export type { TargetPopulationCreate as TargetPopulationCreateCamelCase } from './models/TargetPopulationCreate';
 export type { TargetPopulationDetail as TargetPopulationDetailCamelCase } from './models/TargetPopulationDetail';

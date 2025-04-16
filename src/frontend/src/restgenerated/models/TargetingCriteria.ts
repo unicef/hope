@@ -4,7 +4,6 @@
 /* eslint-disable */
 import type { TargetingCriteriaRule } from './TargetingCriteriaRule';
 export type TargetingCriteria = {
-    readonly id: string;
     /**
      * Exclude households with individuals (members or collectors) that have active adjudication ticket(s).
      */

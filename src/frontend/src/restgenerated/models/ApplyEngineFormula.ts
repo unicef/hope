@@ -2,7 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type TargetPopulationApplyEngineFormula = {
+export type ApplyEngineFormula = {
     engineFormulaRuleId: string;
     version?: number;
 };

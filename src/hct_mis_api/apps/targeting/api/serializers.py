@@ -118,13 +118,11 @@ class TargetingCriteriaRuleSerializer(serializers.ModelSerializer):
 
 
 class TargetingCriteriaSerializer(serializers.ModelSerializer):
-    id = serializers.UUIDField(read_only=True)
     rules = TargetingCriteriaRuleSerializer(many=True)
 
     class Meta:
         model = TargetingCriteria
         fields = (
-            "id",
             "flag_exclude_if_active_adjudication_ticket",
             "flag_exclude_if_on_sanction_list",
             "rules",

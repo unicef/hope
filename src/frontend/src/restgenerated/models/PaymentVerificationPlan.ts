@@ -20,7 +20,13 @@ export type PaymentVerificationPlan = {
     marginOfError?: number | null;
     xlsxFileExporting?: boolean;
     xlsxFileImported?: boolean;
+    readonly hasXlsxFile: boolean;
+    readonly xlsxFileWasDownloaded: boolean;
     error?: string | null;
+    readonly ageFilterMin: number | null;
+    readonly ageFilterMax: number | null;
+    excludedAdminAreasFilter?: any;
+    rapidProFlowId?: string;
     readonly adminUrl: string;
 };
 

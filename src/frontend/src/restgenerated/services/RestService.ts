@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { AcceptanceProcess } from '../models/AcceptanceProcess';
+import type { ApplyEngineFormula } from '../models/ApplyEngineFormula';
 import type { BusinessArea } from '../models/BusinessArea';
 import type { CountResponse } from '../models/CountResponse';
 import type { DelegatePeople } from '../models/DelegatePeople';
@@ -74,7 +75,6 @@ import type { RefuseRdi } from '../models/RefuseRdi';
 import type { RegistrationDataImportDetail } from '../models/RegistrationDataImportDetail';
 import type { RevertMarkPaymentAsFailed } from '../models/RevertMarkPaymentAsFailed';
 import type { SplitPaymentPlan } from '../models/SplitPaymentPlan';
-import type { TargetPopulationApplyEngineFormula } from '../models/TargetPopulationApplyEngineFormula';
 import type { TargetPopulationCopy } from '../models/TargetPopulationCopy';
 import type { TargetPopulationCreate } from '../models/TargetPopulationCreate';
 import type { TargetPopulationDetail } from '../models/TargetPopulationDetail';
@@ -2478,7 +2478,7 @@ export class RestService {
          */
         id: string,
         programSlug: string,
-        requestBody: TargetPopulationApplyEngineFormula,
+        requestBody: ApplyEngineFormula,
     }): CancelablePromise<PaymentPlanDetail> {
         return __request(OpenAPI, {
             method: 'POST',
@@ -3569,7 +3569,7 @@ export class RestService {
     }
     /**
      * Adds a count action to the viewset that returns the count of the queryset.
-     * @returns PaymentPlan
+     * @returns PaymentDetail
      * @throws ApiError
      */
     public static restBusinessAreasProgramsPaymentVerificationsVerificationsRetrieve2({
@@ -3585,7 +3585,7 @@ export class RestService {
         id: string,
         paymentId: string,
         programSlug: string,
-    }): CancelablePromise<PaymentPlan> {
+    }): CancelablePromise<PaymentDetail> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/verifications/{payment_id}/',
@@ -4485,7 +4485,7 @@ export class RestService {
     }
     /**
      * Adds a count action to the viewset that returns the count of the queryset.
-     * @returns TargetPopulationApplyEngineFormula
+     * @returns ApplyEngineFormula
      * @throws ApiError
      */
     public static restBusinessAreasProgramsTargetPopulationsApplyEngineFormulaCreate({
@@ -4500,8 +4500,8 @@ export class RestService {
          */
         id: string,
         programSlug: string,
-        requestBody: TargetPopulationApplyEngineFormula,
-    }): CancelablePromise<TargetPopulationApplyEngineFormula> {
+        requestBody: ApplyEngineFormula,
+    }): CancelablePromise<ApplyEngineFormula> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/target-populations/{id}/apply-engine-formula/',

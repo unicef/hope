@@ -47,6 +47,7 @@ from hct_mis_api.apps.payment.api.filters import (
 )
 from hct_mis_api.apps.payment.api.serializers import (
     AcceptanceProcessSerializer,
+    ApplyEngineFormulaSerializer,
     PaymentDetailSerializer,
     PaymentListSerializer,
     PaymentPlanBulkActionSerializer,
@@ -67,7 +68,6 @@ from hct_mis_api.apps.payment.api.serializers import (
     PaymentVerificationUpdateSerializer,
     RevertMarkPaymentAsFailedSerializer,
     SplitPaymentPlanSerializer,
-    TargetPopulationApplyEngineFormulaSerializer,
     TargetPopulationCopySerializer,
     TargetPopulationCreateSerializer,
     TargetPopulationDetailSerializer,
@@ -162,6 +162,7 @@ class PaymentVerificationViewSet(
         "export_xlsx_payment_verification_plan": PaymentVerificationPlanDetailsSerializer,
         "import_xlsx_payment_verification_plan": PaymentVerificationPlanImportSerializer,
         "verifications": PaymentListSerializer,
+        "verification_details": PaymentDetailSerializer,
         "verifications_update": PaymentVerificationUpdateSerializer,
     }
     permissions_by_action = {
@@ -176,6 +177,7 @@ class PaymentVerificationViewSet(
         "delete_payment_verification_plan": [Permissions.PAYMENT_VERIFICATION_DELETE],
         "export_xlsx_payment_verification_plan": [Permissions.PAYMENT_VERIFICATION_EXPORT],
         "import_xlsx_payment_verification_plan": [Permissions.PAYMENT_VERIFICATION_IMPORT],
+        "verification_details": [Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS],
         "verifications_update": [Permissions.PAYMENT_VERIFICATION_VERIFY],
     }
 
@@ -413,11 +415,12 @@ class PaymentVerificationViewSet(
     ) -> Response:
         payment_plan = self.get_object()
         payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=verification_plan_id)
-
         # payment_plan = graphene.Field(GenericPaymentPlanNode)
         #     errors = graphene.List(XlsxErrorNode)
         # serializer
-        file = ""  # get from serializer
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        file = serializer.validated_data["file"]
         if payment_verification_plan.status != PaymentVerificationPlan.STATUS_ACTIVE:
             raise ValidationError("You can only import verification for active CashPlan verification")
         if payment_verification_plan.verification_channel != PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX:
@@ -426,9 +429,10 @@ class PaymentVerificationViewSet(
         import_service.open_workbook()
         import_service.validate()
         if len(import_service.errors):
-            # add new serializer
-            return Response(import_service.errors, status=status.HTTP_400_BAD_REQUEST)
-            # return ImportXlsxPaymentVerificationPlanFile(None, import_service.errors)
+            return Response(
+                data=XlsxErrorSerializer(import_service.errors, many=True, context={"request": request}).data,
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         import_service.import_verifications()
         calculate_counts(payment_verification_plan)
         payment_verification_plan.xlsx_file_imported = True
@@ -450,15 +454,10 @@ class PaymentVerificationViewSet(
             status=status.HTTP_200_OK,
         )
 
-    @action(
-        detail=True,
-        methods=["get"],
-        url_path="verifications/(?P<payment_id>[^/.]+)",
-        PERMISSIONS=[Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS],
-    )
+    @action(detail=True, methods=["get"], url_path="verifications/(?P<payment_id>[^/.]+)")
     def verification_details(self, request: Request, verification_id: str, *args: Any, **kwargs: Any) -> Response:
         payment = get_object_or_404(Payment, id=verification_id)
-        serializer = PaymentDetailSerializer(payment, context={"request": request})
+        serializer = self.get_serializer(payment)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(
@@ -471,9 +470,10 @@ class PaymentVerificationViewSet(
         # payment = get_object_or_404(Payment, id=verification_id)
         payment_verification = get_object_or_404(PaymentVerification, id=verification_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification)
-        serializer = self.get_serializer()
-        received_amount = ""
-        received = ""
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        received_amount = serializer.validated_data["received_amount"]
+        received = serializer.validated_data["received"]
         old_payment_verification = copy_model_object(payment_verification)
         if (
             payment_verification.payment_verification_plan.verification_channel
@@ -541,7 +541,7 @@ class PaymentPlanViewSet(
         "create_follow_up": PaymentPlanCreateFollowUpSerializer,
         "partial_update": PaymentPlanCreateUpdateSerializer,
         "exclude_beneficiaries": PaymentPlanExcludeBeneficiariesSerializer,
-        "apply_engine_formula": TargetPopulationApplyEngineFormulaSerializer,
+        "apply_engine_formula": ApplyEngineFormulaSerializer,
         "entitlement_import_xlsx": PaymentPlanImportFileSerializer,
         "reject": AcceptanceProcessSerializer,
         "approve": AcceptanceProcessSerializer,
@@ -742,7 +742,7 @@ class PaymentPlanViewSet(
         )
         return Response(status=status.HTTP_200_OK, data={"message": "Payment Plan FSP unlocked"})
 
-    @extend_schema(request=TargetPopulationApplyEngineFormulaSerializer, responses={200: PaymentPlanDetailSerializer})
+    @extend_schema(request=ApplyEngineFormulaSerializer, responses={200: PaymentPlanDetailSerializer})
     @action(detail=True, methods=["post"], url_path="apply-engine-formula")
     def apply_engine_formula(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
@@ -1161,7 +1161,7 @@ class TargetPopulationViewSet(
         "create": TargetPopulationCreateSerializer,
         "partial_update": TargetPopulationCreateSerializer,
         "copy": TargetPopulationCopySerializer,
-        "apply_engine_formula": TargetPopulationApplyEngineFormulaSerializer,
+        "apply_engine_formula": ApplyEngineFormulaSerializer,
     }
     permissions_by_action = {
         "list": [Permissions.TARGETING_VIEW_LIST],

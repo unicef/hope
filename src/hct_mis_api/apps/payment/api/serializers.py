@@ -170,6 +170,10 @@ class PaymentVerificationPlanSerializer(AdminUrlSerializerMixin, serializers.Mod
     status = serializers.CharField(source="get_status_display")
     verification_channel = serializers.CharField(source="get_verification_channel_display")
     sampling = serializers.CharField(source="get_sampling_display")
+    has_xlsx_file = serializers.SerializerMethodField()
+    xlsx_file_was_downloaded = serializers.SerializerMethodField()
+    age_filter_min = serializers.SerializerMethodField()
+    age_filter_max = serializers.SerializerMethodField()
 
     class Meta:
         model = PaymentVerificationPlan
@@ -191,9 +195,27 @@ class PaymentVerificationPlanSerializer(AdminUrlSerializerMixin, serializers.Mod
             "margin_of_error",
             "xlsx_file_exporting",
             "xlsx_file_imported",
+            "has_xlsx_file",
+            "xlsx_file_was_downloaded",
             "error",
+            "age_filter_min",
+            "age_filter_max",
+            "excluded_admin_areas_filter",
+            "rapid_pro_flow_id",
             "admin_url",
         )
+
+    def get_has_xlsx_file(self, obj: PaymentVerificationPlan) -> bool:
+        return obj.has_xlsx_payment_verification_plan_file
+
+    def get_xlsx_file_was_downloaded(self, obj: PaymentVerificationPlan) -> bool:
+        return obj.xlsx_payment_verification_plan_file_was_downloaded
+
+    def get_age_filter_min(self, obj: PaymentVerificationPlan) -> Optional[int]:
+        return obj.age_filter.get("min") if obj.age_filter else None
+
+    def get_age_filter_max(self, obj: PaymentVerificationPlan) -> Optional[int]:
+        return obj.age_filter.get("max") if obj.age_filter else None
 
 
 class FollowUpPaymentPlanSerializer(serializers.ModelSerializer):
@@ -1182,6 +1204,6 @@ class TargetPopulationCopySerializer(serializers.Serializer):
     program_cycle_id = serializers.CharField(required=True)
 
 
-class TargetPopulationApplyEngineFormulaSerializer(serializers.Serializer):
+class ApplyEngineFormulaSerializer(serializers.Serializer):
     engine_formula_rule_id = serializers.CharField(required=True)
     version = serializers.IntegerField(required=False)
