@@ -1,9 +1,8 @@
 from rest_framework.reverse import reverse
 
-from hct_mis_api.api.models import Grant
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
 from hct_mis_api.apps.core.models import BusinessArea
-from tests.unit.api.base import HOPEApiTestCase, token_grant_permission
+from tests.unit.api.base import HOPEApiTestCase
 
 
 class APIBusinessAreaTests(HOPEApiTestCase):
@@ -13,7 +12,7 @@ class APIBusinessAreaTests(HOPEApiTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        cls.list_url = reverse("api:business-area-list")
+        cls.list_url = reverse("api:core:business-areas-list")
 
     def test_list_business_area(self) -> None:
         business_area1: BusinessArea = BusinessAreaFactory(
@@ -36,8 +35,8 @@ class APIBusinessAreaTests(HOPEApiTestCase):
         business_area2.refresh_from_db()
         response = self.client.get(self.list_url)
         assert response.status_code == 403
-        with token_grant_permission(self.token, Grant.API_READ_ONLY):
-            response = self.client.get(self.list_url)
+        self.client.force_authenticate(self.user)
+        response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json()["results"]), 3)
         self.assertIn(

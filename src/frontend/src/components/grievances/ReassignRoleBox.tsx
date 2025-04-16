@@ -94,7 +94,8 @@ export const ReassignRoleBox = ({
   if (reassignData && typeof reassignData === 'object') {
     for (const key of Object.keys(reassignData)) {
       if (reassignData[key] && reassignData[key].individual) {
-        reassignDataDictByIndividualId[reassignData[key].individual] = reassignData[key];
+        reassignDataDictByIndividualId[reassignData[key].individual] =
+          reassignData[key];
       }
     }
   }

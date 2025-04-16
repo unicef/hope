@@ -1,9 +1,9 @@
 from contextlib import contextmanager
-from typing import Callable, Generator
+from typing import Callable, Dict, Generator
 from unittest import mock
 from unittest.mock import patch
 
-from django.conf import settings
+from django.core.management import call_command
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.forms import model_to_dict
 from django.test import TestCase
@@ -69,17 +69,14 @@ def capture_on_commit_callbacks(
 
 
 class TestRdiMergeTask(TestCase):
-    fixtures = [
-        f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",
-        f"{settings.PROJECT_ROOT}/apps/core/fixtures/data.json",
-    ]
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
+        call_command("init-core-fixtures")
         cls.business_area = create_afghanistan()
         program = ProgramFactory()
-        cls.rdi = RegistrationDataImportFactory(program=program)
+        cls.rdi = RegistrationDataImportFactory(program=program, business_area=cls.business_area)
         cls.rdi.business_area.postpone_deduplication = True
         cls.rdi.business_area.save()
 
@@ -216,7 +213,7 @@ class TestRdiMergeTask(TestCase):
 
     @freeze_time("2022-01-01")
     def test_merge_rdi_and_recalculation(self) -> None:
-        household = PendingHouseholdFactory(
+        hh = PendingHouseholdFactory(
             registration_data_import=self.rdi,
             admin_area=self.area4,
             admin4=self.area4,
@@ -234,9 +231,9 @@ class TestRdiMergeTask(TestCase):
         dct.recalculate_composition = True
         dct.save()
 
-        self.set_imported_individuals(household)
-        household.head_of_household = PendingIndividual.objects.first()
-        household.save()
+        self.set_imported_individuals(hh)
+        hh.head_of_household = PendingIndividual.objects.first()
+        hh.save()
 
         with capture_on_commit_callbacks(execute=True):
             RdiMergeTask().execute(self.rdi.pk)
@@ -280,8 +277,8 @@ class TestRdiMergeTask(TestCase):
             Individual.objects.filter(full_name="Benjamin Butler").first().wallet_address, "Wallet Address 1"
         )
 
-        household_data = model_to_dict(
-            household,
+        household_data: Dict = model_to_dict(
+            household,  # type: ignore
             (
                 "female_age_group_0_5_count",
                 "female_age_group_6_11_count",

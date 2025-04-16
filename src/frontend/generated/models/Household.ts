@@ -82,11 +82,8 @@ export type Household = {
     total_cash_received?: string | null;
     family_id?: string | null;
     origin_unicef_id?: string | null;
-    is_migration_handled?: boolean;
-    migrated_at?: string | null;
     collect_type?: CollectTypeEnum;
     enumerator_rec_id?: number | null;
-    mis_unicef_id?: string | null;
     flex_registrations_record_id?: number | null;
     household_collection?: number | null;
     admin_area?: string | null;

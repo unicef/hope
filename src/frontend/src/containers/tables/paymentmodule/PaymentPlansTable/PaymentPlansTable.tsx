@@ -44,7 +44,7 @@ function PaymentPlansTable({
       `Num. of ${_beneficiaryGroup?.groupLabelPlural}`,
   };
 
-  const adjustedHeadCells = adjustHeadCells(
+  const adjustedHeadCells = adjustHeadCells<PaymentPlanNode>(
     headCells,
     beneficiaryGroup,
     replacements,

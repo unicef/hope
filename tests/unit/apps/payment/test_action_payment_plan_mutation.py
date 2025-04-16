@@ -177,7 +177,9 @@ class TestActionPaymentPlanMutation(APITestCase):
         get_exchange_rate_mock: Any,
         send_mock: Any,
     ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
         if status:
             self.payment_plan.status = status
             self.payment_plan.save()
@@ -208,6 +210,7 @@ class TestActionPaymentPlanMutation(APITestCase):
                 Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
             ],
             self.business_area,
+            whole_business_area_access=True,
         )
         self.payment_plan.status = "LOCKED_FSP"
         self.payment_plan.save()
@@ -256,6 +259,7 @@ class TestActionPaymentPlanMutation(APITestCase):
                 Permissions.PM_SEND_XLSX_PASSWORD,
             ],
             self.business_area,
+            whole_business_area_access=True,
         )
         self.payment_plan.status = PaymentPlan.Status.ACCEPTED
         self.payment_plan.save()

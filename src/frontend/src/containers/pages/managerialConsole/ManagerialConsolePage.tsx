@@ -1,7 +1,4 @@
-import {
-  bulkActionPaymentPlansManagerial,
-  fetchPaymentPlansManagerial,
-} from '@api/paymentModuleApi';
+import { bulkActionPaymentPlansManagerial } from '@api/paymentModuleApi';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
@@ -18,10 +15,11 @@ import { FC, SetStateAction, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { RestService } from '@restgenerated/services/RestService';
 
 export const ManagerialConsolePage: FC = () => {
   const { t } = useTranslation();
-  const { businessArea } = useBaseUrl();
+  const { businessAreaSlug } = useBaseUrl();
   const [selectedApproved, setSelectedApproved] = useState([]);
   const [selectedAuthorized, setSelectedAuthorized] = useState([]);
   const [selectedInReview, setSelectedInReview] = useState([]);
@@ -57,15 +55,23 @@ export const ManagerialConsolePage: FC = () => {
   };
 
   const permissions = usePermissions();
+  const fetchPaymentPlans = (status: string) => {
+    return RestService.restBusinessAreasPaymentsPaymentPlansManagerialList({
+      businessAreaSlug,
+      limit: 10000,
+      offset: 0,
+      //@ts-ignore
+      status,
+    });
+  };
 
   const {
     data: inApprovalData,
     isLoading: inApprovalLoading,
     refetch: refetchInApproval,
   } = useQuery({
-    queryKey: ['paymentPlansInApproval', businessArea],
-    queryFn: () =>
-      fetchPaymentPlansManagerial(businessArea, { status: 'IN_APPROVAL' }),
+    queryKey: ['paymentPlansInApproval', businessAreaSlug],
+    queryFn: () => fetchPaymentPlans('IN_APPROVAL'),
   });
 
   const {
@@ -73,11 +79,8 @@ export const ManagerialConsolePage: FC = () => {
     isLoading: inAuthorizationLoading,
     refetch: refetchInAuthorization,
   } = useQuery({
-    queryKey: ['paymentPlansInAuthorization', businessArea],
-    queryFn: () =>
-      fetchPaymentPlansManagerial(businessArea, {
-        status: 'IN_AUTHORIZATION',
-      }),
+    queryKey: ['paymentPlansInAuthorization', businessAreaSlug],
+    queryFn: () => fetchPaymentPlans('IN_AUTHORIZATION'),
   });
 
   const {
@@ -85,9 +88,8 @@ export const ManagerialConsolePage: FC = () => {
     isLoading: inReviewLoading,
     refetch: refetchInReview,
   } = useQuery({
-    queryKey: ['paymentPlansInReview', businessArea],
-    queryFn: () =>
-      fetchPaymentPlansManagerial(businessArea, { status: 'IN_REVIEW' }),
+    queryKey: ['paymentPlansInReview', businessAreaSlug],
+    queryFn: () => fetchPaymentPlans('IN_REVIEW'),
   });
 
   const {
@@ -95,15 +97,14 @@ export const ManagerialConsolePage: FC = () => {
     isLoading: releasedLoading,
     refetch: refetchReleased,
   } = useQuery({
-    queryKey: ['paymentPlansReleased', businessArea],
-    queryFn: () =>
-      fetchPaymentPlansManagerial(businessArea, { status: 'ACCEPTED' }),
+    queryKey: ['paymentPlansReleased', businessAreaSlug],
+    queryFn: () => fetchPaymentPlans('ACCEPTED'),
   });
 
   const bulkAction = useMutation({
     mutationFn: (params: { ids: string[]; action: string; comment: string }) =>
       bulkActionPaymentPlansManagerial({
-        businessAreaSlug: businessArea,
+        businessAreaSlug,
         ids: params.ids,
         action: params.action,
         comment: params.comment,

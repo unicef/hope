@@ -1,10 +1,3 @@
-import { GraphQLError } from 'graphql';
-import localForage from 'localforage';
-import camelCase from 'lodash/camelCase';
-import moment from 'moment';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { ValidationGraphQLError } from '../apollo/ValidationGraphQLError';
-import { theme as themeObj } from '../theme';
 import {
   AllProgramsQuery,
   ChoiceObject,
@@ -14,6 +7,13 @@ import {
   PaymentStatus,
   ProgramStatus,
 } from '@generated/graphql';
+import { GraphQLError } from 'graphql';
+import localForage from 'localforage';
+import camelCase from 'lodash/camelCase';
+import moment from 'moment';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { ValidationGraphQLError } from '../apollo/ValidationGraphQLError';
+import { theme as themeObj } from '../theme';
 import {
   GRIEVANCE_CATEGORIES,
   PAYMENT_PLAN_BACKGROUND_ACTION_STATES,
@@ -21,6 +21,8 @@ import {
   PROGRAM_STATES,
   TARGETING_STATES,
 } from './constants';
+import _ from 'lodash';
+import { HeadCell } from '@core/Table/EnhancedTableHead';
 
 const Gender = new Map([
   ['MALE', 'Male'],
@@ -54,6 +56,23 @@ export const sexToCapitalize = (sex: string): string => {
 
 export function opacityToHex(opacity: number): string {
   return Math.floor(opacity * 0xff).toString(16);
+}
+
+export const isPartnerVisible = (partnerName: string): boolean => {
+  if (!partnerName) return false;
+  return (
+    !partnerName.startsWith('UNICEF Partner for') && partnerName !== 'UNICEF HQ'
+  );
+};
+
+export function mapPartnerChoicesWithoutUnicef(choices, selectedPartners) {
+  return choices
+    .filter((partner) => isPartnerVisible(partner.name))
+    .map((partner) => ({
+      value: partner.value,
+      label: partner.name,
+      disabled: selectedPartners.some((p) => p.id === partner.value),
+    }));
 }
 
 export function periodicDataUpdatesStatusToColor(
@@ -1187,19 +1206,62 @@ export const isProgramNodeUuidFormat = (id: string): boolean => {
 export const arraysHaveSameContent = (a: any[], b: any[]): boolean =>
   a.length === b.length && a.every((val, index) => val === b[index]);
 
-export function adjustHeadCells(
-  headCells,
+export function adjustHeadCells<T>(
+  headCells:HeadCell<T>[],
   beneficiaryGroup: any | undefined,
   replacements: {
     [key: string]: (beneficiaryGroup) => string;
   },
 ) {
   if (!beneficiaryGroup) return headCells;
-
   return headCells.map((cell) => {
+    // @ts-ignore
     if (replacements[cell.id]) {
+      // @ts-ignore
       return { ...cell, label: replacements[cell.id](beneficiaryGroup) };
     }
     return cell;
   });
+}
+
+export const filterEmptyParams = (params) => {
+  return Object.fromEntries(
+    Object.entries(params).filter(
+      ([, value]) => value !== undefined && value !== null && value !== '',
+    ),
+  );
+};
+
+export function deepCamelize(data) {
+  if (_.isArray(data)) {
+    return data.map(deepCamelize);
+  } else if (_.isObject(data)) {
+    return _.reduce(
+      data,
+      (result, value, key) => {
+        const camelKey = _.camelCase(key);
+        result[camelKey] = deepCamelize(value);
+        return result;
+      },
+      {},
+    );
+  }
+  return data;
+}
+
+export function deepUnderscore(data) {
+  if (_.isArray(data)) {
+    return data.map(deepUnderscore);
+  } else if (_.isObject(data)) {
+    return _.reduce(
+      data,
+      (result, value, key) => {
+        const underscoreKey = _.snakeCase(key);
+        result[underscoreKey] = deepUnderscore(value);
+        return result;
+      },
+      {},
+    );
+  }
+  return data;
 }

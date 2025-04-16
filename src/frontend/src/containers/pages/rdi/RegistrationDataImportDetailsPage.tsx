@@ -6,24 +6,22 @@ import { Title } from '@components/core/Title';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import RegistrationDataImportDetailsPageHeader from '@components/rdi/details/RegistrationDataImportDetailsPageHeader';
 import { Tab, Tabs } from '@core/Tabs';
-import {
-  RegistrationDataImportStatus,
-  useHouseholdChoiceDataQuery,
-  useRegistrationDataImportQuery,
-} from '@generated/graphql';
+import { useHouseholdChoiceDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Typography } from '@mui/material';
 import { isPermissionDeniedError } from '@utils/utils';
-import { ReactElement, ReactNode, useEffect, useState } from 'react';
+import { ReactElement, ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
-import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { ImportedHouseholdTable } from '../../tables/rdi/ImportedHouseholdsTable';
 import { ImportedIndividualsTable } from '../../tables/rdi/ImportedIndividualsTable';
 import RegistrationDetails from '@components/rdi/details/RegistrationDetails/RegistrationDetails';
+import { useHopeDetailsQuery } from '@hooks/useHopeDetailsQuery';
+import { RestService } from '@restgenerated/services/RestService';
 
 const Container = styled.div`
   && {
@@ -60,46 +58,45 @@ const RegistrationDataImportDetailsPage = (): ReactElement => {
   const { id } = useParams();
   const permissions = usePermissions();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-
   const { businessArea } = useBaseUrl();
-  const { data, loading, error, stopPolling, startPolling } =
-    useRegistrationDataImportQuery({
-      variables: { id },
-      fetchPolicy: 'cache-and-network',
-    });
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const refetchInterval = (result) => {
+    if (
+      [
+        'Loading',
+        'Deduplication',
+        'Import  Scheduled',
+        'Importing',
+        'Merge Scheduled',
+        'Merging',
+      ].includes(result?.state?.data?.status)
+    ) {
+      return 30000;
+    }
+    return undefined;
+  };
+  const {
+    data,
+    isLoading: loading,
+    error,
+  } = useHopeDetailsQuery(
+    id,
+    RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve,
+    { refetchInterval },
+  );
+
   const { data: choicesData, loading: choicesLoading } =
     useHouseholdChoiceDataQuery();
 
   const [selectedTab, setSelectedTab] = useState(0);
 
-  const status = data?.registrationDataImport?.status;
-  useEffect(() => {
-    if (
-      [
-        RegistrationDataImportStatus.Loading,
-        RegistrationDataImportStatus.Deduplication,
-        RegistrationDataImportStatus.ImportScheduled,
-        RegistrationDataImportStatus.Importing,
-        RegistrationDataImportStatus.MergeScheduled,
-        RegistrationDataImportStatus.Merging,
-      ].includes(status)
-    ) {
-      startPolling(30000);
-    } else {
-      stopPolling();
-    }
-    return stopPolling;
-  }, [status, startPolling, stopPolling]);
-
   if (loading || choicesLoading) return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
-  if (!data?.registrationDataImport || !choicesData || permissions === null) {
+  if (!data || !choicesData || permissions === null) {
     return null;
   }
 
-  const isMerged =
-    RegistrationDataImportStatus.Merged === data.registrationDataImport.status;
+  const isMerged = 'MERGED' === data.status;
 
   function RegistrationContainer({
     isErased,
@@ -108,7 +105,7 @@ const RegistrationDataImportDetailsPage = (): ReactElement => {
   }): ReactElement {
     return (
       <Container>
-        <RegistrationDetails registration={data.registrationDataImport} />
+        <RegistrationDetails registration={data} />
         {isErased ? null : (
           <TableWrapper>
             <ContainerColumnWithBorder>
@@ -138,9 +135,9 @@ const RegistrationDataImportDetailsPage = (): ReactElement => {
               </TabsContainer>
               <TabPanel value={selectedTab} index={0}>
                 <ImportedHouseholdTable
-                  key={`${data.registrationDataImport.status}-household`}
+                  key={`${data.status}-household`}
                   isMerged={isMerged}
-                  rdi={data.registrationDataImport}
+                  rdi={data}
                   businessArea={businessArea}
                 />
               </TabPanel>
@@ -150,9 +147,9 @@ const RegistrationDataImportDetailsPage = (): ReactElement => {
                   rdiId={id}
                   isMerged={isMerged}
                   businessArea={businessArea}
-                  key={`${data.registrationDataImport.status}-individual`}
+                  key={`${data.status}-individual`}
                   choicesData={choicesData}
-                  rdi={data.registrationDataImport}
+                  rdi={data}
                 />
               </TabPanel>
             </ContainerColumnWithBorder>
@@ -161,11 +158,10 @@ const RegistrationDataImportDetailsPage = (): ReactElement => {
       </Container>
     );
   }
-
   return (
     <>
       <RegistrationDataImportDetailsPageHeader
-        registration={data.registrationDataImport}
+        registration={data}
         canMerge={hasPermissions(PERMISSIONS.RDI_MERGE_IMPORT, permissions)}
         canRerunDedupe={hasPermissions(
           PERMISSIONS.RDI_RERUN_DEDUPE,
@@ -174,7 +170,7 @@ const RegistrationDataImportDetailsPage = (): ReactElement => {
         canViewList={hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions)}
         canRefuse={hasPermissions(PERMISSIONS.RDI_REFUSE_IMPORT, permissions)}
       />
-      <RegistrationContainer isErased={data.registrationDataImport.erased} />
+      <RegistrationContainer isErased={data.erased} />
     </>
   );
 };

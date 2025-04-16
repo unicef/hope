@@ -10,13 +10,15 @@ import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
   useCreateGrievanceTicketNoteMutation,
-  useMeQuery,
 } from '@generated/graphql';
 import { LoadingButton } from '@core/LoadingButton';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useProgramContext } from '../../../programContext';
 import { ReactElement } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const Name = styled.span`
   font-size: 16px;
@@ -43,8 +45,16 @@ export function Notes({
   canAddNote: boolean;
 }): ReactElement {
   const { t } = useTranslation();
-  const { data: meData, loading: meLoading } = useMeQuery({
-    fetchPolicy: 'cache-and-network',
+  const { businessArea, programId } = useBaseUrl();
+
+  const { data: meData, isLoading: meLoading } = useQuery({
+    queryKey: ['profile', businessArea, programId],
+    queryFn: () => {
+      return RestService.restUsersProfileRetrieve({
+        businessAreaSlug: businessArea,
+        programSlug: programId === 'all' ? undefined : programId,
+      });
+    },
   });
 
   const { id } = useParams();
@@ -104,7 +114,7 @@ export function Notes({
     newNote: Yup.string().required(t('Note cannot be empty')),
   });
 
-  const myName = `${meData.me.firstName || meData.me.email}`;
+  const myName = `${meData.firstName || meData.email}`;
 
   return (
     <Grid size={{ xs: 8 }}>
@@ -138,7 +148,7 @@ export function Notes({
                   <Grid size={{ xs: 10 }}>
                     <Grid size={{ xs: 12 }}>
                       <Box display="flex" justifyContent="space-between">
-                        <Name>{renderUserName(meData.me)}</Name>
+                        <Name>{renderUserName(meData)}</Name>
                       </Box>
                     </Grid>
                     <Grid size={{ xs: 12 }}>

@@ -25,25 +25,25 @@ import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { LoadingButton } from '@core/LoadingButton';
 import {
-  ProgramCycle,
   ProgramCycleUpdate,
   ProgramCycleUpdateResponse,
   updateProgramCycle,
 } from '@api/programCycleApi';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { ProgramQuery } from '@generated/graphql';
 import type { DefaultError } from '@tanstack/query-core';
 import { useSnackbar } from '@hooks/useSnackBar';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 
 interface MutationError extends DefaultError {
   data: any;
 }
 
 interface EditProgramCycleProps {
-  programCycle: ProgramCycle;
-  program: ProgramQuery['program'];
+  programCycle: ProgramCycleList;
+  program: ProgramDetail;
 }
 
 const EditProgramCycle = ({
@@ -77,7 +77,7 @@ const EditProgramCycle = ({
     },
   });
 
-  const isEndDateRequired = !!programCycle.end_date;
+  const isEndDateRequired = !!programCycle.endDate;
 
   const handleUpdate = async (values: any): Promise<void> => {
     try {
@@ -92,8 +92,8 @@ const EditProgramCycle = ({
     [key: string]: string | boolean | number;
   } = {
     title: programCycle.title,
-    start_date: programCycle.start_date,
-    end_date: programCycle.end_date ?? undefined,
+    start_date: programCycle.startDate,
+    end_date: programCycle.endDate ?? undefined,
   };
 
   const endDateValidationSchema = () => {

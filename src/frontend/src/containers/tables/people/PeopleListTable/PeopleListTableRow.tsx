@@ -5,7 +5,6 @@ import { IndividualNode, IndividualRelationship } from '@generated/graphql';
 import { BlackLink } from '@components/core/BlackLink';
 import { AnonTableCell } from '@components/core/Table/AnonTableCell';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
-import { IndividualFlags } from '@components/population/IndividualFlags';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
 import { individualStatusToColor, sexToCapitalize } from '@utils/utils';
@@ -38,7 +37,7 @@ export const PeopleListTableRow = ({
       data-cy="individual-table-row"
     >
       <TableCell align="left">
-        <IndividualFlags individual={individual} />
+        {/*<IndividualFlags individual={individual} /> TODO REST refactor*/}
       </TableCell>
       <TableCell align="left">
         <BlackLink to={individualDetailsPath}>{individual.unicefId}</BlackLink>

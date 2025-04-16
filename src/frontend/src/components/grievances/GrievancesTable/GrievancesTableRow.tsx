@@ -122,7 +122,6 @@ export function GrievancesTableRow({
 
   const mappedPrograms = getMappedPrograms();
 
-  //TODO: add target to the query
   const getTargetUnicefId = (_ticket) => {
     return isSocialDctType || isAllPrograms
       ? _ticket?.targetId

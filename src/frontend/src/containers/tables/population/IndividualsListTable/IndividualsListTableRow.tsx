@@ -1,16 +1,17 @@
-import TableCell from '@mui/material/TableCell';
-import { useNavigate } from 'react-router-dom';
-import { HouseholdChoiceDataQuery, IndividualNode } from '@generated/graphql';
 import { BlackLink } from '@components/core/BlackLink';
 import { AnonTableCell } from '@components/core/Table/AnonTableCell';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { IndividualFlags } from '@components/population/IndividualFlags';
+import { HouseholdChoiceDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import TableCell from '@mui/material/TableCell';
+import { IndividualList } from '@restgenerated/models/IndividualList';
 import { choicesToDict, sexToCapitalize } from '@utils/utils';
 import { ReactElement } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface IndividualsListTableRowProps {
-  individual: IndividualNode;
+  individual: IndividualList;
   canViewDetails: boolean;
   choicesData: HouseholdChoiceDataQuery;
 }
@@ -55,7 +56,7 @@ export function IndividualsListTableRow({
       </TableCell>
       <TableCell align="right">{individual.age}</TableCell>
       <TableCell align="left">{sexToCapitalize(individual.sex)}</TableCell>
-      <TableCell align="left">{individual.household?.admin2?.name}</TableCell>
+      <TableCell align="left">{individual.household?.admin2}</TableCell>
     </ClickableTableRow>
   );
 }

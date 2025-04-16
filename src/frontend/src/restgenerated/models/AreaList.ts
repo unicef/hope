@@ -3,8 +3,8 @@
 /* tslint:disable */
 /* eslint-disable */
 export type AreaList = {
-    readonly id: string;
+    id: string;
     name: string;
-    p_code?: string | null;
+    pCode?: string | null;
 };
 

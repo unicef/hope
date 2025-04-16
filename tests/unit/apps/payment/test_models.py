@@ -67,7 +67,7 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaRuleFactory,
 )
 
-pytestmark = pytest.mark.django_db
+pytestmark = pytest.mark.django_db()
 
 
 class TestBasePaymentPlanModel:
@@ -696,6 +696,7 @@ class TestPaymentPlanSplitModel(TestCase):
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
 
+@pytest.mark.django_db(transaction=True)
 class TestFinancialServiceProviderModel(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:

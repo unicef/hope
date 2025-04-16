@@ -4,7 +4,6 @@
 /* eslint-disable */
 import type { PeriodicField } from './PeriodicField';
 export type PaginatedPeriodicFieldList = {
-    count: number;
     next?: string | null;
     previous?: string | null;
     results: Array<PeriodicField>;

@@ -77,7 +77,9 @@ export function ReassignMultipleRoleBox({
                   <>{capitalize(householdAndRole.role)} Collector</>
                 </LabelizedField>
                 <LabelizedField
-                  label={t(`${beneficiaryGroup?.memberLabel.toUpperCase()} ID`)}
+                  label={t(
+                    `${beneficiaryGroup?.memberLabel.toUpperCase()} ID`,
+                  )}
                 >
                   <ContentLink
                     href={`/${baseUrl}/population/individuals/${householdAndRole.individual.id}`}
@@ -105,7 +107,11 @@ export function ReassignMultipleRoleBox({
                 ticket={ticket}
                 household={householdAndRole.household}
                 individualToReassign={selectedIndividualToReassign}
-                initialSelectedIndividualId={reassignDataDictByIndividualId[selectedIndividualToReassign.id]?.new_individual}
+                initialSelectedIndividualId={
+                  reassignDataDictByIndividualId[
+                    selectedIndividualToReassign.id
+                  ]?.new_individual
+                }
               />
             </Box>
           ));
@@ -153,7 +159,11 @@ export function ReassignMultipleRoleBox({
                   ticket={ticket}
                   household={household}
                   individualToReassign={selectedIndividualToReassign}
-                  initialSelectedIndividualId={reassignDataDictByIndividualId[selectedIndividualToReassign.id]?.new_individual}
+                  initialSelectedIndividualId={
+                    reassignDataDictByIndividualId[
+                      selectedIndividualToReassign.id
+                    ]?.new_individual
+                  }
                 />
               </Box>
             )}

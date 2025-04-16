@@ -18,7 +18,7 @@ const IndividualQuestionnaire = ({
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const selectedIndividualData =
-    values.selectedIndividual || values.selectedHousehold.headOfHousehold;
+    values.selectedIndividual || values.selectedHousehold.head_of_household;
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 

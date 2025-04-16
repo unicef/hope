@@ -1,4 +1,4 @@
-from django.conf import settings
+from django.core.management import call_command
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
@@ -19,8 +19,6 @@ from hct_mis_api.apps.program.models import Program
 
 
 class TestGrievanceQuerySearchFilter(APITestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     FILTER_BY_SEARCH = """
     query AllGrievanceTicket($search: String, $documentType: String, $documentNumber: String)
     {
@@ -39,6 +37,7 @@ class TestGrievanceQuerySearchFilter(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         create_afghanistan()
 
         cls.partner = PartnerFactory()
@@ -131,6 +130,7 @@ class TestGrievanceQuerySearchFilter(APITestCase):
             self.user,
             [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
@@ -152,6 +152,7 @@ class TestGrievanceQuerySearchFilter(APITestCase):
             self.user,
             [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
@@ -173,6 +174,7 @@ class TestGrievanceQuerySearchFilter(APITestCase):
             self.user,
             [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
@@ -194,6 +196,7 @@ class TestGrievanceQuerySearchFilter(APITestCase):
             self.user,
             [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(

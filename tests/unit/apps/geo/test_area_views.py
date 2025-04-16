@@ -17,7 +17,7 @@ from hct_mis_api.apps.account.fixtures import (
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 
-pytestmark = pytest.mark.django_db
+pytestmark = pytest.mark.django_db()
 
 
 class TestAreaViews:
@@ -77,7 +77,7 @@ class TestAreaViews:
         self.url_list = reverse(
             "api:geo:areas-list",
             kwargs={
-                "business_area": self.afghanistan.slug,
+                "business_area_slug": self.afghanistan.slug,
             },
         )
 
@@ -116,7 +116,6 @@ class TestAreaViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
         self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
@@ -130,37 +129,37 @@ class TestAreaViews:
         response_json = response.json()["results"]
         assert len(response_json) == 6
         assert {
-            "id": id_to_base64(self.area_1_area_type_1.id, "Area"),
+            "id": str(self.area_1_area_type_1.id),
             "name": self.area_1_area_type_1.name,
             "p_code": self.area_1_area_type_1.p_code,
         } in response_json
         assert {
-            "id": id_to_base64(self.area_2_area_type_1.id, "Area"),
+            "id": str(self.area_2_area_type_1.id),
             "name": self.area_2_area_type_1.name,
             "p_code": self.area_2_area_type_1.p_code,
         } in response_json
         assert {
-            "id": id_to_base64(self.area_1_area_type_2.id, "Area"),
+            "id": str(self.area_1_area_type_2.id),
             "name": self.area_1_area_type_2.name,
             "p_code": self.area_1_area_type_2.p_code,
         } in response_json
         assert {
-            "id": id_to_base64(self.area_2_area_type_2.id, "Area"),
+            "id": str(self.area_2_area_type_2.id),
             "name": self.area_2_area_type_2.name,
             "p_code": self.area_2_area_type_2.p_code,
         } in response_json
         assert {
-            "id": id_to_base64(self.area_1_area_type_afg_2.id, "Area"),
+            "id": str(self.area_1_area_type_afg_2.id),
             "name": self.area_1_area_type_afg_2.name,
             "p_code": self.area_1_area_type_afg_2.p_code,
         } in response_json
         assert {
-            "id": id_to_base64(self.area_2_area_type_afg_2.id, "Area"),
+            "id": str(self.area_2_area_type_afg_2.id),
             "name": self.area_2_area_type_afg_2.name,
             "p_code": self.area_2_area_type_afg_2.p_code,
         } in response_json
         assert {
-            "id": id_to_base64(self.area_other.id, "Area"),
+            "id": str(self.area_other.id),
             "name": self.area_other.name,
             "p_code": self.area_other.p_code,
         } not in response_json
@@ -170,7 +169,6 @@ class TestAreaViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
         self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
@@ -185,22 +183,22 @@ class TestAreaViews:
         response_json_1 = response_level_1.json()["results"]
         assert len(response_json_1) == 4
         assert {
-            "id": id_to_base64(self.area_1_area_type_1.id, "Area"),
+            "id": str(self.area_1_area_type_1.id),
             "name": self.area_1_area_type_1.name,
             "p_code": self.area_1_area_type_1.p_code,
         } in response_json_1
         assert {
-            "id": id_to_base64(self.area_2_area_type_1.id, "Area"),
+            "id": str(self.area_2_area_type_1.id),
             "name": self.area_2_area_type_1.name,
             "p_code": self.area_2_area_type_1.p_code,
         } in response_json_1
         assert {
-            "id": id_to_base64(self.area_1_area_type_afg_2.id, "Area"),
+            "id": str(self.area_1_area_type_afg_2.id),
             "name": self.area_1_area_type_afg_2.name,
             "p_code": self.area_1_area_type_afg_2.p_code,
         } in response_json_1
         assert {
-            "id": id_to_base64(self.area_2_area_type_afg_2.id, "Area"),
+            "id": str(self.area_2_area_type_afg_2.id),
             "name": self.area_2_area_type_afg_2.name,
             "p_code": self.area_2_area_type_afg_2.p_code,
         } in response_json_1
@@ -215,7 +213,6 @@ class TestAreaViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
         self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
@@ -257,7 +254,7 @@ class TestAreaViews:
 
             etag_second_call = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 4
+            assert len(ctx.captured_queries) == 2
 
             assert etag_second_call == etag
 
@@ -270,7 +267,7 @@ class TestAreaViews:
 
             etag_call_after_update = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 7
+            assert len(ctx.captured_queries) == 3  # fewer queries than the initial call because of cached permissions
 
             assert etag_call_after_update != etag
 
@@ -282,7 +279,7 @@ class TestAreaViews:
 
             etag_call_after_update_2 = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 7
+            assert len(ctx.captured_queries) == 3  # fewer queries than the initial call because of cached permissions
 
             assert etag_call_after_update_2 != etag_call_after_update
 
@@ -294,7 +291,7 @@ class TestAreaViews:
 
             etag_call_after_update_3 = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 7
+            assert len(ctx.captured_queries) == 3  # fewer queries than the initial call because of cached permissions
 
             assert etag_call_after_update_3 != etag_call_after_update_2
 
@@ -305,7 +302,7 @@ class TestAreaViews:
 
             etag_call_after_update_second_call = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 4
+            assert len(ctx.captured_queries) == 2
 
             assert etag_call_after_update_second_call == etag_call_after_update_3
 

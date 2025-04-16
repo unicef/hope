@@ -29,7 +29,6 @@ export function ImportedIndividualsTableRow({
   const { baseUrl, businessArea } = useBaseUrl();
 
   const relationshipChoicesDict = choicesToDict(choices.relationshipChoices);
-  const roleChoicesDict = choicesToDict(choices.roleChoices);
   const deduplicationBatchDict = choicesToDict(
     choices.deduplicationBatchStatusChoices,
   );
@@ -89,7 +88,7 @@ export function ImportedIndividualsTableRow({
         <BlackLink to={individualDetailsPath}>{individual.unicefId}</BlackLink>
       </TableCell>
       <AnonTableCell>{individual.fullName}</AnonTableCell>
-      <TableCell align="left">{roleChoicesDict[individual.role]}</TableCell>
+      <TableCell align="left">{individual.role}</TableCell>
       <TableCell align="left">
         {relationshipChoicesDict[individual.relationship]}
       </TableCell>
