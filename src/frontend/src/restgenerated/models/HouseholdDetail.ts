@@ -7,7 +7,7 @@ import type { HeadOfHousehold } from './HeadOfHousehold';
 import type { RegistrationDataImport } from './RegistrationDataImport';
 import type { ResidenceStatusEnum } from './ResidenceStatusEnum';
 export type HouseholdDetail = {
-    id: string;
+    readonly id: string;
     unicefId: string | null;
     headOfHousehold: HeadOfHousehold;
     admin1?: string;

@@ -1,5 +1,6 @@
 from typing import Dict
 
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 
@@ -134,19 +135,103 @@ class LinkedGrievanceTicketSerializer(serializers.ModelSerializer):
         )
 
 
+class DeduplicationEngineSimilarityPairIndividualSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    photo = serializers.SerializerMethodField()
+    full_name = serializers.CharField()
+    unicef_id = serializers.CharField()
+    similarity_score = serializers.FloatField(required=False, allow_null=True)
+    age = serializers.IntegerField(required=False, allow_null=True)
+    location = serializers.CharField(required=False, allow_blank=True)
+
+    def get_photo(self, obj):
+        """
+        Retrieve the photo URL from the Individual instance.
+        Assumes `obj` is a dict-like object with an 'id' key.
+        """
+        individual = Individual.all_objects.filter(id=obj.get("id")).first()
+        return individual.photo.url if individual and individual.photo else None
+
+
 class IndividualListSerializer(serializers.ModelSerializer):
     household = HouseholdSimpleSerializer()
-    role = SerializerMethodField()
+    relationship_display = serializers.CharField(source="get_relationship_display")
+    role = serializers.SerializerMethodField()
+    deduplication_batch_status_display = serializers.CharField(source="get_deduplication_batch_status_display")
+    biometric_deduplication_batch_status_display = serializers.CharField(
+        source="get_biometric_deduplication_batch_status_display"
+    )
+
+    deduplication_batch_results = serializers.SerializerMethodField()
+    biometric_deduplication_batch_results = serializers.SerializerMethodField()
+
+    deduplication_golden_record_status_display = serializers.CharField(
+        source="get_deduplication_golden_record_status_display"
+    )
+    biometric_deduplication_golden_record_status_display = serializers.CharField(
+        source="get_biometric_deduplication_golden_record_status_display"
+    )
+
+    deduplication_golden_record_results = serializers.SerializerMethodField()
+    biometric_deduplication_golden_record_results = serializers.SerializerMethodField()
 
     class Meta:
         model = Individual
-        fields = ("id", "unicef_id", "full_name", "household", "status", "relationship", "age", "sex", "role")
+        fields = (
+            "id",
+            "unicef_id",
+            "full_name",
+            "household",
+            "status",
+            "relationship",
+            "age",
+            "sex",
+            "role",
+            "relationship_display",
+            "birth_date",
+            "deduplication_batch_status",
+            "deduplication_batch_status_display",
+            "biometric_deduplication_batch_status",
+            "biometric_deduplication_batch_status_display",
+            "deduplication_batch_results",
+            "biometric_deduplication_batch_results",
+            "deduplication_golden_record_status",
+            "deduplication_golden_record_status_display",
+            "biometric_deduplication_golden_record_status",
+            "biometric_deduplication_golden_record_status_display",
+            "deduplication_golden_record_results",
+            "biometric_deduplication_golden_record_results",
+        )
 
     def get_role(self, obj: Individual) -> str:
         role = obj.households_and_roles(manager="all_objects").filter(household=obj.household).first()
         if role:
             return role.get_role_display()
         return "-"
+
+    @extend_schema_field(DeduplicationEngineSimilarityPairIndividualSerializer(many=True))
+    def get_deduplication_batch_results(self, obj: Individual):
+        results = obj.deduplication_batch_results
+        serializer = DeduplicationEngineSimilarityPairIndividualSerializer(results, many=True, context=self.context)
+        return serializer.data
+
+    @extend_schema_field(DeduplicationEngineSimilarityPairIndividualSerializer(many=True))
+    def get_biometric_deduplication_batch_results(self, obj: Individual):
+        results = obj.biometric_deduplication_batch_results
+        serializer = DeduplicationEngineSimilarityPairIndividualSerializer(results, many=True, context=self.context)
+        return serializer.data
+
+    @extend_schema_field(DeduplicationEngineSimilarityPairIndividualSerializer(many=True))
+    def get_deduplication_golden_record_results(self, obj: Individual):
+        results = obj.deduplication_golden_record_results
+        serializer = DeduplicationEngineSimilarityPairIndividualSerializer(results, many=True, context=self.context)
+        return serializer.data
+
+    @extend_schema_field(DeduplicationEngineSimilarityPairIndividualSerializer(many=True))
+    def get_biometric_deduplication_golden_record_results(self, obj: Individual):
+        results = obj.biometric_deduplication_golden_record_results
+        serializer = DeduplicationEngineSimilarityPairIndividualSerializer(results, many=True, context=self.context)
+        return serializer.data
 
 
 class IndividualDetailSerializer(serializers.ModelSerializer):
