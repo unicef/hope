@@ -23,7 +23,6 @@ import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
-import { error } from 'console';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -59,16 +58,19 @@ const PeopleDetailsPage = (): ReactElement => {
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
 
-  const { data: individual, isLoading: loadingIndividual } =
-    useQuery<IndividualDetail>({
-      queryKey: ['businessAreaProgramIndividual', businessArea, programId, id],
-      queryFn: () =>
-        RestService.restBusinessAreasProgramsIndividualsRetrieve({
-          businessAreaSlug: businessArea,
-          programSlug: programId,
-          id: id,
-        }),
-    });
+  const {
+    data: individual,
+    isLoading: loadingIndividual,
+    error,
+  } = useQuery<IndividualDetail>({
+    queryKey: ['businessAreaProgramIndividual', businessArea, programId, id],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsIndividualsRetrieve({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+        id: id,
+      }),
+  });
 
   const { data: choicesData, loading: choicesLoading } =
     useHouseholdChoiceDataQuery();

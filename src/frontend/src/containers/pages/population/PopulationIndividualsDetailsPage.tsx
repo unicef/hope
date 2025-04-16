@@ -26,7 +26,6 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { RestService } from '@restgenerated/services/RestService';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
-import { error } from 'console';
 
 const Container = styled.div`
   padding: 20px;
@@ -47,16 +46,19 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
 
-  const { data: individual, isLoading: loadingIndividual } =
-    useQuery<IndividualDetail>({
-      queryKey: ['businessAreaProgramIndividual', businessArea, programId, id],
-      queryFn: () =>
-        RestService.restBusinessAreasProgramsIndividualsRetrieve({
-          businessAreaSlug: businessArea,
-          programSlug: programId,
-          id: id,
-        }),
-    });
+  const {
+    data: individual,
+    isLoading: loadingIndividual,
+    error,
+  } = useQuery<IndividualDetail>({
+    queryKey: ['businessAreaProgramIndividual', businessArea, programId, id],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsIndividualsRetrieve({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+        id: id,
+      }),
+  });
 
   const { data: choicesData, loading: choicesLoading } =
     useHouseholdChoiceDataQuery();

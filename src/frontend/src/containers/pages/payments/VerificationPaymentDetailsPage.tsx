@@ -15,7 +15,6 @@ import { usePermissions } from '@hooks/usePermissions';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
-import { error } from 'console';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -27,7 +26,11 @@ function VerificationPaymentDetailsPage(): ReactElement {
   const { businessArea, programId } = useBaseUrl();
   const { paymentPlanId, paymentId } = useParams();
   const permissions = usePermissions();
-  const { data: payment, isLoading: loading } = useQuery<PaymentDetail>({
+  const {
+    data: payment,
+    isLoading: loading,
+    error,
+  } = useQuery<PaymentDetail>({
     queryKey: ['payment', businessArea, paymentId, programId, paymentPlanId],
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsRetrieve2(
@@ -48,8 +51,7 @@ function VerificationPaymentDetailsPage(): ReactElement {
 
   const { paymentVerificationPlans } = payment?.parent || {};
   const verificationPlansAmount = paymentVerificationPlans?.length;
-  const verification =
-    paymentVerificationPlans[verificationPlansAmount - 1];
+  const verification = paymentVerificationPlans[verificationPlansAmount - 1];
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     ...(hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions)

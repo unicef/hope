@@ -20,7 +20,6 @@ import { usePermissions } from '@hooks/usePermissions';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
-import { error } from 'console';
 import { ReactElement } from 'react';
 import { useParams } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
@@ -31,7 +30,11 @@ export const PeopleFollowUpPaymentPlanDetailsPage = (): ReactElement => {
   const { paymentPlanId } = useParams();
   const permissions = usePermissions();
   const { baseUrl, businessArea, programId } = useBaseUrl();
-  const { data: paymentPlan, isLoading } = useQuery<PaymentPlanDetail>({
+  const {
+    data: paymentPlan,
+    isLoading,
+    error,
+  } = useQuery<PaymentPlanDetail>({
     queryKey: ['paymentPlan', businessArea, paymentPlanId, programId],
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlansRetrieve({

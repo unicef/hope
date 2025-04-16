@@ -24,7 +24,6 @@ import {
   getFilterFromQueryParams,
   isPermissionDeniedError,
 } from '@utils/utils';
-import { error } from 'console';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -77,16 +76,19 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
     getFilterFromQueryParams(location, initialFilter),
   );
 
-  const { data: paymentPlan, isLoading } =
-    useQuery<PaymentVerificationPlanDetails>({
-      queryKey: ['paymentPlan', businessArea, paymentPlanId, programId],
-      queryFn: () =>
-        RestService.restBusinessAreasProgramsPaymentVerificationsRetrieve({
-          businessAreaSlug: businessArea,
-          id: paymentPlanId,
-          programSlug: programId,
-        }),
-    });
+  const {
+    data: paymentPlan,
+    isLoading,
+    error,
+  } = useQuery<PaymentVerificationPlanDetails>({
+    queryKey: ['paymentPlan', businessArea, paymentPlanId, programId],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentVerificationsRetrieve({
+        businessAreaSlug: businessArea,
+        id: paymentPlanId,
+        programSlug: programId,
+      }),
+  });
 
   const { data: choicesData, loading: choicesLoading } =
     useCashPlanVerificationSamplingChoicesQuery();

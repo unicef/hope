@@ -15,7 +15,6 @@ import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
-import { error } from 'console';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -37,8 +36,11 @@ const PeopleRegistrationDetailsPage = (): ReactElement => {
   const permissions = usePermissions();
   const { businessArea, programId } = useBaseUrl();
 
-  const { data: flexFieldsData, loading: flexFieldsDataLoading } =
-    useAllIndividualsFlexFieldsAttributesQuery();
+  const {
+    data: flexFieldsData,
+    loading: flexFieldsDataLoading,
+    error,
+  } = useAllIndividualsFlexFieldsAttributesQuery();
   const { data: individual, isLoading: loadingIndividual } =
     useQuery<IndividualDetail>({
       queryKey: ['businessAreaProgramIndividual', businessArea, programId, id],

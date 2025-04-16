@@ -25,7 +25,6 @@ import { Entitlement } from '@components/paymentmodulepeople/PaymentPlanDetails/
 import ExcludeSection from '@components/paymentmodule/PaymentPlanDetails/ExcludeSection/ExcludeSection';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
-import { error } from 'console';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import FundsCommitmentSection from '@components/paymentmodule/PaymentPlanDetails/FundsCommitment/FundsCommitmentSection';
 
@@ -33,7 +32,11 @@ const PaymentPlanDetailsPage = (): ReactElement => {
   const { paymentPlanId } = useParams();
   const permissions = usePermissions();
   const { baseUrl, businessArea, programId } = useBaseUrl();
-  const { data: paymentPlan, isLoading } = useQuery<PaymentPlanDetail>({
+  const {
+    data: paymentPlan,
+    isLoading,
+    error,
+  } = useQuery<PaymentPlanDetail>({
     queryKey: ['paymentPlan', businessArea, paymentPlanId, programId],
     queryFn: () =>
       RestService.restBusinessAreasProgramsPaymentPlansRetrieve({
