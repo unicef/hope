@@ -2,7 +2,6 @@ import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AllPaymentsForTableQueryVariables,
-  HouseholdNode,
   PaymentNode,
   useAllPaymentsForTableQuery,
 } from '@generated/graphql';

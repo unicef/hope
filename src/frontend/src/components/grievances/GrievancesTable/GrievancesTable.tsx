@@ -140,11 +140,10 @@ export const GrievancesTable = ({
 
   const { data: currentUserData, isLoading: currentUserDataLoading } =
     useQuery<Profile>({
-      queryKey: ['profile', businessArea, programId],
+      queryKey: ['profile', businessArea],
       queryFn: () => {
         return RestService.restBusinessAreasUsersProfileRetrieve({
           businessAreaSlug: businessArea,
-          program: programId === 'all' ? undefined : programId,
         });
       },
     });

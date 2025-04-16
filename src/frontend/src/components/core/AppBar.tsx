@@ -64,14 +64,13 @@ const StyledIconButton = styled(IconButton)<AppBarProps>(({ open }) => ({
 }));
 
 export const AppBar = ({ open, handleDrawerOpen }): ReactElement => {
-  const { businessArea, programId } = useBaseUrl();
+  const { businessArea } = useBaseUrl();
 
   const { data: meData } = useQuery<Profile>({
-    queryKey: ['profile', businessArea, programId],
+    queryKey: ['profile', businessArea],
     queryFn: () => {
       return RestService.restBusinessAreasUsersProfileRetrieve({
         businessAreaSlug: businessArea,
-        program: programId === 'all' ? undefined : programId,
       });
     },
   });

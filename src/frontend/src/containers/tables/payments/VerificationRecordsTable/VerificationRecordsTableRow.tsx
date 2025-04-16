@@ -15,8 +15,6 @@ import { ReactElement } from 'react';
 interface VerificationRecordsTableRowProps {
   paymentVerification: PaymentVerificationNode;
   canViewRecordDetails: boolean;
-  // selected: Array<string>;
-  // checkboxClickHandler: () => void;
   showStatusColumn?: boolean;
 }
 

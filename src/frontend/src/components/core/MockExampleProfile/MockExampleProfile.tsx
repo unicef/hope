@@ -5,14 +5,13 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Profile } from '@restgenerated/models/Profile';
 
 const MockExampleProfile = () => {
-  const { businessArea, programId } = useBaseUrl();
+  const { businessArea } = useBaseUrl();
 
   const { data: meData, isLoading: meLoading } = useQuery<Profile>({
-    queryKey: ['profile', businessArea, programId],
+    queryKey: ['profile', businessArea],
     queryFn: () => {
       return RestService.restBusinessAreasUsersProfileRetrieve({
         businessAreaSlug: businessArea,
-        program: programId,
       });
     },
   });
