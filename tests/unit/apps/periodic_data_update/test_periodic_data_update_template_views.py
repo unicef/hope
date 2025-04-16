@@ -33,7 +33,7 @@ pytestmark = pytest.mark.django_db
 
 @freezegun.freeze_time("2022-01-01")
 class TestPeriodicDataUpdateTemplateViews:
-    def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory, id_to_base64: Callable) -> None:
+    def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory) -> None:
         self.partner = PartnerFactory(name="TestPartner")
         self.user = UserFactory(partner=self.partner)
         self.client = api_client(self.user)
@@ -148,9 +148,8 @@ class TestPeriodicDataUpdateTemplateViews:
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
         create_partner_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         if access_to_program:
             create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program1)
             create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan, self.program1)
@@ -166,9 +165,8 @@ class TestPeriodicDataUpdateTemplateViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.PDU_VIEW_LIST_AND_DETAILS],
@@ -250,9 +248,8 @@ class TestPeriodicDataUpdateTemplateViews:
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
         create_partner_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         if access_to_program:
             create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program2)
             create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan, self.program2)
@@ -272,9 +269,8 @@ class TestPeriodicDataUpdateTemplateViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.PDU_VIEW_LIST_AND_DETAILS],
@@ -297,9 +293,8 @@ class TestPeriodicDataUpdateTemplateViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.PDU_VIEW_LIST_AND_DETAILS],
@@ -359,9 +354,8 @@ class TestPeriodicDataUpdateTemplateViews:
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
         create_partner_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         if access_to_program:
             create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program1)
             create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan, self.program1)
@@ -398,9 +392,8 @@ class TestPeriodicDataUpdateTemplateViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.PDU_TEMPLATE_CREATE],
@@ -451,9 +444,8 @@ class TestPeriodicDataUpdateTemplateViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.PDU_TEMPLATE_CREATE],
@@ -516,9 +508,8 @@ class TestPeriodicDataUpdateTemplateViews:
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
         create_partner_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         if access_to_program:
             create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program1)
             create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan, self.program1)
@@ -541,9 +532,8 @@ class TestPeriodicDataUpdateTemplateViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.PDU_TEMPLATE_CREATE],
@@ -567,9 +557,8 @@ class TestPeriodicDataUpdateTemplateViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.PDU_TEMPLATE_CREATE],
@@ -592,9 +581,8 @@ class TestPeriodicDataUpdateTemplateViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.PDU_TEMPLATE_CREATE],
@@ -651,9 +639,8 @@ class TestPeriodicDataUpdateTemplateViews:
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
         create_partner_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         if access_to_program:
             create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program1)
             create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan, self.program1)
@@ -685,9 +672,8 @@ class TestPeriodicDataUpdateTemplateViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.PDU_TEMPLATE_DOWNLOAD],
@@ -720,9 +706,8 @@ class TestPeriodicDataUpdateTemplateViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.PDU_TEMPLATE_DOWNLOAD],
@@ -744,9 +729,8 @@ class TestPeriodicDataUpdateTemplateViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.PDU_TEMPLATE_DOWNLOAD],
@@ -769,9 +753,8 @@ class TestPeriodicDataUpdateTemplateViews:
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
-        id_to_base64: Callable,
     ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
+        self.set_up(api_client, afghanistan)
         create_user_role_with_permissions(
             self.user,
             [Permissions.PDU_TEMPLATE_DOWNLOAD],
