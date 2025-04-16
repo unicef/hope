@@ -1053,7 +1053,8 @@ class TestAccountModelUniqueField(TransactionTestCase):
 
         with transaction.atomic():
             dmd_1.update_unique_field()
-            dmd_1.refresh_from_db()
+            transaction.on_commit(lambda: dmd_1.refresh_from_db())
+
         self.assertIsNotNone(dmd_1.unique_key)
         self.assertEqual(dmd_1.is_unique, True)
 
@@ -1061,7 +1062,8 @@ class TestAccountModelUniqueField(TransactionTestCase):
         dmd_2.save()
         with transaction.atomic():
             dmd_2.update_unique_field()
-            dmd_2.refresh_from_db()
+            transaction.on_commit(lambda: dmd_2.refresh_from_db())
+
         self.assertIsNotNone(dmd_2.unique_key)
         self.assertEqual(dmd_2.is_unique, False)
 
