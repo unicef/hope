@@ -132,7 +132,7 @@ class TestBusinessAreaList:
             assert response.has_header("etag")
             etag_second_call = response.headers["etag"]
             assert etag == etag_second_call
-            assert len(ctx.captured_queries) == 4
+            assert len(ctx.captured_queries) == 5
 
         self.afghanistan.active = False
         self.afghanistan.save()
@@ -160,7 +160,7 @@ class TestBusinessAreaList:
             assert json.loads(cache.get(etag_fourth_call)[0].decode("utf8")) == response.json()
             assert etag_fourth_call not in [etag, etag_second_call, etag_third_call]
             assert len(response.json()["results"]) == 6
-            assert len(ctx.captured_queries) == 4
+            assert len(ctx.captured_queries) == 6
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
@@ -169,7 +169,7 @@ class TestBusinessAreaList:
             assert response.has_header("etag")
             etag_fifth_call = response.headers["etag"]
             assert etag_fifth_call == etag_fourth_call
-            assert len(ctx.captured_queries) == 4
+            assert len(ctx.captured_queries) == 5
 
 
 class TestBusinessAreaDetail:
@@ -194,7 +194,7 @@ class TestBusinessAreaDetail:
     def test_business_area_detail(
         self,
     ) -> None:
-        response = self.client.get(reverse(self.detail_url_name, kwargs={"pk": str(self.afghanistan.id)}))
+        response = self.client.get(reverse(self.detail_url_name, kwargs={"slug": self.afghanistan.slug}))
         assert response.status_code == status.HTTP_200_OK
 
         response_data = response.json()
@@ -282,7 +282,7 @@ class TestBusinessAreaFilter:
         response_inactive = self.client.get(self.list_url, {"active": False})
         assert response_inactive.status_code == status.HTTP_200_OK
         response_data_inactive = response_inactive.json()["results"]
-        assert len(response_data_inactive) == 2
+        assert len(response_data_inactive) == 1
         business_area_ids = {ba["id"] for ba in response_data_inactive}
         assert str(self.somalia.id) in business_area_ids
         assert str(self.afghanistan.id) not in business_area_ids

@@ -31,7 +31,7 @@ class BusinessAreaViewSet(
     serializer_class = BusinessAreaSerializer
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = BusinessAreaFilter
-    lookup_url_kwarg = "slug"
+    lookup_field = "slug"
 
     def get_queryset(self) -> QuerySet[BusinessArea]:
         user = self.request.user
