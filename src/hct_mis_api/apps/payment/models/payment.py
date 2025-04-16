@@ -1896,7 +1896,7 @@ class FinancialInstitution(TimeStampedUUIDModel):
     )
     description = models.CharField(max_length=255, blank=True, null=True)
     type = models.CharField(max_length=30, choices=FinancialInstitutionType.choices)
-    country = models.ForeignKey(Country, on_delete=models.PROTECT)
+    country = models.ForeignKey(Country, on_delete=models.PROTECT, blank=True, null=True)
 
 
 class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
@@ -2114,7 +2114,7 @@ class DeliveryMechanismConfig(models.Model):
     required_fields = ArrayField(default=list, base_field=models.CharField(max_length=255))
 
     def __str__(self) -> str:
-        return f"{self.delivery_mechanism.code} - {self.fsp.name}"
+        return f"{self.delivery_mechanism.code} - {self.fsp.name}"  # pragma: no cover
 
 
 class AccountType(models.Model):

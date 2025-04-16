@@ -49,6 +49,7 @@ from hct_mis_api.apps.payment.models import (
     Approval,
     DeliveryMechanism,
     DeliveryMechanismConfig,
+    FinancialInstitution,
     FinancialServiceProviderXlsxTemplate,
     FspNameMapping,
     Payment,
@@ -876,6 +877,9 @@ class TestAccountModel(TestCase):
         cls.fsp = FinancialServiceProviderFactory()
         generate_delivery_mechanisms()
         cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
+        cls.financial_institution = FinancialInstitution.objects.create(
+            code="ABC", type=FinancialInstitution.FinancialInstitutionType.BANK
+        )
 
     def test_str(self) -> None:
         dmd = AccountFactory(individual=self.ind)
@@ -892,12 +896,13 @@ class TestAccountModel(TestCase):
     def test_delivery_data(self) -> None:
         dmd = AccountFactory(
             data={
-                "number": "test",
                 "expiry_date": "12.12.2024",
                 "name_of_cardholder": "Marek",
             },
             individual=self.ind,
             account_type=AccountType.objects.get(key="bank"),
+            number="test",
+            financial_institution=self.financial_institution,
         )
 
         fsp2 = FinancialServiceProviderFactory()  # no dm config
@@ -954,6 +959,7 @@ class TestAccountModel(TestCase):
                 "custom_ind_name": f"{dmd.individual.full_name} Custom",
                 "custom_hh_address": f"{self.hh.address} Custom",
                 "address": self.hh.address,
+                "financial_institution": "ABC",
             },
         )
 
@@ -1024,7 +1030,10 @@ class TestAccountModelUniqueField(TransactionTestCase):
         )
 
         dmd_1 = AccountFactory(
-            data={"name_of_cardholder__atm_card": "test"}, individual=self.ind, account_type=account_type_bank
+            data={"name_of_cardholder__atm_card": "test"},
+            individual=self.ind,
+            account_type=account_type_bank,
+            number="123",
         )
         dmd_1.individual.seeing_disability = LOT_DIFFICULTY
         dmd_1.individual.save()
@@ -1032,7 +1041,10 @@ class TestAccountModelUniqueField(TransactionTestCase):
         self.assertEqual(dmd_1.is_unique, True)
 
         dmd_2 = AccountFactory(
-            data={"name_of_cardholder__atm_card": "test2"}, individual=self.ind2, account_type=account_type_bank
+            data={"name_of_cardholder__atm_card": "test2"},
+            individual=self.ind2,
+            account_type=account_type_bank,
+            number="123",
         )
         dmd_2.individual.seeing_disability = LOT_DIFFICULTY
         dmd_2.individual.save()

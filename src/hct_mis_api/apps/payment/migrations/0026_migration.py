@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                 ('code', models.CharField(max_length=30, unique=True)),
                 ('description', models.CharField(blank=True, max_length=255, null=True)),
                 ('type', models.CharField(choices=[('bank', 'Bank'), ('telco', 'Telco'), ('other', 'Other')], max_length=30)),
-                ('country', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='geo.country')),
+                ('country', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='geo.country')),
             ],
             options={
                 'abstract': False,
