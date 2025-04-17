@@ -44,7 +44,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     payment_plan_apply_engine_rule,
 )
 from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismDataFactory,
+    AccountFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
@@ -388,7 +388,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         dm_transfer = DeliveryMechanism.objects.get(code="transfer_to_account")
 
         for ind in [individual_1, individual_2, individual_3]:
-            DeliveryMechanismDataFactory(individual=ind, account_type=account_type_bank)
+            AccountFactory(individual=ind, account_type=account_type_bank)
 
         santander_fsp = FinancialServiceProviderFactory(
             name="Santander",

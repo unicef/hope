@@ -18,10 +18,10 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.payment.fixtures import FinancialServiceProviderFactory
 from hct_mis_api.apps.payment.models import (
+    Account,
     AccountType,
     DeliveryMechanism,
     DeliveryMechanismConfig,
-    DeliveryMechanismData,
     FinancialServiceProvider,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -139,7 +139,7 @@ def individual(
 
 
 @pytest.fixture()
-def wallet(individual: Individual, delivery_mechanism: DeliveryMechanism) -> DeliveryMechanismData:
+def wallet(individual: Individual, delivery_mechanism: DeliveryMechanism) -> Account:
     fsp = FinancialServiceProviderFactory(
         name="Western Union",
         communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
@@ -154,11 +154,11 @@ def wallet(individual: Individual, delivery_mechanism: DeliveryMechanism) -> Del
         ],
     )
 
-    return DeliveryMechanismData.objects.create(
+    return Account.objects.create(
         account_type=delivery_mechanism.account_type,
         individual=individual,
         data={"phone_number": "1234567890"},
-        rdi_merge_status=DeliveryMechanismData.MERGED,
+        rdi_merge_status=Account.MERGED,
     )
 
 
@@ -184,7 +184,7 @@ class TestUniversalIndividualUpdateService:
         admin2: Area,
         document_national_id: Document,
         delivery_mechanism: DeliveryMechanism,
-        wallet: DeliveryMechanismData,
+        wallet: Account,
     ) -> None:
         """
         This test generates file for individual update
@@ -283,7 +283,7 @@ Update successful
         admin2: Area,
         document_national_id: Document,
         delivery_mechanism: DeliveryMechanism,
-        wallet: DeliveryMechanismData,
+        wallet: Account,
     ) -> None:
         # save old values
         given_name_old = individual.given_name
@@ -366,7 +366,7 @@ Update successful
         admin2: Area,
         document_national_id: Document,
         delivery_mechanism: DeliveryMechanism,
-        wallet: DeliveryMechanismData,
+        wallet: Account,
     ) -> None:
         # save old values
         given_name_old = individual.given_name
@@ -452,7 +452,7 @@ Row: 2 - Country not found for field national_id_country_i_c and value TEST Stri
         admin2: Area,
         document_national_id: Document,
         delivery_mechanism: DeliveryMechanism,
-        wallet: DeliveryMechanismData,
+        wallet: Account,
     ) -> None:
         universal_update = UniversalUpdate(program=program)
         universal_update.unicef_ids = individual.unicef_id

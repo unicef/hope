@@ -812,17 +812,17 @@ snapshots['TestIndividualQuery::test_query_individuals_by_search_without_search_
     ]
 }
 
-snapshots['TestIndividualWithDeliveryMechanismsDataQuery::test_individual_query_delivery_mechanisms_data_0_with_permissions 1'] = {
+snapshots['TestIndividualWithDeliveryMechanismsDataQuery::test_individual_query_accounts_0_with_permissions 1'] = {
     'data': {
         'individual': {
             'birthDate': '1943-07-30',
-            'deliveryMechanismsData': [
+            'accounts': [
                 {
-                    'individualTabData': '{"card_expiry_date": "2022-01-01", "card_number": "123", "name_of_cardholder": "Marek"}',
+                    'individualTabData': '{"card_expiry_date": "2022-01-01", "card_number": "123", "name_of_cardholder": "Marek", "number": "123", "financial_institution": "ABC"}',
                     'name': 'Bank'
                 },
                 {
-                    'individualTabData': '{"delivery_phone_number": "123456789", "provider": "Provider", "service_provider_code": "ABC"}',
+                    'individualTabData': '{"delivery_phone_number": "123456789", "provider": "Provider", "service_provider_code": "ABC", "number": "321", "financial_institution": "ABC"}',
                     'name': 'Mobile'
                 }
             ],
@@ -834,16 +834,17 @@ snapshots['TestIndividualWithDeliveryMechanismsDataQuery::test_individual_query_
     }
 }
 
-snapshots['TestIndividualWithDeliveryMechanismsDataQuery::test_individual_query_delivery_mechanisms_data_1_without_permissions 1'] = {
+snapshots['TestIndividualWithDeliveryMechanismsDataQuery::test_individual_query_accounts_1_without_permissions 1'] = {
     'data': {
         'individual': {
             'birthDate': '1943-07-30',
-            'deliveryMechanismsData': [
+            'accounts': [
             ],
             'familyName': 'Butler',
             'fullName': 'Benjamin Butler',
             'givenName': 'Benjamin',
             'phoneNo': '(953)682-4596'
+            ''
         }
     }
 }

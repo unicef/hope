@@ -127,7 +127,7 @@ export const individualDetailed = gql`
       accountHolderName
       bankBranchName
     }
-    deliveryMechanismsData {
+    accounts {
       name
       individualTabData
     }
