@@ -47,7 +47,7 @@ interface GrievancesTableProps {
 export const GrievancesTable = ({
   filter,
 }: GrievancesTableProps): ReactElement => {
-  const { businessArea,businessAreaSlug, programSlug, isAllPrograms } = useBaseUrl();
+  const { businessArea, businessAreaSlug, programSlug, isAllPrograms } = useBaseUrl();
   const { isSocialDctType, selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { t } = useTranslation();

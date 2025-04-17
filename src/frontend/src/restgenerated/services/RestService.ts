@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { BusinessArea } from '../models/BusinessArea';
+import type { Choice } from '../models/Choice';
 import type { CountResponse } from '../models/CountResponse';
 import type { DelegatePeople } from '../models/DelegatePeople';
 import type { HouseholdDetail } from '../models/HouseholdDetail';
@@ -492,18 +493,15 @@ export class RestService {
         });
     }
     /**
+     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaginatedBusinessAreaList
      * @throws ApiError
      */
     public static restBusinessAreasList({
-        active,
         limit,
         offset,
         ordering,
-        updatedAtAfter,
-        updatedAtBefore,
     }: {
-        active?: boolean,
         /**
          * Number of results to return per page.
          */
@@ -516,19 +514,14 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
-        updatedAtAfter?: string,
-        updatedAtBefore?: string,
     }): CancelablePromise<PaginatedBusinessAreaList> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/',
             query: {
-                'active': active,
                 'limit': limit,
                 'offset': offset,
                 'ordering': ordering,
-                'updated_at_after': updatedAtAfter,
-                'updated_at_before': updatedAtBefore,
             },
         });
     }
@@ -2629,6 +2622,27 @@ export class RestService {
     }
     /**
      * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns Choice
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsRegistrationDataImportsStatusChoicesList({
+        businessAreaSlug,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+    }): CancelablePromise<Array<Choice>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/status-choices/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns any No response body
      * @throws ApiError
      */
@@ -2951,15 +2965,13 @@ export class RestService {
         });
     }
     /**
+     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns BusinessArea
      * @throws ApiError
      */
     public static restBusinessAreasRetrieve({
         slug,
     }: {
-        /**
-         * A UUID string identifying this business area.
-         */
         slug: string,
     }): CancelablePromise<BusinessArea> {
         return __request(OpenAPI, {
@@ -2968,6 +2980,17 @@ export class RestService {
             path: {
                 'slug': slug,
             },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasCountRetrieve(): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/count/',
         });
     }
     /**

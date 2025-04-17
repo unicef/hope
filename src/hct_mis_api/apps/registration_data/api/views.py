@@ -25,7 +25,11 @@ from hct_mis_api.apps.core.api.mixins import (
     ProgramMixin,
     SerializerActionMixin,
 )
-from hct_mis_api.apps.core.utils import check_concurrency_version_in_mutation
+from hct_mis_api.apps.core.api.serializers import ChoiceSerializer
+from hct_mis_api.apps.core.utils import (
+    check_concurrency_version_in_mutation,
+    to_choice_object,
+)
 from hct_mis_api.apps.household.documents import get_individual_doc
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.program.models import Program
@@ -66,6 +70,7 @@ class RegistrationDataImportViewSet(
         "retrieve": RegistrationDataImportDetailSerializer,
         "refuse": RefuseRdiSerializer,
         "create": RegistrationDataImportCreateSerializer,
+        "status_choices": ChoiceSerializer,
     }
     permissions_by_action = {
         "list": [
@@ -80,6 +85,9 @@ class RegistrationDataImportViewSet(
         "refuse": [Permissions.RDI_REFUSE_IMPORT],
         "deduplicate": [Permissions.RDI_RERUN_DEDUPE],
         "run_deduplication": [Permissions.RDI_RERUN_DEDUPE],
+        "status_choices": [
+            Permissions.RDI_VIEW_LIST,
+        ],
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = RegistrationDataImportFilter
@@ -284,3 +292,18 @@ class RegistrationDataImportViewSet(
             registration_data_import, context=self.get_serializer_context()
         )
         return Response(detail_serializer.data, status=status.HTTP_201_CREATED)
+
+    @extend_schema(
+        responses=ChoiceSerializer(many=True),
+        filters=False,
+    )
+    @action(
+        detail=False,
+        methods=["get"],
+        pagination_class=None,
+        url_path="status-choices",
+    )
+    def status_choices(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        status_choices = to_choice_object(RegistrationDataImport.STATUS_CHOICE)
+
+        return Response(status=200, data=self.get_serializer(status_choices, many=True).data)

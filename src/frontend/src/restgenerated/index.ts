@@ -16,6 +16,7 @@ export type { BeneficiaryGroup as BeneficiaryGroupCamelCase } from './models/Ben
 export { BiometricDeduplicationBatchStatusEnum as BiometricDeduplicationBatchStatusEnumCamelCase } from './models/BiometricDeduplicationBatchStatusEnum';
 export { BiometricDeduplicationGoldenRecordStatusEnum as BiometricDeduplicationGoldenRecordStatusEnumCamelCase } from './models/BiometricDeduplicationGoldenRecordStatusEnum';
 export type { BusinessArea as BusinessAreaCamelCase } from './models/BusinessArea';
+export type { Choice as ChoiceCamelCase } from './models/Choice';
 export { CollectTypeEnum as CollectTypeEnumCamelCase } from './models/CollectTypeEnum';
 export { CommsDisabilityEnum as CommsDisabilityEnumCamelCase } from './models/CommsDisabilityEnum';
 export { ConsentSharingEnum as ConsentSharingEnumCamelCase } from './models/ConsentSharingEnum';
@@ -30,6 +31,7 @@ export { DeduplicationBatchStatusEnum as DeduplicationBatchStatusEnumCamelCase }
 export type { DeduplicationEngineSimilarityPairIndividual as DeduplicationEngineSimilarityPairIndividualCamelCase } from './models/DeduplicationEngineSimilarityPairIndividual';
 export { DeduplicationEngineStatusEnum as DeduplicationEngineStatusEnumCamelCase } from './models/DeduplicationEngineStatusEnum';
 export { DeduplicationGoldenRecordStatusEnum as DeduplicationGoldenRecordStatusEnumCamelCase } from './models/DeduplicationGoldenRecordStatusEnum';
+export type { DeduplicationResult as DeduplicationResultCamelCase } from './models/DeduplicationResult';
 export type { Delegate as DelegateCamelCase } from './models/Delegate';
 export type { DelegatePeople as DelegatePeopleCamelCase } from './models/DelegatePeople';
 export { DisabilityEnum as DisabilityEnumCamelCase } from './models/DisabilityEnum';
