@@ -33,7 +33,7 @@ finished_payment_plans = Count(
     "parent__id", filter=Q(parent__payment_verification_plans__status="FINISHED"), distinct=True
 )
 
-total_payment_plans = Count("parent__id", filter=Q(parent__status="FINISHED"), distinct=True)
+total_payment_plans = Count("parent__id", filter=Q(parent__status__in=["ACCEPTED", "FINISHED"]), distinct=True)
 
 
 class DashboardDataCache(Protocol):
@@ -93,6 +93,7 @@ class DashboardDataCache(Protocol):
                     parent__status__in=["ACCEPTED", "FINISHED"],
                     is_removed=False,
                     conflicted=False,
+                    excluded=False,
                 )  # noqa
                 .exclude(status__in=["Transaction Erroneous", "Not Distributed", "Force failed", "Manually Cancelled"])
                 .annotate(
@@ -139,7 +140,7 @@ class DashboardDataCache(Protocol):
                     individuals=Sum(Coalesce("household__size", Value(1))),
                     households=Count("household", distinct=True),
                     children_counts=Sum("household__children_count"),
-                    reconciled=Count("pk", distinct=False, filter=Q(payment_verifications__isnull=False)),
+                    reconciled=Count("pk", distinct=True, filter=Q(payment_verifications__isnull=False)),
                     pwd_counts=pwdSum,
                     finished_payment_plans=finished_payment_plans,
                     total_payment_plans=total_payment_plans,
@@ -236,6 +237,7 @@ class DashboardGlobalDataCache(DashboardDataCache):
                 parent__status__in=["ACCEPTED", "FINISHED"],
                 is_removed=False,
                 conflicted=False,
+                excluded=False,
             )  # noqa
             .exclude(status__in=["Transaction Erroneous", "Not Distributed", "Force failed", "Manually Cancelled"])
             .annotate(
@@ -266,7 +268,7 @@ class DashboardGlobalDataCache(DashboardDataCache):
                 individuals=Sum(Coalesce("household__size", Value(1))),
                 households=Count("household", distinct=True),
                 children_counts=Sum("household__children_count"),
-                reconciled=Count("pk", distinct=False, filter=Q(payment_verifications__isnull=False)),
+                reconciled=Count("pk", distinct=True, filter=Q(payment_verifications__isnull=False)),
                 pwd_counts=pwdSum,
                 finished_payment_plans=finished_payment_plans,
                 total_payment_plans=total_payment_plans,
