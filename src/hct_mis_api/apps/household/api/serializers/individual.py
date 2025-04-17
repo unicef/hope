@@ -1,17 +1,27 @@
-from typing import Dict
+import uuid
+from datetime import date
+from typing import Dict, Optional
 
+from dateutil.parser import parse
+from dateutil.relativedelta import relativedelta
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
-from rest_framework.fields import SerializerMethodField
+from rest_framework.utils.serializer_helpers import ReturnDict
 
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.utils import resolve_flex_fields_choices_to_string
+from hct_mis_api.apps.core.utils import (
+    decode_id_string,
+    encode_ids,
+    resolve_flex_fields_choices_to_string,
+)
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.api.serializers.registration_data_import import (
     RegistrationDataImportSerializer,
 )
 from hct_mis_api.apps.household.models import (
+    DUPLICATE,
+    DUPLICATE_IN_BATCH,
     ROLE_NO_ROLE,
     BankAccountInfo,
     Document,
@@ -135,20 +145,56 @@ class LinkedGrievanceTicketSerializer(serializers.ModelSerializer):
         )
 
 
+class DeduplicationResultSerializer(serializers.Serializer):
+    unicef_id = serializers.SerializerMethodField()
+    hit_id = serializers.CharField()
+    full_name = serializers.CharField()
+    score = serializers.FloatField()
+    proximity_to_score = serializers.FloatField()
+    location = serializers.SerializerMethodField()
+    age = serializers.SerializerMethodField()
+    duplicate = serializers.SerializerMethodField()
+    distinct = serializers.SerializerMethodField()
+
+    def get_unicef_id(self, obj: dict) -> str:
+        hit_id = obj.get("hit_id")
+        # If hit_id is a valid UUID string, use it directly as the PK
+        try:
+            uuid.UUID(hit_id)
+            pk = hit_id
+        except (ValueError, TypeError):
+            # otherwise decode the opaque ID
+            pk = decode_id_string(hit_id)
+        individual = Individual.all_objects.get(id=pk)
+        return str(individual.unicef_id)
+
+    def get_location(self, obj: dict) -> str:
+        return obj.get("location", "Not provided")
+
+    def get_age(self, obj: dict) -> Optional[int]:
+        dob = obj.get("dob")
+        if not dob:
+            return None
+        birth = parse(dob)
+        return relativedelta(date.today(), birth).years
+
+    def get_duplicate(self, obj: dict) -> bool:
+        return bool(obj.get("duplicate", False))
+
+    def get_distinct(self, obj: dict) -> bool:
+        return bool(obj.get("distinct", False))
+
+
 class DeduplicationEngineSimilarityPairIndividualSerializer(serializers.Serializer):
     id = serializers.CharField()
     photo = serializers.SerializerMethodField()
     full_name = serializers.CharField()
     unicef_id = serializers.CharField()
-    similarity_score = serializers.FloatField(required=False, allow_null=True)
-    age = serializers.IntegerField(required=False, allow_null=True)
-    location = serializers.CharField(required=False, allow_blank=True)
+    similarity_score = serializers.FloatField()
+    age = serializers.IntegerField()
+    location = serializers.CharField()
 
-    def get_photo(self, obj):
-        """
-        Retrieve the photo URL from the Individual instance.
-        Assumes `obj` is a dict-like object with an 'id' key.
-        """
+    def get_photo(self, obj: dict) -> str:
         individual = Individual.all_objects.filter(id=obj.get("id")).first()
         return individual.photo.url if individual and individual.photo else None
 
@@ -209,26 +255,30 @@ class IndividualListSerializer(serializers.ModelSerializer):
             return role.get_role_display()
         return "-"
 
-    @extend_schema_field(DeduplicationEngineSimilarityPairIndividualSerializer(many=True))
-    def get_deduplication_batch_results(self, obj: Individual):
-        results = obj.deduplication_batch_results
-        serializer = DeduplicationEngineSimilarityPairIndividualSerializer(results, many=True, context=self.context)
+    @extend_schema_field(DeduplicationResultSerializer(many=True))
+    def get_deduplication_batch_results(self, obj: Individual) -> ReturnDict:
+        key = "duplicates" if obj.deduplication_batch_status == DUPLICATE_IN_BATCH else "possible_duplicates"
+        results = obj.deduplication_batch_results.get(key, {})
+        results = encode_ids(results, "Individual", "hit_id")
+        serializer = DeduplicationResultSerializer(results, many=True, context=self.context)
         return serializer.data
 
     @extend_schema_field(DeduplicationEngineSimilarityPairIndividualSerializer(many=True))
-    def get_biometric_deduplication_batch_results(self, obj: Individual):
+    def get_biometric_deduplication_batch_results(self, obj: Individual) -> ReturnDict:
         results = obj.biometric_deduplication_batch_results
         serializer = DeduplicationEngineSimilarityPairIndividualSerializer(results, many=True, context=self.context)
         return serializer.data
 
-    @extend_schema_field(DeduplicationEngineSimilarityPairIndividualSerializer(many=True))
-    def get_deduplication_golden_record_results(self, obj: Individual):
-        results = obj.deduplication_golden_record_results
-        serializer = DeduplicationEngineSimilarityPairIndividualSerializer(results, many=True, context=self.context)
+    @extend_schema_field(DeduplicationResultSerializer(many=True))
+    def get_deduplication_golden_record_results(self, obj: Individual) -> ReturnDict:
+        key = "duplicates" if obj.deduplication_golden_record_status == DUPLICATE else "possible_duplicates"
+        results = obj.deduplication_golden_record_results.get(key, {})
+        results = encode_ids(results, "Individual", "hit_id")
+        serializer = DeduplicationResultSerializer(results, many=True, context=self.context)
         return serializer.data
 
     @extend_schema_field(DeduplicationEngineSimilarityPairIndividualSerializer(many=True))
-    def get_biometric_deduplication_golden_record_results(self, obj: Individual):
+    def get_biometric_deduplication_golden_record_results(self, obj: Individual) -> ReturnDict:
         results = obj.biometric_deduplication_golden_record_results
         serializer = DeduplicationEngineSimilarityPairIndividualSerializer(results, many=True, context=self.context)
         return serializer.data
