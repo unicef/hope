@@ -2,9 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type AreaList = {
-    readonly id: string;
+export type Choice = {
     name: string;
-    pCode?: string | null;
+    value: string;
 };
 

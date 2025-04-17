@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { LoadingComponent } from '@components/core/LoadingComponent';
-import { useCreateRegistrationProgramPopulationImportMutation } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box } from '@mui/material';
@@ -14,18 +13,37 @@ import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import * as Yup from 'yup';
 import { ScreenBeneficiaryField } from '../ScreenBeneficiaryField';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import type { RegistrationDataImportCreate } from '@restgenerated/models/RegistrationDataImportCreate';
 
 export const CreateImportFromProgramPopulationForm = ({
   setSubmitForm,
   setSubmitDisabled,
 }): ReactElement => {
-  const { baseUrl, businessArea, programId } = useBaseUrl();
+  const { baseUrl, businessAreaSlug, programSlug } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [createImport] = useCreateRegistrationProgramPopulationImportMutation();
+  const client = useQueryClient();
+  const { mutateAsync: createImport } = useMutation({
+    mutationFn: (data: RegistrationDataImportCreate) => {
+      return RestService.restBusinessAreasProgramsRegistrationDataImportsCreate(
+        {
+          businessAreaSlug,
+          programSlug,
+          requestBody: data,
+        },
+      );
+    },
+    onSuccess: () => {
+      client.invalidateQueries({
+        queryKey: [
+          RestService.restBusinessAreasProgramsRegistrationDataImportsList.name,
+        ],
+      });
+    },
+  });
   const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const regex = isSocialDctType
@@ -56,14 +74,14 @@ export const CreateImportFromProgramPopulationForm = ({
   });
 
   const queryVariables = {
-    businessAreaSlug: businessArea,
-    beneficiaryGroupMatch: programId,
-    compatibleDct: programId,
+    businessAreaSlug,
+    beneficiaryGroupMatch: programSlug,
+    compatibleDct: programSlug,
     first: 100,
   };
 
   const { data: programsData, isLoading: programsDataLoading } = useQuery({
-    queryKey: ['businessAreasProgramsList', queryVariables, businessArea],
+    queryKey: ['businessAreasProgramsList', queryVariables, businessAreaSlug],
     queryFn: () =>
       RestService.restBusinessAreasProgramsList({ ...queryVariables }),
   });
@@ -72,21 +90,29 @@ export const CreateImportFromProgramPopulationForm = ({
     setSubmitDisabled(true);
     try {
       const data = await createImport({
-        variables: {
-          registrationDataImportData: {
-            name: values.name,
-            screenBeneficiary: values.screenBeneficiary,
-            importFromProgramId: values.importFromProgramId,
-            importFromIds: values.importFromIds,
-            businessAreaSlug: businessArea,
-          },
-        },
+        name: values.name,
+        screenBeneficiary: values.screenBeneficiary,
+        importFromProgramId: values.importFromProgramId,
+        importFromIds: values.importFromIds,
       });
-      navigate(
-        `/${baseUrl}/registration-data-import/${data.data.registrationProgramPopulationImport.registrationDataImport.id}`,
-      );
+      navigate(`/${baseUrl}/registration-data-import/${data.id}`);
     } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+      if (!e.body || e.status !== 400) {
+        showMessage(t('Error creating import'));
+        setSubmitDisabled(false);
+        return;
+      }
+      const errorBody = e.body;
+      let fullMessage = '';
+      for (const key in errorBody) {
+        const message = errorBody[key];
+        if (!isNaN(Number(key))) {
+          fullMessage += `${message}\n`;
+          continue;
+        }
+        fullMessage += `${key}: ${message}\n`;
+      }
+      showMessage(fullMessage);
       setSubmitDisabled(false);
     }
   };

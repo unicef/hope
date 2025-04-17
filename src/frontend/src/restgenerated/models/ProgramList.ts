@@ -8,7 +8,7 @@ import type { FrequencyOfPaymentsEnum } from './FrequencyOfPaymentsEnum';
 import type { SectorEnum } from './SectorEnum';
 import type { Status791Enum } from './Status791Enum';
 export type ProgramList = {
-    id: string;
+    readonly id: string;
     /**
      * Program code
      */

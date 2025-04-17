@@ -26,7 +26,7 @@ const initialFilter = {
 
 function ReportingPage(): ReactElement {
   const { t } = useTranslation();
-  const { businessArea, programId } = useBaseUrl();
+  const { businessAreaSlug, programSlug } = useBaseUrl();
   const permissions = usePermissions();
   const location = useLocation();
 
@@ -34,11 +34,11 @@ function ReportingPage(): ReactElement {
     useReportChoiceDataQuery();
 
   const { data: meData, isLoading: meLoading } = useQuery({
-    queryKey: ['profile', businessArea, programId],
+    queryKey: ['profile', businessAreaSlug, programSlug],
     queryFn: () => {
-      return RestService.restUsersProfileRetrieve({
-        businessAreaSlug: businessArea,
-        programSlug: programId === 'all' ? undefined : programId,
+      return RestService.restBusinessAreasUsersProfileRetrieve({
+        businessAreaSlug,
+        program: programSlug === 'all' ? undefined : programSlug,
       });
     },
   });
@@ -71,7 +71,7 @@ function ReportingPage(): ReactElement {
       />
       <ReportingTable
         filter={appliedFilter}
-        businessArea={businessArea}
+        businessArea={businessAreaSlug}
         choicesData={choicesData}
         meData={meData}
       />

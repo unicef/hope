@@ -24,15 +24,15 @@ import { RestService } from '@restgenerated/services/RestService';
 
 const GrievancesDetailsPage = (): ReactElement => {
   const { id } = useParams();
-  const { businessArea, programId } = useBaseUrl();
+  const { businessAreaSlug, programSlug } = useBaseUrl();
   const permissions = usePermissions();
   const { data: currentUserData, isLoading: currentUserDataLoading } = useQuery(
     {
-      queryKey: ['profile', businessArea, programId],
+      queryKey: ['profile', businessAreaSlug, programSlug],
       queryFn: () => {
-        return RestService.restUsersProfileRetrieve({
-          businessAreaSlug: businessArea,
-          programSlug: programId === 'all' ? undefined : programId,
+        return RestService.restBusinessAreasUsersProfileRetrieve({
+          businessAreaSlug: businessAreaSlug,
+          program: programSlug === 'all' ? undefined : programSlug,
         });
       },
     },

@@ -18,7 +18,7 @@ import type { SelfcareDisabilityEnum } from './SelfcareDisabilityEnum';
 import type { SexEnum } from './SexEnum';
 import type { WorkStatusEnum } from './WorkStatusEnum';
 export type IndividualDetail = {
-    id: string;
+    readonly id: string;
     unicefId?: string | null;
     /**
      * Full Name of the Beneficiary

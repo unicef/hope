@@ -5,7 +5,7 @@
 import type { CurrencyEnum } from './CurrencyEnum';
 import type { ResidenceStatusEnum } from './ResidenceStatusEnum';
 export type HouseholdList = {
-    id: string;
+    readonly id: string;
     unicefId: string | null;
     headOfHousehold: string;
     admin1?: string;

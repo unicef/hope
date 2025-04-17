@@ -16,6 +16,7 @@ export type { BeneficiaryGroup as BeneficiaryGroupCamelCase } from './models/Ben
 export { BiometricDeduplicationBatchStatusEnum as BiometricDeduplicationBatchStatusEnumCamelCase } from './models/BiometricDeduplicationBatchStatusEnum';
 export { BiometricDeduplicationGoldenRecordStatusEnum as BiometricDeduplicationGoldenRecordStatusEnumCamelCase } from './models/BiometricDeduplicationGoldenRecordStatusEnum';
 export type { BusinessArea as BusinessAreaCamelCase } from './models/BusinessArea';
+export type { Choice as ChoiceCamelCase } from './models/Choice';
 export { CollectTypeEnum as CollectTypeEnumCamelCase } from './models/CollectTypeEnum';
 export { CommsDisabilityEnum as CommsDisabilityEnumCamelCase } from './models/CommsDisabilityEnum';
 export { ConsentSharingEnum as ConsentSharingEnumCamelCase } from './models/ConsentSharingEnum';
@@ -26,8 +27,11 @@ export { CountryOriginEnum as CountryOriginEnumCamelCase } from './models/Countr
 export { CurrencyEnum as CurrencyEnumCamelCase } from './models/CurrencyEnum';
 export type { DataCollectingType as DataCollectingTypeCamelCase } from './models/DataCollectingType';
 export { DataSourceEnum as DataSourceEnumCamelCase } from './models/DataSourceEnum';
+export { DeduplicationBatchStatusEnum as DeduplicationBatchStatusEnumCamelCase } from './models/DeduplicationBatchStatusEnum';
+export type { DeduplicationEngineSimilarityPairIndividual as DeduplicationEngineSimilarityPairIndividualCamelCase } from './models/DeduplicationEngineSimilarityPairIndividual';
 export { DeduplicationEngineStatusEnum as DeduplicationEngineStatusEnumCamelCase } from './models/DeduplicationEngineStatusEnum';
 export { DeduplicationGoldenRecordStatusEnum as DeduplicationGoldenRecordStatusEnumCamelCase } from './models/DeduplicationGoldenRecordStatusEnum';
+export type { DeduplicationResult as DeduplicationResultCamelCase } from './models/DeduplicationResult';
 export type { Delegate as DelegateCamelCase } from './models/Delegate';
 export type { DelegatePeople as DelegatePeopleCamelCase } from './models/DelegatePeople';
 export { DisabilityEnum as DisabilityEnumCamelCase } from './models/DisabilityEnum';
@@ -71,6 +75,8 @@ export type { PaginatedProjectList as PaginatedProjectListCamelCase } from './mo
 export type { PaginatedRegistrationDataImportListList as PaginatedRegistrationDataImportListListCamelCase } from './models/PaginatedRegistrationDataImportListList';
 export type { PaginatedRegistrationList as PaginatedRegistrationListCamelCase } from './models/PaginatedRegistrationList';
 export type { PaginatedTargetPopulationListList as PaginatedTargetPopulationListListCamelCase } from './models/PaginatedTargetPopulationListList';
+export type { PaginatedUserList as PaginatedUserListCamelCase } from './models/PaginatedUserList';
+export type { Partner as PartnerCamelCase } from './models/Partner';
 export { PartnerAccessEnum as PartnerAccessEnumCamelCase } from './models/PartnerAccessEnum';
 export type { PatchedProgramCycleUpdate as PatchedProgramCycleUpdateCamelCase } from './models/PatchedProgramCycleUpdate';
 export type { PatchedRDI as PatchedRDICamelCase } from './models/PatchedRDI';
@@ -104,6 +110,7 @@ export type { RDINested as RDINestedCamelCase } from './models/RDINested';
 export type { RefuseRdi as RefuseRdiCamelCase } from './models/RefuseRdi';
 export type { Registration as RegistrationCamelCase } from './models/Registration';
 export type { RegistrationDataImport as RegistrationDataImportCamelCase } from './models/RegistrationDataImport';
+export type { RegistrationDataImportCreate as RegistrationDataImportCreateCamelCase } from './models/RegistrationDataImportCreate';
 export type { RegistrationDataImportDetail as RegistrationDataImportDetailCamelCase } from './models/RegistrationDataImportDetail';
 export type { RegistrationDataImportList as RegistrationDataImportListCamelCase } from './models/RegistrationDataImportList';
 export { RegistrationDataImportStatusEnum as RegistrationDataImportStatusEnumCamelCase } from './models/RegistrationDataImportStatusEnum';
@@ -119,7 +126,6 @@ export { Status791Enum as Status791EnumCamelCase } from './models/Status791Enum'
 export { SubtypeEnum as SubtypeEnumCamelCase } from './models/SubtypeEnum';
 export type { TargetPopulationList as TargetPopulationListCamelCase } from './models/TargetPopulationList';
 export type { User as UserCamelCase } from './models/User';
-export type { UserBusinessArea as UserBusinessAreaCamelCase } from './models/UserBusinessArea';
 export { WorkStatusEnum as WorkStatusEnumCamelCase } from './models/WorkStatusEnum';
 
 export { FieldsAttributesService } from './services/FieldsAttributesService';

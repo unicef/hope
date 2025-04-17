@@ -6,7 +6,6 @@ import { Title } from '@components/core/Title';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import RegistrationDataImportDetailsPageHeader from '@components/rdi/details/RegistrationDataImportDetailsPageHeader';
 import { Tab, Tabs } from '@core/Tabs';
-import { useHouseholdChoiceDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Typography } from '@mui/material';
@@ -85,14 +84,11 @@ const RegistrationDataImportDetailsPage = (): ReactElement => {
     { refetchInterval },
   );
 
-  const { data: choicesData, loading: choicesLoading } =
-    useHouseholdChoiceDataQuery();
-
   const [selectedTab, setSelectedTab] = useState(0);
 
-  if (loading || choicesLoading) return <LoadingComponent />;
+  if (loading) return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
-  if (!data || !choicesData || permissions === null) {
+  if (!data || permissions === null) {
     return null;
   }
 
@@ -148,7 +144,6 @@ const RegistrationDataImportDetailsPage = (): ReactElement => {
                   isMerged={isMerged}
                   businessArea={businessArea}
                   key={`${data.status}-individual`}
-                  choicesData={choicesData}
                   rdi={data}
                 />
               </TabPanel>
