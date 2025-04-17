@@ -71,11 +71,11 @@ class UsersFilter(FilterSet):
         )
 
     def program_filter(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[User]":
-        business_area = Program.objects.get(id=value).business_area
+        business_area = Program.objects.get(slug=value).business_area
         return qs.filter(
-            Q(partner__role_assignments__program__id=value)
+            Q(partner__role_assignments__program__slug=value)
             | Q(partner__role_assignments__program=None, partner__role_assignments__business_area=business_area)
-            | Q(role_assignments__program__id=value)
+            | Q(role_assignments__program__slug=value)
             | Q(role_assignments__program=None, role_assignments__business_area=business_area)
         )
 

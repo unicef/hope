@@ -167,7 +167,7 @@ class TestUserProfile:
         }
 
     def test_user_profile_in_scope_program(self) -> None:
-        response = self.api_client.get(self.user_profile_url, {"program": self.program1.id})
+        response = self.api_client.get(self.user_profile_url, {"program": self.program1.slug})
         assert response.status_code == status.HTTP_200_OK
 
         profile_data = response.data
@@ -490,7 +490,7 @@ class TestProgramUsers:
             program=None,
             role=role_with_user_management_permissions,
         )
-        response = self.api_client.get(self.list_url, {"program": self.program.id, "serializer": "program_users"})
+        response = self.api_client.get(self.list_url, {"program": self.program.slug, "serializer": "program_users"})
         assert response.status_code == status.HTTP_200_OK
 
         response_results = response.data["results"]
