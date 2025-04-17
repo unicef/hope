@@ -8,7 +8,7 @@ from django.test import TestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
-from hct_mis_api.apps.payment.models import AccountType, DeliveryMechanismData
+from hct_mis_api.apps.payment.models import Account, AccountType
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
@@ -78,14 +78,14 @@ class TestSouthSudanUpdateScript(TestCase):
         individual2.save()
         individual2.refresh_from_db()
         cls.individual2 = individual2
-        cls.deliver_mechanism_data2 = DeliveryMechanismData.objects.create(
+        cls.deliver_mechanism_data2 = Account.objects.create(
             data={
                 "service_provider_code": "OLD_CODE",
                 "provider": "OLD_PROVIDER",
                 "delivery_phone_number": "+48602102373",
             },
             individual=individual2,
-            rdi_merge_status=DeliveryMechanismData.MERGED,
+            rdi_merge_status=Account.MERGED,
             account_type=cls.account_type_mobile,
         )
 
@@ -109,14 +109,14 @@ class TestSouthSudanUpdateScript(TestCase):
         individual3.save()
         individual3.refresh_from_db()
         cls.individual3 = individual3
-        cls.deliver_mechanism_data3 = DeliveryMechanismData.objects.create(
+        cls.deliver_mechanism_data3 = Account.objects.create(
             data={
                 "service_provider_code": "OLD_CODE",
                 "provider": "OLD_PROVIDER",
                 "delivery_phone_number": "+48602102373",
             },
             individual=individual3,
-            rdi_merge_status=DeliveryMechanismData.MERGED,
+            rdi_merge_status=Account.MERGED,
             account_type=cls.account_type_mobile,
         )
 
@@ -173,8 +173,8 @@ class TestSouthSudanUpdateScript(TestCase):
         deliver_mechanism_data3 = self.deliver_mechanism_data3
         self.assertEqual(str(individual.phone_no), "+243837611111")
         self.assertEqual(str(individual.payment_delivery_phone_no), "+243837611111")
-        self.assertEqual(individual.delivery_mechanisms_data.count(), 1)
-        deliver_mechanism_data = individual.delivery_mechanisms_data.first()
+        self.assertEqual(individual.accounts.count(), 1)
+        deliver_mechanism_data = individual.accounts.first()
         self.assertEqual(
             deliver_mechanism_data.data,
             {
@@ -184,7 +184,7 @@ class TestSouthSudanUpdateScript(TestCase):
         )
         self.assertEqual(str(individual2.phone_no), "+243836122222")
         self.assertEqual(str(individual2.payment_delivery_phone_no), "+243836122222")
-        self.assertEqual(individual2.delivery_mechanisms_data.count(), 1)
+        self.assertEqual(individual2.accounts.count(), 1)
         deliver_mechanism_data2.refresh_from_db()
         self.assertEqual(
             deliver_mechanism_data2.data,
@@ -195,7 +195,7 @@ class TestSouthSudanUpdateScript(TestCase):
             },
         )
         self.assertEqual(str(individual3.phone_no), "+243831733333")
-        self.assertEqual(individual3.delivery_mechanisms_data.count(), 1)
+        self.assertEqual(individual3.accounts.count(), 1)
         deliver_mechanism_data3.refresh_from_db()
         self.assertEqual(
             deliver_mechanism_data3.data,
@@ -207,4 +207,4 @@ class TestSouthSudanUpdateScript(TestCase):
         )
 
         self.assertEqual(str(individual4.phone_no), "+243831733333")
-        self.assertEqual(individual4.delivery_mechanisms_data.count(), 0)
+        self.assertEqual(individual4.accounts.count(), 0)
