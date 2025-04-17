@@ -219,6 +219,7 @@ class FspConfig(FlexibleArgumentsDataclassMixin):
     key: str
     delivery_mechanism: int
     delivery_mechanism_name: str
+    country: Optional[str] = None
     label: Optional[str] = None
     required_fields: Optional[List[str]] = None
 
@@ -428,13 +429,17 @@ class PaymentGatewayService:
                 )
                 fsp.delivery_mechanisms.set(delivery_mechanisms)
 
-            dm_required_fields = {
-                config.delivery_mechanism: config.required_fields or [] for config in fsp_data.configs
-            }
+            # get last config for dm which doesn't have country assigned
+            dm_required_fields = {}
+            for config in fsp_data.configs:
+                if not config.country:
+                    dm_required_fields[config.delivery_mechanism] = config.required_fields
+
             for dm_id, required_fields in dm_required_fields.items():
                 DeliveryMechanismConfig.objects.update_or_create(
                     delivery_mechanism=DeliveryMechanism.objects.get(payment_gateway_id=dm_id),
                     fsp=fsp,
+                    country=None,  # TODO create config for each country in configs data?
                     defaults=dict(required_fields=required_fields),
                 )
 
