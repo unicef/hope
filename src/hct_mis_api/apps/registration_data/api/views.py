@@ -5,7 +5,7 @@ from django.db import transaction
 
 from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import extend_schema, OpenApiExample
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -32,9 +32,9 @@ from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.api.caches import RDIKeyConstructor
 from hct_mis_api.apps.registration_data.api.serializers import (
     RefuseRdiSerializer,
+    RegistrationDataImportCreateSerializer,
     RegistrationDataImportDetailSerializer,
     RegistrationDataImportListSerializer,
-    RegistrationDataImportCreateSerializer,
 )
 from hct_mis_api.apps.registration_data.filters import RegistrationDataImportFilter
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -266,7 +266,7 @@ class RegistrationDataImportViewSet(
         transaction.on_commit(
             lambda: registration_program_population_import_task.delay(
                 registration_data_import_id=str(registration_data_import.id),
-                business_area_id=str(registration_data_import.id),
+                business_area_id=str(registration_data_import.business_area.id),
                 import_from_program_id=str(import_from_program_id),
                 import_to_program_id=str(self.program.id),
             )
@@ -281,8 +281,6 @@ class RegistrationDataImportViewSet(
         )
 
         detail_serializer = RegistrationDataImportDetailSerializer(
-            registration_data_import,
-            context=self.get_serializer_context()
+            registration_data_import, context=self.get_serializer_context()
         )
         return Response(detail_serializer.data, status=status.HTTP_201_CREATED)
-
