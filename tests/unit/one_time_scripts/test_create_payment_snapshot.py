@@ -6,7 +6,7 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
 from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismDataFactory,
+    AccountFactory,
     PaymentFactory,
     PaymentPlanFactory,
     RealProgramFactory,
@@ -44,7 +44,7 @@ class TestMigratePaymentSnapShot(TestCase):
             )
             cls.hoh1.household = cls.hh1
             cls.hoh1.save()
-            DeliveryMechanismDataFactory(
+            AccountFactory(
                 individual=cls.hoh1,
                 data={
                     "card_number__atm_card": "123",

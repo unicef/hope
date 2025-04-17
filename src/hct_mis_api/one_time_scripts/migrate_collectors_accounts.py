@@ -1,5 +1,5 @@
 from hct_mis_api.apps.household.models import BankAccountInfo
-from hct_mis_api.apps.payment.models import AccountType, DeliveryMechanismData
+from hct_mis_api.apps.payment.models import Account, AccountType
 
 
 def migrate_bank_account_info() -> None:
@@ -28,7 +28,7 @@ def migrate_bank_account_info() -> None:
     )
     dmd_ids = []
     for bai in BankAccountInfo.all_objects.filter(id__in=bank_account_ids).iterator(chunk_size=1000):
-        dmd, _ = DeliveryMechanismData.get_or_create(
+        dmd, _ = Account.get_or_create(
             individual_id=bai.individual_id,
             account_type=bank_account_type,
         )
@@ -44,7 +44,7 @@ def migrate_bank_account_info() -> None:
         dmd.save()
         dmd_ids.append(dmd.id)
 
-    DeliveryMechanismData.validate_uniqueness(DeliveryMechanismData.objects.filter(id__in=dmd_ids))
+    Account.validate_uniqueness(Account.objects.filter(id__in=dmd_ids))
 
 
 def migrate_collectors_accounts() -> None:

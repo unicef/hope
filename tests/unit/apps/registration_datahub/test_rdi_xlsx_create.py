@@ -46,7 +46,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividualIdentity,
 )
 from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
-from hct_mis_api.apps.payment.models import PendingDeliveryMechanismData
+from hct_mis_api.apps.payment.models import PendingAccount
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
@@ -573,11 +573,11 @@ class TestRdiXlsxCreateTask(TestCase):
     def test_create_delivery_mechanism_data(self) -> None:
         task = self.RdiXlsxCreateTask()
         task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
-        self.assertEqual(PendingDeliveryMechanismData.objects.count(), 3)
+        self.assertEqual(PendingAccount.objects.count(), 3)
 
-        dmd1 = PendingDeliveryMechanismData.objects.get(individual__detail_id=3)
-        dmd2 = PendingDeliveryMechanismData.objects.get(individual__detail_id=4)
-        dmd3 = PendingDeliveryMechanismData.objects.get(individual__detail_id=5)
+        dmd1 = PendingAccount.objects.get(individual__detail_id=3)
+        dmd2 = PendingAccount.objects.get(individual__detail_id=4)
+        dmd3 = PendingAccount.objects.get(individual__detail_id=5)
         self.assertEqual(dmd1.rdi_merge_status, MergeStatusModel.PENDING)
         self.assertEqual(dmd2.rdi_merge_status, MergeStatusModel.PENDING)
         self.assertEqual(dmd3.rdi_merge_status, MergeStatusModel.PENDING)

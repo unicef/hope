@@ -44,7 +44,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     payment_plan_apply_engine_rule,
 )
 from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismDataFactory,
+    AccountFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
@@ -388,7 +388,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         dm_transfer = DeliveryMechanism.objects.get(code="transfer_to_account")
 
         for ind in [individual_1, individual_2, individual_3]:
-            DeliveryMechanismDataFactory(individual=ind, account_type=account_type_bank)
+            AccountFactory(individual=ind, account_type=account_type_bank)
 
         santander_fsp = FinancialServiceProviderFactory(
             name="Santander",
@@ -710,27 +710,29 @@ class TestPaymentPlanReconciliation(APITestCase):
             self.assertEqual(sheet.cell(row=2, column=5).value, None)
             self.assertEqual(sheet.cell(row=1, column=6).value, "alternate_collector_given_name")
             self.assertEqual(sheet.cell(row=2, column=6).value, None)
-            self.assertEqual(sheet.cell(row=1, column=7).value, "alternate_collector_middle_name")
+            self.assertEqual(sheet.cell(row=1, column=7).value, "alternate_collector_family_name")
             self.assertEqual(sheet.cell(row=2, column=7).value, None)
-            self.assertEqual(sheet.cell(row=1, column=8).value, "alternate_collector_phone_no")
+            self.assertEqual(sheet.cell(row=1, column=8).value, "alternate_collector_middle_name")
             self.assertEqual(sheet.cell(row=2, column=8).value, None)
-            self.assertEqual(sheet.cell(row=1, column=9).value, "alternate_collector_document_numbers")
+            self.assertEqual(sheet.cell(row=1, column=9).value, "alternate_collector_phone_no")
             self.assertEqual(sheet.cell(row=2, column=9).value, None)
-            self.assertEqual(sheet.cell(row=1, column=10).value, "alternate_collector_sex")
+            self.assertEqual(sheet.cell(row=1, column=10).value, "alternate_collector_document_numbers")
             self.assertEqual(sheet.cell(row=2, column=10).value, None)
-            self.assertEqual(sheet.cell(row=1, column=11).value, "payment_channel")
-            self.assertEqual(sheet.cell(row=2, column=11).value, "Cash")
-            self.assertEqual(sheet.cell(row=1, column=12).value, "fsp_name")
-            self.assertEqual(sheet.cell(row=2, column=12).value, payment.financial_service_provider.name)
-            self.assertEqual(sheet.cell(row=1, column=13).value, "currency")
-            self.assertEqual(sheet.cell(row=2, column=13).value, payment.currency)
-            self.assertEqual(sheet.cell(row=1, column=14).value, "entitlement_quantity")
-            self.assertEqual(sheet.cell(row=2, column=14).value, payment.entitlement_quantity)
-            self.assertEqual(sheet.cell(row=1, column=15).value, "entitlement_quantity_usd")
-            self.assertEqual(sheet.cell(row=2, column=15).value, payment.entitlement_quantity_usd)
-            self.assertEqual(sheet.cell(row=1, column=16).value, "delivered_quantity")
-            self.assertEqual(sheet.cell(row=2, column=16).value, None)
-            self.assertEqual(sheet.cell(row=1, column=17).value, "delivery_date")
+            self.assertEqual(sheet.cell(row=1, column=11).value, "alternate_collector_sex")
+            self.assertEqual(sheet.cell(row=2, column=11).value, None)
+            self.assertEqual(sheet.cell(row=1, column=12).value, "payment_channel")
+            self.assertEqual(sheet.cell(row=2, column=12).value, "Cash")
+            self.assertEqual(sheet.cell(row=1, column=13).value, "fsp_name")
+            self.assertEqual(sheet.cell(row=2, column=13).value, payment.financial_service_provider.name)
+            self.assertEqual(sheet.cell(row=1, column=14).value, "currency")
+            self.assertEqual(sheet.cell(row=2, column=14).value, payment.currency)
+            self.assertEqual(sheet.cell(row=1, column=15).value, "entitlement_quantity")
+            self.assertEqual(sheet.cell(row=2, column=15).value, payment.entitlement_quantity)
+            self.assertEqual(sheet.cell(row=1, column=16).value, "entitlement_quantity_usd")
+            self.assertEqual(sheet.cell(row=2, column=16).value, payment.entitlement_quantity_usd)
+            self.assertEqual(sheet.cell(row=1, column=17).value, "delivered_quantity")
+            self.assertEqual(sheet.cell(row=2, column=17).value, None)
+            self.assertEqual(sheet.cell(row=1, column=18).value, "delivery_date")
             # self.assertEqual(sheet.cell(row=2, column=17).value, str(payment.delivery_date))
 
             payment.refresh_from_db()
