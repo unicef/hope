@@ -7,6 +7,7 @@ import type { BiometricDeduplicationGoldenRecordStatusEnum } from './BiometricDe
 import type { DeduplicationBatchStatusEnum } from './DeduplicationBatchStatusEnum';
 import type { DeduplicationEngineSimilarityPairIndividual } from './DeduplicationEngineSimilarityPairIndividual';
 import type { DeduplicationGoldenRecordStatusEnum } from './DeduplicationGoldenRecordStatusEnum';
+import type { DeduplicationResult } from './DeduplicationResult';
 import type { HouseholdSimple } from './HouseholdSimple';
 import type { RelationshipEnum } from './RelationshipEnum';
 import type { SexEnum } from './SexEnum';
@@ -80,7 +81,7 @@ export type IndividualList = {
      */
     biometricDeduplicationBatchStatus?: BiometricDeduplicationBatchStatusEnum;
     biometricDeduplicationBatchStatusDisplay: string;
-    readonly deduplicationBatchResults: Array<DeduplicationEngineSimilarityPairIndividual>;
+    readonly deduplicationBatchResults: Array<DeduplicationResult>;
     readonly biometricDeduplicationBatchResults: Array<DeduplicationEngineSimilarityPairIndividual>;
     /**
      * Deduplication golden record status [sys]
@@ -104,7 +105,7 @@ export type IndividualList = {
      */
     biometricDeduplicationGoldenRecordStatus?: BiometricDeduplicationGoldenRecordStatusEnum;
     biometricDeduplicationGoldenRecordStatusDisplay: string;
-    readonly deduplicationGoldenRecordResults: Array<DeduplicationEngineSimilarityPairIndividual>;
+    readonly deduplicationGoldenRecordResults: Array<DeduplicationResult>;
     readonly biometricDeduplicationGoldenRecordResults: Array<DeduplicationEngineSimilarityPairIndividual>;
 };
 

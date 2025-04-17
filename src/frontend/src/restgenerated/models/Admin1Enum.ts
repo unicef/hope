@@ -3,24 +3,24 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * * `HR62` - Brockmouth
- * * `AF47` - Brownview
- * * `HR89` - East Jennifer
- * * `AF41` - Joseview
- * * `AF89` - New Josephburgh
- * * `UA58` - Parkfurt
- * * `UA23` - Port Charles
- * * `HR47` - Robertshaven
- * * `UA10` - Teresaberg
+ * * `AF14` - Brownstad
+ * * `UA35` - East Brian
+ * * `AF64` - Reyesland
+ * * `UA46` - Samuelport
+ * * `AF81` - South Emilystad
+ * * `UA92` - South Jenniferfurt
+ * * `HR46` - Welchtown
+ * * `HR99` - West Annetteview
+ * * `HR58` - Wolfehaven
  */
 export enum Admin1Enum {
-    HR62 = 'HR62',
-    AF47 = 'AF47',
-    HR89 = 'HR89',
-    AF41 = 'AF41',
-    AF89 = 'AF89',
-    UA58 = 'UA58',
-    UA23 = 'UA23',
-    HR47 = 'HR47',
-    UA10 = 'UA10',
+    AF14 = 'AF14',
+    UA35 = 'UA35',
+    AF64 = 'AF64',
+    UA46 = 'UA46',
+    AF81 = 'AF81',
+    UA92 = 'UA92',
+    HR46 = 'HR46',
+    HR99 = 'HR99',
+    HR58 = 'HR58',
 }

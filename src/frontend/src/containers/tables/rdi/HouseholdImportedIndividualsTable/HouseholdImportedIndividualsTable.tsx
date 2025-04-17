@@ -5,6 +5,7 @@ import { IndividualMinimalFragment } from '@generated/graphql';
 import { ImportedIndividualsTableRow } from '../ImportedIndividualsTable/ImportedIndividualsTableRow';
 import { useProgramContext } from 'src/programContext';
 import { adjustHeadCells } from '@utils/utils';
+import { IndividualList } from '@restgenerated/models/IndividualList';
 
 const headCells: HeadCell<IndividualMinimalFragment>[] = [
   {
@@ -59,7 +60,6 @@ const headCells: HeadCell<IndividualMinimalFragment>[] = [
 
 export function HouseholdImportedIndividualsTable({
   household,
-  choicesData,
 }): ReactElement {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -94,7 +94,7 @@ export function HouseholdImportedIndividualsTable({
 
   const totalCount = allIndividuals.length;
   return (
-    <TableComponent<IndividualMinimalFragment>
+    <TableComponent<IndividualList>
       title="Individuals in Household"
       data={allIndividuals.slice(
         page * rowsPerPage,
@@ -104,7 +104,6 @@ export function HouseholdImportedIndividualsTable({
       renderRow={(row) => (
         <ImportedIndividualsTableRow
           key={row.id}
-          choices={choicesData}
           individual={row}
           rdi={household.rdi}
         />

@@ -20,8 +20,6 @@ import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { usePassFunctionFromChild } from '@hooks/usePassFunctionFromChild';
 import { ButtonTooltip } from '@core/ButtonTooltip';
 import { useProgramContext } from '../../../programContext';
-import { CreateImportFromKoboForm } from './kobo/CreateImportFromKoboForm';
-import { CreateImportFromXlsxForm } from './xlsx/CreateImportFromXlsxForm';
 import { CreateImportFromProgramPopulationForm } from './programPopulation/CreateImportFromProgramPopulation';
 
 const ComboBox = styled(Select)`

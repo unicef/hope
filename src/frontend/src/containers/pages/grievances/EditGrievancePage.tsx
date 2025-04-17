@@ -97,7 +97,7 @@ const BoxWithBottomBorders = styled.div`
 const EditGrievancePage = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { baseUrl, businessAreaSlug,programSlug, isAllPrograms, programId } = useBaseUrl();
+  const { baseUrl, businessAreaSlug, programSlug, isAllPrograms } = useBaseUrl();
   const { selectedProgram, isSocialDctType } = useProgramContext();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
@@ -117,7 +117,7 @@ const EditGrievancePage = (): ReactElement => {
 
   const { data: currentUserData, isLoading: currentUserDataLoading } = useQuery(
     {
-      queryKey: ['profile', businessAreaSlug, programId],
+      queryKey: ['profile', businessAreaSlug, programSlug],
       queryFn: () => {
         return RestService.restBusinessAreasUsersProfileRetrieve({
           businessAreaSlug,
