@@ -160,8 +160,8 @@ DEFAULTS = {
     "MEDIA_LOCATION": (str, "media"),
     "AZURE_ACCOUNT_NAME": (str, ""),
     "AZURE_ACCOUNT_KEY": (str, ""),
-    "GDAL_LIBRARY_PATH": (str, "/opt/homebrew/opt/gdal/lib/libgdal.dylib"),
-    "GEOS_LIBRARY_PATH": (str, "/opt/homebrew/opt/geos/lib/libgeos_c.dylib"),
+    "GDAL_LIBRARY_PATH": (str, None),
+    "GEOS_LIBRARY_PATH": (str, None),
 }
 
 env = SmartEnv(**DEFAULTS)
