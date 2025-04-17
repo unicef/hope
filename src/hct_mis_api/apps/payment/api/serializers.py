@@ -1041,7 +1041,7 @@ class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
     parent = PaymentPlanDetailSerializer()
     source_payment = PaymentListSerializer()
     household = HouseholdDetailSerializer()
-    delivery_mechanism = DeliveryMechanismSerializer()
+    delivery_mechanism = DeliveryMechanismSerializer(source="parent.delivery_mechanism")
     collector = IndividualDetailSerializer()
     snapshot_collector_debit_card_number = serializers.SerializerMethodField()
     snapshot_collector_bank_account_number = serializers.SerializerMethodField()
