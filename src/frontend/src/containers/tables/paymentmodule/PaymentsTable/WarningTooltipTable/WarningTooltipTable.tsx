@@ -29,6 +29,7 @@ import { DialogTitleWrapper } from '../../../../dialogs/DialogTitleWrapper';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { PaymentList } from '@restgenerated/models/PaymentList';
 
 const StyledTable = styled(Table)`
   min-width: 100px;
@@ -44,7 +45,7 @@ const GreyBox = styled(Box)`
 
 interface WarningTooltipTableProps {
   paymentPlan: PaymentPlanDetail;
-  payment: AllPaymentsForTableQuery['allPayments']['edges'][number]['node'];
+  payment: PaymentList;
   setDialogOpen: (dialogOpen: boolean) => void;
   baseUrl: string;
   canViewDetails: boolean;

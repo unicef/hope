@@ -1,8 +1,8 @@
 import { HeadCell } from '@core/Table/EnhancedTableHead';
-import { PaymentVerificationNode } from '@generated/graphql';
+import { PaymentVerificationPlanList } from '@restgenerated/models/PaymentVerificationPlanList';
 
-export const headCells: HeadCell<PaymentVerificationNode>[] = [
-    {
+export const headCells: HeadCell<PaymentVerificationPlanList>[] = [
+  {
     disablePadding: false,
     label: 'Payment ID',
     id: 'unicef_id',

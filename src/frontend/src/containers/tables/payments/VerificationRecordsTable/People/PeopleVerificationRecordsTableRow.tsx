@@ -8,12 +8,12 @@ import {
   householdStatusToColor,
   verificationRecordsStatusToColor,
 } from '@utils/utils';
-import { PaymentVerificationNode } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
+import { PaymentVerificationPlanList } from '@restgenerated/models/PaymentVerificationPlanList';
 
 interface VerificationRecordsTableRowProps {
-  paymentVerification: PaymentVerificationNode;
+  paymentVerification: PaymentVerificationPlanList;
   canViewRecordDetails: boolean;
   showStatusColumn?: boolean;
 }

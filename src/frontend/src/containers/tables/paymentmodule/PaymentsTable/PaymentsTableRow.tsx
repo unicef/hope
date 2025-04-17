@@ -1,22 +1,22 @@
-import TableCell from '@mui/material/TableCell';
-import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded';
-import ErrorOutlineRoundedIcon from '@mui/icons-material/ErrorOutlineRounded';
 import { BlackLink } from '@components/core/BlackLink';
+import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { WarningTooltip } from '@components/core/WarningTooltip';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded';
+import ErrorOutlineRoundedIcon from '@mui/icons-material/ErrorOutlineRounded';
+import TableCell from '@mui/material/TableCell';
+import { PaymentList } from '@restgenerated/models/PaymentList';
 import {
   formatCurrencyWithSymbol,
   paymentStatusDisplayMap,
   paymentStatusToColor,
   renderSomethingOrDash,
 } from '@utils/utils';
-import { AllPaymentsForTableQuery } from '@generated/graphql';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { StatusBox } from '@components/core/StatusBox';
 import { ReactElement, SyntheticEvent } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 
 const OrangeError = styled(ErrorOutlineRoundedIcon)`
   color: ${({ theme }) => theme.hctPalette.orange};
@@ -31,11 +31,9 @@ const GreenCheck = styled(CheckCircleOutlineRoundedIcon)`
 `;
 
 interface PaymentsTableRowProps {
-  payment: AllPaymentsForTableQuery['allPayments']['edges'][number]['node'];
+  payment: PaymentList;
   canViewDetails: boolean;
-  onWarningClick?: (
-    payment: AllPaymentsForTableQuery['allPayments']['edges'][number]['node'],
-  ) => void;
+  onWarningClick?: (payment: PaymentList) => void;
   permissions;
 }
 
