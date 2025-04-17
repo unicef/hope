@@ -1,5 +1,6 @@
 import base64
 
+from rest_framework import status
 from rest_framework.reverse import reverse
 
 from hct_mis_api.api.models import Grant
@@ -75,11 +76,11 @@ class APIAreaTests(HOPEApiTestCase):
         self.area_other = AreaFactory(name="Area Other", area_type=self.area_type_other, p_code="AREA-OTHER")
 
         response = self.client.get(self.url_list)
-        assert response.status_code == 403
+        assert response.status_code == status.HTTP_403_FORBIDDEN
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.url_list)
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_json = response.json()["results"]
         assert len(response_json) == 6
         assert {
