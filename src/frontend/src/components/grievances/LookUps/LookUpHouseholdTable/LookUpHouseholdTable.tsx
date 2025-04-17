@@ -80,7 +80,19 @@ export function LookUpHouseholdTable({
       withdrawn: matchWithdrawnValue(),
       rdiMergeStatus: HouseholdRdiMergeStatus.Merged,
     };
-  }, [businessArea, programId, filter]);
+  }, [
+    businessArea,
+    programId,
+    filter.householdSizeMin,
+    filter.householdSizeMax,
+    filter.search,
+    filter.documentType,
+    filter.documentNumber,
+    filter.admin1,
+    filter.admin2,
+    filter.residenceStatus,
+    filter.withdrawn,
+  ]);
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 

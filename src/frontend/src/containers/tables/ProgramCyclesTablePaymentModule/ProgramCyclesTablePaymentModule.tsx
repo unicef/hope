@@ -50,7 +50,6 @@ export const ProgramCyclesTablePaymentModule = ({
         return RestService.restBusinessAreasProgramsCyclesList({
           businessAreaSlug: businessArea,
           programSlug: programId,
-          ...queryVariables,
         });
       },
     });

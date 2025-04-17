@@ -1,4 +1,4 @@
-import { ReactElement } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AllPaymentsForTableQueryVariables,
@@ -13,6 +13,9 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { headCells } from './PaymentsHouseholdTableHeadCells';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 
 interface PaymentsHouseholdTableProps {
   household?: HouseholdDetail;
@@ -28,11 +31,33 @@ function PaymentsHouseholdTable({
 }: PaymentsHouseholdTableProps): ReactElement {
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
-  const initialVariables = {
+  const initialQueryVariables = {
     householdId: household?.id,
     businessArea,
     program: programId,
   };
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+
+  //TODO: for specific household
+  const {
+    data: paymentsData,
+    isLoading,
+    error,
+  } = useQuery<PaginatedPaymentHouseholdListList>({
+    queryKey: [
+      'businessAreasProgramsPaymentPlansPaymentsList',
+      businessArea,
+      programId,
+      queryVariables,
+    ],
+    queryFn: () => {
+      return RestService.restBusinessAreasProgramsPaymentPlansPaymentsList({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+        paymentPlanId: paymentPlan.id,
+      });
+    },
+  });
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
@@ -51,13 +76,15 @@ function PaymentsHouseholdTable({
   );
 
   return (
-    <UniversalTable<PaymentNode, AllPaymentsForTableQueryVariables>
+    <UniversalRestTable
       title={t('Payments')}
       headCells={adjustedHeadCells}
-      query={useAllPaymentsForTableQuery}
-      queriedObjectName="allPayments"
-      initialVariables={initialVariables}
-      renderRow={(row) => (
+      data={paymentsData}
+      error={error}
+      isLoading={isLoading}
+      queryVariables={queryVariables}
+      setQueryVariables={setQueryVariables}
+      renderRow={(row: PaymentHousehold) => (
         <PaymentsHouseholdTableRow
           key={row.id}
           payment={row}

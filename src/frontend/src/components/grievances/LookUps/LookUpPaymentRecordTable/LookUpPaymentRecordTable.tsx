@@ -30,6 +30,7 @@ export function LookUpPaymentRecordTable({
   };
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
+  //TODO: add payments from all payment plans?
   const {
     data: paymentsData,
     isLoading,
@@ -43,10 +44,9 @@ export function LookUpPaymentRecordTable({
       paymentPlan.id,
     ],
     queryFn: () => {
-      return RestService.paymentslist({
+      return RestService.restBusinessAreasProgramsPaymentPlansPaymentsList({
         businessAreaSlug: businessArea,
         programSlug: programId,
-        paymentPlanId: paymentPlan.id,
       });
     },
   });

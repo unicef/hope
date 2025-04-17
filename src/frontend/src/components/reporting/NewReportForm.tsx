@@ -61,8 +61,6 @@ const NewReportForm = (): ReactElement => {
   });
 
   const queryVariables = {
-    businessAreaSlug: businessArea,
-    businessArea,
     status: ['ACTIVE'] as Array<'ACTIVE' | 'DRAFT' | 'FINISHED'>,
     beneficiaryGroupMatch: programId,
     compatibleDct: programId,
@@ -72,7 +70,9 @@ const NewReportForm = (): ReactElement => {
     useQuery<PaginatedProgramListList>({
       queryKey: ['businessAreasProgramsList', queryVariables, businessArea],
       queryFn: () =>
-        RestService.restBusinessAreasProgramsList({ ...queryVariables }),
+        RestService.restBusinessAreasProgramsList({
+          businessAreaSlug: businessArea,
+        }),
     });
   const { data: choicesData, loading: choicesLoading } =
     useReportChoiceDataQuery();

@@ -1,4 +1,4 @@
-import { ReactElement } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AllPaymentsForTableQueryVariables,
@@ -11,6 +11,10 @@ import { PaymentsPeopleTableRow } from './PaymentsPeopleTableRow';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
+import { error } from 'console';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 
 interface PaymentsPeopleTableProps {
   household?: HouseholdDetail;
@@ -27,19 +31,43 @@ function PaymentsPeopleTable({
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
 
-  const initialVariables = {
+  const initialQueryVariables = {
     householdId: household?.id,
     businessArea,
     program: programId,
   };
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+
+  //TODO: for specific PEOPLE
+  const {
+    data: paymentsData,
+    isLoading,
+    error,
+  } = useQuery<PaginatedPaymentHouseholdListList>({
+    queryKey: [
+      'businessAreasProgramsPaymentPlansPaymentsList',
+      businessArea,
+      programId,
+      queryVariables,
+    ],
+    queryFn: () => {
+      return RestService.restBusinessAreasProgramsPaymentPlansPaymentsList({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+        paymentPlanId: paymentPlan.id,
+      });
+    },
+  });
 
   return (
-    <UniversalTable<PaymentNode, AllPaymentsForTableQueryVariables>
+    <UniversalRestTable
       title={t('Payment Records')}
       headCells={headCells}
-      query={useAllPaymentsForTableQuery}
-      queriedObjectName="allPayments"
-      initialVariables={initialVariables}
+      data={paymentsData}
+      error={error}
+      isLoading={isLoading}
+      queryVariables={queryVariables}
+      setQueryVariables={setQueryVariables}
       renderRow={(row) => (
         <PaymentsPeopleTableRow
           key={row.id}
