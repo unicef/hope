@@ -19,7 +19,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     periodic_sync_payment_gateway_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismDataFactory,
+    AccountFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
@@ -519,7 +519,7 @@ class TestPaymentGatewayService(APITestCase):
         }, 200
 
         primary_collector = self.payments[0].collector
-        DeliveryMechanismDataFactory(
+        AccountFactory(
             individual=primary_collector,
             data={
                 "service_provider_code": "ABC",
