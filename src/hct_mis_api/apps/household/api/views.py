@@ -27,7 +27,7 @@ from hct_mis_api.apps.household.api.caches import (
 from hct_mis_api.apps.household.api.serializers.household import (
     HouseholdDetailSerializer,
     HouseholdListSerializer,
-    HouseholdMemberSerializer,
+    HouseholdMemberSerializer, HouseholdChoicesSerializer, IndividualChoicesSerializer,
 )
 from hct_mis_api.apps.household.api.serializers.individual import (
     IndividualDetailSerializer,
@@ -59,8 +59,8 @@ class HouseholdViewSet(
     }
     permissions_by_action = {
         "list": [
-            Permissions.RDI_VIEW_DETAILS,
             Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST,
+            Permissions.RDI_VIEW_DETAILS,
         ],
         "retrieve": [
             Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
@@ -121,15 +121,19 @@ class HouseholdViewSet(
         instance.withdraw()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-
 class HouseholdGlobalViewSet(
     BusinessAreaVisibilityMixin,
+    SerializerActionMixin,
     CountActionMixin,
     ListModelMixin,
     BaseViewSet,
 ):
     queryset = Household.all_merge_status_objects.all()
     serializer_class = HouseholdListSerializer
+    serializer_classes_by_action = {
+        "list": HouseholdListSerializer,
+        "choices": HouseholdChoicesSerializer,
+    }
     PERMISSIONS = [
         Permissions.RDI_VIEW_DETAILS,
         Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST,
@@ -146,6 +150,10 @@ class HouseholdGlobalViewSet(
             .order_by("created_at")
         )
 
+    @action(detail=False, methods=["get"])
+    def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+        return Response(data=self.get_serializer_class().data)
+
 
 class IndividualViewSet(
     ProgramVisibilityMixin,
@@ -156,7 +164,6 @@ class IndividualViewSet(
     BaseViewSet,
 ):
     queryset = Individual.all_merge_status_objects.order_by("created_at")
-    serializer_class = IndividualListSerializer
     serializer_classes_by_action = {
         "list": IndividualListSerializer,
         "retrieve": IndividualDetailSerializer,
@@ -189,12 +196,16 @@ class IndividualViewSet(
 
 class IndividualGlobalViewSet(
     BusinessAreaVisibilityMixin,
+    SerializerActionMixin,
     CountActionMixin,
     ListModelMixin,
     BaseViewSet,
 ):
     queryset = Individual.all_merge_status_objects.all()
-    serializer_class = IndividualListSerializer
+    serializer_classes_by_action = {
+        "list": IndividualListSerializer,
+        "choices": IndividualChoicesSerializer,
+    }
     PERMISSIONS = [
         Permissions.RDI_VIEW_DETAILS,
         Permissions.POPULATION_VIEW_INDIVIDUALS_LIST,
@@ -205,3 +216,7 @@ class IndividualGlobalViewSet(
 
     def get_queryset(self) -> QuerySet:
         return super().get_queryset().select_related("household", "household__admin2").order_by("created_at")
+
+    @action(detail=False, methods=["get"])
+    def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+        return Response(data=self.get_serializer_class().data)
