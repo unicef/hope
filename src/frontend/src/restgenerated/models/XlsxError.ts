@@ -2,8 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type PaymentVerificationPlanImport = {
-    paymentVerificationPlanId: string;
-    file: string;
+export type XlsxError = {
+    sheet: string;
+    coordinates: string;
+    message: string;
 };
 

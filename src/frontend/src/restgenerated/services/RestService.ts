@@ -56,7 +56,6 @@ import type { PaymentPlanSupportingDocument } from '../models/PaymentPlanSupport
 import type { PaymentVerificationPlanActivate } from '../models/PaymentVerificationPlanActivate';
 import type { PaymentVerificationPlanCreate } from '../models/PaymentVerificationPlanCreate';
 import type { PaymentVerificationPlanDetails } from '../models/PaymentVerificationPlanDetails';
-import type { PaymentVerificationPlanImport } from '../models/PaymentVerificationPlanImport';
 import type { PaymentVerificationUpdate } from '../models/PaymentVerificationUpdate';
 import type { PeriodicDataUpdateTemplateCreate } from '../models/PeriodicDataUpdateTemplateCreate';
 import type { PeriodicDataUpdateTemplateDetail } from '../models/PeriodicDataUpdateTemplateDetail';
@@ -521,18 +520,15 @@ export class RestService {
         });
     }
     /**
+     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaginatedBusinessAreaList
      * @throws ApiError
      */
     public static restBusinessAreasList({
-        active,
         limit,
         offset,
         ordering,
-        updatedAtAfter,
-        updatedAtBefore,
     }: {
-        active?: boolean,
         /**
          * Number of results to return per page.
          */
@@ -545,19 +541,14 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
-        updatedAtAfter?: string,
-        updatedAtBefore?: string,
     }): CancelablePromise<PaginatedBusinessAreaList> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/',
             query: {
-                'active': active,
                 'limit': limit,
                 'offset': offset,
                 'ordering': ordering,
-                'updated_at_after': updatedAtAfter,
-                'updated_at_before': updatedAtBefore,
             },
         });
     }
@@ -3243,7 +3234,7 @@ export class RestService {
     }
     /**
      * Adds a count action to the viewset that returns the count of the queryset.
-     * @returns PaymentVerificationPlanActivate
+     * @returns PaymentVerificationPlanDetails
      * @throws ApiError
      */
     public static restBusinessAreasProgramsPaymentVerificationsActivateVerificationPlanCreate({
@@ -3260,8 +3251,8 @@ export class RestService {
         id: string,
         programSlug: string,
         verificationPlanId: string,
-        requestBody: PaymentVerificationPlanActivate,
-    }): CancelablePromise<PaymentVerificationPlanActivate> {
+        requestBody?: PaymentVerificationPlanActivate,
+    }): CancelablePromise<PaymentVerificationPlanDetails> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/activate-verification-plan/{verification_plan_id}/',
@@ -3308,7 +3299,7 @@ export class RestService {
     }
     /**
      * Adds a count action to the viewset that returns the count of the queryset.
-     * @returns PaymentVerificationPlanActivate
+     * @returns PaymentVerificationPlanDetails
      * @throws ApiError
      */
     public static restBusinessAreasProgramsPaymentVerificationsDeleteVerificationPlanCreate({
@@ -3325,8 +3316,8 @@ export class RestService {
         id: string,
         programSlug: string,
         verificationPlanId: string,
-        requestBody: PaymentVerificationPlanActivate,
-    }): CancelablePromise<PaymentVerificationPlanActivate> {
+        requestBody?: PaymentVerificationPlanActivate,
+    }): CancelablePromise<PaymentVerificationPlanDetails> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/delete-verification-plan/{verification_plan_id}/',
@@ -3342,7 +3333,7 @@ export class RestService {
     }
     /**
      * Adds a count action to the viewset that returns the count of the queryset.
-     * @returns PaymentVerificationPlanActivate
+     * @returns PaymentVerificationPlanDetails
      * @throws ApiError
      */
     public static restBusinessAreasProgramsPaymentVerificationsDiscardVerificationPlanCreate({
@@ -3359,8 +3350,8 @@ export class RestService {
         id: string,
         programSlug: string,
         verificationPlanId: string,
-        requestBody: PaymentVerificationPlanActivate,
-    }): CancelablePromise<PaymentVerificationPlanActivate> {
+        requestBody?: PaymentVerificationPlanActivate,
+    }): CancelablePromise<PaymentVerificationPlanDetails> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/discard-verification-plan/{verification_plan_id}/',
@@ -3379,11 +3370,12 @@ export class RestService {
      * @returns PaymentVerificationPlanDetails
      * @throws ApiError
      */
-    public static restBusinessAreasProgramsPaymentVerificationsExportXlsxRetrieve({
+    public static restBusinessAreasProgramsPaymentVerificationsExportXlsxCreate({
         businessAreaSlug,
         id,
         programSlug,
         verificationPlanId,
+        requestBody,
     }: {
         businessAreaSlug: string,
         /**
@@ -3392,9 +3384,10 @@ export class RestService {
         id: string,
         programSlug: string,
         verificationPlanId: string,
+        requestBody?: PaymentVerificationPlanActivate,
     }): CancelablePromise<PaymentVerificationPlanDetails> {
         return __request(OpenAPI, {
-            method: 'GET',
+            method: 'POST',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/export-xlsx/{verification_plan_id}/',
             path: {
                 'business_area_slug': businessAreaSlug,
@@ -3402,11 +3395,13 @@ export class RestService {
                 'program_slug': programSlug,
                 'verification_plan_id': verificationPlanId,
             },
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
     /**
      * Adds a count action to the viewset that returns the count of the queryset.
-     * @returns PaymentVerificationPlanActivate
+     * @returns PaymentVerificationPlanDetails
      * @throws ApiError
      */
     public static restBusinessAreasProgramsPaymentVerificationsFinishVerificationPlanCreate({
@@ -3423,8 +3418,8 @@ export class RestService {
         id: string,
         programSlug: string,
         verificationPlanId: string,
-        requestBody: PaymentVerificationPlanActivate,
-    }): CancelablePromise<PaymentVerificationPlanActivate> {
+        requestBody?: PaymentVerificationPlanActivate,
+    }): CancelablePromise<PaymentVerificationPlanDetails> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/finish-verification-plan/{verification_plan_id}/',
@@ -3440,7 +3435,7 @@ export class RestService {
     }
     /**
      * Adds a count action to the viewset that returns the count of the queryset.
-     * @returns PaymentVerificationPlanImport
+     * @returns PaymentVerificationPlanDetails
      * @throws ApiError
      */
     public static restBusinessAreasProgramsPaymentVerificationsImportXlsxCreate({
@@ -3457,8 +3452,8 @@ export class RestService {
         id: string,
         programSlug: string,
         verificationPlanId: string,
-        requestBody: PaymentVerificationPlanImport,
-    }): CancelablePromise<PaymentVerificationPlanImport> {
+        requestBody: PaymentVerificationPlanCreate,
+    }): CancelablePromise<PaymentVerificationPlanDetails> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/import-xlsx/{verification_plan_id}/',
@@ -3474,7 +3469,7 @@ export class RestService {
     }
     /**
      * Adds a count action to the viewset that returns the count of the queryset.
-     * @returns PaymentVerificationPlanActivate
+     * @returns PaymentVerificationPlanDetails
      * @throws ApiError
      */
     public static restBusinessAreasProgramsPaymentVerificationsInvalidVerificationPlanCreate({
@@ -3491,8 +3486,8 @@ export class RestService {
         id: string,
         programSlug: string,
         verificationPlanId: string,
-        requestBody: PaymentVerificationPlanActivate,
-    }): CancelablePromise<PaymentVerificationPlanActivate> {
+        requestBody?: PaymentVerificationPlanActivate,
+    }): CancelablePromise<PaymentVerificationPlanDetails> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/invalid-verification-plan/{verification_plan_id}/',
@@ -4984,15 +4979,13 @@ export class RestService {
         });
     }
     /**
+     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns BusinessArea
      * @throws ApiError
      */
     public static restBusinessAreasRetrieve({
         slug,
     }: {
-        /**
-         * A UUID string identifying this business area.
-         */
         slug: string,
     }): CancelablePromise<BusinessArea> {
         return __request(OpenAPI, {
@@ -5001,6 +4994,17 @@ export class RestService {
             path: {
                 'slug': slug,
             },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasCountRetrieve(): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/count/',
         });
     }
     /**

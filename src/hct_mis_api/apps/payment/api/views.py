@@ -75,7 +75,6 @@ from hct_mis_api.apps.payment.api.serializers import (
     XlsxErrorSerializer,
 )
 from hct_mis_api.apps.payment.celery_tasks import (
-    create_payment_verification_plan_xlsx,
     export_pdf_payment_plan_summary,
     import_payment_plan_payment_list_from_xlsx,
     payment_plan_apply_engine_rule,
@@ -159,7 +158,7 @@ class PaymentVerificationViewSet(
         "discard_payment_verification_plan": PaymentVerificationPlanActivateSerializer,
         "invalid_payment_verification_plan": PaymentVerificationPlanActivateSerializer,
         "delete_payment_verification_plan": PaymentVerificationPlanActivateSerializer,
-        "export_xlsx_payment_verification_plan": PaymentVerificationPlanDetailsSerializer,
+        "export_xlsx_payment_verification_plan": PaymentVerificationPlanActivateSerializer,
         "import_xlsx_payment_verification_plan": PaymentVerificationPlanImportSerializer,
         "verifications": PaymentListSerializer,
         "verification_details": PaymentDetailSerializer,
@@ -183,6 +182,9 @@ class PaymentVerificationViewSet(
 
     def get_object(self) -> PaymentPlan:
         return get_object_or_404(PaymentPlan, id=self.kwargs.get("pk"))
+
+    def get_verification_plan_object(self) -> PaymentVerificationPlan:
+        return get_object_or_404(PaymentVerificationPlan, id=self.kwargs.get("verification_plan_id"))
 
     @etag_decorator(PaymentVerificationListKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=PaymentVerificationListKeyConstructor())
@@ -215,44 +217,47 @@ class PaymentVerificationViewSet(
         )
 
     @extend_schema(
-        request=PaymentVerificationPlanCreateSerializer, responses={201: PaymentVerificationPlanDetailsSerializer}
+        request=PaymentVerificationPlanCreateSerializer, responses={200: PaymentVerificationPlanDetailsSerializer}
     )
     @action(detail=True, methods=["patch"], url_path="update-verification-plan/(?P<verification_plan_id>[^/.]+)")
-    def update_payment_verification_plan(
-        self, request: Request, verification_plan_id: str, *args: Any, **kwargs: Any
-    ) -> Response:
-        # TODO: fix it
+    def update_payment_verification_plan(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
-        serializer = self.get_serializer(data=request.data)
-        # verification_plan_id
+        pvp = self.get_verification_plan_object()
+        serializer = self.get_serializer(pvp, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
 
-        verification_plan = VerificationPlanCrudServices.create(payment_plan, serializer.validated_data)
+        old_payment_verification_plan = copy_model_object(pvp)
+        pvp.verification_channel = serializer.validated_data.get("verification_channel")
+        pvp.payment_record_verifications.all().delete()
+
+        payment_verification_plan = VerificationPlanCrudServices.update(pvp, serializer.validated_data)
+
+        payment_plan.refresh_from_db()
         log_create(
             PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
             "business_area",
             request.user,
-            payment_plan.program,
-            None,
-            verification_plan,
+            getattr(payment_verification_plan.get_program, "pk", None),
+            old_payment_verification_plan,
+            payment_verification_plan,
         )
-        payment_plan.refresh_from_db()
         return Response(
-            data=PaymentVerificationPlanDetailsSerializer(payment_plan).data,
-            status=status.HTTP_201_CREATED,
+            data=PaymentVerificationPlanDetailsSerializer(payment_verification_plan.payment_plan).data,
+            status=status.HTTP_200_OK,
         )
 
-    # @extend_schema(
-    #     request=PaymentVerificationPlanCreateSerializer, responses={201: PaymentVerificationPlanDetailsSerializer}
-    # )
+    @extend_schema(
+        request=PaymentVerificationPlanActivateSerializer, responses={200: PaymentVerificationPlanDetailsSerializer}
+    )
     @action(detail=True, methods=["post"], url_path="activate-verification-plan/(?P<verification_plan_id>[^/.]+)")
     def activate_payment_verification_plan(
         self, request: Request, verification_plan_id: str, *args: Any, **kwargs: Any
     ) -> Response:
         payment_plan = self.get_object()
-        payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=verification_plan_id)
-        check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification_plan)
-
+        payment_verification_plan = self.get_verification_plan_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        check_concurrency_version_in_mutation(serializer.validated_data.get("version"), payment_verification_plan)
         old_payment_verification_plan = copy_model_object(payment_verification_plan)
 
         payment_verification_plan = VerificationPlanStatusChangeServices(payment_verification_plan).activate()
@@ -266,19 +271,19 @@ class PaymentVerificationViewSet(
         )
         return Response(
             data=PaymentVerificationPlanDetailsSerializer(payment_plan).data,
-            status=status.HTTP_201_CREATED,
+            status=status.HTTP_200_OK,
         )
 
-    # @extend_schema(
-    #     request=PaymentVerificationPlanCreateSerializer, responses={201: PaymentVerificationPlanDetailsSerializer}
-    # )
+    @extend_schema(
+        request=PaymentVerificationPlanActivateSerializer, responses={200: PaymentVerificationPlanDetailsSerializer}
+    )
     @action(detail=True, methods=["post"], url_path="finish-verification-plan/(?P<verification_plan_id>[^/.]+)")
-    def finish_payment_verification_plan(
-        self, request: Request, verification_plan_id: str, *args: Any, **kwargs: Any
-    ) -> Response:
+    def finish_payment_verification_plan(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
-        payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=verification_plan_id)
-        check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification_plan)
+        payment_verification_plan = self.get_verification_plan_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        check_concurrency_version_in_mutation(serializer.validated_data.get("version"), payment_verification_plan)
         old_payment_verification_plan = copy_model_object(payment_verification_plan)
 
         if payment_verification_plan.status != PaymentVerificationPlan.STATUS_ACTIVE:
@@ -295,19 +300,19 @@ class PaymentVerificationViewSet(
         )
         return Response(
             data=PaymentVerificationPlanDetailsSerializer(payment_plan).data,
-            status=status.HTTP_201_CREATED,
+            status=status.HTTP_200_OK,
         )
 
-    # @extend_schema(
-    #     request=PaymentVerificationPlanCreateSerializer, responses={201: PaymentVerificationPlanDetailsSerializer}
-    # )
+    @extend_schema(
+        request=PaymentVerificationPlanActivateSerializer, responses={200: PaymentVerificationPlanDetailsSerializer}
+    )
     @action(detail=True, methods=["post"], url_path="discard-verification-plan/(?P<verification_plan_id>[^/.]+)")
-    def discard_payment_verification_plan(
-        self, request: Request, verification_plan_id: str, *args: Any, **kwargs: Any
-    ) -> Response:
+    def discard_payment_verification_plan(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
-        payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=verification_plan_id)
-        check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification_plan)
+        payment_verification_plan = self.get_verification_plan_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        check_concurrency_version_in_mutation(serializer.validated_data.get("version"), payment_verification_plan)
 
         old_payment_verification_plan = copy_model_object(payment_verification_plan)
 
@@ -322,20 +327,19 @@ class PaymentVerificationViewSet(
         )
         return Response(
             data=PaymentVerificationPlanDetailsSerializer(payment_plan).data,
-            status=status.HTTP_201_CREATED,
+            status=status.HTTP_200_OK,
         )
 
-    # @extend_schema(
-    #     request=PaymentVerificationPlanCreateSerializer, responses={201: PaymentVerificationPlanDetailsSerializer}
-    # )
+    @extend_schema(
+        request=PaymentVerificationPlanActivateSerializer, responses={200: PaymentVerificationPlanDetailsSerializer}
+    )
     @action(detail=True, methods=["post"], url_path="invalid-verification-plan/(?P<verification_plan_id>[^/.]+)")
-    def invalid_payment_verification_plan(
-        self, request: Request, verification_plan_id: str, *args: Any, **kwargs: Any
-    ) -> Response:
+    def invalid_payment_verification_plan(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
-        payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=verification_plan_id)
-        # serializer
-        check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification_plan)
+        payment_verification_plan = self.get_verification_plan_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        check_concurrency_version_in_mutation(serializer.validated_data.get("version"), payment_verification_plan)
         old_payment_verification_plan = copy_model_object(payment_verification_plan)
 
         payment_verification_plan = VerificationPlanStatusChangeServices(payment_verification_plan).mark_invalid()
@@ -349,23 +353,20 @@ class PaymentVerificationViewSet(
         )
         return Response(
             data=PaymentVerificationPlanDetailsSerializer(payment_plan).data,
-            status=status.HTTP_201_CREATED,
+            status=status.HTTP_200_OK,
         )
 
-    # @extend_schema(
-    #     request=PaymentVerificationPlanCreateSerializer, responses={201: PaymentVerificationPlanDetailsSerializer}
-    # )
+    @extend_schema(
+        request=PaymentVerificationPlanActivateSerializer, responses={200: PaymentVerificationPlanDetailsSerializer}
+    )
     @action(detail=True, methods=["post"], url_path="delete-verification-plan/(?P<verification_plan_id>[^/.]+)")
-    def delete_payment_verification_plan(
-        self, request: Request, verification_plan_id: str, *args: Any, **kwargs: Any
-    ) -> Response:
+    def delete_payment_verification_plan(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
-        payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=verification_plan_id)
-        # serializer
+        payment_verification_plan = self.get_verification_plan_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        check_concurrency_version_in_mutation(serializer.validated_data.get("version"), payment_verification_plan)
         program_id = getattr(payment_verification_plan.get_program, "pk", None)
-
-        check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification_plan)
-
         old_payment_verification_plan = copy_model_object(payment_verification_plan)
 
         VerificationPlanCrudServices.delete(payment_verification_plan)
@@ -379,52 +380,53 @@ class PaymentVerificationViewSet(
         )
         return Response(
             data=PaymentVerificationPlanDetailsSerializer(payment_plan).data,
-            status=status.HTTP_201_CREATED,
+            status=status.HTTP_200_OK,
         )
 
-    @action(detail=True, methods=["get"], url_path="export-xlsx/(?P<verification_plan_id>[^/.]+)")
-    def export_xlsx_payment_verification_plan(
-        self, request: Request, verification_plan_id: str, *args: Any, **kwargs: Any
-    ) -> Response:
+    @extend_schema(
+        request=PaymentVerificationPlanActivateSerializer, responses={200: PaymentVerificationPlanDetailsSerializer}
+    )
+    @action(detail=True, methods=["post"], url_path="export-xlsx/(?P<verification_plan_id>[^/.]+)")
+    def export_xlsx_payment_verification_plan(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
-        payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=verification_plan_id)
-        # serializer
-        if payment_verification_plan.status != PaymentVerificationPlan.STATUS_ACTIVE:
-            raise ValidationError("You can only export verification for active CashPlan verification")
-        if payment_verification_plan.verification_channel != PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX:
-            raise ValidationError("You can only export verification when XLSX channel is selected")
-        if payment_verification_plan.xlsx_file_exporting:
-            raise ValidationError("Exporting xlsx file is already started. Please wait")
-        if payment_verification_plan.has_xlsx_payment_verification_plan_file:
-            raise ValidationError("Xlsx file is already created")
+        payment_verification_plan = self.get_verification_plan_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        check_concurrency_version_in_mutation(serializer.validated_data.get("version"), payment_verification_plan)
+        program_id = getattr(payment_verification_plan.get_program, "pk", None)
+        old_payment_verification_plan = copy_model_object(payment_verification_plan)
 
-        payment_verification_plan.xlsx_file_exporting = True
-        payment_verification_plan.save()
-        create_payment_verification_plan_xlsx.delay(verification_plan_id, request.user.pk)
+        payment_verification_plan = VerificationPlanStatusChangeServices(payment_verification_plan).export_xlsx(
+            str(request.user.pk)
+        )
+        log_create(
+            PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            request.user,
+            program_id,
+            old_payment_verification_plan,
+            payment_verification_plan,
+        )
         return Response(
             data=PaymentVerificationPlanDetailsSerializer(payment_plan).data,
-            status=status.HTTP_201_CREATED,
+            status=status.HTTP_200_OK,
         )
 
-    # @extend_schema(
-    #     request=PaymentVerificationPlanCreateSerializer, responses={201: PaymentVerificationPlanDetailsSerializer}
-    # )
+    @extend_schema(
+        request=PaymentVerificationPlanCreateSerializer,
+        responses={200: PaymentVerificationPlanDetailsSerializer, 400: XlsxErrorSerializer},
+    )
     @action(detail=True, methods=["post"], url_path="import-xlsx/(?P<verification_plan_id>[^/.]+)")
-    def import_xlsx_payment_verification_plan(
-        self, request: Request, verification_plan_id: str, *args: Any, **kwargs: Any
-    ) -> Response:
+    def import_xlsx_payment_verification_plan(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()
-        payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=verification_plan_id)
-        # payment_plan = graphene.Field(GenericPaymentPlanNode)
-        #     errors = graphene.List(XlsxErrorNode)
-        # serializer
+        payment_verification_plan = self.get_verification_plan_object()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         file = serializer.validated_data["file"]
-        if payment_verification_plan.status != PaymentVerificationPlan.STATUS_ACTIVE:
-            raise ValidationError("You can only import verification for active CashPlan verification")
-        if payment_verification_plan.verification_channel != PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX:
-            raise ValidationError("You can only import verification when XLSX channel is selected")
+        check_concurrency_version_in_mutation(serializer.validated_data.get("version"), payment_verification_plan)
+        program_id = getattr(payment_verification_plan.get_program, "pk", None)
+        old_payment_verification_plan = copy_model_object(payment_verification_plan)
+
         import_service = XlsxVerificationImportService(payment_verification_plan, file)
         import_service.open_workbook()
         import_service.validate()
@@ -433,17 +435,23 @@ class PaymentVerificationViewSet(
                 data=XlsxErrorSerializer(import_service.errors, many=True, context={"request": request}).data,
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        import_service.import_verifications()
-        calculate_counts(payment_verification_plan)
-        payment_verification_plan.xlsx_file_imported = True
-        payment_verification_plan.save()
-        # return ImportXlsxPaymentVerificationPlanFile(payment_verification_plan.payment_plan, import_service.errors)
+
+        payment_verification_plan = VerificationPlanStatusChangeServices(payment_verification_plan).import_xlsx(file)
+
+        log_create(
+            PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            request.user,
+            program_id,
+            old_payment_verification_plan,
+            payment_verification_plan,
+        )
         return Response(
             data=PaymentVerificationPlanDetailsSerializer(payment_plan).data,
-            status=status.HTTP_201_CREATED,
+            status=status.HTTP_200_OK,
         )
 
-    # verification
+    # Verification
     @action(detail=True, methods=["get"], PERMISSIONS=[Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS])
     def verifications(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """return list of verification records"""
@@ -804,7 +812,9 @@ class PaymentPlanViewSet(
             data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data, status=status.HTTP_200_OK
         )
 
-    @extend_schema(request=PaymentPlanImportFileSerializer, responses={200: PaymentPlanDetailSerializer})
+    @extend_schema(
+        request=PaymentPlanImportFileSerializer, responses={200: PaymentPlanDetailSerializer, 400: XlsxErrorSerializer}
+    )
     @action(
         detail=True,
         methods=["post"],
@@ -1051,7 +1061,9 @@ class PaymentPlanViewSet(
             data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data, status=status.HTTP_200_OK
         )
 
-    @extend_schema(request=PaymentPlanImportFileSerializer, responses={200: PaymentPlanDetailSerializer})
+    @extend_schema(
+        request=PaymentPlanImportFileSerializer, responses={200: PaymentPlanDetailSerializer, 400: XlsxErrorSerializer}
+    )
     @action(detail=True, methods=["post"], url_path="reconciliation-import-xlsx")
     def reconciliation_import_xlsx(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = self.get_object()

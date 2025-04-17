@@ -6,6 +6,6 @@ export type PaymentVerificationUpdate = {
     paymentVerificationId: string;
     receivedAmount?: number;
     received: boolean;
-    version?: string;
+    version?: number;
 };
 

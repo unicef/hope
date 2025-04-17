@@ -111,7 +111,6 @@ export type { PaymentVerificationPlan as PaymentVerificationPlanCamelCase } from
 export type { PaymentVerificationPlanActivate as PaymentVerificationPlanActivateCamelCase } from './models/PaymentVerificationPlanActivate';
 export type { PaymentVerificationPlanCreate as PaymentVerificationPlanCreateCamelCase } from './models/PaymentVerificationPlanCreate';
 export type { PaymentVerificationPlanDetails as PaymentVerificationPlanDetailsCamelCase } from './models/PaymentVerificationPlanDetails';
-export type { PaymentVerificationPlanImport as PaymentVerificationPlanImportCamelCase } from './models/PaymentVerificationPlanImport';
 export type { PaymentVerificationPlanList as PaymentVerificationPlanListCamelCase } from './models/PaymentVerificationPlanList';
 export type { PaymentVerificationSummary as PaymentVerificationSummaryCamelCase } from './models/PaymentVerificationSummary';
 export type { PaymentVerificationUpdate as PaymentVerificationUpdateCamelCase } from './models/PaymentVerificationUpdate';
@@ -181,6 +180,7 @@ export type { TPHouseholdList as TPHouseholdListCamelCase } from './models/TPHou
 export { TransferTypeEnum as TransferTypeEnumCamelCase } from './models/TransferTypeEnum';
 export type { User as UserCamelCase } from './models/User';
 export { WorkStatusEnum as WorkStatusEnumCamelCase } from './models/WorkStatusEnum';
+export type { XlsxError as XlsxErrorCamelCase } from './models/XlsxError';
 
 export { FieldsAttributesService } from './services/FieldsAttributesService';
 export { HhStatusService } from './services/HhStatusService';

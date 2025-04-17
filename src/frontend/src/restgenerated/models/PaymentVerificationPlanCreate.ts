@@ -9,7 +9,7 @@ export type PaymentVerificationPlanCreate = {
     sampling: string;
     verificationChannel: string;
     fullListArguments: FullList;
-    randomSamplingArguments: RandomSampling;
-    rapidProArguments: RapidPro;
+    randomSamplingArguments: RandomSampling | null;
+    rapidProArguments: RapidPro | null;
 };
 

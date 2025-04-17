@@ -1183,25 +1183,24 @@ class PaymentVerificationPlanCreateSerializer(serializers.Serializer):
     sampling = serializers.CharField(required=True)
     verification_channel = serializers.CharField(required=True)
     full_list_arguments = FullListSerializer()
-    random_sampling_arguments = RandomSamplingSerializer()
-    rapid_pro_arguments = RapidProSerializer()
+    random_sampling_arguments = RandomSamplingSerializer(allow_null=True)
+    rapid_pro_arguments = RapidProSerializer(allow_null=True)
 
 
 class PaymentVerificationPlanActivateSerializer(serializers.Serializer):
-    payment_verification_plan_id = serializers.CharField(required=True)
-    version = serializers.CharField(required=False)
+    version = serializers.IntegerField(required=False)
 
 
 class PaymentVerificationPlanImportSerializer(serializers.Serializer):
-    payment_verification_plan_id = serializers.CharField(required=True)
     file = serializers.FileField(use_url=False, required=True)
+    version = serializers.IntegerField(required=False)
 
 
 class PaymentVerificationUpdateSerializer(serializers.Serializer):
     payment_verification_id = serializers.CharField(required=True)
     received_amount = serializers.FloatField(required=False)
     received = serializers.BooleanField(required=True)
-    version = serializers.CharField(required=False)
+    version = serializers.IntegerField(required=False)
 
 
 class TPHouseholdListSerializer(serializers.ModelSerializer):
