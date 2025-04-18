@@ -4,6 +4,7 @@ from django.db.models import Prefetch, QuerySet
 
 from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
@@ -128,6 +129,11 @@ class HouseholdViewSet(
         instance.withdraw()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @extend_schema(
+        responses={
+            200: PaymentListSerializer(many=True),
+        },
+    )
     @action(detail=True, methods=["get"])
     def payments(self, request: Any, *args: Any, **kwargs: Any) -> Any:
         hh = self.get_object()

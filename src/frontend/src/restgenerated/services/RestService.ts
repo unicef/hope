@@ -43,7 +43,6 @@ import type { PatchedProgramCycleUpdate } from '../models/PatchedProgramCycleUpd
 import type { PatchedRDI } from '../models/PatchedRDI';
 import type { PatchedTargetPopulationCreate } from '../models/PatchedTargetPopulationCreate';
 import type { PaymentDetail } from '../models/PaymentDetail';
-import type { PaymentList } from '../models/PaymentList';
 import type { PaymentPlan } from '../models/PaymentPlan';
 import type { PaymentPlanBulkAction } from '../models/PaymentPlanBulkAction';
 import type { PaymentPlanCreateFollowUp } from '../models/PaymentPlanCreateFollowUp';
@@ -1738,13 +1737,41 @@ export class RestService {
     }
     /**
      * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
-     * @returns PaymentList
+     * @returns PaginatedPaymentListList
      * @throws ApiError
      */
-    public static restBusinessAreasProgramsHouseholdsPaymentsRetrieve({
+    public static restBusinessAreasProgramsHouseholdsPaymentsList({
         businessAreaSlug,
         id,
         programSlug,
+        address,
+        admin1,
+        admin2,
+        adminArea,
+        countryOrigin,
+        documentNumber,
+        documentType,
+        firstRegistrationDate,
+        headOfHouseholdFullName,
+        headOfHouseholdPhoneNoValid,
+        isActiveProgram,
+        lastRegistrationDateAfter,
+        lastRegistrationDateBefore,
+        limit,
+        offset,
+        orderBy,
+        ordering,
+        program,
+        rdiId,
+        rdiMergeStatus,
+        residenceStatus,
+        search,
+        sizeGte,
+        sizeLte,
+        sizeRange,
+        sizeMax,
+        sizeMin,
+        withdrawn,
     }: {
         businessAreaSlug: string,
         /**
@@ -1752,7 +1779,100 @@ export class RestService {
          */
         id: string,
         programSlug: string,
-    }): CancelablePromise<PaymentList> {
+        address?: string,
+        admin1?: string,
+        admin2?: string,
+        adminArea?: string,
+        countryOrigin?: string,
+        documentNumber?: string,
+        documentType?: string,
+        firstRegistrationDate?: string,
+        headOfHouseholdFullName?: string,
+        headOfHouseholdPhoneNoValid?: boolean,
+        isActiveProgram?: boolean,
+        lastRegistrationDateAfter?: string,
+        lastRegistrationDateBefore?: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `age` - Age
+         * * `-age` - Age (descending)
+         * * `sex` - Sex
+         * * `-sex` - Sex (descending)
+         * * `household__id` - Household  id
+         * * `-household__id` - Household  id (descending)
+         * * `id` - Id
+         * * `-id` - Id (descending)
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `size` - Size
+         * * `-size` - Size (descending)
+         * * `status_label` - Status label
+         * * `-status_label` - Status label (descending)
+         * * `head_of_household__full_name` - Head of household  full name
+         * * `-head_of_household__full_name` - Head of household  full name (descending)
+         * * `admin_area__name` - Admin area  name
+         * * `-admin_area__name` - Admin area  name (descending)
+         * * `residence_status` - Residence status
+         * * `-residence_status` - Residence status (descending)
+         * * `registration_data_import__name` - Registration data import  name
+         * * `-registration_data_import__name` - Registration data import  name (descending)
+         * * `total_cash_received` - Total cash received
+         * * `-total_cash_received` - Total cash received (descending)
+         * * `last_registration_date` - Last registration date
+         * * `-last_registration_date` - Last registration date (descending)
+         * * `first_registration_date` - First registration date
+         * * `-first_registration_date` - First registration date (descending)
+         */
+        orderBy?: Array<'-admin_area__name' | '-age' | '-first_registration_date' | '-head_of_household__full_name' | '-household__id' | '-id' | '-last_registration_date' | '-registration_data_import__name' | '-residence_status' | '-sex' | '-size' | '-status_label' | '-total_cash_received' | '-unicef_id' | 'admin_area__name' | 'age' | 'first_registration_date' | 'head_of_household__full_name' | 'household__id' | 'id' | 'last_registration_date' | 'registration_data_import__name' | 'residence_status' | 'sex' | 'size' | 'status_label' | 'total_cash_received' | 'unicef_id'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        program?: string,
+        rdiId?: string,
+        /**
+         * * `PENDING` - Pending
+         * * `MERGED` - Merged
+         */
+        rdiMergeStatus?: 'MERGED' | 'PENDING',
+        /**
+         * Household residence status
+         *
+         * * `` - None
+         * * `IDP` - Displaced  |  Internally Displaced People
+         * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
+         * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
+         * * `HOST` - Non-displaced  |   Host
+         * * `NON_HOST` - Non-displaced  |   Non-host
+         * * `RETURNEE` - Displaced  |   Returnee
+         */
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        search?: any,
+        sizeGte?: number,
+        sizeLte?: number,
+        /**
+         * Multiple values may be separated by commas.
+         */
+        sizeRange?: Array<number>,
+        /**
+         * Household size
+         */
+        sizeMax?: number | null,
+        /**
+         * Household size
+         */
+        sizeMin?: number | null,
+        withdrawn?: boolean,
+    }): CancelablePromise<PaginatedPaymentListList> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/households/{id}/payments/',
@@ -1760,6 +1880,36 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
                 'program_slug': programSlug,
+            },
+            query: {
+                'address': address,
+                'admin1': admin1,
+                'admin2': admin2,
+                'admin_area': adminArea,
+                'country_origin': countryOrigin,
+                'document_number': documentNumber,
+                'document_type': documentType,
+                'first_registration_date': firstRegistrationDate,
+                'head_of_household__full_name': headOfHouseholdFullName,
+                'head_of_household__phone_no_valid': headOfHouseholdPhoneNoValid,
+                'is_active_program': isActiveProgram,
+                'last_registration_date_after': lastRegistrationDateAfter,
+                'last_registration_date_before': lastRegistrationDateBefore,
+                'limit': limit,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'program': program,
+                'rdi_id': rdiId,
+                'rdi_merge_status': rdiMergeStatus,
+                'residence_status': residenceStatus,
+                'search': search,
+                'size__gte': sizeGte,
+                'size__lte': sizeLte,
+                'size__range': sizeRange,
+                'size_max': sizeMax,
+                'size_min': sizeMin,
+                'withdrawn': withdrawn,
             },
         });
     }
@@ -3565,13 +3715,33 @@ export class RestService {
     }
     /**
      * return list of verification records
-     * @returns PaymentList
+     * @returns PaginatedPaymentListList
      * @throws ApiError
      */
-    public static restBusinessAreasProgramsPaymentVerificationsVerificationsRetrieve({
+    public static restBusinessAreasProgramsPaymentVerificationsVerificationsList({
         businessAreaSlug,
         id,
         programSlug,
+        deliveryMechanism,
+        dispersionEndDateLte,
+        dispersionStartDateGte,
+        fsp,
+        isFollowUp,
+        limit,
+        name,
+        offset,
+        ordering,
+        paymentVerificationSummaryStatus,
+        program,
+        programCycle,
+        programCycleEndDate,
+        programCycleStartDate,
+        search,
+        status,
+        totalEntitledQuantityGte,
+        totalEntitledQuantityLte,
+        updatedAtGte,
+        updatedAtLte,
     }: {
         businessAreaSlug: string,
         /**
@@ -3579,7 +3749,65 @@ export class RestService {
          */
         id: string,
         programSlug: string,
-    }): CancelablePromise<PaymentList> {
+        deliveryMechanism?: Array<string>,
+        dispersionEndDateLte?: string,
+        dispersionStartDateGte?: string,
+        fsp?: string,
+        isFollowUp?: boolean,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        name?: string,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        /**
+         * * `ACTIVE` - Active
+         * * `FINISHED` - Finished
+         * * `PENDING` - Pending
+         */
+        paymentVerificationSummaryStatus?: 'ACTIVE' | 'FINISHED' | 'PENDING',
+        program?: string,
+        programCycle?: string,
+        programCycleEndDate?: string,
+        programCycleStartDate?: string,
+        /**
+         * A search term.
+         */
+        search?: string,
+        /**
+         * Status [sys]
+         *
+         * * `TP_OPEN` - Open
+         * * `TP_LOCKED` - Locked
+         * * `PROCESSING` - Processing
+         * * `STEFICON_WAIT` - Steficon Wait
+         * * `STEFICON_RUN` - Steficon Run
+         * * `STEFICON_COMPLETED` - Steficon Completed
+         * * `STEFICON_ERROR` - Steficon Error
+         * * `DRAFT` - Draft
+         * * `PREPARING` - Preparing
+         * * `OPEN` - Open
+         * * `LOCKED` - Locked
+         * * `LOCKED_FSP` - Locked FSP
+         * * `IN_APPROVAL` - In Approval
+         * * `IN_AUTHORIZATION` - In Authorization
+         * * `IN_REVIEW` - In Review
+         * * `ACCEPTED` - Accepted
+         * * `FINISHED` - Finished
+         */
+        status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        totalEntitledQuantityGte?: number,
+        totalEntitledQuantityLte?: number,
+        updatedAtGte?: string,
+        updatedAtLte?: string,
+    }): CancelablePromise<PaginatedPaymentListList> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/verifications/',
@@ -3588,6 +3816,28 @@ export class RestService {
                 'id': id,
                 'program_slug': programSlug,
             },
+            query: {
+                'delivery_mechanism': deliveryMechanism,
+                'dispersion_end_date__lte': dispersionEndDateLte,
+                'dispersion_start_date__gte': dispersionStartDateGte,
+                'fsp': fsp,
+                'is_follow_up': isFollowUp,
+                'limit': limit,
+                'name': name,
+                'offset': offset,
+                'ordering': ordering,
+                'payment_verification_summary_status': paymentVerificationSummaryStatus,
+                'program': program,
+                'program_cycle': programCycle,
+                'program_cycle_end_date': programCycleEndDate,
+                'program_cycle_start_date': programCycleStartDate,
+                'search': search,
+                'status': status,
+                'total_entitled_quantity__gte': totalEntitledQuantityGte,
+                'total_entitled_quantity__lte': totalEntitledQuantityLte,
+                'updated_at__gte': updatedAtGte,
+                'updated_at__lte': updatedAtLte,
+            },
         });
     }
     /**
@@ -3595,7 +3845,7 @@ export class RestService {
      * @returns PaymentDetail
      * @throws ApiError
      */
-    public static restBusinessAreasProgramsPaymentVerificationsVerificationsRetrieve2({
+    public static restBusinessAreasProgramsPaymentVerificationsVerificationsRetrieve({
         businessAreaSlug,
         id,
         paymentId,

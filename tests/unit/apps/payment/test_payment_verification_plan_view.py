@@ -427,7 +427,7 @@ class TestPaymentVerificationViewSet:
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
-    def test_verification_list(
+    def test_verifications_list(
         self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
     ) -> None:
         url = reverse(
@@ -444,7 +444,7 @@ class TestPaymentVerificationViewSet:
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
             assert response.status_code == status.HTTP_200_OK
-            resp_data = response.json()
+            resp_data = response.json()["results"]
             assert len(resp_data) == 2
             payment = resp_data[0]
             assert "id" in payment

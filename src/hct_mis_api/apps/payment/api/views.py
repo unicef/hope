@@ -452,6 +452,11 @@ class PaymentVerificationViewSet(
         )
 
     # Verification
+    @extend_schema(
+        responses={
+            200: PaymentListSerializer(many=True),
+        },
+    )
     @action(detail=True, methods=["get"], PERMISSIONS=[Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS])
     def verifications(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """return list of verification records"""
