@@ -153,9 +153,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
         payload_data = payload.data
 
         if delivery_mech_data:
-            payload_data.update(
-                {field_name.split("__")[0]: field_value for field_name, field_value in delivery_mech_data.items()}
-            )
+            payload_data.update(delivery_mech_data)
 
         return payload_data
 

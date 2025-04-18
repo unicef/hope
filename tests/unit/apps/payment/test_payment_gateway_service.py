@@ -693,9 +693,9 @@ class TestPaymentGatewayService(APITestCase):
                         "first_name": primary_collector.given_name,
                         "full_name": primary_collector.full_name,
                         "destination_currency": self.payments[0].currency,
-                        "service_provider_code": "ABC",
-                        "delivery_phone_number": "123456789",
-                        "provider": "Provider",
+                        "service_provider_code__mobile_money": "ABC",
+                        "delivery_phone_number__mobile_money": "123456789",
+                        "provider__mobile_money": "Provider",
                     },
                     "extra_data": {},
                 }
