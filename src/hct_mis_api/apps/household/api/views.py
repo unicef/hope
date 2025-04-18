@@ -12,8 +12,6 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
 from rest_framework_extensions.cache.decorators import cache_response
 
-from hct_mis_api.apps.payment.api.serializers import PaymentListSerializer
-from hct_mis_api.apps.payment.models import Payment
 from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.api.mixins import (
@@ -42,6 +40,8 @@ from hct_mis_api.apps.household.models import (
     Individual,
     IndividualRoleInHousehold,
 )
+from hct_mis_api.apps.payment.api.serializers import PaymentListSerializer
+from hct_mis_api.apps.payment.models import Payment
 from hct_mis_api.apps.program.models import Program
 
 
