@@ -1738,6 +1738,33 @@ export class RestService {
     }
     /**
      * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
+     * @returns PaymentList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsHouseholdsPaymentsRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Household.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<PaymentList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/households/{id}/payments/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
      * @returns HouseholdList
      * @throws ApiError
      */

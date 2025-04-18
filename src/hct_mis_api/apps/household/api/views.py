@@ -11,6 +11,8 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
 from rest_framework_extensions.cache.decorators import cache_response
 
+from hct_mis_api.apps.payment.api.serializers import PaymentListSerializer
+from hct_mis_api.apps.payment.models import Payment
 from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.api.mixins import (
@@ -56,6 +58,7 @@ class HouseholdViewSet(
         "list": HouseholdListSerializer,
         "retrieve": HouseholdDetailSerializer,
         "members": HouseholdMemberSerializer,
+        "payments": PaymentListSerializer,
     }
     permissions_by_action = {
         "list": [
@@ -69,6 +72,10 @@ class HouseholdViewSet(
         "members": [
             Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
             Permissions.RDI_VIEW_DETAILS,
+        ],
+        "payments": [
+            Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
+            Permissions.PM_VIEW_DETAILS,
         ],
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
@@ -120,6 +127,19 @@ class HouseholdViewSet(
         instance = self.get_object()
         instance.withdraw()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=["get"])
+    def payments(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+        hh = self.get_object()
+        payments = Payment.objects.filter(household=hh)
+
+        page = self.paginate_queryset(payments)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(payments, many=True)
+        return Response(serializer.data)
 
 
 class HouseholdGlobalViewSet(

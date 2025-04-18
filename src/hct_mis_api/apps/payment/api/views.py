@@ -144,7 +144,6 @@ class PaymentVerificationViewSet(
     BaseViewSet,
 ):
     program_model_field = "program_cycle__program"
-    # http_method_names = ["get", "post", "patch"]
     queryset = PaymentPlan.objects.filter(
         status__in=(PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED)
     ).order_by("unicef_id")
