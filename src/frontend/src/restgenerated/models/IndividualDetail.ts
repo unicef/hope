@@ -18,7 +18,7 @@ import type { SelfcareDisabilityEnum } from './SelfcareDisabilityEnum';
 import type { SexEnum } from './SexEnum';
 import type { WorkStatusEnum } from './WorkStatusEnum';
 export type IndividualDetail = {
-    id: string;
+    readonly id: string;
     unicefId?: string | null;
     /**
      * Full Name of the Beneficiary
@@ -214,9 +214,17 @@ export type IndividualDetail = {
      */
     phoneNo?: string;
     /**
+     * Beneficiary phone number valid [sys]
+     */
+    phoneNoValid?: boolean | null;
+    /**
      * Beneficiary phone number alternative
      */
     phoneNoAlternative?: string;
+    /**
+     * Beneficiary phone number alternative valid [sys]
+     */
+    phoneNoAlternativeValid?: boolean | null;
     readonly sanctionListLastCheck: string | null;
     /**
      * Cryptocurrency wallet name

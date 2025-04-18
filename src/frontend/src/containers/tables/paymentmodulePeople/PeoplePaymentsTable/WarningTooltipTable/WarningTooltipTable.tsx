@@ -20,15 +20,13 @@ import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { paymentPlanStatusToColor } from '@utils/utils';
-import {
-  AllPaymentsForTableQuery,
-  PaymentConflictDataNode,
-  PaymentPlanQuery,
-} from '@generated/graphql';
+import { PaymentConflictDataNode } from '@generated/graphql';
 import { DialogFooter } from '../../../../dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../../dialogs/DialogTitleWrapper';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { PaymentList } from '@restgenerated/models/PaymentList';
 
 const StyledTable = styled(Table)`
   min-width: 100px;
@@ -43,8 +41,8 @@ const GreyBox = styled(Box)`
 `;
 
 interface WarningTooltipTableProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
-  payment: AllPaymentsForTableQuery['allPayments']['edges'][number]['node'];
+  paymentPlan: PaymentPlanDetail;
+  payment: PaymentList;
   setDialogOpen: (dialogOpen: boolean) => void;
   baseUrl: string;
   canViewDetails: boolean;

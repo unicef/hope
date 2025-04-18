@@ -8,6 +8,7 @@ from django.utils import timezone
 from graphql import GraphQLError
 from graphql.execution.base import ResolveInfo
 from parameterized import parameterized
+from rest_framework.exceptions import ValidationError
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
@@ -143,7 +144,7 @@ class TestPaymentVerificationMutations(APITestCase):
         payment_verification.status = PaymentVerification.STATUS_RECEIVED
         payment_verification.status_date = timezone.now() - timedelta(minutes=11)
         payment_verification.save()
-        with self.assertRaisesMessage(GraphQLError, "You can only edit payment verification in first 10 minutes"):
+        with self.assertRaisesMessage(ValidationError, "You can only edit payment verification in first 10 minutes"):
             UpdatePaymentVerificationReceivedAndReceivedAmount().mutate(
                 None,
                 self.info,
@@ -196,7 +197,7 @@ class TestPaymentVerificationMutations(APITestCase):
 
         payment_verification = self.verification.payment_record_verifications.first()
         payment_verification_id = encode_id_base64_required(payment_verification.id, "PaymentVerification")
-        with self.assertRaisesMessage(GraphQLError, message):
+        with self.assertRaisesMessage(ValidationError, message):
             UpdatePaymentVerificationReceivedAndReceivedAmount().mutate(
                 None,
                 self.info,

@@ -19,7 +19,7 @@ snapshots['TestDeleteVerificationMutation::test_delete_active_verification_plan_
                     'line': 3
                 }
             ],
-            'message': 'You can delete only PENDING verification',
+            'message': "[ErrorDetail(string='You can delete only PENDING verification', code='invalid')]",
             'path': [
                 'deletePaymentVerificationPlan'
             ]

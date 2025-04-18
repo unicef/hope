@@ -7,7 +7,6 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { renderUserName } from '@utils/utils';
-import { PaymentPlanQuery } from '@generated/graphql';
 import { BlackLink } from '@core/BlackLink';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LabelizedField } from '@core/LabelizedField';
@@ -19,10 +18,11 @@ import { RelatedFollowUpPaymentPlans } from './RelatedFollowUpPaymentPlans';
 import { Info } from '@mui/icons-material';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface PaymentPlanDetailsProps {
   baseUrl: string;
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 const PaymentPlanDetails = ({

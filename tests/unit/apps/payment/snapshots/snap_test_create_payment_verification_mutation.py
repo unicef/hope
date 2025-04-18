@@ -19,7 +19,7 @@ snapshots['TestCreatePaymentVerificationMutation::test_can_t_create_cash_plan_pa
                     'line': 3
                 }
             ],
-            'message': 'There are no payment records that could be assigned to a new verification plan.',
+            'message': "['There are no payment records that could be assigned to a new verification plan.']",
             'path': [
                 'createPaymentVerificationPlan'
             ]

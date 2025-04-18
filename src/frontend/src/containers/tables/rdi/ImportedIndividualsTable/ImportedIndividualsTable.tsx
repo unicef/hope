@@ -43,16 +43,19 @@ function ImportedIndividualsTable({
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   // Wrap initialVariables in useMemo to avoid recreating it on every render
-  const initialVariables = useMemo(() => ({
-    rdiId,
-    household,
-    duplicatesOnly: showDuplicates,
-    businessArea,
-    rdiMergeStatus: isMerged
-      ? IndividualRdiMergeStatus.Merged
-      : IndividualRdiMergeStatus.Pending,
-  }), [rdiId, household, showDuplicates, businessArea, isMerged]);
-  
+  const initialVariables = useMemo(
+    () => ({
+      rdiId,
+      household,
+      duplicatesOnly: showDuplicates,
+      businessArea,
+      rdiMergeStatus: isMerged
+        ? IndividualRdiMergeStatus.Merged
+        : IndividualRdiMergeStatus.Pending,
+    }),
+    [rdiId, household, showDuplicates, businessArea, isMerged],
+  );
+
   const [queryVariables, setQueryVariables] = useState(initialVariables);
 
   useEffect(() => {

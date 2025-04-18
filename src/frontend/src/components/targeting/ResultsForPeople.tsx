@@ -1,3 +1,8 @@
+import { Pointer } from '@components/core/Pointer';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { FieldBorder } from '@core/FieldBorder';
+import { LabelizedField } from '@core/LabelizedField';
+import { PaymentPlanBuildStatus } from '@generated/graphql';
 import {
   Button,
   Dialog,
@@ -9,16 +14,12 @@ import {
   ListItem,
   Typography,
 } from '@mui/material';
+import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { MiśTheme } from '../../theme';
-import { LabelizedField } from '@core/LabelizedField';
 import { PaperContainer } from './PaperContainer';
-import { FieldBorder } from '@core/FieldBorder';
-import { ReactElement, useState } from 'react';
-import { PaymentPlanBuildStatus, PaymentPlanQuery } from '@generated/graphql';
-import withErrorBoundary from '@components/core/withErrorBoundary';
-import { Pointer } from '@components/core/Pointer';
 
 const colors = {
   femaleChildren: '#5F02CF',
@@ -52,7 +53,7 @@ const SummaryValue = styled.div`
 `;
 
 interface ResultsProps {
-  targetPopulation: PaymentPlanQuery['paymentPlan'];
+  targetPopulation: TargetPopulationDetail;
 }
 
 function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
@@ -65,7 +66,7 @@ function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
   };
   const handleClose = () => setOpenDialog(false);
 
-  if (targetPopulation.buildStatus !== PaymentPlanBuildStatus.Ok) {
+  if (targetPopulation.backgroundActionStatus !== PaymentPlanBuildStatus.Ok) {
     return null;
   }
 

@@ -35,6 +35,7 @@ import { useNavigate } from 'react-router-dom';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 
 const NewReportForm = (): ReactElement => {
   const navigate = useNavigate();
@@ -60,18 +61,19 @@ const NewReportForm = (): ReactElement => {
   });
 
   const queryVariables = {
-    businessAreaSlug: businessArea,
-    businessArea,
     status: ['ACTIVE'] as Array<'ACTIVE' | 'DRAFT' | 'FINISHED'>,
     beneficiaryGroupMatch: programId,
     compatibleDct: programId,
   };
 
-  const { data: allProgramsData, isLoading: loadingPrograms } = useQuery({
-    queryKey: ['businessAreasProgramsList', queryVariables, businessArea],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsList({ ...queryVariables }),
-  });
+  const { data: allProgramsData, isLoading: loadingPrograms } =
+    useQuery<PaginatedProgramListList>({
+      queryKey: ['businessAreasProgramsList', queryVariables, businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsList({
+          businessAreaSlug: businessArea,
+        }),
+    });
   const { data: choicesData, loading: choicesLoading } =
     useReportChoiceDataQuery();
   const [mutate, { loading }] = useCreateReportMutation();

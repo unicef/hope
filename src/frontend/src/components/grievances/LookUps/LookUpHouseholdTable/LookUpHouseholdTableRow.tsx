@@ -9,9 +9,10 @@ import { MouseEvent, ReactElement } from 'react';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { HouseholdList } from '@restgenerated/models/HouseholdList';
 
 interface LookUpHouseholdTableRowProps {
-  household: HouseholdDetail;
+  household: HouseholdList;
   radioChangeHandler: (household) => void;
   selectedHousehold: HouseholdDetail;
   choicesData: HouseholdChoiceDataQuery;
@@ -100,9 +101,7 @@ export function LookUpHouseholdTableRow({
           <span>{household.unicefId}</span>
         )}
       </TableCell>
-      <TableCell align="left">
-        {household.headOfHousehold.fullName}
-      </TableCell>
+      <TableCell align="left">{household.headOfHousehold}</TableCell>
       <TableCell align="left">{household.size}</TableCell>
       <TableCell align="left">{household?.admin2 || '-'}</TableCell>
       <TableCell align="left">

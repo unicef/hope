@@ -6,8 +6,8 @@ from typing import Any, List
 from unittest.mock import patch
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 
-from graphql import GraphQLError
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -177,7 +177,7 @@ class TestXlsxVerificationImport(APITestCase):
         import_service = XlsxVerificationImportService(self.verification, file)
         import_service.open_workbook()
         self.assertRaisesMessage(
-            GraphQLError,
+            ValidationError,
             f"Unsupported file version (-1). Only version: {XlsxVerificationExportService.VERSION} is supported",
             import_service.validate,
         )

@@ -6,7 +6,7 @@ import type { HouseholdSimple } from './HouseholdSimple';
 import type { RelationshipEnum } from './RelationshipEnum';
 import type { SexEnum } from './SexEnum';
 export type IndividualList = {
-    id: string;
+    readonly id: string;
     unicefId?: string | null;
     /**
      * Full Name of the Beneficiary

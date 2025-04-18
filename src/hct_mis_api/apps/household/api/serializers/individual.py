@@ -57,6 +57,15 @@ class DocumentSerializer(serializers.ModelSerializer):
         )
 
 
+class IndividualSmallSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Individual
+        fields = (
+            "id",
+            "unicef_id",
+        )
+
+
 class IndividualIdentitySerializer(serializers.ModelSerializer):
     country = CountrySerializer()
 
@@ -199,7 +208,9 @@ class IndividualDetailSerializer(serializers.ModelSerializer):
             "delivery_mechanisms_data",
             "email",
             "phone_no",
+            "phone_no_valid",
             "phone_no_alternative",
+            "phone_no_alternative_valid",
             "sanction_list_last_check",
             "wallet_name",
             "blockchain_name",

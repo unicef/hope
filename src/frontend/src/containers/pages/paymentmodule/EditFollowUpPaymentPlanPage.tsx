@@ -3,11 +3,7 @@ import moment from 'moment';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import * as Yup from 'yup';
-import {
-  useAllTargetPopulationsQuery,
-  usePaymentPlanQuery,
-  useUpdatePpMutation,
-} from '@generated/graphql';
+import { useAllTargetPopulationsQuery } from '@generated/graphql';
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
@@ -21,23 +17,48 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { today } from '@utils/utils';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const EditFollowUpPaymentPlanPage = (): ReactElement => {
   const navigate = useNavigate();
   const { paymentPlanId } = useParams();
   const { t } = useTranslation();
-  const { data: paymentPlanData, loading: loadingPaymentPlan } =
-    usePaymentPlanQuery({
-      variables: {
-        id: paymentPlanId,
-      },
-      fetchPolicy: 'cache-and-network',
+  const { mutateAsync: updatePaymentPlan, isPending: loadingUpdate } =
+    useMutation({
+      mutationFn: ({
+        businessAreaSlug,
+        id: mutationId,
+        programSlug,
+        requestBody,
+      }: {
+        businessAreaSlug: string;
+        id: string;
+        programSlug: string;
+        requestBody;
+      }) =>
+        RestService.restBusinessAreasProgramsPaymentPlansPartialUpdate({
+          businessAreaSlug,
+          id: mutationId,
+          programSlug,
+          requestBody,
+        }),
     });
-
-  const [mutate] = useUpdatePpMutation();
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
+
+  const { data: paymentPlan, isLoading: loadingPaymentPlan } =
+    useQuery<PaymentPlanDetail>({
+      queryKey: ['paymentPlan', businessArea, paymentPlanId, programId],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsPaymentPlansRetrieve({
+          businessAreaSlug: businessArea,
+          id: paymentPlanId,
+          programSlug: programId,
+        }),
+    });
 
   const { data: allTargetPopulationsData, loading: loadingTargetPopulations } =
     useAllTargetPopulationsQuery({
@@ -49,17 +70,15 @@ const EditFollowUpPaymentPlanPage = (): ReactElement => {
     });
   if (loadingTargetPopulations || loadingPaymentPlan)
     return <LoadingComponent />;
-  if (!allTargetPopulationsData || !paymentPlanData) return null;
+  if (!allTargetPopulationsData || !paymentPlan) return null;
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.PM_CREATE, permissions))
     return <PermissionDenied />;
 
-  const { paymentPlan } = paymentPlanData;
-
   const initialValues = {
     paymentPlanId: paymentPlan.id,
     currency: {
-      name: paymentPlan.currencyName,
+      name: paymentPlan.currency,
       value: paymentPlan.currency,
     },
     dispersionStartDate: paymentPlan.dispersionStartDate,
@@ -90,23 +109,24 @@ const EditFollowUpPaymentPlanPage = (): ReactElement => {
   });
 
   const handleSubmit = async (values): Promise<void> => {
+    const requestBody = {
+      dispersionStartDate: values.dispersionStartDate,
+      dispersionEndDate: values.dispersionEndDate,
+      currency: values.currency?.value
+        ? values.currency.value
+        : values.currency,
+    };
     try {
-      const res = await mutate({
-        variables: {
-          paymentPlanId,
-          dispersionStartDate: values.dispersionStartDate,
-          dispersionEndDate: values.dispersionEndDate,
-          currency: values.currency?.value
-            ? values.currency.value
-            : values.currency,
-        },
+      const res = await updatePaymentPlan({
+        businessAreaSlug: businessArea,
+        id: paymentPlanId,
+        programSlug: programId,
+        requestBody,
       });
       showMessage(t('Follow-up Payment Plan Edited'));
-      navigate(
-        `/${baseUrl}/payment-module/followup-payment-plans/${res.data.updatePaymentPlan.paymentPlan.id}`,
-      );
+      navigate(`/${baseUrl}/payment-module/followup-payment-plans/${res.id}`);
     } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+      showMessage(e);
     }
   };
 
@@ -124,6 +144,7 @@ const EditFollowUpPaymentPlanPage = (): ReactElement => {
             handleSubmit={submitForm}
             baseUrl={baseUrl}
             permissions={permissions}
+            loadingUpdate={loadingUpdate}
           />
           <PaymentPlanTargeting
             allTargetPopulations={allTargetPopulationsData}

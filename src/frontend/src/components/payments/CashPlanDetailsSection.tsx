@@ -3,13 +3,13 @@ import { Doughnut } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { countPercentage } from '@utils/utils';
-import { PaymentPlanQuery } from '@generated/graphql';
 import { BlackLink } from '@core/BlackLink';
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
+import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
 
 const ChartContainer = styled.div`
   width: 100%;
@@ -23,7 +23,7 @@ const BorderLeftBox = styled.div`
 `;
 
 interface CashPlanDetailsSectionProps {
-  planNode: PaymentPlanQuery['paymentPlan'];
+  planNode: PaymentVerificationPlanDetails;
 }
 
 export function CashPlanDetailsSection({
@@ -34,17 +34,17 @@ export function CashPlanDetailsSection({
 
   const bankReconciliationSuccessPercentage = countPercentage(
     planNode.bankReconciliationSuccess,
-    planNode.paymentItems.totalCount,
+    planNode.eligiblePaymentsCount,
   );
 
   const bankReconciliationErrorPercentage = countPercentage(
     planNode.bankReconciliationError,
-    planNode.paymentItems.totalCount,
+    planNode.eligiblePaymentsCount,
   );
 
   return (
     <Grid container>
-      <Grid size={{ xs:7 }}>
+      <Grid size={{ xs: 7 }}>
         <Title data-cy="div-payment-plan-details">
           <Typography variant="h6">{t('Payment Plan Details')}</Typography>
         </Title>
@@ -54,8 +54,8 @@ export function CashPlanDetailsSection({
               {
                 label: t('PROGRAMME NAME'),
                 value: (
-                  <BlackLink to={`/${baseUrl}/details/${planNode.program.id}`}>
-                    {planNode.program.name}
+                  <BlackLink to={`/${baseUrl}/details/${planNode.programId}`}>
+                    {planNode.programName}
                   </BlackLink>
                 ),
               },
@@ -65,14 +65,22 @@ export function CashPlanDetailsSection({
               },
               {
                 label: t('START DATE'),
-                value: <UniversalMoment>{planNode.startDate}</UniversalMoment>,
+                value: (
+                  <UniversalMoment>
+                    {planNode.programCycleStartDate}
+                  </UniversalMoment>
+                ),
               },
               {
                 label: t('END DATE'),
-                value: <UniversalMoment>{planNode.endDate}</UniversalMoment>,
+                value: (
+                  <UniversalMoment>
+                    {planNode.programCycleEndDate}
+                  </UniversalMoment>
+                ),
               },
             ].map((el) => (
-              <Grid size={{ xs:3 }} key={el.label}>
+              <Grid size={{ xs: 3 }} key={el.label}>
                 <LabelizedField label={el.label}>{el.value}</LabelizedField>
               </Grid>
             ))}
@@ -97,7 +105,7 @@ export function CashPlanDetailsSection({
                 </LabelizedField>
               </Grid>
             </Grid>
-            <Grid size={{ xs:9 }}>
+            <Grid size={{ xs: 9 }}>
               <ChartContainer>
                 <Doughnut
                   options={

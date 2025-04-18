@@ -137,7 +137,7 @@ snapshots['TestDashboardQueries::test_table_total_cash_transferred_by_administra
                     'line': 7
                 }
             ],
-            'message': 'Permission Denied',
+            'message': "[ErrorDetail(string='Permission Denied', code='invalid')]",
             'path': [
                 'tableTotalCashTransferredByAdministrativeArea'
             ]
@@ -184,7 +184,7 @@ snapshots['TestDashboardQueries::test_table_total_cash_transferred_by_administra
                     'line': 7
                 }
             ],
-            'message': 'Permission Denied',
+            'message': "[ErrorDetail(string='Permission Denied', code='invalid')]",
             'path': [
                 'tableTotalCashTransferredByAdministrativeAreaForPeople'
             ]

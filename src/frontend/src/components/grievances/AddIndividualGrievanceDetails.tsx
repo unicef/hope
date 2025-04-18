@@ -55,8 +55,8 @@ function AddIndividualGrievanceDetails({
   const identities = individualData?.identities;
   delete individualData.documents;
   delete individualData.identities;
-  const flexFields = individualData?.flex_fields;
-  delete individualData?.flex_fields;
+  const flexFields = individualData?.flexFields;
+  delete individualData?.flexFields;
   delete individualData.documents;
   delete individualData.identities;
   const labels =

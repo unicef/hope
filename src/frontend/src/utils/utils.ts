@@ -648,20 +648,20 @@ export function formatCurrency(
 }
 
 export function formatCurrencyWithSymbol(
-  amount: number,
+  amount: number | string,
   currency = 'USD',
 ): string {
   const amountCleared = amount || 0;
   if (currency === 'USDC') return `${amountCleared} ${currency}`;
   // if currency is unknown, simply format using most common formatting option, and don't show currency symbol
-  if (!currency) return formatCurrency(amountCleared, true);
+  if (!currency) return formatCurrency(Number(amountCleared), true);
   // undefined forces to use local browser settings
   return new Intl.NumberFormat(undefined, {
     style: 'currency',
     currency,
     // enable this if decided that we always want code and not a symbol
     currencyDisplay: 'code',
-  }).format(amountCleared);
+  }).format(Number(amountCleared));
 }
 
 export function countPercentage(
@@ -1207,7 +1207,7 @@ export const arraysHaveSameContent = (a: any[], b: any[]): boolean =>
   a.length === b.length && a.every((val, index) => val === b[index]);
 
 export function adjustHeadCells<T>(
-  headCells:HeadCell<T>[],
+  headCells: HeadCell<T>[],
   beneficiaryGroup: any | undefined,
   replacements: {
     [key: string]: (beneficiaryGroup) => string;

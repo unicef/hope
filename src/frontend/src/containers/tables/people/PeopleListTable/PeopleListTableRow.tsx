@@ -1,17 +1,18 @@
-import TableCell from '@mui/material/TableCell';
-import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { IndividualNode, IndividualRelationship } from '@generated/graphql';
 import { BlackLink } from '@components/core/BlackLink';
+import { StatusBox } from '@components/core/StatusBox';
 import { AnonTableCell } from '@components/core/Table/AnonTableCell';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { ReactElement } from 'react';
+import TableCell from '@mui/material/TableCell';
+import { IndividualList } from '@restgenerated/models/IndividualList';
+import { RelationshipEnum } from '@restgenerated/models/RelationshipEnum';
 import { individualStatusToColor, sexToCapitalize } from '@utils/utils';
-import { StatusBox } from '@components/core/StatusBox';
+import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
 interface IndividualsListTableRowProps {
-  individual: IndividualNode;
+  individual: IndividualList;
   canViewDetails: boolean;
 }
 
@@ -50,13 +51,13 @@ export const PeopleListTableRow = ({
         />
       </TableCell>
       <TableCell align="left">
-        {individual.relationship === IndividualRelationship.Head
+        {individual.relationship === RelationshipEnum.HEAD
           ? t('Beneficiary')
           : t('Non-beneficiary')}
       </TableCell>
       <TableCell align="right">{individual.age}</TableCell>
       <TableCell align="left">{sexToCapitalize(individual.sex)}</TableCell>
-      <TableCell align="left">{individual.household?.admin2?.name}</TableCell>
+      <TableCell align="left">{individual.household?.admin2}</TableCell>
     </ClickableTableRow>
   );
 };

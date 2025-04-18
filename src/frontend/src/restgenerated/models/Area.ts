@@ -9,8 +9,8 @@ export type Area = {
     originalId?: string | null;
     name: string;
     pCode?: string | null;
-    geom?: string | null;
-    point?: string | null;
+    longitude?: number | null;
+    latitude?: number | null;
     readonly validFrom: string | null;
     validUntil?: string | null;
     extras?: any;

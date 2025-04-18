@@ -1,15 +1,14 @@
-import { ReactElement } from 'react';
-import { useTranslation } from 'react-i18next';
-import {
-  AllPaymentPlansForTableQueryVariables,
-  PaymentPlanNode,
-  useAllPaymentPlansForTableQuery,
-} from '@generated/graphql';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { UniversalTable } from '../../UniversalTable';
+import { PaginatedPaymentPlanListList } from '@restgenerated/models/PaginatedPaymentPlanListList';
+import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { PeoplePaymentPlanTableRow } from './PeoplePaymentPlanTableRow';
 import { headCells } from './PeoplePaymentPlansHeadCells';
-import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface PeoplePaymentPlansTableProps {
   filter;
@@ -22,7 +21,7 @@ export const PeoplePaymentPlansTable = ({
 }: PeoplePaymentPlansTableProps): ReactElement => {
   const { t } = useTranslation();
   const { programId, businessArea } = useBaseUrl();
-  const initialVariables: AllPaymentPlansForTableQueryVariables = {
+  const initialQueryVariables = {
     businessArea,
     search: filter.search,
     status: filter.status,
@@ -35,15 +34,38 @@ export const PeoplePaymentPlansTable = ({
     isPaymentPlan: true,
   };
 
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+
+  const {
+    data: paymentPlansData,
+    isLoading,
+    error,
+  } = useQuery<PaginatedPaymentPlanListList>({
+    queryKey: [
+      'businessAreasProgramsPaymentPlansList',
+      businessArea,
+      programId,
+      queryVariables,
+    ],
+    queryFn: () => {
+      return RestService.restBusinessAreasProgramsPaymentPlansList({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+      });
+    },
+  });
+
   return (
-    <UniversalTable<PaymentPlanNode, AllPaymentPlansForTableQueryVariables>
+    <UniversalRestTable
       defaultOrderBy="-createdAt"
       title={t('Payment Plans')}
       headCells={headCells}
-      query={useAllPaymentPlansForTableQuery}
-      queriedObjectName="allPaymentPlans"
-      initialVariables={initialVariables}
-      renderRow={(row) => (
+      data={paymentPlansData}
+      isLoading={isLoading}
+      error={error}
+      queryVariables={queryVariables}
+      setQueryVariables={setQueryVariables}
+      renderRow={(row: PaymentPlanList) => (
         <PeoplePaymentPlanTableRow
           key={row.id}
           plan={row}

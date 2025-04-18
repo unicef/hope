@@ -1,4 +1,3 @@
-import base64
 from io import BytesIO
 
 from django.core.files.storage import default_storage
@@ -32,7 +31,7 @@ class PaymentPlanSupportingDocumentSerializerTests(TestCase):
         cls.request.user = cls.client  # type: ignore
         cls.request.parser_context = {
             "kwargs": {
-                "payment_plan_id": base64.b64encode(f"PaymentPlanNode:{str(cls.payment_plan.id)}".encode()).decode(),
+                "payment_plan_id": str(cls.payment_plan.id),
             }
         }
         cls.context = {"payment_plan": cls.payment_plan, "request": cls.request}
@@ -116,14 +115,13 @@ class PaymentPlanSupportingDocumentUploadViewTests(TestCase):
         cls.payment_plan = PaymentPlanFactory(
             status=PaymentPlan.Status.OPEN,
         )
-        payment_plan_id_base64 = base64.b64encode(f"PaymentPlanNode:{str(cls.payment_plan.id)}".encode()).decode()
 
         cls.url = reverse(
             "api:payments:supporting-documents-list",
             kwargs={
                 "business_area_slug": "afghanistan",
                 "program_slug": cls.payment_plan.program.slug,
-                "payment_plan_id": payment_plan_id_base64,
+                "payment_plan_id": str(cls.payment_plan.id),
             },
         )
         cls.file = SimpleUploadedFile("test_file.pdf", b"abc", content_type="application/pdf")
@@ -178,18 +176,14 @@ class PaymentPlanSupportingDocumentViewTests(TestCase):
         cls.document = PaymentPlanSupportingDocument.objects.create(
             payment_plan=cls.payment_plan, title="Test Document333", file=SimpleUploadedFile("test.pdf", b"aaa")
         )
-        cls.payment_plan_id_base64 = base64.b64encode(f"PaymentPlanNode:{str(cls.payment_plan.id)}".encode()).decode()
-        cls.supporting_document_id_base64 = base64.b64encode(
-            f"PaymentPlanSupportingDocumentNode:{str(cls.document.id)}".encode()
-        ).decode()
 
         cls.url = reverse(
             "api:payments:supporting-documents-detail",
             kwargs={
                 "business_area_slug": "afghanistan",
                 "program_slug": cls.payment_plan.program.slug,
-                "payment_plan_id": cls.payment_plan_id_base64,
-                "file_id": cls.supporting_document_id_base64,
+                "payment_plan_id": str(cls.payment_plan.id),
+                "file_id": str(cls.document.id),
             },
         )
 
@@ -204,8 +198,8 @@ class PaymentPlanSupportingDocumentViewTests(TestCase):
             kwargs={
                 "business_area_slug": "afghanistan",
                 "program_slug": self.payment_plan.program.slug,
-                "payment_plan_id": self.payment_plan_id_base64,
-                "file_id": self.supporting_document_id_base64,
+                "payment_plan_id": self.payment_plan.pk,
+                "file_id": self.document.id,
             },
         )
 

@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type HouseholdSimple = {
-    id: string;
+    readonly id: string;
     unicefId?: string | null;
     admin2?: string;
 };

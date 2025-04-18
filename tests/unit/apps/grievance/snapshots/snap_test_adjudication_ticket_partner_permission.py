@@ -197,7 +197,7 @@ snapshots['TestAdjudicationTicketPartnerPermission::test_select_individual_when_
                     'line': 8
                 }
             ],
-            'message': 'Only one option for duplicate or distinct or clear individuals is available',
+            'message': "[ErrorDetail(string='Only one option for duplicate or distinct or clear individuals is available', code='invalid')]",
             'path': [
                 'approveNeedsAdjudication'
             ]

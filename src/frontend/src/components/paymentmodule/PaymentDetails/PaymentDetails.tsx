@@ -7,13 +7,10 @@ import { LabelizedField } from '@core/LabelizedField';
 import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
-import {
-  PaymentQuery,
-  PaymentStatus,
-  PaymentVerificationStatus,
-} from '@generated/graphql';
+import { PaymentStatus, PaymentVerificationStatus } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Grid2 as Grid, Paper, Typography } from '@mui/material';
+import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
 import {
   formatCurrencyWithSymbol,
   getPhoneNoLabel,
@@ -33,7 +30,7 @@ const Overview = styled(Paper)`
 `;
 
 interface PaymentDetailsProps {
-  payment: PaymentQuery['payment'];
+  payment: PaymentDetail;
   canViewActivityLog: boolean;
   canViewHouseholdDetails: boolean;
 }
@@ -47,8 +44,7 @@ function PaymentDetails({
   const { businessArea, programId } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-
-  let paymentVerification: PaymentQuery['payment']['verification'] = null;
+  let paymentVerification: PaymentDetail['verification'] = null;
   if (
     payment.verification &&
     payment.verification.status !== PaymentVerificationStatus.Pending
@@ -60,7 +56,7 @@ function PaymentDetails({
     PaymentStatus.NotDistributed,
     PaymentStatus.ForceFailed,
     PaymentStatus.TransactionErroneous,
-  ].includes(payment.status);
+  ].includes(payment.status as PaymentStatus);
 
   return (
     <>
@@ -111,7 +107,7 @@ function PaymentDetails({
           <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('DISTRIBUTION MODALITY')}
-              value={payment.distributionModality}
+              value={payment.parent?.unicefId}
             />
           </Grid>
           <Grid size={{ xs: 3 }}>
@@ -215,14 +211,11 @@ function PaymentDetails({
           <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('DELIVERY MECHANISM')}
-              value={payment.deliveryType?.name}
+              value={payment.deliveryMechanism?.name}
             />
           </Grid>
           <Grid size={{ xs: 3 }}>
-            <LabelizedField
-              label={t('FSP')}
-              value={payment.serviceProvider?.fullName}
-            />
+            <LabelizedField label={t('FSP')} value={payment.fspName} />
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField
@@ -245,7 +238,7 @@ function PaymentDetails({
               value={payment.snapshotCollectorBankAccountNumber}
             />
           </Grid>
-          {payment.deliveryType?.name === 'Deposit to Card' && (
+          {payment.deliveryMechanism?.name === 'Deposit to Card' && (
             <>
               <Grid size={{ xs: 3 }}>
                 <LabelizedField

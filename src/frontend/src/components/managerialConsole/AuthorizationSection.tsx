@@ -84,7 +84,7 @@ export const AuthorizationSection: FC<AuthorizationSectionProps> = ({
 
   const selectedPlansUnicefIds = inAuthorizationData?.results
     .filter((plan) => selectedAuthorized.includes(plan.id))
-    .map((plan) => plan.unicef_id);
+    .map((plan) => plan.unicefId);
 
   const columns = [
     {

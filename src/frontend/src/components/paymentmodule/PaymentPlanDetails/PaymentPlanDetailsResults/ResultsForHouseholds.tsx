@@ -4,11 +4,11 @@ import {
   SummaryValue,
 } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults/Styles';
 import { LabelizedField } from '@core/LabelizedField';
-import { PaymentPlanQuery } from '@generated/graphql';
 import { useProgramContext } from 'src/programContext';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface ResultsForHouseholdsProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export const ResultsForHouseholds = ({
@@ -17,7 +17,6 @@ export const ResultsForHouseholds = ({
   const { totalHouseholdsCount, totalIndividualsCount } = paymentPlan;
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-
   return (
     <Grid size={{ xs: 4 }}>
       <Grid container spacing={0} justifyContent="flex-end">

@@ -42,8 +42,8 @@ export const restBusinessAreasProgramsHouseholdsRetrieve = {
   import_id: 'HH-0',
   admin_url:
     '/api/unicorn/household/household/5db31269-f73a-4f7a-9eb5-e545193e1e8c/change/',
-  male_children_count: null,
-  female_children_count: null,
+  maleChildrenCount: null,
+  femaleChildrenCount: null,
   children_disabled_count: null,
   currency: 'AED',
   first_registration_date: '2025-01-05T10:06:03Z',

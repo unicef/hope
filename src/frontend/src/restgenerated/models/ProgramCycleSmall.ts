@@ -2,11 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type UserBusinessArea = {
+export type ProgramCycleSmall = {
     readonly id: string;
-    name: string;
-    slug: string;
-    readonly permissions: Array<any>;
-    readonly isAccountabilityApplicable: boolean;
+    title?: string | null;
 };
 

@@ -761,7 +761,7 @@ class OpenPaymentPlanMutation(PermissionMutation):
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
-            programs=payment_plan.program_cycle.program,
+            programs=payment_plan.program,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )
@@ -1317,7 +1317,6 @@ class Mutations(graphene.ObjectType):
     # PaymentVerification
     create_payment_verification_plan = CreateVerificationPlanMutation.Field()
     edit_payment_verification_plan = EditPaymentVerificationMutation.Field()
-
     export_xlsx_payment_verification_plan_file = ExportXlsxPaymentVerificationPlanFile.Field()
     import_xlsx_payment_verification_plan_file = ImportXlsxPaymentVerificationPlanFile.Field()
     activate_payment_verification_plan = ActivatePaymentVerificationPlan.Field()
@@ -1325,20 +1324,22 @@ class Mutations(graphene.ObjectType):
     discard_payment_verification_plan = DiscardPaymentVerificationPlan.Field()
     invalid_payment_verification_plan = InvalidPaymentVerificationPlan.Field()
     delete_payment_verification_plan = DeletePaymentVerificationPlan.Field()
-    mark_payment_as_failed = MarkPaymentAsFailedMutation.Field()
-    revert_mark_payment_as_failed = RevertMarkPaymentAsFailedMutation.Field()
     update_payment_verification_status_and_received_amount = UpdatePaymentVerificationStatusAndReceivedAmount.Field()
     update_payment_verification_received_and_received_amount = (
         UpdatePaymentVerificationReceivedAndReceivedAmount.Field()
     )
 
+    # Payment
+    mark_payment_as_failed = MarkPaymentAsFailedMutation.Field()
+    revert_mark_payment_as_failed = RevertMarkPaymentAsFailedMutation.Field()
+
     # Payment Plan
     action_payment_plan_mutation = ActionPaymentPlanMutation.Field()
-    create_payment_plan = CreatePaymentPlanMutation.Field()
-    open_payment_plan = OpenPaymentPlanMutation.Field()
+    create_payment_plan = CreatePaymentPlanMutation.Field()  # done
+    open_payment_plan = OpenPaymentPlanMutation.Field()  # done
     create_follow_up_payment_plan = CreateFollowUpPaymentPlanMutation.Field()
     update_payment_plan = UpdatePaymentPlanMutation.Field()
-    delete_payment_plan = DeletePaymentPlanMutation.Field()
+    delete_payment_plan = DeletePaymentPlanMutation.Field()  # done
     split_payment_plan = SplitPaymentPlanMutation.Field()
     exclude_households = ExcludeHouseholdsMutation.Field()
     set_steficon_rule_on_payment_plan_payment_list = SetSteficonRuleOnPaymentPlanPaymentListMutation.Field()

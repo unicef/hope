@@ -19,7 +19,7 @@ snapshots['TestXlsxVerificationMarkAsInvalid::test_export_xlsx_payment_verificat
                     'line': 3
                 }
             ],
-            'message': 'You can mark invalid if xlsx file was downloaded or imported',
+            'message': "[ErrorDetail(string='You can mark invalid if xlsx file was downloaded or imported', code='invalid')]",
             'path': [
                 'invalidPaymentVerificationPlan'
             ]

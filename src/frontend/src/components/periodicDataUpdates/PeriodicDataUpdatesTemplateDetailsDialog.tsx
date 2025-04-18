@@ -14,6 +14,7 @@ import {
   TableHead,
   TableRow,
 } from '@mui/material';
+import { PeriodicDataUpdateTemplateDetail } from '@restgenerated/models/PeriodicDataUpdateTemplateDetail';
 import { PeriodicDataUpdateTemplateList } from '@restgenerated/models/PeriodicDataUpdateTemplateList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
@@ -31,21 +32,24 @@ export const PeriodicDataUpdatesTemplateDetailsDialog: FC<
 > = ({ open, onClose, template }) => {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
-  const { data: templateDetailsData, isLoading } = useQuery({
-    queryKey: [
-      'periodicDataUpdateTemplateDetails',
-      businessArea,
-      programId,
-      template.id,
-    ],
+  const { data: templateDetailsData, isLoading } =
+    useQuery<PeriodicDataUpdateTemplateDetail>({
+      queryKey: [
+        'periodicDataUpdateTemplateDetails',
+        businessArea,
+        programId,
+        template.id,
+      ],
 
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsPeriodicDataUpdateTemplatesRetrieve({
-        businessAreaSlug: businessArea,
-        id: template.id,
-        programSlug: programId,
-      }),
-  });
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsPeriodicDataUpdateTemplatesRetrieve(
+          {
+            businessAreaSlug: businessArea,
+            id: template.id,
+            programSlug: programId,
+          },
+        ),
+    });
   const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
     useQuery({
       queryKey: ['periodicFields', businessArea, programId],

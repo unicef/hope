@@ -44,7 +44,6 @@ const ProgramCyclesTableProgramDetails = ({
       return RestService.restBusinessAreasProgramsCyclesList({
         businessAreaSlug,
         programSlug,
-        ...queryVariables,
       });
     },
   });

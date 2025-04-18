@@ -1,3 +1,13 @@
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
+import { LoadingComponent } from '@core/LoadingComponent';
+import {
+  GrievanceTicketDocument,
+  useIndividualChoiceDataQuery,
+  useReassignRoleGrievanceMutation,
+} from '@generated/graphql';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   Box,
   Button,
@@ -6,25 +16,14 @@ import {
   DialogContent,
   DialogTitle,
 } from '@mui/material';
+import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
+import { getFilterFromQueryParams } from '@utils/utils';
 import { Field, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
-import {
-  GrievanceTicketDocument,
-  useIndividualChoiceDataQuery,
-  useReassignRoleGrievanceMutation,
-} from '@generated/graphql';
-import { DialogFooter } from '@containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
-import { getFilterFromQueryParams } from '@utils/utils';
-import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
-import { LoadingComponent } from '@core/LoadingComponent';
 import { IndividualsFilter } from '../../../population/IndividualsFilter';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export function LookUpReassignRoleModal({
   onValueChange,
@@ -87,8 +86,6 @@ export function LookUpReassignRoleModal({
   const [appliedFilterIND, setAppliedFilterIND] = useState(
     getFilterFromQueryParams(location, initialFilterIND),
   );
-
-  const { businessArea } = useBaseUrl();
 
   if (individualChoicesLoading) return <LoadingComponent />;
 
@@ -167,7 +164,6 @@ export function LookUpReassignRoleModal({
             />
             <LookUpIndividualTable
               filter={appliedFilterIND}
-              businessArea={businessArea}
               setFieldValue={setFieldValue}
               valuesInner={values}
               selectedHousehold={selectedHousehold}

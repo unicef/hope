@@ -24,6 +24,7 @@ import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import { headCells } from './HouseholdTableHeadCells';
 import { HouseholdList } from '@restgenerated/models/HouseholdList';
+import { PaginatedHouseholdListList } from '@restgenerated/models/PaginatedHouseholdListList';
 
 interface HouseholdTableRestProps {
   filter;
@@ -74,7 +75,7 @@ export const HouseholdTable = ({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery<PaginatedHouseholdListList>({
     queryKey: [
       'businessAreasProgramsHouseholdsList',
       queryVariables,
@@ -85,12 +86,12 @@ export const HouseholdTable = ({
       RestService.restBusinessAreasProgramsHouseholdsList({
         businessAreaSlug: businessArea,
         programSlug: programId,
-        ...queryVariables,
       }),
     enabled: !!businessArea && !!programId,
   });
 
-  // const { data: countData } = useQuery({ TODO: REST refactor
+  //TODO:
+  // const { data: countData } = useQuery<CountResponse>({
   //   queryKey: ['businessAreasProgramsHouseholdsCount', programId, businessArea],
   //   queryFn: () =>
   //     RestService.restBusinessAreasProgramsHouseholdsCountRetrieve({

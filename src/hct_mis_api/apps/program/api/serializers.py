@@ -305,3 +305,22 @@ class ProgramDetailSerializer(AdminUrlSerializerMixin, ProgramListSerializer):
             .distinct()
         )
         return PartnerForProgramSerializer(partners_qs, many=True).data
+
+
+class ProgramSmallSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Program
+        fields = (
+            "id",
+            "name",
+            "status",
+        )
+
+
+class ProgramCycleSmallSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProgramCycle
+        fields = (
+            "id",
+            "title",
+        )

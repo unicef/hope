@@ -3,8 +3,6 @@ import { GetApp } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
-  CashPlanVerificationSamplingChoicesQuery,
-  PaymentPlanQuery,
   PaymentVerificationPlanStatus,
   PaymentVerificationPlanVerificationChannel,
   useExportXlsxPaymentVerificationPlanFileMutation,
@@ -22,20 +20,20 @@ import { EditVerificationPlan } from './EditVerificationPlan';
 import { FinishVerificationPlan } from './FinishVerificationPlan';
 import { ImportXlsx } from './ImportXlsx';
 import { ReactElement } from 'react';
+import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
+import { PaymentVerificationPlan } from '@restgenerated/models/PaymentVerificationPlan';
 
 const StyledLink = styled.a`
   text-decoration: none;
 `;
 
 interface VerificationPlanActionsProps {
-  verificationPlan: PaymentPlanQuery['paymentPlan']['verificationPlans']['edges'][0]['node'];
-  samplingChoicesData: CashPlanVerificationSamplingChoicesQuery;
-  planNode: PaymentPlanQuery['paymentPlan'];
+  verificationPlan: PaymentVerificationPlanDetails['paymentVerificationPlans'][number];
+  planNode: PaymentVerificationPlan;
 }
 
 export function VerificationPlanActions({
   verificationPlan,
-  samplingChoicesData,
   planNode,
 }: VerificationPlanActionsProps): ReactElement {
   const { t } = useTranslation();
@@ -48,7 +46,7 @@ export function VerificationPlanActions({
   const [mutateInvalid, { loading: loadingInvalid }] =
     useInvalidPaymentVerificationPlanMutation();
 
-  if (!verificationPlan || !samplingChoicesData || !permissions) return null;
+  if (!verificationPlan || !permissions) return null;
 
   const isPending =
     verificationPlan.status === PaymentVerificationPlanStatus.Pending;
@@ -111,7 +109,6 @@ export function VerificationPlanActions({
               <EditVerificationPlan
                 paymentVerificationPlanNode={verificationPlan}
                 cashOrPaymentPlanId={planNode.id}
-                isPaymentPlan={planNode.__typename === 'PaymentPlanNode'}
               />
             )}
             {canActivate && (

@@ -84,7 +84,7 @@ export const ApprovalSection: FC<ApprovalSectionProps> = ({
 
   const selectedPlansUnicefIds = inApprovalData?.results
     .filter((plan) => selectedApproved.includes(plan.id))
-    .map((plan) => plan.unicef_id);
+    .map((plan) => plan.unicefId);
 
   const columns = [
     {

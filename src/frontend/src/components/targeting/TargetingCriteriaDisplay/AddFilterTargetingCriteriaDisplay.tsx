@@ -1,7 +1,6 @@
 import { TargetingCriteriaForm } from '@containers/forms/TargetingCriteriaForm';
 import {
   DataCollectingTypeType,
-  PaymentPlanQuery,
   useAllCollectorFieldsAttributesQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -20,6 +19,7 @@ import TargetingCriteriaDisplayDisabled, {
 import { VulnerabilityScoreComponent } from './VulnerabilityScoreComponent';
 import { useCachedIndividualFieldsQuery } from '@hooks/useCachedIndividualFields';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 
 const Title = styled.div`
   padding: ${({ theme }) => theme.spacing(3)} ${({ theme }) => theme.spacing(4)};
@@ -75,7 +75,7 @@ const AddCriteria = styled.div`
 interface AddFilterTargetingCriteriaDisplayProps {
   rules?;
   helpers?;
-  targetPopulation?: PaymentPlanQuery['paymentPlan'];
+  targetPopulation?: TargetPopulationDetail;
   isEdit?: boolean;
   screenBeneficiary: boolean;
   isSocialDctType: boolean;
@@ -175,15 +175,14 @@ const AddFilterTargetingCriteriaDisplay = ({
   };
 
   // const  collectorFiltersAvailable =
-  //   selectedProgram?.data_collecting_type?.collectorFiltersAvailable;
+  //   selectedProgram?.dataCollectingType?.collectorFiltersAvailable;
 
   let individualFiltersAvailable =
     selectedProgram?.dataCollectingType?.individualFiltersAvailable;
   let householdFiltersAvailable =
     selectedProgram?.dataCollectingType?.householdFiltersAvailable;
   const isSocialWorkingProgram =
-    selectedProgram?.dataCollectingType?.type ===
-    DataCollectingTypeType.Social;
+    selectedProgram?.dataCollectingType?.type === DataCollectingTypeType.Social;
   // Allow use filters on non-migrated programs
   if (individualFiltersAvailable === undefined) {
     individualFiltersAvailable = true;

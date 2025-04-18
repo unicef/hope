@@ -59,12 +59,12 @@ const UpdateProgramCycle = ({
   let endDate = Yup.date()
     .required(t('End Date is required'))
     .min(today, t('End Date cannot be in the past'))
-    .when('start_date', ([start_date], schema) =>
-      start_date
+    .when('startDate', ([startDate], schema) =>
+      startDate
         ? schema.min(
-            new Date(start_date),
+            new Date(startDate),
             `${t('End date have to be greater than')} ${moment(
-              start_date,
+              startDate,
             ).format('YYYY-MM-DD')}`,
           )
         : schema,
@@ -85,7 +85,7 @@ const UpdateProgramCycle = ({
   } = {
     id: programCycle.id,
     title: programCycle.title,
-    start_date: programCycle.start_date,
+    startDate: programCycle.start_date,
     end_date: undefined,
   };
 
@@ -112,7 +112,7 @@ const UpdateProgramCycle = ({
       await mutateAsync({
         title: programCycle.title,
         start_date: programCycle.start_date,
-        end_date: values.end_date,
+        end_date: values.endDate,
       });
       showMessage(t('Programme Cycle Updated'));
     } catch (e) {
@@ -158,7 +158,7 @@ const UpdateProgramCycle = ({
                   data-cy="previous-program-cycle-start-date"
                   label={t('Start Date')}
                 >
-                  {values.start_date}
+                  {values.startDate}
                 </LabelizedField>
               </Grid>
               <Grid size={{ xs: 6 }}>
@@ -171,8 +171,8 @@ const UpdateProgramCycle = ({
                   decoratorEnd={<CalendarTodayRoundedIcon color="disabled" />}
                   data-cy="input-previous-program-cycle-end-date"
                 />
-                {error?.data?.end_date && (
-                  <FormHelperText error>{error.data.end_date}</FormHelperText>
+                {error?.data?.endDate && (
+                  <FormHelperText error>{error.data.endDate}</FormHelperText>
                 )}
               </Grid>
             </Grid>

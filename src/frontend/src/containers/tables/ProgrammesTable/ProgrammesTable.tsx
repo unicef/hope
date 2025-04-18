@@ -3,13 +3,14 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { ProgrammeChoiceDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { CountResponse } from '@restgenerated/models/CountResponse';
+import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { headCells } from './ProgrammesHeadCells';
 import ProgrammesTableRow from './ProgrammesTableRow';
-import { filterEmptyParams } from '@utils/utils';
 
 interface ProgrammesTableProps {
   businessArea: string;
@@ -43,7 +44,21 @@ function ProgrammesTable({
       budget: JSON.stringify({ min: filter.budgetMin, max: filter.budgetMax }),
       dataCollectingType: filter.dataCollectingType,
     }),
-    [businessArea, filter, programId, isAllPrograms],
+    [
+      businessArea,
+      programId,
+      isAllPrograms,
+      filter.search,
+      filter.startDate,
+      filter.endDate,
+      filter.status,
+      filter.sector,
+      filter.numberOfHouseholdsMin,
+      filter.numberOfHouseholdsMax,
+      filter.budgetMin,
+      filter.budgetMax,
+      filter.dataCollectingType,
+    ],
   );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
@@ -52,41 +67,31 @@ function ProgrammesTable({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
-  const filteredQueryVariables = useMemo(() => {
-    const filtered = filterEmptyParams(initialQueryVariables);
-    return {
-      ...filtered,
-      businessAreaSlug: initialQueryVariables.businessAreaSlug,
-      programSlug: initialQueryVariables.programSlug,
-    };
-  }, [initialQueryVariables]);
-
   const {
     data: dataPrograms,
     isLoading: isLoadingPrograms,
     error: errorPrograms,
-  } = useQuery({
+  } = useQuery<PaginatedProgramListList>({
     queryKey: [
       'businessAreasProgramsList',
-      filteredQueryVariables,
+      queryVariables,
       programId,
       businessArea,
     ],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsList(filteredQueryVariables),
+    queryFn: () => RestService.restBusinessAreasProgramsList(queryVariables),
   });
 
-  const { data: dataProgramsCount } = useQuery({
+  const { data: dataProgramsCount } = useQuery<CountResponse>({
     queryKey: [
       'businessAreasProgramsCount',
-      filteredQueryVariables,
+      queryVariables,
       programId,
       businessArea,
     ],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsCountRetrieve(
-        filteredQueryVariables,
-      ),
+      RestService.restBusinessAreasProgramsCountRetrieve({
+        businessAreaSlug: businessArea,
+      }),
   });
 
   return (
