@@ -26,7 +26,6 @@ function PaymentPlansTable({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const initialQueryVariables = {
-    businessArea,
     search: filter.search,
     status: filter.status,
     totalEntitledQuantityFrom: filter.totalEntitledQuantityFrom || null,
@@ -34,7 +33,6 @@ function PaymentPlansTable({
     dispersionStartDate: filter.dispersionStartDate || null,
     dispersionEndDate: filter.dispersionEndDate || null,
     isFollowUp: filter.isFollowUp ? true : null,
-    program: programId,
     isPaymentPlan: true,
   };
 

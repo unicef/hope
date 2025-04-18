@@ -1,20 +1,20 @@
-import { Box, TableCell } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import { useCashPlanVerificationStatusChoicesQuery } from '@generated/graphql';
 import { BlackLink } from '@components/core/BlackLink';
 import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
+import { useCashPlanVerificationStatusChoicesQuery } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { Box, TableCell } from '@mui/material';
+import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
 import {
   formatCurrencyWithSymbol,
   paymentPlanStatusToColor,
 } from '@utils/utils';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { useNavigate } from 'react-router-dom';
 
 interface PaymentPlanTableRowProps {
-  plan: Partial<PaymentPlanDetail>;
+  plan: PaymentPlanList;
   canViewDetails: boolean;
 }
 

@@ -1,20 +1,20 @@
-import TableCell from '@mui/material/TableCell';
-import { useNavigate } from 'react-router-dom';
-import { Radio } from '@mui/material';
-import { PaymentPlanNode } from '@generated/graphql';
-import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
-import { StatusBox } from '@components/core/StatusBox';
-import {
-  paymentPlanStatusToColor,
-  paymentPlanStatusMapping,
-} from '@utils/utils';
-import { UniversalMoment } from '@components/core/UniversalMoment';
 import { BlackLink } from '@components/core/BlackLink';
+import { StatusBox } from '@components/core/StatusBox';
+import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { UniversalMoment } from '@components/core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { Radio } from '@mui/material';
+import TableCell from '@mui/material/TableCell';
+import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
+import {
+  paymentPlanStatusMapping,
+  paymentPlanStatusToColor,
+} from '@utils/utils';
 import { ReactElement } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface LookUpTargetPopulationTableRowSurveysProps {
-  targetPopulation: PaymentPlanNode;
+  targetPopulation: PaymentPlanList;
   canViewDetails: boolean;
   selectedTargetPopulation?;
   radioChangeHandler?: (id: string) => void;
@@ -82,10 +82,7 @@ export function LookUpTargetPopulationTableRowSurveys({
       <TableCell align="left">
         <UniversalMoment>{targetPopulation.updatedAt}</UniversalMoment>
       </TableCell>
-      <TableCell align="left">
-        {targetPopulation.createdBy?.firstName}{' '}
-        {targetPopulation.createdBy?.lastName}
-      </TableCell>
+      <TableCell align="left">{targetPopulation.createdBy}</TableCell>
     </ClickableTableRow>
   );
 }
