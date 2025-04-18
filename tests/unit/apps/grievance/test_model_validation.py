@@ -88,7 +88,12 @@ class TestFspXlsxTemplatePerDeliveryMechanismValidation(TestCase):
 
     def test_admin_form_clean(self) -> None:
         fsp_xls_template = FinancialServiceProviderXlsxTemplateFactory(
-            core_fields=["bank_name__transfer_to_account", "bank_account_number__transfer_to_account"]
+            core_fields=[
+                "bank_name__transfer_to_account",
+                "bank_code__transfer_to_account",
+                "bank_account_number__transfer_to_account",
+                "account_holder_name__transfer_to_account",
+            ]
         )
 
         fsp = FinancialServiceProviderFactory(
@@ -127,11 +132,16 @@ class TestFspXlsxTemplatePerDeliveryMechanismValidation(TestCase):
         self.assertFalse(form.is_valid())
         with self.assertRaisesMessage(
             ValidationError,
-            "[\"['bank_name__transfer_to_account', 'bank_account_number__transfer_to_account'] fields are required by delivery mechanism Transfer to Account and must be present in the template core fields\"]",
+            "[\"['bank_name__transfer_to_account', 'bank_account_number__transfer_to_account', 'bank_code__transfer_to_account', 'account_holder_name__transfer_to_account'] fields are required by delivery mechanism Transfer to Account and must be present in the template core fields\"]",
         ):
             form.clean()
 
-        fsp_xls_template.core_fields = ["bank_name__transfer_to_account", "bank_account_number__transfer_to_account"]
+        fsp_xls_template.core_fields = [
+            "bank_name__transfer_to_account",
+            "bank_account_number__transfer_to_account",
+            "bank_code__transfer_to_account",
+            "account_holder_name__transfer_to_account",
+        ]
         fsp_xls_template.save()
 
         # test delivery mechanism not supported

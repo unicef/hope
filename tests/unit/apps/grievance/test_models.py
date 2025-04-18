@@ -209,6 +209,8 @@ class TestDeliveryMechanismDataModel(TestCase):
                 "service_provider_code__mobile_money",
                 "bank_name__transfer_to_account",
                 "bank_account_number__transfer_to_account",
+                "bank_code__transfer_to_account",
+                "account_holder_name__transfer_to_account",
                 "blockchain_name__transfer_to_digital_wallet",
                 "wallet_address__transfer_to_digital_wallet",
                 "wallet_name__transfer_to_digital_wallet",
