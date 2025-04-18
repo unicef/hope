@@ -56,6 +56,7 @@ import type { PaymentPlanSupportingDocument } from '../models/PaymentPlanSupport
 import type { PaymentVerificationPlanActivate } from '../models/PaymentVerificationPlanActivate';
 import type { PaymentVerificationPlanCreate } from '../models/PaymentVerificationPlanCreate';
 import type { PaymentVerificationPlanDetails } from '../models/PaymentVerificationPlanDetails';
+import type { PaymentVerificationPlanImport } from '../models/PaymentVerificationPlanImport';
 import type { PaymentVerificationUpdate } from '../models/PaymentVerificationUpdate';
 import type { PeriodicDataUpdateTemplateCreate } from '../models/PeriodicDataUpdateTemplateCreate';
 import type { PeriodicDataUpdateTemplateDetail } from '../models/PeriodicDataUpdateTemplateDetail';
@@ -3452,7 +3453,7 @@ export class RestService {
         id: string,
         programSlug: string,
         verificationPlanId: string,
-        requestBody: PaymentVerificationPlanCreate,
+        requestBody: PaymentVerificationPlanImport,
     }): CancelablePromise<PaymentVerificationPlanDetails> {
         return __request(OpenAPI, {
             method: 'POST',
@@ -3594,7 +3595,7 @@ export class RestService {
     }
     /**
      * Adds a count action to the viewset that returns the count of the queryset.
-     * @returns PaymentVerificationUpdate
+     * @returns PaymentDetail
      * @throws ApiError
      */
     public static restBusinessAreasProgramsPaymentVerificationsVerificationsCreate({
@@ -3612,7 +3613,7 @@ export class RestService {
         paymentId: string,
         programSlug: string,
         requestBody: PaymentVerificationUpdate,
-    }): CancelablePromise<PaymentVerificationUpdate> {
+    }): CancelablePromise<PaymentDetail> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/verifications/{payment_id}/',

@@ -111,6 +111,7 @@ export type { PaymentVerificationPlan as PaymentVerificationPlanCamelCase } from
 export type { PaymentVerificationPlanActivate as PaymentVerificationPlanActivateCamelCase } from './models/PaymentVerificationPlanActivate';
 export type { PaymentVerificationPlanCreate as PaymentVerificationPlanCreateCamelCase } from './models/PaymentVerificationPlanCreate';
 export type { PaymentVerificationPlanDetails as PaymentVerificationPlanDetailsCamelCase } from './models/PaymentVerificationPlanDetails';
+export type { PaymentVerificationPlanImport as PaymentVerificationPlanImportCamelCase } from './models/PaymentVerificationPlanImport';
 export type { PaymentVerificationPlanList as PaymentVerificationPlanListCamelCase } from './models/PaymentVerificationPlanList';
 export type { PaymentVerificationSummary as PaymentVerificationSummaryCamelCase } from './models/PaymentVerificationSummary';
 export type { PaymentVerificationUpdate as PaymentVerificationUpdateCamelCase } from './models/PaymentVerificationUpdate';
