@@ -1,0 +1,26 @@
+target-version = "py312"
+line-length = 120
+
+[lint.isort]
+case-sensitive = true
+
+[lint]
+select = [
+    "F",
+    "ICN",
+    "PT",
+    "Q",
+    "YTT"
+]
+ignore = [
+]
+
+[format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[lint.per-file-ignores]
+"tests/**.py" = ["I", "PT", "Q"]
+"src/**/migrations/*.py" = ["F401", "Q"]
