@@ -1,7 +1,11 @@
-import { ReactElement, useEffect, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { columnToOrderBy, isPermissionDeniedError } from '@utils/utils';
+import {
+  columnToOrderBy,
+  filterEmptyParams,
+  isPermissionDeniedError,
+} from '@utils/utils';
 import {
   Order,
   TableRestComponent,
@@ -65,14 +69,24 @@ export const UniversalRestTable = <T, K>({
     defaultOrderDirection,
   );
 
+  const filteredQueryVariables = useMemo(() => {
+    const filtered = filterEmptyParams(queryVariables);
+    return {
+      ...filtered,
+      businessAreaSlug: queryVariables.businessAreaSlug,
+      programSlug: queryVariables.programSlug,
+      ordering: queryVariables.ordering || '',
+    };
+  }, [queryVariables]);
+
   useEffect(() => {
     const newVariables: QueryVariables = {
-      ...queryVariables,
+      ...filteredQueryVariables,
       offset: page * rowsPerPage,
       limit: rowsPerPage,
       ordering: orderBy
         ? columnToOrderBy(orderBy, orderDirection)
-        : queryVariables.ordering,
+        : filteredQueryVariables.ordering,
     };
     const newState = newVariables as unknown as K;
 
@@ -84,6 +98,7 @@ export const UniversalRestTable = <T, K>({
     rowsPerPage,
     orderBy,
     orderDirection,
+    filteredQueryVariables,
     setQueryVariables,
     queryVariables,
   ]);

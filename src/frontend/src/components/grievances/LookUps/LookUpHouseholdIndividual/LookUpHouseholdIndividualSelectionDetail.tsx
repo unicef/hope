@@ -197,7 +197,6 @@ export function LookUpHouseholdIndividualSelectionDetail({
           />
           <LookUpIndividualTable
             filter={appliedFilterIND}
-            businessArea={businessArea}
             setFieldValue={onSelect}
             valuesInner={initialValues}
             selectedHousehold={selectedHousehold}

@@ -34,7 +34,6 @@ export function IndividualsListTable({
   const initialQueryVariables = useMemo(
     () => ({
       age: JSON.stringify({ min: filter.ageMin, max: filter.ageMax }),
-      businessArea,
       sex: [filter.sex],
       search: filter.search.trim(),
       documentType: filter.documentType,
@@ -46,12 +45,9 @@ export function IndividualsListTable({
         min: dateToIsoString(filter.lastRegistrationDateMin, 'startOfDay'),
         max: dateToIsoString(filter.lastRegistrationDateMax, 'endOfDay'),
       }),
-      program: programId,
       rdiMergeStatus: IndividualRdiMergeStatus.Merged,
     }),
     [
-      businessArea,
-      programId,
       filter.ageMin,
       filter.ageMax,
       filter.sex,
