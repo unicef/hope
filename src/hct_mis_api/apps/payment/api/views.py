@@ -457,11 +457,14 @@ class PaymentVerificationViewSet(
     def verifications(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """return list of verification records"""
         payment_plan = self.get_object()
-        serializer = PaymentListSerializer(payment_plan.eligible_payments.all(), many=True)
-        return Response(
-            data=serializer.data,
-            status=status.HTTP_200_OK,
-        )
+        payments = payment_plan.eligible_payments.all()
+        page = self.paginate_queryset(payments)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(payments, many=True)
+        return Response(serializer.data)
 
     @action(detail=True, methods=["get"], url_path="verifications/(?P<payment_id>[^/.]+)")
     def verification_details(self, request: Request, *args: Any, **kwargs: Any) -> Response:
