@@ -95,7 +95,7 @@ class TestCoreFields(APITestCase):
 
         generate_delivery_mechanisms()
         choices = FieldFactory.get_all_core_fields_choices()
-        self.assertEqual(len(choices), 147)
+        self.assertEqual(len(choices), 149)
         self.assertEqual(
             choices[-1],
             (
