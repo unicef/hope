@@ -144,6 +144,7 @@ class PaymentVerificationViewSet(
     BaseViewSet,
 ):
     program_model_field = "program_cycle__program"
+    # http_method_names = ["get", "post", "patch"]
     queryset = PaymentPlan.objects.filter(
         status__in=(PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED)
     ).order_by("unicef_id")
@@ -413,7 +414,7 @@ class PaymentVerificationViewSet(
         )
 
     @extend_schema(
-        request=PaymentVerificationPlanCreateSerializer,
+        request=PaymentVerificationPlanImportSerializer,
         responses={200: PaymentVerificationPlanDetailsSerializer, 400: XlsxErrorSerializer},
     )
     @action(detail=True, methods=["post"], url_path="import-xlsx/(?P<verification_plan_id>[^/.]+)")
@@ -456,30 +457,30 @@ class PaymentVerificationViewSet(
     def verifications(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """return list of verification records"""
         payment_plan = self.get_object()
-        serializer = PaymentListSerializer(payment_plan.payment_items.all(), many=True)
+        serializer = PaymentListSerializer(payment_plan.eligible_payments.all(), many=True)
         return Response(
             data=serializer.data,
             status=status.HTTP_200_OK,
         )
 
     @action(detail=True, methods=["get"], url_path="verifications/(?P<payment_id>[^/.]+)")
-    def verification_details(self, request: Request, verification_id: str, *args: Any, **kwargs: Any) -> Response:
-        payment = get_object_or_404(Payment, id=verification_id)
+    def verification_details(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment = get_object_or_404(Payment, id=self.kwargs.get("payment_id"))
         serializer = self.get_serializer(payment)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @extend_schema(request=PaymentVerificationUpdateSerializer, responses={200: PaymentDetailSerializer})
     @action(
         detail=True,
         methods=["post"],
         url_path="verifications/(?P<payment_id>[^/.]+)",
-        PERMISSIONS=[Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS],
     )
-    def verifications_update(self, request: Request, verification_id: str, *args: Any, **kwargs: Any) -> Response:
-        # payment = get_object_or_404(Payment, id=verification_id)
-        payment_verification = get_object_or_404(PaymentVerification, id=verification_id)
-        check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification)
+    def verifications_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment = get_object_or_404(Payment, id=self.kwargs.get("payment_id"))
+        payment_verification = payment.payment_verifications.first()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        check_concurrency_version_in_mutation(serializer.validated_data.get("version"), payment_verification)
         received_amount = serializer.validated_data["received_amount"]
         received = serializer.validated_data["received"]
         old_payment_verification = copy_model_object(payment_verification)
@@ -489,9 +490,6 @@ class PaymentVerificationViewSet(
         ):
             raise ValidationError("You can only update status of payment verification for MANUAL verification method")
         if payment_verification.payment_verification_plan.status != PaymentVerificationPlan.STATUS_ACTIVE:
-            logger.warning(
-                f"You can only update status of payment verification for {PaymentVerificationPlan.STATUS_ACTIVE} cash plan verification"
-            )
             raise ValidationError(
                 f"You can only update status of payment verification for {PaymentVerificationPlan.STATUS_ACTIVE} cash plan verification"
             )
@@ -523,7 +521,8 @@ class PaymentVerificationViewSet(
             old_payment_verification,
             payment_verification,
         )
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        payment.refresh_from_db()
+        return Response(PaymentDetailSerializer(payment).data, status=status.HTTP_200_OK)
 
 
 class PaymentPlanViewSet(

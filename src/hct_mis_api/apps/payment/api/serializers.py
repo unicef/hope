@@ -132,8 +132,7 @@ class PaymentPlanImportFileSerializer(serializers.Serializer):
         allowed_extensions = ["xlsx"]
         extension = file.name.split(".")[-1].lower()
         if extension not in allowed_extensions:
-            raise serializers.ValidationError("Unsupported file type.")
-
+            raise serializers.ValidationError(f"Unsupported file type ({extension}).")
         return file
 
 
@@ -964,6 +963,7 @@ class PaymentVerificationDetailsSerializer(AdminUrlSerializerMixin, serializers.
             "payment_verification_plan_unicef_id",
             "verification_channel",
             "admin_url",
+            "version",
         )
 
 
@@ -1034,6 +1034,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
         return obj.fsp_auth_code or ""
 
     def get_verification(self, obj: Payment) -> Dict[str, Any]:
+        # TODO: only one Verification per Payment?
         return PaymentVerificationDetailsSerializer(obj.payment_verifications.first()).data
 
 
@@ -1195,9 +1196,15 @@ class PaymentVerificationPlanImportSerializer(serializers.Serializer):
     file = serializers.FileField(use_url=False, required=True)
     version = serializers.IntegerField(required=False)
 
+    def validate_file(self, file: Any) -> Any:
+        allowed_extensions = ["xlsx"]
+        extension = file.name.split(".")[-1].lower()
+        if extension not in allowed_extensions:
+            raise serializers.ValidationError(f"Unsupported file type ({extension}).")
+        return file
+
 
 class PaymentVerificationUpdateSerializer(serializers.Serializer):
-    payment_verification_id = serializers.CharField(required=True)
     received_amount = serializers.FloatField(required=False)
     received = serializers.BooleanField(required=True)
     version = serializers.IntegerField(required=False)

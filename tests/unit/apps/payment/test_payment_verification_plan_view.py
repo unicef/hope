@@ -1,6 +1,8 @@
 from io import BytesIO
+from pathlib import Path
 from typing import Any, List, Optional
 
+from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 
@@ -14,11 +16,13 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.payment.fixtures import (
     PaymentFactory,
     PaymentPlanFactory,
+    PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
 )
 from hct_mis_api.apps.payment.models import (
     Payment,
     PaymentPlan,
+    PaymentVerification,
     PaymentVerificationPlan,
     PaymentVerificationSummary,
     build_summary,
@@ -66,13 +70,34 @@ class TestPaymentVerificationViewSet:
         )
         PaymentVerificationSummary.objects.create(payment_plan=self.pp)
         build_summary(self.pp)
-        self.payment = PaymentFactory(
-            parent=self.pp, status=Payment.STATUS_SUCCESS, delivered_quantity=999, entitlement_quantity=112
+        self.payment_1 = PaymentFactory(
+            pk="0329a41f-affd-4669-9e38-38ec2d6699b3",
+            parent=self.pp,
+            status=Payment.STATUS_SUCCESS,
+            delivered_quantity=999,
+            entitlement_quantity=112,
+        )
+        self.payment_2 = PaymentFactory(
+            pk="299811ef-b123-427d-b77d-9fd5d1bc8946",
+            parent=self.pp,
+            status=Payment.STATUS_SUCCESS,
+            delivered_quantity=111,
+            entitlement_quantity=112,
         )
         self.pvp = PaymentVerificationPlanFactory(
             payment_plan=self.pp,
             sampling=PaymentVerificationPlan.SAMPLING_RANDOM,
             verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
+        )
+        self.verification_1 = PaymentVerificationFactory(
+            payment_verification_plan=self.pvp,
+            payment=self.payment_1,
+            status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
+        )
+        self.verification_2 = PaymentVerificationFactory(
+            payment_verification_plan=self.pvp,
+            payment=self.payment_2,
+            status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
         )
         url_kwargs = {
             "business_area_slug": self.afghanistan.slug,
@@ -156,8 +181,8 @@ class TestPaymentVerificationViewSet:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
             assert "id" in resp_data
-            assert 1 == resp_data["available_payment_records_count"]
-            assert 1 == resp_data["eligible_payments_count"]
+            assert 2 == resp_data["available_payment_records_count"]
+            assert 2 == resp_data["eligible_payments_count"]
             assert "Pending" == resp_data["payment_verification_plans"][0]["status"]
             assert "Random sampling" == resp_data["payment_verification_plans"][0]["sampling"]
             assert (
@@ -175,6 +200,7 @@ class TestPaymentVerificationViewSet:
     )
     def test_create_pvp(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        PaymentFactory(parent=self.pp, status=Payment.STATUS_SUCCESS, delivered_quantity=111, entitlement_quantity=112)
         response = self.client.post(
             self.url_create,
             {
@@ -360,23 +386,140 @@ class TestPaymentVerificationViewSet:
             resp_data = response.json()
             assert "id" in resp_data
             assert 1 == len(resp_data["payment_verification_plans"])
-            assert resp_data["payment_verification_plans"][0]["xlsx_file_exporting"] is True
+            self.pvp.refresh_from_db()
+            if not self.pvp.xlsx_file_exporting:
+                assert self.pvp.has_xlsx_payment_verification_plan_file is True
+            else:
+                assert resp_data["payment_verification_plans"][0]["xlsx_file_exporting"] is True
 
-    # @pytest.mark.parametrize(
-    #     "permissions, expected_status",
-    #     [
-    #         ([Permissions.PAYMENT_VERIFICATION_IMPORT], status.HTTP_200_OK),
-    #         ([], status.HTTP_403_FORBIDDEN),
-    #     ],
-    # )
-    # def test_pvp_import_xlsx(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
-    #     create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
-    #     file = generate_valid_xlsx_file(worksheet_title_list=["Payment Verifications", "Meta"])
-    #     response = self.client.post(self.url_import_xlsx, {"version": self.pvp.version, "file": file}, format="multipart")
-    #     assert response.status_code == expected_status
-    #     if expected_status == status.HTTP_200_OK:
-    #         assert response.status_code == status.HTTP_200_OK
-    #         resp_data = response.json()
-    #         assert "id" in resp_data
-    #         assert 1 == len(resp_data["payment_verification_plans"])
-    #         assert resp_data["payment_verification_plans"][0]["xlsx_file_imported"] is True
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.PAYMENT_VERIFICATION_IMPORT], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_pvp_import_xlsx(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        self.pvp.status = PaymentVerificationPlan.STATUS_ACTIVE
+        self.pvp.verification_channel = PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX
+        self.pvp.save()
+        # file = generate_valid_xlsx_file(worksheet_title_list=["Payment Verifications", "Meta"])
+        file = BytesIO(Path(f"{settings.TESTS_ROOT}/apps/payment/test_file/unordered_columns_1.xlsx").read_bytes())
+        file.name = "unordered_columns_1.xlsx"
+        response = self.client.post(
+            self.url_import_xlsx, {"version": self.pvp.version, "file": file}, format="multipart"
+        )
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.status_code == status.HTTP_200_OK
+            resp_data = response.json()
+            assert "id" in resp_data
+            assert 1 == len(resp_data["payment_verification_plans"])
+            assert resp_data["payment_verification_plans"][0]["xlsx_file_imported"] is True
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_verification_list(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        url = reverse(
+            "api:payments:payment-verifications-verifications",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+                "pk": str(self.pp.pk),
+            },
+        )
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        response = self.client.get(url)
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.status_code == status.HTTP_200_OK
+            resp_data = response.json()
+            assert len(resp_data) == 2
+            payment = resp_data[0]
+            assert "id" in payment
+            assert "verification" in payment
+            assert "id" in payment["verification"]
+            assert "status" in payment["verification"]
+            assert "verification_channel" in payment["verification"]
+            assert "received_amount" in payment["verification"]
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_verification_details(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        url = reverse(
+            "api:payments:payment-verifications-verification-details",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+                "pk": str(self.pp.pk),
+                "payment_id": str(self.payment_1.pk),
+            },
+        )
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        response = self.client.get(url)
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.status_code == status.HTTP_200_OK
+            resp_data = response.json()
+            assert "id" in resp_data
+            assert "verification" in resp_data
+            assert "id" in resp_data["verification"]
+            assert "status" in resp_data["verification"]
+            assert "verification_channel" in resp_data["verification"]
+            assert "received_amount" in resp_data["verification"]
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.PAYMENT_VERIFICATION_VERIFY, Permissions.PAYMENT_VERIFICATION_VIEW_LIST], status.HTTP_200_OK),
+            # ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_update_verification(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        url = reverse(
+            "api:payments:payment-verifications-verifications-update",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+                "pk": str(self.pp.id),
+                "payment_id": str(self.payment_1.id),
+            },
+        )
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        # self.pvp.status = PaymentVerificationPlan.STATUS_ACTIVE
+        # self.pvp.verification_channel = PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
+        # self.pvp.save()
+
+        response = self.client.post(
+            url, {"version": self.verification_1.version, "received_amount": 123.22, "received": True}
+        )
+        print("resp_data = = = = ", response.json())
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.status_code == status.HTTP_200_OK
+            resp_data = response.json()
+
+            assert "id" in resp_data
+            assert 1 == len(resp_data["payment_verification_plans"])
+            assert resp_data["payment_verification_plans"][0]["xlsx_file_imported"] is True

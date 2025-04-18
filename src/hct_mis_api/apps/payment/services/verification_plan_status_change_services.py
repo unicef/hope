@@ -208,6 +208,7 @@ class VerificationPlanStatusChangeServices:
             raise ValidationError("You can only import verification when XLSX channel is selected")
         import_service = XlsxVerificationImportService(self.payment_verification_plan, file)
         import_service.open_workbook()
+        import_service.validate()
 
         import_service.import_verifications()
         calculate_counts(self.payment_verification_plan)

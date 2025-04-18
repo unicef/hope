@@ -1,8 +1,10 @@
 import json
 from io import BytesIO
+from pathlib import Path
 from typing import Any, Callable, List
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
+from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -1566,12 +1568,14 @@ class TestPaymentPlanActions:
         self.cycle = self.program_active.cycles.first()
         self.client = api_client(self.user)
         self.pp = PaymentPlanFactory(
+            unicef_id="PP-0060-23-0.000.001",
             name="DRAFT PP",
             business_area=self.afghanistan,
             program_cycle=self.cycle,
             status=PaymentPlan.Status.DRAFT,
             created_by=self.user,
             created_at="2022-02-24",
+            currency="PLN",
         )
         pp_id = self.pp.pk
         url_kwargs = {
@@ -1898,27 +1902,38 @@ class TestPaymentPlanActions:
         assert status.HTTP_400_BAD_REQUEST
         assert "You can only export Payment List for LOCKED Payment Plan" in response.data
 
-    @patch("hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_import_service.XlsxPaymentPlanImportService")
-    def test_pp_entitlement_import_xlsx(
-        self, mock_import_service_cls: Mock, create_user_role_with_permissions: Any
-    ) -> None:
+    @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    def test_pp_entitlement_import_xlsx(self, mock_exchange_rate: Any, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
             self.user, [Permissions.PM_IMPORT_XLSX_WITH_ENTITLEMENTS], self.afghanistan, self.program_active
         )
         self.pp.status = PaymentPlan.Status.LOCKED
         self.pp.save()
-        # TODO: FIX ME
+        self.payment_1 = PaymentFactory(
+            parent=self.pp,
+            status=Payment.STATUS_PENDING,
+            currency="PLN",
+        )
+        self.payment_2 = PaymentFactory(
+            unicef_id="RCPT-0060-24-0.000.022",
+            parent=self.pp,
+            status=Payment.STATUS_PENDING,
+            currency="PLN",
+        )
+        self.payment_1.unicef_id = "RCPT-0060-24-0.000.011"
+        self.payment_1.save()
+        self.payment_2.unicef_id = "RCPT-0060-24-0.000.022"
+        self.payment_2.save()
 
-        # mock_import_service = MagicMock()
-        # mock_import_service.errors = None
-        # mock_import_service_cls.return_value = mock_import_service
-        # mock_import_service_cls.errors = None
-        # file = generate_valid_xlsx_file(worksheet_title="Payment Plan - Payment List")
-        # response = self.client.post(self.url_import_entitlement_xlsx, {"file": file}, format="multipart")
-        #
-        # assert response.status_code == status.HTTP_200_OK
-        # mock_import_service.open_workbook.assert_called_once()
-        # mock_import_service.validate.assert_called_once()
+        file = BytesIO(Path(f"{settings.TESTS_ROOT}/apps/payment/test_file/pp_entitlement_valid.xlsx").read_bytes())
+        file.name = "pp_entitlement_valid.xlsx"
+        response = self.client.post(self.url_import_entitlement_xlsx, {"file": file}, format="multipart")
+
+        assert response.status_code == status.HTTP_200_OK
+        if response.status_code == status.HTTP_200_OK:
+            pp = response.json()
+            assert pp["background_action_status"] == "Importing Entitlements XLSX file"
+            assert pp["imported_file_name"].startswith("pp_entitlement_valid") is True
 
     def test_pp_entitlement_import_xlsx_status_invalid(self, create_user_role_with_permissions: Any) -> None:
         self.pp.status = PaymentPlan.Status.OPEN
@@ -2222,7 +2237,27 @@ class TestPaymentPlanActions:
             in response_2.data[0]
         )
 
-    # def test_split
+    # @pytest.mark.parametrize(
+    #     "permissions, expected_status",
+    #     [
+    #         ([Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION], status.HTTP_200_OK),
+    #         ([], status.HTTP_403_FORBIDDEN),
+    #     ],
+    # )
+    # def test_reconciliation_import_xlsx(
+    #         self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    # ) -> None:
+    #     create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+    # self.pp.status = PaymentPlan.Status.ACCEPTED
+    # self.pp.save()
+    # file = BytesIO(Path(f"{settings.TESTS_ROOT}/apps/payment/test_file/import_file_one_record.xlsx").read_bytes())
+    #         file.name = "import_file_one_record.xlsx"
+    #         response = self.client.post(self.url_reconciliation_import_xlsx, {"file": file}, format="multipart")
+    # ToDo: add test for success import xlsx
+    # after upload all Payments info
+    # self.pp.refresh_from_db()
+    # assert self.pp.status == PaymentPlan.Status.FINISHED
+
     @pytest.mark.parametrize(
         "permissions, expected_status",
         [
