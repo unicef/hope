@@ -28,7 +28,12 @@ from hct_mis_api.apps.household.api.serializers.individual import (
     IndividualDetailSerializer,
     IndividualSmallSerializer,
 )
-from hct_mis_api.apps.household.models import Household, Individual
+from hct_mis_api.apps.household.models import (
+    STATUS_ACTIVE,
+    STATUS_INACTIVE,
+    Household,
+    Individual,
+)
 from hct_mis_api.apps.payment.models import (
     Approval,
     ApprovalProcess,
@@ -972,7 +977,10 @@ class PaymentListSerializer(serializers.ModelSerializer):
     status = serializers.CharField(source="get_status_display")
     household_unicef_id = serializers.CharField(source="household.unicef_id")
     household_size = serializers.IntegerField(source="household.size")
+    household_status = serializers.SerializerMethodField()
     hoh_full_name = serializers.CharField(source="head_of_household.full_name")
+    hoh_phone_no = serializers.CharField(source="head_of_household.phone_no")
+    hoh_phone_no_alternative = serializers.CharField(source="head_of_household.phone_no_alternative")
     collector_phone_no = serializers.CharField(source="collector.phone_no")
     collector_phone_no_alt = serializers.CharField(source="collector.phone_no_alternative")
     snapshot_collector_full_name = serializers.SerializerMethodField(help_text="Get from Household Snapshot")
@@ -988,6 +996,9 @@ class PaymentListSerializer(serializers.ModelSerializer):
             "household_unicef_id",
             "household_size",
             "household_admin2",
+            "household_status",
+            "hoh_phone_no",
+            "hoh_phone_no_alternative",
             "snapshot_collector_full_name",
             "fsp_name",
             "entitlement_quantity",
@@ -1036,6 +1047,9 @@ class PaymentListSerializer(serializers.ModelSerializer):
     def get_verification(self, obj: Payment) -> Dict[str, Any]:
         # TODO: only one Verification per Payment?
         return PaymentVerificationDetailsSerializer(obj.payment_verifications.first()).data
+
+    def get_household_status(self, obj: Payment) -> str:
+        return STATUS_ACTIVE if not obj.household.withdrawn else STATUS_INACTIVE
 
 
 class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):

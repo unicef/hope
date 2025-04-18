@@ -8,6 +8,9 @@ export type PaymentList = {
     householdUnicefId: string;
     householdSize: number;
     readonly householdAdmin2: string;
+    readonly householdStatus: string;
+    hohPhoneNo: string;
+    hohPhoneNoAlternative: string;
     /**
      * Get from Household Snapshot
      */
