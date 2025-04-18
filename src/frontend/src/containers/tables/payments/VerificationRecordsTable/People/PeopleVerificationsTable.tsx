@@ -1,14 +1,13 @@
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { PeopleVerificationRecordsTableRow } from '@containers/tables/payments/VerificationRecordsTable/People/PeopleVerificationRecordsTableRow';
-import { AllPaymentVerificationsQueryVariables } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { PaginatedPaymentVerificationPlanListList } from '@restgenerated/models/PaginatedPaymentVerificationPlanListList';
-import { PaymentVerificationPlanList } from '@restgenerated/models/PaymentVerificationPlanList';
+import { PaymentList } from '@restgenerated/models/PaymentList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { headCells } from './PeopleVerificationsHeadCells';
+import { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPaymentListList';
 
 interface PeopleVerificationsTableProps {
   paymentPlanId?: string;
@@ -26,7 +25,7 @@ export function PeopleVerificationsTable({
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
 
-  const initialQueryVariables: AllPaymentVerificationsQueryVariables = {
+  const initialQueryVariables = {
     ...filter,
     businessArea,
     paymentPlanId,
@@ -35,21 +34,25 @@ export function PeopleVerificationsTable({
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
   const {
-    data: paymentVerificationsData,
+    data: paymentsData,
     isLoading,
     error,
-  } = useQuery<PaginatedPaymentVerificationPlanListList>({
+  } = useQuery<PaginatedPaymentListList>({
     queryKey: [
-      'businessAreasProgramsPaymentVerificationsList',
+      'businessAreasProgramsPaymentVerificationsVerificationsList',
       businessArea,
       programId,
       queryVariables,
+      paymentPlanId,
     ],
     queryFn: () => {
-      return RestService.restBusinessAreasProgramsPaymentVerificationsList({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
-      });
+      return RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsList(
+        {
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          id: paymentPlanId,
+        },
+      );
     },
   });
 
@@ -61,11 +64,11 @@ export function PeopleVerificationsTable({
       error={error}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
-      data={paymentVerificationsData}
-      renderRow={(paymentVerification: PaymentVerificationPlanList) => (
+      data={paymentsData}
+      renderRow={(payment: PaymentList) => (
         <PeopleVerificationRecordsTableRow
-          key={paymentVerification.id}
-          paymentVerification={paymentVerification}
+          key={payment.id}
+          payment={payment}
           canViewRecordDetails={canViewRecordDetails}
           showStatusColumn={false}
         />

@@ -1,7 +1,7 @@
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { PaginatedPaymentVerificationPlanListList } from '@restgenerated/models/PaginatedPaymentVerificationPlanListList';
-import { PaymentVerificationPlanList } from '@restgenerated/models/PaymentVerificationPlanList';
+import { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPaymentListList';
+import { PaymentList } from '@restgenerated/models/PaymentList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
@@ -36,21 +36,25 @@ export function VerificationsTable({
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
   const {
-    data: paymentVerificationsData,
+    data: paymentsData,
     isLoading,
     error,
-  } = useQuery<PaginatedPaymentVerificationPlanListList>({
+  } = useQuery<PaginatedPaymentListList>({
     queryKey: [
-      'businessAreasProgramsPaymentVerificationsList',
+      'businessAreasProgramsPaymentVerificationsVerificationsList',
       businessArea,
       programId,
       queryVariables,
+      paymentPlanId,
     ],
     queryFn: () => {
-      return RestService.restBusinessAreasProgramsPaymentVerificationsList({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
-      });
+      return RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsList(
+        {
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          id: paymentPlanId,
+        },
+      );
     },
   });
 
@@ -78,11 +82,11 @@ export function VerificationsTable({
       error={error}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
-      data={paymentVerificationsData}
-      renderRow={(paymentVerification: PaymentVerificationPlanList) => (
+      data={paymentsData}
+      renderRow={(payment: PaymentList) => (
         <VerificationRecordsTableRow
-          key={paymentVerification.id}
-          paymentVerification={paymentVerification}
+          key={payment.id}
+          payment={payment}
           canViewRecordDetails={canViewRecordDetails}
           showStatusColumn={false}
         />

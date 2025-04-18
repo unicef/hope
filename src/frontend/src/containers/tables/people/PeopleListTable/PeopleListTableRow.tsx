@@ -4,7 +4,6 @@ import { AnonTableCell } from '@components/core/Table/AnonTableCell';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import TableCell from '@mui/material/TableCell';
-import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { IndividualList } from '@restgenerated/models/IndividualList';
 import { RelationshipEnum } from '@restgenerated/models/RelationshipEnum';
 import { individualStatusToColor, sexToCapitalize } from '@utils/utils';

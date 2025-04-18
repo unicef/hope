@@ -20,10 +20,7 @@ import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { paymentPlanStatusToColor } from '@utils/utils';
-import {
-  AllPaymentsForTableQuery,
-  PaymentConflictDataNode,
-} from '@generated/graphql';
+import { PaymentConflictDataNode } from '@generated/graphql';
 import { DialogFooter } from '../../../../dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../../dialogs/DialogTitleWrapper';
 import { useProgramContext } from 'src/programContext';
@@ -141,7 +138,7 @@ export function WarningTooltipTable({
         </GreyBox>
         <Box mt={10} mb={10} display="flex">
           {`${beneficiaryGroup?.groupLabel} ID`}{' '}
-          <Bold>{payment.household?.unicefId}</Bold>{' '}
+          <Bold>{payment.householdUnicefId}</Bold>{' '}
           {t('is also included in the following Payment Plans')}:
         </Box>
         <StyledTable>

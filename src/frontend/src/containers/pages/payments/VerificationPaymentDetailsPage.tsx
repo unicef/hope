@@ -33,7 +33,7 @@ function VerificationPaymentDetailsPage(): ReactElement {
   } = useQuery<PaymentDetail>({
     queryKey: ['payment', businessArea, paymentId, programId, paymentPlanId],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsRetrieve2(
+      RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsRetrieve(
         {
           businessAreaSlug: businessArea,
           id: paymentPlanId,

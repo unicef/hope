@@ -20,10 +20,7 @@ import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { paymentPlanStatusToColor } from '@utils/utils';
-import {
-  AllPaymentsForTableQuery,
-  PaymentConflictDataNode,
-} from '@generated/graphql';
+import { PaymentConflictDataNode } from '@generated/graphql';
 import { DialogFooter } from '../../../../dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../../dialogs/DialogTitleWrapper';
 import { useProgramContext } from 'src/programContext';

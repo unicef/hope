@@ -1,8 +1,8 @@
 import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPaymentListList';
-import { PaymentList } from '@restgenerated/models/PaymentList';
+import { PaginatedTPHouseholdListList } from '@restgenerated/models/PaginatedTPHouseholdListList';
+import { TPHouseholdList } from '@restgenerated/models/TPHouseholdList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
@@ -26,30 +26,30 @@ export function TargetPopulationHouseholdTable({
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
   const initialQueryVariables = {
-    ...(id && { paymentPlanId: id }),
     ...variables,
   };
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
-  //TODO: pass household id to payments query
   const {
-    data: paymentsData,
+    data: householdsData,
     isLoading,
     error,
-  } = useQuery<PaginatedPaymentListList>({
+  } = useQuery<PaginatedTPHouseholdListList>({
     queryKey: [
       'businessAreasProgramsPaymentPlansPaymentsList',
       businessArea,
       programId,
       queryVariables,
-      paymentPlan.id,
+      id,
     ],
     queryFn: () => {
-      return RestService.restBusinessAreasProgramsPaymentPlansPaymentsList({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
-        paymentPlanId: paymentPlan.id,
-      });
+      return RestService.restBusinessAreasProgramsTargetPopulationsHouseholdsList(
+        {
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          targetPopulationId: id,
+        },
+      );
     },
   });
 
@@ -76,13 +76,13 @@ export function TargetPopulationHouseholdTable({
         headCells={adjustedHeadCells}
         rowsPerPageOptions={[10, 15, 20]}
         isLoading={isLoading}
-        data={paymentsData}
+        data={householdsData}
         error={error}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
-        renderRow={(row: PaymentList) => (
+        renderRow={(row: TPHouseholdList) => (
           <TargetPopulationHouseholdTableRow
-            key={(row as { id: string }).id}
+            key={row.id}
             payment={row}
             canViewDetails={canViewDetails}
           />

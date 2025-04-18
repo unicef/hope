@@ -1,6 +1,5 @@
 import { BlackLink } from '@core/BlackLink';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
-import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Radio } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
@@ -62,13 +61,13 @@ export function LookUpIndividualTableRow({
       )}
       <TableCell align="right">{individual.age}</TableCell>
       <TableCell align="left">{sexToCapitalize(individual.sex)}</TableCell>
+      <TableCell align="left">{individual.household.admin2 || '-'}</TableCell>
       <TableCell align="left">
-        {individual?.household?.admin2?.name || '-'}
+        {/* //TODO: */}
+        {/* <UniversalMoment>{individual.lastRegistrationDate}</UniversalMoment> */}
       </TableCell>
-      <TableCell align="left">
-        <UniversalMoment>{individual.lastRegistrationDate}</UniversalMoment>
-      </TableCell>
-      {isAllPrograms && (
+      {/* //TODO: */}
+      {/* {isAllPrograms && (
         <TableCell align="left">
           {individual.program ? (
             <BlackLink to={`/${baseUrl}/details/${individual.program.id}`}>
@@ -78,7 +77,7 @@ export function LookUpIndividualTableRow({
             '-'
           )}
         </TableCell>
-      )}
+      )} */}
     </ClickableTableRow>
   );
 }

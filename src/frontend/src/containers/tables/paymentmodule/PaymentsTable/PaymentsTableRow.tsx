@@ -46,8 +46,8 @@ export function PaymentsTableRow({
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const paymentDetailsPath = `/${baseUrl}/payment-module/payments/${payment.id}`;
-  const householdDetailsPath = `/${baseUrl}/population/household/${payment.household.id}`;
-  const collectorDetailsPath = `/${baseUrl}/population/individuals/${payment.collector.id}`;
+  const householdDetailsPath = `/${baseUrl}/population/household/${payment.householdId}`;
+  const collectorDetailsPath = `/${baseUrl}/population/individuals/${payment.collectorId}`;
 
   const handleDialogWarningOpen = (e: SyntheticEvent<HTMLDivElement>): void => {
     e.stopPropagation();

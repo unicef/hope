@@ -1,91 +1,74 @@
-import { TableRow } from '@mui/material';
-import TableCell from '@mui/material/TableCell';
 import { BlackLink } from '@components/core/BlackLink';
 import { StatusBox } from '@components/core/StatusBox';
 import { AnonTableCell } from '@components/core/Table/AnonTableCell';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { TableRow } from '@mui/material';
+import TableCell from '@mui/material/TableCell';
+import { PaymentList } from '@restgenerated/models/PaymentList';
 import {
   formatCurrencyWithSymbol,
   householdStatusToColor,
   verificationRecordsStatusToColor,
 } from '@utils/utils';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
-import { PaymentVerificationPlanList } from '@restgenerated/models/PaymentVerificationPlanList';
 
 interface VerificationRecordsTableRowProps {
-  paymentVerification: PaymentVerificationPlanList;
+  payment: PaymentList;
   canViewRecordDetails: boolean;
   showStatusColumn?: boolean;
 }
 
 export function VerificationRecordsTableRow({
-  paymentVerification,
+  payment,
   canViewRecordDetails,
   showStatusColumn = true,
 }: VerificationRecordsTableRowProps): ReactElement {
   const { baseUrl } = useBaseUrl();
 
-  const nodeType = atob(paymentVerification.payment.id).split(':')[0];
-  const linkPath = `/${baseUrl}/verification/payment${
-    nodeType === 'PaymentRecordAndPaymentNode' ? '-record' : ''
-  }/${paymentVerification.payment.id}`;
+  const linkPath = `/${baseUrl}/verification/payment/${payment.id}`;
 
   return (
-    <TableRow hover role="checkbox" key={paymentVerification.id}>
+    <TableRow hover role="checkbox" key={payment.id}>
       <TableCell align="left">
         {canViewRecordDetails ? (
-          <BlackLink to={linkPath}>
-            {paymentVerification.payment?.unicefId}
-          </BlackLink>
+          <BlackLink to={linkPath}>{payment?.unicefId}</BlackLink>
         ) : (
-          <span>{paymentVerification.payment?.unicefId}</span>
+          <span>{payment?.unicefId}</span>
         )}
       </TableCell>
       <TableCell align="left">
-        {paymentVerification.paymentVerificationPlan.verificationChannel}
+        {payment.verification.verificationChannel}
       </TableCell>
       <TableCell align="left">
-        {paymentVerification.paymentVerificationPlan.unicefId}
+        {payment.verification.paymentVerificationPlanUnicefId}
       </TableCell>
       <TableCell align="left">
         <StatusBox
-          status={paymentVerification.status}
+          status={payment.status}
           statusToColor={verificationRecordsStatusToColor}
         />
       </TableCell>
-      <AnonTableCell>
-        {paymentVerification.payment.household.headOfHousehold.fullName}
-      </AnonTableCell>
-      <TableCell align="left">
-        {paymentVerification.payment.household.unicefId}
-      </TableCell>
+      <AnonTableCell>{payment.hohFullName}</AnonTableCell>
+      <TableCell align="left">{payment.householdUnicefId}</TableCell>
       {showStatusColumn && (
         <TableCell align="left">
           <StatusBox
-            status={paymentVerification.payment.household.status}
+            status={payment.householdStatus}
             statusToColor={householdStatusToColor}
           />
         </TableCell>
       )}
       <TableCell align="right">
-        {formatCurrencyWithSymbol(
-          paymentVerification.payment.deliveredQuantity,
-          paymentVerification.payment.currency,
-        )}
+        {formatCurrencyWithSymbol(payment.deliveredQuantity, payment.currency)}
       </TableCell>
       <TableCell align="right">
         {formatCurrencyWithSymbol(
-          paymentVerification.receivedAmount,
-          paymentVerification.payment.currency,
+          payment.verification.receivedAmount,
+          payment.currency,
         )}
       </TableCell>
-      <TableCell align="left">
-        {paymentVerification.payment.household.headOfHousehold.phoneNo}
-      </TableCell>
-      <TableCell align="left">
-        {paymentVerification.payment.household.headOfHousehold
-          .phoneNoAlternative || '-'}
-      </TableCell>
+      <TableCell align="left">{payment.hohPhoneNo}</TableCell>
+      <TableCell align="left">{payment.hohPhoneNoAlternative || '-'}</TableCell>
     </TableRow>
   );
 }

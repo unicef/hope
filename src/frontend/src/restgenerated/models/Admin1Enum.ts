@@ -3,24 +3,24 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * * `HR39` - East Tracyburgh
- * * `AF83` - Estradastad
- * * `AF61` - Laurenburgh
- * * `HR42` - Laurenstad
- * * `AF67` - Mataland
- * * `UA79` - Mooreton
- * * `HR97` - North Melissashire
- * * `UA43` - Port Craig
- * * `UA85` - South Kimberly
+ * * `AF48` - Conleyfurt
+ * * `HR86` - Dannymouth
+ * * `UA66` - East Sarah
+ * * `AF82` - Lake Jennyburgh
+ * * `HR24` - New Andrew
+ * * `HR52` - New Emilyport
+ * * `UA18` - New Richard
+ * * `UA36` - North Jennifershire
+ * * `AF37` - Pruittview
  */
 export enum Admin1Enum {
-    HR39 = 'HR39',
-    AF83 = 'AF83',
-    AF61 = 'AF61',
-    HR42 = 'HR42',
-    AF67 = 'AF67',
-    UA79 = 'UA79',
-    HR97 = 'HR97',
-    UA43 = 'UA43',
-    UA85 = 'UA85',
+    AF48 = 'AF48',
+    HR86 = 'HR86',
+    UA66 = 'UA66',
+    AF82 = 'AF82',
+    HR24 = 'HR24',
+    HR52 = 'HR52',
+    UA18 = 'UA18',
+    UA36 = 'UA36',
+    AF37 = 'AF37',
 }

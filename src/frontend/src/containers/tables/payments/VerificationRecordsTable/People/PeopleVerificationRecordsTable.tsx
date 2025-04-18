@@ -2,12 +2,12 @@ import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PeopleVerificationRecordsTableRow } from '@containers/tables/payments/VerificationRecordsTable/People/PeopleVerificationRecordsTableRow';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import { PaymentVerificationPlanList } from '@restgenerated/models/PaymentVerificationPlanList';
 import { PaginatedPaymentVerificationPlanListList } from '@restgenerated/models/PaginatedPaymentVerificationPlanListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { headCells } from './PeopleVerificationRecordsHeadCells';
+import { PaymentList } from '@restgenerated/models/PaymentList';
 
 interface PeopleVerificationRecordsTableProps {
   paymentPlanId?: string;
@@ -34,7 +34,7 @@ export function PeopleVerificationRecordsTable({
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
   const {
-    data: paymentVerificationsData,
+    data: paymentsData,
     isLoading,
     error,
   } = useQuery<PaginatedPaymentVerificationPlanListList>({
@@ -60,11 +60,11 @@ export function PeopleVerificationRecordsTable({
       error={error}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
-      data={paymentVerificationsData}
-      renderRow={(paymentVerification: PaymentVerificationPlanList) => (
+      data={paymentsData}
+      renderRow={(payment: PaymentList) => (
         <PeopleVerificationRecordsTableRow
-          key={paymentVerification.id}
-          paymentVerification={paymentVerification}
+          key={payment.id}
+          payment={payment}
           canViewRecordDetails={canViewRecordDetails}
         />
       )}

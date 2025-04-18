@@ -1,16 +1,14 @@
-import { ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { TableWrapper } from '@components/core/TableWrapper';
-import { UniversalTable } from '../../UniversalTable';
-import { headCells } from './TargetPopulationPeopleHeadCells';
-import { TargetPopulationPeopleTableRow } from './TargetPopulationPeopleRow';
-import { useAllPaymentsForTableQuery } from '@generated/graphql';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPaymentListList';
+import { PaginatedTPHouseholdListList } from '@restgenerated/models/PaginatedTPHouseholdListList';
+import { TPHouseholdList } from '@restgenerated/models/TPHouseholdList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
-import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import { PaymentList } from '@restgenerated/models/PaymentList';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { headCells } from './TargetPopulationPeopleHeadCells';
+import { TargetPopulationPeopleTableRow } from './TargetPopulationPeopleRow';
 
 interface TargetPopulationPeopleTableProps {
   id?: string;
@@ -24,33 +22,33 @@ export function TargetPopulationPeopleTable({
   canViewDetails,
 }: TargetPopulationPeopleTableProps): ReactElement {
   const { t } = useTranslation();
-  const { businessArea } = useBaseUrl();
+  const { businessArea, programId } = useBaseUrl();
   const initialQueryVariables = {
     businessArea,
-    ...(id && { paymentPlanId: id }),
     ...variables,
   };
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
-  //TODO: add hh (people id)
   const {
-    data: paymentsData,
+    data: householdsData,
     isLoading,
     error,
-  } = useQuery<PaginatedPaymentListList>({
+  } = useQuery<PaginatedTPHouseholdListList>({
     queryKey: [
       'businessAreasProgramsPaymentPlansPaymentsList',
       businessArea,
       programId,
       queryVariables,
-      paymentPlan.id,
+      id,
     ],
     queryFn: () => {
-      return RestService.restBusinessAreasProgramsPaymentPlansPaymentsList({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
-        paymentPlanId: paymentPlan.id,
-      });
+      return RestService.restBusinessAreasProgramsTargetPopulationsHouseholdsList(
+        {
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          targetPopulationId: id,
+        },
+      );
     },
   });
 
@@ -64,8 +62,8 @@ export function TargetPopulationPeopleTable({
         error={error}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
-        data={paymentsData}
-        renderRow={(row: PaymentList) => (
+        data={householdsData}
+        renderRow={(row: TPHouseholdList) => (
           <TargetPopulationPeopleTableRow
             key={row.id}
             payment={row}

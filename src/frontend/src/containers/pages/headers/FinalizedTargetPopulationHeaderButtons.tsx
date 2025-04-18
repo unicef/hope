@@ -5,7 +5,6 @@ import styled from 'styled-components';
 import { useCashAssistUrlPrefixQuery } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 
 const IconContainer = styled.span`

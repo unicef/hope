@@ -1,7 +1,7 @@
 import { HeadCell } from '@core/Table/EnhancedTableHead';
-import { PaymentVerificationPlanList } from '@restgenerated/models/PaymentVerificationPlanList';
+import { PaymentList } from '@restgenerated/models/PaymentList';
 
-export const headCells: HeadCell<PaymentVerificationPlanList>[] = [
+export const headCells: HeadCell<PaymentList>[] = [
   {
     disablePadding: false,
     label: 'Payment ID',
