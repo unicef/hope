@@ -5,6 +5,7 @@ from django.db.models import Case, IntegerField, Prefetch, QuerySet, Value, When
 
 from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -30,7 +31,8 @@ from hct_mis_api.apps.core.api.mixins import (
     SerializerActionMixin,
 )
 from hct_mis_api.apps.core.models import FlexibleAttribute
-from hct_mis_api.apps.payment.models import PaymentPlan
+from hct_mis_api.apps.payment.api.serializers import PaymentListSerializer
+from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 from hct_mis_api.apps.program.api.caches import (
     BeneficiaryGroupKeyConstructor,
     ProgramCycleKeyConstructor,
@@ -66,11 +68,13 @@ class ProgramViewSet(
         "retrieve": [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
         "list": [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS, *ALL_GRIEVANCES_CREATE_MODIFY],
         "destroy": [Permissions.PROGRAMME_REMOVE],
+        "payments": [Permissions.PM_VIEW_PAYMENT_LIST],
     }
     queryset = Program.objects.all()
     serializer_classes_by_action = {
         "list": ProgramListSerializer,
         "retrieve": ProgramDetailSerializer,
+        "payments": PaymentListSerializer,
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = ProgramFilter
@@ -107,6 +111,23 @@ class ProgramViewSet(
     def perform_destroy(self, instance: Program) -> None:
         self.validate(program=instance)
         super().perform_destroy(instance)
+
+    @extend_schema(
+        responses={
+            200: PaymentListSerializer(many=True),
+        },
+    )
+    @action(detail=True, methods=["get"])
+    def payments(self) -> Response:
+        program = self.get_object()
+        payments = Payment.objects.filter(parent__program_cycle__program=program)
+        page = self.paginate_queryset(payments)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(payments, many=True)
+        return Response(serializer.data)
 
 
 class ProgramCycleViewSet(

@@ -27,7 +27,8 @@ from hct_mis_api.apps.household.api.serializers.household import (
 )
 from hct_mis_api.apps.household.api.serializers.individual import (
     IndividualDetailSerializer,
-    IndividualSmallSerializer, IndividualListSerializer,
+    IndividualListSerializer,
+    IndividualSmallSerializer,
 )
 from hct_mis_api.apps.household.models import (
     STATUS_ACTIVE,

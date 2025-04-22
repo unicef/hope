@@ -1868,8 +1868,8 @@ class Payment(
 
     @property
     def people_individual(self) -> Optional[Individual]:
-        """ for DCT social worker return first Individual from Household"""
-        return self.household.individuals.first()
+        """for DCT social worker return first Individual from Household"""
+        return self.household.individuals.first() if self.parent.is_social_worker_program else None
 
     def get_revert_mark_as_failed_status(self, delivered_quantity: Decimal) -> str:  # pragma: no cover
         if delivered_quantity == 0:
