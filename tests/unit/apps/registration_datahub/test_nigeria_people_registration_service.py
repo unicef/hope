@@ -76,7 +76,7 @@ class TestNigeriaPeopleRegistrationService(TestCase):
                             "given_name_i_c": "Giulio",
                             "national_id_no": "01234567891",
                             "account_details": {
-                                "code": "000004",
+                                "uba_code": "000004",
                                 "name": "United Bank for Africa",
                                 "number": "2087008012",
                                 "holder_name": "xxxx",
