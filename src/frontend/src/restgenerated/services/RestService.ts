@@ -3392,20 +3392,88 @@ export class RestService {
         businessAreaSlug,
         paymentVerificationPk,
         programSlug,
+        deliveryMechanism,
+        dispersionEndDateLte,
+        dispersionStartDateGte,
+        fsp,
+        isFollowUp,
         limit,
+        name,
         offset,
+        ordering,
+        paymentVerificationSummaryStatus,
+        program,
+        programCycle,
+        programCycleEndDate,
+        programCycleStartDate,
+        search,
+        status,
+        totalEntitledQuantityGte,
+        totalEntitledQuantityLte,
+        updatedAtGte,
+        updatedAtLte,
     }: {
         businessAreaSlug: string,
         paymentVerificationPk: string,
         programSlug: string,
+        deliveryMechanism?: Array<string>,
+        dispersionEndDateLte?: string,
+        dispersionStartDateGte?: string,
+        fsp?: string,
+        isFollowUp?: boolean,
         /**
          * Number of results to return per page.
          */
         limit?: number,
+        name?: string,
         /**
          * The initial index from which to return the results.
          */
         offset?: number,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        /**
+         * * `ACTIVE` - Active
+         * * `FINISHED` - Finished
+         * * `PENDING` - Pending
+         */
+        paymentVerificationSummaryStatus?: 'ACTIVE' | 'FINISHED' | 'PENDING',
+        program?: string,
+        programCycle?: string,
+        programCycleEndDate?: string,
+        programCycleStartDate?: string,
+        /**
+         * A search term.
+         */
+        search?: string,
+        /**
+         * Status [sys]
+         *
+         * * `TP_OPEN` - Open
+         * * `TP_LOCKED` - Locked
+         * * `PROCESSING` - Processing
+         * * `STEFICON_WAIT` - Steficon Wait
+         * * `STEFICON_RUN` - Steficon Run
+         * * `STEFICON_COMPLETED` - Steficon Completed
+         * * `STEFICON_ERROR` - Steficon Error
+         * * `DRAFT` - Draft
+         * * `PREPARING` - Preparing
+         * * `OPEN` - Open
+         * * `LOCKED` - Locked
+         * * `LOCKED_FSP` - Locked FSP
+         * * `IN_APPROVAL` - In Approval
+         * * `IN_AUTHORIZATION` - In Authorization
+         * * `IN_REVIEW` - In Review
+         * * `ACCEPTED` - Accepted
+         * * `FINISHED` - Finished
+         */
+        status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        totalEntitledQuantityGte?: number,
+        totalEntitledQuantityLte?: number,
+        updatedAtGte?: string,
+        updatedAtLte?: string,
     }): CancelablePromise<PaginatedPaymentListList> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -3416,13 +3484,32 @@ export class RestService {
                 'program_slug': programSlug,
             },
             query: {
+                'delivery_mechanism': deliveryMechanism,
+                'dispersion_end_date__lte': dispersionEndDateLte,
+                'dispersion_start_date__gte': dispersionStartDateGte,
+                'fsp': fsp,
+                'is_follow_up': isFollowUp,
                 'limit': limit,
+                'name': name,
                 'offset': offset,
+                'ordering': ordering,
+                'payment_verification_summary_status': paymentVerificationSummaryStatus,
+                'program': program,
+                'program_cycle': programCycle,
+                'program_cycle_end_date': programCycleEndDate,
+                'program_cycle_start_date': programCycleStartDate,
+                'search': search,
+                'status': status,
+                'total_entitled_quantity__gte': totalEntitledQuantityGte,
+                'total_entitled_quantity__lte': totalEntitledQuantityLte,
+                'updated_at__gte': updatedAtGte,
+                'updated_at__lte': updatedAtLte,
             },
         });
     }
     /**
-     * @returns any No response body
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaymentDetail
      * @throws ApiError
      */
     public static restBusinessAreasProgramsPaymentVerificationsVerificationsRetrieve({
@@ -3438,7 +3525,7 @@ export class RestService {
         id: string,
         paymentVerificationPk: string,
         programSlug: string,
-    }): CancelablePromise<any> {
+    }): CancelablePromise<PaymentDetail> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{payment_verification_pk}/verifications/{id}/',
@@ -3482,6 +3569,30 @@ export class RestService {
             },
             body: requestBody,
             mediaType: 'application/json',
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentVerificationsVerificationsCountRetrieve({
+        businessAreaSlug,
+        paymentVerificationPk,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        paymentVerificationPk: string,
+        programSlug: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{payment_verification_pk}/verifications/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'payment_verification_pk': paymentVerificationPk,
+                'program_slug': programSlug,
+            },
         });
     }
     /**

@@ -132,8 +132,9 @@ class PaymentListSerializerTest(TestCase):
         PaymentHouseholdSnapshot.objects.create(
             payment=self.payment, snapshot_data=household_data, household_id=self.payment.household.id
         )
-        serializer = PaymentListSerializer(instance=self.payment, context={"request": Mock(user=self.user)})
-        data = serializer.data
+        payment_qs = Payment.objects.filter(id=self.payment.id)
+        serializer = PaymentListSerializer(payment_qs, many=True, context={"request": Mock(user=self.user)})
+        data = serializer.data[0]
 
         self.assertEqual(data["snapshot_collector_full_name"], "Name_from_Snapshot")
 

@@ -318,7 +318,6 @@ class PaymentVerificationPlanListSerializer(serializers.ModelSerializer):
 
 class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
     status = serializers.CharField(source="get_status_display")
-    currency = serializers.CharField(source="get_currency_display")
     follow_ups = FollowUpPaymentPlanSerializer(many=True, read_only=True)
     program = serializers.CharField(source="program_cycle.program.name")
     program_id = serializers.UUIDField(source="program_cycle.program.id", read_only=True)
@@ -356,7 +355,7 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
 
 class PaymentPlanListSerializer(serializers.ModelSerializer):
     status = serializers.CharField(source="get_status_display")
-    currency = serializers.CharField(source="get_currency_display")
+    # currency = serializers.CharField(source="get_currency_display")
     follow_ups = FollowUpPaymentPlanSerializer(many=True, read_only=True)
     created_by = serializers.SerializerMethodField()
 
@@ -996,7 +995,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
     payment_plan_soft_conflicted = serializers.SerializerMethodField()
     payment_plan_soft_conflicted_data = serializers.SerializerMethodField()
     people_individual = IndividualListSerializer(read_only=True)
-    program_name = serializers.CharField(source="program.name")
+    program_name = serializers.CharField(source="parent.program.name")
 
     class Meta:
         model = Payment
@@ -1072,10 +1071,10 @@ class PaymentListSerializer(serializers.ModelSerializer):
         return STATUS_ACTIVE if not obj.household.withdrawn else STATUS_INACTIVE
 
     def get_payment_plan_hard_conflicted(self, obj: Payment) -> bool:
-        return obj.parent.status == PaymentPlan.Status.OPEN and obj.payment_plan_hard_conflicted
+        return obj.parent.status == PaymentPlan.Status.OPEN and getattr(obj, "payment_plan_hard_conflicted", False)
 
     def get_payment_plan_soft_conflicted(self, obj: Payment) -> bool:
-        return obj.parent.status == PaymentPlan.Status.OPEN and obj.payment_plan_soft_conflicted
+        return obj.parent.status == PaymentPlan.Status.OPEN and getattr(obj, "payment_plan_soft_conflicted", False)
 
     def get_payment_plan_hard_conflicted_data(self, obj: Payment) -> List[Any]:
         if obj.parent.status != PaymentPlan.Status.OPEN:

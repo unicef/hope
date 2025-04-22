@@ -5,6 +5,7 @@ from typing import Any, List, Optional
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
+from django.utils import timezone
 
 import pytest
 from openpyxl import Workbook
@@ -93,6 +94,7 @@ class TestPaymentVerificationViewSet:
             payment_verification_plan=self.pvp,
             payment=self.payment_1,
             status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
+            status_date=timezone.now(),
         )
         self.verification_2 = PaymentVerificationFactory(
             payment_verification_plan=self.pvp,
@@ -431,11 +433,11 @@ class TestPaymentVerificationViewSet:
         self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
     ) -> None:
         url = reverse(
-            "api:payments:payment-verifications-verifications",
+            "api:payments:verification-records-list",
             kwargs={
                 "business_area_slug": self.afghanistan.slug,
                 "program_slug": self.program_active.slug,
-                "pk": str(self.pp.pk),
+                "payment_verification_pk": str(self.pp.pk),
             },
         )
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
@@ -465,12 +467,12 @@ class TestPaymentVerificationViewSet:
         self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
     ) -> None:
         url = reverse(
-            "api:payments:payment-verifications-verification-details",
+            "api:payments:verification-records-detail",
             kwargs={
                 "business_area_slug": self.afghanistan.slug,
                 "program_slug": self.program_active.slug,
-                "pk": str(self.pp.pk),
-                "payment_id": str(self.payment_1.pk),
+                "payment_verification_pk": str(self.pp.pk),
+                "pk": str(self.payment_1.pk),
             },
         )
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
@@ -487,40 +489,39 @@ class TestPaymentVerificationViewSet:
             assert "verification_channel" in resp_data["verification"]
             assert "received_amount" in resp_data["verification"]
 
-    # FIXME
-    # @pytest.mark.parametrize(
-    #     "permissions, expected_status",
-    #     [
-    #         ([Permissions.PAYMENT_VERIFICATION_VERIFY, Permissions.PAYMENT_VERIFICATION_VIEW_LIST], status.HTTP_200_OK),
-    #         ([], status.HTTP_403_FORBIDDEN),
-    #     ],
-    # )
-    # def test_update_verification(
-    #     self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
-    # ) -> None:
-    #     url = reverse(
-    #         "api:payments:payment-verifications-verifications-update",
-    #         kwargs={
-    #             "business_area_slug": self.afghanistan.slug,
-    #             "program_slug": self.program_active.slug,
-    #             "pk": str(self.pp.id),
-    #             "payment_id": str(self.payment_1.id),
-    #         },
-    #     )
-    #     create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
-    #     # self.pvp.status = PaymentVerificationPlan.STATUS_ACTIVE
-    #     # self.pvp.verification_channel = PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
-    #     # self.pvp.save()
-    #
-    #     response = self.client.post(
-    #         url, {"version": self.verification_1.version, "received_amount": 123.22, "received": True}
-    #     )
-    #     print("resp_data = = = = ", response.json())
-    #     assert response.status_code == expected_status
-    #     if expected_status == status.HTTP_200_OK:
-    #         assert response.status_code == status.HTTP_200_OK
-    #         resp_data = response.json()
-    #
-    #         assert "id" in resp_data
-    #         assert 1 == len(resp_data["payment_verification_plans"])
-    #         assert resp_data["payment_verification_plans"][0]["xlsx_file_imported"] is True
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.PAYMENT_VERIFICATION_VERIFY, Permissions.PAYMENT_VERIFICATION_VIEW_LIST], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_update_verification(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        url = reverse(
+            "api:payments:verification-records-detail",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+                "payment_verification_pk": str(self.pp.id),
+                "pk": str(self.payment_1.pk),
+            },
+        )
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        self.pvp.status = PaymentVerificationPlan.STATUS_ACTIVE
+        self.pvp.verification_channel = PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
+        self.pvp.save()
+
+        response = self.client.patch(
+            url,
+            {"version": self.verification_1.version, "received_amount": 123.22, "received": True},
+            format="multipart",
+        )
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.status_code == status.HTTP_200_OK
+            resp_data = response.json()
+
+            assert "id" in resp_data
+            assert resp_data["verification"]["received_amount"] == "123.22"

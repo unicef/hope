@@ -447,7 +447,9 @@ class PaymentVerificationViewSet(
         )
 
 
-class PaymentVerificationRecordViewSet(BaseViewSet):
+class PaymentVerificationRecordViewSet(
+    CountActionMixin, ProgramMixin, SerializerActionMixin, PaymentPlanMixin, BaseViewSet
+):
     program_model_field = "program_cycle__program"
     queryset = PaymentPlan.objects.filter(
         status__in=(PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED)
@@ -456,19 +458,19 @@ class PaymentVerificationRecordViewSet(BaseViewSet):
     serializer_classes_by_action = {
         "list": PaymentListSerializer,
         "retrieve": PaymentDetailSerializer,
-        "update": PaymentVerificationUpdateSerializer,
+        "partial_update": PaymentVerificationUpdateSerializer,
     }
     permissions_by_action = {
         "list": [Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS],
         "retrieve": [Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS],
-        "update": [Permissions.PAYMENT_VERIFICATION_VERIFY],
+        "partial_update": [Permissions.PAYMENT_VERIFICATION_VERIFY],
     }
 
     def get_object(self) -> PaymentPlan:
-        return get_object_or_404(PaymentPlan, id=self.kwargs.get("pk"))
+        return get_object_or_404(PaymentPlan, id=self.kwargs.get("payment_verification_pk"))
 
-    def get_verification_plan_object(self) -> PaymentVerificationPlan:
-        return get_object_or_404(PaymentVerificationPlan, id=self.kwargs.get("verification_plan_id"))
+    def get_verification_record(self) -> PaymentVerificationPlan:
+        return get_object_or_404(Payment, id=self.kwargs.get("pk"))
 
     @extend_schema(
         responses={
@@ -488,7 +490,7 @@ class PaymentVerificationRecordViewSet(BaseViewSet):
         return Response(serializer.data)
 
     def retrieve(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment = get_object_or_404(Payment, id=self.kwargs.get("payment_id"))
+        payment = self.get_verification_record()
         serializer = self.get_serializer(payment)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -496,7 +498,7 @@ class PaymentVerificationRecordViewSet(BaseViewSet):
     def partial_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """update verification amount"""
 
-        payment = get_object_or_404(Payment, id=self.kwargs.get("payment_id"))
+        payment = self.get_verification_record()
         payment_verification = payment.payment_verifications.first()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -542,7 +544,8 @@ class PaymentVerificationRecordViewSet(BaseViewSet):
             payment_verification,
         )
         payment.refresh_from_db()
-        return Response(PaymentDetailSerializer(payment).data, status=status.HTTP_200_OK)
+
+        return Response(PaymentDetailSerializer(payment, context={"request": request}).data, status=status.HTTP_200_OK)
 
 
 class PaymentPlanViewSet(
