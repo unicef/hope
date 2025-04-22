@@ -422,7 +422,7 @@ class TestPaymentPlanList:
         assert payment_plan["name"] == self.pp.name
         assert payment_plan["status"] == self.pp.get_status_display()
         assert payment_plan["total_households_count"] == self.pp.total_households_count
-        assert payment_plan["currency"] == self.pp.get_currency_display()
+        assert payment_plan["currency"] == self.pp.currency
         assert payment_plan["excluded_ids"] == self.pp.excluded_ids
         assert payment_plan["total_entitled_quantity"] == str(self.pp.total_entitled_quantity)
         assert payment_plan["total_delivered_quantity"] == str(self.pp.total_delivered_quantity)
@@ -582,7 +582,7 @@ class TestPaymentPlanDetail:
         assert payment_plan["name"] == self.pp.name
         assert payment_plan["status"] == self.pp.get_status_display()
         assert payment_plan["total_households_count"] == self.pp.total_households_count
-        assert payment_plan["currency"] == self.pp.get_currency_display()
+        assert payment_plan["currency"] == self.pp.currency
         assert payment_plan["excluded_ids"] == self.pp.excluded_ids
         assert payment_plan["total_entitled_quantity"] == str(self.pp.total_entitled_quantity)
         assert payment_plan["total_delivered_quantity"] == str(self.pp.total_delivered_quantity)
@@ -1649,7 +1649,7 @@ class TestPaymentPlanActions:
             assert response.status_code == status.HTTP_201_CREATED
             resp_data = response.json()
             assert "id" in resp_data
-            assert "United States dollar" == resp_data["currency"]
+            assert "USD" == resp_data["currency"]
             assert "Open" == resp_data["status"]
 
     def test_create_pp_validation_errors(self, create_user_role_with_permissions: Any) -> None:
@@ -2362,4 +2362,4 @@ class TestPaymentPlanActions:
             assert response.json()["name"] == "DRAFT PP Follow Up"
             assert response.json()["dispersion_start_date"] == "2024-01-01"
             assert response.json()["dispersion_end_date"] == "2026-01-01"
-            assert response.json()["currency"] == self.pp.get_currency_display()
+            assert response.json()["currency"] == self.pp.currency
