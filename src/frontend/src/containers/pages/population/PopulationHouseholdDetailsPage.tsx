@@ -64,8 +64,6 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
   const { id } = useParams();
   const { baseUrl, businessArea } = useBaseUrl();
 
-  //TODO: replace with REST queries
-
   const location = useLocation();
   const permissions = usePermissions();
   const { programId } = useBaseUrl();

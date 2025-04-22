@@ -3,24 +3,24 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * * `AF16` - Grantbury
- * * `HR32` - Jeffbury
- * * `HR73` - Kimview
- * * `AF22` - Lake Karenfort
- * * `AF20` - Michelleberg
- * * `UA71` - Port Annafort
- * * `HR36` - Port Kennethfort
- * * `UA84` - West Bradley
- * * `UA78` - West Courtneychester
+ * * `AF48` - Conleyfurt
+ * * `HR86` - Dannymouth
+ * * `UA66` - East Sarah
+ * * `AF82` - Lake Jennyburgh
+ * * `HR24` - New Andrew
+ * * `HR52` - New Emilyport
+ * * `UA18` - New Richard
+ * * `UA36` - North Jennifershire
+ * * `AF37` - Pruittview
  */
 export enum Admin1Enum {
-    AF16 = 'AF16',
-    HR32 = 'HR32',
-    HR73 = 'HR73',
-    AF22 = 'AF22',
-    AF20 = 'AF20',
-    UA71 = 'UA71',
-    HR36 = 'HR36',
-    UA84 = 'UA84',
-    UA78 = 'UA78',
+    AF48 = 'AF48',
+    HR86 = 'HR86',
+    UA66 = 'UA66',
+    AF82 = 'AF82',
+    HR24 = 'HR24',
+    HR52 = 'HR52',
+    UA18 = 'UA18',
+    UA36 = 'UA36',
+    AF37 = 'AF37',
 }

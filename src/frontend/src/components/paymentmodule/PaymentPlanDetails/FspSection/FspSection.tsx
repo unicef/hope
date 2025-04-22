@@ -30,12 +30,12 @@ export const FspSection = ({ paymentPlan }: FspSectionProps): ReactElement => {
         <Grid container spacing={3}>
           <>
             <Grid
-              key={`${deliveryMechanismPerPaymentPlan.name}-${deliveryMechanismPerPaymentPlan.fsp.name}`}
+              key={`${deliveryMechanismPerPaymentPlan?.name}-${deliveryMechanismPerPaymentPlan?.fsp?.name}`}
               size={{ xs: 3 }}
             >
               <LabelizedField
-                label={deliveryMechanismPerPaymentPlan.name || '-'}
-                value={deliveryMechanismPerPaymentPlan.fsp.name || '-'}
+                label={deliveryMechanismPerPaymentPlan?.name || '-'}
+                value={deliveryMechanismPerPaymentPlan?.fsp?.name || '-'}
               />
             </Grid>
           </>

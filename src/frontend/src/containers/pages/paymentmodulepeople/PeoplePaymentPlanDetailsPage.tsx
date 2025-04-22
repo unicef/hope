@@ -44,12 +44,12 @@ export const PeoplePaymentPlanDetailsPage = (): ReactElement => {
         id: paymentPlanId,
         programSlug: programId,
       }),
-    refetchInterval: () => {
-      const { status, backgroundActionStatus } = paymentPlan;
+    refetchInterval: (query) => {
+      const data = query.state.data;
       if (
-        status === PaymentPlanStatus.Preparing ||
-        (backgroundActionStatus !== null &&
-          backgroundActionStatus !==
+        data?.status === PaymentPlanStatus.Preparing ||
+        (data?.backgroundActionStatus !== null &&
+          data?.backgroundActionStatus !==
             PaymentPlanBackgroundActionStatus.ExcludeBeneficiariesError)
       ) {
         return 3000;
