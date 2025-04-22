@@ -1,3 +1,4 @@
+import json
 from decimal import Decimal
 from typing import Any, Dict, List, Optional, Union
 
@@ -987,12 +988,17 @@ class PaymentListSerializer(serializers.ModelSerializer):
     fsp_name = serializers.SerializerMethodField()
     fsp_auth_code = serializers.SerializerMethodField()
     verification = serializers.SerializerMethodField()
+    payment_plan_hard_conflicted = serializers.SerializerMethodField()
+    payment_plan_hard_conflicted_data = serializers.SerializerMethodField()
+    payment_plan_soft_conflicted = serializers.SerializerMethodField()
+    payment_plan_soft_conflicted_data = serializers.SerializerMethodField()
 
     class Meta:
         model = Payment
         fields = (
             "id",
             "unicef_id",
+            "household_id",
             "household_unicef_id",
             "household_size",
             "household_admin2",
@@ -1002,16 +1008,23 @@ class PaymentListSerializer(serializers.ModelSerializer):
             "snapshot_collector_full_name",
             "fsp_name",
             "entitlement_quantity",
+            "entitlement_quantity_usd",
             "delivered_quantity",
+            "delivered_quantity_usd",
             "delivery_date",
             "delivery_type",
             "status",
             "currency",
             "fsp_auth_code",
             "hoh_full_name",
+            "collector_id",
             "collector_phone_no",
             "collector_phone_no_alt",
             "verification",
+            "payment_plan_hard_conflicted",
+            "payment_plan_hard_conflicted_data",
+            "payment_plan_soft_conflicted",
+            "payment_plan_soft_conflicted_data",
         )
 
     @classmethod
@@ -1050,6 +1063,24 @@ class PaymentListSerializer(serializers.ModelSerializer):
 
     def get_household_status(self, obj: Payment) -> str:
         return STATUS_ACTIVE if not obj.household.withdrawn else STATUS_INACTIVE
+
+    def get_payment_plan_hard_conflicted(self, obj: Payment) -> bool:
+        return obj.parent.status == PaymentPlan.Status.OPEN and obj.payment_plan_hard_conflicted
+
+    def get_payment_plan_soft_conflicted(self, obj: Payment) -> bool:
+        return obj.parent.status == PaymentPlan.Status.OPEN and obj.payment_plan_soft_conflicted
+
+    def get_payment_plan_hard_conflicted_data(self, obj: Payment) -> List[Any]:
+        if obj.parent.status != PaymentPlan.Status.OPEN:
+            return list()
+        conflicts_data = getattr(obj, "payment_plan_hard_conflicted_data", [])
+        return [json.loads(conflict) for conflict in conflicts_data]
+
+    def get_payment_plan_soft_conflicted_data(self, obj: Payment) -> List[Any]:
+        if obj.parent.status != PaymentPlan.Status.OPEN:
+            return list()
+        conflicts_data = getattr(obj, "payment_plan_soft_conflicted_data", [])
+        return [json.loads(conflict) for conflict in conflicts_data]
 
 
 class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):

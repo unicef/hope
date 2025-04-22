@@ -107,28 +107,28 @@ export function PaymentsTableRow({
       <TableCell align="left">
         {canViewDetails ? (
           <BlackLink to={householdDetailsPath}>
-            {payment.household.unicefId}
+            {payment.householdUnicefId}
           </BlackLink>
         ) : (
-          payment.household.unicefId
+          payment.householdUnicefId
         )}
       </TableCell>
-      <TableCell align="left">{payment.household.size}</TableCell>
+      <TableCell align="left">{payment.householdSize}</TableCell>
       <TableCell align="left">
-        {renderSomethingOrDash(payment.household.admin2?.name)}
+        {renderSomethingOrDash(payment.householdAdmin2)}
       </TableCell>
       <TableCell align="left">
         {canViewDetails ? (
           <BlackLink to={collectorDetailsPath}>
-            {payment.collector.fullName}
+            {payment.snapshotCollectorFullName}
           </BlackLink>
         ) : (
-          payment.collector.fullName
+          payment.snapshotCollectorFullName
         )}
       </TableCell>
       <TableCell align="left">
         {payment.financialServiceProvider
-          ? payment.financialServiceProvider.name
+          ? payment.fspName
           : '-'}
       </TableCell>
       <TableCell align="left">
