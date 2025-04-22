@@ -996,6 +996,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
     payment_plan_soft_conflicted = serializers.SerializerMethodField()
     payment_plan_soft_conflicted_data = serializers.SerializerMethodField()
     people_individual = IndividualListSerializer(read_only=True)
+    program_name = serializers.CharField(source="program.name")
 
     class Meta:
         model = Payment
@@ -1030,6 +1031,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
             "payment_plan_soft_conflicted",
             "payment_plan_soft_conflicted_data",
             "people_individual",
+            "program_name",
         )
 
     @classmethod

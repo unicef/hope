@@ -37,5 +37,6 @@ export type PaymentList = {
     readonly paymentPlanSoftConflicted: boolean;
     readonly paymentPlanSoftConflictedData: Array<any>;
     readonly peopleIndividual: IndividualList;
+    programName: string;
 };
 
