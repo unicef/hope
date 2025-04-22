@@ -69,7 +69,7 @@ export function VerificationRecordsTable({
         {
           businessAreaSlug: businessArea,
           programSlug: programId,
-          id: paymentPlanId,
+          paymentVerificationPk: paymentPlanId,
         },
       );
     },

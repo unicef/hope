@@ -50,7 +50,7 @@ export function PeopleVerificationsTable({
         {
           businessAreaSlug: businessArea,
           programSlug: programId,
-          id: paymentPlanId,
+          paymentVerificationPk: paymentPlanId,
         },
       );
     },

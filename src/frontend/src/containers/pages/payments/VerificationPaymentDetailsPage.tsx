@@ -36,8 +36,8 @@ function VerificationPaymentDetailsPage(): ReactElement {
       RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsRetrieve(
         {
           businessAreaSlug: businessArea,
-          id: paymentPlanId,
-          paymentId: paymentId,
+          paymentVerificationPk: paymentPlanId,
+          id: paymentId,
           programSlug: programId,
         },
       ),

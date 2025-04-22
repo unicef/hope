@@ -92,6 +92,7 @@ export type { Partner as PartnerCamelCase } from './models/Partner';
 export { PartnerAccessEnum as PartnerAccessEnumCamelCase } from './models/PartnerAccessEnum';
 export type { PatchedPaymentPlanCreateUpdate as PatchedPaymentPlanCreateUpdateCamelCase } from './models/PatchedPaymentPlanCreateUpdate';
 export type { PatchedPaymentVerificationPlanCreate as PatchedPaymentVerificationPlanCreateCamelCase } from './models/PatchedPaymentVerificationPlanCreate';
+export type { PatchedPaymentVerificationUpdate as PatchedPaymentVerificationUpdateCamelCase } from './models/PatchedPaymentVerificationUpdate';
 export type { PatchedProgramCycleUpdate as PatchedProgramCycleUpdateCamelCase } from './models/PatchedProgramCycleUpdate';
 export type { PatchedRDI as PatchedRDICamelCase } from './models/PatchedRDI';
 export type { PatchedTargetPopulationCreate as PatchedTargetPopulationCreateCamelCase } from './models/PatchedTargetPopulationCreate';
@@ -114,7 +115,6 @@ export type { PaymentVerificationPlanDetails as PaymentVerificationPlanDetailsCa
 export type { PaymentVerificationPlanImport as PaymentVerificationPlanImportCamelCase } from './models/PaymentVerificationPlanImport';
 export type { PaymentVerificationPlanList as PaymentVerificationPlanListCamelCase } from './models/PaymentVerificationPlanList';
 export type { PaymentVerificationSummary as PaymentVerificationSummaryCamelCase } from './models/PaymentVerificationSummary';
-export type { PaymentVerificationUpdate as PaymentVerificationUpdateCamelCase } from './models/PaymentVerificationUpdate';
 export type { PeriodicDataUpdateTemplateCreate as PeriodicDataUpdateTemplateCreateCamelCase } from './models/PeriodicDataUpdateTemplateCreate';
 export type { PeriodicDataUpdateTemplateDetail as PeriodicDataUpdateTemplateDetailCamelCase } from './models/PeriodicDataUpdateTemplateDetail';
 export type { PeriodicDataUpdateTemplateList as PeriodicDataUpdateTemplateListCamelCase } from './models/PeriodicDataUpdateTemplateList';

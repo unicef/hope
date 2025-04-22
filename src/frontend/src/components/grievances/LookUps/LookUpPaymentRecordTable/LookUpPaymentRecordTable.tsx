@@ -1,6 +1,5 @@
 import { MouseEvent, ReactElement, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useAllPaymentsForTableQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { headCells } from './LookUpPaymentRecordTableHeadCells';
 import { LookUpPaymentRecordTableRow } from './LookUpPaymentRecordTableRow';
@@ -30,23 +29,21 @@ export function LookUpPaymentRecordTable({
   };
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
-  //TODO: add payments from all payment plans?
   const {
     data: paymentsData,
     isLoading,
     error,
   } = useQuery<PaginatedPaymentListList>({
     queryKey: [
-      'businessAreasProgramsPaymentPlansList',
+      'businessAreasProgramsPaymentsList',
       businessArea,
       programId,
       queryVariables,
-      paymentPlan.id,
     ],
     queryFn: () => {
-      return RestService.restBusinessAreasProgramsPaymentPlansPaymentsList({
+      return RestService.restBusinessAreasProgramsPaymentsList({
         businessAreaSlug: businessArea,
-        programSlug: programId,
+        slug: programId,
       });
     },
   });
@@ -106,9 +103,13 @@ export function LookUpPaymentRecordTable({
   return (
     <UniversalRestTable
       headCells={headCells}
-      query={useAllPaymentsForTableQuery}
       onSelectAllClick={handleSelectAllCheckboxesClick}
       numSelected={numSelected}
+      data={paymentsData}
+      isLoading={isLoading}
+      error={error}
+      queryVariables={queryVariables}
+      setQueryVariables={setQueryVariables}
       renderRow={(row) => (
         <LookUpPaymentRecordTableRow
           openInNewTab={openInNewTab}

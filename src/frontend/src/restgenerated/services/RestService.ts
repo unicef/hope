@@ -39,6 +39,7 @@ import type { PaginatedTPHouseholdListList } from '../models/PaginatedTPHousehol
 import type { PaginatedUserList } from '../models/PaginatedUserList';
 import type { PatchedPaymentPlanCreateUpdate } from '../models/PatchedPaymentPlanCreateUpdate';
 import type { PatchedPaymentVerificationPlanCreate } from '../models/PatchedPaymentVerificationPlanCreate';
+import type { PatchedPaymentVerificationUpdate } from '../models/PatchedPaymentVerificationUpdate';
 import type { PatchedProgramCycleUpdate } from '../models/PatchedProgramCycleUpdate';
 import type { PatchedRDI } from '../models/PatchedRDI';
 import type { PatchedTargetPopulationCreate } from '../models/PatchedTargetPopulationCreate';
@@ -56,7 +57,6 @@ import type { PaymentVerificationPlanActivate } from '../models/PaymentVerificat
 import type { PaymentVerificationPlanCreate } from '../models/PaymentVerificationPlanCreate';
 import type { PaymentVerificationPlanDetails } from '../models/PaymentVerificationPlanDetails';
 import type { PaymentVerificationPlanImport } from '../models/PaymentVerificationPlanImport';
-import type { PaymentVerificationUpdate } from '../models/PaymentVerificationUpdate';
 import type { PeriodicDataUpdateTemplateCreate } from '../models/PeriodicDataUpdateTemplateCreate';
 import type { PeriodicDataUpdateTemplateDetail } from '../models/PeriodicDataUpdateTemplateDetail';
 import type { PeriodicDataUpdateUpload } from '../models/PeriodicDataUpdateUpload';
@@ -3384,6 +3384,107 @@ export class RestService {
         });
     }
     /**
+     * return list of verification records
+     * @returns PaginatedPaymentListList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentVerificationsVerificationsList({
+        businessAreaSlug,
+        paymentVerificationPk,
+        programSlug,
+        limit,
+        offset,
+    }: {
+        businessAreaSlug: string,
+        paymentVerificationPk: string,
+        programSlug: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+    }): CancelablePromise<PaginatedPaymentListList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{payment_verification_pk}/verifications/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'payment_verification_pk': paymentVerificationPk,
+                'program_slug': programSlug,
+            },
+            query: {
+                'limit': limit,
+                'offset': offset,
+            },
+        });
+    }
+    /**
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentVerificationsVerificationsRetrieve({
+        businessAreaSlug,
+        id,
+        paymentVerificationPk,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        paymentVerificationPk: string,
+        programSlug: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{payment_verification_pk}/verifications/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'payment_verification_pk': paymentVerificationPk,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * update verification amount
+     * @returns PaymentDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentVerificationsVerificationsPartialUpdate({
+        businessAreaSlug,
+        id,
+        paymentVerificationPk,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        paymentVerificationPk: string,
+        programSlug: string,
+        requestBody?: PatchedPaymentVerificationUpdate,
+    }): CancelablePromise<PaymentDetail> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{payment_verification_pk}/verifications/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'payment_verification_pk': paymentVerificationPk,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
      * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentVerificationPlanDetails
      * @throws ApiError
@@ -3708,197 +3809,6 @@ export class RestService {
                 'id': id,
                 'program_slug': programSlug,
                 'verification_plan_id': verificationPlanId,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
-    /**
-     * return list of verification records
-     * @returns PaginatedPaymentListList
-     * @throws ApiError
-     */
-    public static restBusinessAreasProgramsPaymentVerificationsVerificationsList({
-        businessAreaSlug,
-        id,
-        programSlug,
-        deliveryMechanism,
-        dispersionEndDateLte,
-        dispersionStartDateGte,
-        fsp,
-        isFollowUp,
-        limit,
-        name,
-        offset,
-        ordering,
-        paymentVerificationSummaryStatus,
-        program,
-        programCycle,
-        programCycleEndDate,
-        programCycleStartDate,
-        search,
-        status,
-        totalEntitledQuantityGte,
-        totalEntitledQuantityLte,
-        updatedAtGte,
-        updatedAtLte,
-    }: {
-        businessAreaSlug: string,
-        /**
-         * A UUID string identifying this Payment Plan.
-         */
-        id: string,
-        programSlug: string,
-        deliveryMechanism?: Array<string>,
-        dispersionEndDateLte?: string,
-        dispersionStartDateGte?: string,
-        fsp?: string,
-        isFollowUp?: boolean,
-        /**
-         * Number of results to return per page.
-         */
-        limit?: number,
-        name?: string,
-        /**
-         * The initial index from which to return the results.
-         */
-        offset?: number,
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string,
-        /**
-         * * `ACTIVE` - Active
-         * * `FINISHED` - Finished
-         * * `PENDING` - Pending
-         */
-        paymentVerificationSummaryStatus?: 'ACTIVE' | 'FINISHED' | 'PENDING',
-        program?: string,
-        programCycle?: string,
-        programCycleEndDate?: string,
-        programCycleStartDate?: string,
-        /**
-         * A search term.
-         */
-        search?: string,
-        /**
-         * Status [sys]
-         *
-         * * `TP_OPEN` - Open
-         * * `TP_LOCKED` - Locked
-         * * `PROCESSING` - Processing
-         * * `STEFICON_WAIT` - Steficon Wait
-         * * `STEFICON_RUN` - Steficon Run
-         * * `STEFICON_COMPLETED` - Steficon Completed
-         * * `STEFICON_ERROR` - Steficon Error
-         * * `DRAFT` - Draft
-         * * `PREPARING` - Preparing
-         * * `OPEN` - Open
-         * * `LOCKED` - Locked
-         * * `LOCKED_FSP` - Locked FSP
-         * * `IN_APPROVAL` - In Approval
-         * * `IN_AUTHORIZATION` - In Authorization
-         * * `IN_REVIEW` - In Review
-         * * `ACCEPTED` - Accepted
-         * * `FINISHED` - Finished
-         */
-        status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
-        totalEntitledQuantityGte?: number,
-        totalEntitledQuantityLte?: number,
-        updatedAtGte?: string,
-        updatedAtLte?: string,
-    }): CancelablePromise<PaginatedPaymentListList> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/verifications/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'id': id,
-                'program_slug': programSlug,
-            },
-            query: {
-                'delivery_mechanism': deliveryMechanism,
-                'dispersion_end_date__lte': dispersionEndDateLte,
-                'dispersion_start_date__gte': dispersionStartDateGte,
-                'fsp': fsp,
-                'is_follow_up': isFollowUp,
-                'limit': limit,
-                'name': name,
-                'offset': offset,
-                'ordering': ordering,
-                'payment_verification_summary_status': paymentVerificationSummaryStatus,
-                'program': program,
-                'program_cycle': programCycle,
-                'program_cycle_end_date': programCycleEndDate,
-                'program_cycle_start_date': programCycleStartDate,
-                'search': search,
-                'status': status,
-                'total_entitled_quantity__gte': totalEntitledQuantityGte,
-                'total_entitled_quantity__lte': totalEntitledQuantityLte,
-                'updated_at__gte': updatedAtGte,
-                'updated_at__lte': updatedAtLte,
-            },
-        });
-    }
-    /**
-     * Adds a count action to the viewset that returns the count of the queryset.
-     * @returns PaymentDetail
-     * @throws ApiError
-     */
-    public static restBusinessAreasProgramsPaymentVerificationsVerificationsRetrieve({
-        businessAreaSlug,
-        id,
-        paymentId,
-        programSlug,
-    }: {
-        businessAreaSlug: string,
-        /**
-         * A UUID string identifying this Payment Plan.
-         */
-        id: string,
-        paymentId: string,
-        programSlug: string,
-    }): CancelablePromise<PaymentDetail> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/verifications/{payment_id}/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'id': id,
-                'payment_id': paymentId,
-                'program_slug': programSlug,
-            },
-        });
-    }
-    /**
-     * Adds a count action to the viewset that returns the count of the queryset.
-     * @returns PaymentDetail
-     * @throws ApiError
-     */
-    public static restBusinessAreasProgramsPaymentVerificationsVerificationsCreate({
-        businessAreaSlug,
-        id,
-        paymentId,
-        programSlug,
-        requestBody,
-    }: {
-        businessAreaSlug: string,
-        /**
-         * A UUID string identifying this Payment Plan.
-         */
-        id: string,
-        paymentId: string,
-        programSlug: string,
-        requestBody: PaymentVerificationUpdate,
-    }): CancelablePromise<PaymentDetail> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-verifications/{id}/verifications/{payment_id}/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'id': id,
-                'payment_id': paymentId,
-                'program_slug': programSlug,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -5096,6 +5006,152 @@ export class RestService {
             path: {
                 'business_area_slug': businessAreaSlug,
                 'slug': slug,
+            },
+        });
+    }
+    /**
+     * Base validation class, inherit from this class to create custom validators.
+     * Your custom validators have to implement validation methods that starts
+     * with name "validate_" so validate can call all the validators from your
+     * custom validator.
+     *
+     * Custom validate method have to takes *args, **kwargs parameters.
+     *
+     * validate method with parameters have to be called in mutate method.
+     * If there are validation errors they will be all
+     * returned as one error message.
+     * @returns PaginatedPaymentListList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentsList({
+        businessAreaSlug,
+        slug,
+        beneficiaryGroupMatch,
+        budgetMax,
+        budgetMin,
+        compatibleDct,
+        dataCollectingType,
+        endDate,
+        limit,
+        name,
+        numberOfHouseholdsMax,
+        numberOfHouseholdsMin,
+        numberOfHouseholdsWithTpInProgramMax,
+        numberOfHouseholdsWithTpInProgramMin,
+        offset,
+        orderBy,
+        ordering,
+        search,
+        sector,
+        startDate,
+        status,
+        updatedAtAfter,
+        updatedAtBefore,
+    }: {
+        businessAreaSlug: string,
+        slug: string,
+        beneficiaryGroupMatch?: string,
+        /**
+         * Program budget
+         */
+        budgetMax?: string,
+        /**
+         * Program budget
+         */
+        budgetMin?: string,
+        compatibleDct?: string,
+        dataCollectingType?: string,
+        endDate?: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        name?: string,
+        numberOfHouseholdsMax?: string,
+        numberOfHouseholdsMin?: string,
+        numberOfHouseholdsWithTpInProgramMax?: string,
+        numberOfHouseholdsWithTpInProgramMin?: string,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `name` - Name
+         * * `-name` - Name (descending)
+         * * `status` - Status
+         * * `-status` - Status (descending)
+         * * `start_date` - Start date
+         * * `-start_date` - Start date (descending)
+         * * `end_date` - End date
+         * * `-end_date` - End date (descending)
+         * * `sector` - Sector
+         * * `-sector` - Sector (descending)
+         * * `number_of_households` - Number of households
+         * * `-number_of_households` - Number of households (descending)
+         * * `budget` - Budget
+         * * `-budget` - Budget (descending)
+         */
+        orderBy?: Array<'-budget' | '-end_date' | '-name' | '-number_of_households' | '-sector' | '-start_date' | '-status' | 'budget' | 'end_date' | 'name' | 'number_of_households' | 'sector' | 'start_date' | 'status'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        search?: any,
+        /**
+         * Program sector
+         *
+         * * `CHILD_PROTECTION` - Child Protection
+         * * `EDUCATION` - Education
+         * * `HEALTH` - Health
+         * * `MULTI_PURPOSE` - Multi Purpose
+         * * `NUTRITION` - Nutrition
+         * * `SOCIAL_POLICY` - Social Policy
+         * * `WASH` - WASH
+         */
+        sector?: Array<'CHILD_PROTECTION' | 'EDUCATION' | 'HEALTH' | 'MULTI_PURPOSE' | 'NUTRITION' | 'SOCIAL_POLICY' | 'WASH'>,
+        startDate?: string,
+        /**
+         * Program status
+         *
+         * * `ACTIVE` - Active
+         * * `DRAFT` - Draft
+         * * `FINISHED` - Finished
+         */
+        status?: Array<'ACTIVE' | 'DRAFT' | 'FINISHED'>,
+        updatedAtAfter?: string,
+        updatedAtBefore?: string,
+    }): CancelablePromise<PaginatedPaymentListList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{slug}/payments/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'slug': slug,
+            },
+            query: {
+                'beneficiary_group_match': beneficiaryGroupMatch,
+                'budget_max': budgetMax,
+                'budget_min': budgetMin,
+                'compatible_dct': compatibleDct,
+                'data_collecting_type': dataCollectingType,
+                'end_date': endDate,
+                'limit': limit,
+                'name': name,
+                'number_of_households_max': numberOfHouseholdsMax,
+                'number_of_households_min': numberOfHouseholdsMin,
+                'number_of_households_with_tp_in_program_max': numberOfHouseholdsWithTpInProgramMax,
+                'number_of_households_with_tp_in_program_min': numberOfHouseholdsWithTpInProgramMin,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'search': search,
+                'sector': sector,
+                'start_date': startDate,
+                'status': status,
+                'updated_at_after': updatedAtAfter,
+                'updated_at_before': updatedAtBefore,
             },
         });
     }

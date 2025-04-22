@@ -52,7 +52,7 @@ export function VerificationsTable({
         {
           businessAreaSlug: businessArea,
           programSlug: programId,
-          id: paymentPlanId,
+          paymentVerificationPk: paymentPlanId,
         },
       );
     },

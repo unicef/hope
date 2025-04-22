@@ -100,7 +100,7 @@ export const PeoplePaymentsTableRow = ({
     if (deliveredQuantity === null) {
       return <></>;
     }
-    if (deliveredQuantity === 0) {
+    if (Number(deliveredQuantity) === 0) {
       return <RedError />;
     }
     if (deliveredQuantity === entitlementQuantity) {
@@ -156,12 +156,11 @@ export const PeoplePaymentsTableRow = ({
       </TableCell>
 
       <TableCell align="left">
-        {payment.financialServiceProvider
-          ? payment.fspName
-          : '-'}
+        {payment.fspName ? payment.fspName : '-'}
       </TableCell>
       <TableCell align="left">
-        {payment.entitlementQuantity != null && payment.entitlementQuantity >= 0
+        {payment.entitlementQuantity != null &&
+        Number(payment.entitlementQuantity) >= 0
           ? `${formatCurrencyWithSymbol(
               payment.entitlementQuantity,
               payment.currency,

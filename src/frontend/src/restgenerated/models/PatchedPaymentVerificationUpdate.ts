@@ -2,9 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type PaymentVerificationUpdate = {
+export type PatchedPaymentVerificationUpdate = {
     receivedAmount?: number;
-    received: boolean;
+    received?: boolean;
     version?: number;
 };
 
