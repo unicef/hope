@@ -21,6 +21,10 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
+from hct_mis_api.apps.payment.models import (
+    DeliveryMechanism,
+    PendingDeliveryMechanismData,
+)
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.contrib.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
@@ -37,6 +41,7 @@ SECONDARY_COLLECTOR = "secondary_collector"
 INDIVIDUAL_FIELD = "individual"
 DOCUMENT_FIELD = "document"
 BANK_FIELD = "bank"
+ACCOUNT_FIELD = "account_details"
 EXTRA_FIELD = "extra"
 
 
@@ -145,6 +150,7 @@ class GenericRegistrationService(BaseRegistrationService):
             my_dict = dict(extra=dict())
             my_dict["documents"] = dict()
             my_dict["banks"] = dict()
+            my_dict[ACCOUNT_FIELD] = dict()
             flex_fields = dict()
             for key, value in mapping_dict.items():
                 model, field = value.split(".")
@@ -165,6 +171,8 @@ class GenericRegistrationService(BaseRegistrationService):
                         if bank_num not in my_dict["banks"]:
                             my_dict["banks"][bank_num] = dict()
                         my_dict["banks"][bank_num].update({bank_field: retrieved_value})
+                    if model == ACCOUNT_FIELD:
+                        my_dict[ACCOUNT_FIELD][field] = retrieved_value
                     if model == EXTRA_FIELD:
                         my_dict["extra"][field] = retrieved_value
                     for kk, vv in item.items():
@@ -220,7 +228,7 @@ class GenericRegistrationService(BaseRegistrationService):
 
         record_data_dict = record.get_data()
         individuals_key = mapping["defaults"].get("individuals_key", "individuals")
-        individuals_data = self.create_individuals_dicts(record_data_dict[individuals_key], mapping["individuals"])
+        individuals_data = self.create_individuals_dicts(record_data_dict[individuals_key], mapping[individuals_key])
 
         individuals = []
         head = None
@@ -230,6 +238,7 @@ class GenericRegistrationService(BaseRegistrationService):
         for individual_data in individuals_data:
             documents_data = individual_data.pop("documents")
             banks_data = individual_data.pop("banks")
+            account_data = individual_data.pop("account_details")
             extra_data = individual_data.pop("extra", dict())
 
             individual_dict = dict(
@@ -259,6 +268,18 @@ class GenericRegistrationService(BaseRegistrationService):
                             photo_base_64, document_data.get("document_number", key)
                         )
                     self._create_object_and_validate(document_data, PendingDocument, DocumentForm)
+
+            if account_data:
+                PendingDeliveryMechanismData.objects.create(
+                    individual_id=individual.id,
+                    delivery_mechanism=DeliveryMechanism.objects.get(code="transfer_to_account"),
+                    data={
+                        "bank_account_number__transfer_to_account": account_data["data"].get("number", ""),
+                        "bank_name__transfer_to_account": account_data["data"].get("name", ""),
+                        "bank_code__transfer_to_account": account_data["data"].get("uba_code", ""),
+                        "account_holder_name__transfer_to_account": account_data["data"].get("holder_name", ""),
+                    },
+                )
 
             if self.get_boolean(extra_data.get(PRIMARY_COLLECTOR, False)):
                 if pr_collector:

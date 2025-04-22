@@ -716,6 +716,26 @@ class TestPaymentGatewayService(APITestCase):
         ):
             PaymentGatewayAPI().add_records_to_payment_instruction([payment], "123")
 
+    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
+    def test_api_add_records_to_payment_instruction_no_snapshot(self, post_mock: Any) -> None:
+        payment = self.payments[0]
+        payment.household_snapshot.delete()
+        payment.refresh_from_db()
+
+        post_mock.return_value = {
+            "remote_id": "123",
+            "records": {
+                "1": payment.id,
+            },
+            "errors": None,
+        }, 200
+
+        with self.assertRaisesMessage(
+            PaymentGatewayAPI.PaymentGatewayAPIException,
+            f"Not found snapshot for Payment {payment.unicef_id}",
+        ):
+            PaymentGatewayAPI().add_records_to_payment_instruction([payment], "123")
+
     @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_delivery_mechanisms")
     def test_sync_delivery_mechanisms(self, get_delivery_mechanisms_mock: Any) -> None:
         assert DeliveryMechanism.objects.all().count() == 16
