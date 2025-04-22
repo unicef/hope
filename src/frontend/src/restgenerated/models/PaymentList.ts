@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { IndividualList } from './IndividualList';
 export type PaymentList = {
     readonly id: string;
     unicefId?: string | null;
@@ -35,5 +36,6 @@ export type PaymentList = {
     readonly paymentPlanHardConflictedData: Array<any>;
     readonly paymentPlanSoftConflicted: boolean;
     readonly paymentPlanSoftConflictedData: Array<any>;
+    readonly peopleIndividual: IndividualList;
 };
 

@@ -1866,6 +1866,11 @@ class Payment(
     def full_name(self) -> str:
         return self.collector.full_name
 
+    @property
+    def people_individual(self) -> Optional[Individual]:
+        """ for DCT social worker return first Individual from Household"""
+        return self.household.individuals.first()
+
     def get_revert_mark_as_failed_status(self, delivered_quantity: Decimal) -> str:  # pragma: no cover
         if delivered_quantity == 0:
             return Payment.STATUS_NOT_DISTRIBUTED

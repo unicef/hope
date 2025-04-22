@@ -5,6 +5,7 @@
 import type { DeliveryMechanism } from './DeliveryMechanism';
 import type { HouseholdDetail } from './HouseholdDetail';
 import type { IndividualDetail } from './IndividualDetail';
+import type { IndividualList } from './IndividualList';
 import type { PaymentList } from './PaymentList';
 import type { PaymentPlanDetail } from './PaymentPlanDetail';
 export type PaymentDetail = {
@@ -40,6 +41,7 @@ export type PaymentDetail = {
     readonly paymentPlanHardConflictedData: Array<any>;
     readonly paymentPlanSoftConflicted: boolean;
     readonly paymentPlanSoftConflictedData: Array<any>;
+    readonly peopleIndividual: IndividualList;
     parent: PaymentPlanDetail;
     readonly adminUrl: string;
     sourcePayment: PaymentList;

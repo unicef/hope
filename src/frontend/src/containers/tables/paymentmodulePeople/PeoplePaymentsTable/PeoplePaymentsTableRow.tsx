@@ -109,7 +109,7 @@ export const PeoplePaymentsTableRow = ({
     return <OrangeError />;
   };
 
-  const individual = payment?.household?.individuals?.edges?.[0]?.node;
+  const individual = payment?.peopleIndividual;
   const individualDetailsPath = `/${baseUrl}/population/people/${individual?.id}`;
 
   return (
@@ -152,12 +152,12 @@ export const PeoplePaymentsTableRow = ({
         )}
       </TableCell>
       <TableCell align="left">
-        {renderSomethingOrDash(payment.household.admin2?.name)}
+        {renderSomethingOrDash(payment.householdAdmin2)}
       </TableCell>
 
       <TableCell align="left">
         {payment.financialServiceProvider
-          ? payment.financialServiceProvider.name
+          ? payment.fspName
           : '-'}
       </TableCell>
       <TableCell align="left">

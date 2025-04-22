@@ -27,7 +27,7 @@ from hct_mis_api.apps.household.api.serializers.household import (
 )
 from hct_mis_api.apps.household.api.serializers.individual import (
     IndividualDetailSerializer,
-    IndividualSmallSerializer,
+    IndividualSmallSerializer, IndividualListSerializer,
 )
 from hct_mis_api.apps.household.models import (
     STATUS_ACTIVE,
@@ -994,6 +994,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
     payment_plan_hard_conflicted_data = serializers.SerializerMethodField()
     payment_plan_soft_conflicted = serializers.SerializerMethodField()
     payment_plan_soft_conflicted_data = serializers.SerializerMethodField()
+    people_individual = IndividualListSerializer(read_only=True)
 
     class Meta:
         model = Payment
@@ -1027,6 +1028,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
             "payment_plan_hard_conflicted_data",
             "payment_plan_soft_conflicted",
             "payment_plan_soft_conflicted_data",
+            "people_individual",
         )
 
     @classmethod
