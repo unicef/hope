@@ -218,7 +218,10 @@ const PeopleDetailsPage = (): ReactElement => {
             </Grid>
           </Grid>
         </OverviewPaper>
-        {hasPermissions(PERMISSIONS.PM_VIEW_PAYMENT_LIST, permissions) && (
+        {hasPermissions(
+          PERMISSIONS.PM_VIEW_PAYMENT_LIST,
+          permissions,
+        ) && (
           <PaymentsPeopleTable
             openInNewTab
             household={household as HouseholdNode}
