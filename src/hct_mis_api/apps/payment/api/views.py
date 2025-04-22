@@ -160,9 +160,6 @@ class PaymentVerificationViewSet(
         "delete_payment_verification_plan": PaymentVerificationPlanActivateSerializer,
         "export_xlsx_payment_verification_plan": PaymentVerificationPlanActivateSerializer,
         "import_xlsx_payment_verification_plan": PaymentVerificationPlanImportSerializer,
-        "verifications": PaymentListSerializer,
-        "verification_details": PaymentDetailSerializer,
-        "verifications_update": PaymentVerificationUpdateSerializer,
     }
     permissions_by_action = {
         "list": [Permissions.PAYMENT_VERIFICATION_VIEW_LIST],
@@ -176,8 +173,6 @@ class PaymentVerificationViewSet(
         "delete_payment_verification_plan": [Permissions.PAYMENT_VERIFICATION_DELETE],
         "export_xlsx_payment_verification_plan": [Permissions.PAYMENT_VERIFICATION_EXPORT],
         "import_xlsx_payment_verification_plan": [Permissions.PAYMENT_VERIFICATION_IMPORT],
-        "verification_details": [Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS],
-        "verifications_update": [Permissions.PAYMENT_VERIFICATION_VERIFY],
     }
 
     def get_object(self) -> PaymentPlan:
@@ -451,14 +446,36 @@ class PaymentVerificationViewSet(
             status=status.HTTP_200_OK,
         )
 
-    # Verification
+
+class PaymentVerificationRecordViewSet(BaseViewSet):
+    program_model_field = "program_cycle__program"
+    queryset = PaymentPlan.objects.filter(
+        status__in=(PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED)
+    ).order_by("unicef_id")
+    PERMISSIONS = [Permissions.PAYMENT_VERIFICATION_VIEW_LIST]
+    serializer_classes_by_action = {
+        "list": PaymentListSerializer,
+        "retrieve": PaymentDetailSerializer,
+        "update": PaymentVerificationUpdateSerializer,
+    }
+    permissions_by_action = {
+        "list": [Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS],
+        "retrieve": [Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS],
+        "update": [Permissions.PAYMENT_VERIFICATION_VERIFY],
+    }
+
+    def get_object(self) -> PaymentPlan:
+        return get_object_or_404(PaymentPlan, id=self.kwargs.get("pk"))
+
+    def get_verification_plan_object(self) -> PaymentVerificationPlan:
+        return get_object_or_404(PaymentVerificationPlan, id=self.kwargs.get("verification_plan_id"))
+
     @extend_schema(
         responses={
             200: PaymentListSerializer(many=True),
         },
     )
-    @action(detail=True, methods=["get"], PERMISSIONS=[Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS])
-    def verifications(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """return list of verification records"""
         payment_plan = self.get_object()
         payments = payment_plan.eligible_payments.all()
@@ -470,19 +487,15 @@ class PaymentVerificationViewSet(
         serializer = self.get_serializer(payments, many=True)
         return Response(serializer.data)
 
-    @action(detail=True, methods=["get"], url_path="verifications/(?P<payment_id>[^/.]+)")
-    def verification_details(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def retrieve(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment = get_object_or_404(Payment, id=self.kwargs.get("payment_id"))
         serializer = self.get_serializer(payment)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @extend_schema(request=PaymentVerificationUpdateSerializer, responses={200: PaymentDetailSerializer})
-    @action(
-        detail=True,
-        methods=["post"],
-        url_path="verifications/(?P<payment_id>[^/.]+)",
-    )
-    def verifications_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def partial_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """update verification amount"""
+
         payment = get_object_or_404(Payment, id=self.kwargs.get("payment_id"))
         payment_verification = payment.payment_verifications.first()
         serializer = self.get_serializer(data=request.data)

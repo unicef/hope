@@ -1,10 +1,13 @@
 from django.urls import include, path
 
+from rest_framework_nested.routers import NestedSimpleRouter
+
 from hct_mis_api.apps.core.api.urls import get_business_area_nested_router
 from hct_mis_api.apps.payment.api.views import (
     PaymentPlanManagerialViewSet,
     PaymentPlanSupportingDocumentViewSet,
     PaymentPlanViewSet,
+    PaymentVerificationRecordViewSet,
     PaymentVerificationViewSet,
     PaymentViewSet,
     TargetPopulationViewSet,
@@ -49,13 +52,19 @@ program_nested_router.register(
     PaymentVerificationViewSet,
     basename="payment-verifications",
 )
-# program_nested_router.register(
-#     r"payment-verifications/(?P<payment_verification_id>[^/.]+)/verifications",
-#     VerificationViewSet,
-#     basename="verifications",
-# )
+payment_verification_nested_router = NestedSimpleRouter(
+    program_nested_router,
+    r"payment-verifications",
+    lookup="payment_verification",
+)
+payment_verification_nested_router.register(
+    r"verifications",
+    PaymentVerificationRecordViewSet,
+    basename="verification-records",
+)
 
 urlpatterns = [
     path("", include(business_area_nested_router.urls)),
     path("", include(program_nested_router.urls)),
+    path("", include(payment_verification_nested_router.urls)),
 ]
