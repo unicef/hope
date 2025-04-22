@@ -138,7 +138,7 @@ export function WarningTooltipTable({
         </GreyBox>
         <Box mt={10} mb={10} display="flex">
           {`${beneficiaryGroup?.groupLabel} ID`}{' '}
-          <Bold>{payment.household?.unicefId}</Bold>{' '}
+          <Bold>{payment.householdUnicefId}</Bold>{' '}
           {t('is also included in the following Payment Plans')}:
         </Box>
         <StyledTable>

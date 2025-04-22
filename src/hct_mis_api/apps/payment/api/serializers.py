@@ -975,6 +975,8 @@ class PaymentVerificationDetailsSerializer(AdminUrlSerializerMixin, serializers.
 
 class PaymentListSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=True)
+    household_id = serializers.UUIDField(read_only=True)
+    collector_id = serializers.UUIDField(read_only=True)
     status = serializers.CharField(source="get_status_display")
     household_unicef_id = serializers.CharField(source="household.unicef_id")
     household_size = serializers.IntegerField(source="household.size")
