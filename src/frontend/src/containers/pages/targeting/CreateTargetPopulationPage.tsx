@@ -58,7 +58,7 @@ const CreateTargetPopulationPage = (): ReactElement => {
         programSlug: string;
         requestBody;
       }) =>
-        RestService.restBusinessAreasProgramsTargetPopulationsCreate({
+        RestService.restBusinessAreasProgramsPaymentPlansCreate({
           businessAreaSlug,
           programSlug,
           requestBody,
@@ -111,7 +111,7 @@ const CreateTargetPopulationPage = (): ReactElement => {
         requestBody,
       });
       showMessage(t('Target Population Created'));
-      navigate(`/${baseUrl}/target-population/${res.id}`);
+      navigate(`/${baseUrl}/target-population/${res.targetPopulationId}`);
     } catch (e) {
       showMessage(e.message);
     }
