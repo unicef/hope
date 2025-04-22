@@ -1,11 +1,11 @@
 FROM alpine:3.19.1 as curl
-RUN apk add curl && mkdir /data
+RUN apk add curl openssl && mkdir /data
 FROM curl as waitforit
 RUN curl -o /data/waitforit -sSL https://github.com/maxcnunes/waitforit/releases/download/v2.4.1/waitforit-linux_amd64 \
     && chmod +x /data/waitforit
 
 FROM curl as certs
-RUN curl -o /data/psql-cert.crt -L https://cacerts.digicert.com/DigiCertGlobalRootCA.crt.pem
+RUN curl -o /data/psql-cert-crt.crt -L https://www.microsoft.com/pkiops/certs/Microsoft%20RSA%20Root%20Certificate%20Authority%202017.crt && openssl x509 -in /data/psql-cert-crt.crt -out /data/psql-cert.crt
 
 # Base image
 FROM python:3.12.7-slim-bookworm as base
