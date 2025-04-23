@@ -245,6 +245,14 @@ class GenericRegistrationService(BaseRegistrationService):
                 **base_individual_data_dict,
                 **individual_data,
             )
+            if "full_name" not in individual_dict:
+                individual_dict["full_name"] = " ".join(
+                    [
+                        individual_dict[key]
+                        for key in ["given_name", "middle_name", "family_name"]
+                        if key in individual_dict
+                    ]
+                )
             individual = self._create_object_and_validate(individual_dict, PendingIndividual, IndividualForm)
 
             if individual.relationship == HEAD:
