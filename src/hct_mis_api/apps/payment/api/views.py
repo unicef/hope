@@ -1639,11 +1639,12 @@ class TPHouseholdViewSet(
     }
 
 
-@extend_schema(responses={200: FspChoicesSerializer})
+@extend_schema(responses={200: FspChoicesSerializer})  # type: ignore
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def available_fsps_for_delivery_mechanisms(request: Request, *args: Any, **kwargs: Any) -> Response:
-    business_area_slug = kwargs.get("business_area_slug")
+def available_fsps_for_delivery_mechanisms(
+    request: Request, business_area_slug: str, *args: Any, **kwargs: Any
+) -> Response:
     delivery_mechanisms = DeliveryMechanism.get_choices()
 
     def get_fsps(mechanism_name: str) -> List[Dict[str, Any]]:

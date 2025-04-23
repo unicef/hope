@@ -132,6 +132,7 @@ class ProgramViewSet(
 
 class ProgramCycleViewSet(
     SerializerActionMixin,
+    CountActionMixin,
     ProgramMixin,
     ModelViewSet,
     BaseViewSet,

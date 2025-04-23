@@ -7,6 +7,7 @@ import type { ApplyEngineFormula } from '../models/ApplyEngineFormula';
 import type { BusinessArea } from '../models/BusinessArea';
 import type { CountResponse } from '../models/CountResponse';
 import type { DelegatePeople } from '../models/DelegatePeople';
+import type { FspChoices } from '../models/FspChoices';
 import type { HouseholdDetail } from '../models/HouseholdDetail';
 import type { HouseholdList } from '../models/HouseholdList';
 import type { HouseholdMember } from '../models/HouseholdMember';
@@ -549,6 +550,23 @@ export class RestService {
                 'limit': limit,
                 'offset': offset,
                 'ordering': ordering,
+            },
+        });
+    }
+    /**
+     * @returns FspChoices
+     * @throws ApiError
+     */
+    public static restBusinessAreasAvailableFspsForDeliveryMechanismsRetrieve({
+        businessAreaSlug,
+    }: {
+        businessAreaSlug: string,
+    }): CancelablePromise<FspChoices> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/available-fsps-for-delivery-mechanisms/',
+            path: {
+                'business_area_slug': businessAreaSlug,
             },
         });
     }
@@ -1247,6 +1265,7 @@ export class RestService {
         });
     }
     /**
+     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaginatedProgramCycleListList
      * @throws ApiError
      */
@@ -1322,6 +1341,7 @@ export class RestService {
         });
     }
     /**
+     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns ProgramCycleCreate
      * @throws ApiError
      */
@@ -1346,6 +1366,7 @@ export class RestService {
         });
     }
     /**
+     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns ProgramCycleList
      * @throws ApiError
      */
@@ -1372,6 +1393,7 @@ export class RestService {
         });
     }
     /**
+     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns ProgramCycleUpdate
      * @throws ApiError
      */
@@ -1402,6 +1424,7 @@ export class RestService {
         });
     }
     /**
+     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns ProgramCycleUpdate
      * @throws ApiError
      */
@@ -1432,6 +1455,7 @@ export class RestService {
         });
     }
     /**
+     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns void
      * @throws ApiError
      */
@@ -1458,6 +1482,7 @@ export class RestService {
         });
     }
     /**
+     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns any No response body
      * @throws ApiError
      */
@@ -1484,6 +1509,7 @@ export class RestService {
         });
     }
     /**
+     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns any No response body
      * @throws ApiError
      */
@@ -1505,6 +1531,27 @@ export class RestService {
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsCyclesCountRetrieve({
+        businessAreaSlug,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/cycles/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,
             },
         });
