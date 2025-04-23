@@ -12,7 +12,6 @@ from rest_framework.response import Response
 from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
-from hct_mis_api.api.endpoints.rdi.upload import IndividualSerializer
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.api.mixins import (
     BaseViewSet,
@@ -99,10 +98,14 @@ class HouseholdViewSet(
         individuals_ids = list(instance.individuals(manager="all_merge_status_objects").values_list("id", flat=True))
         collectors_ids = list(instance.representatives(manager="all_merge_status_objects").values_list("id", flat=True))
         ids = set(individuals_ids + collectors_ids)
-        members = Individual.all_merge_status_objects.filter(id__in=ids).prefetch_related(
-            Prefetch(
-                "households_and_roles",
-                queryset=IndividualRoleInHousehold.all_merge_status_objects.filter(household=instance.id),
+        members = (
+            Individual.all_merge_status_objects.filter(id__in=ids)
+            .order_by("created_at")
+            .prefetch_related(
+                Prefetch(
+                    "households_and_roles",
+                    queryset=IndividualRoleInHousehold.all_merge_status_objects.filter(household=instance.id),
+                )
             )
         )
 

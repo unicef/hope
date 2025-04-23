@@ -164,9 +164,7 @@ class PaymentPlanManagerialViewSet(
         return action_to_permissions_map.get(action_name)
 
 
-class PaymentPlanSupportingDocumentViewSet(
-    mixins.CreateModelMixin, mixins.DestroyModelMixin, BaseViewSet
-):
+class PaymentPlanSupportingDocumentViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin, BaseViewSet):
     serializer_class = PaymentPlanSupportingDocumentSerializer
     lookup_field = "file_id"
 
