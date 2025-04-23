@@ -220,10 +220,9 @@ export const sendRequest = async (
   onCancel: OnCancel,
 ): Promise<Response> => {
   const controller = new AbortController();
-  const camelizedBodyData = body ?? formData;
-  let underscoreBodyData;
-  if (camelizedBodyData) {
-    underscoreBodyData = deepUnderscore(camelizedBodyData);
+  let underscoreBodyData = undefined;
+  if (body) {
+    underscoreBodyData = JSON.stringify(deepUnderscore(JSON.parse(body)));
   }
   const request: RequestInit = {
     headers,
