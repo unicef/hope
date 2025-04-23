@@ -40,10 +40,13 @@ class FeedbackListSerializer(serializers.ModelSerializer):
             "household_id",
             "individual_unicef_id",
             "individual_id",
+            "linked_grievance_id",
+            "linked_grievance_unicef_id",
             "program_name",
             "program_id",
             "created_by",
             "created_at",
+            "feedback_messages",
         )
 
     def get_created_by(self, obj: Feedback) -> str:
@@ -68,7 +71,7 @@ class FeedbackDetailSerializer(AdminUrlSerializerMixin, FeedbackListSerializer):
 class FeedbackCreateSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     issue_type = serializers.ChoiceField(required=True, choices=Feedback.ISSUE_TYPE_CHOICES)
-    household__lookup = serializers.CharField(allow_null=True, allow_blank=True)
+    household_lookup = serializers.CharField(allow_null=True, allow_blank=True)
     individual_lookup = serializers.CharField(allow_null=True, allow_blank=True)
     program_id = serializers.CharField(allow_null=True, allow_blank=True)
     area = serializers.CharField(allow_null=True, allow_blank=True)

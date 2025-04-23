@@ -38,20 +38,20 @@ class FeedbackMixin:
     )
 
 
-# per program
-class PaymentVerificationViewSet(
+class FeedbackViewSet(
     CountActionMixin,
     ProgramMixin,
     SerializerActionMixin,
     FeedbackMixin,
     mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
     mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
     BaseViewSet,
 ):
     queryset = Feedback.objects.all()
     PERMISSIONS = [Permissions.PAYMENT_VERIFICATION_VIEW_LIST]
-    # remove PUT
+    http_method_names = ["get", "post", "patch"]
     serializer_classes_by_action = {
         "list": FeedbackListSerializer,
         "retrieve": FeedbackDetailSerializer,
