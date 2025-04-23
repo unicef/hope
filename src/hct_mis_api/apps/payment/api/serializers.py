@@ -1337,3 +1337,24 @@ class TargetPopulationCopySerializer(serializers.Serializer):
 class ApplyEngineFormulaSerializer(serializers.Serializer):
     engine_formula_rule_id = serializers.CharField(required=True)
     version = serializers.IntegerField(required=False)
+
+
+class FspChoiceSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = FinancialServiceProvider
+        fields = (
+            "id",
+            "name",
+        )
+
+
+class DeliveryMechanismChoiceSerializer(serializers.Serializer):
+    name = serializers.CharField(required=True)
+    code = serializers.CharField(required=True)
+
+
+class FspChoicesSerializer(serializers.Serializer):
+    delivery_mechanism = DeliveryMechanismChoiceSerializer()
+    fsps = FspChoiceSerializer(many=True)
