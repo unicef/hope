@@ -355,7 +355,6 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
 
 class PaymentPlanListSerializer(serializers.ModelSerializer):
     status = serializers.CharField(source="get_status_display")
-    # currency = serializers.CharField(source="get_currency_display")
     follow_ups = FollowUpPaymentPlanSerializer(many=True, read_only=True)
     created_by = serializers.SerializerMethodField()
 
