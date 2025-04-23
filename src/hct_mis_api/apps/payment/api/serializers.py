@@ -156,8 +156,6 @@ class PaymentVerificationSummarySerializer(serializers.ModelSerializer):
 
 
 class PaymentVerificationSerializer(serializers.ModelSerializer):
-    # status = serializers.CharField(source="get_status_display")
-
     class Meta:
         model = PaymentVerification
         fields = ("id", "status", "status_date", "received_amount")
@@ -280,14 +278,6 @@ class PaymentVerificationPlanDetailsSerializer(serializers.ModelSerializer):
             "version",
         )
 
-    # TODO:
-    # PaymentVerificationPlanNode >
-    # ageFilter.min
-    # ageFilter.max
-    # excludedAdminAreasFilter
-    # rapidProFlowId
-    # excludedAdminAreasFilter.length
-
     def get_available_payment_records_count(self, payment_plan: PaymentPlan) -> int:
         return payment_plan.payment_items.filter(
             status__in=Payment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0
@@ -355,7 +345,6 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
 
 class PaymentPlanListSerializer(serializers.ModelSerializer):
     status = serializers.CharField(source="get_status_display")
-    # currency = serializers.CharField(source="get_currency_display")
     follow_ups = FollowUpPaymentPlanSerializer(many=True, read_only=True)
     created_by = serializers.SerializerMethodField()
 
@@ -497,17 +486,6 @@ class DeliveryMechanismPerPaymentPlanSerializer(serializers.ModelSerializer):
             "order",
             "fsp",
         )
-
-
-class ReconciliationSummarySerializer(serializers.Serializer):
-    delivered_fully = serializers.IntegerField()
-    delivered_partially = serializers.IntegerField()
-    not_delivered = serializers.IntegerField()
-    unsuccessful = serializers.IntegerField()
-    pending = serializers.IntegerField()
-    force_failed = serializers.IntegerField()
-    number_of_payments = serializers.IntegerField()
-    reconciled = serializers.IntegerField()
 
 
 def _calculate_volume(payment_plan: "PaymentPlan", field: str) -> Optional[Decimal]:
@@ -722,7 +700,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
 
     @staticmethod
     def get_reconciliation_summary(obj: PaymentPlan) -> Dict[str, int]:
-        # ReconciliationSummarySerializer()
         return obj.eligible_payments.aggregate(
             delivered_fully=Count("id", filter=Q(status=Payment.STATUS_DISTRIBUTION_SUCCESS)),
             delivered_partially=Count("id", filter=Q(status=Payment.STATUS_DISTRIBUTION_PARTIAL)),
@@ -1180,8 +1157,6 @@ class VerificationListSerializer(serializers.ModelSerializer):
     household_size = serializers.IntegerField(source="household.size")
     snapshot_collector_full_name = serializers.SerializerMethodField(help_text="Get from Household Snapshot")
     payment = PaymentListSerializer(read_only=True)
-
-    # add payment_verifications = PaymentVerification
 
     class Meta:
         model = PaymentVerification
