@@ -1,9 +1,12 @@
-from typing import Dict
+from typing import Any, Dict, List
 
 from rest_framework import serializers
 
 from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
-from hct_mis_api.apps.core.utils import resolve_flex_fields_choices_to_string, to_choice_object
+from hct_mis_api.apps.core.utils import (
+    resolve_flex_fields_choices_to_string,
+    to_choice_object,
+)
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.api.serializers.individual import (
     HouseholdSimpleSerializer,
@@ -13,18 +16,11 @@ from hct_mis_api.apps.household.api.serializers.registration_data_import import 
     RegistrationDataImportSerializer,
 )
 from hct_mis_api.apps.household.models import (
-    DUPLICATE,
-    ROLE_NO_ROLE,
-    Household,
-    Individual, INDIVIDUAL_STATUS_CHOICES,
-)
-from hct_mis_api.apps.household.models import (
     AGENCY_TYPE_CHOICES,
     DUPLICATE,
-    DUPLICATE_IN_BATCH,
     INDIVIDUAL_FLAGS_CHOICES,
+    INDIVIDUAL_STATUS_CHOICES,
     MARITAL_STATUS_CHOICE,
-    NEEDS_ADJUDICATION,
     OBSERVED_DISABILITY_CHOICE,
     RELATIONSHIP_CHOICE,
     RESIDENCE_STATUS_CHOICE,
@@ -32,16 +28,10 @@ from hct_mis_api.apps.household.models import (
     ROLE_NO_ROLE,
     SEVERITY_OF_DISABILITY_CHOICES,
     SEX_CHOICE,
-    STATUS_ACTIVE,
-    STATUS_INACTIVE,
     WORK_STATUS_CHOICE,
-    BankAccountInfo,
-    Document,
     DocumentType,
     Household,
     Individual,
-    IndividualIdentity,
-    IndividualRoleInHousehold,
 )
 
 
@@ -233,10 +223,10 @@ class HouseholdChoicesSerializer(serializers.Serializer):
     document_type_choices = serializers.SerializerMethodField()
     residence_status_choices = serializers.SerializerMethodField()
 
-    def get_document_type_choices(self, obj):
-        return [{"name": x.label, "value": x.key} for x in DocumentType.objects.all()]
+    def get_document_type_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return [{"name": x.label, "value": x.key} for x in DocumentType.objects.order_by("key")]
 
-    def get_residence_status_choices(self, obj):
+    def get_residence_status_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(RESIDENCE_STATUS_CHOICE)
 
 
@@ -254,35 +244,35 @@ class IndividualChoicesSerializer(serializers.Serializer):
     severity_of_disability_choices = serializers.SerializerMethodField()
     work_status_choices = serializers.SerializerMethodField()
 
-    def get_document_type_choices(self, obj):
-        return [{"name": x.label, "value": x.key} for x in DocumentType.objects.all()]
+    def get_document_type_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return [{"name": x.label, "value": x.key} for x in DocumentType.objects.order_by("key")]
 
-    def get_sex_choices(self, obj):
+    def get_sex_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(SEX_CHOICE)
 
-    def get_flag_choices(self, obj):
+    def get_flag_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(INDIVIDUAL_FLAGS_CHOICES)
 
-    def get_status_choices(self, obj):
+    def get_status_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(INDIVIDUAL_STATUS_CHOICES)
 
-    def get_relationship_choices(self, obj):
+    def get_relationship_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(RELATIONSHIP_CHOICE)
 
-    def get_role_choices(self, obj):
+    def get_role_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(ROLE_CHOICE)
 
-    def get_martial_status_choices(self, obj):
+    def get_martial_status_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(MARITAL_STATUS_CHOICE)
 
-    def get_identity_type_choices(self, obj):
+    def get_identity_type_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(AGENCY_TYPE_CHOICES)
 
-    def get_observed_disability_choices(self, obj):
+    def get_observed_disability_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(OBSERVED_DISABILITY_CHOICE)
 
-    def get_severity_of_disability_choices(self, obj):
+    def get_severity_of_disability_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(SEVERITY_OF_DISABILITY_CHOICES)
 
-    def get_work_status_choices(self, obj):
+    def get_work_status_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(WORK_STATUS_CHOICE)

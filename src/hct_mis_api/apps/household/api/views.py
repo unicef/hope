@@ -25,9 +25,11 @@ from hct_mis_api.apps.household.api.caches import (
     IndividualListKeyConstructor,
 )
 from hct_mis_api.apps.household.api.serializers.household import (
+    HouseholdChoicesSerializer,
     HouseholdDetailSerializer,
     HouseholdListSerializer,
-    HouseholdMemberSerializer, HouseholdChoicesSerializer, IndividualChoicesSerializer,
+    HouseholdMemberSerializer,
+    IndividualChoicesSerializer,
 )
 from hct_mis_api.apps.household.api.serializers.individual import (
     IndividualDetailSerializer,
@@ -121,6 +123,7 @@ class HouseholdViewSet(
         instance.withdraw()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
 class HouseholdGlobalViewSet(
     BusinessAreaVisibilityMixin,
     SerializerActionMixin,
@@ -152,7 +155,7 @@ class HouseholdGlobalViewSet(
 
     @action(detail=False, methods=["get"])
     def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:
-        return Response(data=self.get_serializer_class().data)
+        return Response(data=self.get_serializer(instance={}).data)
 
 
 class IndividualViewSet(
@@ -219,4 +222,4 @@ class IndividualGlobalViewSet(
 
     @action(detail=False, methods=["get"])
     def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:
-        return Response(data=self.get_serializer_class().data)
+        return Response(data=self.get_serializer(instance={}).data)
