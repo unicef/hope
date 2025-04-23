@@ -557,11 +557,11 @@ export class RestService {
      * @returns FspChoices
      * @throws ApiError
      */
-    public static restBusinessAreasAvailableFspsForDeliveryMechanismsRetrieve({
+    public static restBusinessAreasAvailableFspsForDeliveryMechanismsList({
         businessAreaSlug,
     }: {
         businessAreaSlug: string,
-    }): CancelablePromise<FspChoices> {
+    }): CancelablePromise<Array<FspChoices>> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/available-fsps-for-delivery-mechanisms/',

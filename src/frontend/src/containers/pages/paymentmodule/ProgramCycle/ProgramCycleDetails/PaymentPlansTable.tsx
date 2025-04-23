@@ -2,6 +2,7 @@ import { UniversalRestTable } from '@components/rest/UniversalRestTable/Universa
 import { headCells } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansHeadCells';
 import { PaymentPlanTableRow } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlanTableRow';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { CountResponse } from '@restgenerated/models/CountResponse';
 import { PaginatedPaymentPlanListList } from '@restgenerated/models/PaginatedPaymentPlanListList';
 import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
 import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
@@ -77,6 +78,20 @@ export const PaymentPlansTable = ({
     enabled: !!businessArea && !!programId,
   });
 
+  const { data: dataPaymentPlansCount } = useQuery<CountResponse>({
+    queryKey: [
+      'businessAreasProgramsPaymentPlansCountRetrieve',
+      queryVariables,
+      programId,
+      businessArea,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlansCountRetrieve({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+      }),
+  });
+
   const replacements = {
     totalHouseholdsCount: (_beneficiaryGroup) =>
       `Num. of ${_beneficiaryGroup?.groupLabelPlural}`,
@@ -98,6 +113,7 @@ export const PaymentPlansTable = ({
       error={errorPaymentPlans}
       isLoading={isLoadingPaymentPlans}
       setQueryVariables={setQueryVariables}
+      itemsCount={dataPaymentPlansCount?.count}
       renderRow={(row: PaymentPlanList) => (
         <PaymentPlanTableRow
           key={row.id}

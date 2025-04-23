@@ -9,6 +9,7 @@ import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PeoplePaymentPlanTableRow } from './PeoplePaymentPlanTableRow';
 import { headCells } from './PeoplePaymentPlansHeadCells';
+import { CountResponse } from '@restgenerated/models/CountResponse';
 
 interface PeoplePaymentPlansTableProps {
   filter;
@@ -55,6 +56,20 @@ export const PeoplePaymentPlansTable = ({
     },
   });
 
+  const { data: dataPaymentPlansCount } = useQuery<CountResponse>({
+    queryKey: [
+      'businessAreasProgramsPaymentPlansCountRetrieve',
+      queryVariables,
+      programId,
+      businessArea,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlansCountRetrieve({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+      }),
+  });
+
   return (
     <UniversalRestTable
       defaultOrderBy="-createdAt"
@@ -65,6 +80,7 @@ export const PeoplePaymentPlansTable = ({
       error={error}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
+      itemsCount={dataPaymentPlansCount?.count}
       renderRow={(row: PaymentPlanList) => (
         <PeoplePaymentPlanTableRow
           key={row.id}

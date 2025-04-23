@@ -19,6 +19,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { RestService } from '@restgenerated/services/RestService';
 import { PaginatedProgramCycleListList } from '@restgenerated/models/PaginatedProgramCycleListList';
 import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
+import { CountResponse } from '@restgenerated/models/CountResponse';
 
 interface ProgramCyclesTablePaymentModuleProps {
   program;
@@ -53,6 +54,20 @@ export const ProgramCyclesTablePaymentModule = ({
         });
       },
     });
+
+  const { data: dataProgramCyclesCount } = useQuery<CountResponse>({
+    queryKey: [
+      'businessAreasProgramsCyclesCountRetrieve',
+      queryVariables,
+      programId,
+      businessArea,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsCyclesCountRetrieve({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+      }),
+  });
 
   const { mutateAsync: finishMutation, isPending: isPendingFinishing } =
     useMutation({
@@ -161,6 +176,7 @@ export const ProgramCyclesTablePaymentModule = ({
       title="Programme Cycles"
       renderRow={renderRow}
       headCells={adjustedHeadCells}
+      itemsCount={dataProgramCyclesCount?.count}
       data={data}
       error={error}
       isLoading={isLoading}

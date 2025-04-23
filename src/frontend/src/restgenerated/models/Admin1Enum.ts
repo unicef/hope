@@ -3,24 +3,24 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * * `HR52` - Danielburgh
- * * `HR19` - Hardyborough
- * * `UA60` - Kellyton
- * * `UA85` - Lake Thomas
- * * `HR44` - North Charles
- * * `AF93` - South Joshua
- * * `AF72` - South Katie
- * * `UA37` - Taraberg
- * * `AF32` - West Sheila
+ * * `AF84` - Hollymouth
+ * * `UA87` - Joshuaborough
+ * * `UA84` - Lake Stephen
+ * * `AF55` - North Melissaborough
+ * * `HR10` - Palmerton
+ * * `UA15` - Port Anthony
+ * * `HR39` - Port Richard
+ * * `HR38` - Seanville
+ * * `AF70` - West Christinaside
  */
 export enum Admin1Enum {
-    HR52 = 'HR52',
-    HR19 = 'HR19',
-    UA60 = 'UA60',
-    UA85 = 'UA85',
-    HR44 = 'HR44',
-    AF93 = 'AF93',
-    AF72 = 'AF72',
-    UA37 = 'UA37',
-    AF32 = 'AF32',
+    AF84 = 'AF84',
+    UA87 = 'UA87',
+    UA84 = 'UA84',
+    AF55 = 'AF55',
+    HR10 = 'HR10',
+    UA15 = 'UA15',
+    HR39 = 'HR39',
+    HR38 = 'HR38',
+    AF70 = 'AF70',
 }

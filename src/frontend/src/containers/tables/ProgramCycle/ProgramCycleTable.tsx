@@ -22,6 +22,8 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { Status791Enum } from '@restgenerated/models/Status791Enum';
 import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
+import { CountResponse } from '@restgenerated/models/CountResponse';
+import { RestService } from '@restgenerated/services/RestService';
 
 interface ProgramCyclesTableProgramDetailsProps {
   program: ProgramDetail;
@@ -48,6 +50,20 @@ export const ProgramCyclesTableProgramDetails = ({
     queryFn: async () => {
       return fetchProgramCycles(businessArea, program.id, queryVariables);
     },
+  });
+
+  const { data: dataProgramCyclesCount } = useQuery<CountResponse>({
+    queryKey: [
+      'businessAreasProgramsCyclesCountRetrieve',
+      queryVariables,
+      programId,
+      businessArea,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsCyclesCountRetrieve({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+      }),
   });
 
   const canViewDetails = programId !== 'all';
@@ -139,6 +155,7 @@ export const ProgramCyclesTableProgramDetails = ({
       title="Programme Cycles"
       renderRow={renderRow}
       headCells={headCells}
+      itemsCount={dataProgramCyclesCount?.count}
       data={data}
       error={error}
       isLoading={isLoading}
