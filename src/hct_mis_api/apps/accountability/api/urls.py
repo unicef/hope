@@ -17,7 +17,7 @@ program_nested_router = program_base_router.program_nested_router
 program_nested_router.register(
     "feedbacks",
     FeedbackViewSet,
-    basename="feedbacks",
+    basename="feedbacks-per-program",
 )
 
 urlpatterns = [

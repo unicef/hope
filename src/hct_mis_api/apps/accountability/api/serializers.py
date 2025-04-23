@@ -1,3 +1,5 @@
+from typing import Optional
+
 from rest_framework import serializers
 
 from hct_mis_api.apps.accountability.models import Feedback, FeedbackMessage
@@ -19,14 +21,12 @@ class FeedbackMessageSerializer(serializers.ModelSerializer):
 
 class FeedbackListSerializer(serializers.ModelSerializer):
     issue_type = serializers.CharField(source="get_issue_type_display")
-    household_unicef_id = serializers.CharField(source="household_lookup.unicef_id")
-    household_id = serializers.CharField(source="household_lookup.id")
-    individual_unicef_id = serializers.CharField(source="individual_lookup.unicef_id")
-    individual_id = serializers.CharField(source="individual_lookup.id")
-    linked_grievance_id = serializers.CharField(source="linked_grievance.id")
-    linked_grievance_unicef_id = serializers.CharField(source="linked_grievance.unicef_id")
-    program_name = serializers.CharField(source="program.name")
-    program_id = serializers.CharField(source="program.id")
+    household_unicef_id = serializers.SerializerMethodField()
+    household_id = serializers.SerializerMethodField()
+    individual_unicef_id = serializers.SerializerMethodField()
+    individual_id = serializers.SerializerMethodField()
+    linked_grievance_unicef_id = serializers.SerializerMethodField()
+    program_name = serializers.SerializerMethodField()
     created_by = serializers.SerializerMethodField()
     feedback_messages = FeedbackMessageSerializer(many=True, read_only=True)
 
@@ -52,9 +52,27 @@ class FeedbackListSerializer(serializers.ModelSerializer):
     def get_created_by(self, obj: Feedback) -> str:
         return f"{obj.created_by.first_name} {obj.created_by.last_name}"
 
+    def get_household_unicef_id(self, obj: Feedback) -> Optional[str]:
+        return getattr(obj.household_lookup, "unicef_id", None)
+
+    def get_household_id(self, obj: Feedback) -> Optional[str]:
+        return getattr(obj.household_lookup, "id", None)
+
+    def get_individual_unicef_id(self, obj: Feedback) -> Optional[str]:
+        return getattr(obj.individual_lookup, "unicef_id", None)
+
+    def get_individual_id(self, obj: Feedback) -> Optional[str]:
+        return getattr(obj.individual_lookup, "id", None)
+
+    def get_linked_grievance_unicef_id(self, obj: Feedback) -> Optional[str]:
+        return getattr(obj.linked_grievance, "unicef_id", None)
+
+    def get_program_name(self, obj: Feedback) -> Optional[str]:
+        return getattr(obj.program, "name", None)
+
 
 class FeedbackDetailSerializer(AdminUrlSerializerMixin, FeedbackListSerializer):
-    admin2_name = serializers.CharField(source="admin2.name")
+    admin2_name = serializers.SerializerMethodField()
 
     class Meta(FeedbackListSerializer.Meta):
         fields = FeedbackListSerializer.Meta.fields + (  # type: ignore
@@ -66,6 +84,9 @@ class FeedbackDetailSerializer(AdminUrlSerializerMixin, FeedbackListSerializer):
             "updated_at",
             "admin2_name",
         )
+
+    def get_admin2_name(self, obj: Feedback) -> Optional[str]:
+        return getattr(obj.admin2, "name", None)
 
 
 class FeedbackCreateSerializer(serializers.ModelSerializer):
