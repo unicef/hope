@@ -14,34 +14,10 @@ from hct_mis_api.apps.dashboard.serializers import DashboardBaseSerializer
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import Payment
 
-<<<<<<< HEAD
-CACHE_TIMEOUT = 60 * 60 * 6  # 6 hours
-
-pwdSum = Sum(
-    Coalesce(F("household__female_age_group_0_5_disabled_count"), 0)
-    + Coalesce(F("household__female_age_group_6_11_disabled_count"), 0)
-    + Coalesce(F("household__female_age_group_12_17_disabled_count"), 0)
-    + Coalesce(F("household__female_age_group_18_59_disabled_count"), 0)
-    + Coalesce(F("household__female_age_group_60_disabled_count"), 0)
-    + Coalesce(F("household__male_age_group_0_5_disabled_count"), 0)
-    + Coalesce(F("household__male_age_group_6_11_disabled_count"), 0)
-    + Coalesce(F("household__male_age_group_12_17_disabled_count"), 0)
-    + Coalesce(F("household__male_age_group_18_59_disabled_count"), 0)
-    + Coalesce(F("household__male_age_group_60_disabled_count"), 0),
-    default=0,
-)
-
-finished_payment_plans = Count(
-    "parent__id", filter=Q(parent__payment_verification_plans__status="FINISHED"), distinct=True
-)
-
-total_payment_plans = Count("parent__id", filter=Q(parent__status__in=["ACCEPTED", "FINISHED"]), distinct=True)
-=======
 CACHE_TIMEOUT = 60 * 60 * 6
 GLOBAL_SLUG = "global"
 DEFAULT_ITERATOR_CHUNK_SIZE = 2000
 HOUSEHOLD_BATCH_SIZE = 2000
->>>>>>> origin/master
 
 
 class CountrySummaryDict(TypedDict):
@@ -107,39 +83,6 @@ class DashboardCacheBase(Protocol):
         cache.set(cache_key, json.dumps(data), CACHE_TIMEOUT)
 
     @classmethod
-<<<<<<< HEAD
-    def refresh_data(cls, business_area_slug: str) -> ReturnDict:
-        """
-        Generate and store updated data for a given business area.
-        """
-        list_country = []
-        business_area_ = BusinessArea.objects.using("read_only")
-        if business_area_slug:
-            list_country = business_area_.filter(slug=business_area_slug)
-        else:
-            list_country = business_area_.filter(active=True)
-        result = []
-        for area in list_country:
-            payments_aggregated = (
-                Payment.objects.using("read_only")
-                .select_related(
-                    "business_area",
-                    "household",
-                    "program",
-                    "household__admin1",
-                    "financial_service_provider",
-                    "delivery_type",
-                    "parent",
-                )
-                .filter(
-                    business_area=area,
-                    parent__status__in=["ACCEPTED", "FINISHED"],
-                    is_removed=False,
-                    conflicted=False,
-                    excluded=False,
-                )  # noqa
-                .exclude(status__in=["Transaction Erroneous", "Not Distributed", "Force failed", "Manually Cancelled"])
-=======
     def _get_base_payment_queryset(cls, business_area: Optional[BusinessArea] = None) -> models.QuerySet:
         qs = (
             Payment.objects.using("read_only")
@@ -161,6 +104,7 @@ class DashboardCacheBase(Protocol):
                 parent__is_removed=False,
                 is_removed=False,
                 conflicted=False,
+                excluded=False,
             )
             .exclude(status__in=["Transaction Erroneous", "Not Distributed", "Force failed", "Manually Cancelled"])
         )
@@ -192,7 +136,7 @@ class DashboardCacheBase(Protocol):
             fsp_name=Coalesce(F("financial_service_provider__name"), Value("Unknown FSP")),
             delivery_type_name=Coalesce(F("delivery_type__name"), Value("Unknown Delivery Type")),
             payment_status=Coalesce(F("status"), Value("Unknown Status")),
-            reconciled=Count("pk", filter=Q(payment_verifications__isnull=False), distinct=False),
+            reconciled=Count("pk", filter=Q(payment_verifications__isnull=False), distinct=True),
             household_id_val=F("household_id"),
             parent_id_val=F("parent_id"),
         ).values(
@@ -230,57 +174,18 @@ class DashboardCacheBase(Protocol):
                 Household.objects.using("read_only")
                 .filter(id__in=batch_ids)
                 .select_related("admin1", "admin_area", "business_area")
->>>>>>> origin/master
                 .annotate(
                     pwd_count_calc=get_pwd_count_expression(),
                     admin1_name_hh=Coalesce(F("admin1__name"), F("admin_area__name"), Value("Unknown Admin1")),
                     country_name_hh=Coalesce(F("business_area__name"), Value("Unknown Country")),
                 )
                 .values(
-<<<<<<< HEAD
-                    "currency",
-                    "year",
-                    "month",
-                    "status",
-                    "programs",
-                    "sectors",
-                    "admin1",
-                    "fsp",
-                    "delivery_types",
-                )
-                .annotate(
-                    total_usd=Sum(
-                        Case(
-                            When(delivered_quantity_usd__isnull=False, then="delivered_quantity_usd"),
-                            When(entitlement_quantity_usd__isnull=False, then="entitlement_quantity_usd"),
-                            default=Value(0.0),
-                            output_field=DecimalField(),
-                        )
-                    ),
-                    total_quantity=Sum(
-                        Case(
-                            When(delivered_quantity__isnull=False, then="delivered_quantity"),
-                            When(entitlement_quantity__isnull=False, then="entitlement_quantity"),
-                            default=Value(0.0),
-                            output_field=DecimalField(),
-                        )
-                    ),
-                    total_payments=Count("id", distinct=True),
-                    individuals=Sum(Coalesce("household__size", Value(1))),
-                    households=Count("household", distinct=True),
-                    children_counts=Sum("household__children_count"),
-                    reconciled=Count("pk", distinct=True, filter=Q(payment_verifications__isnull=False)),
-                    pwd_counts=pwdSum,
-                    finished_payment_plans=finished_payment_plans,
-                    total_payment_plans=total_payment_plans,
-=======
                     "id",
                     "size",
                     "children_count",
                     "pwd_count_calc",
                     "admin1_name_hh",
                     "country_name_hh",
->>>>>>> origin/master
                 )
             )
 
@@ -448,64 +353,8 @@ class DashboardDataCache(DashboardCacheBase):
 
 class DashboardGlobalDataCache(DashboardCacheBase):
     @classmethod
-<<<<<<< HEAD
-    def refresh_data(cls, business_area_slug: str = "global") -> ReturnDict:
-        """
-        Generate and store updated data for the global dashboard.
-        """
-        result = []
-        payments_aggregated = (
-            Payment.objects.using("read_only")
-            .select_related(
-                "business_area",
-                "delivery_type",
-                "parent",
-            )
-            .filter(
-                parent__status__in=["ACCEPTED", "FINISHED"],
-                is_removed=False,
-                conflicted=False,
-                excluded=False,
-            )  # noqa
-            .exclude(status__in=["Transaction Erroneous", "Not Distributed", "Force failed", "Manually Cancelled"])
-            .annotate(
-                country=F("business_area__name"),
-                year=ExtractYear(Coalesce("delivery_date", "entitlement_date", "status_date")),
-                sectors=Coalesce(F("household__program__sector"), Value("Unknown sector")),
-                delivery_types=F("delivery_type__name"),
-            )
-            .order_by()
-            .values(
-                "country",
-                "currency",
-                "status",
-                "year",
-                "sectors",
-                "delivery_types",
-            )
-            .annotate(
-                total_usd=Sum(
-                    Case(
-                        When(delivered_quantity_usd__isnull=False, then="delivered_quantity_usd"),
-                        When(entitlement_quantity_usd__isnull=False, then="entitlement_quantity_usd"),
-                        default=Value(0.0),
-                        output_field=DecimalField(),
-                    )
-                ),
-                total_payments=Count("id", distinct=True),
-                individuals=Sum(Coalesce("household__size", Value(1))),
-                households=Count("household", distinct=True),
-                children_counts=Sum("household__children_count"),
-                reconciled=Count("pk", distinct=True, filter=Q(payment_verifications__isnull=False)),
-                pwd_counts=pwdSum,
-                finished_payment_plans=finished_payment_plans,
-                total_payment_plans=total_payment_plans,
-            )
-        )
-=======
     def refresh_data(cls, identifier: str = GLOBAL_SLUG) -> List[Dict[str, Any]]:
         base_payments_qs = cls._get_base_payment_queryset()
->>>>>>> origin/master
 
         household_ids: Set[UUID] = set(
             hh_id for hh_id in base_payments_qs.values_list("household_id", flat=True).distinct() if hh_id is not None
