@@ -1639,7 +1639,7 @@ class TPHouseholdViewSet(
     }
 
 
-@extend_schema(responses={200: FspChoicesSerializer})  # type: ignore
+@extend_schema(responses={200: FspChoicesSerializer(many=True)})  # type: ignore
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def available_fsps_for_delivery_mechanisms(
