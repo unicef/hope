@@ -49,6 +49,7 @@ function PaymentsPeopleTable({
         businessAreaSlug: businessArea,
         programSlug: programId,
         id: household.id,
+        ...queryVariables,
       });
     },
   });

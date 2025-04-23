@@ -52,6 +52,7 @@ export const PeoplePaymentPlansTable = ({
       return RestService.restBusinessAreasProgramsPaymentPlansList({
         businessAreaSlug: businessArea,
         programSlug: programId,
+        ...queryVariables,
       });
     },
   });

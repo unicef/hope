@@ -65,6 +65,7 @@ function PaymentsTable({
         businessAreaSlug: businessArea,
         programSlug: programId,
         paymentPlanId: paymentPlan.id,
+        ...queryVariables,
       });
     },
   });

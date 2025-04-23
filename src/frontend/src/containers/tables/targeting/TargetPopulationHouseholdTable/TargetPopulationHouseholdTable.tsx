@@ -48,6 +48,7 @@ export function TargetPopulationHouseholdTable({
           businessAreaSlug: businessArea,
           programSlug: programId,
           targetPopulationId: id,
+          ...queryVariables,
         },
       );
     },

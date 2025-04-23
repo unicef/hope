@@ -66,6 +66,7 @@ export const ProgramCyclesTablePaymentModule = ({
       RestService.restBusinessAreasProgramsCyclesCountRetrieve({
         businessAreaSlug: businessArea,
         programSlug: programId,
+        ...queryVariables,
       }),
   });
 

@@ -63,6 +63,7 @@ export const ProgramCyclesTableProgramDetails = ({
       RestService.restBusinessAreasProgramsCyclesCountRetrieve({
         businessAreaSlug: businessArea,
         programSlug: programId,
+        ...queryVariables,
       }),
   });
 

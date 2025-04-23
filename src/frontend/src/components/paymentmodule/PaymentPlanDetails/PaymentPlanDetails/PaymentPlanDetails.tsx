@@ -1,3 +1,12 @@
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { BlackLink } from '@core/BlackLink';
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { FieldBorder } from '@core/FieldBorder';
+import { LabelizedField } from '@core/LabelizedField';
+import { OverviewContainer } from '@core/OverviewContainer';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
+import { Info } from '@mui/icons-material';
 import {
   Box,
   Grid2 as Grid,
@@ -5,20 +14,10 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { useTranslation } from 'react-i18next';
-import { renderUserName } from '@utils/utils';
-import { BlackLink } from '@core/BlackLink';
-import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
-import { LabelizedField } from '@core/LabelizedField';
-import { OverviewContainer } from '@core/OverviewContainer';
-import { Title } from '@core/Title';
-import { UniversalMoment } from '@core/UniversalMoment';
-import { FieldBorder } from '@core/FieldBorder';
-import { RelatedFollowUpPaymentPlans } from './RelatedFollowUpPaymentPlans';
-import { Info } from '@mui/icons-material';
-import { ReactElement } from 'react';
-import withErrorBoundary from '@components/core/withErrorBoundary';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { RelatedFollowUpPaymentPlans } from './RelatedFollowUpPaymentPlans';
 
 interface PaymentPlanDetailsProps {
   baseUrl: string;
@@ -53,7 +52,7 @@ const PaymentPlanDetails = ({
             <Grid container size={{ xs: 9 }} spacing={6}>
               <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Created By')}>
-                  {renderUserName(createdBy)}
+                  {createdBy}
                 </LabelizedField>
               </Grid>
               <Grid size={{ xs: 3 }}>

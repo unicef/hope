@@ -86,6 +86,7 @@ export const HouseholdTable = ({
       RestService.restBusinessAreasProgramsHouseholdsList({
         businessAreaSlug: businessArea,
         programSlug: programId,
+        ...queryVariables,
       }),
     enabled: !!businessArea && !!programId,
   });

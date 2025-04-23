@@ -309,43 +309,43 @@ export function Criteria({
   const [pageIND, setPageIND] = useState(0);
   const [rowsPerPageIND, setRowsPerPageIND] = useState(5);
 
-  useEffect(() => {
-    const mappedDeliveryMechanisms =
-      availableFspsForDeliveryMechanismData.deliveryMechanism((el) => ({
-        name: el.deliveryMechanism.name,
-        value: el.deliveryMechanism.code,
-      }));
+  // useEffect(() => {
+  //   const mappedDeliveryMechanisms =
+  //     availableFspsForDeliveryMechanismData.deliveryMechanism((el) => ({
+  //       name: el.deliveryMechanism.name,
+  //       value: el.deliveryMechanism.code,
+  //     }));
 
-    const deliveryMechanismName =
-      deliveryMechanism?.name ||
-      mappedDeliveryMechanisms?.find(
-        (el) => el.value === criteria.deliveryMechanism,
-      )?.name;
+  //   const deliveryMechanismName =
+  //     deliveryMechanism?.name ||
+  //     mappedDeliveryMechanisms?.find(
+  //       (el) => el.value === criteria.deliveryMechanism,
+  //     )?.name;
 
-    const mappedFsps =
-      availableFspsForDeliveryMechanismData.deliveryMechanism
-        ?.find(
-          (el) =>
-            el.deliveryMechanism.code === deliveryMechanism ||
-            el.deliveryMechanism.code ===
-              mappedDeliveryMechanisms?.find(
-                (elem) => elem.value === criteria.deliveryMechanism,
-              )?.value,
-        )
-        ?.fsps.map((el) => ({ name: el.name, value: el.id })) || [];
+  //   const mappedFsps =
+  //     availableFspsForDeliveryMechanismData.deliveryMechanism
+  //       ?.find(
+  //         (el) =>
+  //           el.deliveryMechanism.code === deliveryMechanism ||
+  //           el.deliveryMechanism.code ===
+  //             mappedDeliveryMechanisms?.find(
+  //               (elem) => elem.value === criteria.deliveryMechanism,
+  //             )?.value,
+  //       )
+  //       ?.fsps.map((el) => ({ name: el.name, value: el.id })) || [];
 
-    const fspName =
-      financialServiceProvider?.name ||
-      mappedFsps?.find((el) => el.value === criteria.fsp)?.name;
+  //   const fspName =
+  //     financialServiceProvider?.name ||
+  //     mappedFsps?.find((el) => el.value === criteria.fsp)?.name;
 
-    setDeliveryMechanismToDisplay(deliveryMechanismName);
-    setFspToDisplay(fspName);
-  }, [
-    deliveryMechanism,
-    financialServiceProvider,
-    availableFspsForDeliveryMechanismData,
-    criteria,
-  ]);
+  //   setDeliveryMechanismToDisplay(deliveryMechanismName);
+  //   setFspToDisplay(fspName);
+  // }, [
+  //   deliveryMechanism,
+  //   financialServiceProvider,
+  //   availableFspsForDeliveryMechanismData,
+  //   criteria,
+  // ]);
 
   if (!availableFspsForDeliveryMechanismData) return null;
 

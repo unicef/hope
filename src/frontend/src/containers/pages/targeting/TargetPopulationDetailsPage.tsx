@@ -39,9 +39,9 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
         id: id,
         programSlug: programId,
       }),
-    refetchInterval: () => {
-      const { backgroundActionStatus } = paymentPlan;
-      if (['BUILDING', 'PENDING'].includes(backgroundActionStatus)) {
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      if (['BUILDING', 'PENDING'].includes(data?.backgroundActionStatus)) {
         return 3000;
       }
 

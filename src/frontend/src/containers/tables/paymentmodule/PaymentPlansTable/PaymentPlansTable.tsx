@@ -69,6 +69,7 @@ function PaymentPlansTable({
       RestService.restBusinessAreasProgramsPaymentPlansCountRetrieve({
         businessAreaSlug: businessArea,
         programSlug: programId,
+        ...queryVariables,
       }),
   });
 

@@ -70,6 +70,7 @@ export function VerificationRecordsTable({
           businessAreaSlug: businessArea,
           programSlug: programId,
           paymentVerificationPk: paymentPlanId,
+          ...queryVariables,
         },
       );
     },
