@@ -1,5 +1,6 @@
 import logging
 
+from django.db.models import QuerySet
 from django_filters import rest_framework as filters
 from rest_framework import mixins
 from rest_framework.filters import OrderingFilter, SearchFilter
@@ -59,19 +60,17 @@ class FeedbackViewSet(
         "partial_update": FeedbackUpdateSerializer,
     }
     permissions_by_action = {
-        "list": [Permissions.PAYMENT_VERIFICATION_VIEW_LIST],
-        "retrieve": [Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS],
-        "create": [Permissions.PAYMENT_VERIFICATION_CREATE],
-        "partial_update": [Permissions.PAYMENT_VERIFICATION_UPDATE],
+        "list": [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST, Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS],
+        "retrieve": [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST, Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS],
+        "create": [Permissions.GRIEVANCES_FEEDBACK_VIEW_CREATE],
+        "partial_update": [Permissions.GRIEVANCES_FEEDBACK_VIEW_UPDATE],
     }
 
     def get_object(self) -> Feedback:
         return get_object_or_404(Feedback, id=self.kwargs.get("pk"))
 
-    # def get_queryset(self) -> QuerySet[Feedback]:
-    #     # or add filter based on if program_slug is in kwargs
-    #     return Feedback.objects.all()
-
-
-# all programs
-# TODO: add new ViewSet
+    def get_queryset(self) -> QuerySet["Feedback"]:
+        print("==>> ", self.kwargs)
+        # TODO: add new ViewSet
+        # or add filter based on if program_slug is in kwargs
+        return Feedback.objects.all()
