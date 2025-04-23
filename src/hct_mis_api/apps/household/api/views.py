@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
+from hct_mis_api.api.endpoints.rdi.upload import IndividualSerializer
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.api.mixins import (
     BaseViewSet,
@@ -53,7 +54,6 @@ class HouseholdViewSet(
     BaseViewSet,
 ):
     queryset = Household.all_merge_status_objects.order_by("created_at")
-    serializer_class = HouseholdListSerializer
     serializer_classes_by_action = {
         "list": HouseholdListSerializer,
         "retrieve": HouseholdDetailSerializer,
@@ -132,7 +132,6 @@ class HouseholdGlobalViewSet(
     BaseViewSet,
 ):
     queryset = Household.all_merge_status_objects.all()
-    serializer_class = HouseholdListSerializer
     serializer_classes_by_action = {
         "list": HouseholdListSerializer,
         "choices": HouseholdChoicesSerializer,

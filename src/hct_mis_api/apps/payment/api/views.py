@@ -165,15 +165,11 @@ class PaymentPlanManagerialViewSet(
 
 
 class PaymentPlanSupportingDocumentViewSet(
-    SerializerActionMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin, BaseViewSet
+    mixins.CreateModelMixin, mixins.DestroyModelMixin, BaseViewSet
 ):
     serializer_class = PaymentPlanSupportingDocumentSerializer
     lookup_field = "file_id"
 
-    serializer_classes_by_action = {
-        "create": PaymentPlanSupportingDocumentSerializer,
-        "delete": PaymentPlanSupportingDocumentSerializer,
-    }
     permissions_by_action = {
         "create": [Permissions.PM_UPLOAD_SUPPORTING_DOCUMENT],
         "delete": [Permissions.PM_DELETE_SUPPORTING_DOCUMENT],
