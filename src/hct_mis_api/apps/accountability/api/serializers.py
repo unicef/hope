@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
-from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
 from hct_mis_api.apps.accountability.models import Feedback, FeedbackMessage
+from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
 
 
 class FeedbackMessageSerializer(serializers.ModelSerializer):
@@ -50,7 +50,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, FeedbackListSerialize
     program_name = serializers.CharField(source="program.name")
     program_id = serializers.CharField(source="program.id")
     admin2_name = serializers.CharField(source="admin2.name")
-
 
     class Meta(FeedbackListSerializer.Meta):
         fields = FeedbackListSerializer.Meta.fields + (  # type: ignore
