@@ -5,10 +5,12 @@ from drf_spectacular.views import (
     SpectacularRedocView,
     SpectacularSwaggerView,
 )
+from rest_framework.routers import DefaultRouter
 
 from hct_mis_api.api import endpoints
 from hct_mis_api.api.endpoints.base import ConstanceSettingsAPIView
 from hct_mis_api.api.endpoints.program.views import ProgramGlobalListView
+from hct_mis_api.apps.core.api.views import ChoicesViewSet
 from hct_mis_api.apps.core.rest_api import get_currency_choices
 from hct_mis_api.apps.steficon.views import RuleEngineViewSet
 from hct_mis_api.contrib.aurora.views import (
@@ -18,6 +20,10 @@ from hct_mis_api.contrib.aurora.views import (
 )
 
 app_name = "api"
+
+router = DefaultRouter()
+router.register(r"choices", ChoicesViewSet, basename="choices")
+
 
 urlpatterns = [
     re_path("^$", SpectacularAPIView.as_view(), name="schema"),
@@ -38,6 +44,8 @@ urlpatterns = [
         include("hct_mis_api.apps.geo.api.urls", namespace="geo"),
     ),
     path("", include("hct_mis_api.apps.account.api.urls", namespace="accounts")),
+    # choices
+    path("", include(router.urls)),
     # old urls
     path("areas/", endpoints.lookups.AreaList().as_view(), name="area-list"),
     path("areatypes/", endpoints.lookups.AreaTypeList().as_view(), name="areatype-list"),

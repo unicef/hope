@@ -112,13 +112,13 @@ mutation CreateAccountabilityCommunicationMessage (
             },
         )
 
-    @skip("Because will remove soon after REST refactoring")
     @parameterized.expand(
         [
             (Survey.SAMPLING_FULL_LIST,),
             (Survey.SAMPLING_RANDOM,),
         ]
     )
+    @skip("Because will remove soon after REST refactoring")
     def test_create_accountability_communication_message_by_target_population(self, sampling_type: str) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE], self.business_area, self.program
@@ -152,13 +152,13 @@ mutation CreateAccountabilityCommunicationMessage (
                 self.assertEqual(len(broadcast_message_mock.call_args[0][0]), self.payment_plan.payment_items.count())
             self.assertEqual(broadcast_message_mock.call_args[0][1], "Test body")
 
-    @skip("Because will remove soon after REST refactoring")
     @parameterized.expand(
         [
             (Survey.SAMPLING_FULL_LIST,),
             (Survey.SAMPLING_RANDOM,),
         ]
     )
+    @skip("Because will remove soon after REST refactoring")
     def test_create_accountability_communication_message_by_households(self, sampling_type: str) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE], self.business_area, self.program
