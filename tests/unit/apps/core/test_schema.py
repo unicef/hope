@@ -1,3 +1,4 @@
+from apps.payment.fixtures import generate_delivery_mechanisms
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import (
@@ -171,6 +172,7 @@ class TestAllCollectorsFields(APITestCase):
         super().setUpTestData()
         cls.business_area = create_afghanistan()
         cls.user = UserFactory()
+        generate_delivery_mechanisms()
 
     def test_collectors_fields_choices_data(self) -> None:
         self.snapshot_graphql_request(

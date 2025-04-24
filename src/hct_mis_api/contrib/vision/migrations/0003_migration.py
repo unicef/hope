@@ -5,7 +5,7 @@ CREATE OR REPLACE FUNCTION funds_commitment_trigger_function()
 RETURNS TRIGGER AS $$
 DECLARE
     fc_group_id INT;
-    office_id INT;
+    office_id UUID;
 
 BEGIN
     -- Check if FundsCommitmentGroup exists, if not create it
