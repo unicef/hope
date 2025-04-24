@@ -24,8 +24,8 @@ export function LookUpPaymentRecordTable({
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const initialQueryVariables = {
     householdId: initialValues?.selectedHousehold?.id,
-    businessArea,
-    program: programId === 'all' ? null : programId,
+    businessAreaSlug: businessArea,
+    slug: programId === 'all' ? null : programId,
   };
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
@@ -34,18 +34,9 @@ export function LookUpPaymentRecordTable({
     isLoading,
     error,
   } = useQuery<PaginatedPaymentListList>({
-    queryKey: [
-      'businessAreasProgramsPaymentsList',
-      businessArea,
-      programId,
-      queryVariables,
-    ],
+    queryKey: ['businessAreasProgramsPaymentsList', queryVariables],
     queryFn: () => {
-      return RestService.restBusinessAreasProgramsPaymentsList({
-        businessAreaSlug: businessArea,
-        slug: programId,
-        ...queryVariables,
-      });
+      return RestService.restBusinessAreasProgramsPaymentsList(queryVariables);
     },
   });
   const [selected, setSelected] = useState(

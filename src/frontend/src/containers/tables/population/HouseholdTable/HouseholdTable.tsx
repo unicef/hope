@@ -25,6 +25,7 @@ import { useProgramContext } from 'src/programContext';
 import { headCells } from './HouseholdTableHeadCells';
 import { HouseholdList } from '@restgenerated/models/HouseholdList';
 import { PaginatedHouseholdListList } from '@restgenerated/models/PaginatedHouseholdListList';
+import { CountResponse } from '@restgenerated/models/CountResponse';
 
 interface HouseholdTableRestProps {
   filter;
@@ -67,7 +68,20 @@ export const HouseholdTable = ({
       ordering: filter.orderBy,
       rdiMergeStatus: HouseholdRdiMergeStatus.Merged,
     };
-  }, [businessArea, filter, programId]);
+  }, [
+    businessArea,
+    programId,
+    filter.householdSizeMin,
+    filter.householdSizeMax,
+    filter.search,
+    filter.documentType,
+    filter.documentNumber,
+    filter.admin1,
+    filter.admin2,
+    filter.residenceStatus,
+    filter.withdrawn,
+    filter.orderBy,
+  ]);
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
@@ -76,31 +90,19 @@ export const HouseholdTable = ({
   }, [initialQueryVariables]);
 
   const { data, isLoading, error } = useQuery<PaginatedHouseholdListList>({
-    queryKey: [
-      'businessAreasProgramsHouseholdsList',
-      queryVariables,
-      programId,
-      businessArea,
-    ],
+    queryKey: ['businessAreasProgramsHouseholdsList', queryVariables],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsHouseholdsList({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
-        ...queryVariables,
-      }),
-    enabled: !!businessArea && !!programId,
+      RestService.restBusinessAreasProgramsHouseholdsList(queryVariables),
   });
 
-  //TODO:
-  // const { data: countData } = useQuery<CountResponse>({
-  //   queryKey: ['businessAreasProgramsHouseholdsCount', programId, businessArea],
-  //   queryFn: () =>
-  //     RestService.restBusinessAreasProgramsHouseholdsCountRetrieve({
-  //       businessAreaSlug: businessArea,
-  //       programSlug: programId,
-  //     }),
-  //   enabled: !!businessArea && !!programId,
-  // });
+  const { data: countData } = useQuery<CountResponse>({
+    queryKey: ['businessAreasProgramsHouseholdsCount', programId, businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsHouseholdsCountRetrieve({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+      }),
+  });
 
   const replacements = {
     unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} ID`,
@@ -197,6 +199,7 @@ export const HouseholdTable = ({
         isLoading={isLoading}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
+        itemsCount={countData?.count}
       />
     </TableWrapper>
   );

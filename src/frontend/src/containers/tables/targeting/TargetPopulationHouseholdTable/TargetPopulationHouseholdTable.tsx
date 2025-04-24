@@ -27,6 +27,9 @@ export function TargetPopulationHouseholdTable({
   const { businessArea, programId } = useBaseUrl();
   const initialQueryVariables = {
     ...variables,
+    businessAreaSlug: businessArea,
+    programSlug: programId,
+    targetPopulationId: id,
   };
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
@@ -44,12 +47,7 @@ export function TargetPopulationHouseholdTable({
     ],
     queryFn: () => {
       return RestService.restBusinessAreasProgramsTargetPopulationsHouseholdsList(
-        {
-          businessAreaSlug: businessArea,
-          programSlug: programId,
-          targetPopulationId: id,
-          ...queryVariables,
-        },
+        queryVariables,
       );
     },
   });

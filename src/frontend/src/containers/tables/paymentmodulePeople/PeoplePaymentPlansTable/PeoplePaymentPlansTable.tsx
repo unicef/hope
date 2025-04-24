@@ -23,7 +23,8 @@ export const PeoplePaymentPlansTable = ({
   const { t } = useTranslation();
   const { programId, businessArea } = useBaseUrl();
   const initialQueryVariables = {
-    businessArea,
+    businessAreaSlug: businessArea,
+    programSlug: programId,
     search: filter.search,
     status: filter.status,
     totalEntitledQuantityFrom: filter.totalEntitledQuantityFrom || null,
@@ -31,7 +32,6 @@ export const PeoplePaymentPlansTable = ({
     dispersionStartDate: filter.dispersionStartDate || null,
     dispersionEndDate: filter.dispersionEndDate || null,
     isFollowUp: filter.isFollowUp ? true : null,
-    program: programId,
     isPaymentPlan: true,
   };
 
@@ -42,18 +42,11 @@ export const PeoplePaymentPlansTable = ({
     isLoading,
     error,
   } = useQuery<PaginatedPaymentPlanListList>({
-    queryKey: [
-      'businessAreasProgramsPaymentPlansList',
-      businessArea,
-      programId,
-      queryVariables,
-    ],
+    queryKey: ['businessAreasProgramsPaymentPlansList', queryVariables],
     queryFn: () => {
-      return RestService.restBusinessAreasProgramsPaymentPlansList({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
-        ...queryVariables,
-      });
+      return RestService.restBusinessAreasProgramsPaymentPlansList(
+        queryVariables,
+      );
     },
   });
 

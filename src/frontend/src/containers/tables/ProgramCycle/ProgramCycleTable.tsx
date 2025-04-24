@@ -32,12 +32,14 @@ interface ProgramCyclesTableProgramDetailsProps {
 export const ProgramCyclesTableProgramDetails = ({
   program,
 }: ProgramCyclesTableProgramDetailsProps) => {
+  const { businessArea, baseUrl, programId } = useBaseUrl();
   const [queryVariables, setQueryVariables] = useState({
     offset: 0,
     limit: 5,
     ordering: 'created_at',
+    businessAreaSlug: businessArea,
+    programSlug: programId,
   });
-  const { businessArea, baseUrl, programId } = useBaseUrl();
   const permissions = usePermissions();
   const canCreateProgramCycle =
     program.status === Status791Enum.ACTIVE &&
@@ -53,18 +55,9 @@ export const ProgramCyclesTableProgramDetails = ({
   });
 
   const { data: dataProgramCyclesCount } = useQuery<CountResponse>({
-    queryKey: [
-      'businessAreasProgramsCyclesCountRetrieve',
-      queryVariables,
-      programId,
-      businessArea,
-    ],
+    queryKey: ['businessAreasProgramsCyclesCountRetrieve', queryVariables],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsCyclesCountRetrieve({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
-        ...queryVariables,
-      }),
+      RestService.restBusinessAreasProgramsCyclesCountRetrieve(queryVariables),
   });
 
   const canViewDetails = programId !== 'all';

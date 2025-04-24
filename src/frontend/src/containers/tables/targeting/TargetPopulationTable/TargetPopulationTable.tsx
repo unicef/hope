@@ -54,6 +54,8 @@ export function TargetPopulationTable({
       min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
       max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
     }),
+    businessAreaSlug: businessArea,
+    programSlug: programId,
   };
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
@@ -63,18 +65,11 @@ export function TargetPopulationTable({
     isLoading,
     error,
   } = useQuery<PaginatedTargetPopulationListList>({
-    queryKey: [
-      'businessAreasProgramsTargetPopulationsList',
-      businessArea,
-      programId,
-      queryVariables,
-    ],
+    queryKey: ['businessAreasProgramsTargetPopulationsList', queryVariables],
     queryFn: () => {
-      return RestService.restBusinessAreasProgramsTargetPopulationsList({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
-        ...queryVariables,
-      });
+      return RestService.restBusinessAreasProgramsTargetPopulationsList(
+        queryVariables,
+      );
     },
   });
 

@@ -23,14 +23,14 @@ function PaymentVerificationTable({
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
   const initialQueryVariables = {
-    businessArea,
+    programSlug: programId,
+    businessAreaSlug: businessArea,
     search: filter.search,
     verificationStatus: filter.verificationStatus,
     serviceProvider: filter.serviceProvider,
     deliveryTypes: filter.deliveryTypes,
     startDate: dateToIsoString(filter.startDate, 'startOfDay'),
     endDate: dateToIsoString(filter.endDate, 'endOfDay'),
-    program: programId,
   };
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
@@ -40,21 +40,13 @@ function PaymentVerificationTable({
     isLoading,
     error,
   } = useQuery<PaginatedPaymentVerificationPlanListList>({
-    queryKey: [
-      'businessAreasProgramsPaymentPlansList',
-      businessArea,
-      programId,
-      queryVariables,
-    ],
+    queryKey: ['businessAreasProgramsPaymentPlansList', queryVariables],
     queryFn: () => {
-      return RestService.restBusinessAreasProgramsPaymentVerificationsList({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
-        ...queryVariables,
-      });
+      return RestService.restBusinessAreasProgramsPaymentVerificationsList(
+        queryVariables,
+      );
     },
   });
-  console.log('paymentPlansData', paymentPlansData);
 
   return (
     <UniversalRestTable

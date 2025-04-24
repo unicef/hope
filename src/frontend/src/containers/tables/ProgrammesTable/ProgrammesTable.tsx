@@ -72,26 +72,15 @@ function ProgrammesTable({
     isLoading: isLoadingPrograms,
     error: errorPrograms,
   } = useQuery<PaginatedProgramListList>({
-    queryKey: [
-      'businessAreasProgramsList',
-      queryVariables,
-      programId,
-      businessArea,
-    ],
+    queryKey: ['businessAreasProgramsList', queryVariables],
     queryFn: () => RestService.restBusinessAreasProgramsList(queryVariables),
   });
 
   const { data: dataProgramsCount } = useQuery<CountResponse>({
-    queryKey: [
-      'businessAreasProgramsCount',
-      queryVariables,
-      programId,
-      businessArea,
-    ],
+    queryKey: ['businessAreasProgramsCount', businessArea],
     queryFn: () =>
       RestService.restBusinessAreasProgramsCountRetrieve({
         businessAreaSlug: businessArea,
-        ...queryVariables,
       }),
   });
 
