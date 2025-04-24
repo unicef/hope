@@ -61,7 +61,10 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
     status === PaymentPlanStatus.Accepted ||
     status === PaymentPlanStatus.Finished;
 
-  const shouldDisplayFundsCommitment = status === PaymentPlanStatus.InReview;
+  const shouldDisplayFundsCommitment =
+    status === PaymentPlanStatus.InReview ||
+    status === PaymentPlanStatus.Accepted ||
+    status === PaymentPlanStatus.Finished;
 
   const { paymentPlan } = data;
   if (!paymentPlan) return null;
