@@ -8,9 +8,9 @@ from django import forms
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
-from django.db import models
+from django.db import models, transaction
 from django.db.utils import IntegrityError
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase, tag
 from django.utils import timezone
 
 import pytest
@@ -34,9 +34,9 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.payment.fields import DynamicChoiceArrayField, DynamicChoiceField
 from hct_mis_api.apps.payment.fixtures import (
+    AccountFactory,
     ApprovalFactory,
     ApprovalProcessFactory,
-    DeliveryMechanismDataFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
@@ -44,11 +44,12 @@ from hct_mis_api.apps.payment.fixtures import (
     generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import (
+    Account,
     AccountType,
     Approval,
     DeliveryMechanism,
     DeliveryMechanismConfig,
-    DeliveryMechanismData,
+    FinancialInstitution,
     FinancialServiceProviderXlsxTemplate,
     FspNameMapping,
     Payment,
@@ -858,7 +859,7 @@ class TestFinancialServiceProviderXlsxTemplate(TestCase):
         )
 
 
-class TestDeliveryMechanismDataModel(TestCase):
+class TestAccountModel(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
@@ -876,13 +877,16 @@ class TestDeliveryMechanismDataModel(TestCase):
         cls.fsp = FinancialServiceProviderFactory()
         generate_delivery_mechanisms()
         cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
+        cls.financial_institution = FinancialInstitution.objects.create(
+            code="ABC", type=FinancialInstitution.FinancialInstitutionType.BANK
+        )
 
     def test_str(self) -> None:
-        dmd = DeliveryMechanismDataFactory(individual=self.ind)
+        dmd = AccountFactory(individual=self.ind)
         self.assertEqual(str(dmd), f"{dmd.individual} - {dmd.account_type}")
 
     def test_get_associated_object(self) -> None:
-        dmd = DeliveryMechanismDataFactory(data={"test": "test"}, individual=self.ind)
+        dmd = AccountFactory(data={"test": "test"}, individual=self.ind)
         self.assertEqual(dmd.get_associated_object(FspNameMapping.SourceModel.ACCOUNT.value), dmd.data)
         self.assertEqual(
             dmd.get_associated_object(FspNameMapping.SourceModel.HOUSEHOLD.value), dmd.individual.household
@@ -890,14 +894,15 @@ class TestDeliveryMechanismDataModel(TestCase):
         self.assertEqual(dmd.get_associated_object(FspNameMapping.SourceModel.INDIVIDUAL.value), dmd.individual)
 
     def test_delivery_data(self) -> None:
-        dmd = DeliveryMechanismDataFactory(
+        dmd = AccountFactory(
             data={
-                "number": "test",
                 "expiry_date": "12.12.2024",
                 "name_of_cardholder": "Marek",
             },
             individual=self.ind,
             account_type=AccountType.objects.get(key="bank"),
+            number="test",
+            financial_institution=self.financial_institution,
         )
 
         fsp2 = FinancialServiceProviderFactory()  # no dm config
@@ -954,11 +959,12 @@ class TestDeliveryMechanismDataModel(TestCase):
                 "custom_ind_name": f"{dmd.individual.full_name} Custom",
                 "custom_hh_address": f"{self.hh.address} Custom",
                 "address": self.hh.address,
+                "financial_institution": "ABC",
             },
         )
 
     def test_validate(self) -> None:
-        dmd = DeliveryMechanismDataFactory(
+        dmd = AccountFactory(
             data={
                 "number": "test",
                 "expiry_date": "12.12.2024",
@@ -990,43 +996,75 @@ class TestDeliveryMechanismDataModel(TestCase):
         self.assertEqual(dmd.validate(self.fsp, self.dm_atm_card), False)
 
     def test_validate_uniqueness(self) -> None:
-        DeliveryMechanismDataFactory(data={"name_of_cardholder": "test"}, individual=self.ind)
-        DeliveryMechanismData.update_unique_field = mock.Mock()  # type: ignore
-        DeliveryMechanismData.validate_uniqueness(DeliveryMechanismData.objects.all())
-        DeliveryMechanismData.update_unique_field.assert_called_once()
+        AccountFactory(data={"name_of_cardholder": "test"}, individual=self.ind)
+        Account.update_unique_field = mock.Mock()  # type: ignore
+        Account.validate_uniqueness(Account.objects.all())
+        Account.update_unique_field.assert_called_once()
 
+
+@tag("isolated")
+class TestAccountModelUniqueField(TransactionTestCase):
     def test_update_unique_fields(self) -> None:
-        account_type_bank = AccountType.objects.get(key="bank")
-        account_type_bank.unique_fields = [
-            "seeing_disability",
-            "name_of_cardholder__atm_card",
-        ]
-        account_type_bank.save()
+        create_afghanistan()
+        self.program1 = ProgramFactory()
+        self.user = UserFactory.create()
+        self.ind = IndividualFactory(household=None, program=self.program1)
+        self.ind2 = IndividualFactory(household=None, program=self.program1)
+        self.hh = HouseholdFactory(head_of_household=self.ind)
+        self.ind.household = self.hh
+        self.ind.save()
+        self.ind2.household = self.hh
+        self.ind2.save()
 
-        dmd_1 = DeliveryMechanismDataFactory(
-            data={"name_of_cardholder__atm_card": "test"}, individual=self.ind, account_type=account_type_bank
+        account_type_bank, _ = AccountType.objects.update_or_create(
+            key="bank",
+            label="Bank",
+            defaults=dict(
+                unique_fields=[
+                    "number",
+                    "seeing_disability",
+                    "name_of_cardholder__atm_card",
+                ],
+                payment_gateway_id="123",
+            ),
+        )
+
+        dmd_1 = AccountFactory(
+            data={"name_of_cardholder__atm_card": "test"},
+            individual=self.ind,
+            account_type=account_type_bank,
+            number="123",
         )
         dmd_1.individual.seeing_disability = LOT_DIFFICULTY
         dmd_1.individual.save()
         self.assertIsNone(dmd_1.unique_key)
         self.assertEqual(dmd_1.is_unique, True)
 
-        dmd_2 = DeliveryMechanismDataFactory(
-            data={"name_of_cardholder__atm_card": "test2"}, individual=self.ind2, account_type=account_type_bank
+        dmd_2 = AccountFactory(
+            data={"name_of_cardholder__atm_card": "test2"},
+            individual=self.ind2,
+            account_type=account_type_bank,
+            number="123",
         )
         dmd_2.individual.seeing_disability = LOT_DIFFICULTY
         dmd_2.individual.save()
         self.assertIsNone(dmd_2.unique_key)
         self.assertEqual(dmd_2.is_unique, True)
 
-        dmd_1.update_unique_field()
-        dmd_1.refresh_from_db()
-        self.assertIsNotNone(dmd_1.unique_key)
+        with transaction.atomic():
+            dmd_1.update_unique_field()
+            transaction.on_commit(lambda: dmd_1.refresh_from_db())
 
-        dmd_2.data["name_of_cardholder__atm_card"] = "test"
+        self.assertIsNotNone(dmd_1.unique_key)
+        self.assertEqual(dmd_1.is_unique, True)
+
+        dmd_2.data = {**dmd_2.data, "name_of_cardholder__atm_card": "test"}
         dmd_2.save()
-        dmd_2.update_unique_field()
-        dmd_2.refresh_from_db()
+        with transaction.atomic():
+            dmd_2.update_unique_field()
+            transaction.on_commit(lambda: dmd_2.refresh_from_db())
+
+        self.assertIsNotNone(dmd_2.unique_key)
         self.assertEqual(dmd_2.is_unique, False)
 
 

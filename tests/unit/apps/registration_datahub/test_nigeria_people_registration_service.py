@@ -17,7 +17,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividualRoleInHousehold,
 )
 from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
-from hct_mis_api.apps.payment.models import PendingDeliveryMechanismData
+from hct_mis_api.apps.payment.models import PendingAccount
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.contrib.aurora.fixtures import (
     OrganizationFactory,
@@ -138,14 +138,14 @@ class TestNigeriaPeopleRegistrationService(TestCase):
         self.assertEqual(primary_role.individual, primary_collector)
         self.assertEqual(primary_role.household, household)
 
-        account = PendingDeliveryMechanismData.objects.first()
+        account = PendingAccount.objects.first()
         self.assertEqual(
             account.data,
             {
-                "bank_account_number": "2087008012",
-                "bank_name": "United Bank for Africa",
+                "number": "2087008012",
+                "name": "United Bank for Africa",
                 "uba_code": "000004",
-                "account_holder_name": "xxxx",
+                "holder_name": "xxxx",
             },
         )
         self.assertEqual(account.account_type.key, "bank")

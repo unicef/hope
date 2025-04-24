@@ -3,6 +3,11 @@ schema {
   mutation: Mutations
 }
 
+enum AccountRdiMergeStatus {
+  PENDING
+  MERGED
+}
+
 input AccountabilityCommunicationMessageAgeInput {
   min: Int
   max: Int
@@ -31,6 +36,20 @@ input AccountabilitySampleSizeInput {
 type AccountabilitySampleSizeNode {
   numberOfRecipients: Int
   sampleSize: Int
+}
+
+type AccountsNode implements Node {
+  id: ID!
+  rdiMergeStatus: AccountRdiMergeStatus!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  individual: IndividualNode!
+  number: String
+  data: JSONString!
+  isUnique: Boolean!
+  active: Boolean!
+  name: String
+  individualTabData: JSONString
 }
 
 enum Action {
@@ -809,23 +828,6 @@ type DeliveredQuantityNode {
 type DeliveryMechanismChoice {
   name: String
   code: String
-}
-
-type DeliveryMechanismDataNode implements Node {
-  id: ID!
-  rdiMergeStatus: DeliveryMechanismDataRdiMergeStatus!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  individual: IndividualNode!
-  data: JSONString!
-  isUnique: Boolean!
-  name: String
-  individualTabData: JSONString
-}
-
-enum DeliveryMechanismDataRdiMergeStatus {
-  PENDING
-  MERGED
 }
 
 type DeliveryMechanismNode implements Node {
@@ -1945,7 +1947,7 @@ type IndividualNode implements Node {
   bankAccountInfo: BankAccountInfoNode
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   collectorPayments(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
-  deliveryMechanismsData: [DeliveryMechanismDataNode]
+  accounts: [AccountsNode]
   complaintTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
   individualDataUpdateTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketIndividualDataUpdateDetailsNodeConnection!
