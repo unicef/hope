@@ -168,12 +168,10 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
         cls.household2.registration_data_import.imported_by.save()
         cls.household2.registration_data_import.program = program
         cls.household2.registration_data_import.save()
-        cls.household2.programs.add(program)
         cls.household3.household_collection.save()
         cls.household3.registration_data_import.imported_by.save()
         cls.household3.registration_data_import.program = program2
         cls.household3.registration_data_import.save()
-        cls.household3.programs.add(program2)
         cls.rdi = cls.household.registration_data_import
         cls.rd2 = cls.household3.registration_data_import
         individuals_to_create = [
