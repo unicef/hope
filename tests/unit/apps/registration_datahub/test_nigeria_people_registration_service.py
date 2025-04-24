@@ -1,4 +1,5 @@
 import datetime
+import json
 
 from django.conf import settings
 from django.test import TestCase
@@ -57,12 +58,20 @@ class TestNigeriaPeopleRegistrationService(TestCase):
         cls.organization = OrganizationFactory(business_area=cls.business_area, slug=cls.business_area.slug)
         cls.project = ProjectFactory(name="fake_project", organization=cls.organization, programme=cls.program)
         cls.registration = RegistrationFactory(name="fake_registration", project=cls.project, mapping={})
-
+        files = {
+            "individual-details": [
+                {
+                    "photo_i_c": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
+                    "national_id_photo_i_c": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
+                }
+            ]
+        }
         records = [
             Record(
                 registration=25,
                 timestamp=timezone.make_aware(datetime.datetime(2023, 5, 1)),
                 source_id=1,
+                files=json.dumps(files).encode(),
                 fields={
                     "household-info": [{"admin1_h_c": "NG002", "admin2_h_c": "NG002001", "admin3_h_c": "NG002001007"}],
                     "intro-and-consent": [
@@ -134,6 +143,7 @@ class TestNigeriaPeopleRegistrationService(TestCase):
             },
         )
         self.assertEqual(primary_collector.rdi_merge_status, "PENDING")
+        self.assertIsNotNone(primary_collector.photo.url)
         self.assertEqual(PendingIndividualRoleInHousehold.objects.count(), 1)
 
         primary_role = PendingIndividualRoleInHousehold.objects.first()
@@ -155,3 +165,4 @@ class TestNigeriaPeopleRegistrationService(TestCase):
         national_id = PendingDocument.objects.filter(document_number="01234567891").first()
         self.assertEqual(national_id.individual, primary_collector)
         self.assertEqual(national_id.rdi_merge_status, "PENDING")
+        self.assertIsNotNone(national_id.photo.url)
