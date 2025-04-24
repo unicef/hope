@@ -182,7 +182,9 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
     def _create_object_and_validate(self, data: Dict, model_class: Any, model_form: Optional[Any] = None) -> Any:
         files = {}
         if photo := data.get("photo"):
-            files["photo"] = self._prepare_picture_from_base64(photo, str(uuid.uuid4()))
+            if isinstance(photo, (str, bytes)):
+                photo = self._prepare_picture_from_base64(photo, str(uuid.uuid4()))
+            files["photo"] = photo
             del data["photo"]  # Remove the base64 from data since we're handling it as a file
 
         if model_form is None:
