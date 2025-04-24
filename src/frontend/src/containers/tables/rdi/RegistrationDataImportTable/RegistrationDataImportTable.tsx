@@ -2,7 +2,7 @@ import { TableWrapper } from '@components/core/TableWrapper';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useDeduplicationFlagsQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { adjustHeadCells, dateToIsoString, decodeIdString } from '@utils/utils';
+import { adjustHeadCells, dateToIsoString } from '@utils/utils';
 import { ReactElement, useEffect, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
@@ -47,36 +47,37 @@ function RegistrationDataImportTable({
   });
   const { businessArea, programId } = useBaseUrl();
 
-  const initialVariables = useMemo(() => ({
-    search: filter.search,
-    importedBy: filter.importedBy
-      ? decodeIdString(filter.importedBy)
-      : undefined,
-    status: filter.status !== '' ? filter.status : undefined,
-    businessArea,
-    program: programId,
-    importDateRange:
-      filter.importDateRangeMin || filter.importDateRangeMax
-        ? JSON.stringify({
-            min: dateToIsoString(filter.importDateRangeMin, 'startOfDay'),
-            max: dateToIsoString(filter.importDateRangeMax, 'endOfDay'),
-          })
-        : undefined,
-    size:
-      filter.sizeMin || filter.sizeMax
-        ? JSON.stringify({ min: filter.sizeMin, max: filter.sizeMax })
-        : undefined,
-  }), [
-    filter.importDateRangeMax,
-    filter.importDateRangeMin,
-    filter.importedBy,
-    filter.search,
-    filter.sizeMax,
-    filter.sizeMin,
-    filter.status,
-    businessArea,
-    programId,
-  ]);
+  const initialVariables = useMemo(
+    () => ({
+      search: filter.search,
+      importedBy: filter.importedBy || undefined,
+      status: filter.status !== '' ? filter.status : undefined,
+      businessArea,
+      program: programId,
+      importDateRange:
+        filter.importDateRangeMin || filter.importDateRangeMax
+          ? JSON.stringify({
+              min: dateToIsoString(filter.importDateRangeMin, 'startOfDay'),
+              max: dateToIsoString(filter.importDateRangeMax, 'endOfDay'),
+            })
+          : undefined,
+      size:
+        filter.sizeMin || filter.sizeMax
+          ? JSON.stringify({ min: filter.sizeMin, max: filter.sizeMax })
+          : undefined,
+    }),
+    [
+      filter.importDateRangeMax,
+      filter.importDateRangeMin,
+      filter.importedBy,
+      filter.search,
+      filter.sizeMax,
+      filter.sizeMin,
+      filter.status,
+      businessArea,
+      programId,
+    ],
+  );
 
   const [queryVariables, setQueryVariables] = useState(initialVariables);
 

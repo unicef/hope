@@ -53,19 +53,11 @@ function PaymentsTable({
     isLoading,
     error,
   } = useQuery<PaginatedPaymentListList>({
-    queryKey: [
-      'businessAreasProgramsPaymentPlansPaymentsList',
-      businessArea,
-      programId,
-      queryVariables,
-      paymentPlan.id,
-    ],
+    queryKey: ['businessAreasProgramsPaymentPlansPaymentsList', queryVariables],
     queryFn: () => {
-      return RestService.restBusinessAreasProgramsPaymentPlansPaymentsList({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
-        paymentPlanId: paymentPlan.id,
-      });
+      return RestService.restBusinessAreasProgramsPaymentPlansPaymentsList(
+        queryVariables,
+      );
     },
   });
 

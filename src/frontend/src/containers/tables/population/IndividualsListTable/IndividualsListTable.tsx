@@ -33,6 +33,8 @@ export function IndividualsListTable({
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const initialQueryVariables = useMemo(
     () => ({
+      businessAreaSlug: businessArea,
+      programSlug: programId,
       age: JSON.stringify({ min: filter.ageMin, max: filter.ageMax }),
       sex: [filter.sex],
       search: filter.search.trim(),
@@ -59,6 +61,8 @@ export function IndividualsListTable({
       filter.status,
       filter.lastRegistrationDateMin,
       filter.lastRegistrationDateMax,
+      programId,
+      businessArea,
     ],
   );
   const replacements = {
@@ -83,18 +87,9 @@ export function IndividualsListTable({
   }, [initialQueryVariables]);
 
   const { data, isLoading, error } = useQuery<PaginatedIndividualListList>({
-    queryKey: [
-      'businessAreasProgramsHouseholdsList',
-      queryVariables,
-      programId,
-      businessArea,
-    ],
+    queryKey: ['businessAreasProgramsHouseholdsList', queryVariables],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsIndividualsList({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
-      }),
-    enabled: !!businessArea && !!programId,
+      RestService.restBusinessAreasProgramsIndividualsList(queryVariables),
   });
 
   return (

@@ -44,6 +44,8 @@ export function TargetPopulationForPeopleTable({
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { businessArea, programId } = useBaseUrl();
   const initialQueryVariables = {
+    businessAreaSlug: businessArea,
+    programSlug: programId,
     name: filter.name,
     totalHouseholdsCountMin: filter.totalHouseholdsCountMin || null,
     totalHouseholdsCountMax: filter.totalHouseholdsCountMax || null,
@@ -67,17 +69,11 @@ export function TargetPopulationForPeopleTable({
     isLoading,
     error: targetPopulationsError,
   } = useQuery<PaginatedTargetPopulationListList>({
-    queryKey: [
-      'businessAreasProgramsTargetPopulationsList',
-      businessArea,
-      programId,
-      queryVariables,
-    ],
+    queryKey: ['businessAreasProgramsTargetPopulationsList', queryVariables],
     queryFn: () => {
-      return RestService.restBusinessAreasProgramsTargetPopulationsList({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
-      });
+      return RestService.restBusinessAreasProgramsTargetPopulationsList(
+        queryVariables,
+      );
     },
   });
 

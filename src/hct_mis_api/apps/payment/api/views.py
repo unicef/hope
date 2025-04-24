@@ -2,11 +2,11 @@ import logging
 import mimetypes
 from datetime import datetime
 from decimal import Decimal
-from typing import Any, Optional
+from typing import Any, Dict, List, Optional
 from zipfile import BadZipFile
 
 from django.db import transaction
-from django.db.models import QuerySet
+from django.db.models import Q, QuerySet
 from django.http import FileResponse
 from django.utils import timezone
 
@@ -14,10 +14,11 @@ from constance import config
 from django_filters import rest_framework as filters
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_extensions.cache.decorators import cache_response
@@ -48,6 +49,7 @@ from hct_mis_api.apps.payment.api.filters import (
 from hct_mis_api.apps.payment.api.serializers import (
     AcceptanceProcessSerializer,
     ApplyEngineFormulaSerializer,
+    FspChoicesSerializer,
     PaymentDetailSerializer,
     PaymentListSerializer,
     PaymentPlanBulkActionSerializer,
@@ -83,6 +85,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     payment_plan_full_rebuild,
 )
 from hct_mis_api.apps.payment.models import (
+    DeliveryMechanism,
     FinancialServiceProvider,
     Payment,
     PaymentPlan,
@@ -1634,3 +1637,34 @@ class TPHouseholdViewSet(
             Permissions.TARGETING_VIEW_DETAILS,
         ],
     }
+
+
+@extend_schema(responses={200: FspChoicesSerializer(many=True)})  # type: ignore
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def available_fsps_for_delivery_mechanisms(
+    request: Request, business_area_slug: str, *args: Any, **kwargs: Any
+) -> Response:
+    delivery_mechanisms = DeliveryMechanism.get_choices()
+
+    def get_fsps(mechanism_name: str) -> List[Dict[str, Any]]:
+        fsps_qs = FinancialServiceProvider.objects.filter(
+            Q(fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism__name=mechanism_name)
+            | Q(fsp_xlsx_template_per_delivery_mechanisms__isnull=True),
+            delivery_mechanisms__name=mechanism_name,
+            allowed_business_areas__slug=business_area_slug,
+        ).distinct()
+
+        fsps = list(fsps_qs.values("id", "name"))
+        return fsps
+
+    list_resp = [
+        {
+            "delivery_mechanism": {"code": delivery_mechanism[0], "name": delivery_mechanism[1]},
+            "fsps": get_fsps(delivery_mechanism[1]),
+        }
+        for delivery_mechanism in delivery_mechanisms
+    ]
+
+    serializer = FspChoicesSerializer(list_resp, many=True)
+    return Response(serializer.data)

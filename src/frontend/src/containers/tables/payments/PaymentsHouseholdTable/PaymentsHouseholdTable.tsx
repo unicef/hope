@@ -28,9 +28,9 @@ function PaymentsHouseholdTable({
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
   const initialQueryVariables = {
-    householdId: household?.id,
-    businessArea,
-    program: programId,
+    id: household?.id,
+    businessAreaSlug: businessArea,
+    programSlug: programId,
   };
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
@@ -39,19 +39,11 @@ function PaymentsHouseholdTable({
     isLoading,
     error,
   } = useQuery<PaginatedPaymentListList>({
-    queryKey: [
-      'businessAreasProgramsPaymentPlansPaymentsList',
-      businessArea,
-      programId,
-      queryVariables,
-      household.id,
-    ],
+    queryKey: ['businessAreasProgramsPaymentPlansPaymentsList', queryVariables],
     queryFn: () => {
-      return RestService.restBusinessAreasProgramsHouseholdsPaymentsList({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
-        id: household.id,
-      });
+      return RestService.restBusinessAreasProgramsHouseholdsPaymentsList(
+        queryVariables,
+      );
     },
   });
   const { selectedProgram } = useProgramContext();

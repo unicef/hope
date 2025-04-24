@@ -1226,12 +1226,52 @@ export function adjustHeadCells<T>(
 
 export const filterEmptyParams = (params) => {
   return Object.fromEntries(
-    Object.entries(params).filter(
-      ([, value]) => value !== undefined && value !== null && value !== '',
-    ),
+    Object.entries(params).filter(([, value]) => {
+      // Handle basic empty values
+      if (
+        value === undefined ||
+        value === null ||
+        value === '' ||
+        (Array.isArray(value) && value.length === 1 && value[0] === '')
+      ) {
+        return false;
+      }
+
+      // Handle empty arrays
+      if (Array.isArray(value) && value.length === 0) {
+        return false;
+      }
+
+      // Handle JSON strings that represent empty objects or objects with empty values
+      if (
+        typeof value === 'string' &&
+        (value.startsWith('{') || value.startsWith('['))
+      ) {
+        try {
+          const parsedValue = JSON.parse(value);
+
+          // Empty arrays in JSON format
+          if (Array.isArray(parsedValue) && parsedValue.length === 0) {
+            return false;
+          }
+
+          // Objects with empty values
+          if (typeof parsedValue === 'object' && parsedValue !== null) {
+            const hasNonEmptyValue = Object.values(parsedValue).some(
+              (v) => v !== '' && v !== null && v !== undefined,
+            );
+            return hasNonEmptyValue;
+          }
+        } catch (e) {
+          // If parsing fails, keep the value
+          return true;
+        }
+      }
+
+      return true;
+    }),
   );
 };
-
 export function deepCamelize(data) {
   if (_.isArray(data)) {
     return data.map(deepCamelize);

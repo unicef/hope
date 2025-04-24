@@ -46,8 +46,9 @@ export function VerificationRecordsTable({
 
   const initialQueryVariables = {
     ...filter,
-    businessArea,
-    paymentPlanId,
+    businessAreaSlug: businessArea,
+    programSlug: programId,
+    paymentVerificationPk: paymentPlanId,
   };
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
@@ -59,18 +60,11 @@ export function VerificationRecordsTable({
   } = useQuery<PaginatedPaymentListList>({
     queryKey: [
       'businessAreasProgramsPaymentVerificationsVerificationsList',
-      businessArea,
-      programId,
       queryVariables,
-      paymentPlanId,
     ],
     queryFn: () => {
       return RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsList(
-        {
-          businessAreaSlug: businessArea,
-          programSlug: programId,
-          paymentVerificationPk: paymentPlanId,
-        },
+        queryVariables,
       );
     },
   });

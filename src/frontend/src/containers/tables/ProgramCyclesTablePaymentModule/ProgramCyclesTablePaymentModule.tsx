@@ -1,24 +1,24 @@
-import React, { ReactElement, useEffect, useState } from 'react';
-import { ClickableTableRow } from '@core/Table/ClickableTableRow';
-import TableCell from '@mui/material/TableCell';
-import { StatusBox } from '@core/StatusBox';
-import { decodeIdString, programCycleStatusToColor } from '@utils/utils';
-import { UniversalMoment } from '@core/UniversalMoment';
-import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   finishProgramCycle,
-  ProgramCyclesQuery,
   reactivateProgramCycle,
 } from '@api/programCycleApi';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { BlackLink } from '@core/BlackLink';
-import { useTranslation } from 'react-i18next';
-import { Button } from '@mui/material';
+import { StatusBox } from '@core/StatusBox';
+import { ClickableTableRow } from '@core/Table/ClickableTableRow';
+import { UniversalMoment } from '@core/UniversalMoment';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { RestService } from '@restgenerated/services/RestService';
+import { Button } from '@mui/material';
+import TableCell from '@mui/material/TableCell';
+import { CountResponse } from '@restgenerated/models/CountResponse';
 import { PaginatedProgramCycleListList } from '@restgenerated/models/PaginatedProgramCycleListList';
 import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { decodeIdString, programCycleStatusToColor } from '@utils/utils';
+import { ReactElement, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface ProgramCyclesTablePaymentModuleProps {
   program;
@@ -32,27 +32,39 @@ export const ProgramCyclesTablePaymentModule = ({
   adjustedHeadCells,
 }: ProgramCyclesTablePaymentModuleProps) => {
   const { showMessage } = useSnackbar();
-  const [queryVariables, setQueryVariables] = useState<ProgramCyclesQuery>({
+  const { businessArea, programId } = useBaseUrl();
+  const [queryVariables, setQueryVariables] = useState({
     offset: 0,
     limit: 5,
     ordering: 'created_at',
+    businessAreaSlug: businessArea,
+    programSlug: programId,
     ...filters,
   });
 
-  const { businessArea, programId } = useBaseUrl();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   const { data, refetch, error, isLoading } =
     useQuery<PaginatedProgramCycleListList>({
-      queryKey: ['programCycles', businessArea, programId, queryVariables],
+      queryKey: ['programCycles', queryVariables],
       queryFn: () => {
-        return RestService.restBusinessAreasProgramsCyclesList({
-          businessAreaSlug: businessArea,
-          programSlug: programId,
-        });
+        return RestService.restBusinessAreasProgramsCyclesList(queryVariables);
       },
     });
+
+  const { data: dataProgramCyclesCount } = useQuery<CountResponse>({
+    queryKey: [
+      'businessAreasProgramsCyclesCountRetrieve',
+      programId,
+      businessArea,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsCyclesCountRetrieve({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+      }),
+  });
 
   const { mutateAsync: finishMutation, isPending: isPendingFinishing } =
     useMutation({
@@ -161,6 +173,7 @@ export const ProgramCyclesTablePaymentModule = ({
       title="Programme Cycles"
       renderRow={renderRow}
       headCells={adjustedHeadCells}
+      itemsCount={dataProgramCyclesCount?.count}
       data={data}
       error={error}
       isLoading={isLoading}

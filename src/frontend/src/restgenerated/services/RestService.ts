@@ -5,8 +5,10 @@
 import type { AcceptanceProcess } from '../models/AcceptanceProcess';
 import type { ApplyEngineFormula } from '../models/ApplyEngineFormula';
 import type { BusinessArea } from '../models/BusinessArea';
+import type { Choice } from '../models/Choice';
 import type { CountResponse } from '../models/CountResponse';
 import type { DelegatePeople } from '../models/DelegatePeople';
+import type { FspChoices } from '../models/FspChoices';
 import type { HouseholdDetail } from '../models/HouseholdDetail';
 import type { HouseholdList } from '../models/HouseholdList';
 import type { HouseholdMember } from '../models/HouseholdMember';
@@ -549,6 +551,23 @@ export class RestService {
                 'limit': limit,
                 'offset': offset,
                 'ordering': ordering,
+            },
+        });
+    }
+    /**
+     * @returns FspChoices
+     * @throws ApiError
+     */
+    public static restBusinessAreasAvailableFspsForDeliveryMechanismsList({
+        businessAreaSlug,
+    }: {
+        businessAreaSlug: string,
+    }): CancelablePromise<Array<FspChoices>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/available-fsps-for-delivery-mechanisms/',
+            path: {
+                'business_area_slug': businessAreaSlug,
             },
         });
     }
@@ -1247,6 +1266,7 @@ export class RestService {
         });
     }
     /**
+     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaginatedProgramCycleListList
      * @throws ApiError
      */
@@ -1322,6 +1342,7 @@ export class RestService {
         });
     }
     /**
+     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns ProgramCycleCreate
      * @throws ApiError
      */
@@ -1346,6 +1367,7 @@ export class RestService {
         });
     }
     /**
+     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns ProgramCycleList
      * @throws ApiError
      */
@@ -1372,6 +1394,7 @@ export class RestService {
         });
     }
     /**
+     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns ProgramCycleUpdate
      * @throws ApiError
      */
@@ -1402,6 +1425,7 @@ export class RestService {
         });
     }
     /**
+     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns ProgramCycleUpdate
      * @throws ApiError
      */
@@ -1432,6 +1456,7 @@ export class RestService {
         });
     }
     /**
+     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns void
      * @throws ApiError
      */
@@ -1458,6 +1483,7 @@ export class RestService {
         });
     }
     /**
+     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns any No response body
      * @throws ApiError
      */
@@ -1484,6 +1510,7 @@ export class RestService {
         });
     }
     /**
+     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns any No response body
      * @throws ApiError
      */
@@ -1505,6 +1532,27 @@ export class RestService {
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsCyclesCountRetrieve({
+        businessAreaSlug,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/cycles/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,
             },
         });
@@ -5450,6 +5498,66 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/count/',
+        });
+    }
+    /**
+     * return choices used in the system like statuses, currencies
+     * Response([{"value": k, "name": v} for k, v in PaymentPlan.Status.choices])
+     * @returns Choice
+     * @throws ApiError
+     */
+    public static restChoicesCurrenciesList(): CancelablePromise<Array<Choice>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/choices/currencies/',
+        });
+    }
+    /**
+     * return choices used in the system like statuses, currencies
+     * Response([{"value": k, "name": v} for k, v in PaymentPlan.Status.choices])
+     * @returns Choice
+     * @throws ApiError
+     */
+    public static restChoicesPaymentPlanBackgroundActionStatusList(): CancelablePromise<Array<Choice>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/choices/payment-plan-background-action-status/',
+        });
+    }
+    /**
+     * return choices used in the system like statuses, currencies
+     * Response([{"value": k, "name": v} for k, v in PaymentPlan.Status.choices])
+     * @returns Choice
+     * @throws ApiError
+     */
+    public static restChoicesPaymentPlanStatusList(): CancelablePromise<Array<Choice>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/choices/payment-plan-status/',
+        });
+    }
+    /**
+     * return choices used in the system like statuses, currencies
+     * Response([{"value": k, "name": v} for k, v in PaymentPlan.Status.choices])
+     * @returns Choice
+     * @throws ApiError
+     */
+    public static restChoicesPaymentRecordDeliveryTypeList(): CancelablePromise<Array<Choice>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/choices/payment-record-delivery-type/',
+        });
+    }
+    /**
+     * return choices used in the system like statuses, currencies
+     * Response([{"value": k, "name": v} for k, v in PaymentPlan.Status.choices])
+     * @returns Choice
+     * @throws ApiError
+     */
+    public static restChoicesPaymentVerificationPlanStatusList(): CancelablePromise<Array<Choice>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/choices/payment-verification-plan-status/',
         });
     }
     /**

@@ -24,8 +24,10 @@ export function TargetPopulationPeopleTable({
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
   const initialQueryVariables = {
-    businessArea,
     ...variables,
+    businessAreaSlug: businessArea,
+    programSlug: programId,
+    targetPopulationId: id,
   };
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
@@ -34,20 +36,10 @@ export function TargetPopulationPeopleTable({
     isLoading,
     error,
   } = useQuery<PaginatedTPHouseholdListList>({
-    queryKey: [
-      'businessAreasProgramsPaymentPlansPaymentsList',
-      businessArea,
-      programId,
-      queryVariables,
-      id,
-    ],
+    queryKey: ['businessAreasProgramsPaymentPlansPaymentsList', queryVariables],
     queryFn: () => {
       return RestService.restBusinessAreasProgramsTargetPopulationsHouseholdsList(
-        {
-          businessAreaSlug: businessArea,
-          programSlug: programId,
-          targetPopulationId: id,
-        },
+        queryVariables,
       );
     },
   });

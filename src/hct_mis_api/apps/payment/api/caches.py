@@ -1,6 +1,4 @@
-from typing import Any, Optional
-
-from django.db.models import QuerySet
+from typing import Any
 
 from rest_framework_extensions.key_constructor.bits import KeyBitBase
 
@@ -10,7 +8,6 @@ from hct_mis_api.api.caches import (
     KeyConstructorMixin,
 )
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.payment.models import PaymentPlan
 
 
 class ManagerialPaymentPlanListVersionsKeyBit(BusinessAreaKeyBitMixin):
@@ -20,46 +17,13 @@ class ManagerialPaymentPlanListVersionsKeyBit(BusinessAreaKeyBitMixin):
 class PaymentPlanListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
     specific_view_cache_key = "payment_plans_list"
 
-    def _get_queryset(
-        self,
-        business_area_slug: Optional[Any],
-        program_slug: Optional[Any],
-        view_instance: Optional[Any],
-    ) -> QuerySet:
-        return PaymentPlan.objects.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).filter(
-            program_cycle__program__slug=program_slug,
-            business_area__slug=business_area_slug,
-        )
-
 
 class PaymentVerificationListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
     specific_view_cache_key = "payment_verifications_list"
 
-    def _get_queryset(
-        self,
-        business_area_slug: Optional[Any],
-        program_slug: Optional[Any],
-        view_instance: Optional[Any],
-    ) -> QuerySet:
-        return PaymentPlan.objects.filter(status__in=(PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED)).filter(
-            program_cycle__program__slug=program_slug,
-            business_area__slug=business_area_slug,
-        )
-
 
 class TargetPopulationListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
     specific_view_cache_key = "target_populations_list"
-
-    def _get_queryset(
-        self,
-        business_area_slug: Optional[Any],
-        program_slug: Optional[Any],
-        view_instance: Optional[Any],
-    ) -> QuerySet:
-        return PaymentPlan.objects.filter(
-            program_cycle__program__slug=program_slug,
-            business_area__slug=business_area_slug,
-        )
 
 
 class PaymentPlanProgramsPermissionsKeyBit(KeyBitBase):

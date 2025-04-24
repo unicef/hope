@@ -5,11 +5,14 @@ from django.utils import timezone
 
 from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.utils import extend_schema
+from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.viewsets import ViewSet
 from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
@@ -17,8 +20,18 @@ from hct_mis_api.apps.account.models import RoleAssignment
 from hct_mis_api.apps.core.api.caches import BusinessAreaKeyConstructor
 from hct_mis_api.apps.core.api.filters import BusinessAreaFilter
 from hct_mis_api.apps.core.api.mixins import BaseViewSet, CountActionMixin
-from hct_mis_api.apps.core.api.serializers import BusinessAreaSerializer
+from hct_mis_api.apps.core.api.serializers import (
+    BusinessAreaSerializer,
+    ChoiceSerializer,
+)
+from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import to_choice_object
+from hct_mis_api.apps.payment.models import (
+    DeliveryMechanism,
+    PaymentPlan,
+    PaymentVerificationPlan,
+)
 
 
 class BusinessAreaViewSet(
@@ -44,3 +57,40 @@ class BusinessAreaViewSet(
     @cache_response(timeout=config.REST_API_TTL, key_func=BusinessAreaKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
+
+
+class ChoicesViewSet(ViewSet):
+    """
+    return choices used in the system like statuses, currencies
+        Response([{"value": k, "name": v} for k, v in PaymentPlan.Status.choices])
+    """
+
+    @extend_schema(responses={200: ChoiceSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="currencies")
+    def currencies(self, request: Request) -> Response:
+        resp = ChoiceSerializer(to_choice_object([c for c in CURRENCY_CHOICES if c[0] != ""]), many=True).data
+        return Response(resp)
+
+    @extend_schema(responses={200: ChoiceSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="payment-plan-status")
+    def payment_plan_status(self, request: Request) -> Response:
+        resp = ChoiceSerializer(to_choice_object(PaymentPlan.Status.choices), many=True).data
+        return Response(resp)
+
+    @extend_schema(responses={200: ChoiceSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="payment-plan-background-action-status")
+    def payment_plan_background_action_status(self, request: Request) -> Response:
+        resp = ChoiceSerializer(to_choice_object(PaymentPlan.BackgroundActionStatus.choices), many=True).data
+        return Response(resp)
+
+    @extend_schema(responses={200: ChoiceSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="payment-verification-plan-status")
+    def payment_verification_plan_status(self, request: Request) -> Response:
+        resp = ChoiceSerializer(to_choice_object(PaymentVerificationPlan.STATUS_CHOICES), many=True).data
+        return Response(resp)
+
+    @extend_schema(responses={200: ChoiceSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="payment-record-delivery-type")
+    def payment_record_delivery_type(self, request: Request) -> Response:
+        resp = ChoiceSerializer(to_choice_object(DeliveryMechanism.get_choices()), many=True).data
+        return Response(resp)

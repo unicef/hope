@@ -5,12 +5,12 @@ import { PaymentPlanTargeting } from '@components/paymentmodule/CreatePaymentPla
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { PermissionDenied } from '@core/PermissionDenied';
-import { useAllTargetPopulationsQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { format, parseISO } from 'date-fns';
 import { Form, Formik } from 'formik';
 import { ReactElement } from 'react';
@@ -45,16 +45,25 @@ export const CreatePaymentPlanPage = (): ReactElement => {
         }),
     });
 
-  const { data: allTargetPopulationsData, loading: loadingTargetPopulations } =
-    useAllTargetPopulationsQuery({
-      variables: {
-        businessArea,
+  const {
+    data: allTargetPopulationsData,
+    isLoading: loadingTargetPopulations,
+  } = useQuery<PaginatedTargetPopulationListList>({
+    queryKey: [
+      'businessAreasProgramsTargetPopulationsList',
+      businessArea,
+      programId,
+      programCycleId,
+    ],
+    queryFn: () => {
+      return RestService.restBusinessAreasProgramsTargetPopulationsList({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
         status: 'DRAFT',
-        program: programId,
         programCycle: programCycleId,
-      },
-      fetchPolicy: 'network-only',
-    });
+      });
+    },
+  });
 
   if (loadingTargetPopulations) return <LoadingComponent />;
   if (!allTargetPopulationsData) return null;

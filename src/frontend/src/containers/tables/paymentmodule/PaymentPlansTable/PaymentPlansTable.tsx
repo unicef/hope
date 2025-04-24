@@ -11,6 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { PaginatedPaymentPlanListList } from '@restgenerated/models/PaginatedPaymentPlanListList';
 import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
+import { CountResponse } from '@restgenerated/models/CountResponse';
 
 interface PaymentPlansTableProps {
   filter;
@@ -26,6 +27,8 @@ function PaymentPlansTable({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const initialQueryVariables = {
+    businessAreaSlug: businessArea,
+    programSlug: programId,
     search: filter.search,
     status: filter.status,
     totalEntitledQuantityFrom: filter.totalEntitledQuantityFrom || null,
@@ -43,18 +46,25 @@ function PaymentPlansTable({
     isLoading,
     error,
   } = useQuery<PaginatedPaymentPlanListList>({
-    queryKey: [
-      'businessAreasProgramsPaymentPlansList',
-      businessArea,
-      programId,
-      queryVariables,
-    ],
+    queryKey: ['businessAreasProgramsPaymentPlansList', queryVariables],
     queryFn: () => {
-      return RestService.restBusinessAreasProgramsPaymentPlansList({
+      return RestService.restBusinessAreasProgramsPaymentPlansList(
+        queryVariables,
+      );
+    },
+  });
+
+  const { data: dataPaymentPlansCount } = useQuery<CountResponse>({
+    queryKey: [
+      'businessAreasProgramsPaymentPlansCountRetrieve',
+      programId,
+      businessArea,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlansCountRetrieve({
         businessAreaSlug: businessArea,
         programSlug: programId,
-      });
-    },
+      }),
   });
 
   const replacements = {
@@ -78,6 +88,7 @@ function PaymentPlansTable({
       error={error}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
+      itemsCount={dataPaymentPlansCount?.count}
       renderRow={(row: PaymentPlanList) => (
         <PaymentPlanTableRow
           key={row.id}

@@ -20,6 +20,7 @@ export type { BeneficiaryGroup as BeneficiaryGroupCamelCase } from './models/Ben
 export { BiometricDeduplicationBatchStatusEnum as BiometricDeduplicationBatchStatusEnumCamelCase } from './models/BiometricDeduplicationBatchStatusEnum';
 export { BiometricDeduplicationGoldenRecordStatusEnum as BiometricDeduplicationGoldenRecordStatusEnumCamelCase } from './models/BiometricDeduplicationGoldenRecordStatusEnum';
 export type { BusinessArea as BusinessAreaCamelCase } from './models/BusinessArea';
+export type { Choice as ChoiceCamelCase } from './models/Choice';
 export { CollectTypeEnum as CollectTypeEnumCamelCase } from './models/CollectTypeEnum';
 export { CommsDisabilityEnum as CommsDisabilityEnumCamelCase } from './models/CommsDisabilityEnum';
 export { CommunicationChannelEnum as CommunicationChannelEnumCamelCase } from './models/CommunicationChannelEnum';
@@ -37,6 +38,7 @@ export { DeduplicationGoldenRecordStatusEnum as DeduplicationGoldenRecordStatusE
 export type { Delegate as DelegateCamelCase } from './models/Delegate';
 export type { DelegatePeople as DelegatePeopleCamelCase } from './models/DelegatePeople';
 export type { DeliveryMechanism as DeliveryMechanismCamelCase } from './models/DeliveryMechanism';
+export type { DeliveryMechanismChoice as DeliveryMechanismChoiceCamelCase } from './models/DeliveryMechanismChoice';
 export type { DeliveryMechanismPerPaymentPlan as DeliveryMechanismPerPaymentPlanCamelCase } from './models/DeliveryMechanismPerPaymentPlan';
 export { DisabilityEnum as DisabilityEnumCamelCase } from './models/DisabilityEnum';
 export type { Document as DocumentCamelCase } from './models/Document';
@@ -46,6 +48,8 @@ export type { FinancialServiceProvider as FinancialServiceProviderCamelCase } fr
 export { FlexFieldClassificationEnum as FlexFieldClassificationEnumCamelCase } from './models/FlexFieldClassificationEnum';
 export type { FollowUpPaymentPlan as FollowUpPaymentPlanCamelCase } from './models/FollowUpPaymentPlan';
 export { FrequencyOfPaymentsEnum as FrequencyOfPaymentsEnumCamelCase } from './models/FrequencyOfPaymentsEnum';
+export type { FspChoice as FspChoiceCamelCase } from './models/FspChoice';
+export type { FspChoices as FspChoicesCamelCase } from './models/FspChoices';
 export type { FullList as FullListCamelCase } from './models/FullList';
 export type { HeadOfHousehold as HeadOfHouseholdCamelCase } from './models/HeadOfHousehold';
 export { HearingDisabilityEnum as HearingDisabilityEnumCamelCase } from './models/HearingDisabilityEnum';

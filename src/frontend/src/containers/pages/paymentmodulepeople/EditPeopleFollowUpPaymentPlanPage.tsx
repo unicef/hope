@@ -8,11 +8,13 @@ import { EditPaymentPlanHeader } from '@components/paymentmodule/EditPaymentPlan
 import {
   PaymentPlanBackgroundActionStatus,
   PaymentPlanStatus,
-  useAllTargetPopulationsQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { today } from '@utils/utils';
 import { Form, Formik } from 'formik';
 import moment from 'moment';
@@ -21,9 +23,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import * as Yup from 'yup';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
-import { RestService } from '@restgenerated/services/RestService';
+import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
 
 const EditPeopleFollowUpPaymentPlanPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -79,14 +79,23 @@ const EditPeopleFollowUpPaymentPlanPage = (): ReactElement => {
   const { showMessage } = useSnackbar();
   const permissions = usePermissions();
 
-  const { data: allTargetPopulationsData, loading: loadingTargetPopulations } =
-    useAllTargetPopulationsQuery({
-      variables: {
-        businessArea,
+  const {
+    data: allTargetPopulationsData,
+    isLoading: loadingTargetPopulations,
+  } = useQuery<PaginatedTargetPopulationListList>({
+    queryKey: [
+      'businessAreasProgramsTargetPopulationsList',
+      businessArea,
+      programId,
+    ],
+    queryFn: () => {
+      return RestService.restBusinessAreasProgramsTargetPopulationsList({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
         status: 'DRAFT',
-        program: programId,
-      },
-    });
+      });
+    },
+  });
   if (loadingTargetPopulations || loadingPaymentPlan)
     return <LoadingComponent />;
   if (!allTargetPopulationsData || !paymentPlan) return null;

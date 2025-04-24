@@ -69,6 +69,8 @@ export const PeriodicDataUpdatesUpdatesList = (): ReactElement => {
     page: 1,
     page_size: 10,
     ordering: 'created_at',
+    businessAreaSlug,
+    programSlug: programId,
   };
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
@@ -78,20 +80,10 @@ export const PeriodicDataUpdatesUpdatesList = (): ReactElement => {
     isLoading,
     error,
   } = useQuery<PaginatedPeriodicDataUpdateUploadListList>({
-    queryKey: [
-      'periodicDataUpdateUploads',
-      businessAreaSlug,
-      programId,
-      queryVariables,
-    ],
+    queryKey: ['periodicDataUpdateUploads', queryVariables],
     queryFn: () => {
-      const { ordering } = queryVariables;
       return RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsList(
-        {
-          businessAreaSlug,
-          programSlug: programId,
-          ordering,
-        },
+        queryVariables,
       );
     },
   });
