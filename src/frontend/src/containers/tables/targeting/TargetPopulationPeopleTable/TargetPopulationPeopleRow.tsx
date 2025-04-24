@@ -16,7 +16,7 @@ export function TargetPopulationPeopleTableRow({
   canViewDetails,
 }): ReactElement<TargetPopulationPeopleTableRowProps> {
   const { baseUrl } = useBaseUrl();
-  const householdDetailsPath = `/${baseUrl}/population/people/${payment.household.household?.headOfHousehold?.id}`;
+  const householdDetailsPath = `/${baseUrl}/population/people/${payment.collector?.id}`;
   const handleClick = (): void => {
     const win = window.open(householdDetailsPath, '_blank');
     if (win != null) {
