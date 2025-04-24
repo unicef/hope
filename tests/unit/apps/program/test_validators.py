@@ -38,12 +38,17 @@ class TestProgramValidators(TestCase):
         data = {"program": self.program, "program_data": {"status": Program.FINISHED}}
         self.program.status = Program.ACTIVE
         self.program.save()
-        PaymentPlanFactory(program_cycle=self.program_cycle, status=PaymentPlan.Status.IN_REVIEW, created_by=self.user)
+        pp = PaymentPlanFactory(
+            program_cycle=self.program_cycle, status=PaymentPlan.Status.IN_REVIEW, created_by=self.user
+        )
 
         with self.assertRaisesMessage(
             ValidationError, "All Payment Plans and Follow-Up Payment Plans have to be Reconciled."
         ):
             ProgramValidator.validate_status_change(**data)
-        # add TP and no errors because we ignore TP statuses
+        # add TP and no errors like 'all PP have to be reconciled' because we ignore TP statuses
         PaymentPlanFactory(program_cycle=self.program_cycle, status=PaymentPlan.Status.TP_OPEN, created_by=self.user)
-        ProgramValidator.validate_status_change(**data)
+        pp.status = PaymentPlan.Status.FINISHED
+        pp.save()
+        with self.assertRaisesMessage(ValidationError, "Cannot finish programme with active cycles"):
+            ProgramValidator.validate_status_change(**data)
