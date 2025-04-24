@@ -94,7 +94,9 @@ function LookUpHouseholdTableCommunication({
       businessArea,
     ],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsHouseholdsList(queryVariables),
+      RestService.restBusinessAreasProgramsHouseholdsList({
+        ...queryVariables,
+      }),
     enabled: !!businessArea && !!programId,
   });
 

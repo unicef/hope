@@ -73,6 +73,7 @@ export function TargetPopulationTable({
       return RestService.restBusinessAreasProgramsTargetPopulationsList({
         businessAreaSlug: businessArea,
         programSlug: programId,
+        ...queryVariables,
       });
     },
   });

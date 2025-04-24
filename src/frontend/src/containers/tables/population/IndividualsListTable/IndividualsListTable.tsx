@@ -93,6 +93,7 @@ export function IndividualsListTable({
       RestService.restBusinessAreasProgramsIndividualsList({
         businessAreaSlug: businessArea,
         programSlug: programId,
+        ...queryVariables,
       }),
     enabled: !!businessArea && !!programId,
   });

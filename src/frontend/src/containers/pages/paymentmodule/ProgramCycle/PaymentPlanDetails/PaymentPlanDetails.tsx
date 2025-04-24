@@ -14,7 +14,6 @@ import {
   Typography,
 } from '@mui/material';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
-import { renderUserName } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 interface PaymentPlanDetailsProps {
@@ -49,7 +48,7 @@ export const PaymentPlanDetails = ({
             <Grid container size={{ xs: 9 }} spacing={6}>
               <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Created By')}>
-                  {renderUserName(createdBy)}
+                  {createdBy}
                 </LabelizedField>
               </Grid>
               <Grid size={{ xs: 3 }}>

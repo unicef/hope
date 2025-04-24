@@ -11,6 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { PaginatedPaymentPlanListList } from '@restgenerated/models/PaginatedPaymentPlanListList';
 import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
+import { CountResponse } from '@restgenerated/models/CountResponse';
 
 interface PaymentPlansTableProps {
   filter;
@@ -57,6 +58,21 @@ function PaymentPlansTable({
     },
   });
 
+  const { data: dataPaymentPlansCount } = useQuery<CountResponse>({
+    queryKey: [
+      'businessAreasProgramsPaymentPlansCountRetrieve',
+      queryVariables,
+      programId,
+      businessArea,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlansCountRetrieve({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+        ...queryVariables,
+      }),
+  });
+
   const replacements = {
     totalHouseholdsCount: (_beneficiaryGroup) =>
       `Num. of ${_beneficiaryGroup?.groupLabelPlural}`,
@@ -78,6 +94,7 @@ function PaymentPlansTable({
       error={error}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
+      itemsCount={dataPaymentPlansCount?.count}
       renderRow={(row: PaymentPlanList) => (
         <PaymentPlanTableRow
           key={row.id}

@@ -51,6 +51,7 @@ function PaymentsHouseholdTable({
         businessAreaSlug: businessArea,
         programSlug: programId,
         id: household.id,
+        ...queryVariables,
       });
     },
   });

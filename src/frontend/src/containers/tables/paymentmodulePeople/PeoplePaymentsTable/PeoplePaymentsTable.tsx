@@ -61,6 +61,7 @@ const PeoplePaymentsTable = ({
         businessAreaSlug: businessArea,
         programSlug: programId,
         paymentPlanId: paymentPlan.id,
+        ...queryVariables,
       });
     },
   });

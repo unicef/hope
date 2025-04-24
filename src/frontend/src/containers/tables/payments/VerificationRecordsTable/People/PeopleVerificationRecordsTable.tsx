@@ -48,6 +48,7 @@ export function PeopleVerificationRecordsTable({
       return RestService.restBusinessAreasProgramsPaymentVerificationsList({
         businessAreaSlug: businessArea,
         programSlug: programId,
+        ...queryVariables,
       });
     },
   });

@@ -44,6 +44,7 @@ export function LookUpPaymentRecordTable({
       return RestService.restBusinessAreasProgramsPaymentsList({
         businessAreaSlug: businessArea,
         slug: programId,
+        ...queryVariables,
       });
     },
   });

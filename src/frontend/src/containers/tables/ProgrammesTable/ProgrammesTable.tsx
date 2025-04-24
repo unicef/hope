@@ -91,6 +91,7 @@ function ProgrammesTable({
     queryFn: () =>
       RestService.restBusinessAreasProgramsCountRetrieve({
         businessAreaSlug: businessArea,
+        ...queryVariables,
       }),
   });
 

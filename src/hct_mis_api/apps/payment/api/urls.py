@@ -12,6 +12,7 @@ from hct_mis_api.apps.payment.api.views import (
     PaymentViewSet,
     TargetPopulationViewSet,
     TPHouseholdViewSet,
+    available_fsps_for_delivery_mechanisms,
 )
 from hct_mis_api.apps.program.api.urls import program_base_router
 
@@ -21,6 +22,7 @@ business_area_nested_router = get_business_area_nested_router()
 business_area_nested_router.register(
     r"payments/payment-plans-managerial", PaymentPlanManagerialViewSet, basename="payment-plans-managerial"
 )
+
 program_nested_router = program_base_router.program_nested_router
 program_nested_router.register(
     "payment-plans/(?P<payment_plan_id>[^/.]+)/supporting-documents",
@@ -64,6 +66,11 @@ payment_verification_nested_router.register(
 )
 
 urlpatterns = [
+    path(
+        "business-areas/<slug:business_area_slug>/available-fsps-for-delivery-mechanisms/",
+        available_fsps_for_delivery_mechanisms,
+        name="available-fsps",
+    ),
     path("", include(business_area_nested_router.urls)),
     path("", include(program_nested_router.urls)),
     path("", include(payment_verification_nested_router.urls)),

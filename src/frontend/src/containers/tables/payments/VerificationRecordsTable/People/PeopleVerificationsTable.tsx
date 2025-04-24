@@ -51,6 +51,7 @@ export function PeopleVerificationsTable({
           businessAreaSlug: businessArea,
           programSlug: programId,
           paymentVerificationPk: paymentPlanId,
+          ...queryVariables,
         },
       );
     },

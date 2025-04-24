@@ -1,23 +1,23 @@
-import { Form, Formik } from 'formik';
-import { useTranslation } from 'react-i18next';
-import { format, parseISO } from 'date-fns';
-import * as Yup from 'yup';
+import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { CreatePaymentPlanHeader } from '@components/paymentmodule/CreatePaymentPlan/CreatePaymentPlanHeader/CreatePaymentPlanHeader';
 import { PaymentPlanParameters } from '@components/paymentmodule/CreatePaymentPlan/PaymentPlanParameters';
 import { PaymentPlanTargeting } from '@components/paymentmodule/CreatePaymentPlan/PaymentPlanTargeting/PaymentPlanTargeting';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { useAllTargetPopulationsQuery } from '@generated/graphql';
-import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useNavigate, useParams } from 'react-router-dom';
-import { ReactElement } from 'react';
-import withErrorBoundary from '@components/core/withErrorBoundary';
-import { useMutation } from '@tanstack/react-query';
+import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
 import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { format, parseISO } from 'date-fns';
+import { Form, Formik } from 'formik';
+import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate, useParams } from 'react-router-dom';
+import * as Yup from 'yup';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 
 export const CreatePeoplePaymentPlanPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -46,17 +46,25 @@ export const CreatePeoplePaymentPlanPage = (): ReactElement => {
   const permissions = usePermissions();
   const { programCycleId } = useParams();
 
-  const { data: allTargetPopulationsData, loading: loadingTargetPopulations } =
-    useAllTargetPopulationsQuery({
-      variables: {
-        businessArea,
+  const {
+    data: allTargetPopulationsData,
+    isLoading: loadingTargetPopulations,
+  } = useQuery<PaginatedTargetPopulationListList>({
+    queryKey: [
+      'businessAreasProgramsTargetPopulationsList',
+      businessArea,
+      programId,
+      programCycleId,
+    ],
+    queryFn: () => {
+      return RestService.restBusinessAreasProgramsTargetPopulationsList({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
         status: 'DRAFT',
-        program: programId,
         programCycle: programCycleId,
-      },
-      fetchPolicy: 'network-only',
-    });
-
+      });
+    },
+  });
   if (loadingTargetPopulations) return <LoadingComponent />;
   if (!allTargetPopulationsData) return null;
   if (permissions === null) return null;

@@ -50,9 +50,11 @@ function PaymentVerificationTable({
       return RestService.restBusinessAreasProgramsPaymentVerificationsList({
         businessAreaSlug: businessArea,
         programSlug: programId,
+        ...queryVariables,
       });
     },
   });
+  console.log('paymentPlansData', paymentPlansData);
 
   return (
     <UniversalRestTable

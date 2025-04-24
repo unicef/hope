@@ -53,6 +53,7 @@ export function VerificationsTable({
           businessAreaSlug: businessArea,
           programSlug: programId,
           paymentVerificationPk: paymentPlanId,
+          ...queryVariables,
         },
       );
     },
