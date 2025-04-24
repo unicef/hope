@@ -16,7 +16,7 @@ from hct_mis_api.apps.household.models import (
     Household,
     Individual,
 )
-from hct_mis_api.apps.payment.models import AccountType, DeliveryMechanismData
+from hct_mis_api.apps.payment.models import Account, AccountType
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
     DeduplicateTask,
     HardDocumentDeduplication,
@@ -265,11 +265,11 @@ class UniversalIndividualUpdateService:
     def handle_deliver_mechanism_data_update(
         self, row: Tuple[Any, ...], headers: List[str], individual: Individual
     ) -> None:
-        individual_delivery_mechanisms_data = individual.delivery_mechanisms_data.all()
+        individual_accounts = individual.accounts.all()
         for account_type, delivery_mechanism_columns_mapping in self.deliver_mechanism_data_fields.items():
             account_type_instance = self.delivery_mechanisms_account_types.get(account_type)
             single_data_object = next(
-                (d for d in individual_delivery_mechanisms_data if str(d.account_type.key) == str(account_type)),
+                (d for d in individual_accounts if str(d.account_type.key) == str(account_type)),
                 None,
             )
 
@@ -279,10 +279,10 @@ class UniversalIndividualUpdateService:
                     if self.ignore_empty_values and (value is None or value == ""):
                         continue
                     if single_data_object is None:
-                        single_data_object = DeliveryMechanismData(
+                        single_data_object = Account(
                             individual=individual,
                             account_type=account_type_instance,
-                            rdi_merge_status=DeliveryMechanismData.MERGED,
+                            rdi_merge_status=Account.MERGED,
                         )
                     single_data_object.data[field_name] = value
             if single_data_object:
@@ -312,7 +312,7 @@ class UniversalIndividualUpdateService:
             unicef_id = row[headers.index("unicef_id")]
             individual = (
                 Individual.objects.select_related("household")
-                .prefetch_related("documents", "delivery_mechanisms_data")
+                .prefetch_related("documents", "accounts")
                 .get(unicef_id=unicef_id, business_area=self.business_area, program=self.program)
             )
             individual_ids.append(str(individual.id))
@@ -399,7 +399,7 @@ class UniversalIndividualUpdateService:
             else:
                 row.append(None)
                 row.append(None)
-        all_wallets = individual.delivery_mechanisms_data.all()
+        all_wallets = individual.accounts.all()
         for account_type, data_fields in self.deliver_mechanism_data_fields.items():
             wallet = [x for x in all_wallets if x.account_type.key == account_type]
             if len(wallet) > 1:

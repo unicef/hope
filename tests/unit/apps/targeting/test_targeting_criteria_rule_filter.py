@@ -27,7 +27,7 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismDataFactory,
+    AccountFactory,
     PaymentPlanFactory,
     generate_delivery_mechanisms,
 )
@@ -325,7 +325,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
             individual=hh.individuals.first(), household=hh, role=ROLE_PRIMARY, rdi_merge_status=MergeStatusModel.MERGED
         )
         collector = IndividualRoleInHousehold.objects.get(household_id=hh.pk, role=ROLE_PRIMARY).individual
-        DeliveryMechanismDataFactory(
+        AccountFactory(
             individual=collector, data={"number": "test123"}, account_type=AccountType.objects.get(key="bank")
         )
         tc = TargetingCriteria()
@@ -353,7 +353,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
             individual=hh.individuals.first(), household=hh, role=ROLE_PRIMARY, rdi_merge_status=MergeStatusModel.MERGED
         )
         collector = IndividualRoleInHousehold.objects.get(household_id=hh.pk, role=ROLE_PRIMARY).individual
-        DeliveryMechanismDataFactory(individual=collector, data={"other__random_name": "test123"})
+        AccountFactory(individual=collector, data={"other__random_name": "test123"})
         # Target population
         tc = TargetingCriteria()
         tc.save()

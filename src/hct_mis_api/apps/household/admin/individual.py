@@ -36,7 +36,7 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
     XlsxUpdateFile,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanismData
+from hct_mis_api.apps.payment.models import Account
 from hct_mis_api.apps.utils.admin import (
     BusinessAreaForIndividualCollectionListFilter,
     HOPEModelAdminBase,
@@ -51,8 +51,8 @@ from hct_mis_api.apps.utils.security import is_root
 logger = logging.getLogger(__name__)
 
 
-class IndividualDeliveryMechanismDataInline(admin.TabularInline):
-    model = DeliveryMechanismData
+class IndividualAccountInline(admin.TabularInline):
+    model = Account
     extra = 0
     fields = ("account_type", "data")
 
@@ -168,7 +168,7 @@ class IndividualAdmin(
         ("Others", {"classes": ("collapse",), "fields": ("__others__",)}),
     ]
     actions = ["count_queryset", "revalidate_phone_number_sync", "revalidate_phone_number_async"]
-    inlines = [IndividualDeliveryMechanismDataInline]
+    inlines = [IndividualAccountInline]
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
