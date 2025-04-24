@@ -34,8 +34,9 @@ import { LoadingButton } from '@core/LoadingButton';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useNavigate } from 'react-router-dom';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
-export const NewReportForm = (): ReactElement => {
+const NewReportForm = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -370,3 +371,5 @@ export const NewReportForm = (): ReactElement => {
     </>
   );
 };
+
+export default withErrorBoundary(NewReportForm, 'NewReportForm');

@@ -88,8 +88,6 @@ class ImportDataNode(DjangoObjectType):
         errors = []
         if parent.validation_errors:
             errors.extend(json.loads(parent.validation_errors))
-        if parent.delivery_mechanisms_validation_errors:
-            errors.extend(json.loads(parent.delivery_mechanisms_validation_errors))
         return errors
 
 

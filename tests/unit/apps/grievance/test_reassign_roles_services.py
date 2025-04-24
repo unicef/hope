@@ -34,7 +34,6 @@ class TestReassignRolesOnUpdate(APITestCase):
         cls.household.registration_data_import.imported_by.save()
         cls.household.registration_data_import.program = cls.program_one
         cls.household.registration_data_import.save()
-        cls.household.programs.add(cls.program_one)
 
         cls.primary_collector_individual = IndividualFactory(household=None, program=cls.program_one)
         cls.household.head_of_household = cls.primary_collector_individual

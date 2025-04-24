@@ -1,28 +1,27 @@
-import { ReactElement, useEffect } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
-import { PaymentPlanStatus, usePaymentPlanQuery } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { FollowUpPaymentPlanDetails } from '@components/paymentmodule/FollowUpPaymentPlanDetails/FollowUpPaymentPlanDetails';
 import { FollowUpPaymentPlanDetailsHeader } from '@components/paymentmodule/FollowUpPaymentPlanDetails/FollowUpPaymentPlanDetailsHeader';
-import { AcceptanceProcess } from '@components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
-import { Entitlement } from '@components/paymentmodule/PaymentPlanDetails/Entitlement/Entitlement';
 import { FspSection } from '@components/paymentmodule/PaymentPlanDetails/FspSection';
 import { PaymentPlanDetailsResults } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults';
 import { ReconciliationSummary } from '@components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
+import { PaymentPlanStatus, usePaymentPlanQuery } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
-import { PaymentsTable } from '../../tables/paymentmodule/PaymentsTable';
+import { ReactElement, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
-import { ExcludeSection } from '@components/paymentmodule/PaymentPlanDetails/ExcludeSection';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import PaymentsTable from '@containers/tables/paymentmodule/PaymentsTable/PaymentsTable';
+import { AcceptanceProcess } from '@components/paymentmodulepeople/PaymentPlanDetails/AcceptanceProcess';
+import { ExcludeSection } from '@components/paymentmodulepeople/PaymentPlanDetails/ExcludeSection';
+import { Entitlement } from '@components/paymentmodulepeople/PaymentPlanDetails/Entitlement';
 
 export const PeopleFollowUpPaymentPlanDetailsPage = (): ReactElement => {
   const { paymentPlanId } = useParams();
-  const location = useLocation();
   const permissions = usePermissions();
   const { baseUrl, businessArea } = useBaseUrl();
   const { data, loading, startPolling, stopPolling, error } =
@@ -63,47 +62,39 @@ export const PeopleFollowUpPaymentPlanDetailsPage = (): ReactElement => {
 
   const { paymentPlan } = data;
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'PeopleFollowUpPaymentPlanDetailsPage.tsx');
-      }}
-      componentName="PeopleFollowUpPaymentPlanDetailsPage"
-    >
-      <>
-        <FollowUpPaymentPlanDetailsHeader
-          paymentPlan={paymentPlan}
-          baseUrl={baseUrl}
-          permissions={permissions}
-        />
-        <FollowUpPaymentPlanDetails
-          baseUrl={baseUrl}
-          paymentPlan={paymentPlan}
-        />
-        <AcceptanceProcess paymentPlan={paymentPlan} />
-        {shouldDisplayEntitlement && (
-          <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
-        )}
-        {shouldDisplayFsp && (
-          <FspSection baseUrl={baseUrl} paymentPlan={paymentPlan} />
-        )}
-        <ExcludeSection paymentPlan={paymentPlan} />
-        <SupportingDocumentsSection paymentPlan={paymentPlan} />
-        <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
-        <PaymentsTable
-          businessArea={businessArea}
-          paymentPlan={paymentPlan}
-          permissions={permissions}
-          canViewDetails
-        />
-        {shouldDisplayReconciliationSummary && (
-          <ReconciliationSummary paymentPlan={paymentPlan} />
-        )}
-        {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
-          <UniversalActivityLogTable objectId={paymentPlan.id} />
-        )}
-      </>
-    </UniversalErrorBoundary>
+    <>
+      <FollowUpPaymentPlanDetailsHeader
+        paymentPlan={paymentPlan}
+        baseUrl={baseUrl}
+        permissions={permissions}
+      />
+      <FollowUpPaymentPlanDetails baseUrl={baseUrl} paymentPlan={paymentPlan} />
+      <AcceptanceProcess paymentPlan={paymentPlan} />
+      {shouldDisplayEntitlement && (
+        <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
+      )}
+      {shouldDisplayFsp && (
+        <FspSection paymentPlan={paymentPlan} />
+      )}
+      <ExcludeSection paymentPlan={paymentPlan} />
+      <SupportingDocumentsSection paymentPlan={paymentPlan} />
+      <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
+      <PaymentsTable
+        businessArea={businessArea}
+        paymentPlan={paymentPlan}
+        permissions={permissions}
+        canViewDetails
+      />
+      {shouldDisplayReconciliationSummary && (
+        <ReconciliationSummary paymentPlan={paymentPlan} />
+      )}
+      {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
+        <UniversalActivityLogTable objectId={paymentPlan.id} />
+      )}
+    </>
   );
 };
+export default withErrorBoundary(
+  PeopleFollowUpPaymentPlanDetailsPage,
+  'PeopleFollowUpPaymentPlanDetailsPage',
+);

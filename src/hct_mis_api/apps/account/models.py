@@ -426,7 +426,7 @@ class IncompatibleRoles(NaturalKeyModel, TimeStampedUUIDModel):
     def clean(self) -> None:
         super().clean()
         if self.role_one == self.role_two:
-            logger.error(f"Provided roles are the same role={self.role_one}")
+            logger.warning(f"Provided roles are the same role={self.role_one}")
             raise ValidationError(_("Choose two different roles."))
         failing_users = set()
 
@@ -440,7 +440,7 @@ class IncompatibleRoles(NaturalKeyModel, TimeStampedUUIDModel):
                     failing_users.add(userrole.user.email)
 
         if failing_users:
-            logger.error(
+            logger.warning(
                 f"Users: [{', '.join(failing_users)}] have these roles assigned to them in the same business area. "
                 "Please fix them before creating this incompatible roles pair."
             )
@@ -456,7 +456,7 @@ class IncompatibleRoles(NaturalKeyModel, TimeStampedUUIDModel):
         # unique_together will take care of unique couples only if order is the same
         # since it doesn't matter if role is one or two, we need to check for reverse uniqueness as well
         if IncompatibleRoles.objects.filter(role_one=self.role_two, role_two=self.role_one).exists():
-            logger.error(
+            logger.warning(
                 f"This combination of roles ({self.role_one}, {self.role_two}) already exists as incompatible pair."
             )
             raise ValidationError(_("This combination of roles already exists as incompatible pair."))

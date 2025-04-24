@@ -195,11 +195,7 @@ class TestHouseholdQuery(APITestCase):
                     "program": program,
                 },
             )
-            household.programs.add(program)
             household.save()
-            # added for testing migrate_data_to_representations script
-            if family_size == 14:
-                household.programs.add(cls.program_one)
 
             area_type_level_1 = AreaTypeFactory(
                 name="State1",
@@ -216,7 +212,7 @@ class TestHouseholdQuery(APITestCase):
             cls.households.append(household)
 
         household = cls.households[0]
-        household.registration_id = 123
+        household.detail_id = 123
         household.save()
         household.refresh_from_db()
         household.head_of_household.phone_no = "+18663567905"
@@ -334,6 +330,8 @@ class TestHouseholdQuery(APITestCase):
           }
         }
         """
+        household.detail_id = None
+        household.enumerator_rec_id = None
 
         if field_name is not None:
             setattr(household, field_name, field_value)

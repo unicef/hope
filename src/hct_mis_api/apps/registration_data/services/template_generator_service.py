@@ -49,7 +49,7 @@ class TemplateFileGeneratorService:
 
     def _add_individuals_columns(self) -> None:
         self.individuals_fields = {
-            **self.core_fields.associated_with_individual_with_delivery_mechanism_data().to_dict_by("xlsx_field"),
+            **self.core_fields.associated_with_individual().to_dict_by("xlsx_field"),
             **self.flex_fields["individuals"],
         }
         individuals_rows = self._handle_name_and_label_row(self.individuals_fields)
@@ -60,7 +60,7 @@ class TemplateFileGeneratorService:
 
     def _add_people_columns(self) -> None:
         people_fields = {
-            **FieldFactory.from_scopes([Scope.XLSX_PEOPLE])
+            **FieldFactory.from_scope(Scope.XLSX_PEOPLE)
             .apply_business_area(business_area_slug=self.business_area.slug)
             .to_dict_by("xlsx_field"),
             **self.flex_fields["individuals"],

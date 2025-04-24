@@ -19,7 +19,7 @@ class Countries:
     @classmethod
     def get_choices(cls, output_code: str = "alpha2") -> List:
         if output_code not in ("alpha2", "alpha3"):
-            logger.error(f"output_code have to be one of: alpha2, alpha3, provided output_code={output_code}")
+            logger.warning(f"output_code have to be one of: alpha2, alpha3, provided output_code={output_code}")
             raise ValueError("output_code have to be one of: alpha2, alpha3")
         return [
             {"label": {"English(EN)": name}, "value": alpha2 if output_code == "alpha2" else alpha3}
@@ -42,7 +42,7 @@ class Countries:
         }
 
         if output_type not in ("name", "alpha2", "alpha3"):
-            logger.error(f"output_type have to be one of: name, alpha2, alpha3, provided output_type={output_type}")
+            logger.warning(f"output_type have to be one of: name, alpha2, alpha3, provided output_type={output_type}")
             raise ValueError("output_type have to be one of: name, alpha2, alpha3")
 
         for country_tuple in cls.get_countries():
@@ -1279,7 +1279,7 @@ class SanctionListCountries:
     @classmethod
     def get_choices(cls, output_code: str = "alpha2") -> List:
         if output_code not in ("alpha2", "alpha3"):
-            logger.error(f"output_code have to be one of: alpha2, alpha3, provided output_code={output_code}")
+            logger.warning(f"output_code have to be one of: alpha2, alpha3, provided output_code={output_code}")
             raise ValueError("output_code have to be one of: alpha2, alpha3")
         return [
             {"label": {"English(EN)": name}, "value": alpha2 if output_code == "alpha2" else alpha3}
@@ -1301,7 +1301,7 @@ class SanctionListCountries:
         }
 
         if output_type not in ("name", "alpha2", "alpha3"):
-            logger.error(f"output_type have to be one of: alpha2, alpha3, provided output_type={output_type}")
+            logger.warning(f"output_type have to be one of: alpha2, alpha3, provided output_type={output_type}")
             raise ValueError("output_type have to be one of: name, alpha2, alpha3")
 
         for country_tuple in cls.COUNTRIES:

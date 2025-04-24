@@ -22,8 +22,9 @@ from hct_mis_api.apps.household.models import (
     PendingIndividualRoleInHousehold,
 )
 from hct_mis_api.apps.payment.models import (
-    DeliveryMechanism,
-    PendingDeliveryMechanismData,
+    AccountType,
+    FinancialInstitution,
+    PendingAccount,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.contrib.aurora.services.base_flex_registration_service import (
@@ -339,15 +340,15 @@ class GenericRegistrationService(BaseRegistrationService):
                     self._create_object_and_validate(document_data, PendingDocument, DocumentForm)
 
             if account_data:
-                PendingDeliveryMechanismData.objects.create(
+                financial_institution_code = account_data["data"].get("code", None)
+                PendingAccount.objects.create(
                     individual_id=individual.id,
-                    delivery_mechanism=DeliveryMechanism.objects.get(code="transfer_to_account"),
-                    data={
-                        "bank_account_number__transfer_to_account": account_data["data"].get("number", ""),
-                        "bank_name__transfer_to_account": account_data["data"].get("name", ""),
-                        "bank_code__transfer_to_account": account_data["data"].get("uba_code", ""),
-                        "account_holder_name__transfer_to_account": account_data["data"].get("holder_name", ""),
-                    },
+                    account_type=AccountType.objects.get(key="bank"),
+                    number=account_data["data"].get("number", None),
+                    financial_institution=FinancialInstitution.objects.filter(code=financial_institution_code).first()
+                    if financial_institution_code
+                    else None,
+                    **account_data,
                 )
 
             if self.get_boolean(extra_data.get(PRIMARY_COLLECTOR, False)):
@@ -388,7 +389,6 @@ class GenericRegistrationService(BaseRegistrationService):
                 individual=sec_collector, household=household, role=ROLE_ALTERNATE
             )
 
-        household.registration_id = record.source_id  # TODO to be removed
         household.detail_id = record.source_id
         household.save()
         record.mark_as_imported()

@@ -57,7 +57,7 @@ class ExchangeRateClientAPI(ExchangeRateClient):
         try:
             response.raise_for_status()
         except Exception as e:
-            logger.exception(e)
+            logger.warning(e)
             raise
         return response.json()
 

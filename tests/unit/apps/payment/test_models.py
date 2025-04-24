@@ -1,15 +1,16 @@
 import json
 from datetime import datetime
 from typing import Any
+from unittest import mock
 from unittest.mock import MagicMock, patch
 
 from django import forms
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
-from django.db import models
+from django.db import models, transaction
 from django.db.utils import IntegrityError
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase, tag
 from django.utils import timezone
 
 import pytest
@@ -26,28 +27,33 @@ from hct_mis_api.apps.household.fixtures import (
     IndividualFactory,
     create_household,
 )
-from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
+from hct_mis_api.apps.household.models import (
+    LOT_DIFFICULTY,
+    ROLE_PRIMARY,
+    IndividualRoleInHousehold,
+)
 from hct_mis_api.apps.payment.fields import DynamicChoiceArrayField, DynamicChoiceField
 from hct_mis_api.apps.payment.fixtures import (
+    AccountFactory,
     ApprovalFactory,
     ApprovalProcessFactory,
-    DeliveryMechanismDataFactory,
-    DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    PaymentPlanSplitFactory,
     RealProgramFactory,
     generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import (
+    Account,
+    AccountType,
     Approval,
     DeliveryMechanism,
-    FinancialServiceProvider,
+    DeliveryMechanismConfig,
+    FinancialInstitution,
     FinancialServiceProviderXlsxTemplate,
+    FspNameMapping,
     Payment,
     PaymentPlan,
-    PaymentPlanSplit,
 )
 from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
@@ -690,25 +696,6 @@ class TestPaymentPlanSplitModel(TestCase):
         cls.user = UserFactory()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
-    def test_properties(self) -> None:
-        pp = PaymentPlanFactory(created_by=self.user)
-        dm = DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=pp,
-            chosen_configuration="key1",
-        )
-        p1 = PaymentFactory(parent=pp, currency="PLN")
-        p2 = PaymentFactory(parent=pp, currency="PLN")
-        pp_split1 = PaymentPlanSplitFactory(
-            payment_plan=pp,
-            split_type=PaymentPlanSplit.SplitType.BY_RECORDS,
-            chunks_no=2,
-            order=0,
-        )
-        pp_split1.payments.set([p1, p2])
-        self.assertEqual(pp_split1.financial_service_provider, dm.financial_service_provider)
-        self.assertEqual(pp_split1.chosen_configuration, dm.chosen_configuration)
-        self.assertEqual(pp_split1.delivery_mechanism, dm.delivery_mechanism)
-
 
 class TestFinancialServiceProviderModel(TestCase):
     @classmethod
@@ -716,26 +703,6 @@ class TestFinancialServiceProviderModel(TestCase):
         super().setUpTestData()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-
-    def test_properties(self) -> None:
-        fsp1 = FinancialServiceProviderFactory(
-            data_transfer_configuration=[
-                {"key": "key1", "label": "label1", "id": 1, "random_key": "random"},
-                {"key": "key2", "label": "label2", "id": 2, "random_key": "random"},
-            ],
-            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-            payment_gateway_id=123,
-        )
-        fsp2 = FinancialServiceProviderFactory(
-            data_transfer_configuration=[
-                {"key": "key1", "label": "label1", "id": 1, "random_key": "random"},
-                {"key": "key2", "label": "label2", "id": 2, "random_key": "random"},
-            ],
-            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
-        )
-
-        self.assertEqual(fsp1.configurations, [])
-        self.assertEqual(fsp2.configurations, [])
 
     def test_fsp_template_get_column_from_core_field(self) -> None:
         household, individuals = create_household(
@@ -789,16 +756,6 @@ class TestFinancialServiceProviderModel(TestCase):
             document_number="id_doc_number_123",
         )
         generate_delivery_mechanisms()
-        dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
-        dmd = DeliveryMechanismDataFactory(
-            individual=primary,
-            delivery_mechanism=dm_atm_card,
-            data={
-                "card_number__atm_card": "333111222",
-                "card_expiry_date__atm_card": "2025-11-11",
-                "name_of_cardholder__atm_card": "Just Random Test Name",
-            },
-        )
 
         # get None if no snapshot
         none_resp = fsp_xlsx_template.get_column_from_core_field(payment, "given_name")
@@ -855,10 +812,6 @@ class TestFinancialServiceProviderModel(TestCase):
         primary_collector_id = fsp_xlsx_template.get_column_from_core_field(payment, "primary_collector_id")
         self.assertEqual(primary_collector_id, str(primary.pk))
 
-        # get delivery_mechanisms_data field
-        dmd_resp = fsp_xlsx_template.get_column_from_core_field(payment, "name_of_cardholder__atm_card", dmd)
-        self.assertEqual(dmd_resp, "Just Random Test Name")
-
         # country_origin
         country_origin = fsp_xlsx_template.get_column_from_core_field(payment, "country_origin")
         self.assertEqual(household.country_origin.iso_code3, country_origin)
@@ -904,3 +857,223 @@ class TestFinancialServiceProviderXlsxTemplate(TestCase):
             form.errors,
             {"core_fields": ["Select a valid choice. field1 is not one of the available choices."]},
         )
+
+
+class TestAccountModel(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        create_afghanistan()
+        cls.program1 = ProgramFactory()
+        cls.user = UserFactory.create()
+        cls.ind = IndividualFactory(household=None, program=cls.program1)
+        cls.ind2 = IndividualFactory(household=None, program=cls.program1)
+        cls.hh = HouseholdFactory(head_of_household=cls.ind)
+        cls.ind.household = cls.hh
+        cls.ind.save()
+        cls.ind2.household = cls.hh
+        cls.ind2.save()
+
+        cls.fsp = FinancialServiceProviderFactory()
+        generate_delivery_mechanisms()
+        cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
+        cls.financial_institution = FinancialInstitution.objects.create(
+            code="ABC", type=FinancialInstitution.FinancialInstitutionType.BANK
+        )
+
+    def test_str(self) -> None:
+        dmd = AccountFactory(individual=self.ind)
+        self.assertEqual(str(dmd), f"{dmd.individual} - {dmd.account_type}")
+
+    def test_get_associated_object(self) -> None:
+        dmd = AccountFactory(data={"test": "test"}, individual=self.ind)
+        self.assertEqual(dmd.get_associated_object(FspNameMapping.SourceModel.ACCOUNT.value), dmd.data)
+        self.assertEqual(
+            dmd.get_associated_object(FspNameMapping.SourceModel.HOUSEHOLD.value), dmd.individual.household
+        )
+        self.assertEqual(dmd.get_associated_object(FspNameMapping.SourceModel.INDIVIDUAL.value), dmd.individual)
+
+    def test_delivery_data(self) -> None:
+        dmd = AccountFactory(
+            data={
+                "expiry_date": "12.12.2024",
+                "name_of_cardholder": "Marek",
+            },
+            individual=self.ind,
+            account_type=AccountType.objects.get(key="bank"),
+            number="test",
+            financial_institution=self.financial_institution,
+        )
+
+        fsp2 = FinancialServiceProviderFactory()  # no dm config
+        self.assertEqual(
+            dmd.delivery_data(fsp2, self.dm_atm_card),
+            {},
+        )
+
+        dm_config = DeliveryMechanismConfig.objects.get(fsp=self.fsp, delivery_mechanism=self.dm_atm_card)
+        dm_config.required_fields.extend(["custom_ind_name", "custom_hh_address", "address"])
+        dm_config.save()
+
+        FspNameMapping.objects.create(
+            external_name="number", hope_name="number", source=FspNameMapping.SourceModel.ACCOUNT, fsp=self.fsp
+        )
+        FspNameMapping.objects.create(
+            external_name="expiry_date",
+            hope_name="expiry_date",
+            source=FspNameMapping.SourceModel.ACCOUNT,
+            fsp=self.fsp,
+        )
+        FspNameMapping.objects.create(
+            external_name="custom_ind_name",
+            hope_name="my_custom_ind_name",
+            source=FspNameMapping.SourceModel.INDIVIDUAL,
+            fsp=self.fsp,
+        )
+        FspNameMapping.objects.create(
+            external_name="custom_hh_address",
+            hope_name="my_custom_hh_address",
+            source=FspNameMapping.SourceModel.HOUSEHOLD,
+            fsp=self.fsp,
+        )
+        FspNameMapping.objects.create(
+            external_name="address", hope_name="address", source=FspNameMapping.SourceModel.HOUSEHOLD, fsp=self.fsp
+        )
+
+        def my_custom_ind_name(self: Any) -> str:
+            return f"{self.full_name} Custom"
+
+        dmd.individual.__class__.my_custom_ind_name = property(my_custom_ind_name)
+
+        def my_custom_hh_address(self: Any) -> str:
+            return f"{self.address} Custom"
+
+        self.hh.__class__.my_custom_hh_address = property(my_custom_hh_address)
+
+        self.assertEqual(
+            dmd.delivery_data(self.fsp, self.dm_atm_card),
+            {
+                "number": "test",
+                "expiry_date": "12.12.2024",
+                "name_of_cardholder": "Marek",
+                "custom_ind_name": f"{dmd.individual.full_name} Custom",
+                "custom_hh_address": f"{self.hh.address} Custom",
+                "address": self.hh.address,
+                "financial_institution": "ABC",
+            },
+        )
+
+    def test_validate(self) -> None:
+        dmd = AccountFactory(
+            data={
+                "number": "test",
+                "expiry_date": "12.12.2024",
+                "name_of_cardholder": "Marek",
+            },
+            individual=self.ind,
+            account_type=AccountType.objects.get(key="bank"),
+        )
+        self.assertEqual(dmd.validate(self.fsp, self.dm_atm_card), True)
+
+        dm_config = DeliveryMechanismConfig.objects.get(fsp=self.fsp, delivery_mechanism=self.dm_atm_card)
+        dm_config.required_fields.extend(["address"])
+        dm_config.save()
+
+        FspNameMapping.objects.create(
+            external_name="address", hope_name="address", source=FspNameMapping.SourceModel.HOUSEHOLD, fsp=self.fsp
+        )
+        self.assertEqual(dmd.validate(self.fsp, self.dm_atm_card), True)
+
+        dm_config.required_fields.extend(["missing_field"])
+        dm_config.save()
+
+        FspNameMapping.objects.create(
+            external_name="missing_field",
+            hope_name="missing_field",
+            source=FspNameMapping.SourceModel.INDIVIDUAL,
+            fsp=self.fsp,
+        )
+        self.assertEqual(dmd.validate(self.fsp, self.dm_atm_card), False)
+
+    def test_validate_uniqueness(self) -> None:
+        AccountFactory(data={"name_of_cardholder": "test"}, individual=self.ind)
+        Account.update_unique_field = mock.Mock()  # type: ignore
+        Account.validate_uniqueness(Account.objects.all())
+        Account.update_unique_field.assert_called_once()
+
+
+@tag("isolated")
+class TestAccountModelUniqueField(TransactionTestCase):
+    def test_update_unique_fields(self) -> None:
+        create_afghanistan()
+        self.program1 = ProgramFactory()
+        self.user = UserFactory.create()
+        self.ind = IndividualFactory(household=None, program=self.program1)
+        self.ind2 = IndividualFactory(household=None, program=self.program1)
+        self.hh = HouseholdFactory(head_of_household=self.ind)
+        self.ind.household = self.hh
+        self.ind.save()
+        self.ind2.household = self.hh
+        self.ind2.save()
+
+        account_type_bank, _ = AccountType.objects.update_or_create(
+            key="bank",
+            label="Bank",
+            defaults=dict(
+                unique_fields=[
+                    "number",
+                    "seeing_disability",
+                    "name_of_cardholder__atm_card",
+                ],
+                payment_gateway_id="123",
+            ),
+        )
+
+        dmd_1 = AccountFactory(
+            data={"name_of_cardholder__atm_card": "test"},
+            individual=self.ind,
+            account_type=account_type_bank,
+            number="123",
+        )
+        dmd_1.individual.seeing_disability = LOT_DIFFICULTY
+        dmd_1.individual.save()
+        self.assertIsNone(dmd_1.unique_key)
+        self.assertEqual(dmd_1.is_unique, True)
+
+        dmd_2 = AccountFactory(
+            data={"name_of_cardholder__atm_card": "test2"},
+            individual=self.ind2,
+            account_type=account_type_bank,
+            number="123",
+        )
+        dmd_2.individual.seeing_disability = LOT_DIFFICULTY
+        dmd_2.individual.save()
+        self.assertIsNone(dmd_2.unique_key)
+        self.assertEqual(dmd_2.is_unique, True)
+
+        with transaction.atomic():
+            dmd_1.update_unique_field()
+            transaction.on_commit(lambda: dmd_1.refresh_from_db())
+
+        self.assertIsNotNone(dmd_1.unique_key)
+        self.assertEqual(dmd_1.is_unique, True)
+
+        dmd_2.data = {**dmd_2.data, "name_of_cardholder__atm_card": "test"}
+        dmd_2.save()
+        with transaction.atomic():
+            dmd_2.update_unique_field()
+            transaction.on_commit(lambda: dmd_2.refresh_from_db())
+
+        self.assertIsNotNone(dmd_2.unique_key)
+        self.assertEqual(dmd_2.is_unique, False)
+
+
+class TestAccountTypeModel(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        cls.fsp = FinancialServiceProviderFactory()
+        generate_delivery_mechanisms()
+
+    def test_get_targeting_field_names(self) -> None:
+        self.assertEqual(AccountType.get_targeting_field_names(), ["bank__number", "mobile__number"])

@@ -67,6 +67,7 @@ class TestGenerateReportService(TestCase):
                     "business_area": self.business_area,
                     "last_registration_date": last_registration_dates[0] if index % 2 else last_registration_dates[1],
                     "admin_area": None if index % 2 else self.admin_area_1,
+                    "program": self.program_1 if index % 2 else self.program_2,
                 },
                 [
                     {"last_registration_date": last_registration_dates[0] if index % 2 else last_registration_dates[1]},
@@ -75,10 +76,6 @@ class TestGenerateReportService(TestCase):
             )
             self.households.append(household)
             self.individuals.extend(individuals)
-            if index % 2:
-                household.programs.add(self.program_1)
-            else:
-                household.programs.add(self.program_2)
 
         self.payment_plan_1 = PaymentPlanFactory(
             business_area=self.business_area,

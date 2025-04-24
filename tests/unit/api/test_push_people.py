@@ -74,6 +74,7 @@ class TestPushPeople(HOPEApiTestCase):
                 "birth_date": "2000-01-01",
                 "sex": "NOT_COLLECTED",
                 "type": "",
+                "program": str(self.program.id),
             }
         ]
         response = self.client.post(self.url, data, format="json")
@@ -119,6 +120,7 @@ class TestPushPeople(HOPEApiTestCase):
                         "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                     }
                 ],
+                "program": str(self.program.id),
             }
         ]
         response = self.client.post(self.url, data, format="json")
@@ -156,6 +158,7 @@ class TestPushPeople(HOPEApiTestCase):
                         "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                     }
                 ],
+                "program": str(self.program.id),
             },
             {
                 "residence_status": "IDP",
@@ -165,6 +168,7 @@ class TestPushPeople(HOPEApiTestCase):
                 "birth_date": "1990-01-01",
                 "sex": "FEMALE",
                 "type": "",
+                "program": str(self.program.id),
             },
         ]
         response = self.client.post(self.url, data, format="json")
@@ -211,6 +215,7 @@ class TestPushPeople(HOPEApiTestCase):
                         "country": "AF",
                     }
                 ],
+                "program": str(self.program.id),
             },
             {
                 "residence_status": "IDP",
@@ -218,6 +223,7 @@ class TestPushPeople(HOPEApiTestCase):
                 "country": "AF",
                 "full_name": "Mary Doe",
                 "sex": "FEMALE",
+                "program": str(self.program.id),
             },
         ]
         response = self.client.post(self.url, data, format="json")
@@ -262,6 +268,7 @@ class TestPushPeople(HOPEApiTestCase):
                 "sex": "MALE",
                 "type": "",
                 field_name: phone_number,
+                "program": str(self.program.id),
             }
         ]
         response = self.client.post(self.url, data, format="json")
@@ -292,6 +299,7 @@ class TestPushPeople(HOPEApiTestCase):
                 "birth_date": "2000-01-01",
                 "sex": "MALE",
                 "type": "",
+                "program": str(self.program.id),
             }
         ]
         response = self.client.post(self.url, data, format="json")
@@ -317,6 +325,7 @@ class TestPushPeople(HOPEApiTestCase):
                 "admin2": "AF0101",
                 "admin3": "",
                 "admin4": None,
+                "program": str(self.program.id),
             }
         ]
         response = self.client.post(self.url, data, format="json")

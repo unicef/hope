@@ -13,13 +13,13 @@ import { useLocation } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { Criteria } from './Criteria';
-import { ExcludeCheckboxes } from './ExcludeCheckboxes';
-import {
+import ExcludeCheckboxes from './ExcludeCheckboxes';
+import TargetingCriteriaDisplayDisabled, {
   ContentWrapper,
-  TargetingCriteriaDisplayDisabled,
 } from './TargetingCriteriaDisplayDisabled';
 import { VulnerabilityScoreComponent } from './VulnerabilityScoreComponent';
 import { useCachedIndividualFieldsQuery } from '@hooks/useCachedIndividualFields';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const Title = styled.div`
   padding: ${({ theme }) => theme.spacing(3)} ${({ theme }) => theme.spacing(4)};
@@ -82,7 +82,7 @@ interface AddFilterTargetingCriteriaDisplayProps {
   isStandardDctType: boolean;
 }
 
-export const AddFilterTargetingCriteriaDisplay = ({
+const AddFilterTargetingCriteriaDisplay = ({
   rules,
   helpers,
   targetPopulation,
@@ -104,7 +104,7 @@ export const AddFilterTargetingCriteriaDisplay = ({
     });
 
   const [isOpen, setOpen] = useState(false);
-  const [criteriaIndex, setIndex] = useState(null);
+  const [criteriaIndex, setIndex] = useState(0);
   const [criteriaObject, setCriteria] = useState({});
   const [allDataChoicesDict, setAllDataChoicesDict] = useState(null);
   const [allCollectorDataChoicesDict, setAllCollectorDataChoicesDict] =
@@ -157,6 +157,8 @@ export const AddFilterTargetingCriteriaDisplay = ({
       collectorsFiltersBlocks: [...values.collectorsFiltersBlocks],
       householdIds: values.householdIds,
       individualIds: values.individualIds,
+      deliveryMechanism: values.deliveryMechanism,
+      fsp: values.fsp,
     };
     if (criteriaIndex !== null) {
       helpers.replace(criteriaIndex, criteria);
@@ -164,6 +166,12 @@ export const AddFilterTargetingCriteriaDisplay = ({
       helpers.push(criteria);
     }
     return closeModal();
+  };
+
+  //function to open a first modal
+  const handleAddFilter = (): void => {
+    setIndex(0);
+    setOpen(true);
   };
 
   // const  collectorFiltersAvailable =
@@ -217,6 +225,7 @@ export const AddFilterTargetingCriteriaDisplay = ({
           individualFiltersAvailable={individualFiltersAvailable}
           householdFiltersAvailable={householdFiltersAvailable}
           collectorsFiltersAvailable={true}
+          criteriaIndex={criteriaIndex}
         />
         <ContentWrapper>
           <Box display="flex" flexDirection="column">
@@ -226,6 +235,7 @@ export const AddFilterTargetingCriteriaDisplay = ({
                     // eslint-disable-next-line
                     <Fragment key={criteria.id || index}>
                       <Criteria
+                        criteriaIndex={index}
                         isEdit={isEdit}
                         allDataFieldsChoicesDict={allDataChoicesDict}
                         allCollectorFieldsChoicesDict={
@@ -241,6 +251,11 @@ export const AddFilterTargetingCriteriaDisplay = ({
                         }
                         householdIds={criteria.householdIds}
                         individualIds={criteria.individualIds}
+                        deliveryMechanism={targetPopulation?.deliveryMechanism}
+                        financialServiceProvider={
+                          targetPopulation?.financialServiceProvider
+                        }
+                        criteria={criteria}
                         editFunction={() => editCriteria(criteria, index)}
                         removeFunction={() => helpers.remove(index)}
                       />
@@ -257,7 +272,7 @@ export const AddFilterTargetingCriteriaDisplay = ({
 
               {!rules.length && (
                 <AddCriteria
-                  onClick={() => setOpen(true)}
+                  onClick={handleAddFilter}
                   data-cy="button-target-population-add-criteria"
                 >
                   <AddCircleOutline />
@@ -282,3 +297,8 @@ export const AddFilterTargetingCriteriaDisplay = ({
   }
   return <TargetingCriteriaDisplayDisabled showTooltip />;
 };
+
+export default withErrorBoundary(
+  AddFilterTargetingCriteriaDisplay,
+  'AddFilterTargetingCriteriaDisplay',
+);

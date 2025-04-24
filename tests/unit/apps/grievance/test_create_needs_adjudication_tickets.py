@@ -44,7 +44,6 @@ class TestCreateNeedsAdjudicationTickets(APITestCase):
         cls.household.registration_data_import.imported_by.save()
         cls.household.registration_data_import.program = program
         cls.household.registration_data_import.save()
-        cls.household.programs.add(program)
         cls.individuals_to_create = [
             {
                 "full_name": "test name",
@@ -145,6 +144,10 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
             name="Test HOPE2",
             business_area=BusinessArea.objects.first(),
         )
+        program2 = ProgramFactory(
+            name="Test HOPE2",
+            business_area=BusinessArea.objects.first(),
+        )
         cls.household = HouseholdFactory.build(
             size=2,
             program=program,
@@ -161,7 +164,6 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
         cls.household.registration_data_import.imported_by.save()
         cls.household.registration_data_import.program = program
         cls.household.registration_data_import.save()
-        cls.household.programs.add(program)
         cls.household2.household_collection.save()
         cls.household2.registration_data_import.imported_by.save()
         cls.household2.registration_data_import.program = program
@@ -236,6 +238,10 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
         other_individual = [
             IndividualFactory(household=cls.household2, program=program, **individual)
             for individual in individuals_to_create_2
+        ][0]
+        other_individual2 = [
+            IndividualFactory(household=cls.household3, program=program2, **individual)
+            for individual in individuals_to_create_3
         ][0]
         other_individual2 = [
             IndividualFactory(household=cls.household3, program=program2, **individual)

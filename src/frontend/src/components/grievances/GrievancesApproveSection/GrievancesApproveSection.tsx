@@ -1,7 +1,7 @@
 import { Box, Grid2 as Grid } from '@mui/material';
 import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import { GrievanceTicketQuery } from '@generated/graphql';
-import { AddIndividualGrievanceDetails } from '../AddIndividualGrievanceDetails';
+import AddIndividualGrievanceDetails from '../AddIndividualGrievanceDetails';
 import { DeleteHouseholdGrievanceDetails } from '../DeleteHouseholdGrievanceDetails';
 import { DeleteIndividualGrievanceDetails } from '../DeleteIndividualGrievanceDetails';
 import { FlagDetails } from '../FlagDetails';
@@ -11,6 +11,7 @@ import { PaymentGrievanceDetails } from '../PaymentGrievance/PaymentGrievanceDet
 import { RequestedHouseholdDataChange } from '../RequestedHouseholdDataChange';
 import { RequestedIndividualDataChange } from '../RequestedIndividualDataChange';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface GrievancesApproveSectionProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
@@ -20,7 +21,7 @@ interface GrievancesApproveSectionProps {
   canApprovePaymentVerification: boolean;
 }
 
-export function GrievancesApproveSection({
+function GrievancesApproveSection({
   ticket,
   canApproveFlagAndAdjudication,
   canApproveDataChange,
@@ -127,3 +128,8 @@ export function GrievancesApproveSection({
     </Grid>
   );
 }
+
+export default withErrorBoundary(
+  GrievancesApproveSection,
+  'GrievancesApproveSection',
+);

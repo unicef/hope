@@ -45,7 +45,7 @@ DEFAULTS = {
     "AZURE_CLIENT_ID": (str, ""),
     "AZURE_CLIENT_SECRET": (str, ""),
     "AZURE_TENANT_KEY": (str, ""),
-    "CONSTANCE_REDIS_CONNECTION": (str, "redis://redis:6379/0"),
+    "CONSTANCE_REDIS_CONNECTION": (str, "redis://valkey:6379/0"),
     "SANCTION_LIST_CC_MAIL": (str, "dfam-cashassistance@unicef.org"),
     "ELASTICSEARCH_HOST": (str, "http://elasticsearch:9200"),
     "ELASTICSEARCH_INDEX_PREFIX": (str, ""),
@@ -74,7 +74,7 @@ DEFAULTS = {
     "SECURE_HSTS_SECONDS": (int, 3600),
     "FLOWER_ADDRESS": (str, "https://hope.unicef.org/flower"),
     "CACHE_ENABLED": (bool, True),
-    "CACHE_LOCATION": (str, "redis://redis:6379/1"),
+    "CACHE_LOCATION": (str, "redis://valkey:6379/1"),
     "CSP_REPORT_URI": (tuple, ("",)),
     "CSP_REPORT_ONLY": (bool, True),
     "CSP_REPORT_PERCENTAGE": (float, 0.1),
@@ -140,7 +140,6 @@ DEFAULTS = {
     "EXCHANGE_RATE_CACHE_EXPIRY": (int, 60 * 60 * 24),
     "USE_DUMMY_EXCHANGE_RATES": (str, "no"),
     "PROFILING": (str, "off"),
-    "LIBRARY_PATHS": (bool, False),
     "STATIC_URL": (str, "/static/"),
     "MEDIA_URL": (str, "/media/"),
     "FILE_STORAGE_STATIC": (
@@ -161,6 +160,8 @@ DEFAULTS = {
     "MEDIA_LOCATION": (str, "media"),
     "AZURE_ACCOUNT_NAME": (str, ""),
     "AZURE_ACCOUNT_KEY": (str, ""),
+    "GDAL_LIBRARY_PATH": (str, None),
+    "GEOS_LIBRARY_PATH": (str, None),
 }
 
 env = SmartEnv(**DEFAULTS)

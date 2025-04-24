@@ -173,7 +173,6 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
         household_one.registration_data_import.imported_by.save()
         household_one.registration_data_import.program = household_one.program
         household_one.registration_data_import.save()
-        household_one.programs.add(program_one)
 
         cls.individuals_to_create = [
             {

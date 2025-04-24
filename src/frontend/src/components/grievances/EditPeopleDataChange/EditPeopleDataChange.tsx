@@ -17,6 +17,7 @@ import { ExistingDocumentFieldArray } from '@components/grievances/EditIndividua
 import { NewDocumentFieldArray } from '@components/grievances/EditIndividualDataChange/NewDocumentFieldArray';
 import { ExistingPaymentChannelFieldArray } from '../EditIndividualDataChange/ExistingPaymentChannelFieldArray';
 import { NewPaymentChannelFieldArray } from '../EditIndividualDataChange/NewPaymentChannelFieldArray';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -30,7 +31,7 @@ export interface EditPeopleDataChangeProps {
   field;
 }
 
-export function EditPeopleDataChange({
+function EditPeopleDataChange({
   values,
   setFieldValue,
 }: EditPeopleDataChangeProps): ReactElement {
@@ -87,43 +88,39 @@ export function EditPeopleDataChange({
           <Title>
             <Typography variant="h6">{t('Bio Data')}</Typography>
           </Title>
-          <Grid container spacing={3}>
-            <FieldArray
-              name="individualDataUpdateFields"
-              render={(arrayHelpers) => (
-                <>
-                  {values.individualDataUpdateFields.map((item, index) => (
-                    <EditPeopleDataChangeFieldRow
-                      // eslint-disable-next-line react/no-array-index-key
-                      key={`${index}-${item?.fieldName}`}
-                      itemValue={item}
-                      index={index}
-                      individual={fullIndividual.individual}
-                      fields={
-                        editPeopleFieldsData.allEditPeopleFieldsAttributes
-                      }
-                      notAvailableFields={notAvailableItems}
-                      onDelete={() => arrayHelpers.remove(index)}
-                      values={values}
-                    />
-                  ))}
-                  <Grid size={{ xs: 4 }}>
-                    <Button
-                      color="primary"
-                      onClick={() => {
-                        arrayHelpers.push({ fieldName: null, fieldValue: '' });
-                      }}
-                      startIcon={<AddCircleOutline />}
-                      data-cy="button-add-new-field"
-                      disabled={isEditTicket}
-                    >
-                      {t('Add new field')}
-                    </Button>
-                  </Grid>
-                </>
-              )}
-            />
-          </Grid>
+          <FieldArray
+            name="individualDataUpdateFields"
+            render={(arrayHelpers) => (
+              <>
+                {values.individualDataUpdateFields.map((item, index) => (
+                  <EditPeopleDataChangeFieldRow
+                    // eslint-disable-next-line react/no-array-index-key
+                    key={`${index}-${item?.fieldName}`}
+                    itemValue={item}
+                    index={index}
+                    individual={fullIndividual.individual}
+                    fields={editPeopleFieldsData.allEditPeopleFieldsAttributes}
+                    notAvailableFields={notAvailableItems}
+                    onDelete={() => arrayHelpers.remove(index)}
+                    values={values}
+                  />
+                ))}
+                <Grid size={{ xs: 4 }}>
+                  <Button
+                    color="primary"
+                    onClick={() => {
+                      arrayHelpers.push({ fieldName: null, fieldValue: '' });
+                    }}
+                    startIcon={<AddCircleOutline />}
+                    data-cy="button-add-new-field"
+                    disabled={isEditTicket}
+                  >
+                    {t('Add new field')}
+                  </Button>
+                </Grid>
+              </>
+            )}
+          />
         </BoxWithBorders>
       )}
       <BoxWithBorders>
@@ -166,3 +163,5 @@ export function EditPeopleDataChange({
     </>
   );
 }
+
+export default withErrorBoundary(EditPeopleDataChange, 'EditPeopleDataChange');

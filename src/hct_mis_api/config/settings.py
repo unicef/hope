@@ -207,6 +207,7 @@ PROJECT_APPS = [
     "hct_mis_api.apps.periodic_data_update.apps.PeriodicDataUpdateConfig",
     "hct_mis_api.contrib.aurora.apps.Config",
     "hct_mis_api.contrib.vision.apps.Config",
+    "hct_mis_api.apps.universal_update_script.apps.Config",
 ]
 
 DJANGO_APPS = [
@@ -496,7 +497,5 @@ from hct_mis_api.config.fragments.smart_admin import *  # noqa: F403, F401, E402
 from hct_mis_api.config.fragments.social_auth import *  # noqa: F403, F401, E402
 from hct_mis_api.config.fragments.storages import *  # noqa: F403, F401, E402
 
-LIBRARY_PATHS: bool = env("LIBRARY_PATHS")
-if LIBRARY_PATHS:
-    GDAL_LIBRARY_PATH = "/opt/homebrew/opt/gdal/lib/libgdal.dylib"
-    GEOS_LIBRARY_PATH = "/opt/homebrew/opt/geos/lib/libgeos_c.dylib"
+GDAL_LIBRARY_PATH = env("GDAL_LIBRARY_PATH")
+GEOS_LIBRARY_PATH = env("GEOS_LIBRARY_PATH")

@@ -12,7 +12,6 @@ from hct_mis_api.apps.core.models import (
     PeriodicFieldData,
 )
 from hct_mis_api.apps.core.utils import encode_id_base64_required
-from hct_mis_api.apps.payment.fixtures import DeliveryMechanismFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
@@ -172,10 +171,6 @@ class TestAllCollectorsFields(APITestCase):
         super().setUpTestData()
         cls.business_area = create_afghanistan()
         cls.user = UserFactory()
-        DeliveryMechanismFactory(
-            name="Test Name",
-            required_fields=["delivery_data_field__random_name"],
-        )
 
     def test_collectors_fields_choices_data(self) -> None:
         self.snapshot_graphql_request(
