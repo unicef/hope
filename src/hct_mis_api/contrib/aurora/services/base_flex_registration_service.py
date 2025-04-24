@@ -2,6 +2,7 @@ import abc
 import base64
 import hashlib
 import logging
+import uuid
 from typing import TYPE_CHECKING, Any, Dict, Iterable, Optional, Union
 
 from django.core.exceptions import ValidationError
@@ -179,12 +180,21 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
             raise
 
     def _create_object_and_validate(self, data: Dict, model_class: Any, model_form: Optional[Any] = None) -> Any:
-        if model_form is None:
-            ModelClassForm = modelform_factory(model_class, fields=list(data.keys()))
-        else:
-            ModelClassForm = modelform_factory(model_class, form=model_form, fields=list(data.keys()))
+        files = {}
+        if photo := data.get("photo"):
+            if isinstance(photo, (str, bytes)):
+                photo = self._prepare_picture_from_base64(photo, str(uuid.uuid4()))
+            files["photo"] = photo
+            del data["photo"]  # Remove the base64 from data since we're handling it as a file
 
-        form = ModelClassForm(data=data)
+        if model_form is None:
+            ModelClassForm = modelform_factory(model_class, fields=list(data.keys()) + list(files.keys()))
+        else:
+            ModelClassForm = modelform_factory(
+                model_class, form=model_form, fields=list(data.keys()) + list(files.keys())
+            )
+
+        form = ModelClassForm(data=data, files=files)  # type: ignore
         if not form.is_valid():
             raise ValidationError(form.errors)
         return form.save()
