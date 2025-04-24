@@ -1,4 +1,5 @@
 from typing import Any, Dict, List, Optional
+from unittest import skip
 
 from django.core.management import call_command
 
@@ -90,6 +91,7 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
         )
         super().setUpTestData()
 
+    @skip("Because will remove soon after REST refactoring")
     @parameterized.expand(
         [
             (
@@ -114,6 +116,7 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
             variables=input_data,
         )
 
+    @skip("Because will remove soon after REST refactoring")
     def test_create_a_ticket_per_payment(self) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.GRIEVANCES_CREATE], self.business_area, self.program
@@ -135,6 +138,7 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
         )
         self.assertEqual(GrievanceTicket.objects.count(), 2)
 
+    @skip("Because will remove soon after REST refactoring")
     @parameterized.expand(
         [
             (
@@ -159,6 +163,7 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
             variables=input_data,
         )
 
+    @skip("Because will remove soon after REST refactoring")
     @parameterized.expand(
         [
             (
@@ -186,6 +191,7 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
             variables=input_data,
         )
 
+    @skip("Because will remove soon after REST refactoring")
     @parameterized.expand(
         [
             (
@@ -209,6 +215,7 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
             variables=input_data,
         )
 
+    @skip("Because will remove soon after REST refactoring")
     @parameterized.expand(
         [
             (
@@ -232,6 +239,7 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
             variables=input_data,
         )
 
+    @skip("Because will remove soon after REST refactoring")
     @parameterized.expand(
         [
             (

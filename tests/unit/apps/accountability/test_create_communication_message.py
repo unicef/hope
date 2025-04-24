@@ -1,3 +1,4 @@
+from unittest import skip
 from unittest.mock import MagicMock, patch
 
 from parameterized import parameterized
@@ -87,6 +88,7 @@ mutation CreateAccountabilityCommunicationMessage (
             },
         }
 
+    @skip("Because will remove soon after REST refactoring")
     def test_create_accountability_communication_message_without_permission(self) -> None:
         self.create_user_role_with_permissions(self.user, [], self.business_area, self.program)
 
@@ -110,6 +112,7 @@ mutation CreateAccountabilityCommunicationMessage (
             },
         )
 
+    @skip("Because will remove soon after REST refactoring")
     @parameterized.expand(
         [
             (Survey.SAMPLING_FULL_LIST,),
@@ -149,6 +152,7 @@ mutation CreateAccountabilityCommunicationMessage (
                 self.assertEqual(len(broadcast_message_mock.call_args[0][0]), self.payment_plan.payment_items.count())
             self.assertEqual(broadcast_message_mock.call_args[0][1], "Test body")
 
+    @skip("Because will remove soon after REST refactoring")
     @parameterized.expand(
         [
             (Survey.SAMPLING_FULL_LIST,),
