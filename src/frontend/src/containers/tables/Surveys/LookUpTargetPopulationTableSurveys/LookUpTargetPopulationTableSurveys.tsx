@@ -47,13 +47,14 @@ export function LookUpTargetPopulationTableSurveys({
       filter.totalHouseholdsCountMax || null,
     status: filter.status,
     businessArea,
-    program: programId,
     createdAtRange: JSON.stringify({
       min: filter.createdAtRangeMin || null,
       max: filter.createdAtRangeMax || null,
     }),
     statusNot: PaymentPlanStatus.Open,
     isTargetPopulation: true,
+    businessAreaSlug: businessArea,
+    programSlug: programId,
   };
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
@@ -63,18 +64,11 @@ export function LookUpTargetPopulationTableSurveys({
     isLoading,
     error,
   } = useQuery<PaginatedPaymentPlanListList>({
-    queryKey: [
-      'businessAreasProgramsPaymentPlansList',
-      businessArea,
-      programId,
-      queryVariables,
-    ],
+    queryKey: ['businessAreasProgramsPaymentPlansList', queryVariables],
     queryFn: () => {
-      return RestService.restBusinessAreasProgramsPaymentPlansList({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
-        ...queryVariables,
-      });
+      return RestService.restBusinessAreasProgramsPaymentPlansList(
+        queryVariables,
+      );
     },
   });
 

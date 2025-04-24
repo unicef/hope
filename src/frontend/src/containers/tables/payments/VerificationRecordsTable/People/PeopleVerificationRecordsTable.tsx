@@ -27,8 +27,9 @@ export function PeopleVerificationRecordsTable({
 
   const initialQueryVariables = {
     ...filter,
-    businessArea,
     paymentPlanId,
+    businessAreaSlug: businessArea,
+    programSlug: programId,
   };
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
@@ -38,18 +39,11 @@ export function PeopleVerificationRecordsTable({
     isLoading,
     error,
   } = useQuery<PaginatedPaymentVerificationPlanListList>({
-    queryKey: [
-      'businessAreasProgramsPaymentVerificationsList',
-      businessArea,
-      programId,
-      queryVariables,
-    ],
+    queryKey: ['businessAreasProgramsPaymentVerificationsList', queryVariables],
     queryFn: () => {
-      return RestService.restBusinessAreasProgramsPaymentVerificationsList({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
-        ...queryVariables,
-      });
+      return RestService.restBusinessAreasProgramsPaymentVerificationsList(
+        queryVariables,
+      );
     },
   });
 

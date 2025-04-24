@@ -1228,7 +1228,12 @@ export const filterEmptyParams = (params) => {
   return Object.fromEntries(
     Object.entries(params).filter(([, value]) => {
       // Handle basic empty values
-      if (value === undefined || value === null || value === '') {
+      if (
+        value === undefined ||
+        value === null ||
+        value === '' ||
+        (Array.isArray(value) && value.length === 1 && value[0] === '')
+      ) {
         return false;
       }
 

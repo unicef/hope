@@ -27,6 +27,8 @@ function PaymentPlansTable({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const initialQueryVariables = {
+    businessAreaSlug: businessArea,
+    programSlug: programId,
     search: filter.search,
     status: filter.status,
     totalEntitledQuantityFrom: filter.totalEntitledQuantityFrom || null,
@@ -44,24 +46,17 @@ function PaymentPlansTable({
     isLoading,
     error,
   } = useQuery<PaginatedPaymentPlanListList>({
-    queryKey: [
-      'businessAreasProgramsPaymentPlansList',
-      businessArea,
-      programId,
-      queryVariables,
-    ],
+    queryKey: ['businessAreasProgramsPaymentPlansList', queryVariables],
     queryFn: () => {
-      return RestService.restBusinessAreasProgramsPaymentPlansList({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
-      });
+      return RestService.restBusinessAreasProgramsPaymentPlansList(
+        queryVariables,
+      );
     },
   });
 
   const { data: dataPaymentPlansCount } = useQuery<CountResponse>({
     queryKey: [
       'businessAreasProgramsPaymentPlansCountRetrieve',
-      queryVariables,
       programId,
       businessArea,
     ],
@@ -69,7 +64,6 @@ function PaymentPlansTable({
       RestService.restBusinessAreasProgramsPaymentPlansCountRetrieve({
         businessAreaSlug: businessArea,
         programSlug: programId,
-        ...queryVariables,
       }),
   });
 

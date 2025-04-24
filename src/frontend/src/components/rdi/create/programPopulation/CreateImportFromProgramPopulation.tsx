@@ -65,9 +65,8 @@ export const CreateImportFromProgramPopulationForm = ({
 
   const { data: programsData, isLoading: programsDataLoading } =
     useQuery<PaginatedProgramListList>({
-      queryKey: ['businessAreasProgramsList', queryVariables, businessArea],
-      queryFn: () =>
-        RestService.restBusinessAreasProgramsList({ ...queryVariables }),
+      queryKey: ['businessAreasProgramsList', queryVariables],
+      queryFn: () => RestService.restBusinessAreasProgramsList(queryVariables),
     });
 
   const onSubmit = async (values): Promise<void> => {

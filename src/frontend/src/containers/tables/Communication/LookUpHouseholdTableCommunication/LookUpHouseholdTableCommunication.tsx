@@ -78,7 +78,19 @@ function LookUpHouseholdTableCommunication({
       orderBy: filter.orderBy,
       headOfHouseholdPhoneNoValid: true,
     };
-  }, [businessArea, programId, filter]);
+  }, [
+    businessArea,
+    programId,
+    filter.householdSizeMin,
+    filter.householdSizeMax,
+    filter.search,
+    filter.documentType,
+    filter.documentNumber,
+    filter.admin2,
+    filter.residenceStatus,
+    filter.withdrawn,
+    filter.orderBy,
+  ]);
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
@@ -87,17 +99,9 @@ function LookUpHouseholdTableCommunication({
   }, [initialQueryVariables]);
 
   const { data, isLoading, error } = useQuery<PaginatedHouseholdListList>({
-    queryKey: [
-      'businessAreasProgramsHouseholdsList',
-      queryVariables,
-      programId,
-      businessArea,
-    ],
+    queryKey: ['businessAreasProgramsHouseholdsList', queryVariables],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsHouseholdsList({
-        ...queryVariables,
-      }),
-    enabled: !!businessArea && !!programId,
+      RestService.restBusinessAreasProgramsHouseholdsList(queryVariables),
   });
 
   const [selected, setSelected] = useState<string[]>(

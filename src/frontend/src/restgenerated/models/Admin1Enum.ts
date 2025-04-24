@@ -3,24 +3,24 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * * `AF84` - Hollymouth
- * * `UA87` - Joshuaborough
- * * `UA84` - Lake Stephen
- * * `AF55` - North Melissaborough
- * * `HR10` - Palmerton
- * * `UA15` - Port Anthony
- * * `HR39` - Port Richard
- * * `HR38` - Seanville
- * * `AF70` - West Christinaside
+ * * `AF99` - Crystalfurt
+ * * `UA56` - Danielville
+ * * `UA20` - Kellyville
+ * * `HR59` - Michaelton
+ * * `AF65` - North Cindyville
+ * * `AF91` - North Matthew
+ * * `HR93` - South Dwayneville
+ * * `HR45` - Stephaniestad
+ * * `UA47` - Timothyberg
  */
 export enum Admin1Enum {
-    AF84 = 'AF84',
-    UA87 = 'UA87',
-    UA84 = 'UA84',
-    AF55 = 'AF55',
-    HR10 = 'HR10',
-    UA15 = 'UA15',
-    HR39 = 'HR39',
-    HR38 = 'HR38',
-    AF70 = 'AF70',
+    AF99 = 'AF99',
+    UA56 = 'UA56',
+    UA20 = 'UA20',
+    HR59 = 'HR59',
+    AF65 = 'AF65',
+    AF91 = 'AF91',
+    HR93 = 'HR93',
+    HR45 = 'HR45',
+    UA47 = 'UA47',
 }
