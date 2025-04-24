@@ -90,16 +90,15 @@ class FeedbackDetailSerializer(AdminUrlSerializerMixin, FeedbackListSerializer):
 
 
 class FeedbackCreateSerializer(serializers.ModelSerializer):
-    id = serializers.CharField(read_only=True)
     issue_type = serializers.ChoiceField(required=True, choices=Feedback.ISSUE_TYPE_CHOICES)
-    household_lookup = serializers.CharField(allow_null=True, allow_blank=True)
-    individual_lookup = serializers.CharField(allow_null=True, allow_blank=True)
-    program_id = serializers.CharField(allow_null=True, allow_blank=True)
-    area = serializers.CharField(allow_null=True, allow_blank=True)
-    admin2 = serializers.CharField(allow_null=True, allow_blank=True)
+    household_lookup = serializers.UUIDField(allow_null=True, required=False)
+    individual_lookup = serializers.UUIDField(allow_null=True, required=False)
+    program_id = serializers.UUIDField(allow_null=True, required=False)
+    area = serializers.CharField(allow_null=True, allow_blank=True, required=False)
+    admin2 = serializers.UUIDField(allow_null=True, required=False)
     description = serializers.CharField(required=True)
-    language = serializers.CharField(allow_blank=True)
-    comments = serializers.CharField(allow_null=True, allow_blank=True)
+    language = serializers.CharField(allow_blank=True, required=False)
+    comments = serializers.CharField(allow_null=True, allow_blank=True, required=False)
     consent = serializers.BooleanField(default=True)
 
     class Meta:
@@ -120,20 +119,26 @@ class FeedbackCreateSerializer(serializers.ModelSerializer):
 
 
 class FeedbackUpdateSerializer(serializers.ModelSerializer):
-    id = serializers.CharField(read_only=True)
+    issue_type = serializers.ChoiceField(required=True, choices=Feedback.ISSUE_TYPE_CHOICES)
+    household_lookup = serializers.UUIDField(allow_null=True, required=False)
+    individual_lookup = serializers.UUIDField(allow_null=True, required=False)
     description = serializers.CharField(required=True)
-    comments = serializers.CharField(allow_null=True, allow_blank=True)
-    area = serializers.CharField(allow_null=True, allow_blank=True)
-    admin2 = serializers.CharField(allow_null=True, allow_blank=True)
-    language = serializers.CharField(allow_blank=True)
+    comments = serializers.CharField(allow_null=True, allow_blank=True, required=False)
+    area = serializers.CharField(allow_null=True, allow_blank=True, required=False)
+    admin2 = serializers.UUIDField(allow_null=True, required=False)
+    language = serializers.CharField(allow_blank=True, required=False)
+    consent = serializers.BooleanField(required=False)
 
     class Meta:
         model = Feedback
         fields = (
-            "id",
+            "issue_type",
+            "household_lookup",
+            "individual_lookup",
             "area",
             "admin2",
             "description",
             "language",
             "comments",
+            "consent",
         )

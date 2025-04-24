@@ -22,17 +22,38 @@ class TestFeedbackViewSet:
     def setup(self, api_client: Any) -> None:
         self.afghanistan = create_afghanistan()
         self.partner = PartnerFactory(name="unittest")
-        self.user = UserFactory(partner=self.partner)
+        self.user = UserFactory(partner=self.partner, first_name="Test", last_name="User")
         self.client = api_client(self.user)
-        self.program_active = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
+        self.program_active = ProgramFactory(
+            name="Test Active Program", business_area=self.afghanistan, status=Program.ACTIVE
+        )
         self.hh_1 = HouseholdFactory(program=self.program_active)
         self.individual_1 = IndividualFactory(household_id=self.hh_1.id)
         self.area_1 = AreaFactory(name="AREA_name")
+        self.area_2 = AreaFactory(name="Wroclaw")
 
         self.feedback_1 = FeedbackFactory(
-            program=self.program_active, household_lookup=self.hh_1, individual_lookup=self.individual_1
+            program=self.program_active,
+            household_lookup=self.hh_1,
+            individual_lookup=self.individual_1,
+            created_by=self.user,
+            description="test description 111",
+            area="test area 111",
+            language="test language 111",
+            comments="test comments 111",
         )
-        self.feedback_2 = FeedbackFactory(program=None)
+        self.feedback_2 = FeedbackFactory(
+            program=None,
+            household_lookup=self.hh_1,
+            individual_lookup=self.individual_1,
+            created_by=self.user,
+            issue_type="POSITIVE_FEEDBACK",
+            description="test description",
+            area="test area",
+            language="test language",
+            comments="test comments",
+            admin2=self.area_1,
+        )
         self.feedback_3 = FeedbackFactory(program=ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE))
 
         # per BA
@@ -155,53 +176,148 @@ class TestFeedbackViewSet:
         if expected_status == status.HTTP_200_OK:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
-            # print("resp_data === ", resp_data)
             assert "id" in resp_data
             assert resp_data["admin2_name"] == "AREA_name"
-            # TODO: add more
+            assert resp_data["household_unicef_id"] is not None
+            assert resp_data["household_id"] is not None
+            assert resp_data["individual_unicef_id"] is not None
+            assert resp_data["individual_id"] is not None
+            assert resp_data["program_name"] is None
+            assert resp_data["program_id"] is None
+            assert resp_data["created_by"] == "Test User"
+            assert resp_data["description"] == "test description"
+            assert resp_data["area"] == "test area"
+            assert resp_data["language"] == "test language"
+            assert resp_data["comments"] == "test comments"
 
-    # @pytest.mark.parametrize(
-    #     "permissions, expected_status",
-    #     [
-    #         ([Permissions.GRIEVANCES_FEEDBACK_VIEW_CREATE], status.HTTP_201_CREATED),
-    #         ([], status.HTTP_403_FORBIDDEN),
-    #     ],
-    # )
-    # def test_create_feedback(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
-    #     create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
-    #     PaymentFactory(parent=self.pp, status=Payment.STATUS_SUCCESS, delivered_quantity=111, entitlement_quantity=112)
-    #     response = self.client.post(
-    #         self.url_create,
-    #         {
-    #             "sampling": "FULL_LIST"},
-    #         format="json",
-    #     )
-    #     assert response.status_code == expected_status
-    #     if expected_status == status.HTTP_201_CREATED:
-    #         assert response.status_code == status.HTTP_201_CREATED
-    #         resp_data = response.json()
-    #         assert "id" in resp_data
-    #
-    # @pytest.mark.parametrize(
-    #     "permissions, expected_status",
-    #     [
-    #         ([Permissions.GRIEVANCES_FEEDBACK_VIEW_UPDATE], status.HTTP_200_OK),
-    #         ([], status.HTTP_403_FORBIDDEN),
-    #     ],
-    # )
-    # def test_update_feedback(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
-    #     create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
-    #     response = self.client.patch(
-    #         self.url_update,
-    #         {
-    #             "sampling": "FULL_LIST"},
-    #         format="json",
-    #     )
-    #     assert response.status_code == expected_status
-    #     if expected_status == status.HTTP_200_OK:
-    #         assert response.status_code == status.HTTP_200_OK
-    #         resp_data = response.json()
-    #         assert "id" in resp_data
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.GRIEVANCES_FEEDBACK_VIEW_CREATE], status.HTTP_201_CREATED),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_create_feedback(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        response = self.client.post(
+            self.url_list,
+            {
+                "area": "Area 1",
+                "comments": "Test Comments",
+                "consent": True,
+                "description": "Test new description",
+                "household_lookup": str(self.hh_1.pk),
+                "issue_type": "POSITIVE_FEEDBACK",
+                "admin2": str(self.area_1.pk),
+                "language": "polish",
+            },
+            format="json",
+        )
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_201_CREATED:
+            assert response.status_code == status.HTTP_201_CREATED
+            resp_data = response.json()
+            assert "id" in resp_data
+            assert resp_data["admin2_name"] == "AREA_name"
+            assert resp_data["issue_type"] == "Positive feedback"
+            assert resp_data["household_id"] is not None
+            assert resp_data["household_unicef_id"] is not None
+            assert resp_data["individual_unicef_id"] is None
+            assert resp_data["individual_id"] is None
+            assert resp_data["program_name"] == self.hh_1.program.name
+            assert resp_data["program_id"] is not None
+            assert resp_data["created_by"] == "Test User"
+            assert resp_data["description"] == "Test new description"
+            assert resp_data["area"] == "Area 1"
+            assert resp_data["language"] == "polish"
+            assert resp_data["comments"] == "Test Comments"
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.GRIEVANCES_FEEDBACK_VIEW_CREATE], status.HTTP_201_CREATED),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_create_feedback_with_minimum_data(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        response = self.client.post(
+            self.url_list,
+            {
+                "description": "small",
+                "issue_type": "NEGATIVE_FEEDBACK",
+            },
+            format="json",
+        )
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_201_CREATED:
+            assert response.status_code == status.HTTP_201_CREATED
+            resp_data = response.json()
+            assert "id" in resp_data
+            assert resp_data["admin2_name"] is None
+            assert resp_data["issue_type"] == "Negative feedback"
+            assert resp_data["household_id"] is None
+            assert resp_data["household_unicef_id"] is None
+            assert resp_data["individual_unicef_id"] is None
+            assert resp_data["individual_id"] is None
+            assert resp_data["program_name"] is None
+            assert resp_data["program_id"] is None
+            assert resp_data["created_by"] == "Test User"
+            assert resp_data["description"] == "small"
+            assert resp_data["area"] == ""
+            assert resp_data["language"] == ""
+            assert resp_data["comments"] is None
+            assert resp_data["consent"] is True
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.GRIEVANCES_FEEDBACK_VIEW_UPDATE], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_update_feedback(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        response = self.client.patch(
+            self.url_details,
+            {
+                "issue_type": "NEGATIVE_FEEDBACK",
+                "individual_lookup": str(self.individual_1.pk),
+                "description": "Test_update",
+                "comments": "AAA_update",
+                "admin2": str(self.area_2.pk),
+                "area": "Area 1_updated",
+                "language": "eng_update",
+                "consent": False,
+                # "program": "program_id"
+            },
+            format="json",
+        )
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.status_code == status.HTTP_200_OK
+            resp_data = response.json()
+            assert "id" in resp_data
+            assert resp_data["admin2_name"] == "Wroclaw"
+            assert resp_data["issue_type"] == "Negative feedback"
+            assert resp_data["household_id"] is not None
+            assert resp_data["household_unicef_id"] is not None
+            assert resp_data["individual_unicef_id"] is not None
+            assert resp_data["individual_id"] is not None
+            assert resp_data["program_name"] is None
+            assert resp_data["program_id"] is None
+            assert resp_data["created_by"] == "Test User"
+            assert resp_data["description"] == "Test_update"
+            assert resp_data["area"] == "Area 1_updated"
+            assert resp_data["language"] == "eng_update"
+            assert resp_data["comments"] == "AAA_update"
+            assert resp_data["consent"] is False
 
     # per Program
     @pytest.mark.parametrize(
@@ -262,3 +378,37 @@ class TestFeedbackViewSet:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
             assert resp_data["count"] == 1
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            (
+                [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST, Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS],
+                status.HTTP_200_OK,
+            ),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_feedback_details_per_program(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        response = self.client.get(self.url_details_per_program)
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.status_code == status.HTTP_200_OK
+            resp_data = response.json()
+            assert "id" in resp_data
+            assert resp_data["admin2_name"] == "AREA_name"
+            assert resp_data["household_unicef_id"] is not None
+            assert resp_data["household_id"] is not None
+            assert resp_data["individual_unicef_id"] is not None
+            assert resp_data["individual_id"] is not None
+            assert resp_data["program_name"] == "Test Active Program"
+            assert resp_data["program_id"] is not None
+            assert resp_data["created_by"] == "Test User"
+            assert resp_data["description"] == "test description 111"
+            assert resp_data["area"] == "test area 111"
+            assert resp_data["language"] == "test language 111"
+            assert resp_data["comments"] == "test comments 111"
