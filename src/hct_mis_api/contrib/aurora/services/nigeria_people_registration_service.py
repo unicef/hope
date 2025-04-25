@@ -6,6 +6,7 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.models import (
+    HEAD,
     ROLE_PRIMARY,
     DocumentType,
     PendingDocument,
@@ -42,12 +43,12 @@ class NigeriaPeopleRegistrationService(GenericRegistrationService):
             "individual-details": {
                 "given_name_i_c": "individual.given_name",
                 "family_name_i_c": "individual.family_name",
+                "middle_name_i_c": "individual.middle_name",
                 "birth_date_i_c": "individual.birth_date",
                 "gender_i_c": "individual.sex",
                 "email_i_c": "individual.email",
                 "phone_no_i_c": "individual.phone_no",
                 "estimated_birth_date_i_c": "individual.estimated_birth_date",
-                "confirm_phone_no": "individual.phone_no_alternative",
                 "account_details": "account_details.data",
             },
         }
@@ -62,6 +63,8 @@ class NigeriaPeopleRegistrationService(GenericRegistrationService):
         )
 
         individual = individuals[0]
+        individual.relationship = HEAD
+        individual.save()
         collector = pr_collector or head or individual
         head_of_household = head or individual
         household.head_of_household = head_of_household
