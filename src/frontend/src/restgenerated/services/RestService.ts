@@ -9,9 +9,10 @@ import type { Choice } from '../models/Choice';
 import type { CountResponse } from '../models/CountResponse';
 import type { DelegatePeople } from '../models/DelegatePeople';
 import type { FspChoices } from '../models/FspChoices';
+import type { HouseholdChoices } from '../models/HouseholdChoices';
 import type { HouseholdDetail } from '../models/HouseholdDetail';
-import type { HouseholdList } from '../models/HouseholdList';
 import type { HouseholdMember } from '../models/HouseholdMember';
+import type { IndividualChoices } from '../models/IndividualChoices';
 import type { IndividualDetail } from '../models/IndividualDetail';
 import type { PaginatedAreaList } from '../models/PaginatedAreaList';
 import type { PaginatedAreaListList } from '../models/PaginatedAreaListList';
@@ -80,6 +81,7 @@ import type { TargetPopulationCopy } from '../models/TargetPopulationCopy';
 import type { TargetPopulationCreate } from '../models/TargetPopulationCreate';
 import type { TargetPopulationDetail } from '../models/TargetPopulationDetail';
 import type { TPHouseholdList } from '../models/TPHouseholdList';
+import type { UserChoices } from '../models/UserChoices';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
@@ -572,6 +574,9 @@ export class RestService {
         });
     }
     /**
+     * "
+     * Mixin to allow using the same viewset for both internal and external endpoints.
+     * If the request is authenticated with a token, it will use the HOPEPermission and check permission assigned to variable token_permission.
      * @returns PaginatedAreaListList
      * @throws ApiError
      */
@@ -791,6 +796,24 @@ export class RestService {
     }
     /**
      * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
+     * @returns HouseholdChoices
+     * @throws ApiError
+     */
+    public static restBusinessAreasHouseholdsChoicesRetrieve({
+        businessAreaSlug,
+    }: {
+        businessAreaSlug: string,
+    }): CancelablePromise<HouseholdChoices> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/households/choices/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+        });
+    }
+    /**
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -966,6 +989,24 @@ export class RestService {
     }
     /**
      * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
+     * @returns IndividualChoices
+     * @throws ApiError
+     */
+    public static restBusinessAreasIndividualsChoicesRetrieve({
+        businessAreaSlug,
+    }: {
+        businessAreaSlug: string,
+    }): CancelablePromise<IndividualChoices> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/individuals/choices/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+        });
+    }
+    /**
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -1035,6 +1076,9 @@ export class RestService {
          * * `PENDING` - Pending
          */
         paymentVerificationSummaryStatus?: 'ACTIVE' | 'FINISHED' | 'PENDING',
+        /**
+         * Filter by program slug
+         */
         program?: string,
         programCycle?: string,
         programCycleEndDate?: string,
@@ -1963,14 +2007,13 @@ export class RestService {
     }
     /**
      * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
-     * @returns HouseholdList
+     * @returns any No response body
      * @throws ApiError
      */
     public static restBusinessAreasProgramsHouseholdsWithdrawCreate({
         businessAreaSlug,
         id,
         programSlug,
-        requestBody,
     }: {
         businessAreaSlug: string,
         /**
@@ -1978,8 +2021,7 @@ export class RestService {
          */
         id: string,
         programSlug: string,
-        requestBody: HouseholdList,
-    }): CancelablePromise<HouseholdList> {
+    }): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/households/{id}/withdraw/',
@@ -1988,8 +2030,6 @@ export class RestService {
                 'id': id,
                 'program_slug': programSlug,
             },
-            body: requestBody,
-            mediaType: 'application/json',
         });
     }
     /**
@@ -2276,6 +2316,9 @@ export class RestService {
          * * `PENDING` - Pending
          */
         paymentVerificationSummaryStatus?: 'ACTIVE' | 'FINISHED' | 'PENDING',
+        /**
+         * Filter by program slug
+         */
         program?: string,
         programCycle?: string,
         programCycleEndDate?: string,
@@ -3365,6 +3408,9 @@ export class RestService {
          * * `PENDING` - Pending
          */
         paymentVerificationSummaryStatus?: 'ACTIVE' | 'FINISHED' | 'PENDING',
+        /**
+         * Filter by program slug
+         */
         program?: string,
         programCycle?: string,
         programCycleEndDate?: string,
@@ -3488,6 +3534,9 @@ export class RestService {
          * * `PENDING` - Pending
          */
         paymentVerificationSummaryStatus?: 'ACTIVE' | 'FINISHED' | 'PENDING',
+        /**
+         * Filter by program slug
+         */
         program?: string,
         programCycle?: string,
         programCycleEndDate?: string,
@@ -4647,6 +4696,9 @@ export class RestService {
          * * `PENDING` - Pending
          */
         paymentVerificationSummaryStatus?: 'ACTIVE' | 'FINISHED' | 'PENDING',
+        /**
+         * Filter by program slug
+         */
         program?: string,
         programCycle?: string,
         programCycleEndDate?: string,
@@ -5427,6 +5479,24 @@ export class RestService {
                 'roles': roles,
                 'search': search,
                 'status': status,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns UserChoices
+     * @throws ApiError
+     */
+    public static restBusinessAreasUsersChoicesRetrieve({
+        businessAreaSlug,
+    }: {
+        businessAreaSlug: string,
+    }): CancelablePromise<UserChoices> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/users/choices/',
+            path: {
+                'business_area_slug': businessAreaSlug,
             },
         });
     }

@@ -3,220 +3,222 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * * `AF99523049` - East Andrew
- * * `AF99523056` - Huertamouth
- * * `AF99524969` - Port Alexandra
- * * `AF99524920` - Steeleside
- * * `AF99767543` - South Destiny
- * * `AF99767546` - Teresafurt
- * * `AF99765843` - North Henry
- * * `AF99765817` - West Jamesberg
- * * `AF99679617` - Lake Antoniochester
- * * `AF99679633` - Victoriamouth
- * * `AF99672759` - Fisherbury
- * * `AF99672769` - Lake Antonio
- * * `UA56779812` - New Davidville
- * * `UA56779859` - Turnerborough
- * * `UA56777641` - Aguilarview
- * * `UA56777665` - Munozmouth
- * * `UA56508117` - Herreramouth
- * * `UA56508169` - South Angelashire
- * * `UA56505149` - Briannafurt
- * * `UA56505133` - Scottshire
- * * `UA56493217` - Howardshire
- * * `UA56493299` - Port Kimberlyburgh
- * * `UA56498410` - Lake Michelle
- * * `UA56498446` - Melindamouth
- * * `UA20257267` - Port Harold
- * * `UA20257275` - Thomasbury
- * * `UA20252496` - East Karenfort
- * * `UA20252412` - Myerstown
- * * `UA20845431` - Port Selenachester
- * * `UA20845481` - Port Sydneyfort
- * * `UA20843863` - East Tiffanyview
- * * `UA20843832` - West Michael
- * * `UA20578665` - Dickersonhaven
- * * `UA20578699` - Royland
- * * `UA20573018` - New Johnside
- * * `UA20573096` - South Nicholasstad
- * * `HR59362442` - Port Heather
- * * `HR59362483` - West Daniel
- * * `HR59364322` - Lisabury
- * * `HR59364343` - Port Robinton
- * * `HR59176814` - Lake Peter
- * * `HR59176832` - Wilcoxview
- * * `HR59179525` - Lake Josetown
- * * `HR59179519` - West Francis
- * * `HR59987476` - Huntbury
- * * `HR59987445` - Sheppardberg
- * * `HR59981669` - Lake Stephanie
- * * `HR59981655` - North Candace
- * * `AF65896240` - Adrianaburgh
- * * `AF65896275` - Parkerland
- * * `AF65894143` - Craneville
- * * `AF65894147` - New Allenberg
- * * `AF65367277` - Adrianmouth
- * * `AF65367261` - Jamesbury
- * * `AF65369527` - Hansenland
- * * `AF65369515` - South Julie
- * * `AF65732537` - New Holly
- * * `AF65732546` - West Francis
- * * `AF65739191` - Allenmouth
- * * `AF65739158` - Rhodesside
- * * `AF91653168` - Georgechester
- * * `AF91653150` - Karaport
- * * `AF91651225` - New Nataliefort
- * * `AF91651221` - Port Theodore
- * * `AF91234565` - East Ashley
- * * `AF91234519` - Wolfemouth
- * * `AF91235023` - Fitzgeraldhaven
- * * `AF91235098` - Lake Stephanie
- * * `AF91879423` - Castroborough
- * * `AF91876096` - Lake Cassidy
- * * `AF91876019` - Lake Grant
- * * `HR93251051` - Ericview
- * * `HR93251033` - Wolfmouth
- * * `HR93254345` - Lake Emily
- * * `HR93254319` - Stevenmouth
- * * `HR93989435` - Rossshire
- * * `HR93989427` - Thomaschester
- * * `HR93985740` - Jasminshire
- * * `HR93985779` - Lake Mary
- * * `HR93862518` - Nathanielborough
- * * `HR93862554` - Tinafort
- * * `HR93867629` - North Brittney
- * * `HR93867661` - North Williamton
- * * `HR45381830` - Sanchezbury
- * * `HR45381884` - South Kurt
- * * `HR45383274` - East Samanthashire
- * * `HR45383277` - South Joshuatown
- * * `HR45393350` - Deborahstad
- * * `HR45393321` - Port James
- * * `HR45398727` - East Christopher
- * * `HR45398766` - Port Haley
- * * `HR45558780` - South Adamfort
- * * `HR45558730` - West Daniel
- * * `HR45551457` - Christensenton
- * * `HR45551456` - Newtonmouth
- * * `UA47881848` - Contrerasview
- * * `UA47881846` - Thompsonport
- * * `UA47887613` - Mcintoshland
- * * `UA47887615` - New Heather
- * * `UA47857066` - Hallbury
- * * `UA47857084` - Weaverborough
- * * `UA47855357` - Andreaville
- * * `UA47855334` - Tracymouth
- * * `UA47123073` - Matthewville
- * * `UA47123080` - Myersmouth
- * * `UA47129369` - Port Cynthia
- * * `UA47129330` - Whiteland
+ * * `HR77914440` - Loritown
+ * * `HR77914427` - South Andrewland
+ * * `HR77919111` - North Felicia
+ * * `HR77919162` - Sherryville
+ * * `HR77435980` - Greenstad
+ * * `HR77435950` - Sandersmouth
+ * * `HR77431777` - Jacobland
+ * * `HR77431767` - South Craig
+ * * `HR77245384` - Michaelfort
+ * * `HR77245330` - Wrightville
+ * * `HR77249465` - Noahchester
+ * * `HR77249429` - South Karen
+ * * `AF47753658` - Careyport
+ * * `AF47753691` - Roseborough
+ * * `AF47758619` - Burkeberg
+ * * `AF47758625` - North David
+ * * `AF47135020` - Davismouth
+ * * `AF47135023` - West Clairefurt
+ * * `AF47133012` - Johnsonchester
+ * * `AF47133027` - Weaverfurt
+ * * `AF47878032` - Markborough
+ * * `AF47878045` - Reneebury
+ * * `AF47873217` - East Michael
+ * * `AF47873268` - Ginachester
+ * * `UA15407211` - Patriciaville
+ * * `UA15407269` - South Sherrymouth
+ * * `UA15405927` - New Melinda
+ * * `UA15405966` - West Richard
+ * * `UA15149579` - Lake Dorothyville
+ * * `UA15149582` - Lake Nicole
+ * * `UA15147058` - Joshuahaven
+ * * `UA15147063` - West Michaelton
+ * * `UA15633445` - New Brittanyland
+ * * `UA15633413` - West Theodorefort
+ * * `UA15634697` - Breannashire
+ * * `UA15634630` - North Kimberlyfurt
+ * * `UA88622673` - Natalieville
+ * * `UA88622688` - South James
+ * * `UA88626680` - New Molly
+ * * `UA88626634` - North Kaitlynstad
+ * * `UA88723255` - Aprilberg
+ * * `UA88723291` - Deantown
+ * * `UA88727044` - North Samantha
+ * * `UA88727078` - North Tracyshire
+ * * `UA88363752` - East Troy
+ * * `UA88363728` - Herreraport
+ * * `UA88363023` - Harmonstad
+ * * `UA88363066` - Port Douglas
+ * * `UA95939180` - Robertsonbury
+ * * `UA95939132` - South Lee
+ * * `UA95934914` - Melissahaven
+ * * `UA95934929` - New Janetchester
+ * * `UA95192178` - New Brianfort
+ * * `UA95192146` - Seanshire
+ * * `UA95195778` - East Jackberg
+ * * `UA95195711` - Mitchellstad
+ * * `UA95202831` - Heathertown
+ * * `UA95202828` - Jamesland
+ * * `UA95201185` - New Michael
+ * * `UA95201142` - South Teresaton
+ * * `AF33251322` - Justinmouth
+ * * `AF33251389` - Peggymouth
+ * * `AF33259830` - Lake Donna
+ * * `AF33259894` - West Jaime
+ * * `AF33789541` - East Maryhaven
+ * * `AF33789556` - North Nicole
+ * * `AF33788976` - South Johnside
+ * * `AF33788965` - West Charlotteport
+ * * `AF33124996` - North Austinmouth
+ * * `AF33124975` - Port Christopherbury
+ * * `AF33126951` - Raymouth
+ * * `AF33126961` - Ronaldland
+ * * `HR52409918` - Lake Jamesstad
+ * * `HR52409941` - Rachelside
+ * * `HR52408584` - Langton
+ * * `HR52408564` - West Amanda
+ * * `HR52867216` - Matthewberg
+ * * `HR52867297` - Thomasburgh
+ * * `HR52868333` - Christinaside
+ * * `HR52868311` - Port Annborough
+ * * `HR52897490` - Lake Scott
+ * * `HR52897443` - West Jillside
+ * * `HR52895575` - Douglasbury
+ * * `HR52895530` - Roseborough
+ * * `HR94222819` - Goodmanfort
+ * * `HR94222821` - North Brian
+ * * `HR94227244` - Christinaborough
+ * * `HR94227283` - Timothyton
+ * * `HR94706191` - Knighttown
+ * * `HR94706116` - Rileymouth
+ * * `HR94709850` - Danielberg
+ * * `HR94709827` - Lake Jessehaven
+ * * `HR94502117` - Gonzaleztown
+ * * `HR94502186` - Lake Alexanderburgh
+ * * `HR94502196` - Lake Danielletown
+ * * `HR94502142` - West Sara
+ * * `AF82428839` - Lake Debraberg
+ * * `AF82428873` - Lake Saraborough
+ * * `AF82427477` - East Lisa
+ * * `AF82427424` - Port Jacquelineport
+ * * `AF82465828` - Conniestad
+ * * `AF82465845` - Longville
+ * * `AF82463551` - Brownview
+ * * `AF82463540` - New Emily
+ * * `AF82154785` - East Ryanbury
+ * * `AF82154775` - Lake Oscarport
+ * * `AF82156441` - Jacksonland
+ * * `AF82156445` - Wongmouth
  */
 export enum Admin4Enum {
-    AF99523049 = 'AF99523049',
-    AF99523056 = 'AF99523056',
-    AF99524969 = 'AF99524969',
-    AF99524920 = 'AF99524920',
-    AF99767543 = 'AF99767543',
-    AF99767546 = 'AF99767546',
-    AF99765843 = 'AF99765843',
-    AF99765817 = 'AF99765817',
-    AF99679617 = 'AF99679617',
-    AF99679633 = 'AF99679633',
-    AF99672759 = 'AF99672759',
-    AF99672769 = 'AF99672769',
-    UA56779812 = 'UA56779812',
-    UA56779859 = 'UA56779859',
-    UA56777641 = 'UA56777641',
-    UA56777665 = 'UA56777665',
-    UA56508117 = 'UA56508117',
-    UA56508169 = 'UA56508169',
-    UA56505149 = 'UA56505149',
-    UA56505133 = 'UA56505133',
-    UA56493217 = 'UA56493217',
-    UA56493299 = 'UA56493299',
-    UA56498410 = 'UA56498410',
-    UA56498446 = 'UA56498446',
-    UA20257267 = 'UA20257267',
-    UA20257275 = 'UA20257275',
-    UA20252496 = 'UA20252496',
-    UA20252412 = 'UA20252412',
-    UA20845431 = 'UA20845431',
-    UA20845481 = 'UA20845481',
-    UA20843863 = 'UA20843863',
-    UA20843832 = 'UA20843832',
-    UA20578665 = 'UA20578665',
-    UA20578699 = 'UA20578699',
-    UA20573018 = 'UA20573018',
-    UA20573096 = 'UA20573096',
-    HR59362442 = 'HR59362442',
-    HR59362483 = 'HR59362483',
-    HR59364322 = 'HR59364322',
-    HR59364343 = 'HR59364343',
-    HR59176814 = 'HR59176814',
-    HR59176832 = 'HR59176832',
-    HR59179525 = 'HR59179525',
-    HR59179519 = 'HR59179519',
-    HR59987476 = 'HR59987476',
-    HR59987445 = 'HR59987445',
-    HR59981669 = 'HR59981669',
-    HR59981655 = 'HR59981655',
-    AF65896240 = 'AF65896240',
-    AF65896275 = 'AF65896275',
-    AF65894143 = 'AF65894143',
-    AF65894147 = 'AF65894147',
-    AF65367277 = 'AF65367277',
-    AF65367261 = 'AF65367261',
-    AF65369527 = 'AF65369527',
-    AF65369515 = 'AF65369515',
-    AF65732537 = 'AF65732537',
-    AF65732546 = 'AF65732546',
-    AF65739191 = 'AF65739191',
-    AF65739158 = 'AF65739158',
-    AF91653168 = 'AF91653168',
-    AF91653150 = 'AF91653150',
-    AF91651225 = 'AF91651225',
-    AF91651221 = 'AF91651221',
-    AF91234565 = 'AF91234565',
-    AF91234519 = 'AF91234519',
-    AF91235023 = 'AF91235023',
-    AF91235098 = 'AF91235098',
-    AF91879423 = 'AF91879423',
-    AF91876096 = 'AF91876096',
-    AF91876019 = 'AF91876019',
-    HR93251051 = 'HR93251051',
-    HR93251033 = 'HR93251033',
-    HR93254345 = 'HR93254345',
-    HR93254319 = 'HR93254319',
-    HR93989435 = 'HR93989435',
-    HR93989427 = 'HR93989427',
-    HR93985740 = 'HR93985740',
-    HR93985779 = 'HR93985779',
-    HR93862518 = 'HR93862518',
-    HR93862554 = 'HR93862554',
-    HR93867629 = 'HR93867629',
-    HR93867661 = 'HR93867661',
-    HR45381830 = 'HR45381830',
-    HR45381884 = 'HR45381884',
-    HR45383274 = 'HR45383274',
-    HR45383277 = 'HR45383277',
-    HR45393350 = 'HR45393350',
-    HR45393321 = 'HR45393321',
-    HR45398727 = 'HR45398727',
-    HR45398766 = 'HR45398766',
-    HR45558780 = 'HR45558780',
-    HR45558730 = 'HR45558730',
-    HR45551457 = 'HR45551457',
-    HR45551456 = 'HR45551456',
-    UA47881848 = 'UA47881848',
-    UA47881846 = 'UA47881846',
-    UA47887613 = 'UA47887613',
-    UA47887615 = 'UA47887615',
-    UA47857066 = 'UA47857066',
-    UA47857084 = 'UA47857084',
-    UA47855357 = 'UA47855357',
-    UA47855334 = 'UA47855334',
-    UA47123073 = 'UA47123073',
-    UA47123080 = 'UA47123080',
-    UA47129369 = 'UA47129369',
-    UA47129330 = 'UA47129330',
+    HR77914440 = 'HR77914440',
+    HR77914427 = 'HR77914427',
+    HR77919111 = 'HR77919111',
+    HR77919162 = 'HR77919162',
+    HR77435980 = 'HR77435980',
+    HR77435950 = 'HR77435950',
+    HR77431777 = 'HR77431777',
+    HR77431767 = 'HR77431767',
+    HR77245384 = 'HR77245384',
+    HR77245330 = 'HR77245330',
+    HR77249465 = 'HR77249465',
+    HR77249429 = 'HR77249429',
+    AF47753658 = 'AF47753658',
+    AF47753691 = 'AF47753691',
+    AF47758619 = 'AF47758619',
+    AF47758625 = 'AF47758625',
+    AF47135020 = 'AF47135020',
+    AF47135023 = 'AF47135023',
+    AF47133012 = 'AF47133012',
+    AF47133027 = 'AF47133027',
+    AF47878032 = 'AF47878032',
+    AF47878045 = 'AF47878045',
+    AF47873217 = 'AF47873217',
+    AF47873268 = 'AF47873268',
+    UA15407211 = 'UA15407211',
+    UA15407269 = 'UA15407269',
+    UA15405927 = 'UA15405927',
+    UA15405966 = 'UA15405966',
+    UA15149579 = 'UA15149579',
+    UA15149582 = 'UA15149582',
+    UA15147058 = 'UA15147058',
+    UA15147063 = 'UA15147063',
+    UA15633445 = 'UA15633445',
+    UA15633413 = 'UA15633413',
+    UA15634697 = 'UA15634697',
+    UA15634630 = 'UA15634630',
+    UA88622673 = 'UA88622673',
+    UA88622688 = 'UA88622688',
+    UA88626680 = 'UA88626680',
+    UA88626634 = 'UA88626634',
+    UA88723255 = 'UA88723255',
+    UA88723291 = 'UA88723291',
+    UA88727044 = 'UA88727044',
+    UA88727078 = 'UA88727078',
+    UA88363752 = 'UA88363752',
+    UA88363728 = 'UA88363728',
+    UA88363023 = 'UA88363023',
+    UA88363066 = 'UA88363066',
+    UA95939180 = 'UA95939180',
+    UA95939132 = 'UA95939132',
+    UA95934914 = 'UA95934914',
+    UA95934929 = 'UA95934929',
+    UA95192178 = 'UA95192178',
+    UA95192146 = 'UA95192146',
+    UA95195778 = 'UA95195778',
+    UA95195711 = 'UA95195711',
+    UA95202831 = 'UA95202831',
+    UA95202828 = 'UA95202828',
+    UA95201185 = 'UA95201185',
+    UA95201142 = 'UA95201142',
+    AF33251322 = 'AF33251322',
+    AF33251389 = 'AF33251389',
+    AF33259830 = 'AF33259830',
+    AF33259894 = 'AF33259894',
+    AF33789541 = 'AF33789541',
+    AF33789556 = 'AF33789556',
+    AF33788976 = 'AF33788976',
+    AF33788965 = 'AF33788965',
+    AF33124996 = 'AF33124996',
+    AF33124975 = 'AF33124975',
+    AF33126951 = 'AF33126951',
+    AF33126961 = 'AF33126961',
+    HR52409918 = 'HR52409918',
+    HR52409941 = 'HR52409941',
+    HR52408584 = 'HR52408584',
+    HR52408564 = 'HR52408564',
+    HR52867216 = 'HR52867216',
+    HR52867297 = 'HR52867297',
+    HR52868333 = 'HR52868333',
+    HR52868311 = 'HR52868311',
+    HR52897490 = 'HR52897490',
+    HR52897443 = 'HR52897443',
+    HR52895575 = 'HR52895575',
+    HR52895530 = 'HR52895530',
+    HR94222819 = 'HR94222819',
+    HR94222821 = 'HR94222821',
+    HR94227244 = 'HR94227244',
+    HR94227283 = 'HR94227283',
+    HR94706191 = 'HR94706191',
+    HR94706116 = 'HR94706116',
+    HR94709850 = 'HR94709850',
+    HR94709827 = 'HR94709827',
+    HR94502117 = 'HR94502117',
+    HR94502186 = 'HR94502186',
+    HR94502196 = 'HR94502196',
+    HR94502142 = 'HR94502142',
+    AF82428839 = 'AF82428839',
+    AF82428873 = 'AF82428873',
+    AF82427477 = 'AF82427477',
+    AF82427424 = 'AF82427424',
+    AF82465828 = 'AF82465828',
+    AF82465845 = 'AF82465845',
+    AF82463551 = 'AF82463551',
+    AF82463540 = 'AF82463540',
+    AF82154785 = 'AF82154785',
+    AF82154775 = 'AF82154775',
+    AF82156441 = 'AF82156441',
+    AF82156445 = 'AF82156445',
 }

@@ -54,11 +54,13 @@ export type { FullList as FullListCamelCase } from './models/FullList';
 export type { HeadOfHousehold as HeadOfHouseholdCamelCase } from './models/HeadOfHousehold';
 export { HearingDisabilityEnum as HearingDisabilityEnumCamelCase } from './models/HearingDisabilityEnum';
 export type { Household as HouseholdCamelCase } from './models/Household';
+export type { HouseholdChoices as HouseholdChoicesCamelCase } from './models/HouseholdChoices';
 export type { HouseholdDetail as HouseholdDetailCamelCase } from './models/HouseholdDetail';
 export type { HouseholdList as HouseholdListCamelCase } from './models/HouseholdList';
 export type { HouseholdMember as HouseholdMemberCamelCase } from './models/HouseholdMember';
 export type { HouseholdSimple as HouseholdSimpleCamelCase } from './models/HouseholdSimple';
 export type { Individual as IndividualCamelCase } from './models/Individual';
+export type { IndividualChoices as IndividualChoicesCamelCase } from './models/IndividualChoices';
 export type { IndividualDetail as IndividualDetailCamelCase } from './models/IndividualDetail';
 export type { IndividualList as IndividualListCamelCase } from './models/IndividualList';
 export { MaritalStatusEnum as MaritalStatusEnumCamelCase } from './models/MaritalStatusEnum';
@@ -184,6 +186,7 @@ export type { TargetPopulationList as TargetPopulationListCamelCase } from './mo
 export type { TPHouseholdList as TPHouseholdListCamelCase } from './models/TPHouseholdList';
 export { TransferTypeEnum as TransferTypeEnumCamelCase } from './models/TransferTypeEnum';
 export type { User as UserCamelCase } from './models/User';
+export type { UserChoices as UserChoicesCamelCase } from './models/UserChoices';
 export { WorkStatusEnum as WorkStatusEnumCamelCase } from './models/WorkStatusEnum';
 export type { XlsxError as XlsxErrorCamelCase } from './models/XlsxError';
 
