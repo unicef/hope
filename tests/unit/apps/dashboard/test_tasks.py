@@ -11,7 +11,7 @@ from hct_mis_api.apps.dashboard.celery_tasks import (
 from hct_mis_api.apps.dashboard.services import DashboardDataCache
 
 
-@pytest.mark.django_db(databases=["default", "read_only"], transaction=True)
+@pytest.mark.django_db(databases=["default", "read_only"])
 def test_generate_dash_report_task(afghanistan: BusinessArea, populate_dashboard_cache: Callable) -> None:
     """
     Test that generate_dash_report_task refreshes data for the given business area.
@@ -33,7 +33,7 @@ def test_generate_dash_report_task_business_area_not_found() -> None:
         generate_dash_report_task(business_area_slug=non_existent_slug)
 
 
-@pytest.mark.django_db(databases=["default", "read_only"], transaction=True)
+@pytest.mark.django_db(databases=["default", "read_only"])
 def test_update_dashboard_figures_retry_on_failure(afghanistan: BusinessArea) -> None:
     """
     Test that update_dashboard_figures retries on failure.

@@ -1,6 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
-from django.test import TransactionTestCase
+from django.test import TestCase
 
 from hct_mis_api.apps.core.fixtures import (
     FlexibleAttributeForPDUFactory,
@@ -11,7 +11,7 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
 
-class TestFlexibleAttribute(TransactionTestCase):
+class TestFlexibleAttribute(TestCase):
     def setUp(self) -> None:
         create_afghanistan()
         self.business_area = BusinessArea.objects.get(slug="afghanistan")
@@ -58,6 +58,7 @@ class TestFlexibleAttribute(TransactionTestCase):
             str(ie_context.exception),
         )
 
+    def test_unique_name_rules_for_flex_fields2(self) -> None:
         # Not possible to have flex fields with the same name without a program
         with self.assertRaises(IntegrityError) as ie_context:
             FlexibleAttribute.objects.create(
@@ -71,6 +72,7 @@ class TestFlexibleAttribute(TransactionTestCase):
             str(ie_context.exception),
         )
 
+    def test_unique_name_rules_for_flex_fields3(self) -> None:
         # Not possible to have flex fields with the same name in a program and without a program
         with self.assertRaises(ValidationError) as ve_context:
             FlexibleAttribute.objects.create(
@@ -84,6 +86,7 @@ class TestFlexibleAttribute(TransactionTestCase):
             str(ve_context.exception),
         )
 
+    def test_unique_name_rules_for_flex_fields4(self) -> None:
         with self.assertRaises(ValidationError) as ve_context:
             FlexibleAttributeForPDUFactory(
                 program=self.program1,

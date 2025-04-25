@@ -1,6 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
-from django.test import TransactionTestCase
+from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import (
     AdminAreaLimitedToFactory,
@@ -16,7 +16,7 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
 
-class TestRoleAssignmentModel(TransactionTestCase):
+class TestRoleAssignmentModel(TestCase):
     def setUp(self) -> None:
         self.business_area = create_afghanistan()
         self.role = RoleFactory(
@@ -175,6 +175,8 @@ class TestRoleAssignmentModel(TransactionTestCase):
                 program=self.program1,
             )
 
+    def test_unique_user_role_business_area_program_constraint_correct(self) -> None:
+        role_new = RoleFactory(name="Test Role Duplicate")
         RoleAssignment.objects.create(
             user=self.user,
             partner=None,
@@ -210,6 +212,8 @@ class TestRoleAssignmentModel(TransactionTestCase):
                 program=self.program1,
             )
 
+    def test_unique_partner_role_business_area_program_constraint2(self) -> None:
+        role_new = RoleFactory(name="Test Role Duplicate")
         RoleAssignment.objects.create(
             user=None,
             partner=self.partner,

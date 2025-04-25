@@ -696,7 +696,7 @@ class TestPaymentPlanSplitModel(TestCase):
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
 
-@pytest.mark.django_db(transaction=True)
+@pytest.mark.django_db()
 class TestFinancialServiceProviderModel(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:

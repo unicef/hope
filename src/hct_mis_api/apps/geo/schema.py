@@ -14,7 +14,7 @@ from hct_mis_api.apps.utils.graphql import does_path_exist_in_query
 class AreaNode(DjangoObjectType):
     class Meta:
         model = Area
-        exclude = ["geom", "point"]
+        exclude = ["geom",]
         filter_fields = ["name"]
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection

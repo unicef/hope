@@ -63,7 +63,6 @@ def generate_areas(country_names: Optional[List[str]] = None) -> None:
     """create areas in every level for country in country_names or by default only for Afghanistan"""
     if country_names is None:
         country_names = ["Afghanistan"]
-    print(f"Generating Areas for {country_names}")
     for country in Country.objects.filter(short_name__in=country_names):
         p_code_prefix = country.iso_code2
         area_type_level_1 = AreaType.objects.get(country=country, area_level=1)
