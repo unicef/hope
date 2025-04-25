@@ -3,24 +3,24 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * * `HR77` - Amymouth
- * * `AF47` - Christinestad
- * * `UA15` - Davidport
- * * `UA88` - Lake Terrenceside
- * * `UA95` - Port Margaret
- * * `AF33` - Riggsshire
- * * `HR52` - South Codychester
- * * `HR94` - Timothyside
- * * `AF82` - Victoriastad
+ * * `UA41` - Brownton
+ * * `AF25` - Heatherchester
+ * * `AF85` - Kennethborough
+ * * `AF58` - Lunaton
+ * * `UA88` - Moodyland
+ * * `HR28` - Rileyburgh
+ * * `UA38` - Rodriguezview
+ * * `HR66` - West Christopher
+ * * `HR79` - West Nathaniel
  */
 export enum Admin1Enum {
-    HR77 = 'HR77',
-    AF47 = 'AF47',
-    UA15 = 'UA15',
+    UA41 = 'UA41',
+    AF25 = 'AF25',
+    AF85 = 'AF85',
+    AF58 = 'AF58',
     UA88 = 'UA88',
-    UA95 = 'UA95',
-    AF33 = 'AF33',
-    HR52 = 'HR52',
-    HR94 = 'HR94',
-    AF82 = 'AF82',
+    HR28 = 'HR28',
+    UA38 = 'UA38',
+    HR66 = 'HR66',
+    HR79 = 'HR79',
 }
