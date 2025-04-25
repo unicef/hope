@@ -368,10 +368,27 @@ class TestPaymentPlanMutation(APITestCase):
 
     def test_assign_funds_commitments_mutation(self) -> None:
         ukr_ba = BusinessAreaFactory(name="Ukraine")
-        FundsCommitmentFactory(funds_commitment_number="123", funds_commitment_item="001", office=self.business_area)
-        FundsCommitmentFactory(funds_commitment_number="123", funds_commitment_item="002", office=ukr_ba)
-        FundsCommitmentFactory(funds_commitment_number="345", funds_commitment_item="001", office=self.business_area)
-        FundsCommitmentFactory(funds_commitment_number="345", funds_commitment_item="002", office=self.business_area)
+        FundsCommitmentFactory(
+            funds_commitment_number="123",
+            funds_commitment_item="001",
+            business_area=self.business_area.code,
+            office=self.business_area,
+        )
+        FundsCommitmentFactory(
+            funds_commitment_number="123", funds_commitment_item="002", business_area=ukr_ba.code, office=ukr_ba
+        )
+        FundsCommitmentFactory(
+            funds_commitment_number="345",
+            funds_commitment_item="001",
+            business_area=self.business_area.code,
+            office=self.business_area,
+        )
+        FundsCommitmentFactory(
+            funds_commitment_number="345",
+            funds_commitment_item="002",
+            business_area=self.business_area.code,
+            office=self.business_area,
+        )
 
         payment_plan = PaymentPlanFactory(
             name="FCTP1",
