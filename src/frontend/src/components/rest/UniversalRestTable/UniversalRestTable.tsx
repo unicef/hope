@@ -75,7 +75,7 @@ export const UniversalRestTable = <T, K>({
       ...filtered,
       businessAreaSlug: queryVariables.businessAreaSlug,
       programSlug: queryVariables.programSlug,
-      ordering: queryVariables.ordering || '',
+      ...(queryVariables.ordering ? { ordering: queryVariables.ordering } : {}),
     };
   }, [queryVariables]);
 
@@ -88,7 +88,6 @@ export const UniversalRestTable = <T, K>({
       limit: rowsPerPage,
     };
 
-    // Only add ordering if it has a value
     const ordering = orderBy
       ? columnToOrderBy(orderBy, orderDirection)
       : filteredQueryVariables.ordering;
