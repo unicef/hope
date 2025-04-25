@@ -76,6 +76,7 @@ export const TargetPopulationCore = ({
         </Label>
       </PaperContainer>
     );
+  console.log('targetPopulation', targetPopulation);
 
   return (
     <>
