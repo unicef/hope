@@ -1264,7 +1264,7 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
     excluded_ids = serializers.CharField(required=False, allow_blank=True)
     exclusion_reason = serializers.CharField(required=False, allow_blank=True)
     fsp_id = serializers.UUIDField(required=False, allow_null=True)
-    delivery_mechanism_code = serializers.CharField(required=False, allow_blank=True)
+    delivery_mechanism_code = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     vulnerability_score_min = serializers.DecimalField(required=False, max_digits=6, decimal_places=3)
     vulnerability_score_max = serializers.DecimalField(required=False, max_digits=6, decimal_places=3)
     version = serializers.IntegerField(required=False, read_only=True)
