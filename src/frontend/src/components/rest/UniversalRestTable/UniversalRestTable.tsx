@@ -75,7 +75,7 @@ export const UniversalRestTable = <T, K>({
       ...filtered,
       businessAreaSlug: queryVariables.businessAreaSlug,
       programSlug: queryVariables.programSlug,
-      ordering: queryVariables.ordering || '',
+      ordering: queryVariables.ordering || 'name',
     };
   }, [queryVariables]);
 

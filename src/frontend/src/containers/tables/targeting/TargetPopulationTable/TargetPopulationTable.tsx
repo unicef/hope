@@ -1,7 +1,8 @@
 import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
+import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
+import { TargetPopulationList } from '@restgenerated/models/TargetPopulationList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { adjustHeadCells, dateToIsoString } from '@utils/utils';
@@ -11,7 +12,6 @@ import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { headCells } from './TargetPopulationTableHeadCells';
 import { TargetPopulationTableRow } from './TargetPopulationTableRow';
-import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
 
 interface TargetPopulationProps {
   filter;
@@ -49,7 +49,6 @@ export function TargetPopulationTable({
     totalHouseholdsCountMax: filter.totalHouseholdsCountMax || null,
     status: filter.status,
     businessArea,
-    program: programId,
     createdAtRange: JSON.stringify({
       min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
       max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
@@ -103,7 +102,7 @@ export function TargetPopulationTable({
         data={targetPopulationsData}
         isLoading={isLoading}
         error={error}
-        renderRow={(row: TargetPopulationDetail) => (
+        renderRow={(row: TargetPopulationList) => (
           <TargetPopulationTableRow
             radioChangeHandler={enableRadioButton && handleRadioChange}
             selectedTargetPopulation={selectedTargetPopulation}

@@ -92,6 +92,7 @@ function ProgrammesTable({
           headCells={headCells}
           queryVariables={queryVariables}
           setQueryVariables={setQueryVariables}
+          defaultOrderBy="startDate"
           data={dataPrograms}
           isLoading={isLoadingPrograms}
           error={errorPrograms}
