@@ -79,8 +79,6 @@ export const UniversalRestTable = <T, K>({
     };
   }, [queryVariables]);
 
-  console.log('filteredQueryVariables', filteredQueryVariables);
-
   useEffect(() => {
     const newVariables: QueryVariables = {
       ...filteredQueryVariables,

@@ -8,10 +8,7 @@ import {
 import moment from 'moment';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import {
-  PaymentPlanStatus,
-  usePaymentPlanStatusChoicesQueryQuery,
-} from '@generated/graphql';
+import { PaymentPlanStatus } from '@generated/graphql';
 import { DatePickerFilter } from '@components/core/DatePickerFilter';
 import { FiltersSection } from '@components/core/FiltersSection';
 import { NumberTextField } from '@components/core/NumberTextField';
@@ -20,6 +17,9 @@ import { SelectFilter } from '@components/core/SelectFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { ReactElement } from 'react';
 import { PaymentPlan } from '@restgenerated/models/PaymentPlan';
+import { Choice } from '@restgenerated/models/Choice';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 
 export type FilterProps = Partial<PaymentPlan>;
 
@@ -32,6 +32,7 @@ interface PaymentPlansFiltersProps {
 }
 
 export const allowedStatusChoices = [
+  //TODO: add pp status choices
   PaymentPlanStatus.Accepted,
   PaymentPlanStatus.Draft,
   PaymentPlanStatus.Finished,
@@ -77,16 +78,14 @@ export function PaymentPlansFilters({
   const handleClearFilter = (): void => {
     clearFilter();
   };
-
-  const { data: statusChoicesData } = usePaymentPlanStatusChoicesQueryQuery();
-
-  if (!statusChoicesData) {
-    return null;
-  }
+  const { data: statusChoicesData } = useQuery<Array<Choice>>({
+    queryKey: ['choicesPaymentVerificationPlanStatusList'],
+    queryFn: () => RestService.restChoicesPaymentPlanStatusList(),
+  });
 
   const preparedStatusChoices =
-    [...(statusChoicesData?.paymentPlanStatusChoices || [])]?.filter((el) =>
-      allowedStatusChoices.includes(el.value as PaymentPlanStatus),
+    [...(statusChoicesData || [])]?.filter((el) =>
+      allowedStatusChoices.includes(el.value as any),
     ) || [];
 
   return (
