@@ -1,6 +1,5 @@
 from typing import Any
 
-from django.core.cache import cache
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 
@@ -10,6 +9,8 @@ from hct_mis_api.apps.payment.models import PaymentPlan
 
 @receiver(post_save, sender=PaymentPlan)
 def increment_payment_plan_version_cache(sender: Any, instance: PaymentPlan, created: bool, **kwargs: dict) -> None:
+    from django.core.cache import cache
+
     if instance.status in [
         PaymentPlan.Status.IN_APPROVAL,
         PaymentPlan.Status.IN_AUTHORIZATION,
@@ -27,6 +28,8 @@ def increment_payment_plan_version_cache(sender: Any, instance: PaymentPlan, cre
 @receiver(post_save, sender=PaymentPlan)
 @receiver(pre_delete, sender=PaymentPlan)
 def increment_target_population_version_cache(sender: Any, instance: PaymentPlan, **kwargs: dict) -> None:
+    from django.core.cache import cache
+
     if instance.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES:
         business_area_slug = instance.business_area.slug
         business_area_version = get_or_create_cache_key(f"{business_area_slug}:version", 1)

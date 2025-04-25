@@ -643,7 +643,7 @@ class TestUserFilter:
         )
 
     def test_filter_by_program(self) -> None:
-        response = self.api_client.get(self.list_url, {"program": self.program1.id})
+        response = self.api_client.get(self.list_url, {"program": self.program1.slug})
         assert response.status_code == status.HTTP_200_OK
         response_results = response.data["results"]
         assert len(response_results) == 5
@@ -654,7 +654,7 @@ class TestUserFilter:
         assert str(self.user3.id) in users_ids
         assert str(self.user4.id) in users_ids
 
-        response_2 = self.api_client.get(self.list_url, {"program": self.program2.id})
+        response_2 = self.api_client.get(self.list_url, {"program": self.program2.slug})
         assert response_2.status_code == status.HTTP_200_OK
         response_results_2 = response_2.data["results"]
         assert len(response_results_2) == 4
