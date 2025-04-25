@@ -7,7 +7,7 @@ import { CountResponse } from '@restgenerated/models/CountResponse';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
-import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { ReactElement, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { headCells } from './ProgrammesHeadCells';
 import ProgrammesTableRow from './ProgrammesTableRow';
@@ -43,6 +43,7 @@ function ProgrammesTable({
       }),
       budget: JSON.stringify({ min: filter.budgetMin, max: filter.budgetMax }),
       dataCollectingType: filter.dataCollectingType,
+      ordering: 'startDate',
     }),
     [
       businessArea,
@@ -63,17 +64,15 @@ function ProgrammesTable({
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
-
   const {
     data: dataPrograms,
     isLoading: isLoadingPrograms,
     error: errorPrograms,
   } = useQuery<PaginatedProgramListList>({
-    queryKey: ['businessAreasProgramsList', queryVariables],
-    queryFn: () => RestService.restBusinessAreasProgramsList(queryVariables),
+    queryKey: ['businessAreasProgramsList', initialQueryVariables],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsList(initialQueryVariables),
+    enabled: !!initialQueryVariables.businessAreaSlug,
   });
 
   const { data: dataProgramsCount } = useQuery<CountResponse>({

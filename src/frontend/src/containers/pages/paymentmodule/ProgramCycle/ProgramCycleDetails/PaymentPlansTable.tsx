@@ -58,10 +58,6 @@ export const PaymentPlansTable = ({
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
-
   const {
     data: dataPaymentPlans,
     isLoading: isLoadingPaymentPlans,

@@ -94,10 +94,6 @@ function LookUpHouseholdTableCommunication({
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
-
   const { data, isLoading, error } = useQuery<PaginatedHouseholdListList>({
     queryKey: ['businessAreasProgramsHouseholdsList', queryVariables],
     queryFn: () =>
