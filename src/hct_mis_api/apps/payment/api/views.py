@@ -25,7 +25,6 @@ from hct_mis_api.apps.core.api.mixins import (
     BaseViewSet,
     BusinessAreaProgramsAccessMixin,
     ProgramMixin,
-    SerializerActionMixin,
 )
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import decode_id_string
