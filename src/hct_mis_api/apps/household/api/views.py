@@ -25,9 +25,11 @@ from hct_mis_api.apps.household.api.caches import (
     IndividualListKeyConstructor,
 )
 from hct_mis_api.apps.household.api.serializers.household import (
+    HouseholdChoicesSerializer,
     HouseholdDetailSerializer,
     HouseholdListSerializer,
     HouseholdMemberSerializer,
+    IndividualChoicesSerializer,
 )
 from hct_mis_api.apps.household.api.serializers.individual import (
     IndividualDetailSerializer,
@@ -51,7 +53,6 @@ class HouseholdViewSet(
     BaseViewSet,
 ):
     queryset = Household.all_merge_status_objects.order_by("created_at")
-    serializer_class = HouseholdListSerializer
     serializer_classes_by_action = {
         "list": HouseholdListSerializer,
         "retrieve": HouseholdDetailSerializer,
@@ -59,8 +60,8 @@ class HouseholdViewSet(
     }
     permissions_by_action = {
         "list": [
-            Permissions.RDI_VIEW_DETAILS,
             Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST,
+            Permissions.RDI_VIEW_DETAILS,
         ],
         "retrieve": [
             Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
@@ -97,10 +98,14 @@ class HouseholdViewSet(
         individuals_ids = list(instance.individuals(manager="all_merge_status_objects").values_list("id", flat=True))
         collectors_ids = list(instance.representatives(manager="all_merge_status_objects").values_list("id", flat=True))
         ids = set(individuals_ids + collectors_ids)
-        members = Individual.all_merge_status_objects.filter(id__in=ids).prefetch_related(
-            Prefetch(
-                "households_and_roles",
-                queryset=IndividualRoleInHousehold.all_merge_status_objects.filter(household=instance.id),
+        members = (
+            Individual.all_merge_status_objects.filter(id__in=ids)
+            .order_by("created_at")
+            .prefetch_related(
+                Prefetch(
+                    "households_and_roles",
+                    queryset=IndividualRoleInHousehold.all_merge_status_objects.filter(household=instance.id),
+                )
             )
         )
 
@@ -124,12 +129,16 @@ class HouseholdViewSet(
 
 class HouseholdGlobalViewSet(
     BusinessAreaVisibilityMixin,
+    SerializerActionMixin,
     CountActionMixin,
     ListModelMixin,
     BaseViewSet,
 ):
     queryset = Household.all_merge_status_objects.all()
-    serializer_class = HouseholdListSerializer
+    serializer_classes_by_action = {
+        "list": HouseholdListSerializer,
+        "choices": HouseholdChoicesSerializer,
+    }
     PERMISSIONS = [
         Permissions.RDI_VIEW_DETAILS,
         Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST,
@@ -146,6 +155,10 @@ class HouseholdGlobalViewSet(
             .order_by("created_at")
         )
 
+    @action(detail=False, methods=["get"])
+    def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+        return Response(data=self.get_serializer(instance={}).data)
+
 
 class IndividualViewSet(
     ProgramVisibilityMixin,
@@ -156,7 +169,6 @@ class IndividualViewSet(
     BaseViewSet,
 ):
     queryset = Individual.all_merge_status_objects.order_by("created_at")
-    serializer_class = IndividualListSerializer
     serializer_classes_by_action = {
         "list": IndividualListSerializer,
         "retrieve": IndividualDetailSerializer,
@@ -189,12 +201,16 @@ class IndividualViewSet(
 
 class IndividualGlobalViewSet(
     BusinessAreaVisibilityMixin,
+    SerializerActionMixin,
     CountActionMixin,
     ListModelMixin,
     BaseViewSet,
 ):
     queryset = Individual.all_merge_status_objects.all()
-    serializer_class = IndividualListSerializer
+    serializer_classes_by_action = {
+        "list": IndividualListSerializer,
+        "choices": IndividualChoicesSerializer,
+    }
     PERMISSIONS = [
         Permissions.RDI_VIEW_DETAILS,
         Permissions.POPULATION_VIEW_INDIVIDUALS_LIST,
@@ -205,3 +221,7 @@ class IndividualGlobalViewSet(
 
     def get_queryset(self) -> QuerySet:
         return super().get_queryset().select_related("household", "household__admin2").order_by("created_at")
+
+    @action(detail=False, methods=["get"])
+    def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+        return Response(data=self.get_serializer(instance={}).data)
