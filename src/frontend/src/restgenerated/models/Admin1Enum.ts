@@ -3,24 +3,24 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * * `UA41` - Brownton
- * * `AF25` - Heatherchester
- * * `AF85` - Kennethborough
- * * `AF58` - Lunaton
- * * `UA88` - Moodyland
- * * `HR28` - Rileyburgh
- * * `UA38` - Rodriguezview
- * * `HR66` - West Christopher
- * * `HR79` - West Nathaniel
+ * * `UA20` - Johnsonmouth
+ * * `HR50` - Newmanmouth
+ * * `AF97` - Port Adamside
+ * * `UA33` - South Melissamouth
+ * * `HR38` - South Michael
+ * * `AF48` - Tanyafort
+ * * `HR84` - West Adrianbury
+ * * `UA30` - West Coryshire
+ * * `AF10` - Zacharytown
  */
 export enum Admin1Enum {
-    UA41 = 'UA41',
-    AF25 = 'AF25',
-    AF85 = 'AF85',
-    AF58 = 'AF58',
-    UA88 = 'UA88',
-    HR28 = 'HR28',
-    UA38 = 'UA38',
-    HR66 = 'HR66',
-    HR79 = 'HR79',
+    UA20 = 'UA20',
+    HR50 = 'HR50',
+    AF97 = 'AF97',
+    UA33 = 'UA33',
+    HR38 = 'HR38',
+    AF48 = 'AF48',
+    HR84 = 'HR84',
+    UA30 = 'UA30',
+    AF10 = 'AF10',
 }

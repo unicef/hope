@@ -312,7 +312,7 @@ export function Criteria({
   const [rowsPerPageIND, setRowsPerPageIND] = useState(5);
 
   useEffect(() => {
-    const mappedDeliveryMechanisms = availableFspsForDeliveryMechanismData.map(
+    const mappedDeliveryMechanisms = availableFspsForDeliveryMechanismData?.map(
       (el) => ({
         name: el.deliveryMechanism.name,
         value: el.deliveryMechanism.code,
