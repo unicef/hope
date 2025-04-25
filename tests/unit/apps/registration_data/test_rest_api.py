@@ -1,5 +1,8 @@
+from contextlib import contextmanager
+from typing import Callable, Generator
 from unittest.mock import Mock, patch
 
+from django.db import DEFAULT_DB_ALIAS, connections
 from django.urls import reverse
 
 from rest_framework import status
@@ -404,6 +407,17 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         rdi.refresh_from_db()
         self.assertEqual(rdi.status, RegistrationDataImport.IN_REVIEW)
 
+    def test_status_choices(self) -> None:
+        self.client.force_authenticate(user=self.user)
+        url = reverse(
+            "api:registration-data:registration-data-imports-status-choices",
+            args=["afghanistan", self.program.slug],
+        )
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(response.data, list)
+        self.assertTrue(all("name" in c and "value" in c for c in response.data))
+
 
 class RegistrationDataImportPermissionTest(HOPEApiTestCase):
     @classmethod
@@ -565,3 +579,126 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
 
         response = self.client.post(url, {}, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_permission_checks_status_choices(self) -> None:
+        self.client.force_authenticate(user=self.user)
+        url = reverse(
+            "api:registration-data:registration-data-imports-status-choices",
+            args=["afghanistan", self.program.slug],
+        )
+        # Should be forbidden without permission
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        # Grant permission and try again
+        role, _ = Role.objects.update_or_create(
+            name="TestPermissionStatusChoicesRole", defaults={"permissions": [Permissions.RDI_VIEW_LIST.value]}
+        )
+        RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(response.data, list)
+        self.assertTrue(all("name" in c and "value" in c for c in response.data))
+
+    @patch("hct_mis_api.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
+    def test_create_registration_data_import(self, mock_registration_task: Mock) -> None:
+        self.client.force_authenticate(user=self.user)
+        # Grant permission for create
+        role, _ = Role.objects.update_or_create(
+            name="TestPermissionCreateRole", defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]}
+        )
+        RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
+        # Create a source program to import from, matching beneficiary group and data collecting type
+        import_from_program = ProgramFactory(
+            name="Source Program",
+            status=Program.ACTIVE,
+            biometric_deduplication_enabled=True,
+            beneficiary_group=self.program.beneficiary_group,
+            data_collecting_type=self.program.data_collecting_type,
+        )
+        # Create at least one household and individual in the source program
+        create_household_and_individuals(
+            household_data={
+                "program": import_from_program,
+                "business_area": self.business_area,
+            },
+            individuals_data=[
+                {"program": import_from_program, "business_area": self.business_area},
+            ],
+        )
+        url = reverse(
+            "api:registration-data:registration-data-imports-list",
+            args=["afghanistan", self.program.slug],
+        )
+        data = {
+            "import_from_program_id": str(import_from_program.id),
+            "import_from_ids": "",  # No specific IDs, import all
+            "name": "Test Import",
+            "screen_beneficiary": True,
+        }
+        with capture_on_commit_callbacks(execute=True):
+            response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["name"], "Test Import")
+        self.assertEqual(response.data["number_of_households"], 1)
+        self.assertEqual(response.data["number_of_individuals"], 1)
+        self.assertIn("id", response.data)
+        mock_registration_task.assert_called_once()
+
+    @patch("hct_mis_api.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
+    def test_create_registration_data_import_permission_denied(self, mock_registration_task: Mock) -> None:
+        self.client.force_authenticate(user=self.user)
+        # Create a source program to import from, matching beneficiary group and data collecting type
+        import_from_program = ProgramFactory(
+            name="Source Program",
+            status=Program.ACTIVE,
+            biometric_deduplication_enabled=True,
+            beneficiary_group=self.program.beneficiary_group,
+            data_collecting_type=self.program.data_collecting_type,
+        )
+        # Create at least one household and individual in the source program
+        create_household_and_individuals(
+            household_data={
+                "program": import_from_program,
+                "business_area": self.business_area,
+            },
+            individuals_data=[
+                {"program": import_from_program, "business_area": self.business_area},
+            ],
+        )
+        url = reverse(
+            "api:registration-data:registration-data-imports-list",
+            args=["afghanistan", self.program.slug],
+        )
+        data = {
+            "import_from_program_id": str(import_from_program.id),
+            "import_from_ids": "",  # No specific IDs, import all
+            "name": "Test Import",
+            "screen_beneficiary": True,
+        }
+        with capture_on_commit_callbacks(execute=True):
+            response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        mock_registration_task.assert_not_called()
+
+
+@contextmanager
+def capture_on_commit_callbacks(
+    *, using: str = DEFAULT_DB_ALIAS, execute: bool = False
+) -> Generator[list[Callable[[], None]], None, None]:
+    callbacks: list[Callable[[], None]] = []
+    start_count = len(connections[using].run_on_commit)
+    try:
+        yield callbacks
+    finally:
+        while True:
+            callback_count = len(connections[using].run_on_commit)
+            for _, callback in connections[using].run_on_commit[start_count:]:
+                callbacks.append(callback)
+                if execute:
+                    callback()
+
+            if callback_count == len(connections[using].run_on_commit):
+                break
+            start_count = callback_count
