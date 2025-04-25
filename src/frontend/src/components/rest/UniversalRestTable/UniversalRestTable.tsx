@@ -75,19 +75,28 @@ export const UniversalRestTable = <T, K>({
       ...filtered,
       businessAreaSlug: queryVariables.businessAreaSlug,
       programSlug: queryVariables.programSlug,
-      ordering: queryVariables.ordering || 'name',
+      ordering: queryVariables.ordering || '',
     };
   }, [queryVariables]);
+
+  console.log('filteredQueryVariables', filteredQueryVariables);
 
   useEffect(() => {
     const newVariables: QueryVariables = {
       ...filteredQueryVariables,
       offset: page * rowsPerPage,
       limit: rowsPerPage,
-      ordering: orderBy
-        ? columnToOrderBy(orderBy, orderDirection)
-        : filteredQueryVariables.ordering,
     };
+
+    // Only add ordering if it has a value
+    const ordering = orderBy
+      ? columnToOrderBy(orderBy, orderDirection)
+      : filteredQueryVariables.ordering;
+
+    if (ordering) {
+      newVariables.ordering = ordering;
+    }
+
     const newState = newVariables as unknown as K;
 
     if (!isEqual(newState, queryVariables)) {

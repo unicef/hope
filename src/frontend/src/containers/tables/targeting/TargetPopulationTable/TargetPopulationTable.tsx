@@ -48,7 +48,6 @@ export function TargetPopulationTable({
     totalHouseholdsCountMin: filter.totalHouseholdsCountMin || null,
     totalHouseholdsCountMax: filter.totalHouseholdsCountMax || null,
     status: filter.status,
-    businessArea,
     createdAtRange: JSON.stringify({
       min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
       max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
