@@ -273,7 +273,7 @@ class TestProgramList:
 
         _test_response_len_and_queries(1, no_queries_not_cached_no_permissions)
         # second request should be cached
-        _test_response_len_and_queries(1, no_queries_cached)
+        _test_response_len_and_queries(1, no_queries_cached)  # on CI we have 7 here instead of 5 # FIXME
         # caching data should invalidate cache, -4 queries because of cached permissions
         self.program.name = "New Name"
         self.program.save()
