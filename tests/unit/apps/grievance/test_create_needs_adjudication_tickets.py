@@ -241,10 +241,6 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
             IndividualFactory(household=cls.household3, program=program2, **individual)
             for individual in individuals_to_create_3
         ][0]
-        other_individual2 = [
-            IndividualFactory(household=cls.household3, program=program2, **individual)
-            for individual in individuals_to_create_3
-        ][0]
         cls.household.head_of_household = individuals[0]
         cls.household.save()
         cls.household2.head_of_household = other_individual
