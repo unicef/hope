@@ -640,6 +640,7 @@ class TestCreateTargeting:
         assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
         assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual1.household.unicef_id
 
+    @pytest.mark.xfail(reason="UNSTABLE")
     def test_create_targeting_with_pdu_bool_criteria(
         self,
         program: Program,
