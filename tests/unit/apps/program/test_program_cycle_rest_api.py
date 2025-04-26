@@ -261,6 +261,7 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
         self.assertEqual(self.cycle1.status, ProgramCycle.ACTIVE)
 
     def test_finish_program_cycle(self) -> None:
+        PaymentPlanFactory(program_cycle=self.cycle1, status=PaymentPlan.Status.TP_OPEN)
         payment_plan = PaymentPlanFactory(program_cycle=self.cycle1, status=PaymentPlan.Status.IN_REVIEW)
         self.client.force_authenticate(user=self.user)
         self.assertEqual(self.cycle1.status, ProgramCycle.ACTIVE)

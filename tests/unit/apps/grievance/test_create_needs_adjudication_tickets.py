@@ -144,6 +144,10 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
             name="Test HOPE2",
             business_area=BusinessArea.objects.first(),
         )
+        program2 = ProgramFactory(
+            name="Test HOPE2",
+            business_area=BusinessArea.objects.first(),
+        )
         cls.household = HouseholdFactory.build(
             size=2,
             program=program,
