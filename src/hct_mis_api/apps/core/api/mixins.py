@@ -116,6 +116,10 @@ class PermissionsMixin:
     token_permission = Grant.API_READ_ONLY
 
     def is_external_request(self) -> bool:
+        # condition for the swagger
+        if not self.request:  # pragma: no cover
+            return False
+
         auth_header = get_authorization_header(self.request).split()
         if auth_header and auth_header[0].lower() == "token".encode():
             return True
