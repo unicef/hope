@@ -348,7 +348,6 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
             program_id,
         ):
             return parent.accounts.none()
-
         return parent.accounts.all()
 
     @classmethod

@@ -1948,8 +1948,8 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=("unique_key", "active"),
-                condition=Q(active=True) & Q(unique_key__isnull=False) & Q(is_unique=False),
+                fields=("unique_key", "active", "is_unique"),
+                condition=Q(active=True) & Q(unique_key__isnull=False) & Q(is_unique=True),
                 name="unique_active_wallet",
             ),
         ]
