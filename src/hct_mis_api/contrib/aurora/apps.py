@@ -13,6 +13,12 @@ class Config(AppConfig):
         from hct_mis_api.contrib.aurora.services.generic_registration_service import (
             GenericRegistrationService,
         )
+        from hct_mis_api.contrib.aurora.services.nigeria_people_registration_service import (
+            NigeriaPeopleRegistrationService,
+        )
+        from hct_mis_api.contrib.aurora.services.people_registration_service import (
+            PeopleRegistrationService,
+        )
         from hct_mis_api.contrib.aurora.services.sri_lanka_flex_registration_service import (
             SriLankaRegistrationService,
         )
@@ -25,8 +31,10 @@ class Config(AppConfig):
         from . import admin  # noqa
 
         registry.register(GenericRegistrationService)
+        registry.register(PeopleRegistrationService)
         registry.register(SriLankaRegistrationService)
         registry.register(UkraineBaseRegistrationService)
         registry.register(UkraineRegistrationService)
         registry.register(CzechRepublicFlexRegistration)
         registry.register(Registration2024)
+        registry.register(NigeriaPeopleRegistrationService)
