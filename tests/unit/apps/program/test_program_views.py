@@ -281,7 +281,7 @@ class TestProgramList:
         # changing programs from other business area should not invalidate cache
         self.program_in_ukraine.name = "New Name"
         self.program_in_ukraine.save()
-        _test_response_len_and_queries(1, 7)  # on CI we have 7 here instead of 5 #FIXME
+        _test_response_len_and_queries(1, 5)  # on CI we have 7 here instead of 5 #FIXME
         # changing user permissions should invalidate cache
         create_user_role_with_permissions(
             self.user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], self.afghanistan, program_afghanistan2
