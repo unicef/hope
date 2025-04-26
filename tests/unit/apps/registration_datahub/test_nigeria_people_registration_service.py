@@ -9,6 +9,7 @@ from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.models import Area, AreaType
 from hct_mis_api.apps.household.models import (
+    HEAD,
     MALE,
     DocumentType,
     PendingDocument,
@@ -74,6 +75,7 @@ class TestNigeriaPeopleRegistrationService(TestCase):
                             "phone_no_i_c": "+2348023456789",
                             "birth_date_i_c": "1988-04-08",
                             "given_name_i_c": "Giulio",
+                            "middle_name_i_c": "D",
                             "national_id_no": "01234567891",
                             "account_details": {
                                 "uba_code": "000004",
@@ -82,7 +84,6 @@ class TestNigeriaPeopleRegistrationService(TestCase):
                                 "holder_name": "xxxx",
                             },
                             "family_name_i_c": "Franco",
-                            "confirm_phone_no": "+2348023456789",
                             "national_id_no_i_c": "01234567891",
                             "estimated_birth_date_i_c": "y",
                             "frontline_worker_designation_i_f": "H2HCL",  # ff
@@ -122,6 +123,8 @@ class TestNigeriaPeopleRegistrationService(TestCase):
         self.assertIsNotNone(primary_collector.phone_no)
         self.assertEqual(primary_collector.sex, MALE)
         self.assertEqual(primary_collector.email, "gfranco@unicef.org")
+        self.assertEqual(primary_collector.full_name, "Giulio D Franco")
+        self.assertEqual(primary_collector.relationship, HEAD)
         self.assertIsNotNone(primary_collector.phone_no_alternative)
         self.assertEqual(
             primary_collector.flex_fields,
