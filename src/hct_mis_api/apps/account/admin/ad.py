@@ -32,7 +32,7 @@ class LoadUsersForm(forms.Form):
         widget=AutocompleteWidget(BusinessArea, ""),
     )
     partner = forms.ModelChoiceField(
-        queryset=Partner.objects.all().order_by("name"),
+        queryset=account_models.Partner.objects.all().order_by("name"),
         required=True,
         widget=AutocompleteWidget(Partner, ""),
     )
