@@ -5,6 +5,8 @@ CREATE OR REPLACE FUNCTION funds_commitment_trigger_function()
 RETURNS TRIGGER AS $$
 DECLARE
     fc_group_id INT;
+    office_id UUID;
+
 BEGIN
     -- Check if FundsCommitmentGroup exists, if not create it
     SELECT id INTO fc_group_id FROM vision_fundscommitmentgroup 
@@ -15,6 +17,11 @@ BEGIN
         VALUES (NEW.funds_commitment_number)
         RETURNING id INTO fc_group_id;
     END IF;
+
+    -- Try to get BusinessArea.id using the business_area code
+    SELECT id INTO office_id FROM core_businessarea
+    WHERE code = NEW.business_area
+    LIMIT 1;
 
     -- Insert into FundsCommitmentItem
     INSERT INTO vision_fundscommitmentitem (
@@ -77,7 +84,7 @@ BEGIN
         NEW.created_by,
         NEW.update_date,
         NEW.updated_by,
-        NEW.office_id
+        office_id
     );
 
     RETURN NEW;
