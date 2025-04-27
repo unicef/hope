@@ -107,11 +107,7 @@ export const HouseholdMembersTable = ({
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
-
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery<HouseholdMember>({
     queryKey: [
       'businessAreasProgramsHouseholdsMembers',
       programId,

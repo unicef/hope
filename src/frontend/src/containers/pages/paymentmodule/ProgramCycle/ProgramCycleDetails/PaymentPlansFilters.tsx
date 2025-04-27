@@ -6,7 +6,6 @@ import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { Title } from '@core/Title';
 import {
-  AllPaymentPlansForTableQueryVariables,
   PaymentPlanStatus,
   usePaymentPlanStatusChoicesQueryQuery,
 } from '@generated/graphql';
@@ -18,17 +17,6 @@ import moment from 'moment';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-
-export type FilterProps = Pick<
-  AllPaymentPlansForTableQueryVariables,
-  | 'search'
-  | 'status'
-  | 'totalEntitledQuantityFrom'
-  | 'totalEntitledQuantityTo'
-  | 'dispersionStartDate'
-  | 'dispersionEndDate'
-  | 'isFollowUp'
->;
 
 interface PaymentPlansFilterProps {
   filter;

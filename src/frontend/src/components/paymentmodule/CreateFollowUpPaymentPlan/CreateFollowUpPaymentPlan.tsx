@@ -1,3 +1,15 @@
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { DividerLine } from '@core/DividerLine';
+import { FieldBorder } from '@core/FieldBorder';
+import { GreyText } from '@core/GreyText';
+import { LabelizedField } from '@core/LabelizedField';
+import { LoadingButton } from '@core/LoadingButton';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
+import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import {
   Box,
   Button,
@@ -8,35 +20,23 @@ import {
   Grid2 as Grid,
   Typography,
 } from '@mui/material';
-import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { FormikDateField } from '@shared/Formik/FormikDateField';
+import { useMutation } from '@tanstack/react-query';
+import { today, tomorrow } from '@utils/utils';
+import { format } from 'date-fns';
 import { Field, Form, Formik } from 'formik';
 import moment from 'moment';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import * as Yup from 'yup';
 import { useNavigate } from 'react-router-dom';
-import {
-  PaymentPlanQuery,
-  useCreateFollowUpPpMutation,
-} from '@generated/graphql';
+import * as Yup from 'yup';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { DialogContainer } from '@containers/dialogs/DialogContainer';
-import { DialogFooter } from '@containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { usePermissions } from '@hooks/usePermissions';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { FormikDateField } from '@shared/Formik/FormikDateField';
-import { today, tomorrow } from '@utils/utils';
-import { DividerLine } from '@core/DividerLine';
-import { FieldBorder } from '@core/FieldBorder';
-import { GreyText } from '@core/GreyText';
-import { LabelizedField } from '@core/LabelizedField';
-import { LoadingButton } from '@core/LoadingButton';
 import { useProgramContext } from '../../../programContext';
 
 export interface CreateFollowUpPaymentPlanProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export function CreateFollowUpPaymentPlan({
@@ -45,9 +45,8 @@ export function CreateFollowUpPaymentPlan({
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
-  const [mutate, { loading }] = useCreateFollowUpPpMutation();
   const { isActiveProgram } = useProgramContext();
   const { showMessage } = useSnackbar();
   const { selectedProgram } = useProgramContext();
@@ -55,6 +54,27 @@ export function CreateFollowUpPaymentPlan({
 
   const { id, totalWithdrawnHouseholdsCount, unsuccessfulPaymentsCount } =
     paymentPlan;
+
+  const { mutateAsync: createFollowUpPaymentPlan, isPending: loadingCreate } =
+    useMutation({
+      mutationFn: ({
+        businessAreaSlug,
+        id: paymentPlanId,
+        programSlug,
+        requestBody,
+      }: {
+        businessAreaSlug: string;
+        id: string;
+        programSlug: string;
+        requestBody;
+      }) =>
+        RestService.restBusinessAreasProgramsPaymentPlansCreateFollowUpCreate({
+          businessAreaSlug,
+          id: paymentPlanId,
+          programSlug,
+          requestBody,
+        }),
+    });
 
   if (permissions === null) return null;
 
@@ -87,20 +107,29 @@ export function CreateFollowUpPaymentPlan({
 
   const handleSubmit = async (values: FormValues): Promise<void> => {
     try {
-      const res = await mutate({
-        variables: {
-          paymentPlanId: id,
-          dispersionStartDate: values.dispersionStartDate,
-          dispersionEndDate: values.dispersionEndDate,
-        },
+      const dispersionStartDate = values.dispersionStartDate
+        ? format(new Date(values.dispersionStartDate), 'yyyy-MM-dd')
+        : null;
+      const dispersionEndDate = values.dispersionEndDate
+        ? format(new Date(values.dispersionEndDate), 'yyyy-MM-dd')
+        : null;
+
+      const requestBody = {
+        dispersionStartDate,
+        dispersionEndDate,
+      };
+
+      const res = await createFollowUpPaymentPlan({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+        id,
+        requestBody,
       });
       setDialogOpen(false);
       showMessage(t('Payment Plan Created'));
-      navigate(
-        `/${baseUrl}/payment-module/followup-payment-plans/${res.data.createFollowUpPaymentPlan.paymentPlan.id}`,
-      );
+      navigate(`/${baseUrl}/payment-module/followup-payment-plans/${res.id}`);
     } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+      showMessage(e);
     }
   };
 
@@ -213,7 +242,7 @@ export function CreateFollowUpPaymentPlan({
                         label={t('Dispersion Start Date')}
                         component={FormikDateField}
                         required
-                        disabled={loading}
+                        disabled={loadingCreate}
                         fullWidth
                         decoratorEnd={
                           <CalendarTodayRoundedIcon color="disabled" />
@@ -253,7 +282,7 @@ export function CreateFollowUpPaymentPlan({
                   {t('Cancel')}
                 </Button>
                 <LoadingButton
-                  loading={loading}
+                  loading={loadingCreate}
                   type="submit"
                   color="primary"
                   variant="contained"

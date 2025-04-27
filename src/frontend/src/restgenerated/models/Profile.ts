@@ -2,7 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { UserBusinessArea } from './UserBusinessArea';
+import type { Partner } from './Partner';
 export type Profile = {
     readonly id: string;
     /**
@@ -16,7 +16,8 @@ export type Profile = {
      * Designates that this user has all permissions without explicitly assigning them.
      */
     isSuperuser?: boolean;
-    businessAreas: Array<UserBusinessArea>;
+    partner: Partner;
+    readonly businessAreas: Record<string, any>;
     readonly permissionsInScope: string;
     readonly userRoles: Record<string, any>;
     readonly partnerRoles: Record<string, any>;

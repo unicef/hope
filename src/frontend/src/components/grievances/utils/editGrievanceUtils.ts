@@ -48,8 +48,8 @@ function prepareInitialValueAddIndividual(
   const individualData = {
     ...ticket.addIndividualTicketDetails.individualData,
   };
-  const flexFields = individualData.flex_fields;
-  delete individualData.flex_fields;
+  const flexFields = individualData.flexFields;
+  delete individualData.flexFields;
   initialValues.individualData = Object.entries(individualData).reduce(
     (previousValue, currentValue: [string, { value: string }]) => {
       // eslint-disable-next-line no-param-reassign,prefer-destructuring
@@ -142,8 +142,8 @@ function prepareInitialValueEditHousehold(
   const householdData = {
     ...ticket.householdDataUpdateTicketDetails.householdData,
   };
-  const flexFields = householdData.flex_fields;
-  delete householdData.flex_fields;
+  const flexFields = householdData.flexFields;
+  delete householdData.flexFields;
   const householdDataArray = Object.entries(householdData).map(
     (entry: [string, { value: string }]) => ({
       fieldName: entry[0],

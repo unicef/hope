@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RestService } from '@restgenerated/services/RestService';
+import { PaginatedPaymentPlanList } from '@restgenerated/models/PaginatedPaymentPlanList';
 
 export const ManagerialConsolePage: FC = () => {
   const { t } = useTranslation();
@@ -69,7 +70,7 @@ export const ManagerialConsolePage: FC = () => {
     data: inApprovalData,
     isLoading: inApprovalLoading,
     refetch: refetchInApproval,
-  } = useQuery({
+  } = useQuery<PaginatedPaymentPlanList>({
     queryKey: ['paymentPlansInApproval', businessAreaSlug],
     queryFn: () => fetchPaymentPlans('IN_APPROVAL'),
   });
@@ -78,7 +79,7 @@ export const ManagerialConsolePage: FC = () => {
     data: inAuthorizationData,
     isLoading: inAuthorizationLoading,
     refetch: refetchInAuthorization,
-  } = useQuery({
+  } = useQuery<PaginatedPaymentPlanList>({
     queryKey: ['paymentPlansInAuthorization', businessAreaSlug],
     queryFn: () => fetchPaymentPlans('IN_AUTHORIZATION'),
   });
@@ -87,7 +88,7 @@ export const ManagerialConsolePage: FC = () => {
     data: inReviewData,
     isLoading: inReviewLoading,
     refetch: refetchInReview,
-  } = useQuery({
+  } = useQuery<PaginatedPaymentPlanList>({
     queryKey: ['paymentPlansInReview', businessAreaSlug],
     queryFn: () => fetchPaymentPlans('IN_REVIEW'),
   });
@@ -96,7 +97,7 @@ export const ManagerialConsolePage: FC = () => {
     data: releasedData,
     isLoading: releasedLoading,
     refetch: refetchReleased,
-  } = useQuery({
+  } = useQuery<PaginatedPaymentPlanList>({
     queryKey: ['paymentPlansReleased', businessAreaSlug],
     queryFn: () => fetchPaymentPlans('ACCEPTED'),
   });

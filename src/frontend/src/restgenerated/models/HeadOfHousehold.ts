@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type HeadOfHousehold = {
-    id: string;
+    readonly id: string;
     /**
      * Full Name of the Beneficiary
      */

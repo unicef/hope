@@ -57,9 +57,7 @@ export const ProgramCycleDetailsSection = ({
             </Grid>
             <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Programme End Date')}>
-                <UniversalMoment>
-                  {programCycle.programEndDate}
-                </UniversalMoment>
+                <UniversalMoment>{programCycle.programEndDate}</UniversalMoment>
               </LabelizedField>
             </Grid>
             <Grid size={{ xs: 3 }}>

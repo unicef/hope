@@ -4,6 +4,7 @@ from django.db.models import Prefetch, QuerySet
 
 from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
@@ -41,6 +42,8 @@ from hct_mis_api.apps.household.models import (
     Individual,
     IndividualRoleInHousehold,
 )
+from hct_mis_api.apps.payment.api.serializers import PaymentListSerializer
+from hct_mis_api.apps.payment.models import Payment
 from hct_mis_api.apps.program.models import Program
 
 
@@ -57,6 +60,7 @@ class HouseholdViewSet(
         "list": HouseholdListSerializer,
         "retrieve": HouseholdDetailSerializer,
         "members": HouseholdMemberSerializer,
+        "payments": PaymentListSerializer,
     }
     permissions_by_action = {
         "list": [
@@ -70,6 +74,10 @@ class HouseholdViewSet(
         "members": [
             Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
             Permissions.RDI_VIEW_DETAILS,
+        ],
+        "payments": [
+            Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
+            Permissions.PM_VIEW_DETAILS,
         ],
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
@@ -125,6 +133,24 @@ class HouseholdViewSet(
         instance = self.get_object()
         instance.withdraw()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @extend_schema(
+        responses={
+            200: PaymentListSerializer(many=True),
+        },
+    )
+    @action(detail=True, methods=["get"])
+    def payments(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+        hh = self.get_object()
+        payments = Payment.objects.filter(household=hh)
+
+        page = self.paginate_queryset(payments)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(payments, many=True)
+        return Response(serializer.data)
 
 
 class HouseholdGlobalViewSet(

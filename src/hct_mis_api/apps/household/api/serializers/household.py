@@ -276,3 +276,12 @@ class IndividualChoicesSerializer(serializers.Serializer):
 
     def get_work_status_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(WORK_STATUS_CHOICE)
+
+
+class HouseholdSmallSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Household
+        fields = (
+            "id",
+            "unicef_id",
+        )

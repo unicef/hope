@@ -1,22 +1,21 @@
-import styled from 'styled-components';
-import {
-  AllIndividualsForPopulationTableQuery,
-  AllIndividualsForPopulationTableQueryVariables,
-  IndividualRdiMergeStatus,
-  useAllIndividualsForPopulationTableQuery,
-} from '@generated/graphql';
-import { UniversalTable } from '@containers/tables/UniversalTable';
-import { adjustHeadCells, decodeIdString } from '@utils/utils';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { TableWrapper } from '@core/TableWrapper';
+import { IndividualRdiMergeStatus } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { IndividualList } from '@restgenerated/models/IndividualList';
+import { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { adjustHeadCells, decodeIdString } from '@utils/utils';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { useProgramContext } from 'src/programContext';
+import styled from 'styled-components';
 import {
   headCellsSocialProgram,
   headCellsStandardProgram,
 } from './LookUpIndividualTableHeadCells';
 import { LookUpIndividualTableRow } from './LookUpIndividualTableRow';
-import { useProgramContext } from 'src/programContext';
-import { ReactElement } from 'react';
-import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 interface LookUpIndividualTableProps {
   filter;
@@ -40,7 +39,6 @@ const NoTableStyling = styled.div`
 `;
 
 export function LookUpIndividualTable({
-  businessArea,
   filter,
   setFieldValue,
   valuesInner,
@@ -52,7 +50,7 @@ export function LookUpIndividualTable({
   noTableStyling = false,
 }: LookUpIndividualTableProps): ReactElement {
   const { isSocialDctType } = useProgramContext();
-  const { programId, isAllPrograms } = useBaseUrl();
+  const { businessArea, programId, isAllPrograms } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
@@ -75,33 +73,71 @@ export function LookUpIndividualTable({
       : null;
   }
 
-  const initialVariables: AllIndividualsForPopulationTableQueryVariables = {
-    businessArea,
-    age: JSON.stringify({ min: filter.ageMin, max: filter.ageMax }),
-    sex: [filter.sex],
-    search: filter.search.trim(),
-    documentType: filter.documentType,
-    documentNumber: filter.documentNumber.trim(),
-    admin2: [filter.admin2],
-    flags: filter.flags,
-    status: filter.status,
-    lastRegistrationDate: JSON.stringify({
-      min: filter.lastRegistrationDateMin,
-      max: filter.lastRegistrationDateMax,
+  const initialQueryVariables = useMemo(
+    () => ({
+      age: JSON.stringify({ min: filter.ageMin, max: filter.ageMax }),
+      sex: [filter.sex],
+      search: filter.search.trim(),
+      documentType: filter.documentType,
+      documentNumber: filter.documentNumber.trim(),
+      admin2: [filter.admin2],
+      flags: filter.flags,
+      status: filter.status,
+      lastRegistrationDate: JSON.stringify({
+        min: filter.lastRegistrationDateMin,
+        max: filter.lastRegistrationDateMax,
+      }),
+      orderBy: filter.orderBy,
+      householdId,
+      excludedId: excludedId || ticket?.individual?.id || null,
+      program: isAllPrograms ? filter.program : programId,
+      isActiveProgram: filter.programState === 'active' ? true : null,
+      withdrawn: false,
+      rdiMergeStatus: IndividualRdiMergeStatus.Merged,
     }),
-    orderBy: filter.orderBy,
-    householdId,
-    excludedId: excludedId || ticket?.individual?.id || null,
-    program: isAllPrograms ? filter.program : programId,
-    isActiveProgram: filter.programState === 'active' ? true : null,
-    withdrawn: false,
-    rdiMergeStatus: IndividualRdiMergeStatus.Merged,
-  };
+    [
+      filter.ageMin,
+      filter.ageMax,
+      filter.sex,
+      filter.search,
+      filter.documentType,
+      filter.documentNumber,
+      filter.admin2,
+      filter.flags,
+      filter.status,
+      filter.lastRegistrationDateMin,
+      filter.lastRegistrationDateMax,
+      filter.orderBy,
+      filter.program,
+      filter.programState,
+      householdId,
+      excludedId,
+      ticket?.individual?.id,
+      isAllPrograms,
+      programId,
+    ],
+  );
+
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+
+  const { data, isLoading, error } = useQuery<PaginatedIndividualListList>({
+    queryKey: [
+      'businessAreasProgramsHouseholdsList',
+      queryVariables,
+      programId,
+      businessArea,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsIndividualsList({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+      }),
+    enabled: !!businessArea && !!programId,
+  });
 
   const replacements = {
     unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
-    household__id: (_beneficiaryGroup) =>
-      `${_beneficiaryGroup?.groupLabel} ID`,
+    household__id: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} ID`,
   };
 
   const headCells = isSocialDctType
@@ -130,18 +166,17 @@ export function LookUpIndividualTable({
     : adjustedHeadCells;
 
   const renderTable = (): ReactElement => (
-    <UniversalTable<
-      AllIndividualsForPopulationTableQuery['allIndividuals']['edges'][number]['node'],
-      AllIndividualsForPopulationTableQueryVariables
-    >
+    <UniversalRestTable
       headCells={preparedHeadcells}
       allowSort={false}
       rowsPerPageOptions={[5, 10, 15, 20]}
       filterOrderBy={filter.orderBy}
-      query={useAllIndividualsForPopulationTableQuery}
-      queriedObjectName="allIndividuals"
-      initialVariables={initialVariables}
-      renderRow={(row) => (
+      queryVariables={queryVariables}
+      setQueryVariables={setQueryVariables}
+      data={data}
+      error={error}
+      isLoading={isLoading}
+      renderRow={(row: IndividualList) => (
         <LookUpIndividualTableRow
           radioChangeHandler={handleRadioChange}
           selectedIndividual={selectedIndividual}

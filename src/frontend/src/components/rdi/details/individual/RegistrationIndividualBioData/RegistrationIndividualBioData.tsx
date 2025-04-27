@@ -1,25 +1,21 @@
-import { Box, Grid2 as Grid, Paper, Typography } from '@mui/material';
-import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import {
-  choicesToDict,
-  formatAge,
-  getPhoneNoLabel,
-  renderBoolean,
-  sexToCapitalize,
-} from '@utils/utils';
-import {
-  HouseholdChoiceDataQuery,
-  IndividualDetailedFragment,
-} from '@generated/graphql';
-import { ContentLink } from '@core/ContentLink';
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
-import { DocumentRegistrationPhotoModal } from '../DocumentRegistrationPhotoModal';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useProgramContext } from 'src/programContext';
+import { HouseholdChoiceDataQuery } from '@generated/graphql';
+import { Box, Grid2 as Grid, Paper, Typography } from '@mui/material';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import { ObservedDisabilityEnum } from '@restgenerated/models/ObservedDisabilityEnum';
+import {
+  choicesToDict,
+  formatAge,
+  renderBoolean,
+  sexToCapitalize,
+} from '@utils/utils';
 import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useProgramContext } from 'src/programContext';
+import styled from 'styled-components';
+import { DocumentRegistrationPhotoModal } from '../DocumentRegistrationPhotoModal';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}
@@ -31,7 +27,7 @@ const BorderBox = styled.div`
 `;
 
 interface RegistrationIndividualBioDataProps {
-  individual: IndividualDetailedFragment;
+  individual: IndividualDetail;
   choicesData: HouseholdChoiceDataQuery;
 }
 
@@ -39,7 +35,6 @@ export function RegistrationIndividualBioData({
   individual,
   choicesData,
 }: RegistrationIndividualBioDataProps): ReactElement {
-  const { baseUrl } = useBaseUrl();
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
@@ -51,9 +46,7 @@ export function RegistrationIndividualBioData({
     choicesData.maritalStatusChoices,
   );
   const workStatusChoicesDict = choicesToDict(choicesData.workStatusChoices);
-  const observedDisabilityChoicesDict = choicesToDict(
-    choicesData.observedDisabilityChoices,
-  );
+
   const severityOfDisabilityChoicesDict = choicesToDict(
     choicesData.severityOfDisabilityChoices,
   );
@@ -155,8 +148,8 @@ export function RegistrationIndividualBioData({
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t(`${beneficiaryGroup?.groupLabel} ID`)}>
-            {' '}
-            {individual?.household?.id ? (
+            {/* //TODO: REST */}
+            {/* {individual?.household?.id ? (
               <ContentLink
                 href={`/${baseUrl}/registration-data-import/household/${individual?.household?.id}`}
               >
@@ -164,7 +157,7 @@ export function RegistrationIndividualBioData({
               </ContentLink>
             ) : (
               '-'
-            )}
+            )} */}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
@@ -187,9 +180,7 @@ export function RegistrationIndividualBioData({
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Observed disabilities')}>
-            {individual.observedDisability
-              .map((choice) => observedDisabilityChoicesDict[choice])
-              .join(', ')}
+            {ObservedDisabilityEnum[individual.observedDisability]}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
@@ -224,11 +215,11 @@ export function RegistrationIndividualBioData({
             {severityOfDisabilityChoicesDict[individual.commsDisability]}
           </LabelizedField>
         </Grid>
-        <Grid size={{ xs: 3 }}>
+        {/* <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Disability')}>
             {individual.disability === 'DISABLED' ? 'Disabled' : 'Not Disabled'}
           </LabelizedField>
-        </Grid>
+        </Grid> */}
         {!mappedIndividualDocuments?.length &&
         !mappedIdentities.length ? null : (
           <Grid size={{ xs: 12 }}>
@@ -246,16 +237,18 @@ export function RegistrationIndividualBioData({
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
-          <LabelizedField label={t('Phone Number')}>
+          {/* //TODO: */}
+          {/* <LabelizedField label={t('Phone Number')}>
             {getPhoneNoLabel(individual.phoneNo, individual.phoneNoValid)}
-          </LabelizedField>
+          </LabelizedField> */}
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Alternate Phone Number')}>
-            {getPhoneNoLabel(
+            {/* //TODO: */}
+            {/* {getPhoneNoLabel(
               individual.phoneNoAlternative,
               individual.phoneNoAlternativeValid,
-            )}
+            )} */}
           </LabelizedField>
         </Grid>
       </Grid>

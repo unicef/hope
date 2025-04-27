@@ -5,5 +5,22 @@
 export type FollowUpPaymentPlan = {
     readonly id: string;
     unicefId?: string | null;
+    status: string;
+    /**
+     * Dispersion Start Date
+     */
+    dispersionStartDate?: string | null;
+    /**
+     * Dispersion End Date
+     */
+    dispersionEndDate?: string | null;
+    /**
+     * Follow Up Payment Plan flag [sys]
+     */
+    isFollowUp?: boolean;
+    /**
+     * Name
+     */
+    name?: string | null;
 };
 

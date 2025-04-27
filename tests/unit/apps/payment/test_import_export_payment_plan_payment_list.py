@@ -11,7 +11,7 @@ from django.core.files import File
 from django.test import TestCase
 from django.urls import reverse
 
-from graphql import GraphQLError
+from rest_framework.exceptions import ValidationError
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import Role, RoleAssignment, User
@@ -498,13 +498,13 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             0,
         )
         export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
-        with self.assertRaises(GraphQLError) as e:
+        with self.assertRaises(ValidationError) as e:
             export_service.get_template(self.fsp_1, self.dm_atm_card)
-        self.assertEqual(
-            e.exception.message,
+        self.assertIn(
             f"Not possible to generate export file. There isn't any FSP XLSX Template assigned to Payment "
             f"Plan {self.payment_plan.unicef_id} for FSP {self.fsp_1.name} and delivery "
             f"mechanism {DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD}.",
+            str(e.exception),
         )
 
     def test_flex_fields_admin_visibility(self) -> None:
