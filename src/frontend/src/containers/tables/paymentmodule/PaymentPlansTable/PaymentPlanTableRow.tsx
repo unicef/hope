@@ -2,7 +2,6 @@ import { BlackLink } from '@components/core/BlackLink';
 import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
-import { useCashPlanVerificationStatusChoicesQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box, TableCell } from '@mui/material';
 import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
@@ -30,10 +29,6 @@ export const PaymentPlanTableRow = ({
   const handleClick = (): void => {
     navigate(paymentPlanPath);
   };
-  const { data: statusChoicesData } =
-    useCashPlanVerificationStatusChoicesQuery();
-
-  if (!statusChoicesData) return null;
 
   const followUpLinks = (): ReactElement => {
     if (!plan.followUps?.length) return <>-</>;

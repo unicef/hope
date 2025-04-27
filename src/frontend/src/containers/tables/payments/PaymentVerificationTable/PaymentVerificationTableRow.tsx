@@ -2,10 +2,7 @@ import { BlackLink } from '@components/core/BlackLink';
 import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
-import {
-  PaymentPlanNode,
-  useCashPlanVerificationStatusChoicesQuery,
-} from '@generated/graphql';
+import { PaymentPlanNode } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import TableCell from '@mui/material/TableCell';
 import {
@@ -30,10 +27,6 @@ export function PaymentVerificationTableRow({
   const handleClick = (): void => {
     navigate(planVerificationPath);
   };
-  const { data: statusChoicesData } =
-    useCashPlanVerificationStatusChoicesQuery();
-
-  if (!statusChoicesData) return null;
 
   return (
     <ClickableTableRow

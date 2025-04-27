@@ -3,24 +3,24 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * * `AF99` - Crystalfurt
- * * `UA56` - Danielville
- * * `UA20` - Kellyville
- * * `HR59` - Michaelton
- * * `AF65` - North Cindyville
- * * `AF91` - North Matthew
- * * `HR93` - South Dwayneville
- * * `HR45` - Stephaniestad
- * * `UA47` - Timothyberg
+ * * `AF64` - Baldwinview
+ * * `HR22` - Chavezbury
+ * * `HR85` - East Alexander
+ * * `UA78` - East Andrew
+ * * `AF10` - Mooreport
+ * * `HR13` - North Dawnstad
+ * * `UA38` - South Adamhaven
+ * * `AF92` - Starkmouth
+ * * `UA45` - West Leslieport
  */
 export enum Admin1Enum {
-    AF99 = 'AF99',
-    UA56 = 'UA56',
-    UA20 = 'UA20',
-    HR59 = 'HR59',
-    AF65 = 'AF65',
-    AF91 = 'AF91',
-    HR93 = 'HR93',
-    HR45 = 'HR45',
-    UA47 = 'UA47',
+    AF64 = 'AF64',
+    HR22 = 'HR22',
+    HR85 = 'HR85',
+    UA78 = 'UA78',
+    AF10 = 'AF10',
+    HR13 = 'HR13',
+    UA38 = 'UA38',
+    AF92 = 'AF92',
+    UA45 = 'UA45',
 }

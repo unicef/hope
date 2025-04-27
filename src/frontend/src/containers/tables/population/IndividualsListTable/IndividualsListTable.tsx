@@ -82,10 +82,6 @@ export function IndividualsListTable({
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
-
   const { data, isLoading, error } = useQuery<PaginatedIndividualListList>({
     queryKey: ['businessAreasProgramsHouseholdsList', queryVariables],
     queryFn: () =>

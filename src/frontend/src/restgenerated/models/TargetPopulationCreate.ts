@@ -9,10 +9,10 @@ export type TargetPopulationCreate = {
     name: string;
     programCycleId: string;
     targetingCriteria: TargetingCriteria;
-    excludedIds: string;
-    exclusionReason: string;
-    fspId?: string;
-    deliveryMechanismCode?: string;
+    excludedIds?: string;
+    exclusionReason?: string;
+    fspId?: string | null;
+    deliveryMechanismCode?: string | null;
     vulnerabilityScoreMin?: string;
     vulnerabilityScoreMax?: string;
 };

@@ -11,8 +11,8 @@ export type PatchedTargetPopulationCreate = {
     targetingCriteria?: TargetingCriteria;
     excludedIds?: string;
     exclusionReason?: string;
-    fspId?: string;
-    deliveryMechanismCode?: string;
+    fspId?: string | null;
+    deliveryMechanismCode?: string | null;
     vulnerabilityScoreMin?: string;
     vulnerabilityScoreMax?: string;
 };

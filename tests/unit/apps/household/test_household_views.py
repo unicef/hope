@@ -29,8 +29,10 @@ from hct_mis_api.apps.household.models import (
     DUPLICATE,
     HOST,
     REFUGEE,
+    RESIDENCE_STATUS_CHOICE,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+    DocumentType,
     Household,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -915,6 +917,39 @@ class TestHouseholdGlobalViewSet:
         assert str(household_afghanistan_without_areas.id) in result_ids
         assert str(self.household_ukraine.id) not in result_ids
         assert str(household_afghanistan_different_areas.id) not in result_ids
+
+
+class TestHouseHoldChoices:
+    @pytest.fixture(autouse=True)
+    def setup(self, api_client: Any) -> None:
+        self.choices_url = "api:households:households-global-choices"
+        self.afghanistan = create_afghanistan()
+        self.partner = PartnerFactory(name="TestPartner")
+        self.user = UserFactory(partner=self.partner)
+        self.api_client = api_client(self.user)
+
+        DocumentTypeFactory(key="passport", label="Passport")
+        DocumentTypeFactory(key="id_card", label="ID Card")
+        DocumentTypeFactory(key="birth_certificate", label="Birth Certificate")
+
+    def test_get_choices(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST],
+            business_area=self.afghanistan,
+        )
+        response = self.api_client.get(reverse(self.choices_url, kwargs={"business_area_slug": self.afghanistan.slug}))
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == {
+            "document_type_choices": [
+                {"name": str(document_type.label), "value": document_type.key}
+                for document_type in DocumentType.objects.order_by("key")
+            ],
+            "residence_status_choices": sorted(
+                [{"name": name, "value": value} for value, name in RESIDENCE_STATUS_CHOICE],
+                key=lambda choice: choice["name"],
+            ),
+        }
 
 
 class TestHouseholdFilter:

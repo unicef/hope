@@ -1,11 +1,15 @@
+from typing import Any, Dict, List
+
+from django.conf import settings
 from django.contrib.auth import get_user_model
 
 from flags.state import flag_state
 from rest_framework import serializers
 from rest_framework.utils.serializer_helpers import ReturnDict
 
-from hct_mis_api.apps.account.models import Partner, Role, User
+from hct_mis_api.apps.account.models import USER_STATUS_CHOICES, Partner, Role, User
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import to_choice_object
 from hct_mis_api.apps.geo.api.serializers import AreaLevelSerializer
 from hct_mis_api.apps.program.models import Program
 
@@ -123,3 +127,26 @@ class PartnerForProgramSerializer(serializers.ModelSerializer):
     def get_areas(self, obj: Partner) -> ReturnDict:
         areas_qs = obj.get_areas_for_program(obj.partner_program).order_by("name")
         return AreaLevelSerializer(areas_qs, many=True).data
+
+
+class UserChoicesSerializer(serializers.Serializer):
+    role_choices = serializers.SerializerMethodField()
+    status_choices = serializers.SerializerMethodField()
+    partner_choices = serializers.SerializerMethodField()
+
+    def get_role_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return [dict(name=role.name, value=role.id, subsystem=role.subsystem) for role in Role.objects.order_by("name")]
+
+    def get_status_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return to_choice_object(USER_STATUS_CHOICES)
+
+    def get_partner_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        business_area_slug = self.context["request"].parser_context["kwargs"]["business_area_slug"]
+        return to_choice_object(
+            list(
+                Partner.objects.exclude(name=settings.DEFAULT_EMPTY_PARTNER)
+                .filter(allowed_business_areas__slug=business_area_slug)
+                .exclude(id__in=Partner.objects.filter(parent__isnull=False).values_list("parent_id", flat=True))
+                .values_list("id", "name")
+            )
+        )

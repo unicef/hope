@@ -1225,8 +1225,10 @@ export function adjustHeadCells<T>(
 }
 
 export const filterEmptyParams = (params) => {
+  if (!params) return {};
+
   return Object.fromEntries(
-    Object.entries(params).filter(([, value]) => {
+    Object.entries(params).filter(([_, value]) => {
       // Handle basic empty values
       if (
         value === undefined ||
@@ -1272,6 +1274,7 @@ export const filterEmptyParams = (params) => {
     }),
   );
 };
+
 export function deepCamelize(data) {
   if (_.isArray(data)) {
     return data.map(deepCamelize);

@@ -75,7 +75,7 @@ export const UniversalRestTable = <T, K>({
       ...filtered,
       businessAreaSlug: queryVariables.businessAreaSlug,
       programSlug: queryVariables.programSlug,
-      ordering: queryVariables.ordering || '',
+      ...(queryVariables.ordering ? { ordering: queryVariables.ordering } : {}),
     };
   }, [queryVariables]);
 
@@ -84,10 +84,16 @@ export const UniversalRestTable = <T, K>({
       ...filteredQueryVariables,
       offset: page * rowsPerPage,
       limit: rowsPerPage,
-      ordering: orderBy
-        ? columnToOrderBy(orderBy, orderDirection)
-        : filteredQueryVariables.ordering,
     };
+
+    const ordering = orderBy
+      ? columnToOrderBy(orderBy, orderDirection)
+      : filteredQueryVariables.ordering;
+
+    if (ordering) {
+      newVariables.ordering = ordering;
+    }
+
     const newState = newVariables as unknown as K;
 
     if (!isEqual(newState, queryVariables)) {
