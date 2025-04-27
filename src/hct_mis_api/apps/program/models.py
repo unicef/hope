@@ -448,12 +448,14 @@ class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, C
             raise DRFValidationError("Program should be within Active status.")
 
     def validate_payment_plan_status(self) -> None:
+        """validate status for Finishing Cycle"""
         from hct_mis_api.apps.payment.models import PaymentPlan
 
         if (
             PaymentPlan.objects.filter(program_cycle=self)
             .exclude(
-                status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED],
+                status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES
+                + (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED),
             )
             .exists()
         ):

@@ -5,7 +5,6 @@ import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
-  PaymentPlanQuery,
   PaymentPlanStatus,
   useExportPdfPpSummaryMutation,
 } from '@generated/graphql';
@@ -17,13 +16,14 @@ import { LoadingButton } from '@core/LoadingButton';
 import { Title } from '@core/Title';
 import { useProgramContext } from '../../../../programContext';
 import { AcceptanceProcessRow } from './AcceptanceProcessRow';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const ButtonContainer = styled(Box)`
   width: 200px;
 `;
 
 interface AcceptanceProcessProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export function AcceptanceProcess({
@@ -34,17 +34,16 @@ export function AcceptanceProcess({
   const permissions = usePermissions();
   const { isActiveProgram } = useProgramContext();
 
-  const { edges } = paymentPlan.approvalProcess;
+  const { approvalProcess } = paymentPlan;
   const [showAll, setShowAll] = useState(false);
   const [mutate, { loading: exportPdfLoading }] =
     useExportPdfPpSummaryMutation();
 
   const matchDataSize = (
-    data: PaymentPlanQuery['paymentPlan']['approvalProcess']['edges'],
-  ): PaymentPlanQuery['paymentPlan']['approvalProcess']['edges'] =>
-    showAll ? data : [data[0]];
+    data: PaymentPlanDetail['approvalProcess'],
+  ): PaymentPlanDetail['approvalProcess'] => (showAll ? data : [data[0]]);
 
-  if (!edges.length) {
+  if (!approvalProcess.length) {
     return null;
   }
   const handleExportPdf = async (): Promise<void> => {
@@ -85,14 +84,14 @@ export function AcceptanceProcess({
             </LoadingButton>
           )}
         </Box>
-        {matchDataSize(edges).map((edge) => (
+        {matchDataSize(approvalProcess).map((process, index) => (
           <AcceptanceProcessRow
-            key={edge.node.id}
-            acceptanceProcess={edge.node}
+            key={index}
+            acceptanceProcess={process}
             paymentPlan={paymentPlan}
           />
         ))}
-        {edges.length > 1 && (
+        {approvalProcess.length > 1 && (
           <ButtonContainer>
             <Button
               variant="outlined"

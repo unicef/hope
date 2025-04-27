@@ -48,9 +48,6 @@ export const ProgramDetails = ({
   choices,
 }: ProgramDetailsProps): ReactElement => {
   const { t } = useTranslation();
-  //TODO: remove console.log
-  //TODO: uncomment all fields
-  console.log(program, choices);
   const { programFrequencyOfPaymentsChoices, programSectorChoices } = choices;
   const programFrequencyOfPaymentsChoicesDict = choicesToDict(
     programFrequencyOfPaymentsChoices,

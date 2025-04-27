@@ -1,17 +1,15 @@
+import { LabelizedField } from '@core/LabelizedField';
+import { Title } from '@core/Title';
+import { AllIndividualsFlexFieldsAttributesQuery } from '@generated/graphql';
+import { useArrayToDict } from '@hooks/useArrayToDict';
 import { Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import Paper from '@mui/material/Paper';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useArrayToDict } from '@hooks/useArrayToDict';
-import {
-  AllIndividualsFlexFieldsAttributesQuery,
-  IndividualDetailedFragment,
-} from '@generated/graphql';
-import { LabelizedField } from '@core/LabelizedField';
-import { Title } from '@core/Title';
 import { ImportedIndividualFlexFieldPhotoModal } from '../ImportedIndividualFlexFieldPhotoModal';
-import { ReactElement } from 'react';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}
@@ -21,7 +19,7 @@ const Overview = styled(Paper)`
 `;
 
 interface RegistrationIndividualAdditionalRegistrationInformationProps {
-  individual: IndividualDetailedFragment;
+  individual: IndividualDetail;
   flexFieldsData: AllIndividualsFlexFieldsAttributesQuery;
 }
 
@@ -44,7 +42,7 @@ export const RegistrationIndividualAdditionalRegistrationInformation = ({
     ([key, value]: [string, string | string[]]) => {
       if (key in flexAttributesDict === false) {
         return (
-          <Grid size={{ xs:4 }} key={key}>
+          <Grid size={{ xs: 4 }} key={key}>
             <LabelizedField label={key} value={value}>
               {value}
             </LabelizedField>
@@ -73,7 +71,7 @@ export const RegistrationIndividualAdditionalRegistrationInformation = ({
         newValue = value;
       }
       return (
-        <Grid size={{ xs:4 }} key={key}>
+        <Grid size={{ xs: 4 }} key={key}>
           <LabelizedField label={label} value={newValue}>
             {children}
           </LabelizedField>

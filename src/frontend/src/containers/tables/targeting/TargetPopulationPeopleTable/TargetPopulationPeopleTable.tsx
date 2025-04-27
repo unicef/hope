@@ -1,13 +1,16 @@
-import { ReactElement } from 'react';
-import { useTranslation } from 'react-i18next';
 import { TableWrapper } from '@components/core/TableWrapper';
-import { UniversalTable } from '../../UniversalTable';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { PaginatedTPHouseholdListList } from '@restgenerated/models/PaginatedTPHouseholdListList';
+import { TPHouseholdList } from '@restgenerated/models/TPHouseholdList';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { headCells } from './TargetPopulationPeopleHeadCells';
 import { TargetPopulationPeopleTableRow } from './TargetPopulationPeopleRow';
-import { useAllPaymentsForTableQuery } from '@generated/graphql';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 
-interface TargetPopulationHouseholdProps {
+interface TargetPopulationPeopleTableProps {
   id?: string;
   variables?;
   canViewDetails?: boolean;
@@ -17,24 +20,42 @@ export function TargetPopulationPeopleTable({
   id,
   variables,
   canViewDetails,
-}: TargetPopulationHouseholdProps): ReactElement {
+}: TargetPopulationPeopleTableProps): ReactElement {
   const { t } = useTranslation();
-  const { businessArea } = useBaseUrl();
-  const initialVariables = {
-    businessArea,
-    ...(id && { paymentPlanId: id }),
+  const { businessArea, programId } = useBaseUrl();
+  const initialQueryVariables = {
     ...variables,
+    businessAreaSlug: businessArea,
+    programSlug: programId,
+    targetPopulationId: id,
   };
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+
+  const {
+    data: householdsData,
+    isLoading,
+    error,
+  } = useQuery<PaginatedTPHouseholdListList>({
+    queryKey: ['businessAreasProgramsPaymentPlansPaymentsList', queryVariables],
+    queryFn: () => {
+      return RestService.restBusinessAreasProgramsTargetPopulationsHouseholdsList(
+        queryVariables,
+      );
+    },
+  });
+
   return (
     <TableWrapper>
-      <UniversalTable
+      <UniversalRestTable
         title={t('People')}
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
-        query={useAllPaymentsForTableQuery}
-        queriedObjectName="allPayments"
-        initialVariables={initialVariables}
-        renderRow={(row) => (
+        isLoading={isLoading}
+        error={error}
+        queryVariables={queryVariables}
+        setQueryVariables={setQueryVariables}
+        data={householdsData}
+        renderRow={(row: TPHouseholdList) => (
           <TargetPopulationPeopleTableRow
             key={row.id}
             payment={row}

@@ -84,7 +84,7 @@ export const PendingForReleaseSection: FC<PendingForReleaseSectionProps> = ({
 
   const selectedPlansUnicefIds = inReviewData?.results
     .filter((plan) => selectedInReview.includes(plan.id))
-    .map((plan) => plan.unicef_id);
+    .map((plan) => plan.unicefId);
 
   const columns = [
     {

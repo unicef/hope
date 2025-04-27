@@ -11,9 +11,7 @@ import {
   registrationDataImportDeduplicationEngineStatusToColor,
   registrationDataImportStatusToColor,
 } from '@utils/utils';
-import {
-  RegistrationDataImportStatus,
-} from '@generated/graphql';
+import { RegistrationDataImportStatus } from '@generated/graphql';
 import { DedupeBox, OptionType } from '../DedupeBox';
 import { Title } from '@core/Title';
 import { useProgramContext } from 'src/programContext';

@@ -18,7 +18,7 @@ const initialFilter = {
   status: '',
   total_entitled_quantity_usd_from: '',
   total_entitled_quantity_usd_to: '',
-  start_date: '',
+  startDate: '',
   end_date: '',
 };
 

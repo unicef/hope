@@ -1,10 +1,8 @@
-import { AllPaymentsForTableQuery } from '@generated/graphql';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import { PaymentList } from '@restgenerated/models/PaymentList';
 import { PERMISSIONS } from '../../../../config/permissions';
 
-export const headCells: HeadCell<
-  AllPaymentsForTableQuery['allPayments']['edges'][number]['node']
->[] = [
+export const headCells: HeadCell<PaymentList>[] = [
   {
     disablePadding: false,
     label: '',

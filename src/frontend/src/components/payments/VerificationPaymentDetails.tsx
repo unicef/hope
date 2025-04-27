@@ -7,7 +7,6 @@ import {
   paymentStatusToColor,
   verificationRecordsStatusToColor,
 } from '@utils/utils';
-import { PaymentQuery } from '@generated/graphql';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LabelizedField } from '@core/LabelizedField';
 import { StatusBox } from '@core/StatusBox';
@@ -18,9 +17,10 @@ import { HouseholdDetails } from '@components/payments/HouseholdDetails';
 import { useProgramContext } from '../../programContext';
 import { IndividualDetails } from '@components/payments/IndividualDetails';
 import { ReactElement } from 'react';
+import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
 
 interface VerificationPaymentDetailsProps {
-  payment: PaymentQuery['payment'];
+  payment: PaymentDetail;
   canViewActivityLog: boolean;
 }
 
@@ -56,7 +56,7 @@ export function VerificationPaymentDetails({
           <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('DISTRIBUTION MODALITY')}
-              value={payment.distributionModality}
+              value={payment.parent.unicefId}
             />
           </Grid>
         </Grid>
@@ -113,7 +113,7 @@ export function VerificationPaymentDetails({
           <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('DELIVERY TYPE')}
-              value={payment.deliveryType?.name}
+              value={payment.deliveryMechanism?.name}
             />
           </Grid>
           <Grid size={{ xs: 3 }}>
@@ -125,14 +125,14 @@ export function VerificationPaymentDetails({
           <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('FSP')}
-              value={payment.serviceProvider.fullName}
+              value={payment.fspName}
             />
           </Grid>
         </Grid>
       </Overview>
       {canViewActivityLog && (
         <UniversalActivityLogTable
-          objectId={payment.parent.verificationPlans.edges[0].node.id}
+          objectId={payment.parent.paymentVerificationPlans[0].id}
         />
       )}
     </>

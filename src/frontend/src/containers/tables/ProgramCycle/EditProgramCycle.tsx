@@ -92,19 +92,19 @@ const EditProgramCycle = ({
     [key: string]: string | boolean | number;
   } = {
     title: programCycle.title,
-    start_date: programCycle.startDate,
+    startDate: programCycle.startDate,
     end_date: programCycle.endDate ?? undefined,
   };
 
   const endDateValidationSchema = () => {
     let validation = Yup.date()
       .min(today, t('End Date cannot be in the past'))
-      .when('start_date', ([start_date], schema) =>
-        start_date
+      .when('startDate', ([startDate], schema) =>
+        startDate
           ? schema.min(
-              new Date(start_date),
+              new Date(startDate),
               `${t('End date have to be greater than')} ${moment(
-                start_date,
+                startDate,
               ).format('YYYY-MM-DD')}`,
             )
           : schema,
@@ -129,7 +129,7 @@ const EditProgramCycle = ({
       .required(t('Programme Cycle title is required'))
       .min(2, t('Too short'))
       .max(150, t('Too long')),
-    start_date: Yup.date()
+    startDate: Yup.date()
       .required(t('Start Date is required'))
       .min(
         program.startDate,
@@ -183,7 +183,7 @@ const EditProgramCycle = ({
                   </Grid>
                   <Grid size={{ xs: 6 }} data-cy="start-date-cycle">
                     <Field
-                      name="start_date"
+                      name="startDate"
                       label={t('Start Date')}
                       component={FormikDateField}
                       required
@@ -192,9 +192,9 @@ const EditProgramCycle = ({
                         <CalendarTodayRoundedIcon color="disabled" />
                       }
                     />
-                    {error?.data?.start_date && (
+                    {error?.data?.startDate && (
                       <FormHelperText error>
-                        {error.data.start_date}
+                        {error.data.startDate}
                       </FormHelperText>
                     )}
                   </Grid>
@@ -209,9 +209,9 @@ const EditProgramCycle = ({
                         <CalendarTodayRoundedIcon color="disabled" />
                       }
                     />
-                    {error?.data?.end_date && (
+                    {error?.data?.endDate && (
                       <FormHelperText error>
-                        {error.data.end_date}
+                        {error.data.endDate}
                       </FormHelperText>
                     )}
                   </Grid>

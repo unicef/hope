@@ -648,20 +648,20 @@ export function formatCurrency(
 }
 
 export function formatCurrencyWithSymbol(
-  amount: number,
+  amount: number | string,
   currency = 'USD',
 ): string {
   const amountCleared = amount || 0;
   if (currency === 'USDC') return `${amountCleared} ${currency}`;
   // if currency is unknown, simply format using most common formatting option, and don't show currency symbol
-  if (!currency) return formatCurrency(amountCleared, true);
+  if (!currency) return formatCurrency(Number(amountCleared), true);
   // undefined forces to use local browser settings
   return new Intl.NumberFormat(undefined, {
     style: 'currency',
     currency,
     // enable this if decided that we always want code and not a symbol
     currencyDisplay: 'code',
-  }).format(amountCleared);
+  }).format(Number(amountCleared));
 }
 
 export function countPercentage(
@@ -1207,7 +1207,7 @@ export const arraysHaveSameContent = (a: any[], b: any[]): boolean =>
   a.length === b.length && a.every((val, index) => val === b[index]);
 
 export function adjustHeadCells<T>(
-  headCells:HeadCell<T>[],
+  headCells: HeadCell<T>[],
   beneficiaryGroup: any | undefined,
   replacements: {
     [key: string]: (beneficiaryGroup) => string;
@@ -1225,10 +1225,53 @@ export function adjustHeadCells<T>(
 }
 
 export const filterEmptyParams = (params) => {
+  if (!params) return {};
+
   return Object.fromEntries(
-    Object.entries(params).filter(
-      ([, value]) => value !== undefined && value !== null && value !== '',
-    ),
+    Object.entries(params).filter(([_, value]) => {
+      // Handle basic empty values
+      if (
+        value === undefined ||
+        value === null ||
+        value === '' ||
+        (Array.isArray(value) && value.length === 1 && value[0] === '')
+      ) {
+        return false;
+      }
+
+      // Handle empty arrays
+      if (Array.isArray(value) && value.length === 0) {
+        return false;
+      }
+
+      // Handle JSON strings that represent empty objects or objects with empty values
+      if (
+        typeof value === 'string' &&
+        (value.startsWith('{') || value.startsWith('['))
+      ) {
+        try {
+          const parsedValue = JSON.parse(value);
+
+          // Empty arrays in JSON format
+          if (Array.isArray(parsedValue) && parsedValue.length === 0) {
+            return false;
+          }
+
+          // Objects with empty values
+          if (typeof parsedValue === 'object' && parsedValue !== null) {
+            const hasNonEmptyValue = Object.values(parsedValue).some(
+              (v) => v !== '' && v !== null && v !== undefined,
+            );
+            return hasNonEmptyValue;
+          }
+        } catch (e) {
+          // If parsing fails, keep the value
+          return true;
+        }
+      }
+
+      return true;
+    }),
   );
 };
 

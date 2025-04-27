@@ -33,6 +33,7 @@ import styled from 'styled-components';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { HouseholdCompositionTable } from '../../tables/population/HouseholdCompositionTable/HouseholdCompositionTable';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 const Container = styled.div`
   padding: 20px;
@@ -63,8 +64,6 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
   const { id } = useParams();
   const { baseUrl, businessArea } = useBaseUrl();
 
-  //TODO: replace with REST queries
-
   const location = useLocation();
   const permissions = usePermissions();
   const { programId } = useBaseUrl();
@@ -75,7 +74,7 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
     data: household,
     isLoading: householdLoading,
     error,
-  } = useQuery({
+  } = useQuery<HouseholdDetail>({
     queryKey: ['household', businessArea, id, programId],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsRetrieve({

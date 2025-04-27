@@ -2,13 +2,14 @@ import { Box } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { Action, PaymentPlanQuery } from '@generated/graphql';
+import { Action } from '@generated/graphql';
 import { LoadingButton } from '@core/LoadingButton';
 import { useProgramContext } from '../../../../../programContext';
 import { ReactElement } from 'react';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 export interface LockedFspPaymentPlanHeaderButtonsProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
   canUnlock: boolean;
   canSendForApproval: boolean;
 }

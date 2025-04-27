@@ -13,6 +13,7 @@ import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useProgramContext } from 'src/programContext';
 import { headCells } from './IndividualsListTableHeadCells';
 import { IndividualsListTableRow } from './IndividualsListTableRow';
+import { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
 
 interface IndividualsListTableProps {
   filter;
@@ -32,8 +33,9 @@ export function IndividualsListTable({
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const initialQueryVariables = useMemo(
     () => ({
+      businessAreaSlug: businessArea,
+      programSlug: programId,
       age: JSON.stringify({ min: filter.ageMin, max: filter.ageMax }),
-      businessArea,
       sex: [filter.sex],
       search: filter.search.trim(),
       documentType: filter.documentType,
@@ -45,10 +47,23 @@ export function IndividualsListTable({
         min: dateToIsoString(filter.lastRegistrationDateMin, 'startOfDay'),
         max: dateToIsoString(filter.lastRegistrationDateMax, 'endOfDay'),
       }),
-      program: programId,
       rdiMergeStatus: IndividualRdiMergeStatus.Merged,
     }),
-    [businessArea, filter, programId],
+    [
+      filter.ageMin,
+      filter.ageMax,
+      filter.sex,
+      filter.search,
+      filter.documentType,
+      filter.documentNumber,
+      filter.admin2,
+      filter.flags,
+      filter.status,
+      filter.lastRegistrationDateMin,
+      filter.lastRegistrationDateMax,
+      programId,
+      businessArea,
+    ],
   );
   const replacements = {
     unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
@@ -67,24 +82,10 @@ export function IndividualsListTable({
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
-
-  const { data, isLoading, error } = useQuery({
-    queryKey: [
-      'businessAreasProgramsHouseholdsList',
-      queryVariables,
-      programId,
-      businessArea,
-    ],
+  const { data, isLoading, error } = useQuery<PaginatedIndividualListList>({
+    queryKey: ['businessAreasProgramsHouseholdsList', queryVariables],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsIndividualsList({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
-        ...queryVariables,
-      }),
-    enabled: !!businessArea && !!programId,
+      RestService.restBusinessAreasProgramsIndividualsList(queryVariables),
   });
 
   return (
