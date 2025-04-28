@@ -285,12 +285,3 @@ class HouseholdSmallSerializer(serializers.ModelSerializer):
             "id",
             "unicef_id",
         )
-
-
-class HouseholdSmallSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Household
-        fields = (
-            "id",
-            "unicef_id",
-        )

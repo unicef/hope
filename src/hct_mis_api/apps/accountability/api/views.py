@@ -6,6 +6,7 @@ from django.db.models import QuerySet
 from django_filters import rest_framework as filters
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status
+from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.generics import get_object_or_404
@@ -17,10 +18,12 @@ from hct_mis_api.apps.accountability.api.serializers import (
     FeedbackCreateSerializer,
     FeedbackDetailSerializer,
     FeedbackListSerializer,
+    FeedbackMessageCreateSerializer,
+    FeedbackMessageSerializer,
     FeedbackUpdateSerializer,
 )
 from hct_mis_api.apps.accountability.filters import FeedbackFilter
-from hct_mis_api.apps.accountability.models import Feedback
+from hct_mis_api.apps.accountability.models import Feedback, FeedbackMessage
 from hct_mis_api.apps.accountability.services.feedback_crud_services import (
     FeedbackCrudServices,
 )
@@ -69,12 +72,14 @@ class FeedbackViewSet(
         "retrieve": FeedbackDetailSerializer,
         "create": FeedbackCreateSerializer,
         "partial_update": FeedbackUpdateSerializer,
+        "message": FeedbackMessageCreateSerializer,
     }
     permissions_by_action = {
         "list": [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST, Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS],
         "retrieve": [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST, Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS],
         "create": [Permissions.GRIEVANCES_FEEDBACK_VIEW_CREATE],
         "partial_update": [Permissions.GRIEVANCES_FEEDBACK_VIEW_UPDATE],
+        "message": [Permissions.GRIEVANCES_FEEDBACK_MESSAGE_VIEW_CREATE],
     }
 
     def get_object(self) -> Feedback:
@@ -150,3 +155,20 @@ class FeedbackViewSet(
             updated_feedback,
         )
         return Response(FeedbackDetailSerializer(feedback).data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        request=FeedbackMessageCreateSerializer,
+        responses={
+            201: FeedbackMessageSerializer,
+        },
+    )
+    @action(detail=True, methods=["post"])
+    def message(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        feedback = self.get_object()
+
+        feedback_message = FeedbackMessage.objects.create(
+            feedback=feedback, description=serializer.validated_data["description"], created_by=request.user
+        )
+        return Response(FeedbackMessageSerializer(feedback_message).data, status=status.HTTP_201_CREATED)

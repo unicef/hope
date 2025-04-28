@@ -41,6 +41,7 @@ class TestFeedbackViewSet:
             area="test area 111",
             language="test language 111",
             comments="test comments 111",
+            issue_type="NEGATIVE_FEEDBACK",
         )
         self.feedback_2 = FeedbackFactory(
             program=None,
@@ -72,6 +73,13 @@ class TestFeedbackViewSet:
                 "pk": str(self.feedback_2.pk),
             },
         )
+        self.url_msg_create = reverse(
+            "api:accountability:feedbacks-message",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "pk": str(self.feedback_2.pk),
+            },
+        )
         # per Program
         self.url_list_per_program = reverse(
             "api:accountability:feedbacks-per-program-list",
@@ -89,6 +97,14 @@ class TestFeedbackViewSet:
         )
         self.url_details_per_program = reverse(
             "api:accountability:feedbacks-per-program-detail",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+                "pk": str(self.feedback_1.pk),
+            },
+        )
+        self.url_msg_create_per_program = reverse(
+            "api:accountability:feedbacks-per-program-message",
             kwargs={
                 "business_area_slug": self.afghanistan.slug,
                 "program_slug": self.program_active.slug,
@@ -412,3 +428,136 @@ class TestFeedbackViewSet:
             assert resp_data["area"] == "test area 111"
             assert resp_data["language"] == "test language 111"
             assert resp_data["comments"] == "test comments 111"
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.GRIEVANCES_FEEDBACK_VIEW_UPDATE], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_update_feedback_per_program(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        response = self.client.patch(
+            self.url_details_per_program,
+            {
+                "issue_type": "POSITIVE_FEEDBACK",
+                "individual_lookup": str(self.individual_1.pk),
+                "description": "new description",
+                "comments": "new comments",
+                "admin2": str(self.area_1.pk),
+                "area": "Area new",
+                "language": "polish_english",
+            },
+            format="json",
+        )
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.status_code == status.HTTP_200_OK
+            resp_data = response.json()
+            assert "id" in resp_data
+            assert resp_data["admin2_name"] == "AREA_name"
+            assert resp_data["issue_type"] == "Positive feedback"
+            assert resp_data["household_id"] is not None
+            assert resp_data["household_unicef_id"] is not None
+            assert resp_data["individual_unicef_id"] is not None
+            assert resp_data["individual_id"] is not None
+            assert resp_data["program_name"] is not None
+            assert resp_data["program_id"] is not None
+            assert resp_data["created_by"] == "Test User"
+            assert resp_data["description"] == "new description"
+            assert resp_data["area"] == "Area new"
+            assert resp_data["language"] == "polish_english"
+            assert resp_data["comments"] == "new comments"
+            assert resp_data["consent"] is True
+
+    def test_list_feedback_issue_type(self) -> None:
+        response_data = self.client.get(reverse("api:choices-feedback-issue-type")).data
+        assert response_data is not None
+        assert len(response_data) == 2
+        assert "NEGATIVE_FEEDBACK" in response_data[0]["value"]
+        assert "POSITIVE_FEEDBACK" in response_data[1]["value"]
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            (
+                [Permissions.GRIEVANCES_FEEDBACK_MESSAGE_VIEW_CREATE, Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS],
+                status.HTTP_201_CREATED,
+            ),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_create_feedback_message(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        response = self.client.post(
+            self.url_msg_create,
+            {"description": "Message for Feedback #1"},
+            format="json",
+        )
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_201_CREATED:
+            assert response.status_code == status.HTTP_201_CREATED
+            resp_data = response.json()
+            assert "id" in resp_data
+            assert resp_data["description"] == "Message for Feedback #1"
+            assert "created_by" in resp_data
+            assert "id" in resp_data
+            assert "created_at" in resp_data
+
+            # check message details
+            response_details = self.client.get(self.url_details)
+            assert response_details.status_code == status.HTTP_200_OK
+            resp_data = response_details.json()
+            assert "id" in resp_data
+            assert len(resp_data["feedback_messages"]) == 1
+            feedback_message = resp_data["feedback_messages"][0]
+            assert feedback_message["description"] == "Message for Feedback #1"
+            assert feedback_message["created_by"] == "Test User"
+            assert "id" in feedback_message
+            assert "created_at" in feedback_message
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            (
+                [Permissions.GRIEVANCES_FEEDBACK_MESSAGE_VIEW_CREATE, Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS],
+                status.HTTP_201_CREATED,
+            ),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_create_feedback_message_per_program(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        response = self.client.post(
+            self.url_msg_create_per_program,
+            {"description": "New Message for Feedback Per Program"},
+            format="json",
+        )
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_201_CREATED:
+            assert response.status_code == status.HTTP_201_CREATED
+            resp_data = response.json()
+            assert "id" in resp_data
+            assert resp_data["description"] == "New Message for Feedback Per Program"
+            assert "created_by" in resp_data
+            assert "id" in resp_data
+            assert "created_at" in resp_data
+
+            # check message details
+            response_details = self.client.get(self.url_details_per_program)
+            assert response_details.status_code == status.HTTP_200_OK
+            resp_data = response_details.json()
+            assert "id" in resp_data
+            assert len(resp_data["feedback_messages"]) == 1
+            feedback_message = resp_data["feedback_messages"][0]
+            assert feedback_message["description"] == "New Message for Feedback Per Program"
+            assert feedback_message["created_by"] == "Test User"
+            assert "id" in feedback_message
+            assert "created_at" in feedback_message

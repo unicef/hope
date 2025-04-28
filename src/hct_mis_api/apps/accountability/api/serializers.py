@@ -18,6 +18,13 @@ class FeedbackMessageSerializer(serializers.ModelSerializer):
             "created_at",
         )
 
+    def get_created_by(self, obj: Feedback) -> str:
+        return f"{obj.created_by.first_name} {obj.created_by.last_name}"
+
+
+class FeedbackMessageCreateSerializer(serializers.Serializer):
+    description = serializers.CharField(required=True)
+
 
 class FeedbackListSerializer(serializers.ModelSerializer):
     issue_type = serializers.CharField(source="get_issue_type_display")
