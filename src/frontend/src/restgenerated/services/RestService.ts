@@ -10,6 +10,8 @@ import type { CountResponse } from '../models/CountResponse';
 import type { DelegatePeople } from '../models/DelegatePeople';
 import type { FeedbackCreate } from '../models/FeedbackCreate';
 import type { FeedbackDetail } from '../models/FeedbackDetail';
+import type { FeedbackMessage } from '../models/FeedbackMessage';
+import type { FeedbackMessageCreate } from '../models/FeedbackMessageCreate';
 import type { FeedbackUpdate } from '../models/FeedbackUpdate';
 import type { FspChoices } from '../models/FspChoices';
 import type { HouseholdChoices } from '../models/HouseholdChoices';
@@ -732,6 +734,34 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'PATCH',
             url: '/api/rest/business-areas/{business_area_slug}/feedbacks/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns FeedbackMessage
+     * @throws ApiError
+     */
+    public static restBusinessAreasFeedbacksMessageCreate({
+        businessAreaSlug,
+        id,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Feedback.
+         */
+        id: string,
+        requestBody: FeedbackMessageCreate,
+    }): CancelablePromise<FeedbackMessage> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/feedbacks/{id}/message/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
@@ -1951,6 +1981,37 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'PATCH',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/feedbacks/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns FeedbackMessage
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsFeedbacksMessageCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Feedback.
+         */
+        id: string,
+        programSlug: string,
+        requestBody: FeedbackMessageCreate,
+    }): CancelablePromise<FeedbackMessage> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/feedbacks/{id}/message/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
@@ -5960,6 +6021,18 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/choices/currencies/',
+        });
+    }
+    /**
+     * return choices used in the system like statuses, currencies
+     * Response([{"value": k, "name": v} for k, v in PaymentPlan.Status.choices])
+     * @returns Choice
+     * @throws ApiError
+     */
+    public static restChoicesFeedbackIssueTypeList(): CancelablePromise<Array<Choice>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/choices/feedback-issue-type/',
         });
     }
     /**

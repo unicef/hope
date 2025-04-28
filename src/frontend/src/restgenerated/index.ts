@@ -48,6 +48,7 @@ export type { FeedbackCreate as FeedbackCreateCamelCase } from './models/Feedbac
 export type { FeedbackDetail as FeedbackDetailCamelCase } from './models/FeedbackDetail';
 export type { FeedbackList as FeedbackListCamelCase } from './models/FeedbackList';
 export type { FeedbackMessage as FeedbackMessageCamelCase } from './models/FeedbackMessage';
+export type { FeedbackMessageCreate as FeedbackMessageCreateCamelCase } from './models/FeedbackMessageCreate';
 export type { FeedbackUpdate as FeedbackUpdateCamelCase } from './models/FeedbackUpdate';
 export type { FinancialServiceProvider as FinancialServiceProviderCamelCase } from './models/FinancialServiceProvider';
 export { FlexFieldClassificationEnum as FlexFieldClassificationEnumCamelCase } from './models/FlexFieldClassificationEnum';
