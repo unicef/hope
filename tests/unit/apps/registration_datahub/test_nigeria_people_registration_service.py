@@ -140,7 +140,6 @@ class TestNigeriaPeopleRegistrationService(TestCase):
             {
                 "frontline_worker_designation_i_f": "H2HCL",
                 "national_id_no": "01234567891",
-                "national_id_no_i_c": "01234567891",
             },
         )
         self.assertEqual(primary_collector.rdi_merge_status, "PENDING")
