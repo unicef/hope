@@ -12,6 +12,7 @@ from hct_mis_api.apps.core.models import (
     PeriodicFieldData,
 )
 from hct_mis_api.apps.core.utils import encode_id_base64_required
+from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
@@ -168,6 +169,7 @@ class TestAllCollectorsFields(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        generate_delivery_mechanisms()
         super().setUpTestData()
         cls.business_area = create_afghanistan()
         cls.user = UserFactory()

@@ -458,6 +458,7 @@ class Query(graphene.ObjectType):
         from hct_mis_api.apps.payment.models.payment import AccountType
 
         account_types = AccountType.objects.all()
+        print(account_types)
         definitions = [
             {
                 "id": f"{account_type.key}__{field}",
