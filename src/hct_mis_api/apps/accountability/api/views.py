@@ -106,6 +106,9 @@ class FeedbackViewSet(
         if program_slug:
             program = Program.objects.get(slug=program_slug)
 
+        if program_id := serializer.validated_data.get("program_id"):
+            program = Program.objects.get(id=program_id)
+
         if program and program.status == Program.FINISHED:
             raise ValidationError("In order to proceed this action, program status must not be finished")
 

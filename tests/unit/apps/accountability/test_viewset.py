@@ -228,6 +228,7 @@ class TestFeedbackViewSet:
                 "issue_type": "POSITIVE_FEEDBACK",
                 "admin2": str(self.area_1.pk),
                 "language": "polish",
+                "program_id": str(self.program_active.pk),
             },
             format="json",
         )
@@ -249,6 +250,37 @@ class TestFeedbackViewSet:
             assert resp_data["area"] == "Area 1"
             assert resp_data["language"] == "polish"
             assert resp_data["comments"] == "Test Comments"
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.GRIEVANCES_FEEDBACK_VIEW_CREATE], status.HTTP_400_BAD_REQUEST),
+        ],
+    )
+    def test_create_feedback_for_finished_program(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        program_finished = ProgramFactory(
+            name="Test Finished Program", business_area=self.afghanistan, status=Program.FINISHED
+        )
+        response = self.client.post(
+            self.url_list,
+            {
+                "area": "Area 1",
+                "comments": "Test Comments",
+                "consent": True,
+                "description": "Test new description",
+                "household_lookup": str(self.hh_1.pk),
+                "issue_type": "POSITIVE_FEEDBACK",
+                "admin2": str(self.area_1.pk),
+                "language": "polish",
+                "program_id": str(program_finished.pk),
+            },
+            format="json",
+        )
+        assert response.status_code == expected_status
+        assert "In order to proceed this action, program status must not be finished" in response.json()
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -311,7 +343,51 @@ class TestFeedbackViewSet:
                 "area": "Area 1_updated",
                 "language": "eng_update",
                 "consent": False,
-                # "program": "program_id"
+            },
+            format="json",
+        )
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.status_code == status.HTTP_200_OK
+            resp_data = response.json()
+            assert "id" in resp_data
+            assert resp_data["admin2_name"] == "Wroclaw"
+            assert resp_data["issue_type"] == "Negative feedback"
+            assert resp_data["household_id"] is not None
+            assert resp_data["household_unicef_id"] is not None
+            assert resp_data["individual_unicef_id"] is not None
+            assert resp_data["individual_id"] is not None
+            assert resp_data["program_name"] is None
+            assert resp_data["program_id"] is None
+            assert resp_data["created_by"] == "Test User"
+            assert resp_data["description"] == "Test_update"
+            assert resp_data["area"] == "Area 1_updated"
+            assert resp_data["language"] == "eng_update"
+            assert resp_data["comments"] == "AAA_update"
+            assert resp_data["consent"] is False
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.GRIEVANCES_FEEDBACK_VIEW_UPDATE], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_update_feedback_hh_lookup(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        response = self.client.patch(
+            self.url_details,
+            {
+                "issue_type": "NEGATIVE_FEEDBACK",
+                "household_lookup": str(self.hh_1.pk),
+                "description": "Test_update",
+                "comments": "AAA_update",
+                "admin2": str(self.area_2.pk),
+                "area": "Area 1_updated",
+                "language": "eng_update",
+                "consent": False,
             },
             format="json",
         )
@@ -472,6 +548,34 @@ class TestFeedbackViewSet:
             assert resp_data["language"] == "polish_english"
             assert resp_data["comments"] == "new comments"
             assert resp_data["consent"] is True
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.GRIEVANCES_FEEDBACK_VIEW_UPDATE], status.HTTP_400_BAD_REQUEST),
+        ],
+    )
+    def test_update_feedback_per_program_when_finished(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        self.program_active.status = Program.FINISHED
+        self.program_active.save()
+        response = self.client.patch(
+            self.url_details_per_program,
+            {
+                "issue_type": "POSITIVE_FEEDBACK",
+                "individual_lookup": str(self.individual_1.pk),
+                "description": "new description",
+                "comments": "new comments",
+                "admin2": str(self.area_1.pk),
+                "area": "Area new",
+                "language": "polish_english",
+            },
+            format="json",
+        )
+        assert response.status_code == expected_status
+        assert "In order to proceed this action, program status must not be finished" in response.json()
 
     def test_list_feedback_issue_type(self) -> None:
         response_data = self.client.get(reverse("api:choices-feedback-issue-type")).data
