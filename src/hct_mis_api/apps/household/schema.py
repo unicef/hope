@@ -348,7 +348,7 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
             program_id,
         ):
             return parent.accounts.none()
-        return parent.accounts(manager="all_objects").all()
+        return parent.accounts(manager="all_objects").all()  # type: ignore
 
     @classmethod
     def check_node_permission(cls, info: Any, object_instance: Individual) -> None:
