@@ -49,6 +49,34 @@ export const PAYMENT_PLAN_QUERY = gql`
         fundsCommitmentItems {
           fundsCommitmentItem
           recSerialNumber
+          vendorId
+          businessArea
+          postingDate
+          visionApproval
+          documentReference
+          fcStatus
+          wbsElement
+          grantNumber
+          documentType
+          documentText
+          currencyCode
+          glAccount
+          commitmentAmountLocal
+          commitmentAmountUsd
+          totalOpenAmountLocal
+          totalOpenAmountUsd
+          sponsor
+          sponsorName
+          fund
+          fundsCenter
+          percentage
+          createDate
+          createdBy
+          updateDate
+          updatedBy
+          office {
+            id
+          }
         }
       }
       deliveryMechanism {
@@ -294,9 +322,9 @@ export const PAYMENT_PLAN_QUERY = gql`
       }
       unsuccessfulPaymentsCount
       supportingDocuments {
-          id
-          title
-          file
+        id
+        title
+        file
       }
       targetingCriteria {
         __typename
