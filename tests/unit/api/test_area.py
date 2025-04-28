@@ -87,34 +87,41 @@ class APIAreaTests(HOPEApiTestCase):
             "id": id_to_base64(self.area_1_area_type_1.id, "Area"),
             "name": self.area_1_area_type_1.name,
             "p_code": self.area_1_area_type_1.p_code,
+            "area_type": str(self.area_type_1_afg.id),
         } in response_json
         assert {
             "id": id_to_base64(self.area_2_area_type_1.id, "Area"),
             "name": self.area_2_area_type_1.name,
             "p_code": self.area_2_area_type_1.p_code,
+            "area_type": str(self.area_type_1_afg.id),
         } in response_json
         assert {
             "id": id_to_base64(self.area_1_area_type_2.id, "Area"),
             "name": self.area_1_area_type_2.name,
             "p_code": self.area_1_area_type_2.p_code,
+            "area_type": str(self.area_type_2_afg.id),
         } in response_json
         assert {
             "id": id_to_base64(self.area_2_area_type_2.id, "Area"),
             "name": self.area_2_area_type_2.name,
             "p_code": self.area_2_area_type_2.p_code,
+            "area_type": str(self.area_type_2_afg.id),
         } in response_json
         assert {
             "id": id_to_base64(self.area_1_area_type_afg_2.id, "Area"),
             "name": self.area_1_area_type_afg_2.name,
             "p_code": self.area_1_area_type_afg_2.p_code,
+            "area_type": str(self.area_type_afg_2.id),
         } in response_json
         assert {
             "id": id_to_base64(self.area_2_area_type_afg_2.id, "Area"),
             "name": self.area_2_area_type_afg_2.name,
             "p_code": self.area_2_area_type_afg_2.p_code,
+            "area_type": str(self.area_type_afg_2.id),
         } in response_json
         assert {
             "id": id_to_base64(self.area_other.id, "Area"),
             "name": self.area_other.name,
             "p_code": self.area_other.p_code,
+            "area_type": str(self.area_type_other.id),
         } not in response_json
