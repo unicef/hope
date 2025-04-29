@@ -45,6 +45,7 @@ from hct_mis_api.apps.payment.services.verification_plan_status_change_services 
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin
 from hct_mis_api.apps.utils.security import is_root
+from hct_mis_api.contrib.vision.models import FundsCommitmentItem
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -221,6 +222,33 @@ class PaymentVerificationAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
         )
 
 
+class FundsCommitmentItemInline(admin.TabularInline):  # or admin.StackedInline
+    model = FundsCommitmentItem
+    extra = 0
+    can_delete = False
+    show_change_link = True
+    fields = readonly_fields = (
+        "rec_serial_number",
+        "funds_commitment_group",
+        "funds_commitment_item",
+        "fc_status",
+        "commitment_amount_local",
+        "commitment_amount_usd",
+        "total_open_amount_local",
+        "total_open_amount_usd",
+    )
+    raw_id_fields = ("funds_commitment_group",)
+
+    def has_add_permission(self: Any, request: Any, obj: Any = None) -> bool:
+        return False
+
+    def has_change_permission(self: Any, request: Any, obj: Any = None) -> bool:
+        return False
+
+    def has_delete_permission(self: Any, request: Any, obj: Any = None) -> bool:
+        return False
+
+
 @admin.register(PaymentPlan)
 class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
     list_display = (
@@ -261,6 +289,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
     )
     search_fields = ("id", "unicef_id", "name")
     date_hierarchy = "updated_at"
+    inlines = [FundsCommitmentItemInline]
 
     def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return is_root(request)
