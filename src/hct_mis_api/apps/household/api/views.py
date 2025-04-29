@@ -4,6 +4,7 @@ from django.db.models import Prefetch, QuerySet
 
 from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
@@ -25,9 +26,11 @@ from hct_mis_api.apps.household.api.caches import (
     IndividualListKeyConstructor,
 )
 from hct_mis_api.apps.household.api.serializers.household import (
+    HouseholdChoicesSerializer,
     HouseholdDetailSerializer,
     HouseholdListSerializer,
     HouseholdMemberSerializer,
+    IndividualChoicesSerializer,
 )
 from hct_mis_api.apps.household.api.serializers.individual import (
     IndividualDetailSerializer,
@@ -39,6 +42,8 @@ from hct_mis_api.apps.household.models import (
     Individual,
     IndividualRoleInHousehold,
 )
+from hct_mis_api.apps.payment.api.serializers import PaymentListSerializer
+from hct_mis_api.apps.payment.models import Payment
 from hct_mis_api.apps.program.models import Program
 
 
@@ -51,16 +56,16 @@ class HouseholdViewSet(
     BaseViewSet,
 ):
     queryset = Household.all_merge_status_objects.order_by("created_at")
-    serializer_class = HouseholdListSerializer
     serializer_classes_by_action = {
         "list": HouseholdListSerializer,
         "retrieve": HouseholdDetailSerializer,
         "members": HouseholdMemberSerializer,
+        "payments": PaymentListSerializer,
     }
     permissions_by_action = {
         "list": [
-            Permissions.RDI_VIEW_DETAILS,
             Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST,
+            Permissions.RDI_VIEW_DETAILS,
         ],
         "retrieve": [
             Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
@@ -69,6 +74,10 @@ class HouseholdViewSet(
         "members": [
             Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
             Permissions.RDI_VIEW_DETAILS,
+        ],
+        "payments": [
+            Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
+            Permissions.PM_VIEW_DETAILS,
         ],
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
@@ -97,10 +106,14 @@ class HouseholdViewSet(
         individuals_ids = list(instance.individuals(manager="all_merge_status_objects").values_list("id", flat=True))
         collectors_ids = list(instance.representatives(manager="all_merge_status_objects").values_list("id", flat=True))
         ids = set(individuals_ids + collectors_ids)
-        members = Individual.all_merge_status_objects.filter(id__in=ids).prefetch_related(
-            Prefetch(
-                "households_and_roles",
-                queryset=IndividualRoleInHousehold.all_merge_status_objects.filter(household=instance.id),
+        members = (
+            Individual.all_merge_status_objects.filter(id__in=ids)
+            .order_by("created_at")
+            .prefetch_related(
+                Prefetch(
+                    "households_and_roles",
+                    queryset=IndividualRoleInHousehold.all_merge_status_objects.filter(household=instance.id),
+                )
             )
         )
 
@@ -121,15 +134,37 @@ class HouseholdViewSet(
         instance.withdraw()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @extend_schema(
+        responses={
+            200: PaymentListSerializer(many=True),
+        },
+    )
+    @action(detail=True, methods=["get"])
+    def payments(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+        hh = self.get_object()
+        payments = Payment.objects.filter(household=hh)
+
+        page = self.paginate_queryset(payments)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(payments, many=True)
+        return Response(serializer.data)
+
 
 class HouseholdGlobalViewSet(
     BusinessAreaVisibilityMixin,
+    SerializerActionMixin,
     CountActionMixin,
     ListModelMixin,
     BaseViewSet,
 ):
     queryset = Household.all_merge_status_objects.all()
-    serializer_class = HouseholdListSerializer
+    serializer_classes_by_action = {
+        "list": HouseholdListSerializer,
+        "choices": HouseholdChoicesSerializer,
+    }
     PERMISSIONS = [
         Permissions.RDI_VIEW_DETAILS,
         Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST,
@@ -146,6 +181,10 @@ class HouseholdGlobalViewSet(
             .order_by("created_at")
         )
 
+    @action(detail=False, methods=["get"])
+    def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+        return Response(data=self.get_serializer(instance={}).data)
+
 
 class IndividualViewSet(
     ProgramVisibilityMixin,
@@ -156,7 +195,6 @@ class IndividualViewSet(
     BaseViewSet,
 ):
     queryset = Individual.all_merge_status_objects.order_by("created_at")
-    serializer_class = IndividualListSerializer
     serializer_classes_by_action = {
         "list": IndividualListSerializer,
         "retrieve": IndividualDetailSerializer,
@@ -189,12 +227,16 @@ class IndividualViewSet(
 
 class IndividualGlobalViewSet(
     BusinessAreaVisibilityMixin,
+    SerializerActionMixin,
     CountActionMixin,
     ListModelMixin,
     BaseViewSet,
 ):
     queryset = Individual.all_merge_status_objects.all()
-    serializer_class = IndividualListSerializer
+    serializer_classes_by_action = {
+        "list": IndividualListSerializer,
+        "choices": IndividualChoicesSerializer,
+    }
     PERMISSIONS = [
         Permissions.RDI_VIEW_DETAILS,
         Permissions.POPULATION_VIEW_INDIVIDUALS_LIST,
@@ -205,3 +247,7 @@ class IndividualGlobalViewSet(
 
     def get_queryset(self) -> QuerySet:
         return super().get_queryset().select_related("household", "household__admin2").order_by("created_at")
+
+    @action(detail=False, methods=["get"])
+    def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+        return Response(data=self.get_serializer(instance={}).data)

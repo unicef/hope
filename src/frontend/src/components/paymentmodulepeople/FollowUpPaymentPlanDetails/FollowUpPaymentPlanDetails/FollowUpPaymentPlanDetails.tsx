@@ -1,7 +1,3 @@
-import { Box, Grid2 as Grid, IconButton, Tooltip, Typography } from '@mui/material';
-import { useTranslation } from 'react-i18next';
-import { PaymentPlanQuery } from '@generated/graphql';
-import { renderUserName } from '@utils/utils';
 import { BlackLink } from '@core/BlackLink';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LabelizedField } from '@core/LabelizedField';
@@ -9,11 +5,20 @@ import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { Info } from '@mui/icons-material';
+import {
+  Box,
+  Grid2 as Grid,
+  IconButton,
+  Tooltip,
+  Typography,
+} from '@mui/material';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface FollowUpPaymentPlanDetailsProps {
   baseUrl: string;
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export function FollowUpPaymentPlanDetails({
@@ -57,7 +62,7 @@ export function FollowUpPaymentPlanDetails({
             </Grid>
             <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Created By')}>
-                {renderUserName(createdBy)}
+                {createdBy}
               </LabelizedField>
             </Grid>
             <Grid size={{ xs: 3 }}>

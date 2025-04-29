@@ -2,8 +2,9 @@ import io
 from decimal import Decimal
 from typing import Dict, List
 
+from django.core.exceptions import ValidationError
+
 import openpyxl
-from graphql import GraphQLError
 from openpyxl.utils import get_column_letter
 from xlwt import Row, Worksheet
 
@@ -60,9 +61,9 @@ class XlsxVerificationImportService(XlsxImportBaseService):
 
     def import_verifications(self) -> None:
         if len(self.errors):
-            raise GraphQLError("You can't import verifications with errors.")
+            raise ValidationError("You can't import verifications with errors.")
         if not self.was_validation_run:
-            raise GraphQLError("Run validation before import.")
+            raise ValidationError("Run validation before import.")
         for row in self.ws_verifications.iter_rows(min_row=2):
             if not any([cell.value for cell in row]):
                 continue
@@ -78,7 +79,7 @@ class XlsxVerificationImportService(XlsxImportBaseService):
             version_cell_name != XlsxVerificationExportService.VERSION_CELL_NAME
             or version != XlsxVerificationExportService.VERSION
         ):
-            raise GraphQLError(
+            raise ValidationError(
                 f"Unsupported file version ({version}). "
                 f"Only version: {XlsxVerificationExportService.VERSION} is supported"
             )

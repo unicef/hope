@@ -1,8 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import {
   AllIndividualsForPopulationTableQueryVariables,
-  AllIndividualsQueryVariables,
-  IndividualNode,
   IndividualRdiMergeStatus,
   useAllIndividualsForPopulationTableQuery,
 } from '@generated/graphql';
@@ -48,7 +46,7 @@ export const PeopleListTable = ({
 
   return (
     <TableWrapper>
-      <UniversalTable<IndividualNode, AllIndividualsQueryVariables>
+      <UniversalTable
         title={t('People')}
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}

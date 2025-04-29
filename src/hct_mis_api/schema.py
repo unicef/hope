@@ -14,8 +14,6 @@ import hct_mis_api.apps.grievance.mutations
 import hct_mis_api.apps.grievance.schema
 import hct_mis_api.apps.grievance.schema_dashboard
 import hct_mis_api.apps.household.schema
-import hct_mis_api.apps.payment.mutations
-import hct_mis_api.apps.payment.schema
 import hct_mis_api.apps.program.mutations
 import hct_mis_api.apps.program.schema
 import hct_mis_api.apps.reporting.mutations
@@ -30,7 +28,6 @@ class Query(
     hct_mis_api.apps.household.schema.Query,
     hct_mis_api.apps.program.schema.Query,
     hct_mis_api.apps.core.schema.Query,
-    hct_mis_api.apps.payment.schema.Query,
     hct_mis_api.apps.steficon.schema.Query,
     hct_mis_api.apps.grievance.schema.Query,
     hct_mis_api.apps.grievance.schema_dashboard.Query,
@@ -47,7 +44,6 @@ class Query(
 class Mutations(
     hct_mis_api.apps.sanction_list.mutations.Mutations,
     hct_mis_api.apps.program.mutations.Mutations,
-    hct_mis_api.apps.payment.mutations.Mutations,
     hct_mis_api.apps.grievance.mutations.Mutations,
     hct_mis_api.apps.reporting.mutations.Mutations,
     hct_mis_api.apps.accountability.mutations.Mutations,

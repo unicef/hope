@@ -4,15 +4,12 @@ import styled from 'styled-components';
 import {
   choicesToDict,
   formatAge,
-  getPhoneNoLabel,
   renderBoolean,
   sexToCapitalize,
 } from '@utils/utils';
 import {
   GrievancesChoiceDataQuery,
   HouseholdChoiceDataQuery,
-  IndividualDisability,
-  IndividualNode,
 } from '@generated/graphql';
 import { ContentLink } from '@core/ContentLink';
 import { LabelizedField } from '@core/LabelizedField';
@@ -22,6 +19,9 @@ import { DocumentPopulationPhotoModal } from '../DocumentPopulationPhotoModal';
 import { LinkedGrievancesModal } from '../LinkedGrievancesModal/LinkedGrievancesModal';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement, ReactNode } from 'react';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import { DisabilityEnum } from '@restgenerated/models/DisabilityEnum';
+import { ObservedDisabilityEnum } from '@restgenerated/models/ObservedDisabilityEnum';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}
@@ -33,7 +33,7 @@ const BorderBox = styled.div`
 `;
 
 interface IndividualBioDataProps {
-  individual: IndividualNode;
+  individual: IndividualDetail;
   baseUrl: string;
   businessArea: string;
   choicesData: HouseholdChoiceDataQuery;
@@ -58,45 +58,41 @@ export const IndividualBioData = ({
   );
   const workStatusChoicesDict = choicesToDict(choicesData.workStatusChoices);
   const roleChoicesDict = choicesToDict(choicesData.roleChoices);
-  const observedDisabilityChoicesDict = choicesToDict(
-    choicesData.observedDisabilityChoices,
-  );
+
   const severityOfDisabilityChoicesDict = choicesToDict(
     choicesData.severityOfDisabilityChoices,
   );
 
-  const mappedIndividualDocuments = individual?.documents?.edges?.map(
-    (edge) => (
-      <Grid size={{ xs: 3 }} key={edge.node.id}>
-        <Box flexDirection="column">
-          <Box mb={1}>
-            <LabelizedField label={edge.node.type.label}>
-              {edge.node.photo ? (
-                <DocumentPopulationPhotoModal
-                  documentNumber={edge.node.documentNumber}
-                  documentId={edge.node.id}
-                  individual={individual}
-                />
-              ) : (
-                edge.node.documentNumber
-              )}
-            </LabelizedField>
-          </Box>
-          <LabelizedField label="issued">{edge.node.country}</LabelizedField>
-        </Box>
-      </Grid>
-    ),
-  );
-
-  const mappedIdentities = individual?.identities?.edges?.map((item) => (
-    <Grid size={{ xs: 3 }} key={item.node.id}>
+  const mappedIndividualDocuments = individual?.documents?.map((doc) => (
+    <Grid size={{ xs: 3 }} key={doc.id}>
       <Box flexDirection="column">
         <Box mb={1}>
-          <LabelizedField label={`${item.node.partner} ID`}>
-            {item.node.number}
+          <LabelizedField label={doc.type.label}>
+            {doc.photo ? (
+              <DocumentPopulationPhotoModal
+                documentNumber={doc.documentNumber}
+                documentId={doc.id}
+                individual={individual}
+              />
+            ) : (
+              doc.documentNumber
+            )}
           </LabelizedField>
         </Box>
-        <LabelizedField label="issued">{item.node.country}</LabelizedField>
+        <LabelizedField label="issued">{doc.country}</LabelizedField>
+      </Box>
+    </Grid>
+  ));
+
+  const mappedIdentities = individual?.identities?.map((item) => (
+    <Grid size={{ xs: 3 }} key={item.id}>
+      <Box flexDirection="column">
+        <Box mb={1}>
+          <LabelizedField label={`${item.partner} ID`}>
+            {item.number}
+          </LabelizedField>
+        </Box>
+        <LabelizedField label="issued">{item.country}</LabelizedField>
       </Box>
     </Grid>
   ));
@@ -104,13 +100,14 @@ export const IndividualBioData = ({
   const mappedRoles = (
     <Grid size={{ xs: 3 }}>
       <LabelizedField label={`Linked ${beneficiaryGroup?.groupLabelPlural}`}>
-        {individual?.householdsAndRoles?.length
+        {/* //TODO: */}
+        {/* {individual?.householdsAndRoles?.length
           ? individual?.householdsAndRoles?.map((item) => (
               <Box key={item.id}>
                 {item.household.unicefId} -{roleChoicesDict[item.role]}
               </Box>
             ))
-          : '-'}
+          : '-'} */}
       </LabelizedField>
     </Grid>
   );
@@ -270,9 +267,7 @@ export const IndividualBioData = ({
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Observed disabilities')}>
-            {individual?.observedDisability
-              .map((choice) => observedDisabilityChoicesDict[choice])
-              .join(', ')}
+            {ObservedDisabilityEnum[individual?.observedDisability]}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
@@ -309,7 +304,7 @@ export const IndividualBioData = ({
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Disability')}>
-            {individual?.disability === IndividualDisability.Disabled
+            {individual?.disability === DisabilityEnum.DISABLED
               ? 'Disabled'
               : 'Not Disabled'}
           </LabelizedField>
@@ -331,17 +326,19 @@ export const IndividualBioData = ({
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
-          <LabelizedField label={t('Phone Number')}>
+          {/* //TODO: */}
+          {/* <LabelizedField label={t('Phone Number')}>
             {getPhoneNoLabel(individual?.phoneNo, individual?.phoneNoValid)}
-          </LabelizedField>
+          </LabelizedField> */}
         </Grid>
         <Grid size={{ xs: 3 }}>
-          <LabelizedField label={t('Alternative Phone Number')}>
+          {/* //TODO: */}
+          {/* <LabelizedField label={t('Alternative Phone Number')}>
             {getPhoneNoLabel(
               individual?.phoneNoAlternative,
               individual?.phoneNoAlternativeValid,
             )}
-          </LabelizedField>
+          </LabelizedField> */}
         </Grid>
         <Grid size={{ xs: 12 }}>
           <BorderBox />

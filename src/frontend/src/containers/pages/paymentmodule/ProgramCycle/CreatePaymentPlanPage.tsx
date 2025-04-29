@@ -1,44 +1,69 @@
-import { Form, Formik } from 'formik';
-import { useTranslation } from 'react-i18next';
-import { format, parseISO } from 'date-fns';
-import * as Yup from 'yup';
-import { LoadingComponent } from '@core/LoadingComponent';
-import { PermissionDenied } from '@core/PermissionDenied';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { CreatePaymentPlanHeader } from '@components/paymentmodule/CreatePaymentPlan/CreatePaymentPlanHeader/CreatePaymentPlanHeader';
 import { PaymentPlanParameters } from '@components/paymentmodule/CreatePaymentPlan/PaymentPlanParameters';
 import { PaymentPlanTargeting } from '@components/paymentmodule/CreatePaymentPlan/PaymentPlanTargeting/PaymentPlanTargeting';
-import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
+import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
+import { LoadingComponent } from '@core/LoadingComponent';
+import { PermissionDenied } from '@core/PermissionDenied';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
-import {
-  useAllTargetPopulationsQuery,
-  useOpenPpMutation,
-} from '@generated/graphql';
-import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useNavigate, useParams } from 'react-router-dom';
+import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { format, parseISO } from 'date-fns';
+import { Form, Formik } from 'formik';
 import { ReactElement } from 'react';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useTranslation } from 'react-i18next';
+import { useNavigate, useParams } from 'react-router-dom';
+import * as Yup from 'yup';
+import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 
 export const CreatePaymentPlanPage = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const [mutate, { loading: loadingCreate }] = useOpenPpMutation();
-  const { showMessage } = useSnackbar();
   const { businessArea, programId } = useBaseUrl();
+  const { showMessage } = useSnackbar();
   const permissions = usePermissions();
   const { programCycleId } = useParams();
 
-  const { data: allTargetPopulationsData, loading: loadingTargetPopulations } =
-    useAllTargetPopulationsQuery({
-      variables: {
-        businessArea,
-        status: 'DRAFT',
-        program: programId,
-        programCycle: programCycleId,
-      },
-      fetchPolicy: 'network-only',
+  const { mutateAsync: createPaymentPlan, isPending: loadingCreate } =
+    useMutation({
+      mutationFn: ({
+        businessAreaSlug,
+        programSlug,
+        requestBody,
+      }: {
+        businessAreaSlug: string;
+        programSlug: string;
+        requestBody;
+      }) =>
+        RestService.restBusinessAreasProgramsPaymentPlansCreate({
+          businessAreaSlug,
+          programSlug,
+          requestBody,
+        }),
     });
+
+  const {
+    data: allTargetPopulationsData,
+    isLoading: loadingTargetPopulations,
+  } = useQuery<PaginatedTargetPopulationListList>({
+    queryKey: [
+      'businessAreasProgramsTargetPopulationsList',
+      businessArea,
+      programId,
+      programCycleId,
+    ],
+    queryFn: () => {
+      return RestService.restBusinessAreasProgramsTargetPopulationsList({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+        status: 'DRAFT',
+        programCycle: programCycleId,
+      });
+    },
+  });
 
   if (loadingTargetPopulations) return <LoadingComponent />;
   if (!allTargetPopulationsData) return null;
@@ -83,20 +108,23 @@ export const CreatePaymentPlanPage = (): ReactElement => {
       const dispersionEndDate = values.dispersionEndDate
         ? format(new Date(values.dispersionEndDate), 'yyyy-MM-dd')
         : null;
-      const { currency } = values;
 
-      const res = await mutate({
-        variables: {
-          paymentPlanId: values.paymentPlanId,
-          dispersionStartDate,
-          dispersionEndDate,
-          currency,
-        },
+      const requestBody = {
+        dispersionStartDate,
+        dispersionEndDate,
+        currency: values.currency,
+      };
+
+      const res = await createPaymentPlan({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+        requestBody,
       });
+
       showMessage(t('Payment Plan Created'));
-      navigate(`../${res.data.openPaymentPlan.paymentPlan.id}`);
+      navigate(`../${res.id}`);
     } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+      showMessage(e);
     }
   };
 

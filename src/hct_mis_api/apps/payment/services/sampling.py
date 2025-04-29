@@ -1,9 +1,8 @@
 import abc
 from typing import TYPE_CHECKING, Any, Dict, Tuple
 
+from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
-
-from graphql import GraphQLError
 
 from hct_mis_api.apps.core.filters import filter_age
 from hct_mis_api.apps.core.utils import decode_id_string
@@ -24,7 +23,7 @@ class Sampling:
         self, payment_verification_plan: PaymentVerificationPlan
     ) -> Tuple[PaymentVerificationPlan, QuerySet]:
         if not self.payment_records:
-            raise GraphQLError("There are no payment records that could be assigned to a new verification plan.")
+            raise ValidationError("There are no payment records that could be assigned to a new verification plan.")
 
         sampling: BaseSampling = self._get_sampling()
         sampling.sampling(self.payment_records)

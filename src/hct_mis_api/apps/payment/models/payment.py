@@ -1836,6 +1836,10 @@ class Payment(
         self.delivery_date = delivery_date
 
     @property
+    def household_admin2(self) -> str:
+        return self.household.admin2.name if self.household.admin2 else ""
+
+    @property
     def payment_status(self) -> str:  # pragma: no cover
         status = "-"
         if self.status == Payment.STATUS_PENDING:
@@ -1861,6 +1865,11 @@ class Payment(
     @property
     def full_name(self) -> str:
         return self.collector.full_name
+
+    @property
+    def people_individual(self) -> Optional[Individual]:
+        """for DCT social worker return first Individual from Household"""
+        return self.household.individuals.first() if self.parent.is_social_worker_program else None
 
     def get_revert_mark_as_failed_status(self, delivered_quantity: Decimal) -> str:  # pragma: no cover
         if delivered_quantity == 0:

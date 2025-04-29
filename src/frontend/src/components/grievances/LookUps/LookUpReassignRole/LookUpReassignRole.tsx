@@ -1,12 +1,13 @@
+import { LoadingComponent } from '@core/LoadingComponent';
+import { GrievanceTicketQuery } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import { Formik } from 'formik';
 import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
-import {
-  GrievanceTicketQuery,
-  useIndividualQuery,
-} from '@generated/graphql';
-import { LoadingComponent } from '@core/LoadingComponent';
 import { LookUpButton } from '../../LookUpButton';
 import { LookUpReassignRoleDisplay } from './LookUpReassignRoleDisplay';
 import { LookUpReassignRoleModal } from './LookUpReassignRoleModal';
@@ -34,9 +35,23 @@ export function LookUpReassignRole({
   const [selectedIndividualId, setSelectedIndividualId] = useState<string>(
     initialSelectedIndividualId,
   );
-  const { data: individualData, loading } = useIndividualQuery({
-    variables: { id: selectedIndividualId },
-  });
+  const { businessArea, programId } = useBaseUrl();
+
+  const { data: individual, isLoading: loadingIndividual } =
+    useQuery<IndividualDetail>({
+      queryKey: [
+        'businessAreaProgramIndividual',
+        businessArea,
+        programId,
+        selectedIndividualId,
+      ],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsIndividualsRetrieve({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          id: selectedIndividualId,
+        }),
+    });
   const [lookUpDialogOpen, setLookUpDialogOpen] = useState<boolean>(false);
   const [selectedHousehold, setSelectedHousehold] =
     useState<LookUpReassignRoleProps['household']>(null);
@@ -53,8 +68,6 @@ export function LookUpReassignRole({
     new_individual: null,
   });
   const [shouldUseMultiple, setShouldUseMultiple] = useState(false);
-  // const [loadIndividual, { data: individualData, loading }] =
-  //   useIndividualLazyQuery();
 
   useEffect(() => {
     setSelectedHousehold(household);
@@ -67,10 +80,10 @@ export function LookUpReassignRole({
   }, [selectedIndividual]);
 
   useEffect(() => {
-    if (individualData?.individual) {
-      setSelectedIndividual(individualData.individual);
+    if (individual) {
+      setSelectedIndividual(individual);
     }
-  }, [individualData]);
+  }, [individual]);
 
   useEffect(() => {
     const category = ticket.category?.toString();
@@ -115,11 +128,11 @@ export function LookUpReassignRole({
     }
   }, [reAssigneeRole]);
 
-  if (loading) return <LoadingComponent />;
+  if (loadingIndividual) return <LoadingComponent />;
   return (
     <Formik
       initialValues={{
-        selectedIndividual: individualData?.individual,
+        selectedIndividual: individual,
         selectedHousehold,
         role: individualRole.role,
       }}

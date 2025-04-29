@@ -8,12 +8,15 @@ from drf_spectacular.utils import extend_schema, inline_serializer
 from requests import Response, session
 from requests.adapters import HTTPAdapter
 from rest_framework import serializers, status
+from rest_framework.authentication import get_authorization_header
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response as DRFResponse
 from rest_framework.viewsets import GenericViewSet
 from urllib3 import Retry
 
+from hct_mis_api.api.auth import HOPEAuthentication, HOPEPermission
+from hct_mis_api.api.models import Grant
 from hct_mis_api.apps.account.api.permissions import BaseRestPermission
 from hct_mis_api.apps.core.models import BusinessArea
 
@@ -265,3 +268,33 @@ class CountActionMixin:
     def count(self, request: Any, *args: Any, **kwargs: Any) -> Any:
         queryset_count = self.get_queryset().count()
         return DRFResponse({"count": queryset_count})
+
+
+class PermissionsMixin:
+    """ "
+    Mixin to allow using the same viewset for both internal and external endpoints.
+    If the request is authenticated with a token, it will use the HOPEPermission and check permission assigned to variable token_permission.
+    """
+
+    token_permission = Grant.API_READ_ONLY
+
+    def is_external_request(self) -> bool:
+        # condition for the swagger
+        if not self.request:  # pragma: no cover
+            return False
+
+        auth_header = get_authorization_header(self.request).split()
+        if auth_header and auth_header[0].lower() == "token".encode():
+            return True
+        return False
+
+    def get_authenticators(self) -> List[Any]:
+        if self.is_external_request():
+            self.authentication_classes = [HOPEAuthentication]
+        return super().get_authenticators()  # pragma: no cover
+
+    def get_permissions(self) -> Any:
+        if self.is_external_request():
+            self.permission_classes = [HOPEPermission]
+            self.permission = self.token_permission
+        return super().get_permissions()  # pragma: no cover

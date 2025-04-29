@@ -23,6 +23,7 @@ import {
   useDownloadPeriodicDataUpdateTemplate,
   useExportPeriodicDataUpdateTemplate,
 } from './PeriodicDataUpdatesTemplatesListActions';
+import { PaginatedPeriodicDataUpdateTemplateListList } from '@restgenerated/models/PaginatedPeriodicDataUpdateTemplateListList';
 
 const templatesHeadCells: HeadCell<PeriodicDataUpdateTemplateList>[] = [
   {
@@ -130,6 +131,8 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
     page: 1,
     page_size: 10,
     ordering: 'created_at',
+    businessAreaSlug,
+    programSlug: programId,
   };
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
@@ -138,21 +141,11 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
     data: templatesData,
     isLoading,
     error,
-  } = useQuery({
-    queryKey: [
-      'periodicDataUpdateTemplates',
-      businessAreaSlug,
-      programId,
-      queryVariables,
-    ],
+  } = useQuery<PaginatedPeriodicDataUpdateTemplateListList>({
+    queryKey: ['periodicDataUpdateTemplates', queryVariables],
     queryFn: () => {
-      const { ordering } = queryVariables;
       return RestService.restBusinessAreasProgramsPeriodicDataUpdateTemplatesList(
-        {
-          businessAreaSlug,
-          programSlug: programId,
-          ordering,
-        },
+        queryVariables,
       );
     },
   });

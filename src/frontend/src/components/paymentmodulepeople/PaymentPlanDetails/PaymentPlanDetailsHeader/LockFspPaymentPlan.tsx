@@ -1,3 +1,9 @@
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { LoadingButton } from '@core/LoadingButton';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   Box,
   Button,
@@ -6,20 +12,16 @@ import {
   DialogContent,
   DialogTitle,
 } from '@mui/material';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DialogContainer } from '@containers/dialogs/DialogContainer';
-import { DialogFooter } from '@containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { Action, PaymentPlanQuery } from '@generated/graphql';
-import { LoadingButton } from '@core/LoadingButton';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useProgramContext } from '../../../../programContext';
 
 export interface LockFspPaymentPlanProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
   permissions: string[];
 }
 
@@ -31,16 +33,31 @@ export function LockFspPaymentPlan({
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
   const [lockDialogOpen, setLockDialogOpen] = useState(false);
-  const { mutatePaymentPlanAction: lock, loading: loadingLock } =
-    usePaymentPlanAction(
-      Action.LockFsp,
-      paymentPlan.id,
-      () => showMessage(t('Payment Plan FSPs are locked.')),
-      () => setLockDialogOpen(false),
-    );
+  const { businessArea, programId } = useBaseUrl();
+
+  const { mutateAsync: lock, isPending: loadingLock } = useMutation({
+    mutationFn: ({
+      businessAreaSlug,
+      id,
+      programSlug,
+    }: {
+      businessAreaSlug: string;
+      id: string;
+      programSlug: string;
+    }) =>
+      RestService.restBusinessAreasProgramsPaymentPlansLockFspRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+      }),
+    onSuccess: () => {
+      showMessage(t('Payment Plan FSPs are locked.'));
+      setLockDialogOpen(false);
+    },
+  });
 
   const canLockFsp =
-    paymentPlan.deliveryMechanism &&
+    paymentPlan?.deliveryMechanism &&
     hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK_FSP, permissions);
 
   return (
@@ -83,7 +100,13 @@ export function LockFspPaymentPlan({
               type="submit"
               color="primary"
               variant="contained"
-              onClick={() => lock()}
+              onClick={() =>
+                lock({
+                  businessAreaSlug: businessArea,
+                  id: paymentPlan.id,
+                  programSlug: programId,
+                })
+              }
               data-cy="button-submit"
             >
               {t('Lock FSP')}

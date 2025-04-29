@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from django.db.models import QuerySet
 
-from graphql import GraphQLError
+from rest_framework.exceptions import ValidationError
 
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from hct_mis_api.apps.payment.services.create_payment_verifications import (
@@ -56,7 +56,7 @@ class VerificationPlanCrudServices:
         verifier.verify("verification_channel")
 
         if payment_verification_plan.status != PaymentVerificationPlan.STATUS_PENDING:  # pragma: no cover
-            raise GraphQLError("You can only edit PENDING Payment Plan Verification")
+            raise ValidationError("You can only edit PENDING Payment Plan Verification")
 
         payment_records = get_payment_records(
             payment_verification_plan.payment_plan, payment_verification_plan.verification_channel
@@ -73,6 +73,6 @@ class VerificationPlanCrudServices:
     @classmethod
     def delete(cls, payment_verification_plan: PaymentVerificationPlan) -> None:
         if payment_verification_plan.status != PaymentVerificationPlan.STATUS_PENDING:
-            raise GraphQLError("You can delete only PENDING verification")
+            raise ValidationError("You can delete only PENDING verification")
 
         payment_verification_plan.delete()

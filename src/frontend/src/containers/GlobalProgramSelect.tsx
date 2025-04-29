@@ -34,6 +34,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from '../programContext';
 import { Status791Enum } from '@restgenerated/models/Status791Enum';
+import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 
 interface PopperComponentProps {
   anchorEl?: any;
@@ -124,7 +125,7 @@ export const GlobalProgramSelect = () => {
     data: programsData,
     isLoading: loadingPrograms,
     refetch: refetchPrograms,
-  } = useQuery({
+  } = useQuery<PaginatedProgramListList>({
     queryKey: ['businessAreaProgram', businessArea, queryParams],
     queryFn: () =>
       RestService.restBusinessAreasProgramsList({
@@ -136,7 +137,7 @@ export const GlobalProgramSelect = () => {
   const isMounted = useRef(false);
   const [inputValue, setInputValue] = useState<string>('');
 
-  const { data: program, isLoading: loadingProgram } = useQuery({
+  const { data: program, isLoading: loadingProgram } = useQuery<ProgramDetail>({
     queryKey: ['businessAreaProgram', businessArea, programId],
     queryFn: () =>
       RestService.restBusinessAreasProgramsRetrieve({

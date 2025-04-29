@@ -14,7 +14,11 @@ from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.api.caches import UserListKeyConstructor
-from hct_mis_api.apps.account.api.serializers import ProfileSerializer, UserSerializer
+from hct_mis_api.apps.account.api.serializers import (
+    ProfileSerializer,
+    UserChoicesSerializer,
+    UserSerializer,
+)
 from hct_mis_api.apps.account.filters import UsersFilter
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.account.permissions import (
@@ -41,12 +45,14 @@ class UserViewSet(
     }
     permissions_by_action = {
         "list": [Permissions.USER_MANAGEMENT_VIEW_LIST, *ALL_GRIEVANCES_CREATE_MODIFY],
+        "choices": [Permissions.USER_MANAGEMENT_VIEW_LIST, *ALL_GRIEVANCES_CREATE_MODIFY],
     }
     queryset = User.objects.all()
 
     serializer_classes_by_action = {
         "profile": ProfileSerializer,
         "list": UserSerializer,
+        "choices": UserChoicesSerializer,
     }
     serializer_classes = {
         "program_users": ProfileSerializer,
@@ -77,3 +83,7 @@ class UserViewSet(
     @cache_response(timeout=config.REST_API_TTL, key_func=UserListKeyConstructor())
     def list(self, request: "Request", *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
+
+    @action(detail=False, methods=["get"])
+    def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+        return Response(data=self.get_serializer(instance={}).data)

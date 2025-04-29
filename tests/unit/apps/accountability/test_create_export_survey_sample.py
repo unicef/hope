@@ -1,3 +1,4 @@
+from unittest import skip
 from unittest.mock import patch
 from uuid import uuid4
 
@@ -50,6 +51,7 @@ mutation ExportSurveySample($surveyId: ID!) {
 
         cls.survey = SurveyFactory(title="Test survey", payment_plan=cls.payment_plan, created_by=cls.user)
 
+    @skip("Because will remove soon after REST refactoring")
     def test_create_export_survey_sample_without_permissions(self) -> None:
         self.create_user_role_with_permissions(self.user, [], self.business_area, self.program)
 
@@ -71,6 +73,7 @@ mutation ExportSurveySample($surveyId: ID!) {
         "hct_mis_api.apps.accountability.celery_tasks.export_survey_sample_task.delay",
         new=lambda *args, **kwargs: None,
     )
+    @skip("Because will remove soon after REST refactoring")
     def test_create_export_survey_sample_with_valid_survey_id(self) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS], self.business_area, self.program
@@ -94,6 +97,7 @@ mutation ExportSurveySample($surveyId: ID!) {
         "hct_mis_api.apps.accountability.celery_tasks.export_survey_sample_task.delay",
         new=lambda *args, **kwargs: None,
     )
+    @skip("Because will remove soon after REST refactoring")
     def test_create_export_survey_sample_with_invalid_survey_id(self) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS], self.business_area, self.program

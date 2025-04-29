@@ -5,12 +5,13 @@ import { HouseholdChoiceDataQuery } from '@generated/graphql';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
-import { MouseEvent, ReactElement, useEffect, useMemo, useState } from 'react';
+import { MouseEvent, ReactElement, useMemo, useState } from 'react';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { headCells } from './LookUpHouseholdComunicationTableHeadCells';
 import { LookUpHouseholdTableRowCommunication } from './LookUpHouseholdTableRowCommunication';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { PaginatedHouseholdListList } from '@restgenerated/models/PaginatedHouseholdListList';
 
 interface LookUpHouseholdTableCommunicationProps {
   businessArea: string;
@@ -77,24 +78,26 @@ function LookUpHouseholdTableCommunication({
       orderBy: filter.orderBy,
       headOfHouseholdPhoneNoValid: true,
     };
-  }, [businessArea, programId, filter]);
+  }, [
+    businessArea,
+    programId,
+    filter.householdSizeMin,
+    filter.householdSizeMax,
+    filter.search,
+    filter.documentType,
+    filter.documentNumber,
+    filter.admin2,
+    filter.residenceStatus,
+    filter.withdrawn,
+    filter.orderBy,
+  ]);
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
-
-  const { data, isLoading, error } = useQuery({
-    queryKey: [
-      'businessAreasProgramsHouseholdsList',
-      queryVariables,
-      programId,
-      businessArea,
-    ],
+  const { data, isLoading, error } = useQuery<PaginatedHouseholdListList>({
+    queryKey: ['businessAreasProgramsHouseholdsList', queryVariables],
     queryFn: () =>
       RestService.restBusinessAreasProgramsHouseholdsList(queryVariables),
-    enabled: !!businessArea && !!programId,
   });
 
   const [selected, setSelected] = useState<string[]>(

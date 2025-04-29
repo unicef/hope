@@ -1,22 +1,21 @@
-import React, { ReactElement } from 'react';
-import { Box, Button } from '@mui/material';
-import { PageHeader } from '@core/PageHeader';
 import {
   finishProgramCycle,
   reactivateProgramCycle,
 } from '@api/programCycleApi';
-import { useTranslation } from 'react-i18next';
-import { BreadCrumbsItem } from '@core/BreadCrumbs';
-import { Link } from 'react-router-dom';
-import AddIcon from '@mui/icons-material/Add';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { decodeIdString } from '@utils/utils';
-import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
-import { usePermissions } from '@hooks/usePermissions';
 import { AdminButton } from '@core/AdminButton';
+import { BreadCrumbsItem } from '@core/BreadCrumbs';
+import { PageHeader } from '@core/PageHeader';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
+import AddIcon from '@mui/icons-material/Add';
+import { Box, Button } from '@mui/material';
 import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 
 interface ProgramCycleDetailsHeaderProps {
   programCycle: ProgramCycleList;
@@ -31,16 +30,10 @@ export const ProgramCycleDetailsHeader = ({
   const queryClient = useQueryClient();
   const { businessArea, programId } = useBaseUrl();
 
-  const decodedProgramCycleId = decodeIdString(programCycle.id);
-
   const { mutateAsync: finishMutation, isPending: isPendingFinishing } =
     useMutation({
       mutationFn: async () => {
-        return finishProgramCycle(
-          businessArea,
-          programId,
-          decodedProgramCycleId,
-        );
+        return finishProgramCycle(businessArea, programId, programCycle.id);
       },
       onSuccess: async () => {
         await queryClient.invalidateQueries({
@@ -48,7 +41,7 @@ export const ProgramCycleDetailsHeader = ({
             'programCyclesDetails',
             businessArea,
             programId,
-            decodedProgramCycleId,
+            programCycle.id,
           ],
         });
       },
@@ -57,11 +50,7 @@ export const ProgramCycleDetailsHeader = ({
   const { mutateAsync: reactivateMutation, isPending: isPendingReactivation } =
     useMutation({
       mutationFn: async () => {
-        return reactivateProgramCycle(
-          businessArea,
-          programId,
-          decodedProgramCycleId,
-        );
+        return reactivateProgramCycle(businessArea, programId, programCycle.id);
       },
       onSuccess: async () => {
         await queryClient.invalidateQueries({
@@ -69,7 +58,7 @@ export const ProgramCycleDetailsHeader = ({
             'programCyclesDetails',
             businessArea,
             programId,
-            decodedProgramCycleId,
+            programCycle.id,
           ],
         });
       },

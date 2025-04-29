@@ -2,12 +2,28 @@ from typing import Any
 
 from rest_framework_extensions.key_constructor.bits import KeyBitBase
 
-from hct_mis_api.api.caches import BusinessAreaKeyBitMixin, KeyConstructorMixin
+from hct_mis_api.api.caches import (
+    BusinessAreaAndProgramLastUpdatedKeyBit,
+    BusinessAreaKeyBitMixin,
+    KeyConstructorMixin,
+)
 from hct_mis_api.apps.core.models import BusinessArea
 
 
 class ManagerialPaymentPlanListVersionsKeyBit(BusinessAreaKeyBitMixin):
     specific_view_cache_key = "management_payment_plans_list"
+
+
+class PaymentPlanListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
+    specific_view_cache_key = "payment_plans_list"
+
+
+class PaymentVerificationListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
+    specific_view_cache_key = "payment_verifications_list"
+
+
+class TargetPopulationListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
+    specific_view_cache_key = "target_populations_list"
 
 
 class PaymentPlanProgramsPermissionsKeyBit(KeyBitBase):
@@ -26,3 +42,15 @@ class PaymentPlanProgramsPermissionsKeyBit(KeyBitBase):
 class PaymentPlanKeyConstructor(KeyConstructorMixin):
     managerial_payment_plan_list_version = ManagerialPaymentPlanListVersionsKeyBit()
     permissions_to_programs = PaymentPlanProgramsPermissionsKeyBit()
+
+
+class PaymentPlanListKeyConstructor(KeyConstructorMixin):
+    payment_plan_list = PaymentPlanListKeyBit()
+
+
+class TargetPopulationListKeyConstructor(KeyConstructorMixin):
+    target_population_list = TargetPopulationListKeyBit()
+
+
+class PaymentVerificationListKeyConstructor(KeyConstructorMixin):
+    payment_verification_list = PaymentVerificationListKeyBit()

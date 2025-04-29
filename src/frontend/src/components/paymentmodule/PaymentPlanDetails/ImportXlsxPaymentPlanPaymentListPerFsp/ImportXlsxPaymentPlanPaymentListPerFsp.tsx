@@ -1,23 +1,20 @@
-import { Box, Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { DropzoneField } from '@core/DropzoneField';
+import { LoadingButton } from '@core/LoadingButton';
+import { PaymentPlanBackgroundActionStatus } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { Publish } from '@mui/icons-material';
-import get from 'lodash/get';
+import { Box, Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { PaymentPlanImportFile } from '@restgenerated/models/PaymentPlanImportFile';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { ImportErrors } from '@containers/tables/payments/VerificationRecordsTable/errors/ImportErrors';
-import { useSnackbar } from '@hooks/useSnackBar';
-import {
-  ImportXlsxPpListPerFspMutation,
-  PaymentPlanBackgroundActionStatus,
-  PaymentPlanDocument,
-  PaymentPlanQuery,
-  useImportXlsxPpListPerFspMutation,
-} from '@generated/graphql';
-import { DropzoneField } from '@core/DropzoneField';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useProgramContext } from '../../../../programContext';
-import { LoadingButton } from '@core/LoadingButton';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
@@ -33,7 +30,7 @@ const DisabledUploadIcon = styled(Publish)`
 `;
 
 interface ImportXlsxPaymentPlanPaymentListPerFspProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
   permissions: string[];
 }
 
@@ -49,51 +46,64 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
   permissions,
 }: ImportXlsxPaymentPlanPaymentListPerFspProps): ReactElement {
   const { showMessage } = useSnackbar();
+  const { businessArea, programId } = useBaseUrl();
   const [open, setOpenImport] = useState(false);
   const [fileToImport, setFileToImport] = useState(null);
   const { isActiveProgram } = useProgramContext();
   const { t } = useTranslation();
-
-  const [mutate, { data: uploadData, loading: fileLoading, error }] =
-    useImportXlsxPpListPerFspMutation();
-
-  const xlsxErrors: ImportXlsxPpListPerFspMutation['importXlsxPaymentPlanPaymentListPerFsp']['errors'] =
-    get(uploadData, 'importXlsxPaymentPlanPaymentListPerFsp.errors');
   const canUploadReconciliation =
     hasPermissions(
       PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION,
       permissions,
     ) &&
-    allowedState.includes(paymentPlan.backgroundActionStatus) &&
+    allowedState.includes(
+      paymentPlan.backgroundActionStatus as PaymentPlanBackgroundActionStatus,
+    ) &&
     paymentPlan.fspCommunicationChannel == 'XLSX';
+
+  const {
+    mutateAsync: importReconciliationXlsx,
+    isPending: fileLoading,
+    error: xlsxErrors,
+  } = useMutation({
+    mutationFn: ({
+      businessAreaSlug,
+      id,
+      programSlug,
+      requestBody,
+    }: {
+      businessAreaSlug: string;
+      id: string;
+      programSlug: string;
+      requestBody: PaymentPlanImportFile;
+    }) =>
+      RestService.restBusinessAreasProgramsPaymentPlansReconciliationImportXlsxCreate(
+        {
+          businessAreaSlug,
+          id,
+          programSlug,
+          requestBody,
+        },
+      ),
+    onSuccess: () => {
+      setOpenImport(false);
+      showMessage(t('Your import was successful!'));
+    },
+    onError: (e) => {
+      showMessage(e.message);
+    },
+  });
 
   const handleImport = async (): Promise<void> => {
     if (fileToImport) {
-      try {
-        const { data, errors } = await mutate({
-          variables: {
-            paymentPlanId: paymentPlan.id,
-            file: fileToImport,
-          },
-          refetchQueries: () => [
-            {
-              query: PaymentPlanDocument,
-              variables: {
-                id: paymentPlan.id,
-              },
-            },
-          ],
-        });
-        if (
-          !errors &&
-          !data?.importXlsxPaymentPlanPaymentListPerFsp.errors?.length
-        ) {
-          setOpenImport(false);
-          showMessage(t('Your import was successful!'));
-        }
-      } catch (e) {
-        e.graphQLErrors.map((x) => showMessage(x.message));
-      }
+      await importReconciliationXlsx({
+        businessAreaSlug: businessArea,
+        id: paymentPlan.id,
+        programSlug: programId,
+        requestBody: {
+          file: fileToImport,
+        },
+      });
     }
   };
 
@@ -142,16 +152,12 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
                 setFileToImport(file);
               }}
             />
-            {fileToImport &&
-            (error?.graphQLErrors?.length || xlsxErrors?.length) ? (
-              <Error>
+            {fileToImport && xlsxErrors ? (
+              <Error data-cy="error-list">
                 <p>Errors</p>
-                {error
-                  ? error.graphQLErrors.map((x) => (
-                      <p key={x.message}>{x.message}</p>
-                    ))
-                  : null}
-                <ImportErrors errors={xlsxErrors} />
+                <p>{xlsxErrors.message}</p>
+                {/* //TODO: fix */}
+                {/* <ImportErrors errors={xlsxErrors} /> */}
               </Error>
             ) : null}
           </>
