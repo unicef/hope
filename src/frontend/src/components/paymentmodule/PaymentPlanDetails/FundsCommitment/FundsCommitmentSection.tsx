@@ -156,7 +156,7 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
               <FormControl fullWidth size="small">
                 <Autocomplete
                   value={selectedFundsCommitment}
-                  onChange={(event, newValue) => handleFundsCommitmentChange(newValue)}
+                  onChange={(event, newValue) => handleFundsCommitmentChange(newValue as FundsCommitmentNode | null)}
                   options={availableFundsCommitments}
                   getOptionLabel={(option) => option.fundsCommitmentNumber || ''}
                   renderInput={(params) => (
