@@ -21,6 +21,7 @@ from hct_mis_api.apps.core.fixtures import (
     create_ukraine,
 )
 from hct_mis_api.apps.core.models import PeriodicFieldData
+from hct_mis_api.apps.core.utils import to_choice_object
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
 from hct_mis_api.apps.household.fixtures import (
@@ -32,21 +33,31 @@ from hct_mis_api.apps.household.fixtures import (
     create_household_and_individuals,
 )
 from hct_mis_api.apps.household.models import (
+    AGENCY_TYPE_CHOICES,
     CANNOT_DO,
     DISABLED,
     DUPLICATE,
     FEMALE,
     HEARING,
+    INDIVIDUAL_FLAGS_CHOICES,
+    INDIVIDUAL_STATUS_CHOICES,
     LOT_DIFFICULTY,
     MALE,
+    MARITAL_STATUS_CHOICE,
     NEEDS_ADJUDICATION,
     NOT_COLLECTED,
+    OBSERVED_DISABILITY_CHOICE,
     OTHER,
+    RELATIONSHIP_CHOICE,
     ROLE_ALTERNATE,
+    ROLE_CHOICE,
     ROLE_PRIMARY,
     SEEING,
+    SEVERITY_OF_DISABILITY_CHOICES,
+    SEX_CHOICE,
     STATUS_ACTIVE,
     UNIQUE,
+    WORK_STATUS_CHOICE,
     DocumentType,
     Household,
     Individual,
@@ -1071,6 +1082,45 @@ class TestIndividualGlobalViewSet:
         assert str(individual_afghanistan_different_areas2.id) not in result_ids
         assert str(self.individual_ukraine_1.id) not in result_ids
         assert str(self.individual_ukraine_2.id) not in result_ids
+
+
+class TestIndividualChoices:
+    @pytest.fixture(autouse=True)
+    def setup(self, api_client: Any) -> None:
+        self.choices_url = "api:households:individuals-global-choices"
+        self.afghanistan = create_afghanistan()
+        self.partner = PartnerFactory(name="TestPartner")
+        self.user = UserFactory(partner=self.partner)
+        self.api_client = api_client(self.user)
+
+        DocumentTypeFactory(key="passport", label="Passport")
+        DocumentTypeFactory(key="id_card", label="ID Card")
+        DocumentTypeFactory(key="birth_certificate", label="Birth Certificate")
+
+    def test_get_choices(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.POPULATION_VIEW_INDIVIDUALS_LIST],
+            business_area=self.afghanistan,
+        )
+        response = self.api_client.get(reverse(self.choices_url, kwargs={"business_area_slug": self.afghanistan.slug}))
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == {
+            "document_type_choices": [
+                {"name": str(document_type.label), "value": document_type.key}
+                for document_type in DocumentType.objects.order_by("key")
+            ],
+            "sex_choices": to_choice_object(SEX_CHOICE),
+            "flag_choices": to_choice_object(INDIVIDUAL_FLAGS_CHOICES),
+            "status_choices": to_choice_object(INDIVIDUAL_STATUS_CHOICES),
+            "relationship_choices": to_choice_object(RELATIONSHIP_CHOICE),
+            "role_choices": to_choice_object(ROLE_CHOICE),
+            "martial_status_choices": to_choice_object(MARITAL_STATUS_CHOICE),
+            "identity_type_choices": to_choice_object(AGENCY_TYPE_CHOICES),
+            "observed_disability_choices": to_choice_object(OBSERVED_DISABILITY_CHOICE),
+            "severity_of_disability_choices": to_choice_object(SEVERITY_OF_DISABILITY_CHOICES),
+            "work_status_choices": to_choice_object(WORK_STATUS_CHOICE),
+        }
 
 
 class TestIndividualFilter:

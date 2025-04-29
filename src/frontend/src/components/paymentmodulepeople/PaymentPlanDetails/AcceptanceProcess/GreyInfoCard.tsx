@@ -1,9 +1,9 @@
 import { Box } from '@mui/material';
 import styled from 'styled-components';
 import { UniversalMoment } from '@core/UniversalMoment';
-import { PaymentPlanQuery } from '@generated/graphql';
 import { MessageDialog } from './MessageDialog';
 import { ReactElement } from 'react';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const GreyText = styled.div`
   color: #9e9e9e;
@@ -27,7 +27,11 @@ const GreyBox = styled(Box)`
 interface GreyInfoCardProps {
   topMessage: string;
   topDate: string;
-  approvals: PaymentPlanQuery['paymentPlan']['approvalProcess']['edges'][number]['node']['actions']['approval'];
+  approvals: PaymentPlanDetail['approvalProcess'][number]['actions'][
+    | 'approval'
+    | 'authorization'
+    | 'finance_release'
+    | 'reject'];
 }
 
 export function GreyInfoCard({

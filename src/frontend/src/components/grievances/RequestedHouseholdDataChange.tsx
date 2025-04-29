@@ -38,8 +38,8 @@ export function RequestedHouseholdDataChange({
     ...ticket.householdDataUpdateTicketDetails.householdData,
   };
   let allApprovedCount = 0;
-  const flexFields = householdData?.flex_fields || {};
-  delete householdData.flex_fields;
+  const flexFields = householdData?.flexFields || {};
+  delete householdData.flexFields;
   const flexFieldsEntries = Object.entries(flexFields);
   const entries = Object.entries(householdData);
   allApprovedCount += entries.filter(

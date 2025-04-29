@@ -12,6 +12,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import { PeriodicDataUpdatesUploadDetailsDialog } from '@components/periodicDataUpdates/PeriodicDataUpdatesUploadDetailsDialog';
 import { PeriodicDataUpdateUploadList } from '@restgenerated/models/PeriodicDataUpdateUploadList';
 import { RestService } from '@restgenerated/services/RestService';
+import { PaginatedPeriodicDataUpdateUploadListList } from '@restgenerated/models/PaginatedPeriodicDataUpdateUploadListList';
 
 const updatesHeadCells: HeadCell<PeriodicDataUpdateUploadList>[] = [
   {
@@ -68,6 +69,8 @@ export const PeriodicDataUpdatesUpdatesList = (): ReactElement => {
     page: 1,
     page_size: 10,
     ordering: 'created_at',
+    businessAreaSlug,
+    programSlug: programId,
   };
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
@@ -76,21 +79,11 @@ export const PeriodicDataUpdatesUpdatesList = (): ReactElement => {
     data: updatesData,
     isLoading,
     error,
-  } = useQuery({
-    queryKey: [
-      'periodicDataUpdateUploads',
-      businessAreaSlug,
-      programId,
-      queryVariables,
-    ],
+  } = useQuery<PaginatedPeriodicDataUpdateUploadListList>({
+    queryKey: ['periodicDataUpdateUploads', queryVariables],
     queryFn: () => {
-      const { ordering } = queryVariables;
       return RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsList(
-        {
-          businessAreaSlug,
-          programSlug: programId,
-          ordering,
-        },
+        queryVariables,
       );
     },
   });

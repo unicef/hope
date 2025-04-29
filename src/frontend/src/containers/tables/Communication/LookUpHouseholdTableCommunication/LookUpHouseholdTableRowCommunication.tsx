@@ -87,16 +87,14 @@ export function LookUpHouseholdTableRowCommunication({
       </TableCell>
       <TableCell align="left">
         <BlackLink to={`/${businessArea}/population/household/${household.id}`}>
-          {household.unicef_id}
+          {household.unicefId}
         </BlackLink>
       </TableCell>
-      <TableCell align="left">
-        {household.head_of_household.full_name}
-      </TableCell>
+      <TableCell align="left">{household.headOfHousehold.fullName}</TableCell>
       <TableCell align="left">{household.size}</TableCell>
       <TableCell align="left">{household?.admin2 || '-'}</TableCell>
       <TableCell align="left">
-        <UniversalMoment>{household.last_registration_date}</UniversalMoment>
+        <UniversalMoment>{household.lastRegistrationDate}</UniversalMoment>
       </TableCell>
     </ClickableTableRow>
   );

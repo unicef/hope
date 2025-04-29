@@ -15,7 +15,7 @@ from hct_mis_api.apps.account.fixtures import (
     RoleFactory,
     UserFactory,
 )
-from hct_mis_api.apps.account.models import INACTIVE, Role
+from hct_mis_api.apps.account.models import INACTIVE, USER_STATUS_CHOICES, Role
 from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
     Permissions,
@@ -24,6 +24,7 @@ from hct_mis_api.apps.accountability.fixtures import FeedbackFactory, SurveyFact
 from hct_mis_api.apps.accountability.models import Message
 from hct_mis_api.apps.core.fixtures import create_afghanistan, create_ukraine
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import to_choice_object
 from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
@@ -755,3 +756,41 @@ class TestUserFilter:
         response_results = response.data["results"]
         assert len(response_results) == 1
         assert response_results[0]["id"] == str(self.user_in_different_program.id)
+
+
+class TestUserChoices:
+    @pytest.fixture(autouse=True)
+    def setup(self, api_client: Any) -> None:
+        self.choices_url = "api:accounts:users-choices"
+        self.afghanistan = create_afghanistan()
+        self.partner = PartnerFactory(name="TestPartner")
+        self.user = UserFactory(partner=self.partner)
+        self.api_client = api_client(self.user)
+
+        RoleFactory(name="TestRole")
+        RoleFactory(name="TestRole2")
+        RoleFactory(name="TestRole3")
+
+        self.partner.allowed_business_areas.add(self.afghanistan)
+
+        self.unicef_hq = PartnerFactory(name="UNICEF HQ")
+        self.unicef_partner_in_afghanistan = PartnerFactory(name="UNICEF Partner for afghanistan")
+
+    def test_get_choices(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.USER_MANAGEMENT_VIEW_LIST],
+            business_area=self.afghanistan,
+        )
+        response = self.api_client.get(reverse(self.choices_url, kwargs={"business_area_slug": self.afghanistan.slug}))
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == {
+            "role_choices": [
+                dict(name=role.name, value=role.id, subsystem=role.subsystem) for role in Role.objects.order_by("name")
+            ],
+            "status_choices": to_choice_object(USER_STATUS_CHOICES),
+            "partner_choices": [
+                dict(name=partner.name, value=partner.id)
+                for partner in [self.partner, self.unicef_hq, self.unicef_partner_in_afghanistan]
+            ],
+        }

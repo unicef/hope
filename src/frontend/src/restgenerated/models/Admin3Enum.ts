@@ -3,112 +3,114 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * * `AF142395` - Cookestad
- * * `AF142325` - Lake Jim
- * * `AF143383` - Millerside
- * * `AF143362` - North Jamesfurt
- * * `AF145332` - Heathstad
- * * `AF145346` - New Roberto
- * * `UA359957` - South Seth
- * * `UA359976` - West Danielleshire
- * * `UA354890` - Blackberg
- * * `UA354873` - East Nicole
- * * `UA353274` - Brownmouth
- * * `UA353286` - New Isaiahstad
- * * `AF643989` - Leemouth
- * * `AF643961` - New Samuel
- * * `AF645266` - Heidiside
- * * `AF645272` - Rosefurt
- * * `AF647032` - Courtneyborough
- * * `AF647095` - Lake Gregorytown
- * * `UA468574` - Lake Kimberlyport
- * * `UA468593` - West Nicolebury
- * * `UA461670` - Byrdview
- * * `UA461671` - South Alexa
- * * `UA464141` - Chelsealand
- * * `UA464181` - Grantton
- * * `AF819489` - Figueroaview
- * * `AF819472` - Greenechester
- * * `AF812688` - Robertsborough
- * * `AF812622` - West Josephport
- * * `AF812233` - Lake Cindyberg
- * * `AF812270` - Thompsonmouth
- * * `UA926688` - Lake Laura
- * * `UA926640` - Schmidtfort
- * * `UA927411` - Port Kyle
- * * `UA927455` - West Kevin
- * * `UA928624` - Dunnshire
- * * `UA928644` - Sheppardstad
- * * `HR467270` - Brockchester
- * * `HR467253` - West Brian
- * * `HR462134` - Courtneyland
- * * `HR462145` - New Shawnport
- * * `HR461216` - South Maryhaven
- * * `HR461296` - Wongfurt
- * * `HR999596` - North Tamara
- * * `HR999548` - Reynoldsbury
- * * `HR992442` - Rileytown
- * * `HR992472` - West Christinaton
- * * `HR992194` - Jennachester
- * * `HR992135` - North Theresa
- * * `HR586625` - East Heidiview
- * * `HR586674` - Melissafort
- * * `HR588478` - West Patrickbury
- * * `HR583096` - East Heidi
- * * `HR583033` - Stevensburgh
+ * * `AF161758` - Ballburgh
+ * * `AF161781` - Lake Sherri
+ * * `AF163518` - South Anthonyberg
+ * * `AF163517` - Wilsonshire
+ * * `AF162837` - Port Jenniferview
+ * * `AF162887` - Port Krista
+ * * `HR479866` - Michaelchester
+ * * `HR479851` - Moranstad
+ * * `HR475116` - Andreashire
+ * * `HR475115` - Vegafort
+ * * `HR478013` - East Ericview
+ * * `HR478055` - Mitchellton
+ * * `UA453880` - Beverlyberg
+ * * `UA453861` - Emilyhaven
+ * * `UA451699` - West Shannon
+ * * `UA451670` - Wilkinsside
+ * * `UA455345` - Pearsonhaven
+ * * `UA455323` - West Bonnieborough
+ * * `HR904183` - Dodsonmouth
+ * * `HR904128` - West Julia
+ * * `HR909081` - Amandaland
+ * * `HR909038` - North Danielton
+ * * `HR909264` - East Whitney
+ * * `HR909269` - West Jason
+ * * `UA192356` - South Angel
+ * * `UA192395` - South Dylanberg
+ * * `UA197348` - Jamieton
+ * * `UA197362` - North Harold
+ * * `UA199445` - East Craigfurt
+ * * `UA199478` - Smithfurt
+ * * `HR495758` - North Madison
+ * * `HR495725` - Tatehaven
+ * * `HR491816` - Nicoleview
+ * * `HR491827` - West Susanfurt
+ * * `HR494045` - New Faithshire
+ * * `HR494038` - North Kara
+ * * `UA796919` - Lake Margaretfort
+ * * `UA796951` - North Victoria
+ * * `UA791722` - Jonesfort
+ * * `UA791725` - Port Erinton
+ * * `UA795163` - Mcdowellview
+ * * `UA795170` - Port Jennifer
+ * * `AF769039` - Brownfurt
+ * * `AF769045` - Cynthiamouth
+ * * `AF768754` - East Marie
+ * * `AF768790` - West Louisville
+ * * `AF764754` - Edwardsland
+ * * `AF764757` - Lake Carlos
+ * * `AF605414` - Alexiston
+ * * `AF605473` - New Teresafurt
+ * * `AF602869` - Ryanberg
+ * * `AF602814` - South Ashleyside
+ * * `AF605350` - Deborahport
+ * * `AF605358` - Port Rebecca
  */
 export enum Admin3Enum {
-    AF142395 = 'AF142395',
-    AF142325 = 'AF142325',
-    AF143383 = 'AF143383',
-    AF143362 = 'AF143362',
-    AF145332 = 'AF145332',
-    AF145346 = 'AF145346',
-    UA359957 = 'UA359957',
-    UA359976 = 'UA359976',
-    UA354890 = 'UA354890',
-    UA354873 = 'UA354873',
-    UA353274 = 'UA353274',
-    UA353286 = 'UA353286',
-    AF643989 = 'AF643989',
-    AF643961 = 'AF643961',
-    AF645266 = 'AF645266',
-    AF645272 = 'AF645272',
-    AF647032 = 'AF647032',
-    AF647095 = 'AF647095',
-    UA468574 = 'UA468574',
-    UA468593 = 'UA468593',
-    UA461670 = 'UA461670',
-    UA461671 = 'UA461671',
-    UA464141 = 'UA464141',
-    UA464181 = 'UA464181',
-    AF819489 = 'AF819489',
-    AF819472 = 'AF819472',
-    AF812688 = 'AF812688',
-    AF812622 = 'AF812622',
-    AF812233 = 'AF812233',
-    AF812270 = 'AF812270',
-    UA926688 = 'UA926688',
-    UA926640 = 'UA926640',
-    UA927411 = 'UA927411',
-    UA927455 = 'UA927455',
-    UA928624 = 'UA928624',
-    UA928644 = 'UA928644',
-    HR467270 = 'HR467270',
-    HR467253 = 'HR467253',
-    HR462134 = 'HR462134',
-    HR462145 = 'HR462145',
-    HR461216 = 'HR461216',
-    HR461296 = 'HR461296',
-    HR999596 = 'HR999596',
-    HR999548 = 'HR999548',
-    HR992442 = 'HR992442',
-    HR992472 = 'HR992472',
-    HR992194 = 'HR992194',
-    HR992135 = 'HR992135',
-    HR586625 = 'HR586625',
-    HR586674 = 'HR586674',
-    HR588478 = 'HR588478',
-    HR583096 = 'HR583096',
-    HR583033 = 'HR583033',
+    AF161758 = 'AF161758',
+    AF161781 = 'AF161781',
+    AF163518 = 'AF163518',
+    AF163517 = 'AF163517',
+    AF162837 = 'AF162837',
+    AF162887 = 'AF162887',
+    HR479866 = 'HR479866',
+    HR479851 = 'HR479851',
+    HR475116 = 'HR475116',
+    HR475115 = 'HR475115',
+    HR478013 = 'HR478013',
+    HR478055 = 'HR478055',
+    UA453880 = 'UA453880',
+    UA453861 = 'UA453861',
+    UA451699 = 'UA451699',
+    UA451670 = 'UA451670',
+    UA455345 = 'UA455345',
+    UA455323 = 'UA455323',
+    HR904183 = 'HR904183',
+    HR904128 = 'HR904128',
+    HR909081 = 'HR909081',
+    HR909038 = 'HR909038',
+    HR909264 = 'HR909264',
+    HR909269 = 'HR909269',
+    UA192356 = 'UA192356',
+    UA192395 = 'UA192395',
+    UA197348 = 'UA197348',
+    UA197362 = 'UA197362',
+    UA199445 = 'UA199445',
+    UA199478 = 'UA199478',
+    HR495758 = 'HR495758',
+    HR495725 = 'HR495725',
+    HR491816 = 'HR491816',
+    HR491827 = 'HR491827',
+    HR494045 = 'HR494045',
+    HR494038 = 'HR494038',
+    UA796919 = 'UA796919',
+    UA796951 = 'UA796951',
+    UA791722 = 'UA791722',
+    UA791725 = 'UA791725',
+    UA795163 = 'UA795163',
+    UA795170 = 'UA795170',
+    AF769039 = 'AF769039',
+    AF769045 = 'AF769045',
+    AF768754 = 'AF768754',
+    AF768790 = 'AF768790',
+    AF764754 = 'AF764754',
+    AF764757 = 'AF764757',
+    AF605414 = 'AF605414',
+    AF605473 = 'AF605473',
+    AF602869 = 'AF602869',
+    AF602814 = 'AF602814',
+    AF605350 = 'AF605350',
+    AF605358 = 'AF605358',
 }

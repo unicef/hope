@@ -1,54 +1,54 @@
-import { ReactElement, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import {
-  PaymentPlanBuildStatus,
-  useBusinessAreaDataQuery,
-  usePaymentPlanQuery,
-} from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import EditTargetPopulation from '@components/targeting/EditTargetPopulation/EditTargetPopulation';
+import { useBusinessAreaDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
+import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { ReactElement } from 'react';
+import { useParams } from 'react-router-dom';
 
 const EditTargetPopulationPage = (): ReactElement => {
   const { id } = useParams();
   const permissions = usePermissions();
+  const { businessArea, programId } = useBaseUrl();
 
-  const { data, loading, error, startPolling, stopPolling } =
-    usePaymentPlanQuery({
-      variables: { id },
-      fetchPolicy: 'cache-and-network',
-    });
-  const { businessArea } = useBaseUrl();
+  const {
+    data: paymentPlan,
+    isLoading: loading,
+    error,
+  } = useQuery<TargetPopulationDetail>({
+    queryKey: ['paymentPlan', businessArea, id, programId],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsTargetPopulationsRetrieve({
+        businessAreaSlug: businessArea,
+        id: id,
+        programSlug: programId,
+      }),
+    refetchInterval: () => {
+      const { backgroundActionStatus } = paymentPlan;
+      if (['BUILDING', 'PENDING'].includes(backgroundActionStatus)) {
+        return 3000;
+      }
+
+      return false;
+    },
+    refetchIntervalInBackground: true,
+  });
 
   const { data: businessAreaData } = useBusinessAreaDataQuery({
     variables: { businessAreaSlug: businessArea },
   });
-  const buildStatus = data?.paymentPlan?.buildStatus;
-  useEffect(() => {
-    if (
-      [
-        PaymentPlanBuildStatus.Building,
-        PaymentPlanBuildStatus.Pending,
-      ].includes(buildStatus)
-    ) {
-      startPolling(3000);
-    } else {
-      stopPolling();
-    }
-    return () => stopPolling();
-  }, [buildStatus, id, startPolling, stopPolling]);
 
-  if (loading && !data) return <LoadingComponent />;
+  if (loading && !paymentPlan) return <LoadingComponent />;
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data || permissions === null || !businessAreaData) return null;
-
-  const { paymentPlan } = data;
+  if (!paymentPlan || permissions === null || !businessAreaData) return null;
 
   return (
     <EditTargetPopulation

@@ -1,6 +1,8 @@
+import io
+
 from django.utils import timezone
 
-from graphql import GraphQLError
+from rest_framework.exceptions import ValidationError
 
 from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.grievance.models import (
@@ -9,7 +11,12 @@ from hct_mis_api.apps.grievance.models import (
 )
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.household.models import Individual
+from hct_mis_api.apps.payment.celery_tasks import create_payment_verification_plan_xlsx
 from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
+from hct_mis_api.apps.payment.utils import calculate_counts
+from hct_mis_api.apps.payment.xlsx.xlsx_verification_import_service import (
+    XlsxVerificationImportService,
+)
 
 
 class VerificationPlanStatusChangeServices:
@@ -18,13 +25,13 @@ class VerificationPlanStatusChangeServices:
 
     def discard(self) -> PaymentVerificationPlan:
         if self.payment_verification_plan.status != PaymentVerificationPlan.STATUS_ACTIVE:
-            raise GraphQLError("You can discard only ACTIVE verification")
+            raise ValidationError("You can discard only ACTIVE verification")
         if self.payment_verification_plan.verification_channel == PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX:
             if (
                 self.payment_verification_plan.xlsx_payment_verification_plan_file_was_downloaded
                 or self.payment_verification_plan.xlsx_file_imported
             ):
-                raise GraphQLError("You can't discard if xlsx file was downloaded or imported")
+                raise ValidationError("You can't discard if xlsx file was downloaded or imported")
             # remove xlsx file
             if self.payment_verification_plan.has_xlsx_payment_verification_plan_file:
                 self.payment_verification_plan.get_xlsx_verification_file.file.delete()
@@ -39,9 +46,9 @@ class VerificationPlanStatusChangeServices:
 
     def mark_invalid(self) -> PaymentVerificationPlan:
         if self.payment_verification_plan.status != PaymentVerificationPlan.STATUS_ACTIVE:
-            raise GraphQLError("You can mark invalid only ACTIVE verification")
+            raise ValidationError("You can mark invalid only ACTIVE verification")
         if self.payment_verification_plan.verification_channel != PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX:
-            raise GraphQLError("You can mark invalid only verification when XLSX channel is selected")
+            raise ValidationError("You can mark invalid only verification when XLSX channel is selected")
 
         if (
             self.payment_verification_plan.xlsx_payment_verification_plan_file_was_downloaded
@@ -57,7 +64,7 @@ class VerificationPlanStatusChangeServices:
 
             return self.payment_verification_plan
         else:
-            raise GraphQLError("You can mark invalid if xlsx file was downloaded or imported")
+            raise ValidationError("You can mark invalid if xlsx file was downloaded or imported")
 
     def _reset_payment_verifications(self) -> None:
         # payment verifications to reset using for discard and mark_invalid
@@ -71,7 +78,7 @@ class VerificationPlanStatusChangeServices:
 
     def activate(self) -> PaymentVerificationPlan:
         if self.payment_verification_plan.can_activate():
-            raise GraphQLError("You can activate only PENDING verification")
+            raise ValidationError("You can activate only PENDING verification")
 
         if self._can_activate_via_rapidpro():
             self._activate_rapidpro()
@@ -178,3 +185,33 @@ class VerificationPlanStatusChangeServices:
         self._create_grievance_ticket_for_status(
             payment_verification_plan, PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
         )
+
+    def export_xlsx(self, user_id: str) -> PaymentVerificationPlan:
+        if self.payment_verification_plan.status != PaymentVerificationPlan.STATUS_ACTIVE:
+            raise ValidationError("You can only export verification for active CashPlan verification")
+        if self.payment_verification_plan.verification_channel != PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX:
+            raise ValidationError("You can only export verification when XLSX channel is selected")
+        if self.payment_verification_plan.xlsx_file_exporting:
+            raise ValidationError("Exporting xlsx file is already started. Please wait")
+        if self.payment_verification_plan.has_xlsx_payment_verification_plan_file:
+            raise ValidationError("Xlsx file is already created")
+
+        self.payment_verification_plan.xlsx_file_exporting = True
+        self.payment_verification_plan.save()
+        create_payment_verification_plan_xlsx.delay(str(self.payment_verification_plan.pk), user_id)
+        return self.payment_verification_plan
+
+    def import_xlsx(self, file: io.BytesIO) -> PaymentVerificationPlan:
+        if self.payment_verification_plan.status != PaymentVerificationPlan.STATUS_ACTIVE:
+            raise ValidationError("You can only import verification for active CashPlan verification")
+        if self.payment_verification_plan.verification_channel != PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX:
+            raise ValidationError("You can only import verification when XLSX channel is selected")
+        import_service = XlsxVerificationImportService(self.payment_verification_plan, file)
+        import_service.open_workbook()
+        import_service.validate()
+
+        import_service.import_verifications()
+        calculate_counts(self.payment_verification_plan)
+        self.payment_verification_plan.xlsx_file_imported = True
+        self.payment_verification_plan.save()
+        return self.payment_verification_plan

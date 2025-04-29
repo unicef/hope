@@ -60,46 +60,86 @@ export function HouseholdDetails({
         <Title>
           <Typography variant="h6">{t('Details')}</Typography>
         </Title>
-          <Grid container spacing={3}>
-            <Grid size={{ xs: 3 }}>
-              <LabelizedField label={`${beneficiaryGroup?.groupLabel} Size`}>
-                {household?.size}
-              </LabelizedField>
-            </Grid>
-            <Grid size={{ xs: 3 }}>
-               <LabelizedField label={t('Residence Status')}>
+        <Grid container spacing={3}>
+          <Grid size={{ xs: 3 }}>
+            <LabelizedField label={`${beneficiaryGroup?.groupLabel} Size`}>
+              {household?.size}
+            </LabelizedField>
+          </Grid>
+          <Grid size={{ xs: 3 }}>
+            <LabelizedField label={t('Residence Status')}>
               {household?.residenceStatus}
             </LabelizedField>
-            </Grid>
-            <Grid size={{ xs: 6 }}>
-              <LabelizedField label={`Head of ${beneficiaryGroup?.groupLabel}`}>
-                <ContentLink
-                  href={`/${baseUrl}/population/individuals/${household?.headOfHousehold?.id}`}
-                >
-                  {household?.headOfHousehold?.fullName}
-                </ContentLink>
-              </LabelizedField>
-            </Grid>
-            <Grid size={{ xs: 3 }}>
-              <LabelizedField
-                label={t('FEMALE CHILD HEADED ' + beneficiaryGroup?.groupLabel)}
-              >
-                {household?.fchildHoh ? t('Yes') : t('No')}
-              </LabelizedField>
-            </Grid>
-            <Grid size={{ xs: 3 }}>
-              <LabelizedField
-                label={t('CHILD HEADED ' + beneficiaryGroup?.groupLabel)}
-              >
-                {household?.childHoh ? t('Yes') : t('No')}
-              </LabelizedField>
-            </Grid>
-            <Grid size={{ xs: 3 }}>
-              <LabelizedField label={t('Country')}>
-                {household?.country}
-              </LabelizedField>
-            </Grid>
           </Grid>
+          <Grid size={{ xs: 6 }}>
+            <LabelizedField label={`Head of ${beneficiaryGroup?.groupLabel}`}>
+              <ContentLink
+                href={`/${baseUrl}/population/individuals/${household?.headOfHousehold?.id}`}
+              >
+                {household?.headOfHousehold?.fullName}
+              </ContentLink>
+            </LabelizedField>
+          </Grid>
+          <Grid size={{ xs: 3 }}>
+            <LabelizedField
+              label={t('FEMALE CHILD HEADED ' + beneficiaryGroup?.groupLabel)}
+            >
+              {household?.fchildHoh ? t('Yes') : t('No')}
+            </LabelizedField>
+          </Grid>
+          <Grid size={{ xs: 3 }}>
+            <LabelizedField
+              label={t('CHILD HEADED ' + beneficiaryGroup?.groupLabel)}
+            >
+              {household?.childHoh ? t('Yes') : t('No')}
+            </LabelizedField>
+          </Grid>
+          <Grid size={{ xs: 3 }}>
+            <LabelizedField label={t('Country')}>
+              {household?.country}
+            </LabelizedField>
+          </Grid>
+        </Grid>
+        <Grid container spacing={3}>
+          <Grid size={{ xs: 3 }}>
+            <LabelizedField label={`${beneficiaryGroup?.groupLabel} Size`}>
+              {household?.size}
+            </LabelizedField>
+          </Grid>
+          <Grid size={{ xs: 3 }}>
+            <LabelizedField label={t('Residence Status')}>
+              {household?.residenceStatus}
+            </LabelizedField>
+          </Grid>
+          <Grid size={{ xs: 6 }}>
+            <LabelizedField label={`Head of ${beneficiaryGroup?.groupLabel}`}>
+              <ContentLink
+                href={`/${baseUrl}/population/individuals/${household?.headOfHousehold?.id}`}
+              >
+                {household?.headOfHousehold?.fullName}
+              </ContentLink>
+            </LabelizedField>
+          </Grid>
+          <Grid size={{ xs: 3 }}>
+            <LabelizedField
+              label={t('FEMALE CHILD HEADED ' + beneficiaryGroup?.groupLabel)}
+            >
+              {household?.fchildHoh ? t('Yes') : t('No')}
+            </LabelizedField>
+          </Grid>
+          <Grid size={{ xs: 3 }}>
+            <LabelizedField
+              label={t('CHILD HEADED ' + beneficiaryGroup?.groupLabel)}
+            >
+              {household?.childHoh ? t('Yes') : t('No')}
+            </LabelizedField>
+          </Grid>
+          <Grid size={{ xs: 3 }}>
+            <LabelizedField label={t('Country')}>
+              {household?.country}
+            </LabelizedField>
+          </Grid>
+        </Grid>
         <Grid container spacing={3}>
           <Grid size={{ xs: 3 }}>
             <LabelizedField label={`${beneficiaryGroup?.groupLabel} Size`}>
@@ -245,9 +285,7 @@ export function HouseholdDetails({
         <Grid container>
           <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('Cash received')}>
-              {/* //TODO: fix this */}
-              {/* //TODO: Add the rest of the fields */}
-
+              {/* //TODO: */}
               {/* {household?.deliveredQuantities?.length ? (
                 <Box mb={2}>
                   <Grid container>

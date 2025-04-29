@@ -1,14 +1,13 @@
 import { MouseEvent, ReactElement, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import {
-  AllPaymentsForTableQueryVariables,
-  PaymentNode,
-  useAllPaymentsForTableQuery,
-} from '@generated/graphql';
-import { UniversalTable } from '@containers/tables/UniversalTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { headCells } from './LookUpPaymentRecordTableHeadCells';
 import { LookUpPaymentRecordTableRow } from './LookUpPaymentRecordTableRow';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
+import { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPaymentListList';
+import { PaymentList } from '@restgenerated/models/PaymentList';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 
 interface LookUpPaymentRecordTableProps {
   openInNewTab?: boolean;
@@ -23,11 +22,23 @@ export function LookUpPaymentRecordTable({
   const { businessArea, programId } = useBaseUrl();
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
-  const initialVariables = {
+  const initialQueryVariables = {
     householdId: initialValues?.selectedHousehold?.id,
-    businessArea,
-    program: programId === 'all' ? null : programId,
+    businessAreaSlug: businessArea,
+    slug: programId === 'all' ? null : programId,
   };
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+
+  const {
+    data: paymentsData,
+    isLoading,
+    error,
+  } = useQuery<PaginatedPaymentListList>({
+    queryKey: ['businessAreasProgramsPaymentsList', queryVariables],
+    queryFn: () => {
+      return RestService.restBusinessAreasProgramsPaymentsList(queryVariables);
+    },
+  });
   const [selected, setSelected] = useState(
     initialValues.selectedPaymentRecords,
   );
@@ -62,12 +73,14 @@ export function LookUpPaymentRecordTable({
 
   if (isEditTicket) {
     return (
-      <UniversalTable<PaymentNode, AllPaymentsForTableQueryVariables>
+      <UniversalRestTable
         headCells={headCells}
-        query={useAllPaymentsForTableQuery}
-        queriedObjectName="allPayments"
-        initialVariables={initialVariables}
-        renderRow={(row) => (
+        data={paymentsData}
+        isLoading={isLoading}
+        error={error}
+        queryVariables={queryVariables}
+        setQueryVariables={setQueryVariables}
+        renderRow={(row: PaymentList) => (
           <LookUpPaymentRecordTableRow
             openInNewTab={openInNewTab}
             key={row.id}
@@ -80,13 +93,15 @@ export function LookUpPaymentRecordTable({
     );
   }
   return (
-    <UniversalTable<PaymentNode, AllPaymentsForTableQueryVariables>
+    <UniversalRestTable
       headCells={headCells}
-      query={useAllPaymentsForTableQuery}
-      queriedObjectName="allPayments"
-      initialVariables={initialVariables}
       onSelectAllClick={handleSelectAllCheckboxesClick}
       numSelected={numSelected}
+      data={paymentsData}
+      isLoading={isLoading}
+      error={error}
+      queryVariables={queryVariables}
+      setQueryVariables={setQueryVariables}
       renderRow={(row) => (
         <LookUpPaymentRecordTableRow
           openInNewTab={openInNewTab}
