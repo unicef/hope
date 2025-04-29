@@ -169,6 +169,9 @@ const EditProgramPage = (): ReactElement => {
         'partnerAccess',
         'pduFields',
       ]);
+      const pduFieldsToSendWithoutTypename = pduFieldsToSend.map((pduField) =>
+        omit(pduField, ['__typename']),
+      );
       const response = await updateProgramDetails({
         variables: {
           programData: {
@@ -176,7 +179,7 @@ const EditProgramPage = (): ReactElement => {
             ...requestValuesDetails,
             budget: budgetToFixed,
             populationGoal: populationGoalParsed,
-            pduFields: pduFieldsToSend,
+            pduFields: pduFieldsToSendWithoutTypename,
           },
           version,
         },
