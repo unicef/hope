@@ -104,6 +104,7 @@ class DashboardCacheBase(Protocol):
                 parent__is_removed=False,
                 is_removed=False,
                 conflicted=False,
+                excluded=False,
             )
             .exclude(status__in=["Transaction Erroneous", "Not Distributed", "Force failed", "Manually Cancelled"])
         )
@@ -135,7 +136,7 @@ class DashboardCacheBase(Protocol):
             fsp_name=Coalesce(F("financial_service_provider__name"), Value("Unknown FSP")),
             delivery_type_name=Coalesce(F("delivery_type__name"), Value("Unknown Delivery Type")),
             payment_status=Coalesce(F("status"), Value("Unknown Status")),
-            reconciled=Count("pk", filter=Q(payment_verifications__isnull=False), distinct=False),
+            reconciled=Count("pk", filter=Q(payment_verifications__isnull=False), distinct=True),
             household_id_val=F("household_id"),
             parent_id_val=F("parent_id"),
         ).values(

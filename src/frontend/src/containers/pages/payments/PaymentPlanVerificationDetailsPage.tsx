@@ -1,37 +1,37 @@
-import { Button } from '@mui/material';
-import { ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
-import styled from 'styled-components';
-import {
-  PaymentVerificationPlanStatus,
-  useCashPlanVerificationSamplingChoicesQuery,
-  usePaymentPlanQuery,
-} from '@generated/graphql';
 import { BlackLink } from '@components/core/BlackLink';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { TableWrapper } from '@components/core/TableWrapper';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { CashPlanDetailsSection } from '@components/payments/CashPlanDetailsSection';
 import { CreateVerificationPlan } from '@components/payments/CreateVerificationPlan';
 import { VerificationPlanDetails } from '@components/payments/VerificationPlanDetails';
 import { VerificationPlansSummary } from '@components/payments/VerificationPlansSummary';
-import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
+import { PeopleVerificationsTable } from '@containers/tables/payments/VerificationRecordsTable/People/PeopleVerificationsTable';
+import {
+  PaymentVerificationPlanStatus,
+  useCashPlanVerificationSamplingChoicesQuery,
+  usePaymentPlanQuery,
+} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
+import { Button } from '@mui/material';
 import {
   decodeIdString,
   getFilterFromQueryParams,
   isPermissionDeniedError,
 } from '@utils/utils';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import styled from 'styled-components';
+import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
+import { useProgramContext } from '../../../programContext';
 import { UniversalActivityLogTablePaymentVerification } from '../../tables/UniversalActivityLogTablePaymentVerification';
 import { VerificationsTable } from '../../tables/payments/VerificationRecordsTable';
 import { VerificationRecordsFilters } from '../../tables/payments/VerificationRecordsTable/VerificationRecordsFilters';
-import { useProgramContext } from '../../../programContext';
-import { PeopleVerificationsTable } from '@containers/tables/payments/VerificationRecordsTable/People/PeopleVerificationsTable';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 const Container = styled.div`
   display: flex;
@@ -60,7 +60,7 @@ const initialFilter = {
   paymentVerificationPlan: '',
 };
 
-export function PaymentPlanVerificationDetailsPage(): ReactElement {
+function PaymentPlanVerificationDetailsPage(): ReactElement {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const permissions = usePermissions();
@@ -199,14 +199,7 @@ export function PaymentPlanVerificationDetailsPage(): ReactElement {
   };
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'PaymentPlanVerificationDetailsPage.tsx');
-      }}
-      componentName="PaymentPlanVerificationDetailsPage"
-    >
+    <>
       {toolbar}
       <Container>
         <CashPlanDetailsSection planNode={paymentPlan} />
@@ -253,6 +246,11 @@ export function PaymentPlanVerificationDetailsPage(): ReactElement {
             objectId={paymentPlan.id}
           />
         )}
-    </UniversalErrorBoundary>
+    </>
   );
 }
+
+export default withErrorBoundary(
+  PaymentPlanVerificationDetailsPage,
+  'PaymentPlanVerificationDetailsPage',
+);

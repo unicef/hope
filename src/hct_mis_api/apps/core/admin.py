@@ -334,7 +334,7 @@ class BusinessAreaAdmin(
                 result = task.execute()
                 self.message_user(request, result["message"], messages.SUCCESS)
             except Exception as e:
-                logger.exception(e)
+                logger.warning(e)
                 self.message_user(request, str(e), messages.ERROR)
             return HttpResponseRedirect(reverse("admin:core_businessarea_change", args=[business_area.id]))
         else:
@@ -480,7 +480,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         self, request: HttpRequest, form_url: str = "", extra_context: Optional[Dict] = None
     ) -> Union[HttpResponsePermanentRedirect, TemplateResponse]:
         if not self.has_add_permission(request):
-            logger.error("The user did not have permission to do that")
+            logger.warning("The user did not have permission to do that")
             raise PermissionDenied
 
         opts = self.model._meta

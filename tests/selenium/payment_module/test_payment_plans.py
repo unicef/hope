@@ -155,7 +155,10 @@ def create_payment_plan(create_targeting: None) -> PaymentPlan:
         start_date=datetime.now() + relativedelta(days=10),
         end_date=datetime.now() + relativedelta(days=15),
     )
-    payment_plan = PaymentPlan.objects.update_or_create(
+    dm_cash = DeliveryMechanism.objects.get(code="cash")
+    fsp = FinancialServiceProviderFactory()
+    fsp.delivery_mechanisms.set([dm_cash])
+    payment_plan, _ = PaymentPlan.objects.update_or_create(
         name="Test Payment Plan",
         business_area=program.business_area,
         targeting_criteria=new_targeting_criteria,
@@ -169,8 +172,10 @@ def create_payment_plan(create_targeting: None) -> PaymentPlan:
         total_delivered_quantity=999,
         total_entitled_quantity=2999,
         is_follow_up=False,
+        financial_service_provider=fsp,
+        delivery_mechanism=dm_cash,
     )
-    yield payment_plan[0]
+    yield payment_plan
 
 
 @pytest.fixture
@@ -185,6 +190,11 @@ def create_payment_plan_lock_social_worker(social_worker_program: Program) -> Pa
 
 @pytest.fixture
 def create_payment_plan_open(social_worker_program: Program) -> PaymentPlan:
+    generate_delivery_mechanisms()
+    dm_cash = DeliveryMechanism.objects.get(code="cash")
+    fsp = FinancialServiceProviderFactory()
+    fsp.delivery_mechanisms.set([dm_cash])
+
     program_cycle = ProgramCycleFactory(
         program=social_worker_program,
         title="Cycle for PaymentPlan",
@@ -199,6 +209,8 @@ def create_payment_plan_open(social_worker_program: Program) -> PaymentPlan:
         program_cycle=program_cycle,
         business_area=social_worker_program.business_area,
         dispersion_start_date=datetime.now().date(),
+        financial_service_provider=fsp,
+        delivery_mechanism=dm_cash,
     )
     hoh1 = IndividualFactory(household=None)
     household_1 = HouseholdFactory(
@@ -225,12 +237,15 @@ def create_payment_plan_open(social_worker_program: Program) -> PaymentPlan:
         dispersion_start_date=datetime.now().date(),
         is_follow_up=True,
         source_payment_plan=payment_plan,
+        financial_service_provider=fsp,
+        delivery_mechanism=dm_cash,
     )
 
     yield payment_plan
 
 
 def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKED) -> PaymentPlan:
+    generate_delivery_mechanisms()
     program_cycle = ProgramCycleFactory(
         program=program,
         title="Cycle for PaymentPlan",
@@ -238,14 +253,17 @@ def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKE
         start_date=datetime.now() + relativedelta(days=10),
         end_date=datetime.now() + relativedelta(days=15),
     )
-
+    dm_cash = DeliveryMechanism.objects.get(code="cash")
+    fsp = FinancialServiceProviderFactory()
+    fsp.delivery_mechanisms.set([dm_cash])
     payment_plan = PaymentPlanFactory(
         is_follow_up=False,
         status=status,
         program_cycle=program_cycle,
         dispersion_start_date=datetime.now().date(),
+        financial_service_provider=fsp,
+        delivery_mechanism=dm_cash,
     )
-
     hoh1 = IndividualFactory(household=None)
     hoh2 = IndividualFactory(household=None)
     household_1 = HouseholdFactory(
@@ -408,7 +426,6 @@ class TestSmokePaymentModule:
             in pagePaymentModuleDetails.getLabelDispersionEndDate().text
         )
         assert "-" in pagePaymentModuleDetails.getLabelRelatedFollowUpPaymentPlans().text
-        assert "SET UP FSP" in pagePaymentModuleDetails.getButtonSetUpFsp().text
         assert "CREATE" in pagePaymentModuleDetails.getButtonCreateExclusions().text
         assert "Supporting Documents" in pagePaymentModuleDetails.getSupportingDocumentsTitle().text
         assert "No documents uploaded" in pagePaymentModuleDetails.getSupportingDocumentsEmpty().text
@@ -480,22 +497,6 @@ class TestSmokePaymentModule:
         pagePaymentModuleDetails.getInputEntitlementFormula().click()
         pagePaymentModuleDetails.select_listbox_element("Test Rule")
         pagePaymentModuleDetails.getButtonApplySteficon().click()
-
-        for _ in range(10):
-            try:
-                pagePaymentModuleDetails.getButtonSetUpFsp().click()
-                break
-            except BaseException:
-                sleep(1)
-        else:
-            pagePaymentModuleDetails.getButtonSetUpFsp().click()
-
-        pagePaymentModuleDetails.getSelectDeliveryMechanism().click()
-        pagePaymentModuleDetails.select_listbox_element("Cash")
-        pagePaymentModuleDetails.getButtonNextSave().click()
-        pagePaymentModuleDetails.getSelectDeliveryMechanismFSP().click()
-        pagePaymentModuleDetails.select_listbox_element("FSP_1")
-        pagePaymentModuleDetails.getButtonNextSave().click()
         pagePaymentModuleDetails.checkStatus("LOCKED")
         pagePaymentModuleDetails.clickButtonLockPlan()
         pagePaymentModuleDetails.getButtonSubmit().click()

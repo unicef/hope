@@ -145,7 +145,7 @@ class RegistrationDataImport(BaseComponents):
 
     def buttonImportFileIsEnabled(self, timeout: int = 30) -> bool:
         for _ in range(timeout):
-            if self.getButtonImportFile().is_enabled():  # type: ignore
+            if self.getButtonImportFile().is_enabled():
                 return True
             sleep(1)
         return False

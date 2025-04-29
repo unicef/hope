@@ -3,7 +3,7 @@ import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { ContentLink } from '@core/ContentLink';
 import { LabelizedField } from '@core/LabelizedField';
 import { OverviewContainer } from '@core/OverviewContainer';
-import { PhotoModal } from '@core/PhotoModal/PhotoModal';
+import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
@@ -24,6 +24,7 @@ import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import { replaceLabels } from '../utils/createGrievanceUtils';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface GrievancesDetailsProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
@@ -33,7 +34,7 @@ interface GrievancesDetailsProps {
   canViewIndividualDetails: boolean;
 }
 
-export function GrievancesDetails({
+function GrievancesDetails({
   ticket,
   choicesData,
   baseUrl,
@@ -328,7 +329,7 @@ export function GrievancesDetails({
                 size: 3,
               },
               {
-                label: t('Documentation'),
+                label: t('Grievance Supporting Documents'),
                 value: mappedDocumentation(),
                 size: 3,
               },
@@ -364,3 +365,5 @@ export function GrievancesDetails({
     </Grid>
   );
 }
+
+export default withErrorBoundary(GrievancesDetails, 'GrievancesDetails');

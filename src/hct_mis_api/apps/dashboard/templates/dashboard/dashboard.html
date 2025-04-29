@@ -133,6 +133,7 @@
                     const programDim = ndx.dimension((d) => d.program);
                     const monthDim = ndx.dimension((d) => d.month);
                     const admin1Dim = ndx.dimension((d) => d.admin1);
+                    const currencyDim = ndx.dimension((d) => d.currency || "UNK");
 
                     const fspGroup = fspDim
                         .group()
@@ -150,6 +151,23 @@
                         .group()
                         .reduceSum((d) => d.delivered_quantity_usd)
                         .order((d) => -d);
+
+                    const successfulPaymentsByCurrencyGroup = currencyDim.group().reduce(
+                        (p, v) => { 
+                            if (successfulList.includes(v.payment_status)) {
+                                p.sum += v.delivered_quantity || 0;
+                            }
+                            return p;
+                        },
+                        (p, v) => {
+                            if (successfulList.includes(v.payment_status)) {
+                                p.sum -= v.delivered_quantity || 0;
+                            }
+                            return p;
+                        },
+                        () => ({ sum: 0 })
+                    );
+
                     const topProgramGroup = {
                             all: () => programGroup.all().slice(0, 30), // Top 30 programs
                         };
@@ -159,8 +177,6 @@
                     const monthGroup = monthDim
                         .group()
                         .reduceSum((d) => d.delivered_quantity_usd);
-                    const localCurrency =
-                        processedPayments.find((item) => item.currency)?.currency || "USD";
 
                     // Define charts
                     const fspChart = dc
@@ -270,31 +286,13 @@
                         .ticks(3);
 
                     function updateTopMetrics() {
+                        const totalReconciledCount = ndx.groupAll().reduceSum(d => d.reconciled || 0).value();
                         const totalPaymentsCount = ndx.groupAll().reduceSum(d => d.payments || 0).value();
-                        const reconciliationData = ndx.groupAll().reduce(
-                            (p, v) => {
-                                if (v.payment_status !== "Pending") {
-                                    p.reconciled += 1;
-                                }
-                                p.total += 1;
-                                return p;
-                            },
-                            (p, v) => {
-                                if (v.payment_status !== "Pending") {
-                                    p.reconciled -= 1;
-                                }
-                                p.total -= 1;
-                                return p;
-                            },
-                            () => ({
-                                reconciled: 0,
-                                total: 0,
-                            })
-                        ).value();
-                        const reconciliationPercentage = reconciliationData.total > 0
-                                ? (reconciliationData.reconciled / reconciliationData.total) * 100
+                        const reconciliationPercentage = totalPaymentsCount > 0
+                                ? (totalReconciledCount / totalPaymentsCount) * 100
                                 : 0;
-                                const paymentPlanMetrics = ndx.groupAll().reduce(
+
+                        const paymentPlanMetrics = ndx.groupAll().reduce(
                                     (p, v) => {
                                         p.finished += v.finished_payment_plans || 0;
                                         p.total += v.total_payment_plans || 0;
@@ -309,7 +307,6 @@
                                 ).value();
                         const finishedPaymentPlans = paymentPlanMetrics.finished;
                         const totalPaymentPlans = paymentPlanMetrics.total;
-                        
                         const verificationPercentage = totalPaymentPlans > 0 
                             ? (finishedPaymentPlans / totalPaymentPlans) * 100 
                             : 0;
@@ -336,32 +333,7 @@
                                 }),
                             )
                             .value();
-                        const successfulPaymentsGroup = ndx
-                            .groupAll()
-                            .reduce(
-                                (p, v) => {
-                                    if (successfulList.includes(v.payment_status)) {
-                                        p.count += 1;
-                                        p.sum += v.delivered_quantity || 0;
-                                    }
-                                    return p;
-                                },
-                                (p, v) => {
-                                    if (successfulList.includes(v.payment_status)) {
-                                        p.count -= 1;
-                                        p.sum -= v.delivered_quantity || 0;
-                                    }
-                                    return p;
-                                },
-                                () => ({
-                                    count: 0,
-                                    sum: 0,
-                                }),
-                            )
-                            .value();
-
                         const totalSuccessfulUSD = successfulPaymentsGroupUSD.sum;
-                        const totalSuccessful = successfulPaymentsGroup.sum;
                         const successfulPaymentsCountUSD = successfulPaymentsGroupUSD.count;
                         const pendingPaymentsGroupUSD = ndx
                             .groupAll()
@@ -436,8 +408,18 @@
                             `${decimalnumberFormatter(pendingPaymentsGroupUSD.sum)} USD`;
                         document.getElementById("total-amount-paid").innerHTML =
                             `${decimalnumberFormatter(totalSuccessfulUSD)} USD`;
-                        document.getElementById("total-amount-paid-local").innerHTML =
-                            `${decimalnumberFormatter(totalSuccessful)} ${localCurrency}`;
+                        let localCurrencyHtml = '';
+                        const currencyTotals = successfulPaymentsByCurrencyGroup.all();
+                        currencyTotals.forEach(item => {
+                            if (item.value.sum > 0 && item.key !== 'UNK') {
+                                localCurrencyHtml += `<p class="text-xs mb-1">${decimalnumberFormatter(item.value.sum)} ${item.key}</p>`;
+                            }
+                        });
+                        if (localCurrencyHtml === '') {
+                            localCurrencyHtml = '<p class="text-xs text-gray-500">No non-USD payments</p>';
+                        }
+                        document.getElementById("total-amount-paid-local").innerHTML = localCurrencyHtml;
+
                         document.getElementById("households-reached").innerHTML =
                             `${simplenumberFormatter(householdsReached)}`;
                         document.getElementById("individuals-reached").innerHTML =

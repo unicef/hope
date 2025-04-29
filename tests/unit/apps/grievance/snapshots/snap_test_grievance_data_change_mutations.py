@@ -21,12 +21,6 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_create_payment_channel_fo
                             'fullName': 'Benjamin Butler'
                         },
                         'individualData': {
-                            'delivery_mechanism_data': [
-                            ],
-                            'delivery_mechanism_data_to_edit': [
-                            ],
-                            'delivery_mechanism_data_to_remove': [
-                            ],
                             'documents': [
                             ],
                             'documents_to_edit': [
@@ -107,12 +101,6 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_edit_payment_channel_for_
                             'fullName': 'Benjamin Butler'
                         },
                         'individualData': {
-                            'delivery_mechanism_data': [
-                            ],
-                            'delivery_mechanism_data_to_edit': [
-                            ],
-                            'delivery_mechanism_data_to_remove': [
-                            ],
                             'documents': [
                             ],
                             'documents_to_edit': [
@@ -457,12 +445,6 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                                 'previous_value': '1943-07-30',
                                 'value': '1980-02-01'
                             },
-                            'delivery_mechanism_data': [
-                            ],
-                            'delivery_mechanism_data_to_edit': [
-                            ],
-                            'delivery_mechanism_data_to_remove': [
-                            ],
                             'disability': {
                                 'approve_status': False,
                                 'previous_value': 'not disabled',

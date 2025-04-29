@@ -1,14 +1,12 @@
 import datetime
 import logging
-from decimal import Decimal
 from functools import partial
 from itertools import groupby
-from typing import IO, TYPE_CHECKING, Callable, Dict, List, Optional
+from typing import IO, TYPE_CHECKING, Callable, Dict, Optional
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.db import transaction
-from django.db.models import OuterRef, Q, Sum
-from django.db.models.functions import Coalesce
+from django.db.models import OuterRef
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
@@ -16,6 +14,7 @@ from constance import config
 from graphql import GraphQLError
 from psycopg2._psycopg import IntegrityError
 
+from hct_mis_api.apps.core.currencies import USDC
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp
 from hct_mis_api.apps.core.utils import chunks, decode_id_string
 from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
@@ -32,8 +31,11 @@ from hct_mis_api.apps.payment.celery_tasks import (
     send_to_payment_gateway,
 )
 from hct_mis_api.apps.payment.models import (
+    Account,
     Approval,
     ApprovalProcess,
+    DeliveryMechanism,
+    FinancialServiceProvider,
     Payment,
     PaymentPlan,
     PaymentPlanSplit,
@@ -226,7 +228,6 @@ class PaymentPlanService:
         return self.payment_plan
 
     def unlock(self) -> PaymentPlan:
-        self.payment_plan.delivery_mechanisms.all().delete()
         self.payment_plan.payment_items.all().update(conflicted=False)
         self.payment_plan.status_unlock()
         self.payment_plan.update_population_count_fields()
@@ -238,26 +239,19 @@ class PaymentPlanService:
         return self.payment_plan
 
     def lock_fsp(self) -> PaymentPlan:
-        if self.payment_plan.delivery_mechanisms.filter(
-            Q(financial_service_provider__isnull=True) | Q(delivery_mechanism__isnull=True)
-        ).exists():
-            msg = "There are no Delivery Mechanisms / FSPs chosen for Payment Plan"
-            logging.exception(msg)
-            raise GraphQLError(msg)
+        dm = getattr(self.payment_plan, "delivery_mechanism", None)
+        fsp = getattr(self.payment_plan, "financial_service_provider", None)
+        if not dm or not fsp:
+            raise GraphQLError("Payment Plan doesn't have FSP / DeliveryMechanism assigned.")
 
         if self.payment_plan.eligible_payments.filter(financial_service_provider__isnull=True).exists():
-            raise GraphQLError("All Payments must have assigned FSP")
-
-        dm_to_fsp_mapping = [
-            {
-                "fsp": delivery_mechanism_per_payment_plan.financial_service_provider,
-                "delivery_mechanism_per_payment_plan": delivery_mechanism_per_payment_plan,
-            }
-            for delivery_mechanism_per_payment_plan in self.payment_plan.delivery_mechanisms.all().order_by(
-                "delivery_mechanism_order"
+            self.payment_plan.eligible_payments.update(
+                financial_service_provider=self.payment_plan.financial_service_provider,
+                delivery_type=self.payment_plan.delivery_mechanism,
             )
-        ]
-        self.validate_fsps_per_delivery_mechanisms(dm_to_fsp_mapping, update_dms=False, update_payments=True)
+
+        if self.payment_plan.eligible_payments.filter(entitlement_quantity__isnull=True).exists():
+            raise GraphQLError("All Payments must have entitlement quantity set.")
 
         self.payment_plan.status_lock_fsp()
         self.payment_plan.save()
@@ -266,7 +260,6 @@ class PaymentPlanService:
 
     def unlock_fsp(self) -> Optional[PaymentPlan]:
         self.payment_plan.status_unlock_fsp()
-        self.payment_plan.payment_items.all().update(financial_service_provider=None, delivery_type=None)
         self.payment_plan.save()
 
         return self.payment_plan
@@ -380,6 +373,7 @@ class PaymentPlanService:
 
     @staticmethod
     def create_payments(payment_plan: PaymentPlan) -> None:
+        pp_split = payment_plan.splits.first()
         payments_to_create = []
         households = payment_plan.household_list
 
@@ -399,9 +393,23 @@ class PaymentPlanService:
                 logging.exception(msg)
                 raise GraphQLError(msg)
 
+            has_valid_wallet = True
+            if payment_plan.delivery_mechanism and payment_plan.financial_service_provider:
+                wallet = Account.objects.filter(
+                    individual_id=collector_id, account_type=payment_plan.delivery_mechanism.account_type
+                ).first()
+                if not wallet:
+                    wallet = Account.objects.create(
+                        individual_id=collector_id, account_type=payment_plan.delivery_mechanism.account_type
+                    )
+                has_valid_wallet = wallet.validate(
+                    payment_plan.financial_service_provider, payment_plan.delivery_mechanism
+                )
+
             payments_to_create.append(
                 Payment(
                     parent=payment_plan,
+                    parent_split=pp_split,
                     program_id=payment_plan.program_cycle.program_id,
                     business_area_id=payment_plan.business_area_id,
                     status=Payment.STATUS_PENDING,
@@ -409,6 +417,9 @@ class PaymentPlanService:
                     household_id=household["pk"],
                     head_of_household_id=household["head_of_household"],
                     collector_id=collector_id,
+                    financial_service_provider=payment_plan.financial_service_provider,
+                    delivery_type=payment_plan.delivery_mechanism,
+                    has_valid_wallet=has_valid_wallet,
                 )
             )
         try:
@@ -468,6 +479,17 @@ class PaymentPlanService:
                 excluded_ids=input_data.get("excluded_ids", "").strip(),
                 exclusion_reason=input_data.get("exclusion_reason", "").strip(),
             )
+            PaymentPlanSplit.objects.create(payment_plan=payment_plan)
+
+            fsp_id = input_data.get("fsp_id")
+            delivery_mechanism_code = input_data.get("delivery_mechanism_code")
+
+            if fsp_id and delivery_mechanism_code:
+                fsp = get_object_or_404(FinancialServiceProvider, pk=decode_id_string(fsp_id))
+                delivery_mechanism = get_object_or_404(DeliveryMechanism, code=delivery_mechanism_code)
+                payment_plan.financial_service_provider = fsp
+                payment_plan.delivery_mechanism = delivery_mechanism
+                payment_plan.save(update_fields=["financial_service_provider", "delivery_mechanism"])
 
             transaction.on_commit(lambda: prepare_payment_plan_task.delay(str(payment_plan.id)))
 
@@ -488,6 +510,8 @@ class PaymentPlanService:
         targeting_criteria_input = input_data.get("targeting_criteria")
         dispersion_start_date = input_data.get("dispersion_start_date")
         dispersion_end_date = input_data.get("dispersion_end_date")
+        fsp_id = input_data.get("fsp_id")
+        delivery_mechanism_code = input_data.get("delivery_mechanism_code")
 
         if (
             any([excluded_ids, exclusion_reason, targeting_criteria_input])
@@ -529,10 +553,10 @@ class PaymentPlanService:
                 raise GraphQLError("Not possible to assign Finished Program Cycle")
             self.payment_plan.program_cycle = program_cycle
 
-        if vulnerability_score_min is not None:
+        if vulnerability_score_min != self.payment_plan.vulnerability_score_min:
             vulnerability_filter = True
             self.payment_plan.vulnerability_score_min = vulnerability_score_min
-        if vulnerability_score_max is not None:
+        if vulnerability_score_max != self.payment_plan.vulnerability_score_max:
             vulnerability_filter = True
             self.payment_plan.vulnerability_score_max = vulnerability_score_max
 
@@ -544,10 +568,10 @@ class PaymentPlanService:
                 if self.payment_plan.targeting_criteria:
                     old_targeting_criteria = self.payment_plan.targeting_criteria
                 self.payment_plan.targeting_criteria = targeting_criteria
-        if excluded_ids is not None:
+        if excluded_ids != self.payment_plan.excluded_ids:
             should_rebuild_list = True
             self.payment_plan.excluded_ids = excluded_ids
-        if exclusion_reason is not None:
+        if exclusion_reason != self.payment_plan.exclusion_reason:
             should_rebuild_list = True
             self.payment_plan.exclusion_reason = exclusion_reason
 
@@ -561,9 +585,36 @@ class PaymentPlanService:
 
         new_currency = input_data.get("currency")
         if new_currency and new_currency != self.payment_plan.currency:
+            delivery_mechanism = self.payment_plan.delivery_mechanism
+            if (
+                new_currency == USDC
+                and delivery_mechanism.transfer_type != DeliveryMechanism.TransferType.DIGITAL.value
+            ) or (
+                new_currency != USDC
+                and delivery_mechanism.transfer_type == DeliveryMechanism.TransferType.DIGITAL.value
+            ):
+                raise GraphQLError(
+                    "For delivery mechanism Transfer to Digital Wallet only currency USDC can be assigned."
+                )
             self.payment_plan.currency = new_currency
             should_update_money_stats = True
             Payment.objects.filter(parent=self.payment_plan).update(currency=self.payment_plan.currency)
+
+        if not (fsp_id and delivery_mechanism_code) and hasattr(self.payment_plan, "delivery_mechanism"):
+            self.payment_plan.delivery_mechanism = None
+            self.payment_plan.financial_service_provider = None
+            should_rebuild_list = True
+
+        if fsp_id and delivery_mechanism_code:
+            fsp = get_object_or_404(FinancialServiceProvider, pk=decode_id_string(fsp_id))
+            delivery_mechanism = get_object_or_404(DeliveryMechanism, code=delivery_mechanism_code)
+            if (
+                self.payment_plan.financial_service_provider != fsp
+                or self.payment_plan.delivery_mechanism != delivery_mechanism
+            ):
+                should_rebuild_list = True
+                self.payment_plan.financial_service_provider = fsp
+                self.payment_plan.delivery_mechanism = delivery_mechanism
 
         self.payment_plan.save()
         # remove old targeting_criteria
@@ -638,67 +689,6 @@ class PaymentPlanService:
         self.payment_plan.refresh_from_db()
         return self.payment_plan
 
-    def validate_fsps_per_delivery_mechanisms(
-        self, dm_to_fsp_mapping: List[Dict], update_dms: bool = False, update_payments: bool = False
-    ) -> None:
-        processed_payments = []
-        with transaction.atomic():
-            for mapping in dm_to_fsp_mapping:
-                delivery_mechanism_per_payment_plan = mapping["delivery_mechanism_per_payment_plan"]
-                delivery_mechanism = delivery_mechanism_per_payment_plan.delivery_mechanism
-                fsp = mapping["fsp"]
-
-                if delivery_mechanism_per_payment_plan.delivery_mechanism not in fsp.delivery_mechanisms.all():
-                    raise GraphQLError(
-                        f"Delivery mechanism '{delivery_mechanism_per_payment_plan.delivery_mechanism}' is not supported "
-                        f"by FSP '{fsp}'"
-                    )
-                if not fsp.can_accept_any_volume():
-                    raise GraphQLError(f"{fsp} cannot accept any volume")
-
-                payments_for_delivery_mechanism = (
-                    self.payment_plan.eligible_payments.exclude(
-                        id__in=[processed_payment.id for processed_payment in processed_payments]
-                    )
-                    .distinct()
-                    .order_by("unicef_id")
-                )
-
-                total_volume_for_delivery_mechanism = payments_for_delivery_mechanism.aggregate(
-                    entitlement_quantity_usd__sum=Coalesce(Sum("entitlement_quantity_usd"), Decimal(0.0))
-                )["entitlement_quantity_usd__sum"]
-                if fsp.can_accept_volume(total_volume_for_delivery_mechanism):
-                    processed_payments += list(payments_for_delivery_mechanism)
-                    if update_payments:
-                        payments_for_delivery_mechanism.update(
-                            financial_service_provider=fsp,
-                            delivery_type=delivery_mechanism,
-                        )
-                else:
-                    # Process part of the volume up to the distribution limit
-                    partial_processed_payments = []
-                    partial_total_volume = Decimal(0.0)
-
-                    for payment in payments_for_delivery_mechanism:
-                        if fsp.distribution_limit < (partial_total_volume + payment.entitlement_quantity_usd):
-                            break
-                        partial_total_volume += payment.entitlement_quantity_usd
-                        partial_processed_payments.append(payment)
-
-                    processed_payments += partial_processed_payments
-                    if update_payments:
-                        for payment in partial_processed_payments:
-                            payment.financial_service_provider = fsp
-                            payment.delivery_type = delivery_mechanism
-                            payment.save()
-                if update_dms:
-                    delivery_mechanism_per_payment_plan.financial_service_provider = fsp
-                    delivery_mechanism_per_payment_plan.chosen_configuration = mapping.get("chosen_configuration", None)
-                    delivery_mechanism_per_payment_plan.save()
-
-            if set(processed_payments) != set(self.payment_plan.eligible_payments):
-                raise GraphQLError("Some Payments were not assigned to selected DeliveryMechanisms/FSPs")
-
     def create_follow_up_payments(self) -> None:
         payments_to_copy = self.payment_plan.source_payment_plan.unsuccessful_payments_for_follow_up()
 
@@ -717,6 +707,8 @@ class PaymentPlanService:
                 currency=payment.currency,
                 entitlement_quantity=payment.entitlement_quantity,
                 entitlement_quantity_usd=payment.entitlement_quantity_usd,
+                financial_service_provider=self.payment_plan.financial_service_provider,
+                delivery_type=self.payment_plan.delivery_mechanism,
             )
             for payment in payments_to_copy
         ]
@@ -753,6 +745,8 @@ class PaymentPlanService:
             dispersion_end_date=dispersion_end_date,
             start_date=source_pp.start_date,
             end_date=source_pp.end_date,
+            delivery_mechanism=source_pp.delivery_mechanism,
+            financial_service_provider=source_pp.financial_service_provider,
         )
 
         transaction.on_commit(lambda: prepare_follow_up_payment_plan_task.delay(follow_up_pp.id))
@@ -784,7 +778,7 @@ class PaymentPlanService:
                 raise GraphQLError(
                     f"Payment Parts number should be between {PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK} and total number of payments"
                 )
-            payments_chunks = list(chunks(list(payments.order_by("unicef_id").values_list("id", flat=True)), chunks_no))
+            payments_chunks = list(chunks(list(payments.order_by("unicef_id")), chunks_no))
 
         elif split_type in [
             PaymentPlanSplit.SplitType.BY_ADMIN_AREA1,
@@ -799,13 +793,13 @@ class PaymentPlanService:
             )
             payments_chunks = []
             for _, payments in groupby(grouped_payments, key=lambda x: getattr(x.household, f"admin{area_level}")):  # type: ignore
-                payments_chunks.append([payment.id for payment in payments])
+                payments_chunks.append(list(payments))
 
         elif split_type == PaymentPlanSplit.SplitType.BY_COLLECTOR:
             grouped_payments = list(payments.order_by("collector__unicef_id", "unicef_id").select_related("collector"))
             payments_chunks = []
             for _, payments in groupby(grouped_payments, key=lambda x: x.collector):  # type: ignore
-                payments_chunks.append([payment.id for payment in payments])
+                payments_chunks.append(list(payments))
 
         payments_chunks_count = len(payments_chunks)
         if payments_chunks_count > PaymentPlanSplit.MAX_CHUNKS:
@@ -831,7 +825,7 @@ class PaymentPlanService:
                 )
             PaymentPlanSplit.objects.bulk_create(payment_plan_splits_to_create)
             for i, chunk in enumerate(payments_chunks):
-                payment_plan_splits_to_create[i].payments.add(*chunk)
+                payment_plan_splits_to_create[i].split_payment_items.set(chunk)
 
         return self.payment_plan
 

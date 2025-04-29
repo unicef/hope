@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { chooseFieldType, clearField } from '@utils/targetingUtils';
 import { AllCollectorFieldsAttributesQuery } from '@generated/graphql';
-import { TargetingCriteriaCollectorBlockFilter } from './TargetingCriteriaCollectorBlockFilter';
+import TargetingCriteriaCollectorBlockFilter from './TargetingCriteriaCollectorBlockFilter';
 
 const Divider = styled.div`
   border-top: 1px solid #e2e2e2;

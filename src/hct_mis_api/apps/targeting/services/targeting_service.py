@@ -343,19 +343,19 @@ class TargetingCriteriaFilterBase:
         comparison_attribute = TargetingCriteriaFilterBase.COMPARISON_ATTRIBUTES.get(self.comparison_method)
         args_count = comparison_attribute.get("arguments")
         if self.arguments is None:
-            logger.error(f"{self.field_name} {self.comparison_method} filter query expect {args_count} " f"arguments")
+            logger.warning(f"{self.field_name} {self.comparison_method} filter query expect {args_count} " f"arguments")
             raise ValidationError(
                 f"{self.field_name} {self.comparison_method} filter query expect {args_count} " f"arguments"
             )
         args_input_count = len(self.arguments)
         if select_many:
             if args_input_count < 1:
-                logger.error(f"{self.field_name} SELECT MULTIPLE CONTAINS filter query expect at least 1 argument")
+                logger.warning(f"{self.field_name} SELECT MULTIPLE CONTAINS filter query expect at least 1 argument")
                 raise ValidationError(
                     f"{self.field_name} SELECT MULTIPLE CONTAINS filter query expect at least 1 argument"
                 )
         elif args_count != args_input_count:
-            logger.error(
+            logger.warning(
                 f"{self.field_name} {self.comparison_method} filter query expect {args_count} "
                 f"arguments gets {args_input_count}"
             )
@@ -390,7 +390,7 @@ class TargetingCriteriaFilterBase:
         core_fields = self.get_core_fields()
         core_field_attrs = [attr for attr in core_fields if attr.get("name") == self.field_name]
         if len(core_field_attrs) != 1:
-            logger.error(f"There are no Core Field Attributes associated with this fieldName {self.field_name}")
+            logger.warning(f"There are no Core Field Attributes associated with this fieldName {self.field_name}")
             raise ValidationError(
                 f"There are no Core Field Attributes associated with this fieldName {self.field_name}"
             )
@@ -402,7 +402,7 @@ class TargetingCriteriaFilterBase:
             )
         lookup = core_field_attr.get("lookup")
         if not lookup:
-            logger.error(
+            logger.warning(
                 f"Core Field Attributes associated with this fieldName {self.field_name}"
                 " doesn't have get_query method or lookup field"
             )
@@ -421,18 +421,18 @@ class TargetingCriteriaFilterBase:
             program = targeting_criteria_rule.targeting_criteria.payment_plan.program_cycle.program
             flex_field_attr = FlexibleAttribute.objects.filter(name=self.field_name, program=program).first()
             if not flex_field_attr:
-                logger.error(
+                logger.warning(
                     f"There is no PDU Flex Field Attribute associated with this fieldName {self.field_name} in program {program.name}"
                 )
                 raise ValidationError(
                     f"There is no PDU Flex Field Attribute associated with this fieldName {self.field_name} in program {program.name}"
                 )
             if not self.round_number:
-                logger.error(f"Round number is missing for PDU Flex Field Attribute {self.field_name}")
+                logger.warning(f"Round number is missing for PDU Flex Field Attribute {self.field_name}")
                 raise ValidationError(f"Round number is missing for PDU Flex Field Attribute {self.field_name}")
             flex_field_attr_rounds_number = flex_field_attr.pdu_data.number_of_rounds
             if self.round_number > flex_field_attr_rounds_number:
-                logger.error(
+                logger.warning(
                     f"Round number {self.round_number} is greater than the number of rounds for PDU Flex Field Attribute {self.field_name}"
                 )
                 raise ValidationError(
@@ -442,7 +442,7 @@ class TargetingCriteriaFilterBase:
         else:
             flex_field_attr = FlexibleAttribute.objects.filter(name=self.field_name, program=None).first()
             if not flex_field_attr:
-                logger.error(f"There is no Flex Field Attributes associated with this fieldName {self.field_name}")
+                logger.warning(f"There is no Flex Field Attributes associated with this fieldName {self.field_name}")
                 raise ValidationError(
                     f"There is no Flex Field Attributes associated with this fieldName {self.field_name}"
                 )

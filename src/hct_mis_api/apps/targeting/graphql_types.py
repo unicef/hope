@@ -10,7 +10,7 @@ from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.schema import FieldAttributeNode
 from hct_mis_api.apps.core.utils import decode_id_string
-from hct_mis_api.apps.payment.models import DeliveryMechanism, PaymentPlan
+from hct_mis_api.apps.payment.models import AccountType, PaymentPlan
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.choices import FlexFieldClassification
 from hct_mis_api.apps.utils.schema import Arg
@@ -112,8 +112,7 @@ class TargetingCollectorBlockRuleFilterNode(DjangoObjectType):
 
     def resolve_label_en(parent, info: Any) -> str:
         field_labels_dict = {
-            field["name"]: field["label"].get("English(EN)")
-            for field in DeliveryMechanism.get_all_core_fields_definitions()
+            field: field.replace("__", " ").title() for field in AccountType.get_targeting_field_names()
         }
         return field_labels_dict.get(parent.field_name, "")
 

@@ -10,6 +10,7 @@ export const PAYMENT_PLAN_QUERY = gql`
       status
       buildStatus
       canCreateFollowUp
+      failedWalletValidationCollectorsIds
       backgroundActionStatus
       canCreatePaymentVerificationPlan
       availablePaymentRecordsCount
@@ -20,6 +21,73 @@ export const PAYMENT_PLAN_QUERY = gql`
       canExportXlsx
       canDownloadXlsx
       canSendXlsxPassword
+      volumeByDeliveryMechanism {
+        deliveryMechanism {
+          id
+          name
+          fsp {
+            id
+            name
+          }
+        }
+        volume
+        volumeUsd
+      }
+      availableFundsCommitments {
+        fundsCommitmentNumber
+        fundsCommitmentItems {
+          paymentPlan {
+            id
+            name
+          }
+          fundsCommitmentItem
+          recSerialNumber
+        }
+      }
+      fundsCommitments {
+        fundsCommitmentNumber
+        fundsCommitmentItems {
+          fundsCommitmentItem
+          recSerialNumber
+          vendorId
+          businessArea
+          postingDate
+          visionApproval
+          documentReference
+          fcStatus
+          wbsElement
+          grantNumber
+          documentType
+          documentText
+          currencyCode
+          glAccount
+          commitmentAmountLocal
+          commitmentAmountUsd
+          totalOpenAmountLocal
+          totalOpenAmountUsd
+          sponsor
+          sponsorName
+          fund
+          fundsCenter
+          percentage
+          createDate
+          createdBy
+          updateDate
+          updatedBy
+          office {
+            id
+          }
+        }
+      }
+      deliveryMechanism {
+        id
+        name
+        code
+      }
+      financialServiceProvider {
+        id
+        name
+      }
       programCycle {
         id
         title
@@ -157,38 +225,11 @@ export const PAYMENT_PLAN_QUERY = gql`
       importedFileName
       totalEntitledQuantityUsd
       paymentsConflictsCount
-      deliveryMechanisms {
-        id
-        name
-        code
-        order
-        sentToPaymentGateway
-        chosenConfiguration
-        fsp {
-          id
-          name
-          communicationChannel
-          isPaymentGateway
-        }
-      }
       canSendToPaymentGateway
       canSplit
       splitChoices {
         name
         value
-      }
-      volumeByDeliveryMechanism {
-        deliveryMechanism {
-          id
-          name
-          order
-          fsp {
-            id
-            name
-          }
-        }
-        volume
-        volumeUsd
       }
       verificationPlans {
         totalCount

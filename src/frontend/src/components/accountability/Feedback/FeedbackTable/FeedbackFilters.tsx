@@ -12,6 +12,7 @@ import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { ProgramAutocomplete } from '@shared/autocompletes/ProgramAutocomplete';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface FeedbackFiltersProps {
   setFilter: (filter) => void;
@@ -20,7 +21,7 @@ interface FeedbackFiltersProps {
   setAppliedFilter: (filter) => void;
   filter;
 }
-export const FeedbackFilters = ({
+const FeedbackFilters = ({
   setFilter,
   initialFilter,
   appliedFilter,
@@ -108,7 +109,7 @@ export const FeedbackFilters = ({
             additionalVariables={{ isFeedbackCreator: true }}
           />
         </Grid>
-        {!isAllPrograms && <Grid size={{ xs:3 }} />}
+        {!isAllPrograms && <Grid size={{ xs: 3 }} />}
         <Grid size={{ xs: 3 }}>
           <DatePickerFilter
             topLabel={t('Creation Date')}
@@ -147,3 +148,5 @@ export const FeedbackFilters = ({
     </FiltersSection>
   );
 };
+
+export default withErrorBoundary(FeedbackFilters, 'FeedbackFilters');

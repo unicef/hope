@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from django import forms
 from django.contrib import admin, messages
@@ -22,11 +22,14 @@ from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.payment.models import (
+    Account,
+    AccountType,
     DeliveryMechanism,
-    DeliveryMechanismData,
-    DeliveryMechanismPerPaymentPlan,
+    DeliveryMechanismConfig,
+    FinancialInstitution,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
+    FspNameMapping,
     FspXlsxTemplatePerDeliveryMechanism,
     Payment,
     PaymentHouseholdSnapshot,
@@ -35,17 +38,68 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerification,
     PaymentVerificationPlan,
 )
+from hct_mis_api.apps.payment.models.payment import FinancialInstitutionMapping
 from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin
 from hct_mis_api.apps.utils.security import is_root
+from hct_mis_api.contrib.vision.models import FundsCommitmentItem
 
 if TYPE_CHECKING:
     from uuid import UUID
 
     from django.forms import Form
+
+
+class ArrayFieldWidget(forms.Textarea):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        self.delimiter = kwargs.pop("delimiter", ",")
+        super().__init__(*args, **kwargs)
+
+    def format_value(self, value: Any) -> str:
+        if value is None:
+            return ""
+        if isinstance(value, list):
+            # Join list items with newline instead of comma for each value to be in a new line
+            return "\n".join(str(v) for v in value)
+        return value
+
+    def value_from_datadict(self, data: Any, files: Any, name: Any) -> List[str]:
+        value = data.get(name, "")
+        if not value:
+            return []
+        # Split by newline and strip any extra spaces
+        return [v.strip() for v in value.splitlines()]
+
+
+class CommaSeparatedArrayField(forms.Field):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        self.base_field = forms.CharField()
+        self.widget = ArrayFieldWidget()
+        self.delimiter = kwargs.pop("delimiter", ",")
+        super().__init__(*args, **kwargs)
+
+    def prepare_value(self, value: Any) -> str:
+        if value is None:
+            return ""
+        if isinstance(value, list):
+            # Prepare value to be displayed as a newline-separated string
+            return "\n".join(str(self.base_field.prepare_value(v)) for v in value)
+        return value
+
+    def to_python(self, value: Any) -> List[str]:
+        if not value:
+            return []
+        if isinstance(value, list):
+            return value
+        return [self.base_field.to_python(v) for v in value.splitlines()]
+
+    def validate(self, value: Any) -> None:
+        super().validate(value)
+        for item in value:
+            self.base_field.validate(item)
 
 
 @admin.register(PaymentVerificationPlan)
@@ -168,6 +222,33 @@ class PaymentVerificationAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
         )
 
 
+class FundsCommitmentItemInline(admin.TabularInline):  # or admin.StackedInline
+    model = FundsCommitmentItem
+    extra = 0
+    can_delete = False
+    show_change_link = True
+    fields = readonly_fields = (
+        "rec_serial_number",
+        "funds_commitment_group",
+        "funds_commitment_item",
+        "fc_status",
+        "commitment_amount_local",
+        "commitment_amount_usd",
+        "total_open_amount_local",
+        "total_open_amount_usd",
+    )
+    raw_id_fields = ("funds_commitment_group",)
+
+    def has_add_permission(self: Any, request: Any, obj: Any = None) -> bool:
+        return False
+
+    def has_change_permission(self: Any, request: Any, obj: Any = None) -> bool:
+        return False
+
+    def has_delete_permission(self: Any, request: Any, obj: Any = None) -> bool:
+        return False
+
+
 @admin.register(PaymentPlan)
 class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
     list_display = (
@@ -208,6 +289,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
     )
     search_fields = ("id", "unicef_id", "name")
     date_hierarchy = "updated_at"
+    inlines = [FundsCommitmentItemInline]
 
     def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return is_root(request)
@@ -287,36 +369,6 @@ class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdm
         return False
 
 
-@admin.register(DeliveryMechanismPerPaymentPlan)
-class DeliveryMechanismPerPaymentPlanAdmin(HOPEModelAdminBase):
-    list_display = (
-        "financial_service_provider",
-        "delivery_mechanism",
-        "delivery_mechanism_order",
-        "payment_plan",
-        "status",
-        "created_by",
-        "sent_date",
-        "sent_to_payment_gateway",
-    )
-    raw_id_fields = ("payment_plan", "financial_service_provider", "created_by", "sent_by", "delivery_mechanism")
-    list_filter = (
-        ("financial_service_provider", AutoCompleteFilter),
-        ("delivery_mechanism", AutoCompleteFilter),
-        ("payment_plan", AutoCompleteFilter),
-        ("created_by", AutoCompleteFilter),
-        "sent_to_payment_gateway",
-    )
-    search_fields = ("financial_service_provider__name", "payment_plan__unicef_id")
-
-    def get_queryset(self, request: HttpRequest) -> "QuerySet":
-        return (
-            super()
-            .get_queryset(request)
-            .select_related("payment_plan", "financial_service_provider", "created_by", "sent_by", "delivery_mechanism")
-        )
-
-
 @admin.register(FinancialServiceProviderXlsxTemplate)
 class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
     list_display = (
@@ -371,21 +423,9 @@ class FspXlsxTemplatePerDeliveryMechanismForm(forms.ModelForm):
         cleaned_data = super().clean()
         delivery_mechanism = cleaned_data.get("delivery_mechanism")
         financial_service_provider = cleaned_data.get("financial_service_provider")
-        xlsx_template = cleaned_data.get("xlsx_template")
 
         if not delivery_mechanism or not financial_service_provider:
             return cleaned_data
-
-        missing_required_core_fields = [
-            required_field
-            for required_field in delivery_mechanism.required_fields
-            if required_field not in xlsx_template.core_fields
-        ]
-        if missing_required_core_fields:
-            raise ValidationError(
-                f"{missing_required_core_fields} fields are required by delivery mechanism "
-                f"{delivery_mechanism} and must be present in the template core fields"
-            )
 
         error_message = f"Delivery Mechanism {delivery_mechanism} is not supported by Financial Service Provider {financial_service_provider}"
         # to work both in inline and standalone
@@ -446,7 +486,7 @@ class FinancialServiceProviderAdminForm(forms.ModelForm):
                     PaymentPlan.Status.FINISHED,
                 ],
             ),
-            delivery_mechanisms__financial_service_provider=obj,
+            financial_service_provider=obj,
         ).distinct()
 
     def clean(self) -> Optional[Dict[str, Any]]:
@@ -466,6 +506,14 @@ class FinancialServiceProviderAdminForm(forms.ModelForm):
                     )
 
         return super().clean()
+
+
+class FspNameMappingInline(admin.TabularInline):  # or admin.StackedInline
+    model = FspNameMapping
+    extra = 1
+    min_num = 0
+    fields = ("external_name", "hope_name", "source")
+    autocomplete_fields = ("fsp",)
 
 
 class FspXlsxTemplatePerDeliveryMechanismAdminInline(admin.TabularInline):
@@ -503,10 +551,10 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
         ("communication_channel", "fsp_xlsx_templates"),
         ("data_transfer_configuration",),
         ("allowed_business_areas",),
+        ("payment_gateway_id",),
     )
     readonly_fields = ("fsp_xlsx_templates", "data_transfer_configuration")
-    inlines = (FspXlsxTemplatePerDeliveryMechanismAdminInline,)
-    exclude = ("delivery_mechanisms_choices",)
+    inlines = (FspXlsxTemplatePerDeliveryMechanismAdminInline, FspNameMappingInline)
 
     def fsp_xlsx_templates(self, obj: FinancialServiceProvider) -> str:
         return format_html(
@@ -534,34 +582,34 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
         return request.user.can_change_fsp()
 
 
-@admin.register(DeliveryMechanismData)
+@admin.register(Account)
 class DeliveryMechanismDataAdmin(HOPEModelAdminBase):
-    list_display = ("individual", "get_business_area", "get_program", "delivery_mechanism", "is_valid")
+    list_display = ("individual", "get_business_area", "get_program", "account_type", "is_unique")
 
-    raw_id_fields = ("delivery_mechanism", "individual", "possible_duplicate_of")
-    readonly_fields = ("possible_duplicate_of", "unique_key", "signature_hash", "validation_errors")
+    raw_id_fields = ("account_type", "individual")
+    readonly_fields = ("unique_key", "signature_hash")
     search_fields = ("individual__unicef_id",)
     list_filter = (
         ("individual__program__business_area", AutoCompleteFilter),
         ("individual__program", AutoCompleteFilter),
         ("individual", AutoCompleteFilter),
-        ("delivery_mechanism", AutoCompleteFilter),
-        "is_valid",
+        ("account_type", AutoCompleteFilter),
+        "is_unique",
     )
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("individual__program__business_area")
 
-    def get_business_area(self, obj: DeliveryMechanismData) -> BusinessArea:
+    def get_business_area(self, obj: Account) -> BusinessArea:
         return obj.individual.program.business_area
 
-    def get_program(self, obj: DeliveryMechanismData) -> Program:
+    def get_program(self, obj: Account) -> Program:
         return obj.individual.program
 
 
 @admin.register(DeliveryMechanism)
 class DeliveryMechanismAdmin(HOPEModelAdminBase):
-    list_display = ("code", "name", "is_active", "transfer_type")
+    list_display = ("code", "name", "is_active", "transfer_type", "account_type")
     search_fields = ("code", "name")
     list_filter = ("is_active", "transfer_type")
 
@@ -575,3 +623,78 @@ class PaymentPlanSupportingDocumentAdmin(HOPEModelAdminBase):
         "payment_plan",
         "created_by",
     )
+
+
+@admin.register(AccountType)
+class AccountTypeAdmin(HOPEModelAdminBase):
+    list_display = ("key", "unique_fields", "payment_gateway_id")
+    search_fields = ("key", "payment_gateway_id")
+
+
+@admin.register(FinancialInstitution)
+class FinancialInstitutionAdmin(HOPEModelAdminBase):
+    list_display = (
+        "code",
+        "description",
+        "type",
+        "country",
+    )
+    search_fields = ("code",)
+    list_filter = (
+        ("country", AutoCompleteFilter),
+        "type",
+    )
+    raw_id_fields = ("country",)
+
+
+class DeliveryMechanismConfigForm(forms.ModelForm):
+    required_fields = CommaSeparatedArrayField(required=False)
+
+    class Meta:
+        model = DeliveryMechanismConfig
+        fields = [
+            "required_fields",
+            "delivery_mechanism",
+            "fsp",
+            "country",
+        ]  # Add all fields you want to display in the admin
+
+
+@admin.register(DeliveryMechanismConfig)
+class DeliveryMechanismConfigAdmin(HOPEModelAdminBase):
+    form = DeliveryMechanismConfigForm
+
+    list_display = (
+        "id",
+        "delivery_mechanism",
+        "fsp",
+        "country",
+    )
+    search_fields = ("code",)
+    list_filter = (
+        ("delivery_mechanism", AutoCompleteFilter),
+        ("fsp", AutoCompleteFilter),
+        ("country", AutoCompleteFilter),
+    )
+    raw_id_fields = ("delivery_mechanism", "fsp", "country")
+
+
+@admin.register(FinancialInstitutionMapping)
+class FinancialInstitutionMappingAdmin(HOPEModelAdminBase):
+    list_display = (
+        "financial_institution",
+        "financial_service_provider",
+        "code",
+    )
+    search_fields = (
+        "code",
+        "finanacial_institution____code",
+        "finanacial_institution__description",
+        "financial_service_provider__name",
+        "financial_service_provider__vision_vendor_number",
+    )
+    list_filter = (
+        ("financial_institution", AutoCompleteFilter),
+        ("financial_service_provider", AutoCompleteFilter),
+    )
+    raw_id_fields = ("financial_institution", "financial_service_provider")

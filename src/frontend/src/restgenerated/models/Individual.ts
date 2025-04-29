@@ -80,7 +80,6 @@ export type Individual = {
     flex_fields?: any;
     user_fields?: any;
     enrolled_in_nutrition_programme?: boolean | null;
-    administration_of_rutf?: boolean | null;
     deduplication_golden_record_status?: DeduplicationGoldenRecordStatusEnum;
     imported_individual_id?: string | null;
     sanction_list_possible_match?: boolean;
