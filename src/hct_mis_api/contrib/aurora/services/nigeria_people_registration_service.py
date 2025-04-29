@@ -50,6 +50,9 @@ class NigeriaPeopleRegistrationService(GenericRegistrationService):
                 "phone_no_i_c": "individual.phone_no",
                 "estimated_birth_date_i_c": "individual.estimated_birth_date",
                 "account_details": "account_details.data",
+                "photo_i_c": "individual.photo",
+                "national_id_photo_i_c": "document.doc_national-photo",
+                "national_id_no_i_c": "document.doc_national-document_number",
             },
         }
 
@@ -85,10 +88,14 @@ class NigeriaPeopleRegistrationService(GenericRegistrationService):
         national_id = individual_dict.get("national_id_no_i_c")
         if not national_id:
             return None
+        photo = None
+        if photo_base_64 := individual_dict.get("national_id_photo_i_c", None):
+            photo = self._prepare_picture_from_base64(photo_base_64, national_id)
         return PendingDocument.objects.create(
             program=imported_individual.program,
             document_number=national_id,
             individual=imported_individual,
             type=DocumentType.objects.get(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID]),
             country=Country.objects.get(iso_code2="NG"),
+            photo=photo,
         )
