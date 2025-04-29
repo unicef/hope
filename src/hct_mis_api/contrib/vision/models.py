@@ -7,6 +7,9 @@ from hct_mis_api.apps.payment.models import PaymentPlan
 class FundsCommitmentGroup(models.Model):
     funds_commitment_number = models.CharField(max_length=10)
 
+    def __str__(self) -> str:
+        return self.funds_commitment_number
+
 
 class FundsCommitmentItem(models.Model):
     payment_plan = models.ForeignKey(
@@ -79,6 +82,9 @@ class FundsCommitmentItem(models.Model):
         blank=True,
         help_text="This can be a business office or a business area",
     )
+
+    def __str__(self) -> str:
+        return f"{self.funds_commitment_group} - {self.funds_commitment_item}"
 
 
 class FundsCommitment(models.Model):
