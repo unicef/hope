@@ -10,7 +10,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
       style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
     >
       <div
-        class="sc-cSaEAk icLSME"
+        class="sc-fuExOL ibjntz"
       >
         <h6
           class="MuiTypography-root MuiTypography-h6 css-66ugg1-MuiTypography-root"
@@ -42,10 +42,10 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                   color="textSecondary"
                 >
                   <div
-                    class="sc-deSjom gTaQAn"
+                    class="sc-eiwqOE cWyDrR"
                   >
                     <div
-                      class="sc-jHswkR fPQjpo status-box-container"
+                      class="sc-dPKAra dteCAW status-box-container"
                       data-cy="status-container"
                     >
                       In Progress
@@ -73,10 +73,10 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                   color="textSecondary"
                 >
                   <div
-                    class="sc-deSjom gTaQAn"
+                    class="sc-eiwqOE cWyDrR"
                   >
                     <div
-                      class="sc-jHswkR ivMxyA status-box-container"
+                      class="sc-dPKAra bwZazK status-box-container"
                       data-cy="status-container"
                     >
                       High
@@ -104,10 +104,10 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                   color="textSecondary"
                 >
                   <div
-                    class="sc-deSjom gTaQAn"
+                    class="sc-eiwqOE cWyDrR"
                   >
                     <div
-                      class="sc-jHswkR ivMxyA status-box-container"
+                      class="sc-dPKAra bwZazK status-box-container"
                       data-cy="status-container"
                     >
                       Very urgent
@@ -421,10 +421,10 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 class="sc-dycHyt hCGPcL"
                 color="textSecondary"
               >
-                Documentation
+                Grievance Supporting Documents
               </span>
               <div
-                data-cy="label-Documentation"
+                data-cy="label-Grievance Supporting Documents"
               >
                 <span
                   class="sc-jbAkgO kuLorh"

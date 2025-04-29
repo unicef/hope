@@ -23,7 +23,7 @@ def get_manifest() -> Dict[str, Dict[str, str]]:
         try:
             response.raise_for_status()
         except requests.exceptions.HTTPError as e:
-            logger.exception(e)
+            logger.warning(e)
             raise
         return response.json()
 

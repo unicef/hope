@@ -112,7 +112,7 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
         "is_visible",
     )
     search_fields = ("name", "programme_code")
-    raw_id_fields = ("business_area", "data_collecting_type", "beneficiary_group")
+    raw_id_fields = ("business_area", "data_collecting_type", "beneficiary_group", "admin_areas")
     filter_horizontal = ("admin_areas", "partners")
 
     inlines = (ProgramCycleAdminInline,)
@@ -135,7 +135,7 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
         )
 
     @button(
-        permission="targeting.add_targetpopulation",
+        permission="payment.add_paymentplan",
     )
     def create_target_population_from_list(self, request: HttpRequest, pk: str) -> Optional[HttpResponse]:
         context = self.get_common_context(request, title="Create TargetPopulation")

@@ -12,6 +12,7 @@ import { SelectFilter } from '@core/SelectFilter';
 import { FiltersSection } from '@core/FiltersSection';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface RegistrationFiltersProps {
   filter;
@@ -21,7 +22,7 @@ interface RegistrationFiltersProps {
   setAppliedFilter: (filter) => void;
 }
 
-export const RegistrationFilters = ({
+const RegistrationFilters = ({
   filter,
   setFilter,
   initialFilter,
@@ -142,3 +143,5 @@ export const RegistrationFilters = ({
     </FiltersSection>
   );
 };
+
+export default withErrorBoundary(RegistrationFilters, 'RegistrationFilters');

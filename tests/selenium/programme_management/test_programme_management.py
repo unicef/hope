@@ -676,7 +676,7 @@ class TestComeBackScenarios:
         pageProgrammeManagement.getButtonNext().click()
         # 3rd step (Partners)
         pageProgrammeManagement.getAccessToProgram().click()
-        webdriver.ActionChains(pageProgrammeManagement.driver).send_keys(Keys.ESCAPE).perform()  # type: ignore
+        webdriver.ActionChains(pageProgrammeManagement.driver).send_keys(Keys.ESCAPE).perform()
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
         pageProgrammeDetails.wait_for_text("New Programme", pageProgrammeDetails.headerTitle)

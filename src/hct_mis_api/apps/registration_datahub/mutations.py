@@ -69,7 +69,6 @@ def create_registration_data_import_objects(
     registration_data_import_data: Dict,
     user: "User",
     data_source: str,
-    allow_delivery_mechanisms_validation_errors: bool = False,
 ) -> Tuple[RegistrationDataImport, ImportData, BusinessArea]:
     import_data_id = decode_id_string(registration_data_import_data.pop("import_data_id"))
     import_data_obj = ImportData.objects.get(id=import_data_id)
@@ -88,7 +87,6 @@ def create_registration_data_import_objects(
         pull_pictures=pull_pictures,
         screen_beneficiary=screen_beneficiary,
         program_id=program_id,
-        allow_delivery_mechanisms_validation_errors=allow_delivery_mechanisms_validation_errors,
         import_data=import_data_obj,
         **registration_data_import_data,
     )
@@ -147,14 +145,9 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
         registration_data_import_data = RegistrationXlsxImportMutationInput(required=True)
 
     @classmethod
-    def validate_import_data(
-        cls, import_data_id: Optional[str], allow_delivery_mechanisms_validation_errors: bool = False
-    ) -> None:
+    def validate_import_data(cls, import_data_id: Optional[str]) -> None:
         import_data = get_object_or_404(ImportData, id=decode_id_string(import_data_id))
-        if import_data.status != ImportData.STATUS_FINISHED and not (
-            import_data.status == ImportData.STATUS_DELIVERY_MECHANISMS_VALIDATION_ERROR
-            and allow_delivery_mechanisms_validation_errors
-        ):
+        if import_data.status != ImportData.STATUS_FINISHED:
             raise ValidationError("Cannot import file containing validation errors")
 
         if import_data.number_of_households == 0 and import_data.number_of_individuals == 0:  # pragma: no cover
@@ -166,12 +159,7 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
     def processed_mutate(
         cls, root: Any, info: Any, registration_data_import_data: Dict
     ) -> "RegistrationXlsxImportMutation":
-        allow_delivery_mechanisms_validation_errors = registration_data_import_data.pop(
-            "allow_delivery_mechanisms_validation_errors", False
-        )
-        cls.validate_import_data(
-            registration_data_import_data.import_data_id, allow_delivery_mechanisms_validation_errors
-        )
+        cls.validate_import_data(registration_data_import_data.import_data_id)
 
         program_id: str = decode_id_string_required(info.context.headers.get("Program"))
         program = Program.objects.get(id=program_id)
@@ -183,9 +171,7 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
             created_obj_hct,
             import_data_obj,
             business_area,
-        ) = create_registration_data_import_objects(
-            registration_data_import_data, info.context.user, "XLS", allow_delivery_mechanisms_validation_errors
-        )
+        ) = create_registration_data_import_objects(registration_data_import_data, info.context.user, "XLS")
 
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area)
 
@@ -302,7 +288,7 @@ class RegistrationDeduplicationMutation(BaseValidator, PermissionMutation):
     @classmethod
     def validate_object_status(cls, rdi_obj: RegistrationDataImport, *args: Any, **kwargs: Any) -> None:
         if rdi_obj.status != RegistrationDataImport.DEDUPLICATION_FAILED:
-            logger.error(
+            logger.warning(
                 "Deduplication can only be called when Registration Data Import status is Deduplication Failed"
             )
             raise ValidationError(
@@ -350,12 +336,7 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, Validati
     def processed_mutate(
         cls, root: Any, info: Any, registration_data_import_data: Dict
     ) -> RegistrationXlsxImportMutation:
-        allow_delivery_mechanisms_validation_errors = registration_data_import_data.pop(
-            "allow_delivery_mechanisms_validation_errors", False
-        )
-        RegistrationXlsxImportMutation.validate_import_data(
-            registration_data_import_data.import_data_id, allow_delivery_mechanisms_validation_errors
-        )
+        RegistrationXlsxImportMutation.validate_import_data(registration_data_import_data.import_data_id)
 
         program_id: str = decode_id_string_required(info.context.headers.get("Program"))
         program = Program.objects.get(id=program_id)
@@ -367,9 +348,7 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, Validati
             created_obj_hct,
             import_data_obj,
             business_area,
-        ) = create_registration_data_import_objects(
-            registration_data_import_data, info.context.user, "KOBO", allow_delivery_mechanisms_validation_errors
-        )
+        ) = create_registration_data_import_objects(registration_data_import_data, info.context.user, "KOBO")
 
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area)
 
@@ -451,7 +430,7 @@ class RefuseRegistrationDataImportMutation(BaseValidator, PermissionMutation):
     def validate_object_status(cls, *args: Any, **kwargs: Any) -> None:
         status = kwargs.get("status")
         if status != RegistrationDataImport.IN_REVIEW:
-            logger.error("Only In Review Registration Data Import can be refused")
+            logger.warning("Only In Review Registration Data Import can be refused")
             raise ValidationError("Only In Review Registration Data Import can be refused")
 
     @classmethod
@@ -518,7 +497,7 @@ class EraseRegistrationDataImportMutation(PermissionMutation):
             RegistrationDataImport.DEDUPLICATION_FAILED,
         ):
             msg = "RDI can be erased only when status is: IMPORT_ERROR, MERGE_ERROR, DEDUPLICATION_FAILED"
-            logger.error(msg)
+            logger.warning(msg)
             raise GraphQLError(msg)
 
         Household.all_objects.filter(registration_data_import=obj_hct).delete()

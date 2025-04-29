@@ -246,13 +246,13 @@ class AreaAdmin(ValidityManagerMixin, FieldsetMixin, SyncMixin, HOPEModelAdminBa
                     self.message_user(request, f"Updated all areas for {country}")
                     return redirect("admin:geo_area_changelist")
                 except IntegrityError as e:
-                    logger.error(f"Integrity error: {e}")
+                    logger.warning(f"Integrity error: {e}")
                     if p_code := str(e).split("p_code)=(")[-1].split(")")[0]:
                         self.message_user(
                             request, f"Area with p_code {p_code} already exists but with different data", messages.ERROR
                         )
                 except Exception as e:
-                    logger.error(e)
+                    logger.warning(e)
                     self.message_user(request, "Unable to load areas, please check the format", messages.ERROR)
         else:
             form = ImportCSVForm()

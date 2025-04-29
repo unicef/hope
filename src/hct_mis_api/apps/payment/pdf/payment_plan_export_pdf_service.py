@@ -64,10 +64,8 @@ class PaymentPlanPDFExportService:
         else:
             template_name = "payment/payment_plan_summary_pdf_template.html"
         filename = f"PaymentPlanSummary-{self.payment_plan.unicef_id}.pdf"
-        delivery_mechanism_per_payment_plan = self.payment_plan.delivery_mechanisms.select_related(
-            "financial_service_provider"
-        ).first()
-        fsp = delivery_mechanism_per_payment_plan.financial_service_provider
+        fsp = self.payment_plan.financial_service_provider
+        delivery_mechanism = self.payment_plan.delivery_mechanism
 
         approval_process = self.payment_plan.approval_process.first()
         approval = approval_process.approvals.filter(type=Approval.APPROVAL).first()
@@ -87,7 +85,7 @@ class PaymentPlanPDFExportService:
             "title": self.payment_plan.unicef_id,
             "payment_plan": self.payment_plan,
             "fsp": fsp,
-            "delivery_mechanism_per_payment_plan": delivery_mechanism_per_payment_plan.delivery_mechanism,
+            "delivery_mechanism_per_payment_plan": delivery_mechanism,
             "approval_process": self.payment_plan.approval_process.first(),
             "payment_plan_link": self.payment_plan_link,
             "approval": approval,

@@ -666,7 +666,7 @@ snapshots['TestIndividualQuery::test_query_individuals_by_search_phone_no_filter
     ]
 }
 
-snapshots['TestIndividualQuery::test_query_individuals_by_search_registration_id_filter_0_with_permission 1'] = {
+snapshots['TestIndividualQuery::test_query_individuals_by_search_detail_id_filter_0_with_permission 1'] = {
     'data': {
         'allIndividuals': {
             'edges': [
@@ -685,7 +685,7 @@ snapshots['TestIndividualQuery::test_query_individuals_by_search_registration_id
     }
 }
 
-snapshots['TestIndividualQuery::test_query_individuals_by_search_registration_id_filter_1_without_permission 1'] = {
+snapshots['TestIndividualQuery::test_query_individuals_by_search_detail_id_filter_1_without_permission 1'] = {
     'data': {
         'allIndividuals': None
     },
@@ -705,7 +705,7 @@ snapshots['TestIndividualQuery::test_query_individuals_by_search_registration_id
     ]
 }
 
-snapshots['TestIndividualQuery::test_query_individuals_by_search_registration_id_filter_with_search_type_0_with_permission 1'] = {
+snapshots['TestIndividualQuery::test_query_individuals_by_search_detail_id_filter_with_search_type_0_with_permission 1'] = {
     'data': {
         'allIndividuals': {
             'edges': [
@@ -724,7 +724,7 @@ snapshots['TestIndividualQuery::test_query_individuals_by_search_registration_id
     }
 }
 
-snapshots['TestIndividualQuery::test_query_individuals_by_search_registration_id_filter_with_search_type_1_without_permission 1'] = {
+snapshots['TestIndividualQuery::test_query_individuals_by_search_detail_id_filter_with_search_type_1_without_permission 1'] = {
     'data': {
         'allIndividuals': None
     },
@@ -812,20 +812,18 @@ snapshots['TestIndividualQuery::test_query_individuals_by_search_without_search_
     ]
 }
 
-snapshots['TestIndividualWithDeliveryMechanismsDataQuery::test_individual_query_delivery_mechanisms_data_0_with_permissions 1'] = {
+snapshots['TestIndividualWithDeliveryMechanismsDataQuery::test_individual_query_accounts_0_with_permissions 1'] = {
     'data': {
         'individual': {
             'birthDate': '1943-07-30',
-            'deliveryMechanismsData': [
+            'accounts': [
                 {
-                    'individualTabData': '{"card_number__atm_card": "123", "card_expiry_date__atm_card": "2022-01-01", "name_of_cardholder__atm_card": "Marek"}',
-                    'isValid': True,
-                    'name': 'ATM Card'
+                    'individualTabData': '{"card_expiry_date": "2022-01-01", "card_number": "123", "name_of_cardholder": "Marek", "number": "123", "financial_institution": "ABC"}',
+                    'name': 'Bank'
                 },
                 {
-                    'individualTabData': '{"delivery_phone_number__mobile_money": "123456789", "provider__mobile_money": "Provider", "service_provider_code__mobile_money": "ABC"}',
-                    'isValid': False,
-                    'name': 'Mobile Money'
+                    'individualTabData': '{"delivery_phone_number": "123456789", "provider": "Provider", "service_provider_code": "ABC", "number": "321", "financial_institution": "ABC"}',
+                    'name': 'Mobile'
                 }
             ],
             'familyName': 'Butler',
@@ -836,16 +834,17 @@ snapshots['TestIndividualWithDeliveryMechanismsDataQuery::test_individual_query_
     }
 }
 
-snapshots['TestIndividualWithDeliveryMechanismsDataQuery::test_individual_query_delivery_mechanisms_data_1_without_permissions 1'] = {
+snapshots['TestIndividualWithDeliveryMechanismsDataQuery::test_individual_query_accounts_1_without_permissions 1'] = {
     'data': {
         'individual': {
             'birthDate': '1943-07-30',
-            'deliveryMechanismsData': [
+            'accounts': [
             ],
             'familyName': 'Butler',
             'fullName': 'Benjamin Butler',
             'givenName': 'Benjamin',
             'phoneNo': '(953)682-4596'
+            ''
         }
     }
 }

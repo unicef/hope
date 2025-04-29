@@ -68,6 +68,8 @@ class TestGenericRegistrationService(TestCase):
                 "disability_id_photo_i_c": "document.disability_certificate-photo",
             },
             "flex_fields": ["marketing.can_unicef_contact_you", "enumerators", "macioce"],
+            "household_constances": {"zip_code": "00126"},
+            "individual_constances": {"pregnant": True},
         }
         cls.registration = RegistrationFactory(name="fake_registration", project=cls.project, mapping=mapping)
 
@@ -280,6 +282,7 @@ class TestGenericRegistrationService(TestCase):
         self.assertEqual(PendingHousehold.objects.count(), 1)
 
         household = PendingHousehold.objects.first()
+        self.assertEqual(household.zip_code, "00126")
         self.assertEqual(household.flex_fields["ff"], "random")
         self.assertEqual(household.flex_fields["enumerators"], "ABC")
         self.assertEqual(household.flex_fields["marketing_can_unicef_contact_you"], "YES")
@@ -295,6 +298,7 @@ class TestGenericRegistrationService(TestCase):
                 "sex": "MALE",
                 "email": "email123@mail.com",
                 "phone_no": "+393892781511",
+                "pregnant": True,
             }
         )
         self.assertEqual(PendingIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).count(), 1)

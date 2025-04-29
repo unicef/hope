@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Tooltip, Box } from '@mui/material';
 import { AddCircleOutline } from '@mui/icons-material';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 export const ContentWrapper = styled(Box)`
   display: flex;
@@ -31,7 +32,7 @@ const AddCriteria = styled.div`
   }
 `;
 
-export function TargetingCriteriaDisplayDisabled({
+function TargetingCriteriaDisplayDisabled({
   showTooltip = false,
 }): ReactElement {
   const { t } = useTranslation();
@@ -69,3 +70,8 @@ export function TargetingCriteriaDisplayDisabled({
     </>
   );
 }
+
+export default withErrorBoundary(
+  TargetingCriteriaDisplayDisabled,
+  'TargetingCriteriaDisplayDisabled',
+);
