@@ -309,7 +309,6 @@ class TestIndividualList:
             assert len(response.json()["results"]) == 4
             assert len(ctx.captured_queries) == 22
 
-        # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
             response = self.api_client.get(self.list_url)
             assert response.status_code == status.HTTP_200_OK
@@ -327,7 +326,6 @@ class TestIndividualList:
             etag_third_call = response.headers["etag"]
             assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
             assert etag_third_call not in [etag, etag_second_call]
-            # 5 queries are saved because of cached permissions calculations
             assert len(ctx.captured_queries) == 17
 
         set_admin_area_limits_in_program(self.partner, self.program, [self.area1])
@@ -350,7 +348,6 @@ class TestIndividualList:
             assert etag_fourth_call not in [etag, etag_second_call, etag_third_call, etag_changed_areas]
             assert len(ctx.captured_queries) == 16
 
-        # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
             response = self.api_client.get(self.list_url)
             assert response.status_code == status.HTTP_200_OK
@@ -358,6 +355,48 @@ class TestIndividualList:
             etag_fifth_call = response.headers["etag"]
             assert etag_fifth_call == etag_fourth_call
             assert len(ctx.captured_queries) == 10
+
+    def test_individual_list_deduplication_result_serializer(self, create_user_role_with_permissions: Any) -> None:
+        _, (duplicate_individual,) = create_household_and_individuals(
+            household_data={
+                "program": self.program,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[{"full_name": "das asd asd", "birth_date": "1981-03-11"}],
+        )
+        self.individual1_1.deduplication_golden_record_status = DUPLICATE
+        self.individual1_1.deduplication_golden_record_results = {
+            "duplicates": [
+                {
+                    "dob": "1981-03-11",
+                    "score": 25.0,
+                    "hit_id": str(duplicate_individual.id),
+                    "location": None,
+                    "full_name": duplicate_individual.full_name,
+                    "proximity_to_score": 14.0,
+                }
+            ],
+            "possible_duplicates": [],
+        }
+        self.individual1_1.save()
+
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.POPULATION_VIEW_INDIVIDUALS_LIST],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+        response = self.api_client.get(self.list_url)
+        assert response.status_code == status.HTTP_200_OK
+        results = response.json()["results"]
+        ind = next(r for r in results if r["id"] == str(self.individual1_1.id))
+        assert "deduplication_golden_record_results" in ind
+        assert ind["deduplication_golden_record_results"][0]["hit_id"] == str(duplicate_individual.id)
+        assert ind["deduplication_golden_record_results"][0]["full_name"] == "das asd asd"
+        assert ind["deduplication_golden_record_results"][0]["age"] == 44
+        assert ind["deduplication_golden_record_results"][0]["score"] == 25.0
+        assert ind["deduplication_golden_record_results"][0]["proximity_to_score"] == 14.0
+        assert ind["deduplication_golden_record_results"][0]["location"] is None
 
 
 class TestIndividualDetail:
@@ -416,7 +455,6 @@ class TestIndividualDetail:
             individuals_data=[{}, {}],
         )
 
-        # self.individual1 is PRIMARY collector in self.household and ALTERNATE in self.household2
         self.role_primary = IndividualRoleInHouseholdFactory(
             individual=self.individual1,
             household=self.household,
@@ -432,11 +470,9 @@ class TestIndividualDetail:
         self.individual1.duplicate = True
         self.individual1.save()
 
-        # linked tickets
         self.grievance_ticket = GrievanceTicketFactory(household_unicef_id=self.household.unicef_id)
-        GrievanceTicketFactory()  # not linked ticket
+        GrievanceTicketFactory()
 
-        # flex fields
         self.individual1.flex_fields = {
             "wellbeing_index_i_f": 24,
             "school_enrolled_before_i_f": 1,
@@ -462,7 +498,6 @@ class TestIndividualDetail:
             pdu_data=pdu_data_2,
         )
         self.individual1.flex_fields = populate_pdu_with_null_values(self.program, self.individual1.flex_fields)
-        # populate some values - in the response only populated values should be returned
         self.individual1.flex_fields["pdu_field_1"]["1"] = {
             "value": 123.45,
             "collection_date": "2021-01-01",
@@ -477,7 +512,6 @@ class TestIndividualDetail:
         }
         self.individual1.save()
 
-        # documents
         self.national_id_type = DocumentTypeFactory(key="national_id")
         self.national_passport_type = DocumentTypeFactory(key="national_passport")
         self.tax_id_type = DocumentTypeFactory(key="tax_id")
@@ -532,20 +566,17 @@ class TestIndividualDetail:
             country=self.country,
         )
 
-        # bank account info
         self.bank_account_info = BankAccountInfoFactory(
             individual=self.individual1,
             bank_name="ING",
             bank_account_number=11110000222255558888999925,
         )
 
-        # identity
         self.identity = IndividualIdentityFactory(
             country=self.country,
             individual=self.individual1,
         )
 
-        # delivery mechanisms data
         generate_delivery_mechanisms()
         self.account_type_bank = AccountType.objects.get(key="bank")
         self.dm_atm_card_data = DeliveryMechanismDataFactory(

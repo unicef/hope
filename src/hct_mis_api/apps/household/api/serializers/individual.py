@@ -11,7 +11,6 @@ from rest_framework.utils.serializer_helpers import ReturnDict
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.utils import (
     decode_id_string,
-    encode_ids,
     resolve_flex_fields_choices_to_string,
 )
 from hct_mis_api.apps.geo.models import Country
@@ -268,7 +267,6 @@ class IndividualListSerializer(serializers.ModelSerializer):
     def get_deduplication_batch_results(self, obj: Individual) -> ReturnDict:
         key = "duplicates" if obj.deduplication_batch_status == DUPLICATE_IN_BATCH else "possible_duplicates"
         results = obj.deduplication_batch_results.get(key, {})
-        results = encode_ids(results, "Individual", "hit_id")
         serializer = DeduplicationResultSerializer(results, many=True, context=self.context)
         return serializer.data
 
@@ -282,7 +280,6 @@ class IndividualListSerializer(serializers.ModelSerializer):
     def get_deduplication_golden_record_results(self, obj: Individual) -> ReturnDict:
         key = "duplicates" if obj.deduplication_golden_record_status == DUPLICATE else "possible_duplicates"
         results = obj.deduplication_golden_record_results.get(key, {})
-        results = encode_ids(results, "Individual", "hit_id")
         serializer = DeduplicationResultSerializer(results, many=True, context=self.context)
         return serializer.data
 

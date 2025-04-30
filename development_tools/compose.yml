@@ -26,6 +26,7 @@ services:
     volumes:
       - ../src:/app/src
       - ../tests:/app/tests
+      - ../htmlcov:/app/htmlcov
       - backend-data:/data
       - ../pyproject.toml:/app/pyproject.toml
       - ../uv.lock:/packages/uv.lock
