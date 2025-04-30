@@ -332,6 +332,7 @@ class CopyProgramPopulation:
             account.pk = None
             account.individual = individual_representation
             account.rdi_merge_status = rdi_merge_status
+            account.unique_key = None
             accounts_list.append(account)
         return accounts_list
 
