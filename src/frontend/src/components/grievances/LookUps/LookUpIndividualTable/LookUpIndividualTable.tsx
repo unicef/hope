@@ -8,7 +8,7 @@ import { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndi
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { adjustHeadCells, decodeIdString } from '@utils/utils';
-import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { ReactElement, useMemo, useState } from 'react';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import {

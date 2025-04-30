@@ -17,7 +17,7 @@ class HouseholdListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
     def _get_queryset(
         self, business_area_slug: Optional[Any], program_slug: Optional[Any], view_instance: Optional[Any]
     ) -> QuerySet:
-        return Household.objects.filter(
+        return Household.all_merge_status_objects.filter(
             program__slug=program_slug,
             business_area__slug=business_area_slug,
         )
@@ -29,7 +29,7 @@ class IndividualListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
     def _get_queryset(
         self, business_area_slug: Optional[Any], program_slug: Optional[Any], view_instance: Optional[Any]
     ) -> QuerySet:
-        return Individual.objects.filter(
+        return Individual.all_merge_status_objects.filter(
             program__slug=program_slug,
             business_area__slug=business_area_slug,
         )

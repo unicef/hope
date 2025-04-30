@@ -18,7 +18,7 @@ import {
   formatCurrencyWithSymbol,
   householdStatusToColor,
 } from '@utils/utils';
-import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { ReactElement, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';

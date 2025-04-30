@@ -74,6 +74,7 @@ import type { PushPeople } from '../models/PushPeople';
 import type { RDI } from '../models/RDI';
 import type { RDINested } from '../models/RDINested';
 import type { RefuseRdi } from '../models/RefuseRdi';
+import type { RegistrationDataImportCreate } from '../models/RegistrationDataImportCreate';
 import type { RegistrationDataImportDetail } from '../models/RegistrationDataImportDetail';
 import type { RevertMarkPaymentAsFailed } from '../models/RevertMarkPaymentAsFailed';
 import type { SplitPaymentPlan } from '../models/SplitPaymentPlan';
@@ -4444,6 +4445,31 @@ export class RestService {
      * @returns RegistrationDataImportDetail
      * @throws ApiError
      */
+    public static restBusinessAreasProgramsRegistrationDataImportsCreate({
+        businessAreaSlug,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        requestBody: RegistrationDataImportCreate,
+    }): CancelablePromise<RegistrationDataImportDetail> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns RegistrationDataImportDetail
+     * @throws ApiError
+     */
     public static restBusinessAreasProgramsRegistrationDataImportsRetrieve({
         businessAreaSlug,
         id,
@@ -4614,6 +4640,27 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/run-deduplication/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns Choice
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsRegistrationDataImportsStatusChoicesList({
+        businessAreaSlug,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+    }): CancelablePromise<Array<Choice>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/registration-data-imports/status-choices/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,

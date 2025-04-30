@@ -118,6 +118,12 @@ class ProgramMixin:
 
         return get_object_or_404(Program, slug=self.program_slug, business_area__slug=self.business_area_slug)
 
+    def get_serializer_context(self) -> dict:
+        context = super().get_serializer_context()
+        context["program"] = self.program
+        context["business_area"] = self.business_area
+        return context
+
     def get_queryset(self) -> QuerySet:
         return (
             super()

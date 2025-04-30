@@ -38,7 +38,6 @@ import { BulkAddNoteModal } from './bulk/BulkAddNoteModal';
 import { BulkAssignModal } from './bulk/BulkAssignModal';
 import { BulkSetPriorityModal } from './bulk/BulkSetPriorityModal';
 import { BulkSetUrgencyModal } from './bulk/BulkSetUrgencyModal';
-import { Profile } from '@restgenerated/models/Profile';
 
 interface GrievancesTableProps {
   filter;
@@ -48,7 +47,7 @@ interface GrievancesTableProps {
 export const GrievancesTable = ({
   filter,
 }: GrievancesTableProps): ReactElement => {
-  const { businessArea, programId, isAllPrograms } = useBaseUrl();
+  const { businessArea, businessAreaSlug, programSlug, isAllPrograms } = useBaseUrl();
   const { isSocialDctType, selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { t } = useTranslation();
@@ -90,7 +89,7 @@ export const GrievancesTable = ({
     priority: filter.priority === 'Not Set' ? 0 : filter.priority,
     urgency: filter.urgency === 'Not Set' ? 0 : filter.urgency,
     preferredLanguage: filter.preferredLanguage,
-    program: isAllPrograms ? filter.program : programId,
+    program: isAllPrograms ? filter.program : programSlug,
     isActiveProgram: filter.programState === 'active' ? true : null,
     isCrossArea: filter.areaScope === 'cross-area' ? true : null,
   };
@@ -138,15 +137,17 @@ export const GrievancesTable = ({
   const { data: choicesData, loading: choicesLoading } =
     useGrievancesChoiceDataQuery();
 
-  const { data: currentUserData, isLoading: currentUserDataLoading } =
-    useQuery<Profile>({
-      queryKey: ['profile', businessArea],
+  const { data: currentUserData, isLoading: currentUserDataLoading } = useQuery(
+    {
+      queryKey: ['profile', businessAreaSlug, programSlug],
       queryFn: () => {
         return RestService.restBusinessAreasUsersProfileRetrieve({
-          businessAreaSlug: businessArea,
+          businessAreaSlug,
+          program: programSlug === 'all' ? undefined : programSlug,
         });
       },
-    });
+    },
+  );
 
   const permissions = usePermissions();
 

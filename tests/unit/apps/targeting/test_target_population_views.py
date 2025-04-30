@@ -226,7 +226,7 @@ class TestTargetPopulationViews:
 
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 16  # 12
+            assert len(ctx.captured_queries) == 18
 
         # Test that reoccurring requests use cached data
         with CaptureQueriesContext(connection) as ctx:

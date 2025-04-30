@@ -26,6 +26,7 @@ services:
     volumes:
       - ../src:/app/src
       - ../tests:/app/tests
+      - ../htmlcov:/app/htmlcov
       - backend-data:/data
       - ../pyproject.toml:/app/pyproject.toml
       - ../uv.lock:/packages/uv.lock
@@ -155,7 +156,7 @@ services:
       - cluster.name=es-docker-cluster
       - cluster.initial_master_nodes=es01
       - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
       - xpack.security.enabled=false
     ulimits:
       memlock:

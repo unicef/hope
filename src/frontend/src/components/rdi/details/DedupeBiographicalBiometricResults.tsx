@@ -25,7 +25,7 @@ import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { MiśTheme } from '../../../theme';
 import BiometricsResultsRdi from './BiometricsResultsRdi';
-import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import { IndividualList } from '@restgenerated/models/IndividualList';
 
 const Error = styled.span`
   color: ${({ theme }: { theme: MiśTheme }) => theme.hctPalette.red};
@@ -43,7 +43,7 @@ const StyledTable = styled(Table)`
 `;
 
 interface DedupeBiographicalBiometricResultsProps {
-  individual: IndividualDetail;
+  individual: IndividualList;
   status: string;
   results: Array<DeduplicationResultNode>;
   biometricResults: Array<DeduplicationEngineSimilarityPairIndividualNode>;

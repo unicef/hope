@@ -5,6 +5,7 @@ from django.db import transaction
 
 from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -24,13 +25,18 @@ from hct_mis_api.apps.core.api.mixins import (
     ProgramMixin,
     SerializerActionMixin,
 )
-from hct_mis_api.apps.core.utils import check_concurrency_version_in_mutation
+from hct_mis_api.apps.core.api.serializers import ChoiceSerializer
+from hct_mis_api.apps.core.utils import (
+    check_concurrency_version_in_mutation,
+    to_choice_object,
+)
 from hct_mis_api.apps.household.documents import get_individual_doc
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.api.caches import RDIKeyConstructor
 from hct_mis_api.apps.registration_data.api.serializers import (
     RefuseRdiSerializer,
+    RegistrationDataImportCreateSerializer,
     RegistrationDataImportDetailSerializer,
     RegistrationDataImportListSerializer,
 )
@@ -41,6 +47,7 @@ from hct_mis_api.apps.registration_datahub.celery_tasks import (
     fetch_biometric_deduplication_results_and_process,
     merge_registration_data_import_task,
     rdi_deduplication_task,
+    registration_program_population_import_task,
 )
 from hct_mis_api.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
@@ -62,6 +69,8 @@ class RegistrationDataImportViewSet(
         "list": RegistrationDataImportListSerializer,
         "retrieve": RegistrationDataImportDetailSerializer,
         "refuse": RefuseRdiSerializer,
+        "create": RegistrationDataImportCreateSerializer,
+        "status_choices": ChoiceSerializer,
     }
     permissions_by_action = {
         "list": [
@@ -70,11 +79,15 @@ class RegistrationDataImportViewSet(
         "retrieve": [
             Permissions.RDI_VIEW_DETAILS,
         ],
+        "create": [Permissions.RDI_IMPORT_DATA],
         "merge": [Permissions.RDI_MERGE_IMPORT],
         "erase": [Permissions.RDI_REFUSE_IMPORT],
         "refuse": [Permissions.RDI_REFUSE_IMPORT],
         "deduplicate": [Permissions.RDI_RERUN_DEDUPE],
         "run_deduplication": [Permissions.RDI_RERUN_DEDUPE],
+        "status_choices": [
+            Permissions.RDI_VIEW_LIST,
+        ],
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = RegistrationDataImportFilter
@@ -222,3 +235,75 @@ class RegistrationDataImportViewSet(
             rdi,
         )
         return Response(status=status.HTTP_200_OK, data={"message": "Registration Data Import Erased"})
+
+    @extend_schema(
+        request=RegistrationDataImportCreateSerializer,
+        responses=RegistrationDataImportDetailSerializer,
+    )
+    @transaction.atomic
+    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        registration_data_import = serializer.get_object(serializer.validated_data)
+        import_from_program_id = serializer.validated_data["import_from_program_id"]
+        import_from_program = Program.objects.get(id=import_from_program_id)
+        if self.program.status == Program.FINISHED:
+            raise ValidationError("In order to proceed this action, program status must not be finished.")
+
+        if self.program.beneficiary_group != import_from_program.beneficiary_group:
+            raise ValidationError("Cannot import data from a program with a different Beneficiary Group.")
+
+        if (
+            self.program.data_collecting_type.code != import_from_program.data_collecting_type.code
+            and self.program.data_collecting_type not in import_from_program.data_collecting_type.compatible_types.all()
+        ):
+            raise ValidationError("Cannot import data from a program with not compatible data collecting type.")
+        if (
+            registration_data_import.should_check_against_sanction_list()
+            and not registration_data_import.should_check_against_sanction_list()
+        ):
+            raise ValidationError("Cannot check against sanction list")
+
+        if registration_data_import.number_of_households == 0 and registration_data_import.number_of_individuals == 0:
+            raise ValidationError("This action would result in importing 0 households and 0 individuals.")
+        registration_data_import.status = RegistrationDataImport.IMPORT_SCHEDULED
+        registration_data_import.deduplication_engine_status = (
+            RegistrationDataImport.DEDUP_ENGINE_PENDING if self.program.biometric_deduplication_enabled else None
+        )
+        registration_data_import.save(update_fields=["status", "deduplication_engine_status"])
+        transaction.on_commit(
+            lambda: registration_program_population_import_task.delay(
+                registration_data_import_id=str(registration_data_import.id),
+                business_area_id=str(registration_data_import.business_area.id),
+                import_from_program_id=str(import_from_program_id),
+                import_to_program_id=str(self.program.id),
+            )
+        )
+        log_create(
+            RegistrationDataImport.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            request.user,
+            self.program.id,
+            None,
+            registration_data_import,
+        )
+
+        detail_serializer = RegistrationDataImportDetailSerializer(
+            registration_data_import, context=self.get_serializer_context()
+        )
+        return Response(detail_serializer.data, status=status.HTTP_201_CREATED)
+
+    @extend_schema(
+        responses=ChoiceSerializer(many=True),
+        filters=False,
+    )
+    @action(
+        detail=False,
+        methods=["get"],
+        pagination_class=None,
+        url_path="status-choices",
+    )
+    def status_choices(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        status_choices = to_choice_object(RegistrationDataImport.STATUS_CHOICE)
+
+        return Response(status=200, data=self.get_serializer(status_choices, many=True).data)
