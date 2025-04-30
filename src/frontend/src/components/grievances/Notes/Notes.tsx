@@ -19,7 +19,6 @@ import { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { Profile } from '@restgenerated/models/Profile';
 
 const Name = styled.span`
   font-size: 16px;
@@ -46,13 +45,14 @@ export function Notes({
   canAddNote: boolean;
 }): ReactElement {
   const { t } = useTranslation();
-  const { businessArea } = useBaseUrl();
+  const { businessAreaSlug, programSlug } = useBaseUrl();
 
-  const { data: meData, isLoading: meLoading } = useQuery<Profile>({
-    queryKey: ['profile', businessArea],
+  const { data: meData, isLoading: meLoading } = useQuery({
+    queryKey: ['profile', businessAreaSlug, programSlug],
     queryFn: () => {
       return RestService.restBusinessAreasUsersProfileRetrieve({
-        businessAreaSlug: businessArea,
+        businessAreaSlug,
+        program: programSlug === 'all' ? undefined : programSlug,
       });
     },
   });

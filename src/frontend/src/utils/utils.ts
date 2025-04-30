@@ -1224,11 +1224,13 @@ export function adjustHeadCells<T>(
   });
 }
 
+/* eslint-disable @typescript-eslint/no-unused-vars,
+              @typescript-eslint/no-shadow */
 export const filterEmptyParams = (params) => {
   if (!params) return {};
 
   return Object.fromEntries(
-    Object.entries(params).filter(([_, value]) => {
+    Object.entries(params).filter(([, value]) => {
       // Handle basic empty values
       if (
         value === undefined ||
@@ -1274,7 +1276,8 @@ export const filterEmptyParams = (params) => {
     }),
   );
 };
-
+/* eslint-enable @typescript-eslint/no-unused-vars,
+                 @typescript-eslint/no-shadow */
 export function deepCamelize(data) {
   if (_.isArray(data)) {
     return data.map(deepCamelize);

@@ -36,10 +36,6 @@ mutation CreateAccountabilityCommunicationMessage (
       paymentPlan {
         name
       }
-      registrationDataImport {
-        name
-        status
-      }
       fullListArguments
       randomSamplingArguments
       sampleSize

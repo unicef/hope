@@ -15,7 +15,6 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
-import { Profile } from '@restgenerated/models/Profile';
 
 const initialFilter = {
   type: '',
@@ -27,18 +26,19 @@ const initialFilter = {
 
 function ReportingPage(): ReactElement {
   const { t } = useTranslation();
-  const { businessArea } = useBaseUrl();
+  const { businessAreaSlug, programSlug } = useBaseUrl();
   const permissions = usePermissions();
   const location = useLocation();
 
   const { data: choicesData, loading: choicesLoading } =
     useReportChoiceDataQuery();
 
-  const { data: meData, isLoading: meLoading } = useQuery<Profile>({
-    queryKey: ['profile', businessArea],
+  const { data: meData, isLoading: meLoading } = useQuery({
+    queryKey: ['profile', businessAreaSlug, programSlug],
     queryFn: () => {
       return RestService.restBusinessAreasUsersProfileRetrieve({
-        businessAreaSlug: businessArea,
+        businessAreaSlug,
+        program: programSlug === 'all' ? undefined : programSlug,
       });
     },
   });
@@ -71,7 +71,7 @@ function ReportingPage(): ReactElement {
       />
       <ReportingTable
         filter={appliedFilter}
-        businessArea={businessArea}
+        businessArea={businessAreaSlug}
         choicesData={choicesData}
         meData={meData}
       />

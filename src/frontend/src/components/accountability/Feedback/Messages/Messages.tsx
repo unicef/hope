@@ -10,7 +10,6 @@ import {
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Avatar, Box, Grid2 as Grid, Paper, Typography } from '@mui/material';
-import { Profile } from '@restgenerated/models/Profile';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { useQuery } from '@tanstack/react-query';
@@ -46,13 +45,14 @@ interface MessagesProps {
 
 function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
   const { t } = useTranslation();
-  const { businessArea } = useBaseUrl();
+  const { businessAreaSlug, programSlug } = useBaseUrl();
 
-  const { data: meData, isLoading: meLoading } = useQuery<Profile>({
-    queryKey: ['profile', businessArea],
+  const { data: meData, isLoading: meLoading } = useQuery({
+    queryKey: ['profile', businessAreaSlug, programSlug],
     queryFn: () => {
       return RestService.restBusinessAreasUsersProfileRetrieve({
-        businessAreaSlug: businessArea,
+        businessAreaSlug,
+        program: programSlug,
       });
     },
   });

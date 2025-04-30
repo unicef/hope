@@ -447,7 +447,7 @@ class TestPaymentPlanList:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 1
-            assert len(ctx.captured_queries) == 15
+            assert len(ctx.captured_queries) == 17
 
         # second call get from cache
         with CaptureQueriesContext(connection) as ctx:
@@ -468,7 +468,7 @@ class TestPaymentPlanList:
             new_etag = response.headers["etag"]
             assert json.loads(cache.get(new_etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 1
-            assert len(ctx.captured_queries) == 9
+            assert len(ctx.captured_queries) == 11
         with CaptureQueriesContext(connection) as ctx:
             response = self.client.get(self.pp_list_url)
             assert response.status_code == status.HTTP_200_OK
@@ -490,7 +490,7 @@ class TestPaymentPlanList:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 2
-            assert len(ctx.captured_queries) == 11
+            assert len(ctx.captured_queries) == 13
         with CaptureQueriesContext(connection) as ctx:
             response = self.client.get(self.pp_list_url)
             assert response.status_code == status.HTTP_200_OK
@@ -508,7 +508,7 @@ class TestPaymentPlanList:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 1
-            assert len(ctx.captured_queries) == 9
+            assert len(ctx.captured_queries) == 11
         with CaptureQueriesContext(connection) as ctx:
             response = self.client.get(self.pp_list_url)
             assert response.status_code == status.HTTP_200_OK
@@ -941,7 +941,7 @@ class TestTargetPopulationList:
 
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 15
+            assert len(ctx.captured_queries) == 17
 
         # Test that reoccurring requests use cached data
         with CaptureQueriesContext(connection) as ctx:
@@ -962,7 +962,7 @@ class TestTargetPopulationList:
 
             etag_call_after_update = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 9
+            assert len(ctx.captured_queries) == 11
 
             assert etag_call_after_update != etag
 

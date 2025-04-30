@@ -5,6 +5,7 @@ from rest_framework import serializers
 from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
 from hct_mis_api.apps.core.utils import get_count_and_percentage
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.registration_datahub.utils import get_rdi_program_population
 
 
 class RegistrationDataImportListSerializer(serializers.ModelSerializer):
@@ -136,3 +137,35 @@ class RegistrationDataImportDetailSerializer(serializers.ModelSerializer, AdminU
 
 class RefuseRdiSerializer(serializers.Serializer):
     reason = serializers.CharField(required=True)
+
+
+class RegistrationDataImportCreateSerializer(serializers.Serializer):
+    import_from_program_id = serializers.CharField(required=True)
+    import_from_ids = serializers.CharField(
+        required=True, allow_blank=True, help_text="String of Ind or HH ids separated by comma"
+    )
+    name = serializers.CharField(required=True)
+    screen_beneficiary = serializers.BooleanField(required=True)
+
+    def get_object(self, validated_data: dict) -> RegistrationDataImport:
+        request = self.context["request"]
+        program = self.context["program"]
+        business_area = self.context["business_area"]
+        user = request.user
+        screen_beneficiary = validated_data.get("screen_beneficiary", False)
+        import_from_program_id: str = validated_data["import_from_program_id"]
+        import_from_ids = validated_data.get("import_from_ids")
+        households, individuals = get_rdi_program_population(import_from_program_id, program.id, import_from_ids)
+        return RegistrationDataImport(
+            name=validated_data["name"],
+            status=RegistrationDataImport.IMPORTING,
+            imported_by=user,
+            data_source=RegistrationDataImport.PROGRAM_POPULATION,
+            number_of_individuals=individuals.count(),
+            number_of_households=households.count(),
+            business_area=business_area,
+            pull_pictures=True,
+            screen_beneficiary=screen_beneficiary,
+            program=program,
+            import_from_ids=import_from_ids,
+        )
