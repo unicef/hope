@@ -246,39 +246,35 @@ class TestRdiMergeTask(TestCase):
 
         household = households.first()
 
-        self.assertEqual(1, households.count())
-        self.assertEqual(8, individuals.count())
-        self.assertEqual(household.flex_fields.get("enumerator_id"), 1234567890)
-        self.assertEqual(household.detail_id, "123456123")
+        assert households.count() == 1
+        assert individuals.count() == 8
+        assert household.flex_fields.get("enumerator_id") == 1234567890
+        assert household.detail_id == "123456123"
 
         # check KoboImportedSubmission
         kobo_import_submission_qs = KoboImportedSubmission.objects.all()
         kobo_import_submission = kobo_import_submission_qs.first()
-        self.assertEqual(kobo_import_submission_qs.count(), 1)
-        self.assertEqual(str(kobo_import_submission.kobo_submission_uuid), "c09130af-6c9c-4dba-8c7f-1b2ff1970d19")
-        self.assertEqual(kobo_import_submission.kobo_asset_id, "123456123")
-        self.assertEqual(str(kobo_import_submission.kobo_submission_time), "2022-02-22 12:22:22+00:00")
+        assert kobo_import_submission_qs.count() == 1
+        assert str(kobo_import_submission.kobo_submission_uuid) == "c09130af-6c9c-4dba-8c7f-1b2ff1970d19"
+        assert kobo_import_submission.kobo_asset_id == "123456123"
+        assert str(kobo_import_submission.kobo_submission_time) == "2022-02-22 12:22:22+00:00"
         # self.assertEqual(kobo_import_submission.imported_household, None)
 
         individual_with_valid_phone_data = Individual.objects.filter(given_name="Liz").first()
         individual_with_invalid_phone_data = Individual.objects.filter(given_name="Jenna").first()
 
-        self.assertEqual(individual_with_valid_phone_data.phone_no_valid, True)
-        self.assertEqual(individual_with_valid_phone_data.phone_no_alternative_valid, True)
+        assert individual_with_valid_phone_data.phone_no_valid is True
+        assert individual_with_valid_phone_data.phone_no_alternative_valid is True
 
-        self.assertEqual(individual_with_invalid_phone_data.phone_no_valid, False)
-        self.assertEqual(individual_with_invalid_phone_data.phone_no_alternative_valid, False)
+        assert individual_with_invalid_phone_data.phone_no_valid is False
+        assert individual_with_invalid_phone_data.phone_no_alternative_valid is False
 
-        self.assertEqual(Individual.objects.filter(full_name="Baz Bush").first().email, "fake_email_5@com")
-        self.assertEqual(Individual.objects.filter(full_name="Benjamin Butler").first().email, "fake_email_1@com")
-        self.assertEqual(Individual.objects.filter(full_name="Bob Jackson").first().email, "")
-        self.assertEqual(Individual.objects.filter(full_name="Benjamin Butler").first().wallet_name, "Wallet Name 1")
-        self.assertEqual(
-            Individual.objects.filter(full_name="Benjamin Butler").first().blockchain_name, "Blockchain Name 1"
-        )
-        self.assertEqual(
-            Individual.objects.filter(full_name="Benjamin Butler").first().wallet_address, "Wallet Address 1"
-        )
+        assert Individual.objects.filter(full_name="Baz Bush").first().email == "fake_email_5@com"
+        assert Individual.objects.filter(full_name="Benjamin Butler").first().email == "fake_email_1@com"
+        assert Individual.objects.filter(full_name="Bob Jackson").first().email == ""
+        assert Individual.objects.filter(full_name="Benjamin Butler").first().wallet_name == "Wallet Name 1"
+        assert Individual.objects.filter(full_name="Benjamin Butler").first().blockchain_name == "Blockchain Name 1"
+        assert Individual.objects.filter(full_name="Benjamin Butler").first().wallet_address == "Wallet Address 1"
 
         household_data = model_to_dict(
             household,
@@ -324,7 +320,7 @@ class TestRdiMergeTask(TestCase):
             "admin4": self.area4.id,
             "zip_code": "00-123",
         }
-        self.assertEqual(household_data, expected)
+        assert household_data == expected
 
     @freeze_time("2022-01-01")
     @patch(
@@ -479,23 +475,17 @@ class TestRdiMergeTask(TestCase):
             RdiMergeTask().execute(self.rdi.pk)
 
         individual_without_collection.refresh_from_db()
-        self.assertIsNotNone(individual_without_collection.individual_collection)
-        self.assertEqual(
-            individual_without_collection.individual_collection.individuals.count(),
-            2,
-        )
-        self.assertEqual(
-            individual_collection.individuals.count(),
-            2,
-        )
+        assert individual_without_collection.individual_collection is not None
+        assert individual_without_collection.individual_collection.individuals.count() == 2
+        assert individual_collection.individuals.count() == 2
         if household_representation_exists is not None:
             if household_representation_exists:
                 household_collection.refresh_from_db()
-                self.assertEqual(household_collection.households.count(), 2)
+                assert household_collection.households.count() == 2
             else:
                 household.refresh_from_db()
-                self.assertIsNotNone(household.household_collection)
-                self.assertEqual(household.household_collection.households.count(), 2)
+                assert household.household_collection is not None
+                assert household.household_collection.households.count() == 2
 
     def test_merging_external_collector(self) -> None:
         household = PendingHouseholdFactory(
@@ -506,16 +496,14 @@ class TestRdiMergeTask(TestCase):
         )
         self.set_imported_individuals(household)
         external_collector = PendingIndividualFactory(
-            **{
-                "full_name": "External Collector",
-                "given_name": "External",
-                "family_name": "Collector",
-                "relationship": NON_BENEFICIARY,
-                "birth_date": "1962-02-02",  # age 39
-                "sex": "OTHER",
-                "registration_data_import": self.rdi,
-                "email": "xd@com",
-            }
+            full_name="External Collector",
+            given_name="External",
+            family_name="Collector",
+            relationship=NON_BENEFICIARY,
+            birth_date="1962-02-02",
+            sex="OTHER",
+            registration_data_import=self.rdi,
+            email="xd@com",
         )
         role = PendingIndividualRoleInHousehold(individual=external_collector, household=household, role=ROLE_ALTERNATE)
         role.save()

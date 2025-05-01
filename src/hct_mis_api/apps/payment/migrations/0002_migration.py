@@ -5,32 +5,33 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('program', '0001_migration'),
-        ('payment', '0001_migration'),
+        ("program", "0001_migration"),
+        ("payment", "0001_migration"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='financialserviceprovider',
-            name='delivery_mechanisms_choices',
+            model_name="financialserviceprovider",
+            name="delivery_mechanisms_choices",
         ),
         migrations.RemoveField(
-            model_name='payment',
-            name='delivery_type_choice',
+            model_name="payment",
+            name="delivery_type_choice",
         ),
         migrations.RemoveField(
-            model_name='paymentplan',
-            name='program',
+            model_name="paymentplan",
+            name="program",
         ),
         migrations.RemoveField(
-            model_name='paymentrecord',
-            name='delivery_type_choice',
+            model_name="paymentrecord",
+            name="delivery_type_choice",
         ),
         migrations.AlterField(
-            model_name='paymentplan',
-            name='program_cycle',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='payment_plans', to='program.programcycle'),
+            model_name="paymentplan",
+            name="program_cycle",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, related_name="payment_plans", to="program.programcycle"
+            ),
         ),
     ]

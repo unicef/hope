@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Iterable, List, Optional, Tuple
+from typing import Iterable
 
 from django.core.cache import cache
 from django.db import transaction
@@ -32,7 +32,7 @@ log = logging.getLogger(__name__)
 
 class CheckAgainstSanctionListPreMergeTask:
     @staticmethod
-    def _get_query_dict(individual: Individual) -> Dict:
+    def _get_query_dict(individual: Individual) -> dict:
         documents = [
             doc
             for doc in individual.documents.all()
@@ -59,13 +59,13 @@ class CheckAgainstSanctionListPreMergeTask:
             {"match": {"birth_date": {"query": dob.date, "boost": 1}}} for dob in individual.dates_of_birth.all()
         ]
 
-        queries: List = [
+        queries: list = [
             {"match": {"full_name": {"query": individual.full_name, "boost": 4, "operator": "and"}}},
         ]
         queries.extend(document_queries)
         queries.extend(birth_dates_queries)
 
-        query_dict = {
+        return {
             "size": 10000,
             "query": {
                 "bool": {
@@ -76,20 +76,18 @@ class CheckAgainstSanctionListPreMergeTask:
             "_source": ["id", "full_name"],
         }
 
-        return query_dict
-
     @classmethod
     @transaction.atomic
     def execute(
         cls,
-        individuals: Optional[Iterable[SanctionListIndividual]] = None,
-        registration_data_import: Optional[RegistrationDataImport] = None,
+        individuals: Iterable[SanctionListIndividual] | None = None,
+        registration_data_import: RegistrationDataImport | None = None,
     ) -> None:
         if individuals is None:
             individuals = SanctionListIndividual.objects.all()
         possible_match_score = config.SANCTION_LIST_MATCH_SCORE
 
-        documents: Tuple = (
+        documents: tuple = (
             (
                 IndividualDocumentAfghanistan,
                 IndividualDocumentUkraine,

@@ -76,7 +76,7 @@ class TestChangeIndividualRole(TestCase):
         service.close(UserFactory())
 
         role = IndividualRoleInHousehold.objects.get(household=self.individual.household, individual=self.individual)
-        self.assertEqual(role.role, ROLE_ALTERNATE)
+        assert role.role == ROLE_ALTERNATE
 
     def test_change_role_to_alternate(self) -> None:
         TicketIndividualDataUpdateDetailsFactory(
@@ -88,7 +88,7 @@ class TestChangeIndividualRole(TestCase):
         service.close(UserFactory())
 
         role = IndividualRoleInHousehold.objects.get(household=self.individual.household, individual=self.individual)
-        self.assertEqual(role.role, ROLE_ALTERNATE)
+        assert role.role == ROLE_ALTERNATE
 
     def test_change_role_from_alternate_to_none(self) -> None:
         IndividualRoleInHousehold.objects.create(
@@ -109,7 +109,7 @@ class TestChangeIndividualRole(TestCase):
         role = IndividualRoleInHousehold.objects.filter(
             household=self.individual.household, individual=self.individual
         ).first()
-        self.assertIsNone(role)
+        assert role is None
 
     def test_change_role_from_none_to_primary(self) -> None:
         IndividualRoleInHousehold.objects.create(
@@ -128,12 +128,12 @@ class TestChangeIndividualRole(TestCase):
         service.close(UserFactory())
 
         role = IndividualRoleInHousehold.objects.get(household=self.individual.household, individual=self.individual)
-        self.assertEqual(role.role, ROLE_PRIMARY)
+        assert role.role == ROLE_PRIMARY
 
         previous_role = IndividualRoleInHousehold.objects.filter(
             household=self.individual.household, individual=self.individual_hoh
         ).first()
-        self.assertIsNone(previous_role)  # previous primary collector does not have a role anymore
+        assert previous_role is None  # previous primary collector does not have a role anymore
 
     def test_change_role_to_primary(self) -> None:
         TicketIndividualDataUpdateDetailsFactory(
@@ -146,12 +146,12 @@ class TestChangeIndividualRole(TestCase):
         service.close(UserFactory())
 
         role = IndividualRoleInHousehold.objects.get(household=self.individual.household, individual=self.individual)
-        self.assertEqual(role.role, ROLE_PRIMARY)
+        assert role.role == ROLE_PRIMARY
 
         previous_role = IndividualRoleInHousehold.objects.filter(
             household=self.individual.household, individual=self.individual_hoh
         ).first()
-        self.assertIsNone(previous_role)  # previous primary collector does not have a role anymore
+        assert previous_role is None  # previous primary collector does not have a role anymore
 
     def test_change_role_from_alternate_to_primary(self) -> None:
         IndividualRoleInHousehold.objects.create(
@@ -170,12 +170,12 @@ class TestChangeIndividualRole(TestCase):
         service.close(UserFactory())
 
         role = IndividualRoleInHousehold.objects.get(household=self.individual.household, individual=self.individual)
-        self.assertEqual(role.role, ROLE_PRIMARY)
+        assert role.role == ROLE_PRIMARY
 
         previous_role = IndividualRoleInHousehold.objects.filter(
             household=self.individual.household, individual=self.individual_hoh
         ).first()
-        self.assertIsNone(previous_role)
+        assert previous_role is None
 
     def test_change_role_from_primary_to_alternate(self) -> None:
         TicketIndividualDataUpdateDetailsFactory(
@@ -183,17 +183,15 @@ class TestChangeIndividualRole(TestCase):
             individual=self.individual_hoh,
             individual_data={"role": {"value": ROLE_ALTERNATE, "approve_status": True}},
         )
-        with self.assertRaises(ValidationError) as e:
+        with pytest.raises(ValidationError) as e:
             service = IndividualDataUpdateService(self.ticket, self.ticket.individual_data_update_ticket_details)
             service.close(UserFactory())
-        self.assertEqual(
-            e.exception.messages[0], "Ticket cannot be closed, primary collector role has to be reassigned"
-        )
+        assert e.value.messages[0] == "Ticket cannot be closed, primary collector role has to be reassigned"
 
         role = IndividualRoleInHousehold.objects.get(
             household=self.individual.household, individual=self.individual_hoh
         )
-        self.assertEqual(role.role, ROLE_PRIMARY)  # still with primary role
+        assert role.role == ROLE_PRIMARY  # still with primary role
 
     def test_change_role_from_primary_to_none(self) -> None:
         TicketIndividualDataUpdateDetailsFactory(
@@ -201,14 +199,12 @@ class TestChangeIndividualRole(TestCase):
             individual=self.individual_hoh,
             individual_data={"role": {"value": ROLE_NO_ROLE, "approve_status": True}},
         )
-        with self.assertRaises(ValidationError) as e:
+        with pytest.raises(ValidationError) as e:
             service = IndividualDataUpdateService(self.ticket, self.ticket.individual_data_update_ticket_details)
             service.close(UserFactory())
-        self.assertEqual(
-            e.exception.messages[0], "Ticket cannot be closed, primary collector role has to be reassigned"
-        )
+        assert e.value.messages[0] == "Ticket cannot be closed, primary collector role has to be reassigned"
 
         role = IndividualRoleInHousehold.objects.get(
             household=self.individual.household, individual=self.individual_hoh
         )
-        self.assertEqual(role.role, ROLE_PRIMARY)  # still with primary role
+        assert role.role == ROLE_PRIMARY  # still with primary role

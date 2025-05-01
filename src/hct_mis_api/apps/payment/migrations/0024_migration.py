@@ -4,9 +4,8 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('payment', '0023_migration'),
+        ("payment", "0023_migration"),
     ]
 
     operations = [
@@ -14,9 +13,9 @@ class Migration(migrations.Migration):
             database_operations=[],
             state_operations=[
                 migrations.RemoveConstraint(
-                    model_name='deliverymechanismdata',
-                    name='unique_individual_delivery_mechanism',
+                    model_name="deliverymechanismdata",
+                    name="unique_individual_delivery_mechanism",
                 )
-            ]
+            ],
         )
     ]

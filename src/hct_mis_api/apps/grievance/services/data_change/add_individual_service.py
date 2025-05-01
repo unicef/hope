@@ -1,5 +1,3 @@
-from typing import List
-
 from django.contrib.auth.models import AbstractUser
 from django.db import transaction
 from django.shortcuts import get_object_or_404
@@ -50,7 +48,7 @@ from hct_mis_api.apps.utils.querysets import evaluate_qs
 
 
 class AddIndividualService(DataChangeService):
-    def save(self) -> List[GrievanceTicket]:
+    def save(self) -> list[GrievanceTicket]:
         data_change_extras = self.extras.get("issue_type")
         add_individual_issue_type_extras = data_change_extras.get("add_individual_issue_type_extras")
         household_encoded_id = add_individual_issue_type_extras.get("household")

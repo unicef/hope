@@ -72,4 +72,4 @@ class TestSettingTypesForCalculateFields(TestCase):
                 ("this_is_text_h_f", TYPE_STRING),
             ]
             created_flex_fields = list(FlexibleAttribute.objects.order_by("name").values_list("name", "type"))
-            self.assertEqual(created_flex_fields, expected_flex_fields)
+            assert created_flex_fields == expected_flex_fields

@@ -392,7 +392,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "marital_status": "SINGLE",
                 "estimated_birth_date": False,
             }
-            self.assertFalse(self.add_individual_grievance_ticket.add_individual_ticket_details.approve_status)
+            assert not self.add_individual_grievance_ticket.add_individual_ticket_details.approve_status
 
         else:
             expected_result = {
@@ -407,13 +407,13 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "relationship": "UNKNOWN",
                 "estimated_birth_date": False,
             }
-            self.assertTrue(self.add_individual_grievance_ticket.add_individual_ticket_details.approve_status)
+            assert self.add_individual_grievance_ticket.add_individual_ticket_details.approve_status
 
-        self.assertEqual(result, expected_result)
+        assert result == expected_result
         if name == "without_permission":
-            self.assertEqual(self.add_individual_grievance_ticket.status, GrievanceTicket.STATUS_FOR_APPROVAL)
+            assert self.add_individual_grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL
         else:
-            self.assertEqual(self.add_individual_grievance_ticket.status, GrievanceTicket.STATUS_IN_PROGRESS)
+            assert self.add_individual_grievance_ticket.status == GrievanceTicket.STATUS_IN_PROGRESS
 
     @parameterized.expand(
         [
@@ -571,11 +571,11 @@ class TestUpdateGrievanceTickets(APITestCase):
                 ],
                 "estimated_birth_date": False,
             }
-        self.assertEqual(result, expected_result)
+        assert result == expected_result
         if name == "without_permission":
-            self.assertEqual(self.individual_data_change_grievance_ticket.status, GrievanceTicket.STATUS_FOR_APPROVAL)
+            assert self.individual_data_change_grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL
         else:
-            self.assertEqual(self.individual_data_change_grievance_ticket.status, GrievanceTicket.STATUS_IN_PROGRESS)
+            assert self.individual_data_change_grievance_ticket.status == GrievanceTicket.STATUS_IN_PROGRESS
 
     def test_update_change_household_with_permission(self) -> None:
         self.create_user_role_with_permissions(
@@ -620,10 +620,10 @@ class TestUpdateGrievanceTickets(APITestCase):
             "village": {"value": "Test Town", "approve_status": False, "previous_value": "Example"},
             "flex_fields": {},
         }
-        self.assertEqual(result, expected_result)
-        self.assertEqual(str(self.household_data_change_grievance_ticket.assigned_to.id), self.user_two.id)
-        self.assertNotEqual(self.household_data_change_grievance_ticket.description, "this is new description")
-        self.assertEqual(self.household_data_change_grievance_ticket.status, GrievanceTicket.STATUS_IN_PROGRESS)
+        assert result == expected_result
+        assert str(self.household_data_change_grievance_ticket.assigned_to.id) == self.user_two.id
+        assert self.household_data_change_grievance_ticket.description != "this is new description"
+        assert self.household_data_change_grievance_ticket.status == GrievanceTicket.STATUS_IN_PROGRESS
 
     def test_update_change_household_with_partial_permission(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.business_area)
@@ -659,10 +659,10 @@ class TestUpdateGrievanceTickets(APITestCase):
             "size": {"value": 19, "approve_status": True},
             "country": "AFG",
         }
-        self.assertEqual(result, expected_result)
-        self.assertEqual(str(self.household_data_change_grievance_ticket.assigned_to.id), self.user_two.id)
-        self.assertNotEqual(self.household_data_change_grievance_ticket.description, "this is new description")
-        self.assertEqual(self.household_data_change_grievance_ticket.status, GrievanceTicket.STATUS_IN_PROGRESS)
+        assert result == expected_result
+        assert str(self.household_data_change_grievance_ticket.assigned_to.id) == self.user_two.id
+        assert self.household_data_change_grievance_ticket.description != "this is new description"
+        assert self.household_data_change_grievance_ticket.status == GrievanceTicket.STATUS_IN_PROGRESS
 
     def test_update_change_household_without_permission(self) -> None:
         self.create_user_role_with_permissions(self.user, [], self.business_area)
@@ -698,10 +698,10 @@ class TestUpdateGrievanceTickets(APITestCase):
             "size": {"value": 19, "approve_status": True},
             "country": "AFG",
         }
-        self.assertEqual(result, expected_result)
-        self.assertNotEqual(str(self.household_data_change_grievance_ticket.assigned_to.id), self.user_two.id)
-        self.assertNotEqual(self.household_data_change_grievance_ticket.description, "this is new description")
-        self.assertEqual(self.household_data_change_grievance_ticket.status, GrievanceTicket.STATUS_FOR_APPROVAL)
+        assert result == expected_result
+        assert str(self.household_data_change_grievance_ticket.assigned_to.id) != self.user_two.id
+        assert self.household_data_change_grievance_ticket.description != "this is new description"
+        assert self.household_data_change_grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL
 
     @parameterized.expand(
         [
@@ -760,7 +760,7 @@ class TestUpdateGrievanceTickets(APITestCase):
         )
         ticket.refresh_from_db()
 
-        self.assertEqual(ticket.household, household)
+        assert ticket.household == household
 
     @parameterized.expand(
         [
@@ -791,7 +791,7 @@ class TestUpdateGrievanceTickets(APITestCase):
         )
         ticket.refresh_from_db()
 
-        self.assertEqual(ticket.individual, individuals[0])
+        assert ticket.individual == individuals[0]
 
     @parameterized.expand(
         [
@@ -822,7 +822,7 @@ class TestUpdateGrievanceTickets(APITestCase):
         )
         ticket.refresh_from_db()
 
-        self.assertTrue("Cannot change household" in response["errors"][0]["message"])
+        assert "Cannot change household" in response["errors"][0]["message"]
 
     @parameterized.expand(
         [
@@ -853,7 +853,7 @@ class TestUpdateGrievanceTickets(APITestCase):
         )
         ticket.refresh_from_db()
 
-        self.assertTrue("Cannot change individual" in response["errors"][0]["message"])
+        assert "Cannot change individual" in response["errors"][0]["message"]
 
     def _prepare_input_data(
         self, ticket_id: str, household_id: Optional[str] = None, individual_id: Optional[str] = None

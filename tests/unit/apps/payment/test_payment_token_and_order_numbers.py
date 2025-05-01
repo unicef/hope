@@ -14,6 +14,7 @@ from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service impo
     generate_token_and_order_numbers,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+import pytest
 
 
 class TestPaymentTokenAndOrderNumbers(TestCase):
@@ -67,7 +68,7 @@ class TestPaymentTokenAndOrderNumbers(TestCase):
         assert check_if_token_or_order_number_exists_per_program(payment, "order_number", 123456789) is False
 
     def test_validation_token_must_not_has_the_same_digit_more_than_three_times(self) -> None:
-        with self.assertRaises(ValidationError):
+        with pytest.raises(ValidationError):
             payment_token_and_order_number_validator(1111111)
 
     def test_validation_save_payment_with_exists_token_or_order_number(self) -> None:
@@ -81,7 +82,7 @@ class TestPaymentTokenAndOrderNumbers(TestCase):
         payment_1.order_number = order_number
         payment_1.save()
 
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             payment_2.token_number = token_number
             payment_2.order_number = order_number
             payment_2.save(update_fields=["order_number", "token_number"])

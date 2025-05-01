@@ -144,7 +144,7 @@ def prepare_xlsx_file(rounds_data: list, rows: list, program: Program) -> _Tempo
     periodic_data_update_template = PeriodicDataUpdateTemplate.objects.create(
         program=program,
         business_area=program.business_area,
-        filters=dict(),
+        filters={},
         rounds_data=rounds_data,
     )
     service = PeriodicDataUpdateExportTemplateService(periodic_data_update_template)
@@ -260,7 +260,7 @@ class TestPeriodicDataUpdateUpload:
         periodic_data_update_template = PeriodicDataUpdateTemplate.objects.create(
             program=program,
             business_area=program.business_area,
-            filters=dict(),
+            filters={},
             rounds_data=[
                 {
                     "field": string_attribute.name,
@@ -305,7 +305,7 @@ class TestPeriodicDataUpdateUpload:
             program=program,
             business_area=program.business_area,
             status=PeriodicDataUpdateTemplate.Status.TO_EXPORT,
-            filters=dict(),
+            filters={},
             rounds_data=[
                 {
                     "field": string_attribute.name,

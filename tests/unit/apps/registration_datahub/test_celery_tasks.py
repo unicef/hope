@@ -481,7 +481,7 @@ def create_record(fields: Dict, registration: int, status: str, files: Optional[
 
 
 def create_imported_document_types() -> None:
-    for document_key_string, _ in UkraineBaseRegistrationService.DOCUMENT_MAPPING_KEY_DICT.items():
+    for document_key_string in UkraineBaseRegistrationService.DOCUMENT_MAPPING_KEY_DICT:
         DocumentType.objects.create(key=document_key_string)
 
 
@@ -715,7 +715,7 @@ class TestAutomatingRDICreationTask(TestCase):
 
             # NotImplementedError
             if registration_id in [999, 18, 19]:
-                with self.assertRaises(NotImplementedError):
+                with pytest.raises(NotImplementedError):
                     run_automate_rdi_creation_task(
                         registration_id=registration_id,
                         page_size=page_size,
@@ -742,7 +742,7 @@ class TestAutomatingRDICreationTask(TestCase):
                 assert result[1][1] == page_size
 
     def test_atomic_rollback_if_record_invalid(self, mock_validate_data_collection_type: Any) -> None:
-        for document_key in UkraineBaseRegistrationService.DOCUMENT_MAPPING_KEY_DICT.keys():
+        for document_key in UkraineBaseRegistrationService.DOCUMENT_MAPPING_KEY_DICT:
             DocumentType.objects.get_or_create(key=document_key, label="abc")
         create_ukraine_business_area()
         create_record(fields=UKRAINE_FIELDS, registration=2, status=Record.STATUS_TO_IMPORT)
@@ -775,7 +775,7 @@ class TestAutomatingRDICreationTask(TestCase):
 
     @pytest.mark.skip("NEED TO BE FIXED")
     def test_ukraine_new_registration_form(self, mock_validate_data_collection_type: Any) -> None:
-        for document_key in UkraineRegistrationService.DOCUMENT_MAPPING_KEY_DICT.keys():
+        for document_key in UkraineRegistrationService.DOCUMENT_MAPPING_KEY_DICT:
             DocumentType.objects.get_or_create(key=document_key, label="abc")
         create_ukraine_business_area()
         create_record(
@@ -852,7 +852,7 @@ class TestAutomatingRDICreationTask(TestCase):
             def PROCESS_FLEX_RECORDS_TASK(cls) -> str:
                 raise NotImplementedError
 
-        with self.assertRaises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             create_task_for_processing_records(ServiceWithoutCeleryTask, uuid.uuid4(), uuid.uuid4(), [1])
 
 
@@ -904,25 +904,25 @@ class RemoveOldRDIDatahubLinksTest(TestCase):
         PendingBankAccountInfoFactory(individual=imported_individual_1)
         PendingBankAccountInfoFactory(individual=imported_individual_2)
 
-        self.assertEqual(PendingHousehold.objects.count(), 3)
-        self.assertEqual(PendingIndividual.objects.count(), 3)
-        self.assertEqual(PendingDocument.objects.count(), 3)
-        self.assertEqual(PendingBankAccountInfo.objects.count(), 2)
+        assert PendingHousehold.objects.count() == 3
+        assert PendingIndividual.objects.count() == 3
+        assert PendingDocument.objects.count() == 3
+        assert PendingBankAccountInfo.objects.count() == 2
 
         remove_old_rdi_links_task.__wrapped__()
 
-        self.assertEqual(PendingHousehold.objects.count(), 1)
-        self.assertEqual(PendingIndividual.objects.count(), 1)
-        self.assertEqual(PendingDocument.objects.count(), 1)
-        self.assertEqual(PendingBankAccountInfo.objects.count(), 0)
+        assert PendingHousehold.objects.count() == 1
+        assert PendingIndividual.objects.count() == 1
+        assert PendingDocument.objects.count() == 1
+        assert PendingBankAccountInfo.objects.count() == 0
 
         self.rdi_1.refresh_from_db()
         self.rdi_2.refresh_from_db()
         self.rdi_3.refresh_from_db()
 
-        self.assertEqual(self.rdi_1.erased, True)
-        self.assertEqual(self.rdi_2.erased, True)
-        self.assertEqual(self.rdi_3.erased, False)
+        assert self.rdi_1.erased is True
+        assert self.rdi_2.erased is True
+        assert self.rdi_3.erased is False
 
 
 class TestRegistrationImportCeleryTasks(APITestCase):
@@ -991,10 +991,10 @@ class TestRegistrationImportCeleryTasks(APITestCase):
     ) -> None:
         mock_rdi_merge_task_instance = MockRdiMergeTask.return_value
         mock_rdi_merge_task_instance.execute.side_effect = Exception("Test Exception")
-        self.assertEqual(self.registration_data_import.status, RegistrationDataImport.IN_REVIEW)
+        assert self.registration_data_import.status == RegistrationDataImport.IN_REVIEW
         merge_registration_data_import_task.delay(registration_data_import_id=self.registration_data_import.id)
         self.registration_data_import.refresh_from_db()
-        self.assertEqual(self.registration_data_import.status, RegistrationDataImport.MERGE_ERROR)
+        assert self.registration_data_import.status == RegistrationDataImport.MERGE_ERROR
 
     @patch("hct_mis_api.apps.registration_datahub.tasks.rdi_merge.RdiMergeTask")
     def test_merge_registration_data_import_task(
@@ -1002,7 +1002,7 @@ class TestRegistrationImportCeleryTasks(APITestCase):
         MockRdiMergeTask: Mock,
     ) -> None:
         mock_rdi_merge_task_instance = MockRdiMergeTask.return_value
-        self.assertEqual(self.registration_data_import.status, RegistrationDataImport.IN_REVIEW)
+        assert self.registration_data_import.status == RegistrationDataImport.IN_REVIEW
         merge_registration_data_import_task.delay(registration_data_import_id=self.registration_data_import.id)
         mock_rdi_merge_task_instance.execute.assert_called_once()
 
@@ -1013,10 +1013,10 @@ class TestRegistrationImportCeleryTasks(APITestCase):
     ) -> None:
         mock_deduplicate_task_task_instance = MockDeduplicateTask.return_value
         mock_deduplicate_task_task_instance.deduplicate_pending_individuals.side_effect = Exception("Test Exception")
-        self.assertEqual(self.registration_data_import.status, RegistrationDataImport.IN_REVIEW)
+        assert self.registration_data_import.status == RegistrationDataImport.IN_REVIEW
         rdi_deduplication_task.delay(registration_data_import_id=self.registration_data_import.id)
         self.registration_data_import.refresh_from_db()
-        self.assertEqual(self.registration_data_import.status, RegistrationDataImport.IMPORT_ERROR)
+        assert self.registration_data_import.status == RegistrationDataImport.IMPORT_ERROR
 
     @patch("hct_mis_api.apps.registration_datahub.tasks.pull_kobo_submissions.PullKoboSubmissions")
     def test_pull_kobo_submissions_task(
@@ -1046,7 +1046,7 @@ class TestRegistrationImportCeleryTasks(APITestCase):
         )
         mock_get_project_submissions.return_value = VALID_JSON
         resp_1 = PullKoboSubmissions().execute(kobo_import_data_with_pics, self.program)
-        self.assertEqual(str(resp_1["kobo_import_data_id"]), str(kobo_import_data_with_pics.id))
+        assert str(resp_1["kobo_import_data_id"]) == str(kobo_import_data_with_pics.id)
 
         kobo_import_data_without_pics = KoboImportData.objects.create(
             kobo_asset_id="2222",
@@ -1055,7 +1055,7 @@ class TestRegistrationImportCeleryTasks(APITestCase):
         )
         mock_get_project_submissions.return_value = VALID_JSON
         resp_2 = PullKoboSubmissions().execute(kobo_import_data_without_pics, self.program)
-        self.assertEqual(str(resp_2["kobo_import_data_id"]), str(kobo_import_data_without_pics.id))
+        assert str(resp_2["kobo_import_data_id"]) == str(kobo_import_data_without_pics.id)
 
 
 class DeduplicationEngineCeleryTasksTests(TestCase):
@@ -1082,7 +1082,7 @@ class DeduplicationEngineCeleryTasksTests(TestCase):
         self,
         mock_upload_and_process: Mock,
     ) -> None:
-        self.assertIsNone(self.program.deduplication_set_id)
+        assert self.program.deduplication_set_id is None
         deduplication_engine_process(str(self.program.id))
 
         mock_upload_and_process.assert_called_once_with(self.program)

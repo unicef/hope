@@ -62,4 +62,4 @@ class TestMetaDataFilterType(APITestCase):
     def test_rest_endpoint_all_fields_attributes(self, business_area: BusinessArea) -> None:
         client = APIClient()
         response = client.get(reverse("fields_attributes"), data={"business_area_slug": business_area})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK

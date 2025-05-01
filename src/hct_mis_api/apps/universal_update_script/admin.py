@@ -1,4 +1,4 @@
-from typing import Any, Iterator, Tuple, Union
+from typing import Any, Iterator
 
 from django import forms
 from django.contrib import admin
@@ -30,18 +30,17 @@ from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 
 class ArrayFieldFilteredSelectMultiple(FilteredSelectMultiple):
-    def format_value(self, value: Union[str, tuple, list]) -> list[str]:  # type: ignore
+    def format_value(self, value: str | tuple | list) -> list[str]:  # type: ignore
         """Return selected values as a list."""
         if value is None and self.allow_multiple_selected:
             return []
-        elif self.allow_multiple_selected:
+        if self.allow_multiple_selected:
             value = value.split(",")
 
-        if not isinstance(value, (tuple, list)):
+        if not isinstance(value, tuple | list):
             value = [value]
 
-        results = [str(v) if v is not None else "" for v in value]
-        return results
+        return [str(v) if v is not None else "" for v in value]
 
 
 class UniversalUpdateAdminForm(forms.ModelForm):
@@ -88,19 +87,19 @@ class UniversalUpdateAdminForm(forms.ModelForm):
         self.fields["document_types"].queryset = self.get_dynamic_document_types_queryset()
         self.fields["delivery_mechanisms"].queryset = self.get_dynamic_delivery_mechanisms_queryset()
 
-    def get_dynamic_individual_fields_choices(self) -> Iterator[Tuple[str, str]]:
+    def get_dynamic_individual_fields_choices(self) -> Iterator[tuple[str, str]]:
         for field_data in individual_fields.values():
             yield (field_data[0], field_data[0])
 
-    def get_dynamic_individual_flex_fields_choices(self) -> Iterator[Tuple[str, str]]:
+    def get_dynamic_individual_flex_fields_choices(self) -> Iterator[tuple[str, str]]:
         for field_data in get_individual_flex_fields().values():
             yield (field_data[0], field_data[0])
 
-    def get_dynamic_household_fields_choices(self) -> Iterator[Tuple[str, str]]:
+    def get_dynamic_household_fields_choices(self) -> Iterator[tuple[str, str]]:
         for field_data in household_fields.values():
             yield (field_data[0], field_data[0])
 
-    def get_dynamic_household_flex_fields_choices(self) -> Iterator[Tuple[str, str]]:
+    def get_dynamic_household_flex_fields_choices(self) -> Iterator[tuple[str, str]]:
         for field_data in get_household_flex_fields().values():
             yield (field_data[0], field_data[0])
 
@@ -189,7 +188,6 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
         universal_update = self.get_object(request, pk)
         universal_update.queue(generate_universal_individual_update_template)
         self.message_user(request, "Gnerating Excel Template Task Scheduled")
-        return None
 
     @button(
         label="Start Universal Update Task",
@@ -201,4 +199,3 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
         universal_update = self.get_object(request, pk)
         universal_update.queue(run_universal_individual_update)
         self.message_user(request, "Universal individual update task scheduled")
-        return None

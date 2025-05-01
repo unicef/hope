@@ -1,4 +1,4 @@
-from typing import Any, Dict, Iterable, Tuple
+from typing import Any, Dict, Iterable, Tuple, TYPE_CHECKING
 
 from django.contrib.admin import ModelAdmin, site
 from django.contrib.admin.templatetags.admin_urls import admin_urlname
@@ -13,7 +13,9 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import Role, User, UserRole
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.core.models import BusinessArea
 
 EXCLUDED_MODELS = []
 
@@ -21,8 +23,8 @@ factories_registry = {}
 
 
 class AutoRegisterFactoryMetaClass(FactoryMetaClass):
-    def __new__(mcs, class_name: str, bases: object, attrs: Dict) -> object:
-        new_class = super().__new__(mcs, class_name, bases, attrs)
+    def __new__(cls, class_name: str, bases: object, attrs: Dict) -> object:
+        new_class = super().__new__(cls, class_name, bases, attrs)
         factories_registry[new_class._meta.model] = new_class
         return new_class
 
@@ -71,4 +73,4 @@ class TestAdminSite(WebTest):
         self.create_user_role_with_permissions(self.superuser, [Permissions.DOWNLOAD_STORAGE_FILE], self.business_area)
         url = reverse(admin_urlname(model_admin.model._meta, "changelist"))  # type: ignore # str vs SafeString
         res = self.app.get(url, user=self.superuser)
-        self.assertEqual(res.status_code, 200)
+        assert res.status_code == 200

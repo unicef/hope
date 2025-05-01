@@ -1,5 +1,3 @@
-from typing import List
-
 from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.periodic_data_update.utils import (
@@ -9,7 +7,7 @@ from hct_mis_api.apps.periodic_data_update.utils import (
 from hct_mis_api.apps.program.models import Program
 
 
-def add_pdu_fields(program: Program, label: str, subtype: str, rounds_names: List) -> None:
+def add_pdu_fields(program: Program, label: str, subtype: str, rounds_names: list) -> None:
     flexible_attribute, _ = FlexibleAttribute.objects.get_or_create(
         label={"English(EN)": label},
         name=field_label_to_field_name(label),

@@ -266,11 +266,11 @@ class TestCopyProgram(APITestCase):
 
     @flaky(max_runs=3, min_passes=1)
     def test_copy_with_permissions(self) -> None:
-        self.assertEqual(Household.objects.count(), 3)
-        self.assertEqual(Individual.objects.count(), 4)
+        assert Household.objects.count() == 3
+        assert Individual.objects.count() == 4
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
-        self.assertIsNone(self.household1.household_collection)
-        self.assertIsNone(self.individuals1[0].individual_collection)
+        assert self.household1.household_collection is None
+        assert self.individuals1[0].individual_collection is None
         with self.captureOnCommitCallbacks(execute=True):
             self.snapshot_graphql_request(
                 request_string=self.COPY_PROGRAM_MUTATION,
@@ -278,131 +278,122 @@ class TestCopyProgram(APITestCase):
                 variables=self.copy_data,
             )
         copied_program = Program.objects.exclude(id=self.program.id).order_by("created_at").last()
-        self.assertEqual(copied_program.status, Program.DRAFT)
-        self.assertEqual(copied_program.name, "copied name")
-        self.assertEqual(copied_program.households.count(), 2)
-        self.assertEqual(copied_program.individuals.count(), 2)
-        self.assertNotIn(self.household3, copied_program.households.all())
-        self.assertNotIn(self.individuals3[0], copied_program.individuals.all())
-        self.assertNotIn(self.individuals3[1], copied_program.individuals.all())
-        self.assertEqual(Household.objects.count(), 5)
-        self.assertEqual(Individual.objects.count(), 6)
-        self.assertEqual(EntitlementCard.objects.count(), 2)
-        self.assertNotEqual(
-            copied_program.households.filter(copied_from=self.household1).first().entitlement_cards.first().id,
-            self.entitlement_card1.id,
+        assert copied_program.status == Program.DRAFT
+        assert copied_program.name == "copied name"
+        assert copied_program.households.count() == 2
+        assert copied_program.individuals.count() == 2
+        assert self.household3 not in copied_program.households.all()
+        assert self.individuals3[0] not in copied_program.individuals.all()
+        assert self.individuals3[1] not in copied_program.individuals.all()
+        assert Household.objects.count() == 5
+        assert Individual.objects.count() == 6
+        assert EntitlementCard.objects.count() == 2
+        assert (
+            copied_program.households.filter(copied_from=self.household1).first().entitlement_cards.first().id
+            != self.entitlement_card1.id
         )
-        self.assertEqual(
-            copied_program.households.filter(copied_from=self.household1).first().entitlement_cards.first().card_number,
-            self.entitlement_card1.card_number,
+        assert (
+            copied_program.households.filter(copied_from=self.household1).first().entitlement_cards.first().card_number
+            == self.entitlement_card1.card_number
         )
-        self.assertNotEqual(
-            copied_program.households.filter(copied_from=self.household1).first().first_registration_date,
-            self.household1.first_registration_date,
+        assert (
+            copied_program.households.filter(copied_from=self.household1).first().first_registration_date
+            != self.household1.first_registration_date
         )
-        self.assertNotEqual(
-            copied_program.households.filter(copied_from=self.household1).first().last_registration_date,
-            self.household1.last_registration_date,
+        assert (
+            copied_program.households.filter(copied_from=self.household1).first().last_registration_date
+            != self.household1.last_registration_date
         )
-        self.assertEqual(Document.objects.count(), 2)
-        self.assertNotEqual(
-            copied_program.individuals.filter(copied_from=self.individuals1[0]).first().documents.first().id,
-            self.document1.id,
+        assert Document.objects.count() == 2
+        assert (
+            copied_program.individuals.filter(copied_from=self.individuals1[0]).first().documents.first().id
+            != self.document1.id
         )
-        self.assertEqual(
+        assert (
             copied_program.individuals.filter(copied_from=self.individuals1[0])
             .first()
             .documents.first()
-            .document_number,
-            self.document1.document_number,
+            .document_number
+            == self.document1.document_number
         )
 
-        self.assertEqual(IndividualIdentity.objects.count(), 2)
-        self.assertNotEqual(
-            copied_program.individuals.filter(copied_from=self.individuals1[0]).first().identities.first().id,
-            self.individual_identity1.id,
+        assert IndividualIdentity.objects.count() == 2
+        assert (
+            copied_program.individuals.filter(copied_from=self.individuals1[0]).first().identities.first().id
+            != self.individual_identity1.id
         )
-        self.assertEqual(
-            copied_program.individuals.filter(copied_from=self.individuals1[0]).first().identities.first().number,
-            self.individual_identity1.number,
+        assert (
+            copied_program.individuals.filter(copied_from=self.individuals1[0]).first().identities.first().number
+            == self.individual_identity1.number
         )
 
-        self.assertEqual(BankAccountInfo.objects.count(), 2)
-        self.assertNotEqual(
-            copied_program.individuals.filter(copied_from=self.individuals1[0]).first().bank_account_info.first().id,
-            self.bank_account_info1.id,
+        assert BankAccountInfo.objects.count() == 2
+        assert (
+            copied_program.individuals.filter(copied_from=self.individuals1[0]).first().bank_account_info.first().id
+            != self.bank_account_info1.id
         )
-        self.assertEqual(
+        assert (
             copied_program.individuals.filter(copied_from=self.individuals1[0])
             .first()
             .bank_account_info.first()
-            .bank_account_number,
-            self.bank_account_info1.bank_account_number,
+            .bank_account_number
+            == self.bank_account_info1.bank_account_number
         )
 
-        self.assertEqual(IndividualRoleInHousehold.objects.count(), 2)
-        self.assertNotEqual(
-            copied_program.households.filter(copied_from=self.household1).first().representatives.first().id,
-            self.individuals1[0].id,
+        assert IndividualRoleInHousehold.objects.count() == 2
+        assert (
+            copied_program.households.filter(copied_from=self.household1).first().representatives.first().id
+            != self.individuals1[0].id
         )
-        self.assertEqual(
-            copied_program.households.filter(copied_from=self.household1).first().representatives.first().role,
-            self.individual_role_in_household1.role,
+        assert (
+            copied_program.households.filter(copied_from=self.household1).first().representatives.first().role
+            == self.individual_role_in_household1.role
         )
-        self.assertEqual(
-            copied_program.households.filter(copied_from=self.household1).first().representatives.first().copied_from,
-            self.individual_role_in_household1.individual,
+        assert (
+            copied_program.households.filter(copied_from=self.household1).first().representatives.first().copied_from
+            == self.individual_role_in_household1.individual
         )
-        self.assertEqual(ProgramPartnerThrough.objects.filter(program=copied_program).count(), 1)
+        assert ProgramPartnerThrough.objects.filter(program=copied_program).count() == 1
 
         self.individuals1[0].refresh_from_db()
         self.household1.refresh_from_db()
 
-        self.assertIsNotNone(self.household1.household_collection)
-        self.assertIsNotNone(self.individuals1[0].individual_collection)
-        self.assertEqual(
-            copied_program.households.filter(copied_from=self.household1).first().household_collection,
-            self.household1.household_collection,
+        assert self.household1.household_collection is not None
+        assert self.individuals1[0].individual_collection is not None
+        assert (
+            copied_program.households.filter(copied_from=self.household1).first().household_collection
+            == self.household1.household_collection
         )
-        self.assertEqual(
-            copied_program.individuals.filter(copied_from=self.individuals1[0]).first().individual_collection,
-            self.individuals1[0].individual_collection,
+        assert (
+            copied_program.individuals.filter(copied_from=self.individuals1[0]).first().individual_collection
+            == self.individuals1[0].individual_collection
         )
-        self.assertNotEqual(
-            copied_program.individuals.filter(copied_from=self.individuals1[0]).first().first_registration_date,
-            self.individuals1[0].first_registration_date,
+        assert (
+            copied_program.individuals.filter(copied_from=self.individuals1[0]).first().first_registration_date
+            != self.individuals1[0].first_registration_date
         )
-        self.assertNotEqual(
-            copied_program.individuals.filter(copied_from=self.individuals1[0]).first().last_registration_date,
-            self.individuals1[0].last_registration_date,
+        assert (
+            copied_program.individuals.filter(copied_from=self.individuals1[0]).first().last_registration_date
+            != self.individuals1[0].last_registration_date
         )
         # check flex fields and PDU fields on original and copied individual
-        self.assertNotEqual(
-            copied_program.individuals.filter(copied_from=self.individuals1[0]).first().flex_fields,
-            self.individuals1[0].flex_fields,
+        assert (
+            copied_program.individuals.filter(copied_from=self.individuals1[0]).first().flex_fields
+            != self.individuals1[0].flex_fields
         )
-        self.assertEqual(
-            self.individuals1[0].flex_fields,
-            {
-                "pdu_field_1": {
-                    "1": {
-                        "value": "1.1",
-                        "collection_date": "2021-01-01",
-                    }
-                },
-                "flex_field_1": "Value 1",
-            },
-        )
-        self.assertEqual(
-            copied_program.individuals.filter(copied_from=self.individuals1[0]).first().flex_fields,
-            {"flex_field_1": "Value 1"},
-        )
+        assert self.individuals1[0].flex_fields == {
+            "pdu_field_1": {"1": {"value": "1.1", "collection_date": "2021-01-01"}},
+            "flex_field_1": "Value 1",
+        }
+        assert copied_program.individuals.filter(copied_from=self.individuals1[0]).first().flex_fields == {
+            "flex_field_1": "Value 1"
+        }
 
-        self.assertIsNotNone(copied_program.cycles.first())
-        self.assertEqual(copied_program.cycles.first().program_id, copied_program.pk)
-        self.assertEqual(copied_program.cycles.first().title, "Default Programme Cycle")
-        self.assertEqual(copied_program.cycles.first().status, "DRAFT")
-        self.assertIsNone(copied_program.cycles.first().end_date)
+        assert copied_program.cycles.first() is not None
+        assert copied_program.cycles.first().program_id == copied_program.pk
+        assert copied_program.cycles.first().title == "Default Programme Cycle"
+        assert copied_program.cycles.first().status == "DRAFT"
+        assert copied_program.cycles.first().end_date is None
 
     def test_copy_program_incompatible_collecting_type(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
@@ -509,7 +500,7 @@ class TestCopyProgram(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.COPY_PROGRAM_MUTATION, context={"user": self.user}, variables=self.copy_data
         )
-        self.assertEqual(Program.objects.get(name="copied name").pdu_fields.count(), 4)
+        assert Program.objects.get(name="copied name").pdu_fields.count() == 4
 
     def test_copy_program_with_pdu_fields_invalid_data(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)

@@ -5,7 +5,7 @@ import typing
 from base64 import b64decode
 from decimal import Decimal
 from math import ceil
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional
 
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 
 def get_number_of_samples(
-    payment_records_sample_count: int, confidence_interval: int, margin_of_error: Union[int, float]
+    payment_records_sample_count: int, confidence_interval: int, margin_of_error: int | float
 ) -> int:
     from statistics import NormalDist
 
@@ -41,24 +41,18 @@ def get_number_of_samples(
     return min(actual_sample, payment_records_sample_count)
 
 
-def from_received_to_status(
-    received: bool, received_amount: Union[Decimal, float], delivered_amount: Union[Decimal, float]
-) -> str:
+def from_received_to_status(received: bool, received_amount: Decimal | float, delivered_amount: Decimal | float) -> str:
     received_amount_dec = to_decimal(received_amount)
     if received is None:
         return PaymentVerification.STATUS_PENDING
     if received:
-        if received_amount_dec is None:
+        if received_amount_dec is None or received_amount_dec == delivered_amount:
             return PaymentVerification.STATUS_RECEIVED
-        elif received_amount_dec == delivered_amount:
-            return PaymentVerification.STATUS_RECEIVED
-        else:
-            return PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
-    else:
-        return PaymentVerification.STATUS_NOT_RECEIVED
+        return PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
+    return PaymentVerification.STATUS_NOT_RECEIVED
 
 
-def to_decimal(received_amount: Optional[Union[Decimal, float, int, str]]) -> Optional[Decimal]:
+def to_decimal(received_amount: Decimal | float | int | str | None) -> Decimal | None:
     if received_amount is None or str(received_amount).strip() == "":
         return None
 
@@ -96,7 +90,7 @@ def calculate_counts(payment_verification_plan: PaymentVerificationPlan) -> None
 
 
 def get_payment_items_for_dashboard(
-    year: int, business_area_slug: str, filters: Dict, only_with_delivered_quantity: bool = False
+    year: int, business_area_slug: str, filters: dict, only_with_delivered_quantity: bool = False
 ) -> "QuerySet":
     additional_filters = {}
     if only_with_delivered_quantity:
@@ -123,18 +117,17 @@ def get_quantity_in_usd(
     exchange_rate: Decimal,
     currency_exchange_date: datetime.datetime,
     exchange_rates_client: Optional["ExchangeRateClient"] = None,
-) -> Optional[Decimal]:
+) -> Decimal | None:
     if amount is None:
         return None
 
     if amount == 0:
         return Decimal(0)
 
-    if not exchange_rate:
-        if exchange_rates_client is None:
-            exchange_rates_client = ExchangeRates()
+    if not exchange_rate and exchange_rates_client is None:
+        exchange_rates_client = ExchangeRates()
 
-            exchange_rate = exchange_rates_client.get_exchange_rate_for_currency_code(currency, currency_exchange_date)
+        exchange_rate = exchange_rates_client.get_exchange_rate_for_currency_code(currency, currency_exchange_date)
 
     if exchange_rate is None:
         return None
@@ -148,13 +141,12 @@ def get_payment_plan_object(payment_plan_id: str) -> "PaymentPlan":
 
 
 def get_payment_delivered_quantity_status_and_value(
-    delivered_quantity: Optional[Union[int, float, str]], entitlement_quantity: Decimal
-) -> typing.Tuple[str, Optional[Decimal]]:
-    """
-    * Fully Delivered (entitled quantity = delivered quantity) [int, float, str]
+    delivered_quantity: int | float | str | None, entitlement_quantity: Decimal
+) -> tuple[str, Decimal | None]:
+    """* Fully Delivered (entitled quantity = delivered quantity) [int, float, str]
     * Partially Delivered (entitled quantity > delivered quantity > 0) [int, float, str]
     * Not Delivered (0 = delivered quantity) [int, float, str]
-    * Unsuccessful (failed at the delivery processing level) [-1.0]
+    * Unsuccessful (failed at the delivery processing level) [-1.0].
     """
     delivered_quantity_decimal: Decimal = to_decimal(delivered_quantity)  # type: ignore
 
@@ -164,19 +156,18 @@ def get_payment_delivered_quantity_status_and_value(
     if delivered_quantity_decimal < 0:
         return Payment.STATUS_ERROR, None
 
-    elif delivered_quantity_decimal == 0:
+    if delivered_quantity_decimal == 0:
         return Payment.STATUS_NOT_DISTRIBUTED, delivered_quantity_decimal
 
-    elif delivered_quantity_decimal < entitlement_quantity:
+    if delivered_quantity_decimal < entitlement_quantity:
         return Payment.STATUS_DISTRIBUTION_PARTIAL, delivered_quantity_decimal
 
-    elif delivered_quantity_decimal == entitlement_quantity:
+    if delivered_quantity_decimal == entitlement_quantity:
         return Payment.STATUS_DISTRIBUTION_SUCCESS, delivered_quantity_decimal
 
-    else:
-        raise Exception(f"Invalid delivered quantity {delivered_quantity}")
+    raise Exception(f"Invalid delivered quantity {delivered_quantity}")
 
 
-def generate_cache_key(data: Dict[str, Any]) -> str:
+def generate_cache_key(data: dict[str, Any]) -> str:
     task_params_str = json.dumps(data)
     return hashlib.sha256(task_params_str.encode()).hexdigest()

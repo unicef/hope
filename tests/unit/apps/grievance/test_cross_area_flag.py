@@ -52,12 +52,12 @@ class TestCrossAreaTickets(TestCase):
     def test_cross_area_field(self) -> None:
         self.needs_adjudication_ticket_cross_area.populate_cross_area_flag()
         self.needs_adjudication_ticket_cross_area.refresh_from_db()
-        self.assertEqual(self.needs_adjudication_ticket_cross_area.is_cross_area, True)
+        assert self.needs_adjudication_ticket_cross_area.is_cross_area is True
 
         self.needs_adjudication_ticket_same_area.populate_cross_area_flag()
         self.needs_adjudication_ticket_same_area.refresh_from_db()
-        self.assertEqual(self.needs_adjudication_ticket_same_area.is_cross_area, False)
+        assert self.needs_adjudication_ticket_same_area.is_cross_area is False
 
         self.needs_adjudication_ticket_ind_no_household.populate_cross_area_flag()
         self.needs_adjudication_ticket_ind_no_household.refresh_from_db()
-        self.assertEqual(self.needs_adjudication_ticket_ind_no_household.is_cross_area, False)
+        assert self.needs_adjudication_ticket_ind_no_household.is_cross_area is False

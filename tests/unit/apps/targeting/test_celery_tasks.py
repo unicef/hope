@@ -48,8 +48,8 @@ class CreateTPFromListTaskTest(TestCase):
         payment_plan = PaymentPlan.objects.get(name="Test TP")
 
         mock_create_payments.assert_called_once_with(payment_plan)
-        self.assertEqual(payment_plan.targeting_criteria, self.targeting_criteria)
-        self.assertEqual(payment_plan.business_area, self.program.business_area)
-        self.assertEqual(payment_plan.program_cycle, self.program_cycle)
-        self.assertEqual(payment_plan.created_by, self.user)
-        self.assertEqual(payment_plan.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_OK)
+        assert payment_plan.targeting_criteria == self.targeting_criteria
+        assert payment_plan.business_area == self.program.business_area
+        assert payment_plan.program_cycle == self.program_cycle
+        assert payment_plan.created_by == self.user
+        assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK

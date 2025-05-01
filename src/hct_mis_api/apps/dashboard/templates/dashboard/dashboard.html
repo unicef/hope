@@ -2,7 +2,8 @@
 {% load i18n %}
 {% block title %}
     {{ business_area_slug }} {% translate "Dashboard" %}
-{% endblock %}
+{% endblock title %}
+
 {% block content %}
     <div class="grid grid-cols-6 grid-rows-2 gap-1 justify-items-stretch">
         <!-- Months Chart -->
@@ -49,7 +50,8 @@
             <div id="payments-by-delivery" class="dc-chart w-full h-full"></div>
         </div>
     </div>
-{% endblock %}
+{% endblock content %}
+
 {% block scripts %}
     <script>
     document.addEventListener("DOMContentLoaded", () => {
@@ -75,7 +77,7 @@
                 document.getElementById(chartId).innerHTML = "";
             }
 
-            const url = "{{household_data_url}}";
+            const url = "{{ household_data_url }}";
             const pendingList = ["Sent to Payment Gateway", "Sent to FSP"];
             const successfulList = [
                 "Distribution Successful",
@@ -153,7 +155,7 @@
                         .order((d) => -d);
 
                     const successfulPaymentsByCurrencyGroup = currencyDim.group().reduce(
-                        (p, v) => { 
+                        (p, v) => {
                             if (successfulList.includes(v.payment_status)) {
                                 p.sum += v.delivered_quantity || 0;
                             }
@@ -227,7 +229,7 @@
                         .group(topProgramGroup)
                         .elasticX(true)
                         .height(400)
-                        .margins({ top: 10, right: 20, bottom: 30, left: 5 }) 
+                        .margins({ top: 10, right: 20, bottom: 30, left: 5 })
                         .label(
                             (d) =>
                             `${truncateLabel(d.key)}: ${decimalnumberFormatter(d.value)} USD (${((d.value / programGroup.all().reduce((sum, g) => sum + g.value, 0)) * 100).toFixed(0)}%)`,
@@ -259,7 +261,7 @@
                         .group(monthGroup)
                         .elasticX(true)
                         .height(400)
-                        .margins({ top: 0, right: 0, bottom: 30, left: 5 }) 
+                        .margins({ top: 0, right: 0, bottom: 30, left: 5 })
                         .useViewBoxResizing(true)
                         .label(
                             (d) =>
@@ -276,7 +278,7 @@
                         .group(topAdmin1Group)
                         .elasticX(true)
                         .height(400)
-                        .margins({ top: 0, right: 20, bottom: 30, left: 5 }) 
+                        .margins({ top: 0, right: 20, bottom: 30, left: 5 })
                         .label(
                             (d) =>
                             `${truncateLabel(d.key)}: ${decimalnumberFormatter(d.value)} USD (${((d.value / admin1Group.all().reduce((sum, g) => sum + g.value, 0)) * 100).toFixed(0)}%)`,
@@ -307,8 +309,8 @@
                                 ).value();
                         const finishedPaymentPlans = paymentPlanMetrics.finished;
                         const totalPaymentPlans = paymentPlanMetrics.total;
-                        const verificationPercentage = totalPaymentPlans > 0 
-                            ? (finishedPaymentPlans / totalPaymentPlans) * 100 
+                        const verificationPercentage = totalPaymentPlans > 0
+                            ? (finishedPaymentPlans / totalPaymentPlans) * 100
                             : 0;
                         const successfulPaymentsGroupUSD = ndx
                             .groupAll()
@@ -504,4 +506,4 @@
         fetchDataForCountry();
     });
     </script>
-{% endblock %}
+{% endblock scripts %}

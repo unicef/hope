@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from dateutil.parser import parse
 
@@ -8,9 +8,8 @@ from hct_mis_api.apps.household.models import NON_BENEFICIARY, RELATIONSHIP_UNKN
 KOBO_FORM_INDIVIDUALS_COLUMN_NAME = "individual_questions"
 
 
-def reduce_asset(asset: Dict, *args: Any, **kwargs: Any) -> Dict:
-    """
-    Takes from asset only values that are needed by our frontend.
+def reduce_asset(asset: dict, *args: Any, **kwargs: Any) -> dict:
+    """Takes from asset only values that are needed by our frontend.
 
     {
         "uid": "aY2dvQ64KudGV5UdSvJkB6",
@@ -56,11 +55,10 @@ def reduce_asset(asset: Dict, *args: Any, **kwargs: Any) -> Dict:
 def get_field_name(field_name: str) -> str:
     if "/" in field_name:
         return field_name.split("/")[-1]
-    else:
-        return field_name
+    return field_name
 
 
-def reduce_assets_list(assets: List, deployed: bool = True, *args: Any, **kwarg: Any) -> List:
+def reduce_assets_list(assets: list, deployed: bool = True, *args: Any, **kwarg: Any) -> list:
     if deployed:
         return [reduce_asset(asset) for asset in assets if asset["has_deployment"] and asset["deployment__active"]]
     return [reduce_asset(asset) for asset in assets]
@@ -85,7 +83,7 @@ def count_population(results: list, business_area: BusinessArea) -> tuple[int, i
         if submission_exists is False:
             total_households_count += 1
             for individual_data in result[KOBO_FORM_INDIVIDUALS_COLUMN_NAME]:
-                fields: Dict[str, Optional[str]] = {
+                fields: dict[str, str | None] = {
                     "given_name_i_c": None,
                     "middle_name_i_c": None,
                     "family_name_i_c": None,
@@ -111,14 +109,14 @@ def count_population(results: list, business_area: BusinessArea) -> tuple[int, i
     return total_households_count, total_individuals_count
 
 
-def filter_by_owner(data: List, business_area: BusinessArea) -> List:
+def filter_by_owner(data: list, business_area: BusinessArea) -> list:
     kobo_username = business_area.kobo_username
     if data:
         return [element for element in data if element["owner__username"] == kobo_username]
     return []
 
 
-def get_submission_metadata(household_data_dict: Dict) -> Dict:
+def get_submission_metadata(household_data_dict: dict) -> dict:
     meta_fields_mapping = {
         "_uuid": "kobo_submission_uuid",
         "_xform_id_string": "kobo_asset_id",

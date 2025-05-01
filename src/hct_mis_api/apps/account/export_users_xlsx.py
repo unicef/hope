@@ -1,5 +1,4 @@
 from collections import OrderedDict
-from typing import Optional
 
 from django.db import transaction
 
@@ -56,7 +55,7 @@ class ExportUsersXlsx:
             self.ws.column_dimensions[get_column_letter(i)].width = 20
 
     @transaction.atomic()
-    def get_exported_users_file(self) -> Optional[Workbook]:
+    def get_exported_users_file(self) -> Workbook | None:
         fields = self.FIELDS_TO_COLUMNS_MAPPING.values()
         users = (
             User.objects.prefetch_related("user_roles")

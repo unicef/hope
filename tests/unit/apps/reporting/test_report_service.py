@@ -28,17 +28,17 @@ class TestGenerateReportService(TestCase):
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
-    def setUpTestData(self) -> None:
-        self.business_area = create_afghanistan()
+    def setUpTestData(cls) -> None:
+        cls.business_area = create_afghanistan()
         PartnerFactory(name="UNICEF")
         from hct_mis_api.apps.reporting.services.generate_report_service import (
             GenerateReportService,
         )
 
-        self.GenerateReportService = GenerateReportService
+        cls.GenerateReportService = GenerateReportService
 
-        self.partner = PartnerFactory(name="Test1")
-        self.user = UserFactory.create(partner=self.partner)
+        cls.partner = PartnerFactory(name="Test1")
+        cls.user = UserFactory.create(partner=cls.partner)
         family_sizes_list = (2, 4, 5, 1, 3, 11, 14)
         last_registration_dates = (
             timezone.datetime(2020, 1, 1, tzinfo=utc),
@@ -51,12 +51,12 @@ class TestGenerateReportService(TestCase):
             country=country,
             area_level=2,
         )
-        self.admin_area_1 = AreaFactory(name="Adminarea Test", area_type=area_type, p_code="asdfgfhghkjltr")
+        cls.admin_area_1 = AreaFactory(name="Adminarea Test", area_type=area_type, p_code="asdfgfhghkjltr")
 
-        self.program_1 = ProgramFactory(business_area=self.business_area, end_date="2020-01-01")
-        self.program_2 = ProgramFactory(business_area=self.business_area, end_date="2022-01-01")
-        self.households = []
-        self.individuals = []
+        cls.program_1 = ProgramFactory(business_area=cls.business_area, end_date="2020-01-01")
+        cls.program_2 = ProgramFactory(business_area=cls.business_area, end_date="2022-01-01")
+        cls.households = []
+        cls.individuals = []
         country_origin = geo_models.Country.objects.filter(iso_code2="PL").first()
         for index, family_size in enumerate(family_sizes_list):
             (household, individuals) = create_household_and_individuals(
@@ -64,95 +64,95 @@ class TestGenerateReportService(TestCase):
                     "size": family_size,
                     "address": "Lorem Ipsum",
                     "country_origin": country_origin,
-                    "business_area": self.business_area,
+                    "business_area": cls.business_area,
                     "last_registration_date": last_registration_dates[0] if index % 2 else last_registration_dates[1],
-                    "admin_area": None if index % 2 else self.admin_area_1,
-                    "program": self.program_1 if index % 2 else self.program_2,
+                    "admin_area": None if index % 2 else cls.admin_area_1,
+                    "program": cls.program_1 if index % 2 else cls.program_2,
                 },
                 [
                     {"last_registration_date": last_registration_dates[0] if index % 2 else last_registration_dates[1]},
                     {"last_registration_date": last_registration_dates[0] if index % 2 else last_registration_dates[1]},
                 ],
             )
-            self.households.append(household)
-            self.individuals.extend(individuals)
+            cls.households.append(household)
+            cls.individuals.extend(individuals)
 
-        self.payment_plan_1 = PaymentPlanFactory(
-            business_area=self.business_area,
-            program_cycle=self.program_1.cycles.first(),
-            created_by=self.user,
+        cls.payment_plan_1 = PaymentPlanFactory(
+            business_area=cls.business_area,
+            program_cycle=cls.program_1.cycles.first(),
+            created_by=cls.user,
         )
-        self.payment_plan_2 = PaymentPlanFactory(
-            business_area=self.business_area,
-            created_by=self.user,
+        cls.payment_plan_2 = PaymentPlanFactory(
+            business_area=cls.business_area,
+            created_by=cls.user,
         )
-        self.payment_plan_3 = PaymentPlanFactory(
-            business_area=self.business_area,
-            program_cycle=self.program_1.cycles.first(),
-            created_by=self.user,
+        cls.payment_plan_3 = PaymentPlanFactory(
+            business_area=cls.business_area,
+            program_cycle=cls.program_1.cycles.first(),
+            created_by=cls.user,
         )
-        self.payment_plan_4 = PaymentPlanFactory(
-            business_area=self.business_area,
-            created_by=self.user,
+        cls.payment_plan_4 = PaymentPlanFactory(
+            business_area=cls.business_area,
+            created_by=cls.user,
         )
-        PaymentVerificationSummary.objects.create(payment_plan=self.payment_plan_1)
-        PaymentVerificationSummary.objects.create(payment_plan=self.payment_plan_2)
-        PaymentVerificationSummary.objects.create(payment_plan=self.payment_plan_3)
-        PaymentVerificationSummary.objects.create(payment_plan=self.payment_plan_4)
-        self.payment_plan_verification_1 = PaymentVerificationPlanFactory(
-            payment_plan=self.payment_plan_1, completion_date="2020-01-01T14:30+00:00"
+        PaymentVerificationSummary.objects.create(payment_plan=cls.payment_plan_1)
+        PaymentVerificationSummary.objects.create(payment_plan=cls.payment_plan_2)
+        PaymentVerificationSummary.objects.create(payment_plan=cls.payment_plan_3)
+        PaymentVerificationSummary.objects.create(payment_plan=cls.payment_plan_4)
+        cls.payment_plan_verification_1 = PaymentVerificationPlanFactory(
+            payment_plan=cls.payment_plan_1, completion_date="2020-01-01T14:30+00:00"
         )
-        self.payment_plan_verification_2 = PaymentVerificationPlanFactory(
-            payment_plan=self.payment_plan_2, completion_date="2020-01-01T14:30+00:00"
+        cls.payment_plan_verification_2 = PaymentVerificationPlanFactory(
+            payment_plan=cls.payment_plan_2, completion_date="2020-01-01T14:30+00:00"
         )
-        self.payment_plan_verification_3 = PaymentVerificationPlanFactory(
-            payment_plan=self.payment_plan_3, completion_date="2020-01-01T14:30+00:00"
+        cls.payment_plan_verification_3 = PaymentVerificationPlanFactory(
+            payment_plan=cls.payment_plan_3, completion_date="2020-01-01T14:30+00:00"
         )
-        self.payment_plan_verification_4 = PaymentVerificationPlanFactory(
-            payment_plan=self.payment_plan_4, completion_date="2020-01-01T14:30+00:00"
+        cls.payment_plan_verification_4 = PaymentVerificationPlanFactory(
+            payment_plan=cls.payment_plan_4, completion_date="2020-01-01T14:30+00:00"
         )
         payment_1 = PaymentFactory(
-            household=self.households[0],
-            business_area=self.business_area,
+            household=cls.households[0],
+            business_area=cls.business_area,
             delivery_date="2020-01-01T00:00+00:00",
-            parent=self.payment_plan_1,
+            parent=cls.payment_plan_1,
             currency="PLN",
         )
         payment_2 = PaymentFactory(
-            household=self.households[1],
-            business_area=self.business_area,
+            household=cls.households[1],
+            business_area=cls.business_area,
             delivery_date="2020-01-01T00:00+00:00",
-            parent=self.payment_plan_2,
+            parent=cls.payment_plan_2,
             currency="PLN",
         )
         payment_3 = PaymentFactory(
-            household=self.households[0],
-            business_area=self.business_area,
+            household=cls.households[0],
+            business_area=cls.business_area,
             delivery_date="2020-01-01T14:30+00:00",
-            parent=self.payment_plan_3,
+            parent=cls.payment_plan_3,
             currency="PLN",
         )
         payment_4 = PaymentFactory(
-            household=self.households[1],
-            business_area=self.business_area,
+            household=cls.households[1],
+            business_area=cls.business_area,
             delivery_date="2020-01-01T14:30+00:00",
-            parent=self.payment_plan_4,
+            parent=cls.payment_plan_4,
             currency="PLN",
         )
         PaymentVerificationFactory(
-            payment_verification_plan=self.payment_plan_verification_1,
+            payment_verification_plan=cls.payment_plan_verification_1,
             payment=payment_1,
         )
         PaymentVerificationFactory(
-            payment_verification_plan=self.payment_plan_verification_2,
+            payment_verification_plan=cls.payment_plan_verification_2,
             payment=payment_2,
         )
         PaymentVerificationFactory(
-            payment_verification_plan=self.payment_plan_verification_1,
+            payment_verification_plan=cls.payment_plan_verification_1,
             payment=payment_3,
         )
         PaymentVerificationFactory(
-            payment_verification_plan=self.payment_plan_verification_2,
+            payment_verification_plan=cls.payment_plan_verification_2,
             payment=payment_4,
         )
 
@@ -210,6 +210,6 @@ class TestGenerateReportService(TestCase):
         # assert mock_generate_workbook.called
         # assert mock_save_wb_file_in_db.called
         report.refresh_from_db()
-        self.assertEqual(report.status, Report.COMPLETED)
+        assert report.status == Report.COMPLETED
         # self.assertEqual(report.number_of_records, number_of_records) # when mocking generating workbook, this is not set
         # so for the sake of stability, this assertion may be omitted

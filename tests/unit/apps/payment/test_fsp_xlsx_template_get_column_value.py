@@ -66,7 +66,7 @@ class FinancialServiceProviderXlsxTemplateTest(APITestCase):
 
         result = FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(payment, "registration_token")
         # return empty string if no document
-        self.assertEqual(result, "")
+        assert result == ""
 
     @parameterized.expand(
         [
@@ -117,4 +117,4 @@ class FinancialServiceProviderXlsxTemplateTest(APITestCase):
             "registration_token": document.document_number,
             "invalid_column_name": "wrong_column_name",
         }
-        self.assertEqual(accepted_results.get(field_name), result)
+        assert accepted_results.get(field_name) == result

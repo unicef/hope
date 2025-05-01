@@ -33,7 +33,6 @@ pytestmark = pytest.mark.django_db()
 @pytest.fixture
 def create_programs() -> None:
     create_program("Test Programm")
-    yield
 
 
 def create_program(
@@ -878,10 +877,10 @@ class TestManualCalendar:
         pageProgrammeManagement.wait_for(pageProgrammeManagement.inputPartner).click()
         select_options_container = pageProgrammeManagement.getSelectOptionsContainer()
         options = select_options_container.find_elements(By.TAG_NAME, "li")
-        assert any("Test Partner 1" == li.text for li in options) is True
-        assert any("Test Partner 2" == li.text for li in options) is False
-        assert any("UNHCR" == li.text for li in options) is True
-        assert any("TEST" == li.text for li in options) is True
+        assert any(li.text == "Test Partner 1" for li in options) is True
+        assert any(li.text == "Test Partner 2" for li in options) is False
+        assert any(li.text == "UNHCR" for li in options) is True
+        assert any(li.text == "TEST" for li in options) is True
 
         pageProgrammeManagement.driver.find_element(By.CSS_SELECTOR, "body").click()
 

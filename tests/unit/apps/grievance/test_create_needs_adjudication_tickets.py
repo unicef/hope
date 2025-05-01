@@ -76,7 +76,7 @@ class TestCreateNeedsAdjudicationTickets(APITestCase):
         rebuild_search_index()
 
     def test_create_needs_adjudication_ticket_with_the_same_ind(self) -> None:
-        self.assertEqual(Individual.objects.count(), 2)
+        assert Individual.objects.count() == 2
         ind = Individual.objects.first()
         ind_2 = Individual.objects.last()
         ind.deduplication_golden_record_results = {
@@ -94,7 +94,7 @@ class TestCreateNeedsAdjudicationTickets(APITestCase):
             GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
             rdi,
         )
-        self.assertEqual(GrievanceTicket.objects.all().count(), 0)
+        assert GrievanceTicket.objects.all().count() == 0
 
         create_needs_adjudication_tickets(
             individuals_queryset,
@@ -103,7 +103,7 @@ class TestCreateNeedsAdjudicationTickets(APITestCase):
             GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
             rdi,
         )
-        self.assertEqual(GrievanceTicket.objects.all().count(), 0)
+        assert GrievanceTicket.objects.all().count() == 0
 
         # ticket_have to be created
         deduplication_golden_record_results_data = {
@@ -124,7 +124,7 @@ class TestCreateNeedsAdjudicationTickets(APITestCase):
             GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
             rdi,
         )
-        self.assertEqual(GrievanceTicket.objects.all().count(), 1)
+        assert GrievanceTicket.objects.all().count() == 1
 
 
 class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
@@ -263,35 +263,32 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
         )
 
     def test_create_na_tickets_biometrics(self) -> None:
-        self.assertEqual(GrievanceTicket.objects.all().count(), 0)
-        self.assertEqual(TicketNeedsAdjudicationDetails.objects.all().count(), 0)
-        self.assertIsNone(self.rdi.deduplication_engine_status)
+        assert GrievanceTicket.objects.all().count() == 0
+        assert TicketNeedsAdjudicationDetails.objects.all().count() == 0
+        assert self.rdi.deduplication_engine_status is None
 
         create_needs_adjudication_tickets_for_biometrics(DeduplicationEngineSimilarityPair.objects.none(), self.rdi)
-        self.assertEqual(GrievanceTicket.objects.all().count(), 0)
-        self.assertEqual(TicketNeedsAdjudicationDetails.objects.all().count(), 0)
+        assert GrievanceTicket.objects.all().count() == 0
+        assert TicketNeedsAdjudicationDetails.objects.all().count() == 0
 
-        self.assertEqual(DeduplicationEngineSimilarityPair.objects.all().count(), 3)
+        assert DeduplicationEngineSimilarityPair.objects.all().count() == 3
         create_needs_adjudication_tickets_for_biometrics(
             DeduplicationEngineSimilarityPair.objects.filter(pk=self.dedup_engine_similarity_pair.pk),
             self.rdi,
         )
 
-        self.assertEqual(GrievanceTicket.objects.all().count(), 1)
-        self.assertEqual(TicketNeedsAdjudicationDetails.objects.all().count(), 1)
+        assert GrievanceTicket.objects.all().count() == 1
+        assert TicketNeedsAdjudicationDetails.objects.all().count() == 1
         grievance_ticket = GrievanceTicket.objects.first()
         na_ticket = TicketNeedsAdjudicationDetails.objects.first()
 
-        self.assertEqual(grievance_ticket.category, GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION)
-        self.assertEqual(
-            grievance_ticket.issue_type,
-            GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY,
-        )
+        assert grievance_ticket.category == GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION
+        assert grievance_ticket.issue_type == GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY
 
-        self.assertTrue(na_ticket.is_multiple_duplicates_version)
-        self.assertEqual(
-            na_ticket.extra_data["dedup_engine_similarity_pair"],
-            self.dedup_engine_similarity_pair.serialize_for_ticket(),
+        assert na_ticket.is_multiple_duplicates_version
+        assert (
+            na_ticket.extra_data["dedup_engine_similarity_pair"]
+            == self.dedup_engine_similarity_pair.serialize_for_ticket()
         )
 
         # different RDI
@@ -299,41 +296,38 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
             DeduplicationEngineSimilarityPair.objects.filter(pk=self.dedup_engine_similarity_pair_2.pk),
             self.rdi,
         )
-        self.assertEqual(GrievanceTicket.objects.all().count(), 2)
-        self.assertEqual(TicketNeedsAdjudicationDetails.objects.all().count(), 2)
+        assert GrievanceTicket.objects.all().count() == 2
+        assert TicketNeedsAdjudicationDetails.objects.all().count() == 2
         # run one time
         create_needs_adjudication_tickets_for_biometrics(
             DeduplicationEngineSimilarityPair.objects.filter(pk=self.dedup_engine_similarity_pair_2.pk),
             self.rdi,
         )
-        self.assertEqual(GrievanceTicket.objects.all().count(), 2)
-        self.assertEqual(TicketNeedsAdjudicationDetails.objects.all().count(), 2)
+        assert GrievanceTicket.objects.all().count() == 2
+        assert TicketNeedsAdjudicationDetails.objects.all().count() == 2
 
     def test_create_na_tickets_biometrics_for_1_ind(self) -> None:
-        self.assertEqual(GrievanceTicket.objects.all().count(), 0)
-        self.assertEqual(TicketNeedsAdjudicationDetails.objects.all().count(), 0)
+        assert GrievanceTicket.objects.all().count() == 0
+        assert TicketNeedsAdjudicationDetails.objects.all().count() == 0
 
         create_needs_adjudication_tickets_for_biometrics(
             DeduplicationEngineSimilarityPair.objects.filter(pk=self.dedup_engine_similarity_pair_3.pk),
             self.rdi,
         )
 
-        self.assertEqual(GrievanceTicket.objects.all().count(), 1)
-        self.assertEqual(TicketNeedsAdjudicationDetails.objects.all().count(), 1)
+        assert GrievanceTicket.objects.all().count() == 1
+        assert TicketNeedsAdjudicationDetails.objects.all().count() == 1
         grievance_ticket = GrievanceTicket.objects.first()
         na_ticket = TicketNeedsAdjudicationDetails.objects.first()
 
-        self.assertEqual(grievance_ticket.category, GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION)
-        self.assertEqual(
-            grievance_ticket.issue_type,
-            GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY,
-        )
+        assert grievance_ticket.category == GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION
+        assert grievance_ticket.issue_type == GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY
 
-        self.assertEqual(str(na_ticket.golden_records_individual.id), str(self.ind5.id))
-        self.assertIsNone(na_ticket.possible_duplicate)
-        self.assertEqual(
-            na_ticket.extra_data["dedup_engine_similarity_pair"],
-            self.dedup_engine_similarity_pair_3.serialize_for_ticket(),
+        assert str(na_ticket.golden_records_individual.id) == str(self.ind5.id)
+        assert na_ticket.possible_duplicate is None
+        assert (
+            na_ticket.extra_data["dedup_engine_similarity_pair"]
+            == self.dedup_engine_similarity_pair_3.serialize_for_ticket()
         )
 
     def test_ticket_biometric_query_response(self) -> None:

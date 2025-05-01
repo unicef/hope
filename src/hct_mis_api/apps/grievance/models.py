@@ -1,7 +1,7 @@
 import logging
 from decimal import Decimal
 from itertools import chain
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Iterable, Optional
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -300,7 +300,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         },
     }
 
-    TICKET_DETAILS_NAME_MAPPING: Dict[int, Union[str, Dict[int, str]]] = {
+    TICKET_DETAILS_NAME_MAPPING: dict[int, str | dict[int, str]] = {
         CATEGORY_DATA_CHANGE: {
             ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE: "household_data_update_ticket_details",
             ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE: "individual_data_update_ticket_details",
@@ -413,17 +413,17 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
     # added for migration purposes because 0062 call .objects()
     default_for_migrations_fix = OriginalAndRepresentationsManager()
 
-    def flatten(self, t: List[List]) -> List:
+    def flatten(self, t: list[list]) -> list:
         return [item for sublist in t for item in sublist]
 
     @cached_property
     def _linked_tickets(self) -> QuerySet["GrievanceTicket"]:
-        """Tickets linked explicitly via UI or in 'create_needs_adjudication_tickets' function"""
+        """Tickets linked explicitly via UI or in 'create_needs_adjudication_tickets' function."""
         return self.linked_tickets.all()
 
     @cached_property
     def _existing_tickets(self) -> QuerySet["GrievanceTicket"]:
-        """All tickets for assigned Household"""
+        """All tickets for assigned Household."""
         if not self.household_unicef_id:
             return GrievanceTicket.objects.none()
 
@@ -433,7 +433,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
 
     @cached_property
     def _related_tickets(self) -> QuerySet["GrievanceTicket"]:
-        """Distinct linked + existing tickets"""
+        """Distinct linked + existing tickets."""
         return self._linked_tickets.union(self._existing_tickets)
 
     @property
@@ -455,9 +455,9 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
 
     @property
     def ticket_details(self) -> Any:
-        nested_dict_or_value: Union[str, Dict[int, str]] = self.TICKET_DETAILS_NAME_MAPPING[self.category]
+        nested_dict_or_value: str | dict[int, str] = self.TICKET_DETAILS_NAME_MAPPING[self.category]
         if isinstance(nested_dict_or_value, dict):
-            value: Optional[str] = nested_dict_or_value.get(self.issue_type)
+            value: str | None = nested_dict_or_value.get(self.issue_type)
             if value is None:
                 return None
             return getattr(self, value, None)
@@ -473,7 +473,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         return self.get_category_display()
 
     @property
-    def issue_type_log(self) -> Optional[str]:
+    def issue_type_log(self) -> str | None:
         if self.issue_type is None:
             return None
         issue_type_choices_dict = {}
@@ -504,7 +504,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         verbose_name = "Grievance Ticket"
 
     def clean(self) -> None:
-        issue_types: Optional[Dict[int, str]] = self.ISSUE_TYPES_CHOICES.get(self.category)
+        issue_types: dict[int, str] | None = self.ISSUE_TYPES_CHOICES.get(self.category)
         should_contain_issue_types = bool(issue_types)
         has_invalid_issue_type = should_contain_issue_types is True and self.issue_type not in issue_types  # type: ignore # FIXME: Unsupported right operand type for in ("Optional[Dict[int, str]]")
         has_issue_type_for_category_without_issue_types = bool(should_contain_issue_types is False and self.issue_type)
@@ -525,7 +525,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
     def get_issue_type(self) -> str:
         return dict(self.ALL_ISSUE_TYPES).get(self.issue_type, "")
 
-    def issue_type_to_string(self) -> Optional[str]:
+    def issue_type_to_string(self) -> str | None:
         if self.category in range(2, 5):
             return self.get_issue_type()
         return None
@@ -879,20 +879,19 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
             documents1 = [f"{x.document_number}--{x.type_id}" for x in self.golden_records_individual.documents.all()]
             documents2 = [f"{x.document_number}--{x.type_id}" for x in self.possible_duplicate.documents.all()]
             return bool(set(documents1) & set(documents2))
-        else:
-            possible_duplicates = [self.golden_records_individual, *self.possible_duplicates.all()]
-            selected_individuals = self.selected_individuals.all()
+        possible_duplicates = [self.golden_records_individual, *self.possible_duplicates.all()]
+        selected_individuals = self.selected_individuals.all()
 
-            unselected_individuals = [
-                individual for individual in possible_duplicates if individual not in selected_individuals
-            ]
+        unselected_individuals = [
+            individual for individual in possible_duplicates if individual not in selected_individuals
+        ]
 
-            if unselected_individuals and len(unselected_individuals) > 1:
-                documents = []
-                for individual in unselected_individuals:
-                    documents.append(set([f"{x.document_number}--{x.type_id}" for x in individual.documents.all()]))
-                return bool(set.intersection(*documents))
-            return False
+        if unselected_individuals and len(unselected_individuals) > 1:
+            documents = []
+            for individual in unselected_individuals:
+                documents.append({f"{x.document_number}--{x.type_id}" for x in individual.documents.all()})
+            return bool(set.intersection(*documents))
+        return False
 
     @property
     def household(self) -> "Household":

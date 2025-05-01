@@ -19,8 +19,8 @@ class APIProgramStatuesTests(HOPEApiTestCase):
         url = reverse("api:program-statuses-list")
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), dict(Program.STATUS_CHOICE))
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() == dict(Program.STATUS_CHOICE)
 
 
 class APICountriesTests(HOPEApiTestCase):
@@ -69,17 +69,14 @@ class APICountriesTests(HOPEApiTestCase):
     def test_get_countries(self) -> None:
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(
-            response.json()["results"],
-            [
-                self.get_response(self.country_afghanistan),
-                self.get_response(self.country_poland),
-            ],
-        )
-        self.assertIn("count", response.json())
-        self.assertIn("next", response.json())
-        self.assertIn("previous", response.json())
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["results"] == [
+            self.get_response(self.country_afghanistan),
+            self.get_response(self.country_poland),
+        ]
+        assert "count" in response.json()
+        assert "next" in response.json()
+        assert "previous" in response.json()
 
     def test_get_countries_filter_valid_from_until(self) -> None:
         for filter_data, expected_result in [
@@ -90,14 +87,10 @@ class APICountriesTests(HOPEApiTestCase):
         ]:
             with token_grant_permission(self.token, Grant.API_READ_ONLY):
                 response = self.client.get(self.url, filter_data)
-            self.assertEqual(response.status_code, status.HTTP_200_OK, filter_data)
-            self.assertEqual(len(response.json()["results"]), len(expected_result), filter_data)
+            assert response.status_code == status.HTTP_200_OK, filter_data
+            assert len(response.json()["results"]) == len(expected_result), filter_data
             for result in expected_result:
-                self.assertIn(
-                    self.get_response(result),
-                    response.json()["results"],
-                    filter_data,
-                )
+                assert self.get_response(result) in response.json()["results"], filter_data
 
     def test_get_countries_search(self) -> None:
         for filter_data, expected_result in [
@@ -109,13 +102,9 @@ class APICountriesTests(HOPEApiTestCase):
         ]:
             with token_grant_permission(self.token, Grant.API_READ_ONLY):
                 response = self.client.get(self.url, {"search": filter_data})
-            self.assertEqual(response.status_code, status.HTTP_200_OK, filter_data)
-            self.assertEqual(len(response.json()["results"]), 1, filter_data)
-            self.assertIn(
-                self.get_response(expected_result),
-                response.json()["results"],
-                filter_data,
-            )
+            assert response.status_code == status.HTTP_200_OK, filter_data
+            assert len(response.json()["results"]) == 1, filter_data
+            assert self.get_response(expected_result) in response.json()["results"], filter_data
 
 
 class AreaListTests(HOPEApiTestCase):
@@ -170,13 +159,10 @@ class AreaListTests(HOPEApiTestCase):
     def test_get_area_list(self) -> None:
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         for area in [self.area1, self.area2]:
             expected_result = self.get_result(area)
-            self.assertIn(
-                expected_result,
-                response.json()["results"],
-            )
+            assert expected_result in response.json()["results"]
 
     def test_get_area_list_filter(self) -> None:
         for filter_data, expected_results in (
@@ -197,14 +183,10 @@ class AreaListTests(HOPEApiTestCase):
         ):
             with token_grant_permission(self.token, Grant.API_READ_ONLY):
                 response = self.client.get(self.url, filter_data)  # type: ignore
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
-            self.assertEqual(len(response.json()["results"]), len(expected_results), filter_data)
+            assert response.status_code == status.HTTP_200_OK
+            assert len(response.json()["results"]) == len(expected_results), filter_data
             for area in expected_results:
-                self.assertIn(
-                    self.get_result(area),
-                    response.json()["results"],
-                    filter_data,
-                )
+                assert self.get_result(area) in response.json()["results"], filter_data
 
     def test_get_area_list_search(self) -> None:
         for filter_data, area in [
@@ -215,13 +197,9 @@ class AreaListTests(HOPEApiTestCase):
         ]:
             with token_grant_permission(self.token, Grant.API_READ_ONLY):
                 response = self.client.get(self.url, {"search": filter_data})
-            self.assertEqual(response.status_code, status.HTTP_200_OK, filter_data)
-            self.assertEqual(len(response.json()["results"]), 1, filter_data)
-            self.assertIn(
-                self.get_result(area),
-                response.json()["results"],
-                filter_data,
-            )
+            assert response.status_code == status.HTTP_200_OK, filter_data
+            assert len(response.json()["results"]) == 1, filter_data
+            assert self.get_result(area) in response.json()["results"], filter_data
 
 
 class AreaTypeListTests(HOPEApiTestCase):
@@ -268,13 +246,10 @@ class AreaTypeListTests(HOPEApiTestCase):
     def test_get_area_type_list(self) -> None:
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         for area_type in [self.area_type1, self.area_type2]:
             expected_result = self.get_result(area_type)
-            self.assertIn(
-                expected_result,
-                response.json()["results"],
-            )
+            assert expected_result in response.json()["results"]
 
     def test_get_area_type_list_filter(self) -> None:
         for filter_data, expected_results in (
@@ -289,14 +264,11 @@ class AreaTypeListTests(HOPEApiTestCase):
         ):
             with token_grant_permission(self.token, Grant.API_READ_ONLY):
                 response = self.client.get(self.url, filter_data)  # type: ignore
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
-            self.assertEqual(len(response.json()["results"]), len(expected_results), filter_data)
+            assert response.status_code == status.HTTP_200_OK
+            assert len(response.json()["results"]) == len(expected_results), filter_data
             for area_type in expected_results:
                 expected_result = self.get_result(area_type)
-                self.assertIn(
-                    expected_result,
-                    response.json()["results"],
-                )
+                assert expected_result in response.json()["results"]
 
     def test_get_area_type_list_search(self) -> None:
         for filter_data, area_type in [
@@ -305,9 +277,6 @@ class AreaTypeListTests(HOPEApiTestCase):
         ]:
             with token_grant_permission(self.token, Grant.API_READ_ONLY):
                 response = self.client.get(self.url, {"search": filter_data})
-            self.assertEqual(response.status_code, status.HTTP_200_OK, filter_data)
-            self.assertEqual(len(response.json()["results"]), 1, filter_data)
-            self.assertIn(
-                self.get_result(area_type),
-                response.json()["results"],
-            )
+            assert response.status_code == status.HTTP_200_OK, filter_data
+            assert len(response.json()["results"]) == 1, filter_data
+            assert self.get_result(area_type) in response.json()["results"]

@@ -147,7 +147,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
             variables={"input": data},
         )
         assert "errors" not in response, response
-        self.assertEqual(Feedback.objects.count(), amount + 1)
+        assert Feedback.objects.count() == amount + 1
         return decode_id_string_required(response["data"]["createFeedback"]["feedback"]["id"])
 
     def create_new_feedback(self, data: Optional[Dict] = None) -> str:
@@ -169,7 +169,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
             variables={},
         )
         assert "errors" not in response, response["errors"]
-        self.assertEqual(len(response["data"]["allFeedbacks"]["edges"]), 1)
+        assert len(response["data"]["allFeedbacks"]["edges"]) == 1
 
     def test_permission_denied_when_user_is_not_provided(self) -> None:
         self.create_new_feedback()
@@ -177,8 +177,8 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
             request_string=self.ALL_FEEDBACKS_QUERY,
             variables={},
         )
-        self.assertIsNotNone(response.get("errors"))
-        self.assertIn("Permission Denied", response["errors"][0]["message"])
+        assert response.get("errors") is not None
+        assert "Permission Denied" in response["errors"][0]["message"]
 
     def test_filtering_feedbacks(self) -> None:
         self.create_new_feedback(
@@ -223,7 +223,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
                 variables={"input": data},
             )
             assert "errors" in response, response
-            self.assertEqual(Feedback.objects.count(), current_amount)
+            assert Feedback.objects.count() == current_amount
 
         # missing issue type
         expect_failure(
@@ -245,16 +245,16 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         }
         self.submit_feedback(data)
         feedback = Feedback.objects.first()
-        self.assertEqual(feedback.household_lookup, self.household)
+        assert feedback.household_lookup == self.household
 
     def test_optional_individual_lookup(self) -> None:
         data = self.create_dummy_correct_input() | {
             "individualLookup": encode_id_base64(self.individuals[0].pk, "Individual"),
         }
         self.submit_feedback(data)
-        self.assertEqual(Feedback.objects.count(), 1)
+        assert Feedback.objects.count() == 1
         feedback = Feedback.objects.first()
-        self.assertEqual(feedback.individual_lookup, self.individuals[0])
+        assert feedback.individual_lookup == self.individuals[0]
 
     def test_optional_comments(self) -> None:
         data = self.create_dummy_correct_input() | {
@@ -262,7 +262,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         }
         self.submit_feedback(data)
         feedback = Feedback.objects.first()
-        self.assertEqual(feedback.comments, "Test comments")
+        assert feedback.comments == "Test comments"
 
     def test_optional_language(self) -> None:
         data = self.create_dummy_correct_input() | {
@@ -270,7 +270,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         }
         self.submit_feedback(data)
         feedback = Feedback.objects.first()
-        self.assertEqual(feedback.language, "en")
+        assert feedback.language == "en"
 
     def test_optional_area(self) -> None:
         data = self.create_dummy_correct_input() | {
@@ -278,7 +278,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         }
         self.submit_feedback(data)
         feedback = Feedback.objects.first()
-        self.assertEqual(feedback.area, "Test area")
+        assert feedback.area == "Test area"
 
     def test_optional_admin2(self) -> None:
         country = CountryFactory()
@@ -289,12 +289,12 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         }
         self.submit_feedback(data)
         feedback = Feedback.objects.first()
-        self.assertEqual(feedback.admin2, admin2)
+        assert feedback.admin2 == admin2
 
     def test_updating_feedback(self) -> None:
         feedback_id = self.create_new_feedback()
         feedback = Feedback.objects.get(id=feedback_id)
-        self.assertEqual(feedback.issue_type, Feedback.POSITIVE_FEEDBACK)
+        assert feedback.issue_type == Feedback.POSITIVE_FEEDBACK
         response = self.graphql_request(
             request_string=self.UPDATE_FEEDBACK_MUTATION,
             context={
@@ -313,7 +313,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         )
         assert "errors" not in response, response["errors"]
         feedback.refresh_from_db()
-        self.assertEqual(feedback.issue_type, Feedback.NEGATIVE_FEEDBACK)
+        assert feedback.issue_type == Feedback.NEGATIVE_FEEDBACK
 
     def test_getting_single_feedback(self) -> None:
         feedback_id = self.create_new_feedback()
@@ -329,7 +329,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
             variables={"id": encode_id_base64(feedback_id, "Feedback")},
         )
         assert "errors" not in response, response["errors"]
-        self.assertEqual(response["data"]["feedback"]["id"], encode_id_base64(feedback_id, "Feedback"))
+        assert response["data"]["feedback"]["id"] == encode_id_base64(feedback_id, "Feedback")
 
     def create_linked_grievance_ticket(self, feedback_id: str) -> Dict:
         create_grievance_response = self.graphql_request(
@@ -363,13 +363,8 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         received_grievance_id = decode_id_string(grievance_data["id"])
         received_feedback_id = decode_id_string(grievance_data["feedback"]["id"])
         feedback = Feedback.objects.get(id=feedback_id)
-        self.assertEqual(
-            str(
-                feedback.linked_grievance.id,
-            ),
-            received_grievance_id,
-        )
-        self.assertEqual(str(feedback.id), received_feedback_id)
+        assert str(feedback.linked_grievance.id) == received_grievance_id
+        assert str(feedback.id) == received_feedback_id
 
     def test_individuals_lookup_household_matching_household_lookup(self) -> None:
         self.other_household, self.other_individuals = create_household_and_individuals(
@@ -400,7 +395,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
             },
         )
         assert "errors" in response, response
-        self.assertEqual(Feedback.objects.count(), amount)
+        assert Feedback.objects.count() == amount
 
     def test_ordering_by_issue_type(self) -> None:
         self.create_new_feedback(
@@ -428,9 +423,9 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         )
         assert "errors" not in response_1, response_1["errors"]
         feedbacks_1 = response_1["data"]["allFeedbacks"]["edges"]
-        self.assertEqual(len(feedbacks_1), 2)
-        self.assertEqual(feedbacks_1[0]["node"]["issueType"], Feedback.POSITIVE_FEEDBACK)
-        self.assertEqual(feedbacks_1[1]["node"]["issueType"], Feedback.NEGATIVE_FEEDBACK)
+        assert len(feedbacks_1) == 2
+        assert feedbacks_1[0]["node"]["issueType"] == Feedback.POSITIVE_FEEDBACK
+        assert feedbacks_1[1]["node"]["issueType"] == Feedback.NEGATIVE_FEEDBACK
 
         response_2 = self.graphql_request(
             request_string=self.ALL_FEEDBACKS_QUERY,
@@ -444,9 +439,9 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         )
         assert "errors" not in response_2, response_2["errors"]
         feedbacks_2 = response_2["data"]["allFeedbacks"]["edges"]
-        self.assertEqual(len(feedbacks_2), 2)
-        self.assertEqual(feedbacks_2[0]["node"]["issueType"], Feedback.NEGATIVE_FEEDBACK)
-        self.assertEqual(feedbacks_2[1]["node"]["issueType"], Feedback.POSITIVE_FEEDBACK)
+        assert len(feedbacks_2) == 2
+        assert feedbacks_2[0]["node"]["issueType"] == Feedback.NEGATIVE_FEEDBACK
+        assert feedbacks_2[1]["node"]["issueType"] == Feedback.POSITIVE_FEEDBACK
 
     def test_ordering_by_linked_grievance(self) -> None:
         feedback_id_1 = self.create_new_feedback()
@@ -467,10 +462,10 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         )
         assert "errors" not in response_1, response_1["errors"]
         feedbacks_1 = response_1["data"]["allFeedbacks"]["edges"]
-        self.assertEqual(len(feedbacks_1), 3)
-        self.assertEqual(feedbacks_1[0]["node"]["linkedGrievance"]["id"], grievance_data_1["id"])
-        self.assertEqual(feedbacks_1[1]["node"]["linkedGrievance"]["id"], grievance_data_2["id"])
-        self.assertEqual(feedbacks_1[2]["node"]["linkedGrievance"], None)
+        assert len(feedbacks_1) == 3
+        assert feedbacks_1[0]["node"]["linkedGrievance"]["id"] == grievance_data_1["id"]
+        assert feedbacks_1[1]["node"]["linkedGrievance"]["id"] == grievance_data_2["id"]
+        assert feedbacks_1[2]["node"]["linkedGrievance"] is None
 
         response_2 = self.graphql_request(
             request_string=self.ALL_FEEDBACKS_QUERY,
@@ -484,7 +479,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         )
         assert "errors" not in response_2, response_2["errors"]
         feedbacks_2 = response_2["data"]["allFeedbacks"]["edges"]
-        self.assertEqual(len(feedbacks_2), 3)
-        self.assertEqual(feedbacks_2[0]["node"]["linkedGrievance"], None)
-        self.assertEqual(feedbacks_2[1]["node"]["linkedGrievance"]["id"], grievance_data_2["id"])
-        self.assertEqual(feedbacks_2[2]["node"]["linkedGrievance"]["id"], grievance_data_1["id"])
+        assert len(feedbacks_2) == 3
+        assert feedbacks_2[0]["node"]["linkedGrievance"] is None
+        assert feedbacks_2[1]["node"]["linkedGrievance"]["id"] == grievance_data_2["id"]
+        assert feedbacks_2[2]["node"]["linkedGrievance"]["id"] == grievance_data_1["id"]

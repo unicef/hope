@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, TYPE_CHECKING
 from uuid import UUID
 
 from django.db.transaction import atomic
@@ -9,7 +9,6 @@ from django.utils.functional import cached_property
 from django_countries import Countries
 from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status
-from rest_framework.request import Request
 from rest_framework.response import Response
 
 from hct_mis_api.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
@@ -30,6 +29,9 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+
+if TYPE_CHECKING:
+    from rest_framework.request import Request
 
 PEOPLE_TYPE_CHOICES = (
     (BLANK, "None"),
@@ -86,7 +88,7 @@ class PushPeopleSerializer(serializers.ModelSerializer):
 
 
 class PeopleUploadMixin:
-    def save_people(self, rdi: RegistrationDataImport, people_data: List[Dict]) -> List[int]:
+    def save_people(self, rdi: RegistrationDataImport, people_data: list[dict]) -> list[int]:
         people_ids = []
         for person_data in people_data:
             documents = person_data.pop("documents", [])
@@ -96,7 +98,7 @@ class PeopleUploadMixin:
             people_ids.append(ind.id)
         return people_ids
 
-    def _create_household(self, person_data: Dict, rdi: RegistrationDataImport) -> Optional[PendingHousehold]:
+    def _create_household(self, person_data: dict, rdi: RegistrationDataImport) -> PendingHousehold | None:
         if person_data.get("type") == NON_BENEFICIARY:
             return None
         household_fields = [field.name for field in PendingHousehold._meta.get_fields()]
@@ -131,9 +133,9 @@ class PeopleUploadMixin:
 
     def _create_individual(
         self,
-        documents: List[Dict],
-        hh: Optional[PendingHousehold],
-        person_data: Dict,
+        documents: list[dict],
+        hh: PendingHousehold | None,
+        person_data: dict,
         rdi: RegistrationDataImport,
     ) -> PendingIndividual:
         individual_fields = [field.name for field in PendingIndividual._meta.get_fields()]
@@ -143,9 +145,7 @@ class PeopleUploadMixin:
         relationship = NON_BENEFICIARY if person_type is NON_BENEFICIARY else HEAD
         individual_data["phone_no"] = individual_data.get("phone_no") or ""
         individual_data["phone_no_alternative"] = individual_data.get("phone_no_alternative") or ""
-        individual_data["flex_fields"] = populate_pdu_with_null_values(
-            rdi.program, individual_data.get("flex_fields", None)
-        )
+        individual_data["flex_fields"] = populate_pdu_with_null_values(rdi.program, individual_data.get("flex_fields"))
 
         ind = PendingIndividual.objects.create(
             business_area=rdi.business_area,
@@ -167,10 +167,10 @@ class PeopleUploadMixin:
             self._create_document(ind, doc)
         return ind
 
-    def _create_document(self, member: PendingIndividual, doc: Dict) -> None:
+    def _create_document(self, member: PendingIndividual, doc: dict) -> None:
         PendingDocument.objects.create(
             document_number=doc["document_number"],
-            photo=get_photo_from_stream(doc.get("image", None)),
+            photo=get_photo_from_stream(doc.get("image")),
             individual=member,
             country=Country.objects.get(iso_code2=doc["country"]),
             type=DocumentType.objects.get(key=doc["type"]),

@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any, List, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from django.utils import timezone
 
@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def process_flex_records_task(self: Any, reg_id: "UUID", rdi_id: "UUID", records_ids: List) -> None:
+def process_flex_records_task(self: Any, reg_id: "UUID", rdi_id: "UUID", records_ids: list) -> None:
     registration = Registration.objects.get(id=reg_id)
     try:
         if service := registration.rdi_parser:
@@ -67,7 +67,7 @@ def automate_rdi_creation_task(
     auto_merge: bool = False,
     fix_tax_id: bool = False,
     **filters: Any,
-) -> List:
+) -> list:
     try:
         with locked_cache(key=f"automate_rdi_creation_task-{registration_id}") as locked:
             if not locked:
@@ -80,7 +80,7 @@ def automate_rdi_creation_task(
             project = registration.project
             # programme = project.programme TODO programme refactoring
             organization = project.organization
-            service: Optional[Any] = registration.rdi_parser
+            service: Any | None = registration.rdi_parser
             if service is None:
                 raise NotImplementedError
 
@@ -121,7 +121,7 @@ def automate_rdi_creation_task(
 @log_start_and_end
 @sentry_tags
 def clean_old_record_files_task(default_timedelta: int = 60) -> None:
-    """This task once a month clears (sets to null) Record's files field"""
+    """This task once a month clears (sets to null) Record's files field."""
     from datetime import timedelta
 
     try:

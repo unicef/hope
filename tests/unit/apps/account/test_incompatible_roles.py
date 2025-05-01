@@ -18,7 +18,7 @@ class IncompatibleRolesTest(TestCase):
         test_role = IncompatibleRoles(role_one=self.role_1, role_two=self.role_2)
         test_role.full_clean()
         test_role.save()
-        self.assertTrue(IncompatibleRoles.objects.filter(role_one=self.role_1, role_two=self.role_2).exists())
+        assert IncompatibleRoles.objects.filter(role_one=self.role_1, role_two=self.role_2).exists()
 
     def test_roles_must_be_different(self) -> None:
         incomp_role = IncompatibleRoles(role_one=self.role_1, role_two=self.role_1)

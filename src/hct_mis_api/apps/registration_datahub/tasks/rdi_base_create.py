@@ -1,7 +1,7 @@
 import logging
 from collections import defaultdict
 from functools import reduce
-from typing import Any, List
+from typing import Any
 
 from hct_mis_api.apps.core.utils import (
     get_combined_attributes,
@@ -43,7 +43,7 @@ class RdiBaseCreateTask:
 
         field = self.COMBINED_FIELDS[header]
 
-        casters: List = [
+        casters: list = [
             DefaultValueCaster(),
             BooleanValueCaster,
             SelectOneValueCaster,
@@ -80,7 +80,7 @@ class RdiBaseCreateTask:
         account_types_dict = {obj.key: obj for obj in AccountType.objects.all()}
 
         imported_delivery_mechanism_data = []
-        for _, data in self.accounts.items():
+        for data in self.accounts.values():
             individual = data.pop("individual")
             for account_type, values in data.items():
                 financial_institution_code = values.get("code", None)

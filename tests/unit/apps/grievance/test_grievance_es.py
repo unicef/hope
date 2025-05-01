@@ -345,22 +345,20 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         cls.program_2 = ProgramFactory(status="ACTIVE")
 
         cls.grievance_ticket_1 = GrievanceTicket.objects.create(
-            **{
-                "business_area": cls.business_area,
-                "unicef_id": "GRV-0000001",
-                "admin2": cls.admin_area_1,
-                "language": "Polish",
-                "consent": True,
-                "description": "grievance_ticket_1",
-                "category": GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
-                "status": GrievanceTicket.STATUS_NEW,
-                "created_by": cls.user,
-                "assigned_to": cls.user,
-                "created_at": "2022-04-30T09:54:07.827000",
-                "household_unicef_id": "HH-20-0000.0001",
-                "priority": 1,
-                "urgency": 2,
-            }
+            business_area=cls.business_area,
+            unicef_id="GRV-0000001",
+            admin2=cls.admin_area_1,
+            language="Polish",
+            consent=True,
+            description="grievance_ticket_1",
+            category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+            status=GrievanceTicket.STATUS_NEW,
+            created_by=cls.user,
+            assigned_to=cls.user,
+            created_at="2022-04-30T09:54:07.827000",
+            household_unicef_id="HH-20-0000.0001",
+            priority=1,
+            urgency=2,
         )
 
         cls.es.index(
@@ -387,23 +385,21 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         )
 
         cls.grievance_ticket_2 = GrievanceTicket.objects.create(
-            **{
-                "business_area": cls.business_area,
-                "unicef_id": "GRV-0000002",
-                "admin2": cls.admin_area_2,
-                "language": "Polish",
-                "consent": True,
-                "description": "grievance_ticket_2",
-                "category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
-                "status": GrievanceTicket.STATUS_IN_PROGRESS,
-                "issue_type": 12,
-                "created_by": cls.user2,
-                "assigned_to": cls.user2,
-                "created_at": "2022-05-12T09:12:07.857000",
-                "household_unicef_id": "HH-20-0000.0001",
-                "priority": 2,
-                "urgency": 3,
-            }
+            business_area=cls.business_area,
+            unicef_id="GRV-0000002",
+            admin2=cls.admin_area_2,
+            language="Polish",
+            consent=True,
+            description="grievance_ticket_2",
+            category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+            status=GrievanceTicket.STATUS_IN_PROGRESS,
+            issue_type=12,
+            created_by=cls.user2,
+            assigned_to=cls.user2,
+            created_at="2022-05-12T09:12:07.857000",
+            household_unicef_id="HH-20-0000.0001",
+            priority=2,
+            urgency=3,
         )
 
         cls.es.index(
@@ -430,22 +426,20 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         )
 
         cls.grievance_ticket_3 = GrievanceTicket.objects.create(
-            **{
-                "business_area": cls.business_area,
-                "unicef_id": "GRV-0000003",
-                "admin2": cls.admin_area_2,
-                "language": "Polish",
-                "consent": True,
-                "description": "grievance_ticket_3",
-                "category": GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
-                "status": GrievanceTicket.STATUS_ON_HOLD,
-                "created_by": cls.user,
-                "assigned_to": cls.user,
-                "created_at": "2022-05-05T09:12:07.857000",
-                "household_unicef_id": "HH-20-0000.0003",
-                "priority": 3,
-                "urgency": 1,
-            }
+            business_area=cls.business_area,
+            unicef_id="GRV-0000003",
+            admin2=cls.admin_area_2,
+            language="Polish",
+            consent=True,
+            description="grievance_ticket_3",
+            category=GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
+            status=GrievanceTicket.STATUS_ON_HOLD,
+            created_by=cls.user,
+            assigned_to=cls.user,
+            created_at="2022-05-05T09:12:07.857000",
+            household_unicef_id="HH-20-0000.0003",
+            priority=3,
+            urgency=1,
         )
 
         cls.es.index(

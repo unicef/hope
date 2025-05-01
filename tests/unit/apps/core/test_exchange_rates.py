@@ -105,14 +105,14 @@ class TestExchangeRatesAPI(TestCase):
             api_client = ExchangeRateClientAPI(api_key=api_key, api_url=api_url)
 
             if api_key is not None:
-                self.assertEqual(api_key, api_client.api_key)
+                assert api_key == api_client.api_key
 
             if api_url is not None:
-                self.assertEqual(api_url, api_client.api_url)
+                assert api_url == api_client.api_url
 
             if api_url is None and api_key is None:
-                self.assertEqual("TEST_API_KEY", api_client.api_key)
-                self.assertEqual("https://uniapis.unicef.org/biapi/v1/exchangerates", api_client.api_url)
+                assert api_client.api_key == "TEST_API_KEY"
+                assert api_client.api_url == "https://uniapis.unicef.org/biapi/v1/exchangerates"
 
     @parameterized.expand(
         [
@@ -139,9 +139,9 @@ class TestExchangeRatesAPI(TestCase):
             response_dict = api_client.fetch_exchange_rates(with_history=with_history)
 
             if test_name == "with_history":
-                self.assertEqual(EXCHANGE_RATES_WITH_HISTORICAL_DATA, response_dict)
+                assert response_dict == EXCHANGE_RATES_WITH_HISTORICAL_DATA
             elif test_name == "without_history":
-                self.assertEqual(EXCHANGE_RATES_WITHOUT_HISTORICAL_DATA, response_dict)
+                assert response_dict == EXCHANGE_RATES_WITHOUT_HISTORICAL_DATA
 
 
 @mock.patch.dict(os.environ, {"EXCHANGE_RATES_API_KEY": "TEST_API_KEY"})
@@ -152,42 +152,41 @@ class TestExchangeRates(TestCase):
         xeu = converted_response.get("XEU")
         cup1 = converted_response.get("CUP1")
 
-        self.assertEqual(2, len(converted_response))
+        assert len(converted_response) == 2
 
-        self.assertEqual("XEU", xeu.currency_code)
-        self.assertEqual(1.0, xeu.ratio)
-        self.assertEqual(0.867, xeu.x_rate)
-        self.assertEqual(datetime(1998, 12, 1, 0, 0), xeu.valid_from)
-        self.assertEqual(datetime(9999, 12, 31), xeu.valid_to)
+        assert xeu.currency_code == "XEU"
+        assert xeu.ratio == 1.0
+        assert xeu.x_rate == 0.867
+        assert datetime(1998, 12, 1, 0, 0) == xeu.valid_from
+        assert datetime(9999, 12, 31) == xeu.valid_to
 
-        self.assertEqual(3, len(xeu.historical_exchange_rates))
+        assert len(xeu.historical_exchange_rates) == 3
 
         xeu_second_historical_rate = xeu.historical_exchange_rates[1]
-        self.assertEqual(xeu_second_historical_rate.valid_to, datetime(1998, 2, 28))
-        self.assertEqual(xeu_second_historical_rate.valid_from, datetime(1998, 2, 1))
-        self.assertEqual(xeu_second_historical_rate.past_xrate, 0.926)
-        self.assertEqual(xeu_second_historical_rate.past_ratio, 1)
+        assert xeu_second_historical_rate.valid_to == datetime(1998, 2, 28)
+        assert xeu_second_historical_rate.valid_from == datetime(1998, 2, 1)
+        assert xeu_second_historical_rate.past_xrate == 0.926
+        assert xeu_second_historical_rate.past_ratio == 1
 
         # dispersion_date not provided, return current rate
-        self.assertEqual(xeu.get_exchange_rate_by_dispersion_date(dispersion_date=None), xeu.x_rate * xeu.ratio)
+        assert xeu.get_exchange_rate_by_dispersion_date(dispersion_date=None) == xeu.x_rate * xeu.ratio
         # dispersion_date from current valid date range, return current rate
-        self.assertEqual(
-            xeu.get_exchange_rate_by_dispersion_date(dispersion_date=datetime(1998, 12, 15, 0, 0)),
-            xeu.x_rate * xeu.ratio,
+        assert (
+            xeu.get_exchange_rate_by_dispersion_date(dispersion_date=datetime(1998, 12, 15, 0, 0))
+            == xeu.x_rate * xeu.ratio
         )
         # dispersion_date from past valid date range, return past rate
-        self.assertEqual(
-            xeu.get_exchange_rate_by_dispersion_date(dispersion_date=datetime(1998, 2, 15, 0, 0)),
-            float(xeu_second_historical_rate.past_xrate) * float(xeu_second_historical_rate.past_ratio),
-        )
+        assert xeu.get_exchange_rate_by_dispersion_date(dispersion_date=datetime(1998, 2, 15, 0, 0)) == float(
+            xeu_second_historical_rate.past_xrate
+        ) * float(xeu_second_historical_rate.past_ratio)
 
-        self.assertEqual("CUP1", cup1.currency_code)
-        self.assertEqual(1.0, cup1.ratio)
-        self.assertEqual(24, cup1.x_rate)
-        self.assertEqual(datetime(2006, 8, 15, 0, 0), cup1.valid_from)
-        self.assertEqual(datetime(9999, 12, 31), cup1.valid_to)
+        assert cup1.currency_code == "CUP1"
+        assert cup1.ratio == 1.0
+        assert cup1.x_rate == 24
+        assert datetime(2006, 8, 15, 0, 0) == cup1.valid_from
+        assert datetime(9999, 12, 31) == cup1.valid_to
 
-        self.assertEqual([], cup1.historical_exchange_rates)
+        assert cup1.historical_exchange_rates == []
 
     @parameterized.expand(
         [
@@ -209,4 +208,4 @@ class TestExchangeRates(TestCase):
             )
             exchange_rates_client = ExchangeRates()
             exchange_rate = exchange_rates_client.get_exchange_rate_for_currency_code(currency_code, dispersion_date)
-            self.assertEqual(expected_result, exchange_rate)
+            assert expected_result == exchange_rate

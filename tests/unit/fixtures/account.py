@@ -9,7 +9,7 @@ from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
 
 
-@pytest.fixture()
+@pytest.fixture
 def update_partner_access_to_program() -> Callable:
     def _update_partner_access_to_program(
         partner: Partner,
@@ -30,7 +30,7 @@ def update_partner_access_to_program() -> Callable:
     return _update_partner_access_to_program
 
 
-@pytest.fixture()
+@pytest.fixture
 def create_partner_role_with_permissions() -> Callable:
     def _create_partner_role_with_permissions(
         partner: Partner,
@@ -49,7 +49,7 @@ def create_partner_role_with_permissions() -> Callable:
     return _create_partner_role_with_permissions
 
 
-@pytest.fixture()
+@pytest.fixture
 def create_user_role_with_permissions(update_partner_access_to_program: Any) -> Callable:
     def _create_user_role_with_permissions(
         user: User,
@@ -71,6 +71,6 @@ def create_user_role_with_permissions(update_partner_access_to_program: Any) -> 
     return _create_user_role_with_permissions
 
 
-@pytest.fixture()
+@pytest.fixture
 def partner_unicef(db: Any) -> PartnerFactory:
     return PartnerFactory(name="UNICEF")

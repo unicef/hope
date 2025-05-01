@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
@@ -52,8 +52,7 @@ class BusinessAreaPartnerThrough(TimeStampedUUIDModel):
 
 
 class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
-    """
-    BusinessArea (EPRP called Workspace, also synonym was
+    """BusinessArea (EPRP called Workspace, also synonym was
     country/region) model.
     It's used for drop down menu in top bar in the UI. Many times
     BusinessArea means country.
@@ -64,7 +63,7 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
         <BUSINESS_AREA_LONG_NAME>THE PEOPLE'S DEMOCRATIC REPUBLIC OF ALGERIA</BUSINESS_AREA_LONG_NAME>
         <REGION_CODE>59</REGION_CODE>
         <REGION_NAME>MENAR</REGION_NAME>
-    </BusinessArea>
+    </BusinessArea>.
     """
 
     code = models.CharField(max_length=10, unique=True)
@@ -162,15 +161,15 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
     def __str__(self) -> str:
         return self.name
 
-    def natural_key(self) -> Tuple[str]:
+    def natural_key(self) -> tuple[str]:
         return (self.code,)
 
     @property
     def can_import_ocha_response_plans(self) -> bool:
-        return any([c.details for c in self.countries.all()])
+        return any(c.details for c in self.countries.all())
 
     @classmethod
-    def get_business_areas_as_choices(cls) -> List[Dict[str, Any]]:
+    def get_business_areas_as_choices(cls) -> list[dict[str, Any]]:
         return [
             {"label": {"English(EN)": business_area.name}, "value": business_area.slug}
             for business_area in cls.objects.all()
@@ -257,7 +256,7 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
             and FlexibleAttribute.objects.filter(name=self.name, program__isnull=True).exclude(id=self.id).exists()
         ):
             raise ValidationError(f'Flex field with name "{self.name}" already exists without a program.')
-        elif (
+        if (
             not self.program
             and FlexibleAttribute.objects.filter(name=self.name, program__isnull=False).exclude(id=self.id).exists()
         ):
@@ -301,7 +300,7 @@ class FlexibleAttributeGroup(SoftDeletionTreeModel):
     def __str__(self) -> str:
         return f"name: {self.name}"
 
-    def natural_key(self) -> Tuple[str]:
+    def natural_key(self) -> tuple[str]:
         return (self.name,)
 
 
@@ -323,9 +322,7 @@ mptt.register(FlexibleAttributeGroup, order_insertion_by=["name"])
 
 
 class PeriodicFieldData(models.Model):
-    """
-    Additional data for PDU
-    """
+    """Additional data for PDU."""
 
     STRING = "STRING"
     DECIMAL = "DECIMAL"
@@ -406,7 +403,7 @@ class CountryCodeMapManager(models.Manager):
         self._cache = {2: {}, 3: {}, "ca2": {}, "ca3": {}}
         super().__init__()
 
-    def get_code(self, iso_code: str) -> Optional[str]:
+    def get_code(self, iso_code: str) -> str | None:
         iso_code = iso_code.upper()
         self.build_cache()
         return self._cache[len(iso_code)].get(iso_code, iso_code)
@@ -443,12 +440,10 @@ class CountryCodeMap(models.Model):
 
 
 class CustomModelEntry(ModelEntry):
-    """
-    don't update existing tasks
-    """
+    """don't update existing tasks."""
 
     @classmethod
-    def from_entry(cls, name: str, app: Optional[str] = None, **entry: Any) -> "CustomModelEntry":
+    def from_entry(cls, name: str, app: str | None = None, **entry: Any) -> "CustomModelEntry":
         obj, _ = PeriodicTask._default_manager.get_or_create(
             name=name,
             defaults=cls._unpack_fields(**entry),
@@ -507,7 +502,7 @@ class StorageFile(models.Model):
 
 
 class FileTemp(TimeStampedModel):
-    """Use this model for temporary store files"""
+    """Use this model for temporary store files."""
 
     object_id = models.CharField(max_length=120, null=True)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)

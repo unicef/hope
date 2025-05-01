@@ -106,7 +106,7 @@ class TargetingCreate(BaseComponents):
                 self.wait_for_disappear(self.buttonTargetPopulationCreate)
                 break
             except BaseException:
-                print("Error: Try again to click Save button during Target Population creation")
+                pass
         else:
             raise Exception(f"Element {self.buttonTargetPopulationCreate} not found")
         return True

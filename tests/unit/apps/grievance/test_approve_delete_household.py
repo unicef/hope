@@ -84,7 +84,7 @@ class TestApproveDeleteHousehold(APITestCase):
         )
 
         hh_withdraw = Household.objects.filter(id=self.household_withdraw.id).first()
-        self.assertTrue(hh_withdraw.withdrawn)
+        assert hh_withdraw.withdrawn
 
         self.snapshot_graphql_request(
             request_string=self.APPROVE_DELETE_HH_MUTATION,
@@ -96,7 +96,7 @@ class TestApproveDeleteHousehold(APITestCase):
             },
         )
         ticket_details.refresh_from_db()
-        self.assertIsNone(ticket_details.reason_household)
+        assert ticket_details.reason_household is None
 
         self.graphql_request(
             request_string=self.APPROVE_DELETE_HH_MUTATION,
@@ -108,7 +108,7 @@ class TestApproveDeleteHousehold(APITestCase):
             },
         )
         ticket_details.refresh_from_db()
-        self.assertIsNone(ticket_details.reason_household)
+        assert ticket_details.reason_household is None
 
         self.snapshot_graphql_request(
             request_string=self.APPROVE_DELETE_HH_MUTATION,
@@ -120,7 +120,7 @@ class TestApproveDeleteHousehold(APITestCase):
             },
         )
         ticket_details.refresh_from_db()
-        self.assertEqual(ticket_details.reason_household, self.household_test_1)
+        assert ticket_details.reason_household == self.household_test_1
 
         self.snapshot_graphql_request(
             request_string=self.APPROVE_DELETE_HH_MUTATION,
@@ -132,7 +132,7 @@ class TestApproveDeleteHousehold(APITestCase):
             },
         )
         ticket_details.refresh_from_db()
-        self.assertIsNone(ticket_details.reason_household)
+        assert ticket_details.reason_household is None
 
         self.snapshot_graphql_request(
             request_string=self.APPROVE_DELETE_HH_MUTATION,
@@ -144,7 +144,7 @@ class TestApproveDeleteHousehold(APITestCase):
             },
         )
         ticket_details.refresh_from_db()
-        self.assertIsNone(ticket_details.reason_household)
+        assert ticket_details.reason_household is None
 
         self.snapshot_graphql_request(
             request_string=self.APPROVE_DELETE_HH_MUTATION,
@@ -156,4 +156,4 @@ class TestApproveDeleteHousehold(APITestCase):
             },
         )
         ticket_details.refresh_from_db()
-        self.assertEqual(ticket_details.reason_household, self.household_test_2)
+        assert ticket_details.reason_household == self.household_test_2

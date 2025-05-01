@@ -1,5 +1,5 @@
 import base64
-from typing import Any, Dict, Optional
+from typing import Any
 
 from django.shortcuts import get_object_or_404
 
@@ -51,7 +51,7 @@ class PaymentPlanSerializer(serializers.ModelSerializer):
             "last_approval_process_by",
         )
 
-    def get_last_approval_process_by(self, obj: PaymentPlan) -> Optional[str]:
+    def get_last_approval_process_by(self, obj: PaymentPlan) -> str | None:
         return str(obj.last_approval_process_by) if obj.last_approval_process_by else None
 
 
@@ -83,7 +83,7 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
 
         return file
 
-    def validate(self, data: Dict) -> Dict:
+    def validate(self, data: dict) -> dict:
         payment_plan_id = self.context["request"].parser_context["kwargs"]["payment_plan_id"]
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
         data["payment_plan"] = payment_plan
@@ -97,5 +97,5 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
             )
         return data
 
-    def create(self, validated_data: Dict[str, Any]) -> PaymentPlanSupportingDocument:
+    def create(self, validated_data: dict[str, Any]) -> PaymentPlanSupportingDocument:
         return super().create(validated_data)

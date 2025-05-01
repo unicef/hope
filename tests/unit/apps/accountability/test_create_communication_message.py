@@ -144,10 +144,10 @@ mutation CreateAccountabilityCommunicationMessage (
                     },
                 },
             )
-            self.assertEqual(broadcast_message_mock.call_count, 1)
+            assert broadcast_message_mock.call_count == 1
             if sampling_type == Survey.SAMPLING_FULL_LIST:
-                self.assertEqual(len(broadcast_message_mock.call_args[0][0]), self.payment_plan.payment_items.count())
-            self.assertEqual(broadcast_message_mock.call_args[0][1], "Test body")
+                assert len(broadcast_message_mock.call_args[0][0]) == self.payment_plan.payment_items.count()
+            assert broadcast_message_mock.call_args[0][1] == "Test body"
 
     @parameterized.expand(
         [
@@ -183,7 +183,7 @@ mutation CreateAccountabilityCommunicationMessage (
                     },
                 },
             )
-            self.assertEqual(broadcast_message_mock.call_count, 1)
+            assert broadcast_message_mock.call_count == 1
             if sampling_type == Survey.SAMPLING_FULL_LIST:
-                self.assertEqual(len(broadcast_message_mock.call_args[0][0]), len(self.households))
-            self.assertEqual(broadcast_message_mock.call_args[0][1], "Test body")
+                assert len(broadcast_message_mock.call_args[0][0]) == len(self.households)
+            assert broadcast_message_mock.call_args[0][1] == "Test body"

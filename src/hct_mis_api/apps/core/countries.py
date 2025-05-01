@@ -1,6 +1,6 @@
 import logging
-from functools import lru_cache
-from typing import Any, List, Tuple, Union
+from functools import cache
+from typing import Any
 
 from django_countries import countries as internal_countries
 from django_countries.fields import Country
@@ -12,12 +12,12 @@ logger = logging.getLogger(__name__)
 
 class Countries:
     @classmethod
-    @lru_cache(maxsize=None)
-    def get_countries(cls) -> List[Tuple[str, str, str]]:
+    @cache
+    def get_countries(cls) -> list[tuple[str, str, str]]:
         return [(label, alpha2, Country(alpha2).alpha3) for alpha2, label in internal_countries]
 
     @classmethod
-    def get_choices(cls, output_code: str = "alpha2") -> List:
+    def get_choices(cls, output_code: str = "alpha2") -> list:
         if output_code not in ("alpha2", "alpha3"):
             logger.warning(f"output_code have to be one of: alpha2, alpha3, provided output_code={output_code}")
             raise ValueError("output_code have to be one of: alpha2, alpha3")
@@ -27,14 +27,12 @@ class Countries:
         ]
 
     @classmethod
-    @lru_cache(maxsize=None)
+    @cache
     def is_valid_country_choice(cls, choice: str) -> bool:
         return any(choice in CaseInsensitiveTuple(country_tuple) for country_tuple in cls.get_countries())
 
     @classmethod
-    def get_country_value(
-        cls, input_value: str, output_type: str = "alpha2", *args: Any, **kwargs: Any
-    ) -> Union[str, None]:
+    def get_country_value(cls, input_value: str, output_type: str = "alpha2", *args: Any, **kwargs: Any) -> str | None:
         index_map = {
             "name": 0,
             "alpha2": 1,
@@ -1277,7 +1275,7 @@ class SanctionListCountries:
     }
 
     @classmethod
-    def get_choices(cls, output_code: str = "alpha2") -> List:
+    def get_choices(cls, output_code: str = "alpha2") -> list:
         if output_code not in ("alpha2", "alpha3"):
             logger.warning(f"output_code have to be one of: alpha2, alpha3, provided output_code={output_code}")
             raise ValueError("output_code have to be one of: alpha2, alpha3")
@@ -1291,9 +1289,7 @@ class SanctionListCountries:
         return any(choice in CaseInsensitiveTuple(country_tuple) for country_tuple in cls.COUNTRIES)
 
     @classmethod
-    def get_country_value(
-        cls, input_value: str, output_type: str = "alpha2", *args: Any, **kwargs: Any
-    ) -> Union[str, None]:
+    def get_country_value(cls, input_value: str, output_type: str = "alpha2", *args: Any, **kwargs: Any) -> str | None:
         index_map = {
             "name": 0,
             "alpha2": 1,

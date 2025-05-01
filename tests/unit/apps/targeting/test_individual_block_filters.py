@@ -39,6 +39,7 @@ from hct_mis_api.apps.targeting.services.targeting_service import (
     TargetingCollectorRuleFilterBlockBase,
 )
 from hct_mis_api.apps.utils.models import MergeStatusModel
+import pytest
 
 
 class TestIndividualBlockFilter(TestCase):
@@ -96,8 +97,8 @@ class TestIndividualBlockFilter(TestCase):
         )
         sex_filter.save()
         queryset = queryset.filter(tc.get_query())
-        self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset.first().id, self.household_1_indiv.id)
+        assert queryset.count() == 1
+        assert queryset.first().id == self.household_1_indiv.id
 
     def test_all_individuals_are_female_on_mixins(self) -> None:
         query = Household.objects.all()
@@ -119,8 +120,8 @@ class TestIndividualBlockFilter(TestCase):
         )
         tc = TargetingCriteriaQueryingBase(rules=[tcr])
         query = query.filter(tc.get_query())
-        self.assertEqual(query.count(), 1)
-        self.assertEqual(query.first().id, self.household_1_indiv.id)
+        assert query.count() == 1
+        assert query.first().id == self.household_1_indiv.id
 
     def test_two_separate_blocks_on_mixins(self) -> None:
         query = Household.objects.all()
@@ -157,8 +158,8 @@ class TestIndividualBlockFilter(TestCase):
         )
         tc = TargetingCriteriaQueryingBase(rules=[tcr])
         query = query.filter(tc.get_query())
-        self.assertEqual(query.count(), 1)
-        self.assertEqual(query.first().id, self.household_2_indiv.id)
+        assert query.count() == 1
+        assert query.first().id == self.household_2_indiv.id
 
     def test_filter_on_flex_field_not_exist(self) -> None:
         tc = TargetingCriteriaFactory()
@@ -180,12 +181,9 @@ class TestIndividualBlockFilter(TestCase):
         )
         flex_field_filter.save()
 
-        with self.assertRaises(Exception) as e:
+        with pytest.raises(Exception) as e:
             query.filter(tc.get_query())
-        self.assertIn(
-            "There is no Flex Field Attributes associated with this fieldName flex_field_2",
-            str(e.exception),
-        )
+        assert "There is no Flex Field Attributes associated with this fieldName flex_field_2" in str(e.value)
 
     def test_filter_on_flex_field(self) -> None:
         tc = TargetingCriteriaFactory()
@@ -213,15 +211,15 @@ class TestIndividualBlockFilter(TestCase):
         )
         flex_field_filter.save()
         query = query.filter(tc.get_query())
-        self.assertEqual(query.count(), 0)
+        assert query.count() == 0
 
         self.individual_1.flex_fields["flex_field_1"] = "Average value"
         self.individual_1.save()
 
         query = query.filter(tc.get_query())
 
-        self.assertEqual(query.count(), 1)
-        self.assertEqual(query.first().id, self.household_1_indiv.id)
+        assert query.count() == 1
+        assert query.first().id == self.household_1_indiv.id
 
     def test_filter_on_pdu_flex_field_not_exist(self) -> None:
         tc = TargetingCriteriaFactory()
@@ -244,11 +242,11 @@ class TestIndividualBlockFilter(TestCase):
         )
         pdu_filter.save()
 
-        with self.assertRaises(Exception) as e:
+        with pytest.raises(Exception) as e:
             query.filter(tc.get_query())
-        self.assertIn(
-            "There is no PDU Flex Field Attribute associated with this fieldName pdu_field_1 in program Test Program",
-            str(e.exception),
+        assert (
+            "There is no PDU Flex Field Attribute associated with this fieldName pdu_field_1 in program Test Program"
+            in str(e.value)
         )
 
     def test_filter_on_pdu_flex_field_no_round_number(self) -> None:
@@ -281,12 +279,9 @@ class TestIndividualBlockFilter(TestCase):
         )
         pdu_filter.save()
 
-        with self.assertRaises(Exception) as e:
+        with pytest.raises(Exception) as e:
             query.filter(tc.get_query())
-        self.assertIn(
-            "Round number is missing for PDU Flex Field Attribute pdu_field_1",
-            str(e.exception),
-        )
+        assert "Round number is missing for PDU Flex Field Attribute pdu_field_1" in str(e.value)
 
     def test_filter_on_pdu_flex_field_incorrect_round_number(self) -> None:
         tc = TargetingCriteriaFactory()
@@ -319,11 +314,10 @@ class TestIndividualBlockFilter(TestCase):
         )
         pdu_filter.save()
 
-        with self.assertRaises(Exception) as e:
+        with pytest.raises(Exception) as e:
             query.filter(tc.get_query())
-        self.assertIn(
-            "Round number 3 is greater than the number of rounds for PDU Flex Field Attribute pdu_field_1",
-            str(e.exception),
+        assert "Round number 3 is greater than the number of rounds for PDU Flex Field Attribute pdu_field_1" in str(
+            e.value
         )
 
     def test_filter_on_pdu_flex_field(self) -> None:
@@ -365,14 +359,14 @@ class TestIndividualBlockFilter(TestCase):
         self.individual_2.save()
 
         query = query.filter(tc.get_query())
-        self.assertEqual(query.count(), 0)
+        assert query.count() == 0
 
         self.individual_1.flex_fields["pdu_field_1"]["1"] = {"value": 2.5, "collection_date": "2021-01-01"}
         self.individual_1.save()
 
         query = query.filter(tc.get_query())
-        self.assertEqual(query.count(), 1)
-        self.assertEqual(query.first().id, self.household_1_indiv.id)
+        assert query.count() == 1
+        assert query.first().id == self.household_1_indiv.id
 
     def test_collector_blocks(self) -> None:
         query = Household.objects.all().order_by("unicef_id")
@@ -405,5 +399,5 @@ class TestIndividualBlockFilter(TestCase):
         )
         tc = TargetingCriteriaQueryingBase(rules=[tcr])
         query = query.filter(tc.get_query())
-        self.assertEqual(query.count(), 1)
-        self.assertEqual(query.first().unicef_id, self.household_1_indiv.unicef_id)
+        assert query.count() == 1
+        assert query.first().unicef_id == self.household_1_indiv.unicef_id

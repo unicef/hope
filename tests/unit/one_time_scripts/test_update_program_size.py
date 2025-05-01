@@ -21,12 +21,12 @@ class TestUpdateProgramSize(TestCase):
         Household.objects.filter(id__in=households_ids).update(program_id=program.id)
         Individual.objects.filter(id__in=individuals_ids).update(program_id=program.id)
 
-        self.assertEqual(program.household_count, 0)
-        self.assertEqual(program.individual_count, 0)
+        assert program.household_count == 0
+        assert program.individual_count == 0
 
         update_program_size()
 
         program.refresh_from_db()
 
-        self.assertEqual(program.household_count, 3)
-        self.assertEqual(program.individual_count, 9)
+        assert program.household_count == 3
+        assert program.individual_count == 9

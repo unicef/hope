@@ -1,5 +1,3 @@
-from typing import List
-
 from django.contrib.auth.models import AbstractUser
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
@@ -20,7 +18,7 @@ from hct_mis_api.apps.household.services.household_withdraw import HouseholdWith
 
 
 class HouseholdDeleteService(DataChangeService):
-    def save(self) -> List[GrievanceTicket]:
+    def save(self) -> list[GrievanceTicket]:
         data_change_extras = self.extras.get("issue_type")
         household_data_update_issue_type_extras = data_change_extras.get("household_delete_issue_type_extras")
         household_encoded_id = household_data_update_issue_type_extras.get("household")

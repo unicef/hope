@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any, List
+from typing import TYPE_CHECKING, Any
 
 from django.db import models
 from django.db.models import JSONField, Q
@@ -32,8 +32,7 @@ logger = logging.getLogger(__name__)
 
 
 class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingBase):
-    """
-    Class with filtering criteria flags and a set of ORed Rules. Rules are either applied for a candidate list
+    """Class with filtering criteria flags and a set of ORed Rules. Rules are either applied for a candidate list
     (against Golden Record) or for a final list (against the approved candidate list).
     If flag is applied, target population needs to be filtered by it as an AND condition to the existing set of rules.
     """
@@ -52,7 +51,7 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingBase):
     def get_rules(self) -> "QuerySet":
         return self.rules.all()
 
-    def get_excluded_household_ids(self) -> List[str]:
+    def get_excluded_household_ids(self) -> list[str]:
         if not self.payment_plan.excluded_ids:
             return []
         hh_ids_list = []
@@ -67,9 +66,7 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingBase):
 
 
 class TargetingCriteriaRule(TimeStampedUUIDModel, TargetingCriteriaRuleQueryingBase):
-    """
-    This is a set of ANDed Filters.
-    """
+    """This is a set of ANDed Filters."""
 
     targeting_criteria = models.ForeignKey(
         "TargetingCriteria",
@@ -122,11 +119,10 @@ class TargetingIndividualRuleFilterBlock(
 
 
 class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterBase):
-    """
-    This is one explicit filter like:
-        :Age <> 10-20
-        :Residential Status = Refugee
-        :Residential Status != Refugee
+    """This is one explicit filter like:
+    :Age <> 10-20
+    :Residential Status = Refugee
+    :Residential Status != Refugee.
     """
 
     comparison_method = models.CharField(
@@ -154,27 +150,24 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterB
     @property
     def is_social_worker_program(self) -> bool:
         try:
-            return (
-                self.targeting_criteria_rule.targeting_criteria.payment_plan.program_cycle.program.is_social_worker_program
-            )
+            return self.targeting_criteria_rule.targeting_criteria.payment_plan.program_cycle.program.is_social_worker_program
         except (
             AttributeError,
             TargetingCriteriaRuleFilter.targeting_criteria_rule.RelatedObjectDoesNotExist,
         ):
             return False
 
-    def get_core_fields(self) -> List:
+    def get_core_fields(self) -> list:
         if self.is_social_worker_program:
             return FieldFactory.from_only_scopes([Scope.TARGETING, Scope.XLSX_PEOPLE])
         return FieldFactory.from_scope(Scope.TARGETING).associated_with_household()
 
 
 class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterBase):
-    """
-    This is one explicit filter like:
-        :Age <> 10-20
-        :Residential Status = Refugee
-        :Residential Status != Refugee
+    """This is one explicit filter like:
+    :Age <> 10-20
+    :Residential Status = Refugee
+    :Residential Status != Refugee.
     """
 
     comparison_method = models.CharField(
@@ -203,7 +196,7 @@ class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteria
     def is_social_worker_program(self) -> bool:
         return False
 
-    def get_core_fields(self) -> List:
+    def get_core_fields(self) -> list:
         return FieldFactory.from_scope(Scope.TARGETING).associated_with_individual()
 
     def get_lookup_prefix(self, associated_with: Any) -> str:

@@ -30,7 +30,7 @@ class CountryDashboard(BaseComponents):
 
     def switch_to_dashboard_iframe(self) -> None:
         retries = 3
-        for attempt in range(retries):
+        for _attempt in range(retries):
             try:
                 iframe = WebDriverWait(self.driver, 30).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, 'iframe[title="Dashboard"]'))
@@ -38,7 +38,7 @@ class CountryDashboard(BaseComponents):
                 self.driver.switch_to.frame(iframe)
                 return
             except TimeoutException:
-                print(f"Attempt {attempt + 1} - Could not locate iframe 'Dashboard'. Checking all iframes on page.")
+                pass
             sleep(2)
         raise NoSuchElementException("Could not locate iframe with title 'Dashboard' after multiple attempts.")
 

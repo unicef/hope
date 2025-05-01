@@ -45,9 +45,9 @@ class TestSoftDeleteOriginalObjects(TestCase):
         self.individual_identity.refresh_from_db()
         self.bank_account_info.refresh_from_db()
 
-        self.assertEqual(self.household.is_removed, False)
-        self.assertEqual(self.individual.is_removed, False)
-        self.assertEqual(self.individual_role_in_hh.is_removed, False)
-        self.assertEqual(self.document.is_removed, False)
-        self.assertEqual(self.individual_identity.is_removed, False)
-        self.assertEqual(self.bank_account_info.is_removed, False)
+        assert self.household.is_removed is False
+        assert self.individual.is_removed is False
+        assert self.individual_role_in_hh.is_removed is False
+        assert self.document.is_removed is False
+        assert self.individual_identity.is_removed is False
+        assert self.bank_account_info.is_removed is False

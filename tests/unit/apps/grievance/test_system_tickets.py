@@ -40,7 +40,7 @@ class TestSystemTickets(APITestCase):
 
         close_system_flagging_ticket_service(ticket_details.ticket, self.user)
         individual = Individual.objects.get(pk=self.individual.pk)
-        self.assertTrue(individual.sanction_list_confirmed_match)
+        assert individual.sanction_list_confirmed_match
 
     def test_close_system_flagging_ticket_without_approve_status(self) -> None:
         ticket_details = TicketSystemFlaggingDetailsFactory(
@@ -52,4 +52,4 @@ class TestSystemTickets(APITestCase):
 
         close_system_flagging_ticket_service(ticket_details.ticket, self.user)
         individual = Individual.objects.get(pk=self.individual.pk)
-        self.assertFalse(individual.sanction_list_confirmed_match)
+        assert not individual.sanction_list_confirmed_match

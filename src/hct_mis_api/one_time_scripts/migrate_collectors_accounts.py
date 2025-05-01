@@ -4,7 +4,7 @@ from hct_mis_api.apps.payment.models import Account, AccountType
 
 def migrate_bank_account_info() -> None:
     bank_account_type, _ = AccountType.objects.get_or_create(
-        key="bank", defaults=dict(label="Bank", unique_fields=["number"])
+        key="bank", defaults={"label": "Bank", "unique_fields": ["number"]}
     )
     bank_account_ids = (
         BankAccountInfo.all_objects.order_by(
@@ -33,13 +33,13 @@ def migrate_bank_account_info() -> None:
             account_type=bank_account_type,
         )
         dmd.data.update(
-            dict(
-                name=bai.bank_name or "",
-                number=bai.bank_account_number or "",
-                debit_card_number=bai.debit_card_number or "",
-                branch_name=bai.bank_branch_name or "",
-                account_holder_name=bai.account_holder_name or "",
-            )  # TODO field names?
+            {
+                "name": bai.bank_name or "",
+                "number": bai.bank_account_number or "",
+                "debit_card_number": bai.debit_card_number or "",
+                "branch_name": bai.bank_branch_name or "",
+                "account_holder_name": bai.account_holder_name or "",
+            }  # TODO field names?
         )
         dmd.save()
         dmd_ids.append(dmd.id)

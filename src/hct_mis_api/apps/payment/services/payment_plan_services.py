@@ -2,7 +2,7 @@ import datetime
 import logging
 from functools import partial
 from itertools import groupby
-from typing import IO, TYPE_CHECKING, Callable, Dict, Optional
+from typing import IO, TYPE_CHECKING, Callable
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.db import transaction
@@ -63,12 +63,12 @@ class PaymentPlanService:
     def __init__(self, payment_plan: "PaymentPlan"):
         self.payment_plan = payment_plan
 
-        self.action: Optional[str] = None
-        self.user: Optional["User"] = None
-        self.input_data: Optional[Dict] = None
+        self.action: str | None = None
+        self.user: "User" | None = None
+        self.input_data: dict | None = None
 
     @property
-    def actions_map(self) -> Dict:
+    def actions_map(self) -> dict:
         return {
             # old TP
             PaymentPlan.Action.TP_LOCK.value: self.tp_lock,
@@ -90,7 +90,7 @@ class PaymentPlanService:
             PaymentPlan.Action.SEND_XLSX_PASSWORD.value: self.send_xlsx_password,
         }
 
-    def get_required_number_by_approval_type(self, approval_process: ApprovalProcess) -> Optional[int]:
+    def get_required_number_by_approval_type(self, approval_process: ApprovalProcess) -> int | None:
         approval_count_map = {
             Approval.APPROVAL: approval_process.approval_number_required,
             Approval.AUTHORIZATION: approval_process.authorization_number_required,
@@ -111,9 +111,9 @@ class PaymentPlanService:
         }
         return actions_to_approval_type_map[self.action]
 
-    def execute_update_status_action(self, input_data: Dict, user: "User") -> PaymentPlan:
+    def execute_update_status_action(self, input_data: dict, user: "User") -> PaymentPlan:
         """Get function from get_action_function and execute it
-        return PaymentPlan object
+        return PaymentPlan object.
         """
         self.action = input_data.get("action")
         self.input_data = input_data
@@ -121,16 +121,14 @@ class PaymentPlanService:
         self.validate_action()
 
         function_action = self.get_action_function()
-        payment_plan = function_action()
-
-        return payment_plan
+        return function_action()
 
     def validate_action(self) -> None:
         actions = list(self.actions_map.keys())
         if self.action not in actions:
             raise GraphQLError(f"Not Implemented Action: {self.action}. List of possible actions: {actions}")
 
-    def get_action_function(self) -> Optional[Callable]:
+    def get_action_function(self) -> Callable | None:
         return self.actions_map.get(self.action)
 
     def send_for_approval(self) -> PaymentPlan:
@@ -193,7 +191,7 @@ class PaymentPlanService:
         self.payment_plan.save(update_fields=("status_date", "status"))
         return self.payment_plan
 
-    def open(self, input_data: Dict) -> PaymentPlan:
+    def open(self, input_data: dict) -> PaymentPlan:
         self.payment_plan.status_open()
         dispersion_end_date = input_data["dispersion_end_date"]
         if not dispersion_end_date or dispersion_end_date <= timezone.now().date():
@@ -258,13 +256,13 @@ class PaymentPlanService:
 
         return self.payment_plan
 
-    def unlock_fsp(self) -> Optional[PaymentPlan]:
+    def unlock_fsp(self) -> PaymentPlan | None:
         self.payment_plan.status_unlock_fsp()
         self.payment_plan.save()
 
         return self.payment_plan
 
-    def acceptance_process(self) -> Optional[PaymentPlan]:
+    def acceptance_process(self) -> PaymentPlan | None:
         self.validate_payment_plan_status_to_acceptance_process_approval_type()
 
         # every time we will create Approval for first created AcceptanceProcess
@@ -438,15 +436,13 @@ class PaymentPlanService:
         Payment.objects.bulk_update(payments, ["signature_hash"])
 
     @staticmethod
-    def create_targeting_criteria(targeting_criteria_input: Dict, program: Program) -> TargetingCriteria:
+    def create_targeting_criteria(targeting_criteria_input: dict, program: Program) -> TargetingCriteria:
         TargetingCriteriaInputValidator.validate(targeting_criteria_input, program)
 
-        targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input, program)
-
-        return targeting_criteria
+        return from_input_to_targeting_criteria(targeting_criteria_input, program)
 
     @staticmethod
-    def create(input_data: Dict, user: "User", business_area_slug: str) -> PaymentPlan:
+    def create(input_data: dict, user: "User", business_area_slug: str) -> PaymentPlan:
         business_area = BusinessArea.objects.get(slug=business_area_slug)
         program_cycle_id = decode_id_string(input_data["program_cycle_id"])
         program_cycle = get_object_or_404(ProgramCycle, pk=program_cycle_id)
@@ -495,7 +491,7 @@ class PaymentPlanService:
 
         return payment_plan
 
-    def update(self, input_data: Dict) -> PaymentPlan:
+    def update(self, input_data: dict) -> PaymentPlan:
         program = self.payment_plan.program_cycle.program
         should_update_money_stats = False
         should_rebuild_list = False
@@ -658,7 +654,7 @@ class PaymentPlanService:
         self.payment_plan.refresh_from_db(fields=["background_action_status", "export_file_entitlement"])
         return self.payment_plan
 
-    def export_xlsx_per_fsp(self, user_id: "UUID", fsp_xlsx_template_id: Optional[str]) -> PaymentPlan:
+    def export_xlsx_per_fsp(self, user_id: "UUID", fsp_xlsx_template_id: str | None) -> PaymentPlan:
         self.payment_plan.background_action_status_xlsx_exporting()
         self.payment_plan.save()
 
@@ -763,7 +759,7 @@ class PaymentPlanService:
                 payment.update_signature_hash()
             Payment.objects.bulk_update(payments, ("signature_hash",))
 
-    def split(self, split_type: str, chunks_no: Optional[int] = None) -> PaymentPlan:
+    def split(self, split_type: str, chunks_no: int | None = None) -> PaymentPlan:
         payments_chunks = []
         payments = self.payment_plan.eligible_payments.all()
         payments_count = payments.count()

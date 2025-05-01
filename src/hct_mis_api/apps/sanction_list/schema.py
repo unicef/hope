@@ -25,8 +25,8 @@ class SanctionListIndividualNode(DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_country_of_birth(parent, info: Any) -> str:
-        return parent.country_of_birth.name
+    def resolve_country_of_birth(self, info: Any) -> str:
+        return self.country_of_birth.name
 
 
 class SanctionListIndividualDocumentNode(DjangoObjectType):
@@ -38,8 +38,8 @@ class SanctionListIndividualDocumentNode(DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_issuing_country(parent, info: Any) -> str:
-        return parent.issuing_country.name
+    def resolve_issuing_country(self, info: Any) -> str:
+        return self.issuing_country.name
 
 
 class SanctionListIndividualNationalitiesNode(DjangoObjectType):
@@ -51,8 +51,8 @@ class SanctionListIndividualNationalitiesNode(DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_nationality(parent, info: Any) -> str:
-        return parent.nationality.name
+    def resolve_nationality(self, info: Any) -> str:
+        return self.nationality.name
 
 
 class SanctionListIndividualCountriesNode(DjangoObjectType):
@@ -64,8 +64,8 @@ class SanctionListIndividualCountriesNode(DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_country(parent, info: Any) -> str:
-        return parent.country.name
+    def resolve_country(self, info: Any) -> str:
+        return self.country.name
 
 
 class SanctionListIndividualAliasNameNode(DjangoObjectType):

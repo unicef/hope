@@ -80,7 +80,7 @@ class APIAreaTests(HOPEApiTestCase):
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.url_list)
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         response_json = response.json()["results"]
         assert len(response_json) == 6
         assert {

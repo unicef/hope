@@ -473,7 +473,7 @@ class TestPaymentPlanReconciliation(APITestCase):
                 }
             },
         )
-        self.assertEqual(locked_pp_response["data"]["actionPaymentPlanMutation"]["paymentPlan"]["status"], "TP_LOCKED")
+        assert locked_pp_response["data"]["actionPaymentPlanMutation"]["paymentPlan"]["status"] == "TP_LOCKED"
 
         finalize_pp_response = self.graphql_request(
             request_string=PAYMENT_PLAN_ACTION_MUTATION,
@@ -485,7 +485,7 @@ class TestPaymentPlanReconciliation(APITestCase):
                 }
             },
         )
-        self.assertEqual(finalize_pp_response["data"]["actionPaymentPlanMutation"]["paymentPlan"]["status"], "DRAFT")
+        assert finalize_pp_response["data"]["actionPaymentPlanMutation"]["paymentPlan"]["status"] == "DRAFT"
 
         # all cycles should have end_date before creation new one
         ProgramCycle.objects.filter(program_id=decode_id_string(program_id)).update(
@@ -506,7 +506,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             },
         )
         assert "errors" not in open_payment_plan_response, open_payment_plan_response
-        assert "OPEN" == open_payment_plan_response["data"]["openPaymentPlan"]["paymentPlan"]["status"]
+        assert open_payment_plan_response["data"]["openPaymentPlan"]["paymentPlan"]["status"] == "OPEN"
 
         # check if Cycle is active
         assert ProgramCycle.objects.filter(title="NEW NEW NAME").first().status == "ACTIVE"
@@ -527,7 +527,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             currency="PLN",
             has_valid_wallet=True,
         )
-        self.assertEqual(payment.entitlement_quantity, 1000)
+        assert payment.entitlement_quantity == 1000
         create_payment_plan_snapshot_data(payment_plan)
 
         lock_payment_plan_response = self.graphql_request(
@@ -546,7 +546,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         rule = RuleFactory(name="Rule", type=Rule.TYPE_PAYMENT_PLAN)
         RuleCommitFactory(definition="result.value=Decimal('500')", rule=rule)
 
-        self.assertEqual(payment_plan.background_action_status, None)
+        assert payment_plan.background_action_status is None
 
         with patch("hct_mis_api.apps.payment.mutations.payment_plan_apply_engine_rule") as mock:
             payment_plan.refresh_from_db()
@@ -565,10 +565,10 @@ class TestPaymentPlanReconciliation(APITestCase):
             payment_plan_apply_engine_rule(*call_args)
 
         payment_plan.refresh_from_db()
-        self.assertEqual(payment_plan.background_action_status, None)
+        assert payment_plan.background_action_status is None
 
         payment.refresh_from_db()
-        self.assertEqual(payment.entitlement_quantity, 500)
+        assert payment.entitlement_quantity == 500
 
         lock_fsp_in_payment_plan_response = self.graphql_request(
             request_string=PAYMENT_PLAN_ACTION_MUTATION,
@@ -581,9 +581,9 @@ class TestPaymentPlanReconciliation(APITestCase):
             },
         )
         assert "errors" not in lock_fsp_in_payment_plan_response, lock_fsp_in_payment_plan_response
-        self.assertEqual(
-            lock_fsp_in_payment_plan_response["data"]["actionPaymentPlanMutation"]["paymentPlan"]["status"],
-            "LOCKED_FSP",
+        assert (
+            lock_fsp_in_payment_plan_response["data"]["actionPaymentPlanMutation"]["paymentPlan"]["status"]
+            == "LOCKED_FSP"
         )
 
         send_for_approval_payment_plan_response = self.graphql_request(
@@ -597,9 +597,9 @@ class TestPaymentPlanReconciliation(APITestCase):
             },
         )
         assert "errors" not in send_for_approval_payment_plan_response, send_for_approval_payment_plan_response
-        self.assertEqual(
-            send_for_approval_payment_plan_response["data"]["actionPaymentPlanMutation"]["paymentPlan"]["status"],
-            "IN_APPROVAL",
+        assert (
+            send_for_approval_payment_plan_response["data"]["actionPaymentPlanMutation"]["paymentPlan"]["status"]
+            == "IN_APPROVAL"
         )
 
         approve_payment_plan_response = self.graphql_request(
@@ -613,9 +613,9 @@ class TestPaymentPlanReconciliation(APITestCase):
             },
         )
         assert "errors" not in approve_payment_plan_response, approve_payment_plan_response
-        self.assertEqual(
-            approve_payment_plan_response["data"]["actionPaymentPlanMutation"]["paymentPlan"]["status"],
-            "IN_AUTHORIZATION",
+        assert (
+            approve_payment_plan_response["data"]["actionPaymentPlanMutation"]["paymentPlan"]["status"]
+            == "IN_AUTHORIZATION"
         )
 
         authorize_payment_plan_response = self.graphql_request(
@@ -629,9 +629,8 @@ class TestPaymentPlanReconciliation(APITestCase):
             },
         )
         assert "errors" not in authorize_payment_plan_response, authorize_payment_plan_response
-        self.assertEqual(
-            authorize_payment_plan_response["data"]["actionPaymentPlanMutation"]["paymentPlan"]["status"],
-            "IN_REVIEW",
+        assert (
+            authorize_payment_plan_response["data"]["actionPaymentPlanMutation"]["paymentPlan"]["status"] == "IN_REVIEW"
         )
 
         review_payment_plan_response = self.graphql_request(
@@ -645,13 +644,10 @@ class TestPaymentPlanReconciliation(APITestCase):
             },
         )
         assert "errors" not in review_payment_plan_response, review_payment_plan_response
-        self.assertEqual(
-            review_payment_plan_response["data"]["actionPaymentPlanMutation"]["paymentPlan"]["status"],
-            "ACCEPTED",
-        )
+        assert review_payment_plan_response["data"]["actionPaymentPlanMutation"]["paymentPlan"]["status"] == "ACCEPTED"
 
         payment_plan.refresh_from_db()
-        self.assertEqual(payment_plan.background_action_status, None)
+        assert payment_plan.background_action_status is None
 
         with patch(
             "hct_mis_api.apps.payment.services.payment_plan_services.create_payment_plan_payment_list_xlsx_per_fsp"
@@ -674,14 +670,14 @@ class TestPaymentPlanReconciliation(APITestCase):
         assert zip_file is not None
 
         with tempfile.TemporaryDirectory() as temp_dir:
-            self.assertEqual(len(os.listdir(temp_dir)), 0)
+            assert len(os.listdir(temp_dir)) == 0
 
             assert zip_file.file is not None
             with ZipFile(zip_file.file, "r") as zip_ref:
-                self.assertEqual(len(zip_ref.namelist()), 1)
+                assert len(zip_ref.namelist()) == 1
                 zip_ref.extractall(temp_dir)
 
-            self.assertEqual(len(os.listdir(temp_dir)), 1)
+            assert len(os.listdir(temp_dir)) == 1
 
             file_name = os.listdir(temp_dir)[0]
             assert file_name.endswith(".xlsx")
@@ -693,53 +689,53 @@ class TestPaymentPlanReconciliation(APITestCase):
             sheet = workbook["Santander"]
             assert sheet.max_row == 5, sheet.max_row
 
-            self.assertEqual(sheet.cell(row=1, column=1).value, "payment_id")
+            assert sheet.cell(row=1, column=1).value == "payment_id"
             assert payment_plan.payment_items.count() == 4
             payment = payment_plan.eligible_payments.filter(household=household_1).first()
             # check if there is the same HH
-            self.assertEqual(payment.household.unicef_id, household_1.unicef_id)
+            assert payment.household.unicef_id == household_1.unicef_id
 
-            self.assertEqual(sheet.cell(row=2, column=1).value, payment.unicef_id)  # unintuitive
-            self.assertEqual(sheet.cell(row=1, column=2).value, "household_id")
-            self.assertEqual(sheet.cell(row=2, column=2).value, household_1.unicef_id)
-            self.assertEqual(sheet.cell(row=1, column=3).value, "household_size")
-            self.assertEqual(sheet.cell(row=2, column=3).value, household_1.size)
-            self.assertEqual(sheet.cell(row=1, column=4).value, "collector_name")
-            self.assertEqual(sheet.cell(row=2, column=4).value, payment.collector.full_name)
-            self.assertEqual(sheet.cell(row=1, column=5).value, "alternate_collector_full_name")
-            self.assertEqual(sheet.cell(row=2, column=5).value, None)
-            self.assertEqual(sheet.cell(row=1, column=6).value, "alternate_collector_given_name")
-            self.assertEqual(sheet.cell(row=2, column=6).value, None)
-            self.assertEqual(sheet.cell(row=1, column=7).value, "alternate_collector_family_name")
-            self.assertEqual(sheet.cell(row=2, column=7).value, None)
-            self.assertEqual(sheet.cell(row=1, column=8).value, "alternate_collector_middle_name")
-            self.assertEqual(sheet.cell(row=2, column=8).value, None)
-            self.assertEqual(sheet.cell(row=1, column=9).value, "alternate_collector_phone_no")
-            self.assertEqual(sheet.cell(row=2, column=9).value, None)
-            self.assertEqual(sheet.cell(row=1, column=10).value, "alternate_collector_document_numbers")
-            self.assertEqual(sheet.cell(row=2, column=10).value, None)
-            self.assertEqual(sheet.cell(row=1, column=11).value, "alternate_collector_sex")
-            self.assertEqual(sheet.cell(row=2, column=11).value, None)
-            self.assertEqual(sheet.cell(row=1, column=12).value, "payment_channel")
-            self.assertEqual(sheet.cell(row=2, column=12).value, "Cash")
-            self.assertEqual(sheet.cell(row=1, column=13).value, "fsp_name")
-            self.assertEqual(sheet.cell(row=2, column=13).value, payment.financial_service_provider.name)
-            self.assertEqual(sheet.cell(row=1, column=14).value, "currency")
-            self.assertEqual(sheet.cell(row=2, column=14).value, payment.currency)
-            self.assertEqual(sheet.cell(row=1, column=15).value, "entitlement_quantity")
-            self.assertEqual(sheet.cell(row=2, column=15).value, payment.entitlement_quantity)
-            self.assertEqual(sheet.cell(row=1, column=16).value, "entitlement_quantity_usd")
-            self.assertEqual(sheet.cell(row=2, column=16).value, payment.entitlement_quantity_usd)
-            self.assertEqual(sheet.cell(row=1, column=17).value, "delivered_quantity")
-            self.assertEqual(sheet.cell(row=2, column=17).value, None)
-            self.assertEqual(sheet.cell(row=1, column=18).value, "delivery_date")
+            assert sheet.cell(row=2, column=1).value == payment.unicef_id  # unintuitive
+            assert sheet.cell(row=1, column=2).value == "household_id"
+            assert sheet.cell(row=2, column=2).value == household_1.unicef_id
+            assert sheet.cell(row=1, column=3).value == "household_size"
+            assert sheet.cell(row=2, column=3).value == household_1.size
+            assert sheet.cell(row=1, column=4).value == "collector_name"
+            assert sheet.cell(row=2, column=4).value == payment.collector.full_name
+            assert sheet.cell(row=1, column=5).value == "alternate_collector_full_name"
+            assert sheet.cell(row=2, column=5).value is None
+            assert sheet.cell(row=1, column=6).value == "alternate_collector_given_name"
+            assert sheet.cell(row=2, column=6).value is None
+            assert sheet.cell(row=1, column=7).value == "alternate_collector_family_name"
+            assert sheet.cell(row=2, column=7).value is None
+            assert sheet.cell(row=1, column=8).value == "alternate_collector_middle_name"
+            assert sheet.cell(row=2, column=8).value is None
+            assert sheet.cell(row=1, column=9).value == "alternate_collector_phone_no"
+            assert sheet.cell(row=2, column=9).value is None
+            assert sheet.cell(row=1, column=10).value == "alternate_collector_document_numbers"
+            assert sheet.cell(row=2, column=10).value is None
+            assert sheet.cell(row=1, column=11).value == "alternate_collector_sex"
+            assert sheet.cell(row=2, column=11).value is None
+            assert sheet.cell(row=1, column=12).value == "payment_channel"
+            assert sheet.cell(row=2, column=12).value == "Cash"
+            assert sheet.cell(row=1, column=13).value == "fsp_name"
+            assert sheet.cell(row=2, column=13).value == payment.financial_service_provider.name
+            assert sheet.cell(row=1, column=14).value == "currency"
+            assert sheet.cell(row=2, column=14).value == payment.currency
+            assert sheet.cell(row=1, column=15).value == "entitlement_quantity"
+            assert sheet.cell(row=2, column=15).value == payment.entitlement_quantity
+            assert sheet.cell(row=1, column=16).value == "entitlement_quantity_usd"
+            assert sheet.cell(row=2, column=16).value == payment.entitlement_quantity_usd
+            assert sheet.cell(row=1, column=17).value == "delivered_quantity"
+            assert sheet.cell(row=2, column=17).value is None
+            assert sheet.cell(row=1, column=18).value == "delivery_date"
             # self.assertEqual(sheet.cell(row=2, column=17).value, str(payment.delivery_date))
 
             payment.refresh_from_db()
-            self.assertEqual(payment.entitlement_quantity, 500)
-            self.assertEqual(payment.delivered_quantity, None)
-            self.assertEqual(payment.status, Payment.STATUS_PENDING)
-            self.assertEqual(payment_plan.is_reconciled, False)
+            assert payment.entitlement_quantity == 500
+            assert payment.delivered_quantity is None
+            assert payment.status == Payment.STATUS_PENDING
+            assert payment_plan.is_reconciled is False
 
             filled_file_name = "filled.xlsx"
             filled_file_path = os.path.join(temp_dir, filled_file_name)
@@ -761,9 +757,9 @@ class TestPaymentPlanReconciliation(APITestCase):
                             "file": uploaded_file,
                         },
                     )
-                    assert (
-                        "errors" in import_mutation_response["data"]["importXlsxPaymentPlanPaymentListPerFsp"]
-                    ), import_mutation_response
+                    assert "errors" in import_mutation_response["data"]["importXlsxPaymentPlanPaymentListPerFsp"], (
+                        import_mutation_response
+                    )
                     assert (
                         import_mutation_response["data"]["importXlsxPaymentPlanPaymentListPerFsp"]["errors"][0][
                             "message"
@@ -796,14 +792,14 @@ class TestPaymentPlanReconciliation(APITestCase):
 
             payment.refresh_from_db()
             payment.household.refresh_from_db()
-            self.assertEqual(payment.entitlement_quantity, 500)
-            self.assertEqual(payment.delivered_quantity, 500)
-            self.assertEqual(payment.status, Payment.STATUS_DISTRIBUTION_SUCCESS)
-            self.assertEqual(payment.household.total_cash_received, 500)
-            self.assertEqual(payment.household.total_cash_received_usd, 250)
-            self.assertEqual(payment_plan.eligible_payments.exclude(status__in=Payment.PENDING_STATUSES).count(), 1)
-            self.assertEqual(payment_plan.eligible_payments.count(), 4)
-            self.assertFalse(payment_plan.is_reconciled)
+            assert payment.entitlement_quantity == 500
+            assert payment.delivered_quantity == 500
+            assert payment.status == Payment.STATUS_DISTRIBUTION_SUCCESS
+            assert payment.household.total_cash_received == 500
+            assert payment.household.total_cash_received_usd == 250
+            assert payment_plan.eligible_payments.exclude(status__in=Payment.PENDING_STATUSES).count() == 1
+            assert payment_plan.eligible_payments.count() == 4
+            assert not payment_plan.is_reconciled
 
     @parameterized.expand(
         [
@@ -882,8 +878,8 @@ class TestPaymentPlanReconciliation(APITestCase):
             status, value = service._get_delivered_quantity_status_and_value(
                 delivered_quantity, entitlement_quantity, "xx"
             )
-            self.assertEqual(status, expected_status)
-            self.assertEqual(value, expected_delivered_quantity)
+            assert status == expected_status
+            assert value == expected_delivered_quantity
 
     def test_xlsx_payment_plan_import_per_fsp_service_import_row(self) -> None:
         pp = PaymentPlanFactory(
@@ -993,17 +989,17 @@ class TestPaymentPlanReconciliation(APITestCase):
         verification_2.refresh_from_db()
         verification_3.refresh_from_db()
 
-        self.assertEqual(payment_1.delivered_quantity, 999)
-        self.assertEqual(verification_1.received_amount, 999)
-        self.assertEqual(verification_1.status, PaymentVerification.STATUS_RECEIVED)
+        assert payment_1.delivered_quantity == 999
+        assert verification_1.received_amount == 999
+        assert verification_1.status == PaymentVerification.STATUS_RECEIVED
 
-        self.assertEqual(payment_2.delivered_quantity, 100)
-        self.assertEqual(verification_2.received_amount, 500)
-        self.assertEqual(verification_2.status, PaymentVerification.STATUS_RECEIVED_WITH_ISSUES)
+        assert payment_2.delivered_quantity == 100
+        assert verification_2.received_amount == 500
+        assert verification_2.status == PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
 
-        self.assertEqual(payment_3.delivered_quantity, 2999)
-        self.assertEqual(verification_3.received_amount, None)
-        self.assertEqual(verification_3.status, PaymentVerification.STATUS_PENDING)
+        assert payment_3.delivered_quantity == 2999
+        assert verification_3.received_amount is None
+        assert verification_3.status == PaymentVerification.STATUS_PENDING
 
     def test_payment_plan_is_fully_delivered(self) -> None:
         payment_plan = PaymentPlanFactory(
@@ -1031,13 +1027,8 @@ class TestPaymentPlanReconciliation(APITestCase):
         payment_plan.status_finished()
         payment_plan.save()
         payment_plan.refresh_from_db()
-        self.assertTrue(
-            all(
-                [
-                    payment.entitlement_quantity == payment.delivered_quantity
-                    for payment in payment_plan.eligible_payments
-                ]
-            )
+        assert all(
+            payment.entitlement_quantity == payment.delivered_quantity for payment in payment_plan.eligible_payments
         )
 
     @freeze_time("2023-12-12")
@@ -1084,8 +1075,8 @@ class TestPaymentPlanReconciliation(APITestCase):
         payment_plan.save()
         payment_plan.refresh_from_db(fields=["status", "background_action_status"])
 
-        self.assertEqual(payment_plan.status, PaymentPlan.Status.LOCKED)
-        self.assertEqual(payment_plan.background_action_status, PaymentPlan.BackgroundActionStatus.RULE_ENGINE_RUN)
+        assert payment_plan.status == PaymentPlan.Status.LOCKED
+        assert payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.RULE_ENGINE_RUN
         self.snapshot_graphql_request(
             request_string=SET_STEFICON_RULE_MUTATION,
             context={"user": self.user},
@@ -1161,7 +1152,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             created_by=self.user,
         )
 
-        self.assertEqual(payment_plan.status, PaymentPlan.Status.OPEN)
+        assert payment_plan.status == PaymentPlan.Status.OPEN
         self.snapshot_graphql_request(
             request_string=IMPORT_XLSX_PER_FSP_MUTATION,
             context={"user": self.user},
@@ -1200,11 +1191,9 @@ class TestPaymentPlanReconciliation(APITestCase):
             request_string=EXPORT_XLSX_PER_FSP_MUTATION_AUTH_CODE, context={"user": self.user}, variables=variables
         )
         payment_plan.refresh_from_db()
-        self.assertEqual(FileTemp.objects.filter(object_id=payment_plan.id).count(), 1)
-        self.assertIsNotNone(payment_plan.export_file_per_fsp)
-        self.assertEqual(
-            payment_plan.export_file_per_fsp_id, FileTemp.objects.filter(object_id=payment_plan.id).first().pk
-        )
+        assert FileTemp.objects.filter(object_id=payment_plan.id).count() == 1
+        assert payment_plan.export_file_per_fsp is not None
+        assert payment_plan.export_file_per_fsp_id == FileTemp.objects.filter(object_id=payment_plan.id).first().pk
 
     def test_export_xlsx_per_fsp_error_msg(self) -> None:
         fsp = FinancialServiceProviderFactory(

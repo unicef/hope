@@ -272,83 +272,71 @@ class TestGrievanceQuery(APITestCase):
 
         grievances_to_create = (
             GrievanceTicket(
-                **{
-                    "business_area": cls.business_area,
-                    "admin2": cls.admin_area_1,
-                    "language": "Polish",
-                    "consent": True,
-                    "description": "Ticket with program, in admin area 1, new",
-                    "category": GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
-                    "status": GrievanceTicket.STATUS_NEW,
-                    "created_by": cls.user,
-                    "assigned_to": cls.user,
-                    "issue_type": GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
-                }
+                business_area=cls.business_area,
+                admin2=cls.admin_area_1,
+                language="Polish",
+                consent=True,
+                description="Ticket with program, in admin area 1, new",
+                category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+                status=GrievanceTicket.STATUS_NEW,
+                created_by=cls.user,
+                assigned_to=cls.user,
+                issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
             ),
             GrievanceTicket(
-                **{
-                    "business_area": cls.business_area,
-                    "admin2": cls.admin_area_2,
-                    "language": "English",
-                    "consent": True,
-                    "description": "Ticket with program, in admin area 2, on hold",
-                    "category": GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
-                    "status": GrievanceTicket.STATUS_ON_HOLD,
-                    "created_by": cls.user,
-                    "assigned_to": cls.user,
-                }
+                business_area=cls.business_area,
+                admin2=cls.admin_area_2,
+                language="English",
+                consent=True,
+                description="Ticket with program, in admin area 2, on hold",
+                category=GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
+                status=GrievanceTicket.STATUS_ON_HOLD,
+                created_by=cls.user,
+                assigned_to=cls.user,
             ),
             GrievanceTicket(
-                **{
-                    "business_area": cls.business_area,
-                    "admin2": cls.admin_area_2,
-                    "language": "Polish, English",
-                    "consent": True,
-                    "description": "Ticket with program, in admin area 2, in progress",
-                    "category": GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
-                    "status": GrievanceTicket.STATUS_IN_PROGRESS,
-                    "created_by": cls.user,
-                    "assigned_to": cls.user,
-                }
+                business_area=cls.business_area,
+                admin2=cls.admin_area_2,
+                language="Polish, English",
+                consent=True,
+                description="Ticket with program, in admin area 2, in progress",
+                category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+                status=GrievanceTicket.STATUS_IN_PROGRESS,
+                created_by=cls.user,
+                assigned_to=cls.user,
             ),
             GrievanceTicket(
-                **{
-                    "business_area": cls.business_area,
-                    "admin2": None,
-                    "language": "Polish, English",
-                    "consent": True,
-                    "description": "Ticket with program, without admin area",
-                    "category": GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
-                    "status": GrievanceTicket.STATUS_IN_PROGRESS,
-                    "created_by": cls.user,
-                    "assigned_to": cls.user,
-                }
+                business_area=cls.business_area,
+                admin2=None,
+                language="Polish, English",
+                consent=True,
+                description="Ticket with program, without admin area",
+                category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+                status=GrievanceTicket.STATUS_IN_PROGRESS,
+                created_by=cls.user,
+                assigned_to=cls.user,
             ),
             GrievanceTicket(
-                **{
-                    "business_area": cls.business_area,
-                    "admin2": None,
-                    "language": "Polish, English",
-                    "consent": True,
-                    "description": "Ticket without program, without admin area",
-                    "category": GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
-                    "status": GrievanceTicket.STATUS_IN_PROGRESS,
-                    "created_by": cls.user,
-                    "assigned_to": cls.user,
-                }
+                business_area=cls.business_area,
+                admin2=None,
+                language="Polish, English",
+                consent=True,
+                description="Ticket without program, without admin area",
+                category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+                status=GrievanceTicket.STATUS_IN_PROGRESS,
+                created_by=cls.user,
+                assigned_to=cls.user,
             ),
             GrievanceTicket(
-                **{
-                    "business_area": cls.business_area,
-                    "admin2": cls.admin_area_1,
-                    "language": "Polish, English",
-                    "consent": True,
-                    "description": "Ticket without program, in admin area 1",
-                    "category": GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
-                    "status": GrievanceTicket.STATUS_IN_PROGRESS,
-                    "created_by": cls.user,
-                    "assigned_to": cls.user,
-                }
+                business_area=cls.business_area,
+                admin2=cls.admin_area_1,
+                language="Polish, English",
+                consent=True,
+                description="Ticket without program, in admin area 1",
+                category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+                status=GrievanceTicket.STATUS_IN_PROGRESS,
+                created_by=cls.user,
+                assigned_to=cls.user,
             ),
         )
         cls.grievance_tickets = GrievanceTicket.objects.bulk_create(grievances_to_create)
@@ -896,7 +884,7 @@ class TestGrievanceNode(TestCase):
         self.grievance_sw_without_ind_in_details.refresh_from_db()
 
         # return HH_id
-        self.assertEqual(self.grievance_non_sw_program.target_id, "HH-001-001")
+        assert self.grievance_non_sw_program.target_id == "HH-001-001"
         # return Ind_id
-        self.assertEqual(self.grievance_sw_with_ind_in_details.target_id, self.individual_1.unicef_id)
-        self.assertEqual(self.grievance_sw_without_ind_in_details.target_id, self.individual_1.unicef_id)
+        assert self.grievance_sw_with_ind_in_details.target_id == self.individual_1.unicef_id
+        assert self.grievance_sw_without_ind_in_details.target_id == self.individual_1.unicef_id

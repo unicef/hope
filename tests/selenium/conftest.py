@@ -112,6 +112,7 @@ from tests.selenium.page_object.registration_data_import.registration_data_impor
 from tests.selenium.page_object.targeting.targeting import Targeting
 from tests.selenium.page_object.targeting.targeting_create import TargetingCreate
 from tests.selenium.page_object.targeting.targeting_details import TargetingDetails
+import contextlib
 
 
 def pytest_addoption(parser) -> None:  # type: ignore
@@ -120,8 +121,7 @@ def pytest_addoption(parser) -> None:  # type: ignore
 
 def get_redis_host() -> str:
     regex = "\\/\\/(.*):"
-    redis_host = re.search(regex, env("CACHE_LOCATION")).group(1)
-    return redis_host
+    return re.search(regex, env("CACHE_LOCATION")).group(1)
 
 
 @pytest.fixture(autouse=True)
@@ -261,21 +261,18 @@ def driver(download_path: str) -> Chrome:
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920,1080")
     chrome_options.add_argument("--disable-dev-shm-usage")
-    try:
+    with contextlib.suppress(FileExistsError):
         os.makedirs(download_path)
-    except FileExistsError:
-        pass
     prefs = {
         "download.default_directory": download_path,
     }
     chrome_options.add_experimental_option("prefs", prefs)
-    driver = webdriver.Chrome(options=chrome_options)
-    yield driver
+    return webdriver.Chrome(options=chrome_options)
 
 
 @pytest.fixture(scope="session")
 def live_server() -> LiveServer:
-    yield LiveServer("localhost")
+    return LiveServer("localhost")
 
 
 @pytest.fixture(autouse=True, scope="session")
@@ -320,92 +317,92 @@ def login(browser: Chrome) -> Chrome:
     from django.core.cache import cache
 
     cache.clear()
-    yield browser
+    return browser
 
 
 @pytest.fixture
 def filters(request: FixtureRequest, browser: Chrome) -> Filters:
-    yield Filters(browser)
+    return Filters(browser)
 
 
 @pytest.fixture
 def pageProgrammeManagement(request: FixtureRequest, browser: Chrome) -> ProgrammeManagement:
-    yield ProgrammeManagement(browser)
+    return ProgrammeManagement(browser)
 
 
 @pytest.fixture
 def pageProgrammeDetails(request: FixtureRequest, browser: Chrome) -> ProgrammeDetails:
-    yield ProgrammeDetails(browser)
+    return ProgrammeDetails(browser)
 
 
 @pytest.fixture
 def pageAdminPanel(request: FixtureRequest, browser: Chrome) -> AdminPanel:
-    yield AdminPanel(browser)
+    return AdminPanel(browser)
 
 
 @pytest.fixture
 def pageFeedback(request: FixtureRequest, browser: Chrome) -> Feedback:
-    yield Feedback(browser)
+    return Feedback(browser)
 
 
 @pytest.fixture
 def pageGrievanceTickets(request: FixtureRequest, browser: Chrome) -> GrievanceTickets:
-    yield GrievanceTickets(browser)
+    return GrievanceTickets(browser)
 
 
 @pytest.fixture
 def pageFeedbackDetails(request: FixtureRequest, browser: Chrome) -> FeedbackDetailsPage:
-    yield FeedbackDetailsPage(browser)
+    return FeedbackDetailsPage(browser)
 
 
 @pytest.fixture
 def pageNewFeedback(request: FixtureRequest, browser: Chrome) -> NewFeedback:
-    yield NewFeedback(browser)
+    return NewFeedback(browser)
 
 
 @pytest.fixture
 def pageRegistrationDataImport(request: FixtureRequest, browser: Chrome) -> RegistrationDataImport:
-    yield RegistrationDataImport(browser)
+    return RegistrationDataImport(browser)
 
 
 @pytest.fixture
 def pageDetailsRegistrationDataImport(request: FixtureRequest, browser: Chrome) -> RDIDetailsPage:
-    yield RDIDetailsPage(browser)
+    return RDIDetailsPage(browser)
 
 
 @pytest.fixture
 def pageHouseholds(request: FixtureRequest, browser: Chrome) -> Households:
-    yield Households(browser)
+    return Households(browser)
 
 
 @pytest.fixture
 def pagePeople(request: FixtureRequest, browser: Chrome) -> People:
-    yield People(browser)
+    return People(browser)
 
 
 @pytest.fixture
 def pagePeopleDetails(request: FixtureRequest, browser: Chrome) -> PeopleDetails:
-    yield PeopleDetails(browser)
+    return PeopleDetails(browser)
 
 
 @pytest.fixture
 def pageHouseholdsDetails(request: FixtureRequest, browser: Chrome) -> HouseholdsDetails:
-    yield HouseholdsDetails(browser)
+    return HouseholdsDetails(browser)
 
 
 @pytest.fixture
 def pageIndividuals(request: FixtureRequest, browser: Chrome) -> Individuals:
-    yield Individuals(browser)
+    return Individuals(browser)
 
 
 @pytest.fixture
 def pageIndividualsDetails(request: FixtureRequest, browser: Chrome) -> IndividualsDetails:
-    yield IndividualsDetails(browser)
+    return IndividualsDetails(browser)
 
 
 @pytest.fixture
 def pagePeriodicDataUpdateTemplates(request: FixtureRequest, browser: Chrome) -> PeriodicDatUpdateTemplates:
-    yield PeriodicDatUpdateTemplates(browser)
+    return PeriodicDatUpdateTemplates(browser)
 
 
 @pytest.fixture
@@ -413,147 +410,145 @@ def pagePeriodicDataUpdateTemplatesDetails(
     request: FixtureRequest,
     browser: Chrome,
 ) -> PeriodicDatUpdateTemplatesDetails:
-    yield PeriodicDatUpdateTemplatesDetails(browser)
+    return PeriodicDatUpdateTemplatesDetails(browser)
 
 
 @pytest.fixture
 def pagePeriodicDataUploads(request: FixtureRequest, browser: Chrome) -> PeriodicDataUpdateUploads:
-    yield PeriodicDataUpdateUploads(browser)
+    return PeriodicDataUpdateUploads(browser)
 
 
 @pytest.fixture
 def pageTargeting(request: FixtureRequest, browser: Chrome) -> Targeting:
-    yield Targeting(browser)
+    return Targeting(browser)
 
 
 @pytest.fixture
 def pagePaymentModule(request: FixtureRequest, browser: Chrome) -> PaymentModule:
-    yield PaymentModule(browser)
+    return PaymentModule(browser)
 
 
 @pytest.fixture
 def pagePaymentRecord(request: FixtureRequest, browser: Chrome) -> PaymentRecord:
-    yield PaymentRecord(browser)
+    return PaymentRecord(browser)
 
 
 @pytest.fixture
 def pagePaymentVerificationDetails(request: FixtureRequest, browser: Chrome) -> PaymentVerificationDetails:
-    yield PaymentVerificationDetails(browser)
+    return PaymentVerificationDetails(browser)
 
 
 @pytest.fixture
 def pagePaymentVerification(request: FixtureRequest, browser: Chrome) -> PaymentVerification:
-    yield PaymentVerification(browser)
+    return PaymentVerification(browser)
 
 
 @pytest.fixture
 def pageTargetingDetails(request: FixtureRequest, browser: Chrome) -> TargetingDetails:
-    yield TargetingDetails(browser)
+    return TargetingDetails(browser)
 
 
 @pytest.fixture
 def pageTargetingCreate(request: FixtureRequest, browser: Chrome) -> TargetingCreate:
-    yield TargetingCreate(browser)
+    return TargetingCreate(browser)
 
 
 @pytest.fixture
 def pageGrievanceDetailsPage(request: FixtureRequest, browser: Chrome) -> GrievanceDetailsPage:
-    yield GrievanceDetailsPage(browser)
+    return GrievanceDetailsPage(browser)
 
 
 @pytest.fixture
 def pageGrievanceNewTicket(request: FixtureRequest, browser: Chrome) -> NewTicket:
-    yield NewTicket(browser)
+    return NewTicket(browser)
 
 
 @pytest.fixture
 def pageGrievanceDashboard(request: FixtureRequest, browser: Chrome) -> GrievanceDashboard:
-    yield GrievanceDashboard(browser)
+    return GrievanceDashboard(browser)
 
 
 @pytest.fixture
 def pageManagerialConsole(request: FixtureRequest, browser: Chrome) -> ManagerialConsole:
-    yield ManagerialConsole(browser)
+    return ManagerialConsole(browser)
 
 
 @pytest.fixture
 def pagePaymentModuleDetails(request: FixtureRequest, browser: Chrome) -> PaymentModuleDetails:
-    yield PaymentModuleDetails(browser)
+    return PaymentModuleDetails(browser)
 
 
 @pytest.fixture
 def pageNewPaymentPlan(request: FixtureRequest, browser: Chrome) -> NewPaymentPlan:
-    yield NewPaymentPlan(browser)
+    return NewPaymentPlan(browser)
 
 
 @pytest.fixture
 def pageProgramCycle(request: FixtureRequest, browser: Chrome) -> ProgramCyclePage:
-    yield ProgramCyclePage(browser)
+    return ProgramCyclePage(browser)
 
 
 @pytest.fixture
 def pageProgramCycleDetails(request: FixtureRequest, browser: Chrome) -> ProgramCycleDetailsPage:
-    yield ProgramCycleDetailsPage(browser)
+    return ProgramCycleDetailsPage(browser)
 
 
 @pytest.fixture
 def pageAccountabilitySurveys(request: FixtureRequest, browser: Chrome) -> AccountabilitySurveys:
-    yield AccountabilitySurveys(browser)
+    return AccountabilitySurveys(browser)
 
 
 @pytest.fixture
 def pageAccountabilitySurveysDetails(request: FixtureRequest, browser: Chrome) -> AccountabilitySurveysDetails:
-    yield AccountabilitySurveysDetails(browser)
+    return AccountabilitySurveysDetails(browser)
 
 
 @pytest.fixture
 def pageProgrammeUsers(request: FixtureRequest, browser: Chrome) -> ProgrammeUsers:
-    yield ProgrammeUsers(browser)
+    return ProgrammeUsers(browser)
 
 
 @pytest.fixture
 def pageAccountabilityCommunication(request: FixtureRequest, browser: Chrome) -> AccountabilityCommunication:
-    yield AccountabilityCommunication(browser)
+    return AccountabilityCommunication(browser)
 
 
 @pytest.fixture
 def pageAccountabilityCommunicationDetails(
     request: FixtureRequest, browser: Chrome
 ) -> AccountabilityCommunicationDetails:
-    yield AccountabilityCommunicationDetails(browser)
+    return AccountabilityCommunicationDetails(browser)
 
 
 @pytest.fixture
 def pageProgramLog(request: FixtureRequest, browser: Chrome) -> ProgramLog:
-    yield ProgramLog(browser)
+    return ProgramLog(browser)
 
 
 @pytest.fixture
 def pageCountryDashboard(request: FixtureRequest, browser: Chrome) -> CountryDashboard:
-    yield CountryDashboard(browser)
+    return CountryDashboard(browser)
 
 
 @pytest.fixture
 def business_area() -> BusinessArea:
     business_area, _ = BusinessArea.objects.get_or_create(
-        **{
-            "pk": "c259b1a0-ae3a-494e-b343-f7c8eb060c68",
-            "code": "0060",
-            "name": "Afghanistan",
-            "long_name": "THE ISLAMIC REPUBLIC OF AFGHANISTAN",
-            "region_code": "64",
-            "region_name": "SAR",
-            "slug": "afghanistan",
-            "screen_beneficiary": True,
-            "has_data_sharing_agreement": True,
-            "is_accountability_applicable": True,
-            "kobo_token": "XXX",
-        },
+        pk="c259b1a0-ae3a-494e-b343-f7c8eb060c68",
+        code="0060",
+        name="Afghanistan",
+        long_name="THE ISLAMIC REPUBLIC OF AFGHANISTAN",
+        region_code="64",
+        region_name="SAR",
+        slug="afghanistan",
+        screen_beneficiary=True,
+        has_data_sharing_agreement=True,
+        is_accountability_applicable=True,
+        kobo_token="XXX",
     )
     FlagState.objects.get_or_create(
-        **{"name": "ALLOW_ACCOUNTABILITY_MODULE", "condition": "boolean", "value": "True", "required": False}
+        name="ALLOW_ACCOUNTABILITY_MODULE", condition="boolean", value="True", required=False
     )
-    yield business_area
+    return business_area
 
 
 @pytest.fixture
@@ -571,7 +566,7 @@ def change_super_user(business_area: BusinessArea) -> None:
     user.partner = Partner.objects.get(name="UNHCR")
     user.partner.allowed_business_areas.add(business_area)
     user.save()
-    yield user
+    return user
 
 
 @pytest.fixture(autouse=True)
@@ -717,22 +712,20 @@ def pytest_runtest_makereport(item: Item, call: CallInfo[None]) -> None:
     setattr(item, "rep_" + rep.when, rep)
 
 
-@pytest.fixture(scope="function", autouse=True)
+@pytest.fixture(autouse=True)
 def test_failed_check(request: FixtureRequest, browser: Chrome) -> None:
     yield
     if request.node.rep_setup.failed:
-        print("setting up a test failed!", request.node.nodeid)
-    elif request.node.rep_setup.passed:
-        if request.node.rep_call.failed:
-            screenshot(browser, request.node.nodeid)
-            print("\nExecuting test failed", request.node.nodeid)
+        pass
+    elif request.node.rep_setup.passed and request.node.rep_call.failed:
+        screenshot(browser, request.node.nodeid)
 
 
 # make a screenshot with a name of the test, date and time
 def screenshot(driver: Chrome, node_id: str) -> None:
     if not os.path.exists(settings.SCREENSHOT_DIRECTORY):
         os.makedirs(settings.SCREENSHOT_DIRECTORY)
-    file_name = f'{node_id.split("::")[-1]}_{datetime.today().strftime("%Y-%m-%d_%H.%M")}.png'.replace(
+    file_name = f"{node_id.split('::')[-1]}_{datetime.today().strftime('%Y-%m-%d_%H.%M')}.png".replace(
         "/", "_"
     ).replace("::", "__")
     file_path = os.path.join(settings.SCREENSHOT_DIRECTORY, file_name)

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Type, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from django.db.models.functions import ExtractYear
 
@@ -35,7 +35,7 @@ TQuery = TypeVar("TQuery", bound="Query")
 
 
 class ReportNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes: Tuple[Type[BasePermission], ...] = (
+    permission_classes: tuple[type[BasePermission], ...] = (
         hopePermissionClass(
             Permissions.REPORTING_EXPORT,
         ),
@@ -79,17 +79,17 @@ class Query(graphene.ObjectType):
     dashboard_report_types_choices = graphene.List(ChoiceObject, business_area_slug=graphene.String(required=True))
     dashboard_years_choices = graphene.List(graphene.String, business_area_slug=graphene.String(required=True))
 
-    def resolve_report_types_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_report_types_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(
             [report_type for report_type in Report.REPORT_TYPES if report_type[0] != Report.PROGRAM]
         )
 
-    def resolve_report_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_report_status_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(Report.STATUSES)
 
     def resolve_dashboard_report_types_choices(
         self, info: Any, business_area_slug: str, **kwargs: Any
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         if business_area_slug == "global":
             return to_choice_object(
                 [
@@ -98,17 +98,16 @@ class Query(graphene.ObjectType):
                     if report_type[0] != DashboardReport.TOTAL_TRANSFERRED_BY_ADMIN_AREA
                 ]
             )
-        else:
-            return to_choice_object(
-                [
-                    report_type
-                    for report_type in DashboardReport.REPORT_TYPES
-                    if report_type[0] != DashboardReport.TOTAL_TRANSFERRED_BY_COUNTRY
-                ]
-            )
+        return to_choice_object(
+            [
+                report_type
+                for report_type in DashboardReport.REPORT_TYPES
+                if report_type[0] != DashboardReport.TOTAL_TRANSFERRED_BY_COUNTRY
+            ]
+        )
 
     @cached_in_django_cache(24)
-    def resolve_dashboard_years_choices(self, info: Any, business_area_slug: str, **kwargs: Any) -> List[int]:
+    def resolve_dashboard_years_choices(self, info: Any, business_area_slug: str, **kwargs: Any) -> list[int]:
         current_year = datetime.today().year
         years_list = [*range(current_year, current_year - 5, -1)]
         models = [

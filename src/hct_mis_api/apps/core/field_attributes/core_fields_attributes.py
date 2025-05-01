@@ -1,7 +1,7 @@
 import copy
 import logging
 from functools import reduce
-from typing import Any, Dict, Iterable, List, Optional, Set
+from typing import Any, Iterable
 
 from hct_mis_api.apps.core.attributes_qet_queries import (
     age_to_birth_date_query,
@@ -2182,16 +2182,14 @@ CORE_FIELDS_ATTRIBUTES = [
 ] + PAYMENT_CHANNEL_FIELDS_ATTRIBUTES
 
 
-def get_core_fields_attributes() -> List[Dict[str, Any]]:
+def get_core_fields_attributes() -> list[dict[str, Any]]:
     return CORE_FIELDS_ATTRIBUTES
 
 
 class FieldFactory(list):
-    def __init__(
-        self, fields: Optional[Any] = None, scopes: Optional[Set[Scope]] = None, *args: Any, **kwargs: Any
-    ) -> None:
+    def __init__(self, fields: Any | None = None, scopes: set[Scope] | None = None, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
-        self.scopes: Set = scopes or set()
+        self.scopes: set = scopes or set()
         self.all_fields = copy.deepcopy(get_core_fields_attributes())
         if fields:
             self.extend(copy.deepcopy(fields))
@@ -2207,7 +2205,7 @@ class FieldFactory(list):
         self._fill_label_template(attr)
         super().append(attr)
 
-    def _fill_label_template(self, field: dict, language: str = "English(EN)") -> Optional[str]:
+    def _fill_label_template(self, field: dict, language: str = "English(EN)") -> str | None:
         label_with_template = field["label"].get(language)
         if not label_with_template:
             return None
@@ -2271,7 +2269,7 @@ class FieldFactory(list):
             factory.extend(filter(lambda field: scope in field["scope"], all_fields))
         return factory
 
-    def filtered_by_types(self, types: List) -> "FieldFactory":
+    def filtered_by_types(self, types: list) -> "FieldFactory":
         factory = FieldFactory(scopes=self.scopes)
 
         for item in self:
@@ -2285,23 +2283,23 @@ class FieldFactory(list):
     def associated_with_household(self) -> "FieldFactory":
         return self._associated_with([_HOUSEHOLD])
 
-    def _associated_with(self, associated_with: List[str]) -> "FieldFactory":
+    def _associated_with(self, associated_with: list[str]) -> "FieldFactory":
         factory = FieldFactory(scopes=self.scopes)
         for item in self:
             if item.get("associated_with") in associated_with:
                 factory.append(item)
         return factory
 
-    def to_dict_by(self, attr: str) -> Dict:
+    def to_dict_by(self, attr: str) -> dict:
         return reduce(lambda pre, curr: {**pre, curr[attr]: curr}, self, {})
 
-    def to_choices(self) -> List[Any]:
+    def to_choices(self) -> list[Any]:
         return [(x["name"], x["label"]["English(EN)"]) for x in self]
 
     def apply_business_area(
         self,
-        business_area_slug: Optional[str] = None,
-        program_id: Optional[str] = None,
+        business_area_slug: str | None = None,
+        program_id: str | None = None,
     ) -> "FieldFactory":
         factory = FieldFactory(self, self.scopes)
         for field in factory:
@@ -2311,7 +2309,7 @@ class FieldFactory(list):
         return factory
 
     @classmethod
-    def get_all_core_fields_choices(cls) -> List:
+    def get_all_core_fields_choices(cls) -> list:
         factory = cls()
         factory.extend(factory.all_fields)
         return factory.to_choices()

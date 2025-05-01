@@ -5,7 +5,7 @@ import shutil
 import time
 from functools import reduce
 from io import BytesIO
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional
+from typing import TYPE_CHECKING, Any, Iterable, Optional
 
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
@@ -24,6 +24,7 @@ from hct_mis_api.apps.core.models import BusinessAreaPartnerThrough
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_CHOICE, DocumentType
 from hct_mis_api.apps.program.models import ProgramPartnerThrough
+import contextlib
 
 if TYPE_CHECKING:  # pragma: no_cover
     from hct_mis_api.apps.account.models import Partner, User
@@ -57,7 +58,7 @@ class APITestCase(SnapshotTestTestCase):
         super().tearDown()
 
     def snapshot_graphql_request(
-        self, request_string: str, context: Optional[Dict] = None, variables: Optional[Dict] = None
+        self, request_string: str, context: dict | None = None, variables: dict | None = None
     ) -> None:
         if context is None:
             context = {}
@@ -70,9 +71,7 @@ class APITestCase(SnapshotTestTestCase):
             )
         )
 
-    def graphql_request(
-        self, request_string: str, context: Optional[Dict] = None, variables: Optional[Dict] = None
-    ) -> Dict:
+    def graphql_request(self, request_string: str, context: dict | None = None, variables: dict | None = None) -> dict:
         if context is None:
             context = {}
 
@@ -83,10 +82,10 @@ class APITestCase(SnapshotTestTestCase):
         )
 
     def generate_context(
-        self, user: Optional["User"] = None, files: Optional[Dict] = None, headers: Optional[Dict[str, str]] = None
+        self, user: Optional["User"] = None, files: dict | None = None, headers: dict[str, str] | None = None
     ) -> WSGIRequest:
         request = RequestFactory()
-        prepared_headers: Dict = reduce(
+        prepared_headers: dict = reduce(
             lambda prev_headers, curr_header: {**prev_headers, f"HTTP_{curr_header[0]}": curr_header[1]},
             (headers or {}).items(),
             {},
@@ -110,7 +109,7 @@ class APITestCase(SnapshotTestTestCase):
         return base64.b64encode(f"{name}:{str(object_id)}".encode()).decode()
 
     @staticmethod
-    def __set_context_files(context: Any, files: Dict) -> None:
+    def __set_context_files(context: Any, files: dict) -> None:
         if isinstance(files, dict):
             for name, file in files.items():
                 context.FILES[name] = file
@@ -119,8 +118,8 @@ class APITestCase(SnapshotTestTestCase):
     def update_partner_access_to_program(
         partner: "Partner",
         program: "Program",
-        areas: Optional[List["Area"]] = None,
-        full_area_access: Optional[bool] = False,
+        areas: list["Area"] | None = None,
+        full_area_access: bool | None = False,
     ) -> None:
         program_partner_through, _ = ProgramPartnerThrough.objects.get_or_create(
             program=program,
@@ -134,7 +133,7 @@ class APITestCase(SnapshotTestTestCase):
 
     @staticmethod
     def add_partner_role_in_business_area(
-        partner: "Partner", business_area: "BusinessArea", roles: List["Role"]
+        partner: "Partner", business_area: "BusinessArea", roles: list["Role"]
     ) -> None:
         business_area_partner_through, _ = BusinessAreaPartnerThrough.objects.get_or_create(
             business_area=business_area,
@@ -149,8 +148,8 @@ class APITestCase(SnapshotTestTestCase):
         permissions: Iterable,
         business_area: "BusinessArea",
         program: Optional["Program"] = None,
-        areas: Optional[List["Area"]] = None,
-        name: Optional[str] = "Partner Role with Permissions",
+        areas: list["Area"] | None = None,
+        name: str | None = "Partner Role with Permissions",
     ) -> None:
         business_area_partner_through, _ = BusinessAreaPartnerThrough.objects.get_or_create(
             business_area=business_area,
@@ -169,8 +168,8 @@ class APITestCase(SnapshotTestTestCase):
         permissions: Iterable,
         business_area: "BusinessArea",
         program: Optional["Program"] = None,
-        areas: Optional[List["Area"]] = None,
-        name: Optional[str] = "Role with Permissions",
+        areas: list["Area"] | None = None,
+        name: str | None = "Role with Permissions",
     ) -> UserRole:
         permission_list = [perm.value for perm in permissions]
         role, created = Role.objects.update_or_create(name=name, defaults={"permissions": permission_list})
@@ -193,8 +192,6 @@ class UploadDocumentsBase(APITestCase):
 
     @classmethod
     def tearDownClass(cls) -> None:
-        try:
+        with contextlib.suppress(OSError):
             shutil.rmtree(cls.TEST_DIR)
-        except OSError:
-            pass
         super().tearDownClass()

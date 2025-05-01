@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING
 
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.targeting.models import (
@@ -41,7 +41,7 @@ def get_unicef_ids(ids_string: str, type_id: str, program: "Program") -> str:
     return ", ".join(list_ids)
 
 
-def from_input_to_targeting_criteria(targeting_criteria_input: Dict, program: "Program") -> TargetingCriteria:
+def from_input_to_targeting_criteria(targeting_criteria_input: dict, program: "Program") -> TargetingCriteria:
     rules = targeting_criteria_input.pop("rules", [])
 
     targeting_criteria = TargetingCriteria(**targeting_criteria_input)

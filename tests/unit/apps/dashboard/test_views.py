@@ -180,7 +180,7 @@ def test_dashboard_report_view_context_without_permission(afghanistan: Callable,
 
 
 @pytest.mark.parametrize(
-    "business_area_slug, expected_url_key, expected_status, permission_granted",
+    ("business_area_slug", "expected_url_key", "expected_status", "permission_granted"),
     [
         ("afghanistan", "list_url", status.HTTP_403_FORBIDDEN, False),  # Without permission
         ("afghanistan", "list_url", status.HTTP_200_OK, True),  # With permission

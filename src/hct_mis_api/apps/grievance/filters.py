@@ -1,5 +1,5 @@
 import logging
-from typing import Any, List
+from typing import Any
 
 from django.db import models
 from django.db.models import Count, F, Func, Q, QuerySet, Window
@@ -43,7 +43,7 @@ class GrievanceOrderingFilter(OrderingFilter):
             ("-linked_tickets", "Linked tickets (descending)"),
         ]
 
-    def filter(self, qs: QuerySet, value: List[str]) -> QuerySet:
+    def filter(self, qs: QuerySet, value: list[str]) -> QuerySet:
         if value and any(v in ["linked_tickets", "-linked_tickets"] for v in value):
             qs = super().filter(qs, value)
             qs = (
@@ -231,7 +231,7 @@ class GrievanceTicketFilter(FilterSet):
             return qs.filter(q_obj)
         return qs
 
-    def permissions_filter(self, qs: QuerySet, name: str, values: List[str]) -> QuerySet:
+    def permissions_filter(self, qs: QuerySet, name: str, values: list[str]) -> QuerySet:
         can_view_ex_sensitive_all = Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE.value in values
         can_view_sensitive_all = Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE.value in values
         can_view_ex_sensitive_creator = Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR.value in values
@@ -260,25 +260,20 @@ class GrievanceTicketFilter(FilterSet):
 
             if can_view_ex_sensitive_all:
                 return qs.filter(~Q(**sensitive_category_filter) | Q(**filters_1) | Q(**filters_2))
-            else:
-                return qs.filter(Q(**sensitive_category_filter) | Q(**filters_1) | Q(**filters_1))
+            return qs.filter(Q(**sensitive_category_filter) | Q(**filters_1) | Q(**filters_1))
 
-        else:
-            # no full lists so only creator and/or owner lists
-            if can_view_ex_sensitive_creator:
-                filters_1.update(created_by_filter)
-                if not can_view_sensitive_creator:
-                    filters_1_exclude.update(sensitive_category_filter)
-            if can_view_ex_sensitive_owner:
-                filters_2.update(assigned_to_filter)
-                if not can_view_sensitive_owner:
-                    filters_2_exclude.update(sensitive_category_filter)
-            if filters_1 or filters_2:
-                return qs.filter(
-                    Q(Q(**filters_1), ~Q(**filters_1_exclude)) | Q(Q(**filters_2), ~Q(**filters_2_exclude))
-                )
-            else:
-                return GrievanceTicket.objects.none()
+        # no full lists so only creator and/or owner lists
+        if can_view_ex_sensitive_creator:
+            filters_1.update(created_by_filter)
+            if not can_view_sensitive_creator:
+                filters_1_exclude.update(sensitive_category_filter)
+        if can_view_ex_sensitive_owner:
+            filters_2.update(assigned_to_filter)
+            if not can_view_sensitive_owner:
+                filters_2_exclude.update(sensitive_category_filter)
+        if filters_1 or filters_2:
+            return qs.filter(Q(Q(**filters_1), ~Q(**filters_1_exclude)) | Q(Q(**filters_2), ~Q(**filters_2_exclude)))
+        return GrievanceTicket.objects.none()
 
     def filter_grievance_type(self, qs: QuerySet, name: Any, val: str) -> QuerySet:
         choices = dict(GrievanceTicket.CATEGORY_CHOICES)
@@ -286,7 +281,7 @@ class GrievanceTicketFilter(FilterSet):
 
         if val == "system":
             return qs.filter(~Q(category__in=user_generated))
-        elif val == "user":
+        if val == "user":
             return qs.filter(category__in=user_generated)
         return qs
 
@@ -298,10 +293,9 @@ class GrievanceTicketFilter(FilterSet):
     def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
         if value is True:
             return qs.filter(programs__status=Program.ACTIVE)
-        elif value is False:
+        if value is False:
             return qs.filter(programs__status=Program.FINISHED)
-        else:
-            return qs
+        return qs
 
     def filter_is_cross_area(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
         user = self.request.user
@@ -315,8 +309,7 @@ class GrievanceTicketFilter(FilterSet):
             and (user.partner.has_full_area_access_in_program(program_id) or not program_id)
         ):
             return qs.filter(needs_adjudication_ticket_details__is_cross_area=True)
-        else:
-            return qs
+        return qs
 
 
 class ExistingGrievanceTicketFilter(FilterSet):
@@ -366,12 +359,8 @@ class ExistingGrievanceTicketFilter(FilterSet):
             queryset.model.objects.none()
         for name, value in cleaned_data.items():
             queryset = self.filters[name].filter(queryset, value)
-            assert isinstance(
-                queryset, models.QuerySet
-            ), "Expected '{}.{}' to return a QuerySet, but got a {} instead.".format(
-                type(self).__name__,
-                name,
-                type(queryset).__name__,
+            assert isinstance(queryset, models.QuerySet), (
+                f"Expected '{type(self).__name__}.{name}' to return a QuerySet, but got a {type(queryset).__name__} instead."
             )
 
         if payment_record_objects:
@@ -388,7 +377,7 @@ class ExistingGrievanceTicketFilter(FilterSet):
 
         return queryset
 
-    def permissions_filter(self, qs: QuerySet, name: str, values: List[str]) -> QuerySet:
+    def permissions_filter(self, qs: QuerySet, name: str, values: list[str]) -> QuerySet:
         return GrievanceTicketFilter.permissions_filter(self, qs, name, values)
 
 

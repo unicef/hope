@@ -5,15 +5,16 @@ import hct_mis_api.apps.payment.fields
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('payment', '0006_migration'),
+        ("payment", "0006_migration"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='financialserviceproviderxlsxtemplate',
-            name='document_types',
-            field=hct_mis_api.apps.payment.fields.DynamicChoiceArrayField(base_field=models.CharField(blank=True, max_length=255), blank=True, default=list, size=None),
+            model_name="financialserviceproviderxlsxtemplate",
+            name="document_types",
+            field=hct_mis_api.apps.payment.fields.DynamicChoiceArrayField(
+                base_field=models.CharField(blank=True, max_length=255), blank=True, default=list, size=None
+            ),
         ),
     ]

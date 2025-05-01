@@ -17,43 +17,42 @@ from hct_mis_api.apps.universal_update_script.models import UniversalUpdate
 pytestmark = pytest.mark.django_db(transaction=True)
 
 
-@pytest.fixture()
+@pytest.fixture
 def poland() -> Country:
     return Country.objects.create(name="Poland", iso_code2="PL", iso_code3="POL", iso_num="616")
 
 
-@pytest.fixture()
+@pytest.fixture
 def germany() -> Country:
     return Country.objects.create(name="Germany", iso_code2="DE", iso_code3="DEU", iso_num="276")
 
 
-@pytest.fixture()
+@pytest.fixture
 def state(poland: Country) -> AreaType:
     return AreaType.objects.create(name="State", country=poland)
 
 
-@pytest.fixture()
+@pytest.fixture
 def district(poland: Country, state: AreaType) -> AreaType:
     return AreaType.objects.create(name="District", parent=state, country=poland)
 
 
-@pytest.fixture()
+@pytest.fixture
 def admin1(state: AreaType) -> Area:
     return Area.objects.create(name="Kabul", area_type=state, p_code="AF11")
 
 
-@pytest.fixture()
+@pytest.fixture
 def admin2(district: AreaType) -> Area:
     return Area.objects.create(name="Kabul1", area_type=district, p_code="AF1115")
 
 
-@pytest.fixture()
+@pytest.fixture
 def program(poland: Country, germany: Country) -> Program:
     business_area = create_afghanistan()
     business_area.countries.add(poland, germany)
 
-    program = ProgramFactory(name="Test Program for Household", status=Program.ACTIVE, business_area=business_area)
-    return program
+    return ProgramFactory(name="Test Program for Household", status=Program.ACTIVE, business_area=business_area)
 
 
 @pytest.fixture
@@ -120,7 +119,7 @@ def individual(
     return ind
 
 
-@pytest.fixture()
+@pytest.fixture
 def wallet(individual: Individual, delivery_mechanism: DeliveryMechanism) -> Account:
     return Account.objects.create(
         individual=individual,

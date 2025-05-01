@@ -58,21 +58,21 @@ class TestDelegatePeople(HOPEApiTestCase):
         people_ids = self._create_people()
         households_count = PendingHousehold.objects.filter(registration_data_import=self.rdi).count()
         individuals_count = PendingIndividual.objects.filter(registration_data_import=self.rdi).count()
-        self.assertEqual(households_count, 2)
-        self.assertEqual(individuals_count, 3)
+        assert households_count == 2
+        assert individuals_count == 3
 
         data = {"delegates": [{"delegate_id": people_ids[2], "delegated_for": [people_ids[1]]}]}
 
         response = self.client.post(self.url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_200_OK, str(response.json()))
+        assert response.status_code == status.HTTP_200_OK, str(response.json())
         data = response.json()
-        self.assertEqual(data["updated"], 1)
+        assert data["updated"] == 1
 
         hh1 = PendingHousehold.objects.get(registration_data_import=self.rdi, village="village1")
         hh2 = PendingHousehold.objects.get(registration_data_import=self.rdi, village="village2")
 
-        self.assertEqual(hh1.primary_collector.full_name, "John Doe")
-        self.assertEqual(hh2.primary_collector.full_name, "Jack Jones")
+        assert hh1.primary_collector.full_name == "John Doe"
+        assert hh2.primary_collector.full_name == "Jack Jones"
 
     def _create_people(self) -> List[UUID]:
         data = [
@@ -115,6 +115,6 @@ class TestDelegatePeople(HOPEApiTestCase):
         ]
         url = reverse("api:rdi-push-people", args=[self.business_area.slug, str(self.rdi.id)])
         response = self.client.post(url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
+        assert response.status_code == status.HTTP_201_CREATED, str(response.json())
         response_json = response.json()
         return response_json["people"]

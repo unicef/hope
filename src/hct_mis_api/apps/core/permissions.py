@@ -4,8 +4,7 @@ from django.core.exceptions import PermissionDenied
 
 
 def is_authenticated(func: Callable) -> Any:
-    """
-    Simple decorator for use with Graphene mutate method
+    """Simple decorator for use with Graphene mutate method
     to check if user is authenticated.
     """
 

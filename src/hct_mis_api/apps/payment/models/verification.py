@@ -134,7 +134,7 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
         )
 
     @property
-    def xlsx_payment_verification_plan_file_link(self) -> Optional[str]:
+    def xlsx_payment_verification_plan_file_link(self) -> str | None:
         return self.get_xlsx_verification_file.file.url if self.has_xlsx_payment_verification_plan_file else None
 
     @property

@@ -160,7 +160,7 @@ class TestSouthSudanUpdateScript(TestCase):
             "Deduplicating documents",
             "Update successful",
         ]
-        self.assertEqual(output, expected_output)
+        assert output == expected_output
         self.individual.refresh_from_db()
         self.individual2.refresh_from_db()
         self.individual3.refresh_from_db()
@@ -171,40 +171,28 @@ class TestSouthSudanUpdateScript(TestCase):
         individual4 = self.individual4
         deliver_mechanism_data2 = self.deliver_mechanism_data2
         deliver_mechanism_data3 = self.deliver_mechanism_data3
-        self.assertEqual(str(individual.phone_no), "+243837611111")
-        self.assertEqual(str(individual.payment_delivery_phone_no), "+243837611111")
-        self.assertEqual(individual.accounts.count(), 1)
+        assert str(individual.phone_no) == "+243837611111"
+        assert str(individual.payment_delivery_phone_no) == "+243837611111"
+        assert individual.accounts.count() == 1
         deliver_mechanism_data = individual.accounts.first()
-        self.assertEqual(
-            deliver_mechanism_data.data,
-            {
-                "service_provider_code": "CD-VODACASH",
-                "provider": "Vodacash",
-            },
-        )
-        self.assertEqual(str(individual2.phone_no), "+243836122222")
-        self.assertEqual(str(individual2.payment_delivery_phone_no), "+243836122222")
-        self.assertEqual(individual2.accounts.count(), 1)
+        assert deliver_mechanism_data.data == {"service_provider_code": "CD-VODACASH", "provider": "Vodacash"}
+        assert str(individual2.phone_no) == "+243836122222"
+        assert str(individual2.payment_delivery_phone_no) == "+243836122222"
+        assert individual2.accounts.count() == 1
         deliver_mechanism_data2.refresh_from_db()
-        self.assertEqual(
-            deliver_mechanism_data2.data,
-            {
-                "service_provider_code": "CD-VODACASH",
-                "provider": "Vodacash",
-                "delivery_phone_number": "+48602102373",
-            },
-        )
-        self.assertEqual(str(individual3.phone_no), "+243831733333")
-        self.assertEqual(individual3.accounts.count(), 1)
+        assert deliver_mechanism_data2.data == {
+            "service_provider_code": "CD-VODACASH",
+            "provider": "Vodacash",
+            "delivery_phone_number": "+48602102373",
+        }
+        assert str(individual3.phone_no) == "+243831733333"
+        assert individual3.accounts.count() == 1
         deliver_mechanism_data3.refresh_from_db()
-        self.assertEqual(
-            deliver_mechanism_data3.data,
-            {
-                "service_provider_code": "OLD_CODE",
-                "provider": "OLD_PROVIDER",
-                "delivery_phone_number": "+48602102373",
-            },
-        )
+        assert deliver_mechanism_data3.data == {
+            "service_provider_code": "OLD_CODE",
+            "provider": "OLD_PROVIDER",
+            "delivery_phone_number": "+48602102373",
+        }
 
-        self.assertEqual(str(individual4.phone_no), "+243831733333")
-        self.assertEqual(individual4.accounts.count(), 0)
+        assert str(individual4.phone_no) == "+243831733333"
+        assert individual4.accounts.count() == 0

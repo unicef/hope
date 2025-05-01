@@ -70,7 +70,7 @@ class MessageCrudServices:
                 head_of_household__phone_no_valid=False,
                 head_of_household__phone_no_alternative_valid=False,
             )
-        elif payment_plan_id := input_data.get("payment_plan"):
+        if payment_plan_id := input_data.get("payment_plan"):
             payment_plan = PaymentPlan.objects.get(id=decode_id_string(payment_plan_id))
             if payment_plan.status == PaymentPlan.Status.TP_OPEN:
                 return Household.objects.none()
@@ -78,7 +78,7 @@ class MessageCrudServices:
                 head_of_household__phone_no_valid=False,
                 head_of_household__phone_no_alternative_valid=False,
             )
-        elif registration_data_import_id := input_data.get("registration_data_import"):
+        if registration_data_import_id := input_data.get("registration_data_import"):
             return Household.objects.filter(
                 registration_data_import__status=RegistrationDataImport.MERGED,
                 registration_data_import_id=decode_id_string(registration_data_import_id),

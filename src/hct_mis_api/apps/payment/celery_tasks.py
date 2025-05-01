@@ -1,6 +1,6 @@
 import datetime
 import logging
-from typing import Any, List, Optional
+from typing import Any
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.auth import get_user_model
@@ -86,7 +86,7 @@ def create_payment_verification_plan_xlsx(self: Any, payment_verification_plan_i
 @log_start_and_end
 @sentry_tags
 def remove_old_cash_plan_payment_verification_xls(self: Any, past_days: int = 30) -> None:
-    """Remove old Payment Verification report XLSX files"""
+    """Remove old Payment Verification report XLSX files."""
     try:
         days = datetime.datetime.now() - datetime.timedelta(days=past_days)
         ct = ContentType.objects.get(app_label="payment", model="paymentverificationplan")
@@ -142,7 +142,7 @@ def create_payment_plan_payment_list_xlsx(self: Any, payment_plan_id: str, user_
 @log_start_and_end
 @sentry_tags
 def create_payment_plan_payment_list_xlsx_per_fsp(
-    self: Any, payment_plan_id: str, user_id: str, fsp_xlsx_template_id: Optional[str] = None
+    self: Any, payment_plan_id: str, user_id: str, fsp_xlsx_template_id: str | None = None
 ) -> None:
     try:
         from hct_mis_api.apps.payment.models import PaymentPlan
@@ -294,7 +294,7 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
     payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
     set_sentry_business_area_tag(payment_plan.business_area.name)
     engine_rule = get_object_or_404(Rule, id=engine_rule_id)
-    rule: Optional["RuleCommit"] = engine_rule.latest
+    rule: "RuleCommit" | None = engine_rule.latest
     if rule.id != payment_plan.steficon_rule_id:
         payment_plan.steficon_rule = rule
         payment_plan.save()
@@ -337,7 +337,7 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
 @log_start_and_end
 @sentry_tags
 def remove_old_payment_plan_payment_list_xlsx(self: Any, past_days: int = 30) -> None:
-    """Remove old Payment Plan Payment List XLSX files"""
+    """Remove old Payment Plan Payment List XLSX files."""
     try:
         from hct_mis_api.apps.core.models import FileTemp
         from hct_mis_api.apps.payment.models import PaymentPlan
@@ -434,7 +434,7 @@ def prepare_follow_up_payment_plan_task(self: Any, payment_plan_id: str) -> bool
 @log_start_and_end
 @sentry_tags
 def payment_plan_exclude_beneficiaries(
-    self: Any, payment_plan_id: str, excluding_hh_or_ind_ids: List[Optional[str]], exclusion_reason: Optional[str] = ""
+    self: Any, payment_plan_id: str, excluding_hh_or_ind_ids: list[str | None], exclusion_reason: str | None = ""
 ) -> None:
     try:
         from django.db.models import Q
@@ -527,7 +527,7 @@ def payment_plan_exclude_beneficiaries(
 @log_start_and_end
 @sentry_tags
 def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id: str) -> None:
-    """create PDF file with summary and sent an enail to request user"""
+    """Create PDF file with summary and sent an enail to request user."""
     try:
         from hct_mis_api.apps.core.models import FileTemp
         from hct_mis_api.apps.payment.models import PaymentPlan
@@ -694,7 +694,7 @@ def payment_plan_apply_steficon_hh_selection(self: Any, payment_plan_id: str, en
     payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
     set_sentry_business_area_tag(payment_plan.business_area.name)
     engine_rule = get_object_or_404(Rule, id=engine_rule_id)
-    rule: Optional["RuleCommit"] = engine_rule.latest
+    rule: "RuleCommit" | None = engine_rule.latest
     if rule and rule.id != payment_plan.steficon_rule_targeting_id:
         payment_plan.steficon_rule_targeting = rule
         payment_plan.save(update_fields=["steficon_rule_targeting"])

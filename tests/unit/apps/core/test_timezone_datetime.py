@@ -18,4 +18,4 @@ class TestTimezoneDatetime(TestCase):
         ]
     )
     def test_timezone_datetime(self, date: datetime.date) -> None:
-        self.assertEqual(timezone_datetime(date), timezone.datetime(2022, 9, 24, tzinfo=pytz.utc))
+        assert timezone_datetime(date) == timezone.datetime(2022, 9, 24, tzinfo=pytz.utc)

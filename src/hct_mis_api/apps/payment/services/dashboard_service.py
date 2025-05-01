@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Dict, List, Optional, TypedDict
+from typing import TypedDict
 
 from django.db.models import Count, DecimalField, F, Q, QuerySet, Sum
 from django.db.models.functions import Coalesce
@@ -11,8 +11,8 @@ from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 
 
 class PaymentVerificationChartQueryResponse(TypedDict):
-    labels: List[str]
-    datasets: List
+    labels: list[str]
+    datasets: list
     number_of_records: int
     average_sample_size: float
 
@@ -21,8 +21,8 @@ def payment_verification_chart_query(
     year: int,
     business_area_slug: str,
     collect_type: str,
-    program: Optional[str] = None,
-    administrative_area: Optional[str] = None,
+    program: str | None = None,
+    administrative_area: str | None = None,
 ) -> PaymentVerificationChartQueryResponse:
     status_choices_mapping = dict(PaymentVerification.STATUS_CHOICES)
 
@@ -48,7 +48,7 @@ def payment_verification_chart_query(
         payment_verifications.values("status").annotate(count=Count("status")).values_list("status", "count")
     )
     verifications_by_status_dict = dict(verifications_by_status)
-    dataset: List[int] = [verifications_by_status_dict.get(status, 0) for status in status_choices_mapping.keys()]
+    dataset: list[int] = [verifications_by_status_dict.get(status, 0) for status in status_choices_mapping]
     try:
         all_verifications = sum(dataset)
         dataset_percentage = [data / all_verifications for data in dataset]
@@ -56,7 +56,7 @@ def payment_verification_chart_query(
         dataset_percentage = [0] * len(status_choices_mapping.values())
     dataset_percentage_done = [
         {"label": status, "data": [dataset_percentage_value]}
-        for (dataset_percentage_value, status) in zip(dataset_percentage, status_choices_mapping.values())
+        for (dataset_percentage_value, status) in zip(dataset_percentage, status_choices_mapping.values(), strict=False)
     ]
 
     samples_count = payment_verifications.aggregate(payments_count=Count("payment"))["payments_count"]
@@ -90,7 +90,7 @@ def payment_verification_chart_query(
 
 
 def total_cash_transferred_by_administrative_area_table_query(
-    year: int, business_area_slug: str, filters: Dict, collect_type: str
+    year: int, business_area_slug: str, filters: dict, collect_type: str
 ) -> QuerySet[Area]:
     payment_items_ids = (
         get_payment_items_for_dashboard(year, business_area_slug, filters, True)

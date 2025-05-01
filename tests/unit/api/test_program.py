@@ -53,7 +53,7 @@ class APIProgramTests(HOPEApiTestCase):
 
         if not (program := Program.objects.filter(name="Program #1").first()):
             self.fail("Program was not present")
-        self.assertTrue(program)
+        assert program
         self.assertDictEqual(
             data,
             {
@@ -71,7 +71,7 @@ class APIProgramTests(HOPEApiTestCase):
             },
         )
 
-        self.assertEqual(program.business_area, self.business_area)
+        assert program.business_area == self.business_area
 
     def test_list_program(self) -> None:
         program1: Program = ProgramFactory(
@@ -109,40 +109,34 @@ class APIProgramTests(HOPEApiTestCase):
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.list_url)
 
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json()), 2)
-        self.assertIn(
-            {
-                "budget": str(program1.budget),
-                "cash_plus": program1.cash_plus,
-                "end_date": program1.end_date.strftime("%Y-%m-%d"),
-                "frequency_of_payments": program1.frequency_of_payments,
-                "id": str(program1.id),
-                "name": program1.name,
-                "population_goal": program1.population_goal,
-                "sector": program1.sector,
-                "start_date": program1.start_date.strftime("%Y-%m-%d"),
-                "data_collecting_type": program1.data_collecting_type_id,
-                "beneficiary_group": str(program1.beneficiary_group_id),
-            },
-            response.json(),
-        )
-        self.assertIn(
-            {
-                "budget": str(program2.budget),
-                "cash_plus": program2.cash_plus,
-                "end_date": program2.end_date.strftime("%Y-%m-%d"),
-                "frequency_of_payments": program2.frequency_of_payments,
-                "id": str(program2.id),
-                "name": program2.name,
-                "population_goal": program2.population_goal,
-                "sector": program2.sector,
-                "start_date": program2.start_date.strftime("%Y-%m-%d"),
-                "data_collecting_type": program2.data_collecting_type_id,
-                "beneficiary_group": str(program2.beneficiary_group_id),
-            },
-            response.json(),
-        )
+        assert response.status_code == 200
+        assert len(response.json()) == 2
+        assert {
+            "budget": str(program1.budget),
+            "cash_plus": program1.cash_plus,
+            "end_date": program1.end_date.strftime("%Y-%m-%d"),
+            "frequency_of_payments": program1.frequency_of_payments,
+            "id": str(program1.id),
+            "name": program1.name,
+            "population_goal": program1.population_goal,
+            "sector": program1.sector,
+            "start_date": program1.start_date.strftime("%Y-%m-%d"),
+            "data_collecting_type": program1.data_collecting_type_id,
+            "beneficiary_group": str(program1.beneficiary_group_id),
+        } in response.json()
+        assert {
+            "budget": str(program2.budget),
+            "cash_plus": program2.cash_plus,
+            "end_date": program2.end_date.strftime("%Y-%m-%d"),
+            "frequency_of_payments": program2.frequency_of_payments,
+            "id": str(program2.id),
+            "name": program2.name,
+            "population_goal": program2.population_goal,
+            "sector": program2.sector,
+            "start_date": program2.start_date.strftime("%Y-%m-%d"),
+            "data_collecting_type": program2.data_collecting_type_id,
+            "beneficiary_group": str(program2.beneficiary_group_id),
+        } in response.json()
 
 
 class APIGlobalProgramTests(HOPEApiTestCase):
@@ -222,60 +216,39 @@ class APIGlobalProgramTests(HOPEApiTestCase):
 
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.list_url)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json()["results"]), 3)
-        self.assertIn(
-            self.program1_expected_response,
-            response.json()["results"],
-        )
-        self.assertIn(
-            self.program2_expected_response,
-            response.json()["results"],
-        )
-        self.assertIn(
-            self.program_from_another_ba_expected_response,
-            response.json()["results"],
-        )
+        assert response.status_code == 200
+        assert len(response.json()["results"]) == 3
+        assert self.program1_expected_response in response.json()["results"]
+        assert self.program2_expected_response in response.json()["results"]
+        assert self.program_from_another_ba_expected_response in response.json()["results"]
 
     def test_list_program_filter_business_area(self) -> None:
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.list_url, {"business_area": "afghanistan"})
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json()["results"]), 2)
-        self.assertNotIn(
-            self.program_from_another_ba_expected_response,
-            response.json()["results"],
-        )
+        assert response.status_code == 200
+        assert len(response.json()["results"]) == 2
+        assert self.program_from_another_ba_expected_response not in response.json()["results"]
 
     def test_list_program_filter_active(self) -> None:
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.list_url, {"active": "true"})
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json()["results"]), 2)
-        self.assertNotIn(
-            self.program2_expected_response,
-            response.json()["results"],
-        )
+        assert response.status_code == 200
+        assert len(response.json()["results"]) == 2
+        assert self.program2_expected_response not in response.json()["results"]
 
     def test_list_program_filter_not_active(self) -> None:
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.list_url, {"active": "false"})
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json()["results"]), 1)
-        self.assertIn(
-            self.program2_expected_response,
-            response.json()["results"],
-        )
+        assert response.status_code == 200
+        assert len(response.json()["results"]) == 1
+        assert self.program2_expected_response in response.json()["results"]
 
     def test_list_program_filter_status(self) -> None:
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.list_url, {"status": Program.DRAFT})
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json()["results"]), 1)
-        self.assertIn(
-            self.program2_expected_response,
-            response.json()["results"],
-        )
+        assert response.status_code == 200
+        assert len(response.json()["results"]) == 1
+        assert self.program2_expected_response in response.json()["results"]
 
     def test_list_program_filter_updated_at(self) -> None:
         tomorrow = (timezone.now() + timedelta(days=1)).date()
@@ -284,20 +257,20 @@ class APIGlobalProgramTests(HOPEApiTestCase):
         yesterday_str = yesterday.strftime("%Y-%m-%d")
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.list_url, {"updated_at_before": tomorrow_str})
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json()["results"]), 3)
+        assert response.status_code == 200
+        assert len(response.json()["results"]) == 3
 
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.list_url, {"updated_at_after": tomorrow_str})
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json()["results"]), 0)
+        assert response.status_code == 200
+        assert len(response.json()["results"]) == 0
 
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.list_url, {"updated_at_before": yesterday_str})
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json()["results"]), 0)
+        assert response.status_code == 200
+        assert len(response.json()["results"]) == 0
 
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.list_url, {"updated_at_after": yesterday_str})
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json()["results"]), 3)
+        assert response.status_code == 200
+        assert len(response.json()["results"]) == 3

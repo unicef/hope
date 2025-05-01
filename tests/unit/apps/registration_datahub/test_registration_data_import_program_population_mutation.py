@@ -105,11 +105,11 @@ class TestRegistrationDataProgramPopulationImportMutations(APITestCase):
         )
         if permissions:
             rdi = RegistrationDataImport.objects.filter(imported_by=user).first()
-            self.assertEqual(rdi.status, RegistrationDataImport.IMPORT_SCHEDULED)
-            self.assertEqual(rdi.data_source, RegistrationDataImport.PROGRAM_POPULATION)
-            self.assertEqual(rdi.number_of_individuals, 2)
-            self.assertEqual(rdi.number_of_households, 1)
-            self.assertEqual(rdi.program_id, self.import_to_program.id)
+            assert rdi.status == RegistrationDataImport.IMPORT_SCHEDULED
+            assert rdi.data_source == RegistrationDataImport.PROGRAM_POPULATION
+            assert rdi.number_of_individuals == 2
+            assert rdi.number_of_households == 1
+            assert rdi.program_id == self.import_to_program.id
 
     def test_registration_data_import_different_beneficiary_group(self) -> None:
         user = UserFactory(partner=self.partner)
@@ -318,13 +318,13 @@ class TestRegistrationDataProgramPopulationImportMutations(APITestCase):
         )
 
         rdi = RegistrationDataImport.objects.filter(name="New Import of Data HH Ids").first()
-        self.assertEqual(rdi.status, RegistrationDataImport.IMPORT_SCHEDULED)
-        self.assertEqual(rdi.data_source, RegistrationDataImport.PROGRAM_POPULATION)
-        self.assertEqual(rdi.import_from_ids, hh_ids)
-        self.assertEqual(rdi.program.data_collecting_type.type, DataCollectingType.Type.STANDARD)
-        self.assertEqual(rdi.number_of_individuals, 4)
-        self.assertEqual(rdi.number_of_households, 2)
-        self.assertEqual(rdi.program_id, self.import_to_program.id)
+        assert rdi.status == RegistrationDataImport.IMPORT_SCHEDULED
+        assert rdi.data_source == RegistrationDataImport.PROGRAM_POPULATION
+        assert rdi.import_from_ids == hh_ids
+        assert rdi.program.data_collecting_type.type == DataCollectingType.Type.STANDARD
+        assert rdi.number_of_individuals == 4
+        assert rdi.number_of_households == 2
+        assert rdi.program_id == self.import_to_program.id
 
         # check with external collector
         self.graphql_request(
@@ -344,13 +344,13 @@ class TestRegistrationDataProgramPopulationImportMutations(APITestCase):
         )
 
         rdi = RegistrationDataImport.objects.filter(name="New Import of Data HH Ids with external collector").first()
-        self.assertEqual(rdi.status, RegistrationDataImport.IMPORT_SCHEDULED)
-        self.assertEqual(rdi.data_source, RegistrationDataImport.PROGRAM_POPULATION)
-        self.assertEqual(rdi.import_from_ids, self.household_5.unicef_id)
-        self.assertEqual(rdi.program.data_collecting_type.type, DataCollectingType.Type.STANDARD)
-        self.assertEqual(rdi.number_of_individuals, 3)  # 2 Inds and + one external collector
-        self.assertEqual(rdi.number_of_households, 1)  # household_5
-        self.assertEqual(rdi.program_id, self.import_to_program.id)
+        assert rdi.status == RegistrationDataImport.IMPORT_SCHEDULED
+        assert rdi.data_source == RegistrationDataImport.PROGRAM_POPULATION
+        assert rdi.import_from_ids == self.household_5.unicef_id
+        assert rdi.program.data_collecting_type.type == DataCollectingType.Type.STANDARD
+        assert rdi.number_of_individuals == 3  # 2 Inds and + one external collector
+        assert rdi.number_of_households == 1  # household_5
+        assert rdi.program_id == self.import_to_program.id
 
         # update program DCT
         self.import_to_program.data_collecting_type.type = DataCollectingType.Type.SOCIAL
@@ -373,10 +373,10 @@ class TestRegistrationDataProgramPopulationImportMutations(APITestCase):
         )
 
         rdi = RegistrationDataImport.objects.filter(name="New Import of Data Ind ids").first()
-        self.assertEqual(rdi.status, RegistrationDataImport.IMPORT_SCHEDULED)
-        self.assertEqual(rdi.data_source, RegistrationDataImport.PROGRAM_POPULATION)
-        self.assertEqual(rdi.program.data_collecting_type.type, DataCollectingType.Type.SOCIAL)
-        self.assertEqual(rdi.import_from_ids, ind_ids)
-        self.assertEqual(rdi.number_of_individuals, 2)
-        self.assertEqual(rdi.number_of_households, 2)
-        self.assertEqual(rdi.program_id, self.import_to_program.id)
+        assert rdi.status == RegistrationDataImport.IMPORT_SCHEDULED
+        assert rdi.data_source == RegistrationDataImport.PROGRAM_POPULATION
+        assert rdi.program.data_collecting_type.type == DataCollectingType.Type.SOCIAL
+        assert rdi.import_from_ids == ind_ids
+        assert rdi.number_of_individuals == 2
+        assert rdi.number_of_households == 2
+        assert rdi.program_id == self.import_to_program.id

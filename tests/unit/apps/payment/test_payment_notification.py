@@ -172,86 +172,50 @@ class TestPaymentNotification(APITestCase):
             self.user_action_user,
             f"{timezone.now():%-d %B %Y}",
         )
-        self.assertEqual(
-            payment_notification.user_recipients.count(),
-            3,
-        )
+        assert payment_notification.user_recipients.count() == 3
         for recipient in [
             self.user_with_approval_permission_partner_unicef,
             self.user_with_approval_permission_partner_with_program_access,
             self.user_with_partner_action_permissions_and_program_access,
         ]:
-            self.assertIn(
-                recipient,
-                payment_notification.user_recipients.all(),
-            )
-        self.assertNotIn(
-            self.user_action_user,
-            payment_notification.user_recipients.all(),
-        )
+            assert recipient in payment_notification.user_recipients.all()
+        assert self.user_action_user not in payment_notification.user_recipients.all()
 
     def test_prepare_user_recipients_for_approve(self) -> None:
         payment_notification = PaymentNotification(
             self.payment_plan, PaymentPlan.Action.APPROVE.name, self.user_action_user, f"{timezone.now():%-d %B %Y}"
         )
-        self.assertEqual(
-            payment_notification.user_recipients.count(),
-            2,
-        )
+        assert payment_notification.user_recipients.count() == 2
         for recipient in [
             self.user_with_authorize_permission,
             self.user_with_partner_action_permissions_and_program_access,
         ]:
-            self.assertIn(
-                recipient,
-                payment_notification.user_recipients.all(),
-            )
-        self.assertNotIn(
-            self.user_action_user,
-            payment_notification.user_recipients.all(),
-        )
+            assert recipient in payment_notification.user_recipients.all()
+        assert self.user_action_user not in payment_notification.user_recipients.all()
 
     def test_prepare_user_recipients_for_authorize(self) -> None:
         payment_notification = PaymentNotification(
             self.payment_plan, PaymentPlan.Action.AUTHORIZE.name, self.user_action_user, f"{timezone.now():%-d %B %Y}"
         )
-        self.assertEqual(
-            payment_notification.user_recipients.count(),
-            2,
-        )
+        assert payment_notification.user_recipients.count() == 2
         for recipient in [
             self.user_with_review_permission,
             self.user_with_partner_action_permissions_and_program_access,
         ]:
-            self.assertIn(
-                recipient,
-                payment_notification.user_recipients.all(),
-            )
-        self.assertNotIn(
-            self.user_action_user,
-            payment_notification.user_recipients.all(),
-        )
+            assert recipient in payment_notification.user_recipients.all()
+        assert self.user_action_user not in payment_notification.user_recipients.all()
 
     def test_prepare_user_recipients_for_release(self) -> None:
         payment_notification = PaymentNotification(
             self.payment_plan, PaymentPlan.Action.REVIEW.name, self.user_action_user, f"{timezone.now():%-d %B %Y}"
         )
-        self.assertEqual(
-            payment_notification.user_recipients.count(),
-            2,
-        )
+        assert payment_notification.user_recipients.count() == 2
         for recipient in [
             self.user_with_download_xlsx_permission,
             self.user_with_partner_action_permissions_and_program_access,
         ]:
-            self.assertIn(
-                recipient,
-                payment_notification.user_recipients.all(),
-            )
-        self.assertNotIn(
-            self.user_action_user,
-            payment_notification.user_recipients.all(),
-        )
+            assert recipient in payment_notification.user_recipients.all()
+        assert self.user_action_user not in payment_notification.user_recipients.all()
 
     @mock.patch("hct_mis_api.apps.payment.notifications.MailjetClient.send_email")
     @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
@@ -263,10 +227,7 @@ class TestPaymentNotification(APITestCase):
             f"{timezone.now():%-d %B %Y}",
         )
         payment_notification.send_email_notification()
-        self.assertEqual(
-            mock_send.call_count,
-            1,
-        )
+        assert mock_send.call_count == 1
 
     @mock.patch("hct_mis_api.apps.payment.notifications.MailjetClient.send_email")
     @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
@@ -278,7 +239,7 @@ class TestPaymentNotification(APITestCase):
             self.user_action_user,
             f"{timezone.now():%-d %B %Y}",
         )
-        self.assertEqual(payment_notification.email.subject, "[test] Payment pending for Approval")
+        assert payment_notification.email.subject == "[test] Payment pending for Approval"
 
     @mock.patch("hct_mis_api.apps.payment.notifications.MailjetClient.send_email")
     @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
@@ -290,7 +251,7 @@ class TestPaymentNotification(APITestCase):
             self.user_action_user,
             f"{timezone.now():%-d %B %Y}",
         )
-        self.assertEqual(payment_notification.email.subject, "Payment pending for Approval")
+        assert payment_notification.email.subject == "Payment pending for Approval"
 
     @mock.patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
     @override_config(
@@ -305,19 +266,10 @@ class TestPaymentNotification(APITestCase):
             f"{timezone.now():%-d %B %Y}",
         )
         payment_notification.send_email_notification()
-        self.assertEqual(len(payment_notification.email.recipients), 2)
-        self.assertIn(
-            "catchallemail@email.com",
-            payment_notification.email.recipients,
-        )
-        self.assertIn(
-            "catchallemail2@email.com",
-            payment_notification.email.recipients,
-        )
-        self.assertEqual(
-            mock_post.call_count,
-            1,
-        )
+        assert len(payment_notification.email.recipients) == 2
+        assert "catchallemail@email.com" in payment_notification.email.recipients
+        assert "catchallemail2@email.com" in payment_notification.email.recipients
+        assert mock_post.call_count == 1
 
     @mock.patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
     @override_config(
@@ -331,23 +283,16 @@ class TestPaymentNotification(APITestCase):
             f"{timezone.now():%-d %B %Y}",
         )
         payment_notification.send_email_notification()
-        self.assertEqual(len(payment_notification.email.recipients), 3)
-        self.assertIn(
-            self.user_with_approval_permission_partner_unicef.email,
-            payment_notification.email.recipients,
+        assert len(payment_notification.email.recipients) == 3
+        assert self.user_with_approval_permission_partner_unicef.email in payment_notification.email.recipients
+        assert (
+            self.user_with_approval_permission_partner_with_program_access.email
+            in payment_notification.email.recipients
         )
-        self.assertIn(
-            self.user_with_approval_permission_partner_with_program_access.email,
-            payment_notification.email.recipients,
+        assert (
+            self.user_with_partner_action_permissions_and_program_access.email in payment_notification.email.recipients
         )
-        self.assertIn(
-            self.user_with_partner_action_permissions_and_program_access.email,
-            payment_notification.email.recipients,
-        )
-        self.assertEqual(
-            mock_post.call_count,
-            1,
-        )
+        assert mock_post.call_count == 1
 
     @mock.patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
     @override_config(
@@ -364,16 +309,12 @@ class TestPaymentNotification(APITestCase):
             f"{timezone.now():%-d %B %Y}",
         )
         payment_notification.send_email_notification()
-        self.assertEqual(len(payment_notification.email.recipients), 2)
-        self.assertIn(
-            self.user_with_approval_permission_partner_with_program_access.email,
-            payment_notification.email.recipients,
+        assert len(payment_notification.email.recipients) == 2
+        assert (
+            self.user_with_approval_permission_partner_with_program_access.email
+            in payment_notification.email.recipients
         )
-        self.assertIn(
-            self.user_with_partner_action_permissions_and_program_access.email,
-            payment_notification.email.recipients,
+        assert (
+            self.user_with_partner_action_permissions_and_program_access.email in payment_notification.email.recipients
         )
-        self.assertEqual(
-            mock_post.call_count,
-            1,
-        )
+        assert mock_post.call_count == 1

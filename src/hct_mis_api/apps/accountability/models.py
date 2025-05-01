@@ -1,5 +1,4 @@
 from datetime import timedelta
-from typing import Optional
 
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
@@ -277,7 +276,7 @@ class Survey(UnicefIdentifiedModel, AdminUrlMixin, TimeStampedUUIDModel):
     def __str__(self) -> str:
         return self.title
 
-    def sample_file_path(self) -> Optional[str]:
+    def sample_file_path(self) -> str | None:
         if not self.sample_file:
             return None
         if not self.has_valid_sample_file():

@@ -2,10 +2,10 @@
 
 {% block body %}
     <div class="block block_1">
-        <h1 class="title">Dear {{first_name}} {{last_name}},</h1>
+        <h1 class="title">Dear {{ first_name }} {{ last_name }},</h1>
         <p>
             {% block content %}
-            {% endblock %}
+            {% endblock content %}
         </p>
     </div>
-{% endblock %}
+{% endblock body %}

@@ -53,14 +53,9 @@ class TestAddPDUFields(TestCase):
         cls.individual_with_flex_field.save()
 
     def test_add_specific_fields_and_populate_round(self) -> None:
-        self.assertEqual(
-            self.individual_with_flex_field.flex_fields,
-            {
-                "flex_field_1": "value1",
-            },
-        )
-        self.assertEqual(FlexibleAttribute.objects.count(), 1)
-        self.assertEqual(PeriodicFieldData.objects.count(), 0)
+        assert self.individual_with_flex_field.flex_fields == {"flex_field_1": "value1"}
+        assert FlexibleAttribute.objects.count() == 1
+        assert PeriodicFieldData.objects.count() == 0
         individuals_flex_fields_before = {}
         for individual in Individual.objects.filter(program=self.program).exclude(
             id=self.individual_with_flex_field.id
@@ -69,38 +64,35 @@ class TestAddPDUFields(TestCase):
 
         add_specific_fields_and_populate_round()
 
-        self.assertEqual(FlexibleAttribute.objects.count(), 2)
-        self.assertEqual(FlexibleAttribute.objects.filter(program=self.program).count(), 1)
-        self.assertEqual(PeriodicFieldData.objects.count(), 1)
+        assert FlexibleAttribute.objects.count() == 2
+        assert FlexibleAttribute.objects.filter(program=self.program).count() == 1
+        assert PeriodicFieldData.objects.count() == 1
 
         pdu_field = PeriodicFieldData.objects.first()
-        self.assertEqual(pdu_field.subtype, PeriodicFieldData.BOOL)
-        self.assertEqual(pdu_field.number_of_rounds, 12)
-        self.assertEqual(
-            pdu_field.rounds_names,
-            [
-                "July 2024 Payment",
-                "August 2024 Payment",
-                "September 2024 Payment",
-                "October 2024 Payment",
-                "November 2024 Payment",
-                "December 2024 Payment",
-                "January 2025 Payment",
-                "February 2025 Payment",
-                "March 2025 Payment",
-                "April 2025 Payment",
-                "May 2025 Payment",
-                "June 2025 Payment",
-            ],
-        )
+        assert pdu_field.subtype == PeriodicFieldData.BOOL
+        assert pdu_field.number_of_rounds == 12
+        assert pdu_field.rounds_names == [
+            "July 2024 Payment",
+            "August 2024 Payment",
+            "September 2024 Payment",
+            "October 2024 Payment",
+            "November 2024 Payment",
+            "December 2024 Payment",
+            "January 2025 Payment",
+            "February 2025 Payment",
+            "March 2025 Payment",
+            "April 2025 Payment",
+            "May 2025 Payment",
+            "June 2025 Payment",
+        ]
 
         flex_field = pdu_field.flex_field
-        self.assertEqual(flex_field.name, "valid_for_payment")
-        self.assertEqual(flex_field.type, FlexibleAttribute.PDU)
-        self.assertEqual(flex_field.associated_with, FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL)
+        assert flex_field.name == "valid_for_payment"
+        assert flex_field.type == FlexibleAttribute.PDU
+        assert flex_field.associated_with == FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
         self.program.refresh_from_db()
-        self.assertEqual(flex_field.program, self.program)
-        self.assertEqual(flex_field.label, {"English(EN)": "valid for payment"})
+        assert flex_field.program == self.program
+        assert flex_field.label == {"English(EN)": "valid for payment"}
 
         rounds_data = {
             "1": {
@@ -115,17 +107,14 @@ class TestAddPDUFields(TestCase):
             },
         }
         self.individual_with_flex_field.refresh_from_db()
-        self.assertEqual(
-            self.individual_with_flex_field.flex_fields,
-            {
-                "flex_field_1": "value1",
-                "valid_for_payment": rounds_data,
-            },
-        )
+        assert self.individual_with_flex_field.flex_fields == {
+            "flex_field_1": "value1",
+            "valid_for_payment": rounds_data,
+        }
         for individual in Individual.objects.filter(program=self.program).exclude(
             id=self.individual_with_flex_field.id
         ):
-            self.assertEqual(
-                individual.flex_fields,
-                {"valid_for_payment": rounds_data, **individuals_flex_fields_before[individual]},
-            )
+            assert individual.flex_fields == {
+                "valid_for_payment": rounds_data,
+                **individuals_flex_fields_before[individual],
+            }

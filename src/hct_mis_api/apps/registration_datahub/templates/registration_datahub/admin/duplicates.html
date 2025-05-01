@@ -1,4 +1,5 @@
 {% extends "admin_extra_buttons/action_page.html" %}
+
 {% block action-content %}
     <h2>{{ original }}</h2>
 
@@ -35,7 +36,7 @@
             </tr>
         {% endfor %}
 
-{#  GOLDEN RECORD #}
+{# GOLDEN RECORD #}
         <tr><th colspan="6">GOLDEN RECORD DUPLICATES</th></tr>
         {% for k in original.deduplication_golden_record_results.duplicates %}
             <tr>
@@ -59,4 +60,4 @@
             </tr>
         {% endfor %}
   </table>
-{% endblock %}
+{% endblock action-content %}

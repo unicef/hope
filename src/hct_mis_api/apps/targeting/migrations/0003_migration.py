@@ -4,18 +4,17 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('targeting', '0002_migration'),
+        ("targeting", "0002_migration"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='targetpopulation',
-            name='ca_hash_id',
+            model_name="targetpopulation",
+            name="ca_hash_id",
         ),
         migrations.RemoveField(
-            model_name='targetpopulation',
-            name='ca_id',
+            model_name="targetpopulation",
+            name="ca_id",
         ),
     ]

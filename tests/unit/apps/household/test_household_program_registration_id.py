@@ -69,7 +69,7 @@ class TestHouseholdRegistrationId(APITestCase):
         self.household.save(update_fields=["program_registration_id"])
         self.household.refresh_from_db()
         expected_program_registration_id = f"{program_registration_id}#0" if program_registration_id else None
-        self.assertEqual(self.household.program_registration_id, expected_program_registration_id)
+        assert self.household.program_registration_id == expected_program_registration_id
 
         self.snapshot_graphql_request(
             request_string=self.QUERY,
@@ -107,4 +107,4 @@ class TestHouseholdRegistrationId(APITestCase):
             .values_list("program_registration_id", flat=True)
         )
         expected_program_registrations_ids = ["ABCD-111222#0", "ABCD-123123#0", "ABCD-123123#1", "ABCD-123123#2"]
-        self.assertEqual(registrations_ids, expected_program_registrations_ids)
+        assert registrations_ids == expected_program_registrations_ids

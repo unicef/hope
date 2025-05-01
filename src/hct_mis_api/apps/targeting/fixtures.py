@@ -1,6 +1,6 @@
 import random
 import typing
-from typing import Any, List, Optional, Union
+from typing import Any
 
 import factory
 from factory.django import DjangoModelFactory
@@ -15,7 +15,7 @@ from hct_mis_api.apps.targeting.models import (
 )
 
 
-def comparison_method_resolver(obj: Any) -> Optional[Union[List[str], str]]:
+def comparison_method_resolver(obj: Any) -> list[str] | str | None:
     core_fields = FieldFactory.from_scope(Scope.GLOBAL)
     core_field_attrs = [attr for attr in core_fields if attr.get("name") == obj.field_name]
     core_field_attr = core_field_attrs[0]
@@ -30,7 +30,7 @@ def comparison_method_resolver(obj: Any) -> Optional[Union[List[str], str]]:
 
 
 @typing.no_type_check
-def arguments_resolver(obj: Any) -> Union[int, Optional[List[int]]]:
+def arguments_resolver(obj: Any) -> int | list[int] | None:
     min = None
     max = None
     if obj.field_name == "age":
@@ -41,7 +41,7 @@ def arguments_resolver(obj: Any) -> Union[int, Optional[List[int]]]:
         max = random.randint(min, random.randint(min + 1, 10))
     if obj.field_name == "residence_status":
         return [random.choice([x[0] for x in RESIDENCE_STATUS_CHOICE])]
-    if obj.comparison_method == "RANGE" or obj.comparison_method == "NOT_IN_RANGE":
+    if obj.comparison_method in ("RANGE", "NOT_IN_RANGE"):
         return [min, max]
     return [min]
 

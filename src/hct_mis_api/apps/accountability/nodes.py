@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from django.conf import settings
 
@@ -26,8 +26,8 @@ class RapidProFlowNode(graphene.ObjectType):
     id = graphene.String()
     name = graphene.String()
 
-    def resolve_id(parent, info: Any) -> str:
-        return parent["uuid"]  # type: ignore
+    def resolve_id(self, info: Any) -> str:
+        return self["uuid"]  # type: ignore
 
 
 class CommunicationMessageRecipientMapNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -120,7 +120,7 @@ class SurveyNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
         filter_fields = []
 
     @staticmethod
-    def resolve_sample_file_path(survey: Survey, info: Any) -> Optional[str]:
+    def resolve_sample_file_path(survey: Survey, info: Any) -> str | None:
         try:
             return survey.sample_file_path()
         except SampleFileExpiredException:
@@ -131,7 +131,7 @@ class SurveyNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
         return survey.has_valid_sample_file()
 
     @staticmethod
-    def resolve_rapid_pro_url(survey: Survey, info: Any) -> Optional[str]:
+    def resolve_rapid_pro_url(survey: Survey, info: Any) -> str | None:
         if not survey.flow_id:
             return None
         return f"{settings.RAPID_PRO_URL}/flow/results/{survey.flow_id}/"

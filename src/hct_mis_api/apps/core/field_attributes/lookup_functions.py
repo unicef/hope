@@ -1,5 +1,3 @@
-from typing import Optional
-
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_DRIVERS_LICENSE,
@@ -46,31 +44,31 @@ def get_document_no(individual: Individual, document_type: str) -> str:
     return getattr(individual.documents.filter(type__key=document_type.lower()).first(), "document_number", "")
 
 
-def get_birth_certificate_issuer(individual: Individual) -> Optional[str]:
+def get_birth_certificate_issuer(individual: Individual) -> str | None:
     return get_document_issuer(individual, IDENTIFICATION_TYPE_BIRTH_CERTIFICATE)
 
 
-def get_tax_id_issuer(individual: Individual) -> Optional[str]:
+def get_tax_id_issuer(individual: Individual) -> str | None:
     return get_document_issuer(individual, IDENTIFICATION_TYPE_TAX_ID)
 
 
-def get_drivers_license_issuer(individual: Individual) -> Optional[str]:
+def get_drivers_license_issuer(individual: Individual) -> str | None:
     return get_document_issuer(individual, IDENTIFICATION_TYPE_DRIVERS_LICENSE)
 
 
-def get_electoral_card_issuer(individual: Individual) -> Optional[str]:
+def get_electoral_card_issuer(individual: Individual) -> str | None:
     return get_document_issuer(individual, IDENTIFICATION_TYPE_ELECTORAL_CARD)
 
 
-def get_national_passport_issuer(individual: Individual) -> Optional[str]:
+def get_national_passport_issuer(individual: Individual) -> str | None:
     return get_document_issuer(individual, IDENTIFICATION_TYPE_NATIONAL_PASSPORT)
 
 
-def get_national_id_issuer(individual: Individual) -> Optional[str]:
+def get_national_id_issuer(individual: Individual) -> str | None:
     return get_document_issuer(individual, IDENTIFICATION_TYPE_NATIONAL_ID)
 
 
-def get_other_id_issuer(individual: Individual) -> Optional[str]:
+def get_other_id_issuer(individual: Individual) -> str | None:
     return get_document_issuer(individual, IDENTIFICATION_TYPE_OTHER)
 
 
@@ -107,8 +105,7 @@ def get_scope_id_issuer(individual: Individual) -> str:
 def get_debit_card_number(individual: Individual) -> str:
     if bank_account_info := individual.bank_account_info.first():
         return bank_account_info.debit_card_number
-    else:
-        return ""
+    return ""
 
 
 def get_debit_card_issuer(individual: Individual) -> str:

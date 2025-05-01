@@ -56,6 +56,7 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetingCriteriaRuleFactory,
 )
+import pytest
 
 
 class TestPaymentPlanServices(APITestCase):
@@ -91,8 +92,8 @@ class TestPaymentPlanServices(APITestCase):
         )
 
         pp = PaymentPlanService(payment_plan=pp).delete()
-        self.assertEqual(pp.is_removed, True)
-        self.assertEqual(pp.status, PaymentPlan.Status.TP_OPEN)
+        assert pp.is_removed is True
+        assert pp.status == PaymentPlan.Status.TP_OPEN
 
     def test_delete_open(self) -> None:
         program = ProgramFactory(status=Program.ACTIVE)
@@ -101,18 +102,15 @@ class TestPaymentPlanServices(APITestCase):
         )
 
         pp = PaymentPlanService(payment_plan=pp).delete()
-        self.assertEqual(pp.is_removed, False)
-        self.assertEqual(pp.status, PaymentPlan.Status.DRAFT)
+        assert pp.is_removed is False
+        assert pp.status == PaymentPlan.Status.DRAFT
 
     def test_delete_locked(self) -> None:
         pp = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED, created_by=self.user)
 
-        with self.assertRaises(GraphQLError) as e:
+        with pytest.raises(GraphQLError) as e:
             PaymentPlanService(payment_plan=pp).delete()
-        self.assertEqual(
-            e.exception.message,
-            "Deletion is only allowed when the status is 'Open'",
-        )
+        assert e.value.message == "Deletion is only allowed when the status is 'Open'"
 
     def test_delete_when_its_one_pp_in_cycle(self) -> None:
         program = ProgramFactory(status=Program.ACTIVE)
@@ -124,13 +122,13 @@ class TestPaymentPlanServices(APITestCase):
         pp.save()
         pp.refresh_from_db()
 
-        self.assertEqual(pp.program_cycle.status, ProgramCycle.ACTIVE)
+        assert pp.program_cycle.status == ProgramCycle.ACTIVE
 
         pp = PaymentPlanService(payment_plan=pp).delete()
-        self.assertEqual(pp.is_removed, False)
-        self.assertEqual(pp.status, PaymentPlan.Status.DRAFT)
+        assert pp.is_removed is False
+        assert pp.status == PaymentPlan.Status.DRAFT
         program_cycle.refresh_from_db()
-        self.assertEqual(program_cycle.status, ProgramCycle.DRAFT)
+        assert program_cycle.status == ProgramCycle.DRAFT
 
     def test_delete_when_its_two_pp_in_cycle(self) -> None:
         program = ProgramFactory(status=Program.ACTIVE)
@@ -140,13 +138,13 @@ class TestPaymentPlanServices(APITestCase):
         )
         PaymentPlanFactory(status=PaymentPlan.Status.OPEN, program_cycle=program_cycle, created_by=self.user)
 
-        self.assertEqual(pp_1.program_cycle.status, ProgramCycle.ACTIVE)
+        assert pp_1.program_cycle.status == ProgramCycle.ACTIVE
 
         pp_1 = PaymentPlanService(payment_plan=pp_1).delete()
-        self.assertEqual(pp_1.is_removed, False)
-        self.assertEqual(pp_1.status, PaymentPlan.Status.DRAFT)
+        assert pp_1.is_removed is False
+        assert pp_1.status == PaymentPlan.Status.DRAFT
         program_cycle.refresh_from_db()
-        self.assertEqual(program_cycle.status, ProgramCycle.ACTIVE)
+        assert program_cycle.status == ProgramCycle.ACTIVE
 
     @freeze_time("2020-10-10")
     def test_create_validation_errors(self) -> None:
@@ -165,10 +163,10 @@ class TestPaymentPlanServices(APITestCase):
             },
             individuals_data=[{}],
         )
-        create_input_data = dict(
-            program_cycle_id=self.id_to_base64(str(program_cycle.id), "ProgramCycle"),
-            name="TEST_123",
-            targeting_criteria={
+        create_input_data = {
+            "program_cycle_id": self.id_to_base64(str(program_cycle.id), "ProgramCycle"),
+            "name": "TEST_123",
+            "targeting_criteria": {
                 "flag_exclude_if_active_adjudication_ticket": False,
                 "flag_exclude_if_on_sanction_list": False,
                 "rules": [
@@ -181,7 +179,7 @@ class TestPaymentPlanServices(APITestCase):
                     }
                 ],
             },
-        )
+        }
 
         with self.assertRaisesMessage(
             GraphQLError, f"Payment Plan with name: TEST_123 and program: {program.name} already exists."
@@ -220,17 +218,14 @@ class TestPaymentPlanServices(APITestCase):
         pp.save()
 
         # check validation for Open PP
-        open_input_data = dict(
-            dispersion_start_date=parse_date("2020-09-10"),
-            dispersion_end_date=parse_date("2020-09-11"),
-            currency="USD",
-        )
-        with self.assertRaises(TransitionNotAllowed) as e:
+        open_input_data = {
+            "dispersion_start_date": parse_date("2020-09-10"),
+            "dispersion_end_date": parse_date("2020-09-11"),
+            "currency": "USD",
+        }
+        with pytest.raises(TransitionNotAllowed) as e:
             PaymentPlanService(payment_plan=pp).open(input_data=open_input_data)
-        self.assertEqual(
-            str(e.exception),
-            "Can't switch from state 'TP_OPEN' using method 'status_open'",
-        )
+        assert str(e.value) == "Can't switch from state 'TP_OPEN' using method 'status_open'"
 
         pp.status = PaymentPlan.Status.DRAFT
         pp.save()
@@ -240,10 +235,10 @@ class TestPaymentPlanServices(APITestCase):
             PaymentPlanService(payment_plan=pp).open(input_data=open_input_data)
         open_input_data["dispersion_end_date"] = parse_date("2020-11-11")
         pp.refresh_from_db()
-        self.assertEqual(pp.status, PaymentPlan.Status.DRAFT)
+        assert pp.status == PaymentPlan.Status.DRAFT
         pp = PaymentPlanService(payment_plan=pp).open(input_data=open_input_data)
         pp.refresh_from_db()
-        self.assertEqual(pp.status, PaymentPlan.Status.OPEN)
+        assert pp.status == PaymentPlan.Status.OPEN
 
     @freeze_time("2020-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
@@ -275,11 +270,11 @@ class TestPaymentPlanServices(APITestCase):
         IndividualRoleInHouseholdFactory(household=hh2, individual=hoh2, role=ROLE_PRIMARY)
         IndividualFactory.create_batch(4, household=hh1)
 
-        input_data = dict(
-            business_area_slug="afghanistan",
-            name="paymentPlanName",
-            program_cycle_id=self.id_to_base64(program_cycle.id, "ProgramCycleNode"),
-            targeting_criteria={
+        input_data = {
+            "business_area_slug": "afghanistan",
+            "name": "paymentPlanName",
+            "program_cycle_id": self.id_to_base64(program_cycle.id, "ProgramCycleNode"),
+            "targeting_criteria": {
                 "flag_exclude_if_active_adjudication_ticket": False,
                 "flag_exclude_if_on_sanction_list": False,
                 "rules": [
@@ -292,9 +287,9 @@ class TestPaymentPlanServices(APITestCase):
                     }
                 ],
             },
-            fsp_id=encode_id_base64(self.fsp.id, "FinancialServiceProvider"),
-            delivery_mechanism_code=self.dm_transfer_to_account.code,
-        )
+            "fsp_id": encode_id_base64(self.fsp.id, "FinancialServiceProvider"),
+            "delivery_mechanism_code": self.dm_transfer_to_account.code,
+        }
 
         with mock.patch(
             "hct_mis_api.apps.payment.services.payment_plan_services.transaction"
@@ -305,18 +300,18 @@ class TestPaymentPlanServices(APITestCase):
                 )
             assert mock_prepare_payment_plan_task.on_commit.call_count == 1
 
-        self.assertEqual(pp.status, PaymentPlan.Status.TP_OPEN)
-        self.assertEqual(pp.total_households_count, 0)
-        self.assertEqual(pp.total_individuals_count, 0)
-        self.assertEqual(pp.payment_items.count(), 0)
+        assert pp.status == PaymentPlan.Status.TP_OPEN
+        assert pp.total_households_count == 0
+        assert pp.total_individuals_count == 0
+        assert pp.payment_items.count() == 0
         with self.assertNumQueries(112):
             prepare_payment_plan_task.delay(str(pp.id))
         pp.refresh_from_db()
-        self.assertEqual(pp.status, PaymentPlan.Status.TP_OPEN)
-        self.assertEqual(pp.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_OK)
-        self.assertEqual(pp.total_households_count, 2)
-        self.assertEqual(pp.total_individuals_count, 6)
-        self.assertEqual(pp.payment_items.count(), 2)
+        assert pp.status == PaymentPlan.Status.TP_OPEN
+        assert pp.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
+        assert pp.total_households_count == 2
+        assert pp.total_individuals_count == 6
+        assert pp.payment_items.count() == 2
 
     @freeze_time("2020-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
@@ -331,11 +326,11 @@ class TestPaymentPlanServices(APITestCase):
         IndividualRoleInHouseholdFactory(household=hh2, individual=hoh2, role=ROLE_PRIMARY)
         IndividualFactory.create_batch(4, household=hh1)
 
-        input_data = dict(
-            dispersion_start_date=parse_date("2020-09-10"),
-            dispersion_end_date=parse_date("2020-09-11"),
-            currency="USD",
-        )
+        input_data = {
+            "dispersion_start_date": parse_date("2020-09-10"),
+            "dispersion_end_date": parse_date("2020-09-11"),
+            "currency": "USD",
+        }
 
         with self.assertRaisesMessage(GraphQLError, "Not Allow edit Payment Plan within status LOCKED"):
             pp = PaymentPlanService(payment_plan=pp).update(input_data=input_data)
@@ -377,7 +372,7 @@ class TestPaymentPlanServices(APITestCase):
             PaymentPlanService(pp).create_follow_up(self.user, dispersion_start_date, dispersion_end_date)
 
         # create follow-up payments for STATUS_ERROR, STATUS_NOT_DISTRIBUTED, STATUS_FORCE_FAILED, STATUS_MANUALLY_CANCELLED
-        for payment, status in zip(payments[:4], Payment.FAILED_STATUSES):
+        for payment, status in zip(payments[:4], Payment.FAILED_STATUSES, strict=False):
             payment.status = status
             payment.save()
 
@@ -396,45 +391,44 @@ class TestPaymentPlanServices(APITestCase):
             )
 
         follow_up_pp.refresh_from_db()
-        self.assertEqual(follow_up_pp.status, PaymentPlan.Status.OPEN)
+        assert follow_up_pp.status == PaymentPlan.Status.OPEN
         # self.assertEqual(follow_up_pp.target_population, pp.target_population)
-        self.assertEqual(follow_up_pp.program, pp.program)
-        self.assertEqual(follow_up_pp.program_cycle, pp.program_cycle)
-        self.assertEqual(follow_up_pp.business_area, pp.business_area)
-        self.assertEqual(follow_up_pp.created_by, self.user)
-        self.assertEqual(follow_up_pp.currency, pp.currency)
-        self.assertEqual(follow_up_pp.dispersion_start_date, dispersion_start_date)
-        self.assertEqual(follow_up_pp.dispersion_end_date, dispersion_end_date)
-        self.assertEqual(follow_up_pp.program_cycle.start_date, pp.program_cycle.start_date)
-        self.assertEqual(follow_up_pp.program_cycle.end_date, pp.program_cycle.end_date)
-        self.assertEqual(follow_up_pp.total_households_count, 0)
-        self.assertEqual(follow_up_pp.total_individuals_count, 0)
-        self.assertEqual(follow_up_pp.payment_items.count(), 0)
+        assert follow_up_pp.program == pp.program
+        assert follow_up_pp.program_cycle == pp.program_cycle
+        assert follow_up_pp.business_area == pp.business_area
+        assert follow_up_pp.created_by == self.user
+        assert follow_up_pp.currency == pp.currency
+        assert follow_up_pp.dispersion_start_date == dispersion_start_date
+        assert follow_up_pp.dispersion_end_date == dispersion_end_date
+        assert follow_up_pp.program_cycle.start_date == pp.program_cycle.start_date
+        assert follow_up_pp.program_cycle.end_date == pp.program_cycle.end_date
+        assert follow_up_pp.total_households_count == 0
+        assert follow_up_pp.total_individuals_count == 0
+        assert follow_up_pp.payment_items.count() == 0
 
-        self.assertEqual(pp.follow_ups.count(), 1)
+        assert pp.follow_ups.count() == 1
 
         prepare_follow_up_payment_plan_task(follow_up_pp.id)
         follow_up_pp.refresh_from_db()
 
-        self.assertEqual(follow_up_pp.status, PaymentPlan.Status.OPEN)
-        self.assertEqual(follow_up_pp.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_OK)
+        assert follow_up_pp.status == PaymentPlan.Status.OPEN
+        assert follow_up_pp.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
 
-        self.assertEqual(follow_up_pp.payment_items.count(), 4)
-        self.assertEqual(
-            {p_error.id, p_not_distributed.id, p_force_failed.id, p_manually_cancelled.id},
-            set(follow_up_pp.payment_items.values_list("source_payment_id", flat=True)),
+        assert follow_up_pp.payment_items.count() == 4
+        assert {p_error.id, p_not_distributed.id, p_force_failed.id, p_manually_cancelled.id} == set(
+            follow_up_pp.payment_items.values_list("source_payment_id", flat=True)
         )
 
         follow_up_payment = follow_up_pp.payment_items.first()
-        self.assertEqual(follow_up_payment.status, Payment.STATUS_PENDING)
-        self.assertEqual(follow_up_payment.parent, follow_up_pp)
-        self.assertIsNotNone(follow_up_payment.source_payment)
-        self.assertEqual(follow_up_payment.is_follow_up, True)
-        self.assertEqual(follow_up_payment.business_area, follow_up_payment.source_payment.business_area)
-        self.assertEqual(follow_up_payment.household, follow_up_payment.source_payment.household)
-        self.assertEqual(follow_up_payment.head_of_household, follow_up_payment.source_payment.head_of_household)
-        self.assertEqual(follow_up_payment.collector, follow_up_payment.source_payment.collector)
-        self.assertEqual(follow_up_payment.currency, follow_up_payment.source_payment.currency)
+        assert follow_up_payment.status == Payment.STATUS_PENDING
+        assert follow_up_payment.parent == follow_up_pp
+        assert follow_up_payment.source_payment is not None
+        assert follow_up_payment.is_follow_up is True
+        assert follow_up_payment.business_area == follow_up_payment.source_payment.business_area
+        assert follow_up_payment.household == follow_up_payment.source_payment.household
+        assert follow_up_payment.head_of_household == follow_up_payment.source_payment.head_of_household
+        assert follow_up_payment.collector == follow_up_payment.source_payment.collector
+        assert follow_up_payment.currency == follow_up_payment.source_payment.currency
 
         # exclude one payment from follow up pp, create new follow up pp which covers this payment
         follow_up_payment.excluded = True
@@ -445,15 +439,14 @@ class TestPaymentPlanServices(APITestCase):
                 self.user, dispersion_start_date, dispersion_end_date
             )
 
-        self.assertEqual(pp.follow_ups.count(), 2)
+        assert pp.follow_ups.count() == 2
 
         with self.assertNumQueries(47):
             prepare_follow_up_payment_plan_task(follow_up_pp_2.id)
 
-        self.assertEqual(follow_up_pp_2.payment_items.count(), 1)
-        self.assertEqual(
-            {follow_up_payment.source_payment.id},
-            set(follow_up_pp_2.payment_items.values_list("source_payment_id", flat=True)),
+        assert follow_up_pp_2.payment_items.count() == 1
+        assert {follow_up_payment.source_payment.id} == set(
+            follow_up_pp_2.payment_items.values_list("source_payment_id", flat=True)
         )
 
     def test_create_follow_up_pp_from_follow_up_validation(self) -> None:
@@ -465,12 +458,9 @@ class TestPaymentPlanServices(APITestCase):
         )
         dispersion_start_date = (payment_plan.dispersion_start_date + timedelta(days=1)).date()
         dispersion_end_date = (payment_plan.dispersion_end_date + timedelta(days=1)).date()
-        with self.assertRaises(GraphQLError) as e:
+        with pytest.raises(GraphQLError) as e:
             PaymentPlanService(payment_plan).create_follow_up(self.user, dispersion_start_date, dispersion_end_date)
-        self.assertEqual(
-            e.exception.message,
-            "Cannot create a follow-up of a follow-up Payment Plan",
-        )
+        assert e.value.message == "Cannot create a follow-up of a follow-up Payment Plan"
 
     def test_update_follow_up_dates_and_not_currency(self) -> None:
         payment_plan = PaymentPlanFactory(
@@ -489,9 +479,9 @@ class TestPaymentPlanServices(APITestCase):
                 "currency": "UAH",
             }
         )
-        self.assertEqual(payment_plan.currency, "PLN")
-        self.assertEqual(payment_plan.dispersion_start_date, dispersion_start_date)
-        self.assertEqual(payment_plan.dispersion_end_date, dispersion_end_date)
+        assert payment_plan.currency == "PLN"
+        assert payment_plan.dispersion_start_date == dispersion_start_date
+        assert payment_plan.dispersion_end_date == dispersion_end_date
 
     @flaky(max_runs=5, min_passes=1)
     @freeze_time("2023-10-10")
@@ -565,42 +555,42 @@ class TestPaymentPlanServices(APITestCase):
         with self.assertNumQueries(26):
             PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_COLLECTOR)
         unique_collectors_count = pp.eligible_payments.values_list("collector", flat=True).distinct().count()
-        self.assertEqual(unique_collectors_count, 10)
+        assert unique_collectors_count == 10
         pp_splits = pp.splits.all().order_by("order")
 
-        self.assertEqual(pp_splits.count(), unique_collectors_count)
-        self.assertEqual(pp_splits[0].split_type, PaymentPlanSplit.SplitType.BY_COLLECTOR)
-        self.assertEqual(pp_splits[0].split_payment_items.count(), 3)
-        self.assertEqual(pp_splits[1].split_payment_items.count(), 1)
-        self.assertEqual(pp_splits[2].split_payment_items.count(), 1)
-        self.assertEqual(pp_splits[3].split_payment_items.count(), 1)
-        self.assertEqual(pp_splits[4].split_payment_items.count(), 1)
-        self.assertEqual(pp_splits[5].split_payment_items.count(), 1)
-        self.assertEqual(pp_splits[6].split_payment_items.count(), 1)
-        self.assertEqual(pp_splits[7].split_payment_items.count(), 1)
-        self.assertEqual(pp_splits[8].split_payment_items.count(), 1)
-        self.assertEqual(pp_splits[9].split_payment_items.count(), 1)
+        assert pp_splits.count() == unique_collectors_count
+        assert pp_splits[0].split_type == PaymentPlanSplit.SplitType.BY_COLLECTOR
+        assert pp_splits[0].split_payment_items.count() == 3
+        assert pp_splits[1].split_payment_items.count() == 1
+        assert pp_splits[2].split_payment_items.count() == 1
+        assert pp_splits[3].split_payment_items.count() == 1
+        assert pp_splits[4].split_payment_items.count() == 1
+        assert pp_splits[5].split_payment_items.count() == 1
+        assert pp_splits[6].split_payment_items.count() == 1
+        assert pp_splits[7].split_payment_items.count() == 1
+        assert pp_splits[8].split_payment_items.count() == 1
+        assert pp_splits[9].split_payment_items.count() == 1
 
         # split by records
         with self.assertNumQueries(17):
             PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_RECORDS, chunks_no=5)
         pp_splits = pp.splits.all().order_by("order")
-        self.assertEqual(pp_splits.count(), 3)
-        self.assertEqual(pp_splits[0].split_type, PaymentPlanSplit.SplitType.BY_RECORDS)
-        self.assertEqual(pp_splits[0].split_payment_items.count(), 5)
-        self.assertEqual(pp_splits[1].split_payment_items.count(), 5)
-        self.assertEqual(pp_splits[2].split_payment_items.count(), 2)
+        assert pp_splits.count() == 3
+        assert pp_splits[0].split_type == PaymentPlanSplit.SplitType.BY_RECORDS
+        assert pp_splits[0].split_payment_items.count() == 5
+        assert pp_splits[1].split_payment_items.count() == 5
+        assert pp_splits[2].split_payment_items.count() == 2
 
         # split by admin2
         with self.assertNumQueries(15):
             PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_ADMIN_AREA2)
         unique_admin2_count = pp.eligible_payments.values_list("household__admin2", flat=True).distinct().count()
-        self.assertEqual(unique_admin2_count, 2)
+        assert unique_admin2_count == 2
         pp_splits = pp.splits.all().order_by("order")
-        self.assertEqual(pp.splits.count(), unique_admin2_count)
-        self.assertEqual(pp_splits[0].split_type, PaymentPlanSplit.SplitType.BY_ADMIN_AREA2)
-        self.assertEqual(pp_splits[0].split_payment_items.count(), 4)
-        self.assertEqual(pp_splits[1].split_payment_items.count(), 8)
+        assert pp.splits.count() == unique_admin2_count
+        assert pp_splits[0].split_type == PaymentPlanSplit.SplitType.BY_ADMIN_AREA2
+        assert pp_splits[0].split_payment_items.count() == 4
+        assert pp_splits[1].split_payment_items.count() == 8
 
     @freeze_time("2023-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
@@ -650,14 +640,14 @@ class TestPaymentPlanServices(APITestCase):
             cycle__end_date=timezone.datetime(2021, 12, 10, tzinfo=utc).date(),
         )
         cycle = program.cycles.first()
-        input_data = dict(
-            business_area_slug="afghanistan",
-            dispersion_start_date=parse_date("2020-11-11"),
-            dispersion_end_date=parse_date("2020-11-20"),
-            currency="USD",
-            name="TestName123",
-            program_cycle_id=self.id_to_base64(cycle.id, "ProgramCycleNode"),
-            targeting_criteria={
+        input_data = {
+            "business_area_slug": "afghanistan",
+            "dispersion_start_date": parse_date("2020-11-11"),
+            "dispersion_end_date": parse_date("2020-11-20"),
+            "currency": "USD",
+            "name": "TestName123",
+            "program_cycle_id": self.id_to_base64(cycle.id, "ProgramCycleNode"),
+            "targeting_criteria": {
                 "flag_exclude_if_active_adjudication_ticket": False,
                 "flag_exclude_if_on_sanction_list": False,
                 "rules": [
@@ -677,7 +667,7 @@ class TestPaymentPlanServices(APITestCase):
                     }
                 ],
             },
-        )
+        }
 
         with self.assertRaisesMessage(
             GraphQLError,
@@ -713,11 +703,11 @@ class TestPaymentPlanServices(APITestCase):
         IndividualRoleInHouseholdFactory(household=hh2, individual=hoh2, role=ROLE_PRIMARY)
         IndividualFactory.create_batch(4, household=hh1)
 
-        input_data = dict(
-            business_area_slug="afghanistan",
-            name="paymentPlanName",
-            program_cycle_id=self.id_to_base64(program_cycle.id, "ProgramCycleNode"),
-            targeting_criteria={
+        input_data = {
+            "business_area_slug": "afghanistan",
+            "name": "paymentPlanName",
+            "program_cycle_id": self.id_to_base64(program_cycle.id, "ProgramCycleNode"),
+            "targeting_criteria": {
                 "flag_exclude_if_active_adjudication_ticket": False,
                 "flag_exclude_if_on_sanction_list": False,
                 "rules": [
@@ -730,7 +720,7 @@ class TestPaymentPlanServices(APITestCase):
                     }
                 ],
             },
-        )
+        }
         with mock.patch(
             "hct_mis_api.apps.payment.services.payment_plan_services.transaction"
         ) as mock_prepare_payment_plan_task:
@@ -740,16 +730,16 @@ class TestPaymentPlanServices(APITestCase):
                 )
             assert mock_prepare_payment_plan_task.on_commit.call_count == 1
 
-        self.assertEqual(pp.status, PaymentPlan.Status.TP_OPEN)
-        self.assertEqual(pp.total_households_count, 0)
-        self.assertEqual(pp.total_individuals_count, 0)
-        self.assertEqual(pp.payment_items.count(), 0)
+        assert pp.status == PaymentPlan.Status.TP_OPEN
+        assert pp.total_households_count == 0
+        assert pp.total_individuals_count == 0
+        assert pp.payment_items.count() == 0
         with self.assertNumQueries(78):
             prepare_payment_plan_task.delay(str(pp.id))
         pp.refresh_from_db()
-        self.assertEqual(pp.status, PaymentPlan.Status.TP_OPEN)
-        self.assertEqual(pp.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_OK)
-        self.assertEqual(pp.payment_items.count(), 2)
+        assert pp.status == PaymentPlan.Status.TP_OPEN
+        assert pp.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
+        assert pp.payment_items.count() == 2
 
         old_payment_ids = list(pp.payment_items.values_list("id", flat=True))
         old_payment_unicef_ids = list(pp.payment_items.values_list("unicef_id", flat=True))
@@ -760,24 +750,24 @@ class TestPaymentPlanServices(APITestCase):
 
         pp.refresh_from_db()
         # all Payments (removed and new)
-        self.assertEqual(Payment.all_objects.filter(parent=pp).count(), 2)
+        assert Payment.all_objects.filter(parent=pp).count() == 2
 
         new_payment_ids = list(pp.payment_items.values_list("id", flat=True))
         new_payment_unicef_ids = list(pp.payment_items.values_list("unicef_id", flat=True))
 
         for p_id in new_payment_ids:
-            self.assertNotIn(p_id, old_payment_ids)
+            assert p_id not in old_payment_ids
 
         for p_unicef_id in new_payment_unicef_ids:
-            self.assertNotIn(p_unicef_id, old_payment_unicef_ids)
+            assert p_unicef_id not in old_payment_unicef_ids
 
     def test_get_approval_type_by_action_value_error(self) -> None:
-        with self.assertRaises(ValueError) as error:
+        with pytest.raises(ValueError) as error:
             PaymentPlanService(payment_plan=self.payment_plan).get_approval_type_by_action()
-        self.assertEqual(str(error.exception), "Action cannot be None")
+        assert str(error.value) == "Action cannot be None"
 
     def test_validate_action_not_implemented(self) -> None:
-        with self.assertRaises(GraphQLError) as e:
+        with pytest.raises(GraphQLError) as e:
             PaymentPlanService(self.payment_plan).execute_update_status_action(
                 input_data={"action": "INVALID_ACTION"}, user=self.user
             )
@@ -798,39 +788,30 @@ class TestPaymentPlanServices(APITestCase):
             "SEND_TO_PAYMENT_GATEWAY",
             "SEND_XLSX_PASSWORD",
         ]
-        self.assertEqual(
-            e.exception.message,
-            f"Not Implemented Action: INVALID_ACTION. List of possible actions: {actions}",
-        )
+        assert e.value.message == f"Not Implemented Action: INVALID_ACTION. List of possible actions: {actions}"
 
     def test_tp_lock_invalid_pp_status(self) -> None:
         payment_plan = PaymentPlanFactory(
             program_cycle=self.cycle, created_by=self.user, status=PaymentPlan.Status.DRAFT
         )
-        with self.assertRaises(TransitionNotAllowed) as e:
+        with pytest.raises(TransitionNotAllowed) as e:
             PaymentPlanService(payment_plan).tp_lock()
-        self.assertEqual(
-            str(e.exception),
-            "Can't switch from state 'DRAFT' using method 'status_tp_lock'",
-        )
+        assert str(e.value) == "Can't switch from state 'DRAFT' using method 'status_tp_lock'"
 
     def test_tp_unlock(self) -> None:
         payment_plan = PaymentPlanFactory(
             program_cycle=self.cycle, created_by=self.user, status=PaymentPlan.Status.DRAFT
         )
-        with self.assertRaises(TransitionNotAllowed) as e:
+        with pytest.raises(TransitionNotAllowed) as e:
             PaymentPlanService(payment_plan).tp_unlock()
-        self.assertEqual(
-            str(e.exception),
-            "Can't switch from state 'DRAFT' using method 'status_tp_open'",
-        )
+        assert str(e.value) == "Can't switch from state 'DRAFT' using method 'status_tp_open'"
         payment_plan.status = PaymentPlan.Status.TP_LOCKED
         payment_plan.save()
         PaymentPlanService(payment_plan).tp_unlock()
 
         payment_plan.refresh_from_db()
-        self.assertEqual(payment_plan.status, PaymentPlan.Status.TP_OPEN)
-        self.assertEqual(payment_plan.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_PENDING)
+        assert payment_plan.status == PaymentPlan.Status.TP_OPEN
+        assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_PENDING
 
     def test_tp_rebuild(self) -> None:
         payment_plan = PaymentPlanFactory(
@@ -839,19 +820,16 @@ class TestPaymentPlanServices(APITestCase):
             status=PaymentPlan.Status.DRAFT,
             build_status=PaymentPlan.BuildStatus.BUILD_STATUS_FAILED,
         )
-        with self.assertRaises(GraphQLError) as e:
+        with pytest.raises(GraphQLError) as e:
             PaymentPlanService(payment_plan).tp_rebuild()
-        self.assertEqual(
-            e.exception.message,
-            "Can only Rebuild Population for Locked or Open Population status",
-        )
+        assert e.value.message == "Can only Rebuild Population for Locked or Open Population status"
         payment_plan.status = PaymentPlan.Status.TP_LOCKED
         payment_plan.save()
         PaymentPlanService(payment_plan).tp_rebuild()
 
         payment_plan.refresh_from_db()
-        self.assertEqual(payment_plan.status, PaymentPlan.Status.TP_LOCKED)
-        self.assertEqual(payment_plan.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_PENDING)
+        assert payment_plan.status == PaymentPlan.Status.TP_LOCKED
+        assert payment_plan.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_PENDING
 
     def test_draft_with_invalid_pp_status(self) -> None:
         payment_plan = PaymentPlanFactory(
@@ -859,12 +837,9 @@ class TestPaymentPlanServices(APITestCase):
             created_by=self.user,
             status=PaymentPlan.Status.DRAFT,
         )
-        with self.assertRaises(TransitionNotAllowed) as e:
+        with pytest.raises(TransitionNotAllowed) as e:
             PaymentPlanService(payment_plan).draft()
-        self.assertEqual(
-            str(e.exception),
-            "Can't switch from state 'DRAFT' using method 'status_draft'",
-        )
+        assert str(e.value) == "Can't switch from state 'DRAFT' using method 'status_draft'"
 
     def test_lock_if_no_valid_payments(self) -> None:
         payment_plan = PaymentPlanFactory(
@@ -872,12 +847,9 @@ class TestPaymentPlanServices(APITestCase):
             created_by=self.user,
             status=PaymentPlan.Status.OPEN,
         )
-        with self.assertRaises(GraphQLError) as e:
+        with pytest.raises(GraphQLError) as e:
             PaymentPlanService(payment_plan).lock()
-        self.assertEqual(
-            e.exception.message,
-            "At least one valid Payment should exist in order to Lock the Payment Plan",
-        )
+        assert e.value.message == "At least one valid Payment should exist in order to Lock the Payment Plan"
 
     def test_update_pp_validation_errors(self) -> None:
         payment_plan = PaymentPlanFactory(
@@ -885,33 +857,24 @@ class TestPaymentPlanServices(APITestCase):
             created_by=self.user,
             status=PaymentPlan.Status.LOCKED,
         )
-        with self.assertRaises(GraphQLError) as e:
+        with pytest.raises(GraphQLError) as e:
             PaymentPlanService(payment_plan).update({"exclusion_reason": "ABC"})
-        self.assertEqual(
-            e.exception.message,
-            f"Not Allow edit targeting criteria within status {payment_plan.status}",
-        )
+        assert e.value.message == f"Not Allow edit targeting criteria within status {payment_plan.status}"
 
-        with self.assertRaises(GraphQLError) as e:
+        with pytest.raises(GraphQLError) as e:
             PaymentPlanService(payment_plan).update({"vulnerability_score_min": "test_data"})
-        self.assertEqual(
-            e.exception.message,
-            "You can only set vulnerability_score_min and vulnerability_score_max on Locked Population status",
+        assert (
+            e.value.message
+            == "You can only set vulnerability_score_min and vulnerability_score_max on Locked Population status"
         )
 
-        with self.assertRaises(GraphQLError) as e:
+        with pytest.raises(GraphQLError) as e:
             PaymentPlanService(payment_plan).update({"currency": "test_data"})
-        self.assertEqual(
-            e.exception.message,
-            f"Not Allow edit Payment Plan within status {payment_plan.status}",
-        )
+        assert e.value.message == f"Not Allow edit Payment Plan within status {payment_plan.status}"
 
-        with self.assertRaises(GraphQLError) as e:
+        with pytest.raises(GraphQLError) as e:
             PaymentPlanService(payment_plan).update({"name": "test_data"})
-        self.assertEqual(
-            e.exception.message,
-            "Name can be changed only within Open status",
-        )
+        assert e.value.message == "Name can be changed only within Open status"
 
         payment_plan.status = PaymentPlan.Status.TP_OPEN
         payment_plan.save()
@@ -921,22 +884,16 @@ class TestPaymentPlanServices(APITestCase):
             created_by=self.user,
             status=PaymentPlan.Status.DRAFT,
         )
-        with self.assertRaises(GraphQLError) as e:
+        with pytest.raises(GraphQLError) as e:
             PaymentPlanService(payment_plan).update({"name": "test_data"})
-        self.assertEqual(
-            e.exception.message,
-            f"Name 'test_data' and program '{self.cycle.program.name}' already exists.",
-        )
+        assert e.value.message == f"Name 'test_data' and program '{self.cycle.program.name}' already exists."
 
         self.cycle.status = ProgramCycle.FINISHED
         self.cycle.save()
         program_cycle_id = self.id_to_base64(self.cycle.id, "ProgramCycleNode")
-        with self.assertRaises(GraphQLError) as e:
+        with pytest.raises(GraphQLError) as e:
             PaymentPlanService(payment_plan).update({"program_cycle_id": program_cycle_id})
-        self.assertEqual(
-            e.exception.message,
-            "Not possible to assign Finished Program Cycle",
-        )
+        assert e.value.message == "Not possible to assign Finished Program Cycle"
 
     def test_rebuild_payment_plan_population(self) -> None:
         pp = PaymentPlanFactory(
@@ -957,7 +914,7 @@ class TestPaymentPlanServices(APITestCase):
         )
 
         self.payment_plan.refresh_from_db(fields=("build_status",))
-        self.assertEqual(pp.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_PENDING)
+        assert pp.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_PENDING
 
     def test_lock_fsp_validation(self) -> None:
         payment_plan = PaymentPlanFactory(
@@ -977,28 +934,22 @@ class TestPaymentPlanServices(APITestCase):
             delivered_quantity_usd=None,
         )
 
-        with self.assertRaises(GraphQLError) as e:
+        with pytest.raises(GraphQLError) as e:
             PaymentPlanService(payment_plan).lock_fsp()
-        self.assertEqual(
-            e.exception.message,
-            "Payment Plan doesn't have FSP / DeliveryMechanism assigned.",
-        )
+        assert e.value.message == "Payment Plan doesn't have FSP / DeliveryMechanism assigned."
         payment_plan.financial_service_provider = self.fsp
         payment_plan.delivery_mechanism = self.dm_transfer_to_account
         payment.save()
 
-        with self.assertRaises(GraphQLError) as e:
+        with pytest.raises(GraphQLError) as e:
             PaymentPlanService(payment_plan).lock_fsp()
-        self.assertEqual(
-            e.exception.message,
-            "All Payments must have entitlement quantity set.",
-        )
+        assert e.value.message == "All Payments must have entitlement quantity set."
         payment.entitlement_quantity = 100
         payment.save()
 
         PaymentPlanService(payment_plan).lock_fsp()
         payment.refresh_from_db()
-        self.assertEqual(payment.financial_service_provider, self.fsp)
+        assert payment.financial_service_provider == self.fsp
 
     def test_unlock_fsp(self) -> None:
         payment_plan = PaymentPlanFactory(
@@ -1010,7 +961,7 @@ class TestPaymentPlanServices(APITestCase):
         PaymentPlanService(payment_plan).unlock_fsp()
 
         payment_plan.refresh_from_db(fields=("status",))
-        self.assertEqual(payment_plan.status, PaymentPlan.Status.LOCKED)
+        assert payment_plan.status == PaymentPlan.Status.LOCKED
 
     def test_update_pp_program_cycle(self) -> None:
         new_cycle = ProgramCycleFactory(program=self.program, title="New Cycle ABC")
@@ -1019,15 +970,15 @@ class TestPaymentPlanServices(APITestCase):
         PaymentPlanService(self.payment_plan).update({"program_cycle_id": program_cycle_id})
 
         self.payment_plan.refresh_from_db()
-        self.assertEqual(self.payment_plan.program_cycle.title, "New Cycle ABC")
+        assert self.payment_plan.program_cycle.title == "New Cycle ABC"
 
     def test_update_pp_vulnerability_score(self) -> None:
         PaymentPlanService(self.payment_plan).update(
             {"vulnerability_score_min": "11.229222", "vulnerability_score_max": "77.889777"}
         )
         self.payment_plan.refresh_from_db(fields=("vulnerability_score_min", "vulnerability_score_max"))
-        self.assertEqual(self.payment_plan.vulnerability_score_min, Decimal("11.229"))
-        self.assertEqual(self.payment_plan.vulnerability_score_max, Decimal("77.890"))
+        assert self.payment_plan.vulnerability_score_min == Decimal("11.229")
+        assert self.payment_plan.vulnerability_score_max == Decimal("77.890")
 
     def test_update_pp_exclude_ids(self) -> None:
         payment_plan = PaymentPlanFactory(
@@ -1037,8 +988,8 @@ class TestPaymentPlanServices(APITestCase):
         )
         PaymentPlanService(payment_plan).update({"excluded_ids": "IND-123", "exclusion_reason": "Test text"})
         payment_plan.refresh_from_db(fields=("excluded_ids", "exclusion_reason"))
-        self.assertEqual(payment_plan.excluded_ids, "IND-123")
-        self.assertEqual(payment_plan.exclusion_reason, "Test text")
+        assert payment_plan.excluded_ids == "IND-123"
+        assert payment_plan.exclusion_reason == "Test text"
 
     def test_update_pp_currency(self) -> None:
         payment_plan = PaymentPlanFactory(
@@ -1051,7 +1002,7 @@ class TestPaymentPlanServices(APITestCase):
         )
         PaymentPlanService(payment_plan).update({"currency": "PLN"})
         payment_plan.refresh_from_db()
-        self.assertEqual(payment_plan.currency, "PLN")
+        assert payment_plan.currency == "PLN"
 
     def test_update_pp_currency_validation(self) -> None:
         payment_plan = PaymentPlanFactory(
@@ -1076,7 +1027,7 @@ class TestPaymentPlanServices(APITestCase):
         )
         PaymentPlanService(payment_plan).update({"dispersion_end_date": timezone.now().date() + timedelta(days=3)})
         payment_plan.refresh_from_db()
-        self.assertEqual(payment_plan.dispersion_end_date, timezone.now().date() + timedelta(days=3))
+        assert payment_plan.dispersion_end_date == timezone.now().date() + timedelta(days=3)
 
     def test_update_pp_dm_fsp(self) -> None:
         payment_plan = PaymentPlanFactory(
@@ -1094,19 +1045,19 @@ class TestPaymentPlanServices(APITestCase):
             }
         )
         payment_plan.refresh_from_db()
-        self.assertEqual(payment_plan.delivery_mechanism, self.dm_transfer_to_account)
-        self.assertEqual(payment_plan.financial_service_provider, self.fsp)
+        assert payment_plan.delivery_mechanism == self.dm_transfer_to_account
+        assert payment_plan.financial_service_provider == self.fsp
 
     def test_export_xlsx(self) -> None:
         payment_plan = PaymentPlanFactory(
             program_cycle=self.cycle, created_by=self.user, status=PaymentPlan.Status.LOCKED
         )
-        self.assertEqual(FileTemp.objects.all().count(), 0)
+        assert FileTemp.objects.all().count() == 0
 
         PaymentPlanService(payment_plan).export_xlsx(self.user.pk)
 
-        self.assertEqual(FileTemp.objects.all().count(), 1)
-        self.assertEqual(FileTemp.objects.first().object_id, str(payment_plan.pk))
+        assert FileTemp.objects.all().count() == 1
+        assert FileTemp.objects.first().object_id == str(payment_plan.pk)
 
     def test_create_payments_integrity_error_handling(self) -> None:
         household, individuals = create_household_with_individual_with_collectors(
@@ -1137,21 +1088,19 @@ class TestPaymentPlanServices(APITestCase):
 
         # check households with payments in program
         hh_qs = self.program.households_with_payments_in_program
-        self.assertEqual(hh_qs.count(), 1)
-        self.assertEqual(hh_qs.first().unicef_id, household.unicef_id)
+        assert hh_qs.count() == 1
+        assert hh_qs.first().unicef_id == household.unicef_id
 
         with transaction.atomic():
-            with self.assertRaises(IntegrityError) as error:
+            with pytest.raises(IntegrityError) as error:
                 PaymentPlanService.create_payments(payment_plan)
 
-            self.assertIn(
-                'duplicate key value violates unique constraint "payment_plan_and_household"', str(error.exception)
-            )
+            assert 'duplicate key value violates unique constraint "payment_plan_and_household"' in str(error.value)
 
         with transaction.atomic():
             IndividualRoleInHousehold.objects.filter(household=household, role=ROLE_PRIMARY).delete()
 
-            with self.assertRaises(GraphQLError) as error:
+            with pytest.raises(GraphQLError) as error:
                 PaymentPlanService.create_payments(payment_plan)
 
-            self.assertIn(f"Couldn't find a primary collector in {household.unicef_id}", str(error.exception))
+            assert f"Couldn't find a primary collector in {household.unicef_id}" in str(error.value)

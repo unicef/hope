@@ -46,9 +46,9 @@ class TestCalculatingAgeAtRegistrationMigration(TestCase):
         self.individual_5.refresh_from_db()
         self.individual_6.refresh_from_db()
 
-        self.assertEqual(self.individual_1.age_at_registration, 11)
-        self.assertEqual(self.individual_2.age_at_registration, 19)
-        self.assertEqual(self.individual_3.age_at_registration, 8)
-        self.assertEqual(self.individual_4.age_at_registration, 29)
-        self.assertEqual(self.individual_5.age_at_registration, 8)
-        self.assertEqual(self.individual_6.age_at_registration, 32)
+        assert self.individual_1.age_at_registration == 11
+        assert self.individual_2.age_at_registration == 19
+        assert self.individual_3.age_at_registration == 8
+        assert self.individual_4.age_at_registration == 29
+        assert self.individual_5.age_at_registration == 8
+        assert self.individual_6.age_at_registration == 32

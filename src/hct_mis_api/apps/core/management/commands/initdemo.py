@@ -1,5 +1,4 @@
-"""
-Django Management Command: initdemo
+"""Django Management Command: initdemo.
 
 This command initializes demo data for the application by performing the following steps:
 
@@ -51,7 +50,7 @@ import logging
 import os
 import time
 from argparse import ArgumentParser
-from typing import Any, List
+from typing import Any
 
 from django.conf import settings
 from django.core.management import BaseCommand, call_command
@@ -189,7 +188,7 @@ class Command(BaseCommand):
             afghanistan = BusinessArea.objects.get(slug="afghanistan")
             partner = Partner.objects.get(name="UNICEF")
 
-            combined_email_list: List[str] = [email.strip() for email in email_list + tester_list if email.strip()]
+            combined_email_list: list[str] = [email.strip() for email in email_list + tester_list if email.strip()]
 
             if combined_email_list:
                 self.stdout.write("Creating users...")

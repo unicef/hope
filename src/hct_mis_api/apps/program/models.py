@@ -2,7 +2,7 @@ import random
 import string
 from datetime import date
 from decimal import Decimal
-from typing import Any, Collection, Optional
+from typing import Any, Collection
 
 from django.conf import settings
 from django.contrib.postgres.fields import CICharField
@@ -241,15 +241,21 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
 
     def clean(self) -> None:
         super().clean()
-        if self.data_collecting_type and self.beneficiary_group:
-            if (
-                self.data_collecting_type.type == DataCollectingType.Type.SOCIAL
-                and self.beneficiary_group.master_detail
-            ) or (
-                self.data_collecting_type.type == DataCollectingType.Type.STANDARD
-                and not self.beneficiary_group.master_detail
-            ):
-                raise ValidationError("Selected combination of data collecting type and beneficiary group is invalid.")
+        if (
+            self.data_collecting_type
+            and self.beneficiary_group
+            and (
+                (
+                    self.data_collecting_type.type == DataCollectingType.Type.SOCIAL
+                    and self.beneficiary_group.master_detail
+                )
+                or (
+                    self.data_collecting_type.type == DataCollectingType.Type.STANDARD
+                    and not self.beneficiary_group.master_detail
+                )
+            )
+        ):
+            raise ValidationError("Selected combination of data collecting type and beneficiary group is invalid.")
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         self.clean()
@@ -269,7 +275,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     @staticmethod
     def get_total_number_of_households_from_payments(qs: models.QuerySet[PaymentPlan]) -> int:
         return (
-            qs.filter(**{"payment_items__delivered_quantity__gt": 0})
+            qs.filter(payment_items__delivered_quantity__gt=0)
             .distinct("payment_items__household__unicef_id")
             .values_list("payment_items__household__unicef_id", flat=True)
             .order_by("payment_items__household__unicef_id")
@@ -319,13 +325,13 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     def __str__(self) -> str:
         return self.name
 
-    def validate_unique(self, exclude: Optional[Collection[str]] = ...) -> None:  # type: ignore
+    def validate_unique(self, exclude: Collection[str] | None = ...) -> None:  # type: ignore
         query = Program.objects.filter(name=self.name, business_area=self.business_area, is_removed=False)
         if query.exists() and query.first() != self:
             raise ValidationError(
                 f"Program for name: {self.name} and business_area: {self.business_area.slug} already exists."
             )
-        super(Program, self).validate_unique()
+        super().validate_unique()
 
     def is_active(self) -> bool:
         return self.status == self.ACTIVE
@@ -437,7 +443,7 @@ class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, C
             raise DRFValidationError("Program should be within Active status.")
 
     def validate_payment_plan_status(self) -> None:
-        """validate status for Finishing Cycle"""
+        """Validate status for Finishing Cycle."""
         from hct_mis_api.apps.payment.models import PaymentPlan
 
         if (

@@ -56,8 +56,7 @@ class VerificationPlanStatusChangeServices:
                 self.payment_verification_plan.get_xlsx_verification_file.delete()
 
             return self.payment_verification_plan
-        else:
-            raise GraphQLError("You can mark invalid if xlsx file was downloaded or imported")
+        raise GraphQLError("You can mark invalid if xlsx file was downloaded or imported")
 
     def _reset_payment_verifications(self) -> None:
         # payment verifications to reset using for discard and mark_invalid
@@ -159,7 +158,7 @@ class VerificationPlanStatusChangeServices:
         GrievanceTicketProgramThrough.objects.bulk_create(tickets_programs)
 
         ticket_payment_verification_details_list = []
-        for verification, grievance_ticket in zip(verifications, grievance_ticket_objs):
+        for verification, grievance_ticket in zip(verifications, grievance_ticket_objs, strict=False):
             GrievanceNotification.send_all_notifications(
                 GrievanceNotification.prepare_notification_for_ticket_creation(grievance_ticket)
             )

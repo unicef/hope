@@ -109,9 +109,9 @@ class TestChangeHeadOfHousehold(APITestCase):
         self.individual1.refresh_from_db()
         self.individual2.refresh_from_db()
 
-        self.assertTrue("There is one head of household" in response["errors"][0]["message"])
-        self.assertEqual(self.individual1.relationship, "HEAD")
-        self.assertEqual(self.individual2.relationship, "BROTHER_SISTER")
+        assert "There is one head of household" in response["errors"][0]["message"]
+        assert self.individual1.relationship == "HEAD"
+        assert self.individual2.relationship == "BROTHER_SISTER"
 
     def test_close_update_individual_should_change_head_of_household_if_there_was_no_one(self) -> None:
         self.individual1.relationship = AUNT_UNCLE
@@ -128,9 +128,9 @@ class TestChangeHeadOfHousehold(APITestCase):
                 "status": GrievanceTicket.STATUS_CLOSED,
             },
         )
-        self.assertFalse("errors" in response)
+        assert "errors" not in response
         self.individual1.refresh_from_db()
         self.individual2.refresh_from_db()
 
-        self.assertEqual(self.individual1.relationship, "AUNT_UNCLE")
-        self.assertEqual(self.individual2.relationship, "HEAD")
+        assert self.individual1.relationship == "AUNT_UNCLE"
+        assert self.individual2.relationship == "HEAD"

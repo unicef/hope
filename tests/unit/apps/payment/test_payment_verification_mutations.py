@@ -35,6 +35,7 @@ from hct_mis_api.apps.payment.services.verification_plan_status_change_services 
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+import pytest
 
 EDIT_PAYMENT_VERIFICATION_MUTATION = """
 mutation EditPaymentVerificationPlan($input: EditPaymentVerificationInput!) {
@@ -122,15 +123,15 @@ class TestPaymentVerificationMutations(APITestCase):
         )
 
         payment_verification = self.verification.payment_record_verifications.first()
-        self.assertIsNone(payment_verification.received_amount)
-        self.assertEqual(payment_verification.status, PaymentVerification.STATUS_PENDING)
+        assert payment_verification.received_amount is None
+        assert payment_verification.status == PaymentVerification.STATUS_PENDING
         payment_verification_id = encode_id_base64_required(payment_verification.id, "PaymentVerification")
         UpdatePaymentVerificationReceivedAndReceivedAmount().mutate(
             None, self.info, payment_verification_id, received_amount=Decimal(received_amount), received=received
         )
         payment_verification.refresh_from_db()
-        self.assertEqual(payment_verification.received_amount, Decimal(received_amount))
-        self.assertEqual(payment_verification.status, status)
+        assert payment_verification.received_amount == Decimal(received_amount)
+        assert payment_verification.status == status
 
     def test_update_payment_verification_received_and_received_amount_update_time_restricted(self) -> None:
         from hct_mis_api.apps.payment.mutations import (
@@ -215,7 +216,7 @@ class TestPaymentVerificationMutations(APITestCase):
         info.context = request
         payment_verification = self.verification.payment_record_verifications.first()
         payment_verification_id = encode_id_base64_required(payment_verification.id, "PaymentVerification")
-        with self.assertRaises(PermissionDenied):
+        with pytest.raises(PermissionDenied):
             UpdatePaymentVerificationReceivedAndReceivedAmount().mutate(
                 None, info, payment_verification_id, received_amount=Decimal(21.36), received=True
             )

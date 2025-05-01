@@ -104,11 +104,11 @@ class CommunicationMessageFactory(DjangoModelFactory):
     created_at = factory.Faker("date_time_this_decade", before_now=False, after_now=True, tzinfo=utc)
 
     @factory.post_generation
-    def cash_plan_payment_verification_summary(obj, create: bool, extracted: bool, **kwargs: Any) -> None:
+    def cash_plan_payment_verification_summary(self, create: bool, extracted: bool, **kwargs: Any) -> None:
         if not create:
             return
 
         households = Household.objects.all()
-        obj.number_of_recipients = len(households)
-        obj.households.set(households)
-        obj.save()
+        self.number_of_recipients = len(households)
+        self.households.set(households)
+        self.save()

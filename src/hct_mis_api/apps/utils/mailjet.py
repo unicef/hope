@@ -1,5 +1,5 @@
 import json
-from typing import Any, Dict, Optional
+from typing import Any
 
 from django.conf import settings
 
@@ -9,21 +9,19 @@ from hct_mis_api.apps.utils.celery_tasks import send_email_task
 
 
 class MailjetClient:
-    """
-    Mailjet client to send emails using Mailjet API.
-    """
+    """Mailjet client to send emails using Mailjet API."""
 
     def __init__(
         self,
         subject: str,
         recipients: list[str],
-        mailjet_template_id: Optional[int] = None,
-        html_body: Optional[str] = None,
-        text_body: Optional[str] = None,
-        ccs: Optional[list[str]] = None,
-        variables: Optional[Dict[str, Any]] = None,
-        from_email: Optional[str] = None,
-        from_email_display: Optional[str] = None,
+        mailjet_template_id: int | None = None,
+        html_body: str | None = None,
+        text_body: str | None = None,
+        ccs: list[str] | None = None,
+        variables: dict[str, Any] | None = None,
+        from_email: str | None = None,
+        from_email_display: str | None = None,
     ) -> None:
         self.mailjet_template_id = mailjet_template_id
         self.html_body = html_body
@@ -78,9 +76,8 @@ class MailjetClient:
         data_json = json.dumps(data)
         send_email_task.delay(data_json)
 
-    def _get_email_body(self) -> Dict[str, Any]:
-        """
-        Construct the dictionary with the data responsible for email body,
+    def _get_email_body(self) -> dict[str, Any]:
+        """Construct the dictionary with the data responsible for email body,
         built for passed content (html and/or text) or mailjet template (with variables).
         """
         if self.mailjet_template_id:
@@ -89,13 +86,13 @@ class MailjetClient:
                 "TemplateLanguage": True,
                 "Variables": self.variables,
             }
-        else:  # Body content provided through html_body and/or text_body
-            content = {}
-            if self.html_body:
-                content["HTMLPart"] = self.html_body
-            if self.text_body:
-                content["TextPart"] = self.text_body
-            return content
+        # Body content provided through html_body and/or text_body
+        content = {}
+        if self.html_body:
+            content["HTMLPart"] = self.html_body
+        if self.text_body:
+            content["TextPart"] = self.text_body
+        return content
 
     def attach_file(self, attachment: str, filename: str, mimetype: str) -> None:
         new_attachment = [

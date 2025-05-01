@@ -131,7 +131,7 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
             context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=input_data,
         )
-        self.assertEqual(GrievanceTicket.objects.count(), 2)
+        assert GrievanceTicket.objects.count() == 2
 
     @parameterized.expand(
         [

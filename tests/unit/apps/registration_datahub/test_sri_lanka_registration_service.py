@@ -155,52 +155,43 @@ class TestSriLankaRegistrationService(TestCase):
         service.process_records(rdi.id, records_ids)
 
         self.records[0].refresh_from_db()
-        self.assertEqual(
-            Record.objects.filter(id__in=records_ids, ignored=False, status=Record.STATUS_IMPORTED).count(), 2
-        )
+        assert Record.objects.filter(id__in=records_ids, ignored=False, status=Record.STATUS_IMPORTED).count() == 2
 
-        self.assertEqual(PendingHousehold.objects.count(), 1)
-        self.assertEqual(PendingHousehold.objects.filter(program=rdi.program).count(), 1)
-        self.assertEqual(PendingIndividualRoleInHousehold.objects.count(), 1)
-        self.assertEqual(PendingBankAccountInfo.objects.count(), 1)
-        self.assertEqual(PendingDocument.objects.count(), 1)
-        self.assertEqual(PendingDocument.objects.filter(program=rdi.program).count(), 1)
+        assert PendingHousehold.objects.count() == 1
+        assert PendingHousehold.objects.filter(program=rdi.program).count() == 1
+        assert PendingIndividualRoleInHousehold.objects.count() == 1
+        assert PendingBankAccountInfo.objects.count() == 1
+        assert PendingDocument.objects.count() == 1
+        assert PendingDocument.objects.filter(program=rdi.program).count() == 1
 
         bank_acc_info = PendingBankAccountInfo.objects.first()
-        self.assertEqual(bank_acc_info.account_holder_name, "Test Holder Name 123")
-        self.assertEqual(bank_acc_info.bank_branch_name, "Branch Name 123")
-        self.assertEqual(bank_acc_info.rdi_merge_status, "PENDING")
+        assert bank_acc_info.account_holder_name == "Test Holder Name 123"
+        assert bank_acc_info.bank_branch_name == "Branch Name 123"
+        assert bank_acc_info.rdi_merge_status == "PENDING"
 
         household = PendingHousehold.objects.first()
-        self.assertEqual(household.admin1.p_code, "LK1")
-        self.assertEqual(household.admin2.p_code, "LK11")
-        self.assertEqual(household.admin3.p_code, "LK1163")
-        self.assertEqual(household.admin4.p_code, "LK1163020")
-        self.assertEqual(household.admin_area.p_code, "LK1163020")
+        assert household.admin1.p_code == "LK1"
+        assert household.admin2.p_code == "LK11"
+        assert household.admin3.p_code == "LK1163"
+        assert household.admin4.p_code == "LK1163020"
+        assert household.admin_area.p_code == "LK1163020"
 
         registration_data_import = household.registration_data_import
 
-        self.assertEqual(registration_data_import.program, self.program)
+        assert registration_data_import.program == self.program
 
-        self.assertEqual(
-            PendingIndividual.objects.filter(relationship="HEAD").first().flex_fields, {"has_nic_number_i_c": "n"}
-        )
+        assert PendingIndividual.objects.filter(relationship="HEAD").first().flex_fields == {"has_nic_number_i_c": "n"}
 
-        self.assertEqual(
-            PendingIndividual.objects.filter(full_name="Dome").first().flex_fields,
-            {
-                "confirm_nic_number": "123456789V",
-                "branch_or_branch_code": "7472_002",
-                "who_answers_this_phone": "alternate collector",
-                "confirm_alternate_collector_phone_number": "+94788908046",
-                "does_the_mothercaretaker_have_her_own_active_bank_account_not_samurdhi": "n",
-            },
-        )
-        self.assertEqual(PendingIndividual.objects.filter(full_name="Dome").first().email, "email999@mail.com")
-        self.assertEqual(PendingIndividual.objects.filter(full_name="Dome").first().age_at_registration, 43)
-        self.assertEqual(
-            PendingIndividual.objects.filter(full_name="Dome", program=rdi.program).first().age_at_registration, 43
-        )
+        assert PendingIndividual.objects.filter(full_name="Dome").first().flex_fields == {
+            "confirm_nic_number": "123456789V",
+            "branch_or_branch_code": "7472_002",
+            "who_answers_this_phone": "alternate collector",
+            "confirm_alternate_collector_phone_number": "+94788908046",
+            "does_the_mothercaretaker_have_her_own_active_bank_account_not_samurdhi": "n",
+        }
+        assert PendingIndividual.objects.filter(full_name="Dome").first().email == "email999@mail.com"
+        assert PendingIndividual.objects.filter(full_name="Dome").first().age_at_registration == 43
+        assert PendingIndividual.objects.filter(full_name="Dome", program=rdi.program).first().age_at_registration == 43
 
     def test_import_record_twice(self) -> None:
         service = SriLankaRegistrationService(self.registration)
@@ -209,10 +200,10 @@ class TestSriLankaRegistrationService(TestCase):
         service.process_records(rdi.id, [self.records[0].id])
         self.records[0].refresh_from_db()
 
-        self.assertEqual(Record.objects.first().status, Record.STATUS_IMPORTED)
-        self.assertEqual(PendingHousehold.objects.count(), 1)
+        assert Record.objects.first().status == Record.STATUS_IMPORTED
+        assert PendingHousehold.objects.count() == 1
 
         # Process again, but no new household created
         service.process_records(rdi.id, [self.records[0].id])
         self.records[0].refresh_from_db()
-        self.assertEqual(PendingHousehold.objects.count(), 1)
+        assert PendingHousehold.objects.count() == 1

@@ -145,15 +145,15 @@ class TestSanctionListPreMerge(TestCase):
 
         result = list(Individual.objects.order_by("full_name").values("full_name", "sanction_list_possible_match"))
 
-        self.assertEqual(result, expected)
+        assert result == expected
 
     def test_create_system_flag_tickets(self) -> None:
         CheckAgainstSanctionListPreMergeTask.execute()
-        self.assertEqual(GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING).count(), 0)
+        assert GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING).count() == 0
         for grievance_ticket in GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING):
-            self.assertEqual(grievance_ticket.programs.count(), 0)
-            self.assertEqual(grievance_ticket.programs.first(), self.program)
+            assert grievance_ticket.programs.count() == 0
+            assert grievance_ticket.programs.first() == self.program
 
         self.household.refresh_from_db()
         for grievance_ticket in GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING):
-            self.assertEqual(grievance_ticket.household_unicef_id, self.household.unicef_id)
+            assert grievance_ticket.household_unicef_id == self.household.unicef_id

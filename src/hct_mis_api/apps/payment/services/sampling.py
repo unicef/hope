@@ -1,5 +1,5 @@
 import abc
-from typing import TYPE_CHECKING, Any, Dict, Tuple
+from typing import TYPE_CHECKING, Any
 
 from django.db.models import Q, QuerySet
 
@@ -15,14 +15,14 @@ if TYPE_CHECKING:
 
 
 class Sampling:
-    def __init__(self, input_data: Dict, payment_plan: "PaymentPlan", payment_records: QuerySet["Payment"]) -> None:
+    def __init__(self, input_data: dict, payment_plan: "PaymentPlan", payment_records: QuerySet["Payment"]) -> None:
         self.input_data = input_data
         self.payment_plan = payment_plan
         self.payment_records = payment_records
 
     def process_sampling(
         self, payment_verification_plan: PaymentVerificationPlan
-    ) -> Tuple[PaymentVerificationPlan, QuerySet]:
+    ) -> tuple[PaymentVerificationPlan, QuerySet]:
         if not self.payment_records:
             raise GraphQLError("There are no payment records that could be assigned to a new verification plan.")
 
@@ -44,7 +44,7 @@ class Sampling:
 
         return payment_verification_plan, self.payment_records
 
-    def generate_sampling(self) -> Tuple[int, int]:
+    def generate_sampling(self) -> tuple[int, int]:
         payment_record_count = self.payment_records.count()
         sampling = self._get_sampling()
         sampling.sampling(self.payment_records)
@@ -56,13 +56,12 @@ class Sampling:
         if sampling_type == PaymentVerificationPlan.SAMPLING_FULL_LIST:
             arguments = self.input_data["full_list_arguments"]
             return FullListSampling(arguments, sampling_type)
-        else:
-            arguments = self.input_data["random_sampling_arguments"]
-            return RandomSampling(arguments, sampling_type)
+        arguments = self.input_data["random_sampling_arguments"]
+        return RandomSampling(arguments, sampling_type)
 
 
 class BaseSampling(abc.ABC):
-    def __init__(self, arguments: Dict, sampling_type: str) -> None:
+    def __init__(self, arguments: dict, sampling_type: str) -> None:
         self.sampling_type = sampling_type
         self.arguments = arguments
         self.confidence_interval = self.arguments.get("confidence_interval", 0)
@@ -77,8 +76,7 @@ class BaseSampling(abc.ABC):
     def calc_sample_size(self, sample_count: int) -> int:
         if self.sampling_type == PaymentVerificationPlan.SAMPLING_FULL_LIST:
             return sample_count
-        else:
-            return get_number_of_samples(sample_count, self.confidence_interval, self.margin_of_error)
+        return get_number_of_samples(sample_count, self.confidence_interval, self.margin_of_error)
 
     @abc.abstractmethod
     def sampling(self, payment_records: QuerySet["Payment"]) -> None:  # pragma: no cover

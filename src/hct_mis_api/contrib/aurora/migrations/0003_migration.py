@@ -5,43 +5,42 @@ import django.utils.timezone
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('aurora', '0002_migration'),
+        ("aurora", "0002_migration"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='organization',
-            name='created_at',
+            model_name="organization",
+            name="created_at",
             field=models.DateTimeField(auto_now_add=True, db_index=True, default=django.utils.timezone.now),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='organization',
-            name='updated_at',
+            model_name="organization",
+            name="updated_at",
             field=models.DateTimeField(auto_now=True, db_index=True),
         ),
         migrations.AddField(
-            model_name='project',
-            name='created_at',
+            model_name="project",
+            name="created_at",
             field=models.DateTimeField(auto_now_add=True, db_index=True, default=django.utils.timezone.now),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='project',
-            name='updated_at',
+            model_name="project",
+            name="updated_at",
             field=models.DateTimeField(auto_now=True, db_index=True),
         ),
         migrations.AddField(
-            model_name='registration',
-            name='created_at',
+            model_name="registration",
+            name="created_at",
             field=models.DateTimeField(auto_now_add=True, db_index=True, default=django.utils.timezone.now),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='registration',
-            name='updated_at',
+            model_name="registration",
+            name="updated_at",
             field=models.DateTimeField(auto_now=True, db_index=True),
         ),
     ]

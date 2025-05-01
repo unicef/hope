@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable
 
 from django import forms
 from django.contrib import admin, messages
@@ -105,7 +105,7 @@ class BusinessofficeFilter(SimpleListFilter):
     title = "Business Ofiice"
     parameter_name = "bo"
 
-    def lookups(self, request: HttpRequest, model_admin: "ModelAdmin") -> List[Tuple[int, str]]:
+    def lookups(self, request: HttpRequest, model_admin: "ModelAdmin") -> list[tuple[int, str]]:
         return [(1, "Is a Business Office"), (2, "Is a Business Area")]
 
     def value(self) -> str:
@@ -114,20 +114,20 @@ class BusinessofficeFilter(SimpleListFilter):
     def queryset(self, request: HttpRequest, queryset: "QuerySet") -> "QuerySet":
         if self.value() == "2":
             return queryset.filter(parent_id__isnull=True)
-        elif self.value() == "1":
+        if self.value() == "1":
             return queryset.exclude(parent_id__isnull=True)
         return queryset
 
 
 class AcceptanceProcessThresholdFormset(forms.models.BaseInlineFormSet):
     @classmethod
-    def validate_ranges(cls, ranges: List[List[Optional[int]]]) -> None:
+    def validate_ranges(cls, ranges: list[list[int | None]]) -> None:
         ranges = sorted(ranges)  # sorted by range min value
 
         if ranges[0][0] != 0:
             raise forms.ValidationError("Ranges need to start from 0")
 
-        for r1, r2 in zip(ranges, ranges[1:]):
+        for r1, r2 in zip(ranges, ranges[1:], strict=False):
             if not r1[1] or (r1[1] and r2[0] and r1[1] > r2[0]):  # [1, None) [10, 100) or [1, 10) [8, 20)
                 raise forms.ValidationError(
                     f"Provided ranges overlap [{r1[0]}, {r1[1] or '∞'}) [{r2[0]}, {r2[1] or '∞'})"
@@ -223,7 +223,7 @@ class BusinessAreaAdmin(
     readonly_fields = ("parent", "is_split", "document_types_valid_for_deduplication")
     filter_horizontal = ("countries", "partners")
 
-    def document_types_valid_for_deduplication(self, obj: Any) -> List:
+    def document_types_valid_for_deduplication(self, obj: Any) -> list:
         return list(DocumentType.objects.filter(valid_for_deduplication=True).values_list("label", flat=True))
 
     def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
@@ -236,7 +236,7 @@ class BusinessAreaAdmin(
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
     @button(label="Create Business Office", permission="core.can_split")
-    def split_business_area(self, request: HttpRequest, pk: "UUID") -> Union[HttpResponseRedirect, TemplateResponse]:
+    def split_business_area(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect | TemplateResponse:
         context = self.get_common_context(request, pk)
         opts = self.object._meta
         if request.POST:
@@ -288,7 +288,7 @@ class BusinessAreaAdmin(
 
     @button(label="Test RapidPro Connection", permission="core.ping_rapidpro")
     def _test_rapidpro_connection(self, request: HttpRequest, pk: "UUID") -> TemplateResponse:
-        context: Dict = self.get_common_context(request, pk)
+        context: dict = self.get_common_context(request, pk)
         context["business_area"] = self.object
         context["title"] = f"Test `{self.object.name}` RapidPRO connection"
 
@@ -337,18 +337,17 @@ class BusinessAreaAdmin(
                 logger.warning(e)
                 self.message_user(request, str(e), messages.ERROR)
             return HttpResponseRedirect(reverse("admin:core_businessarea_change", args=[business_area.id]))
-        else:
-            return confirm_action(
-                self,
-                request,
-                self.mark_submissions,
-                mark_safe(
-                    """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
+        return confirm_action(
+            self,
+            request,
+            self.mark_submissions,
+            mark_safe(
+                """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
                 <h3>All ImportedSubmission for not merged rdi will be marked.</h3>
                 """
-                ),
-                "Successfully executed",
-            )
+            ),
+            "Successfully executed",
+        )
 
 
 class FlexibleAttributeInline(admin.TabularInline):
@@ -445,7 +444,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
             obj.status,
         )
 
-    def get_form(self, request: HttpRequest, obj: Optional[Any] = None, change: bool = False, **kwargs: Any) -> Any:
+    def get_form(self, request: HttpRequest, obj: Any | None = None, change: bool = False, **kwargs: Any) -> Any:
         if obj is None:
             return XLSImportForm
         return super().get_form(request, obj, change, **kwargs)
@@ -453,7 +452,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
     @button(permission="core.download_last_valid_file")
     def download_last_valid_file(
         self, request: HttpRequest
-    ) -> Optional[Union[HttpResponseRedirect, HttpResponsePermanentRedirect]]:
+    ) -> HttpResponseRedirect | HttpResponsePermanentRedirect | None:
         latest_valid_import = self.model.objects.latest_valid()
         if latest_valid_import:
             return redirect(latest_valid_import.file.url)
@@ -477,8 +476,8 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         return redirect(".")
 
     def add_view(
-        self, request: HttpRequest, form_url: str = "", extra_context: Optional[Dict] = None
-    ) -> Union[HttpResponsePermanentRedirect, TemplateResponse]:
+        self, request: HttpRequest, form_url: str = "", extra_context: dict | None = None
+    ) -> HttpResponsePermanentRedirect | TemplateResponse:
         if not self.has_add_permission(request):
             logger.warning("The user did not have permission to do that")
             raise PermissionDenied
@@ -539,9 +538,9 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         return TemplateResponse(request, "core/xls_form.html", payload)
 
     def change_view(
-        self, request: HttpRequest, object_id: str, form_url: str = "", extra_context: Optional[Dict[str, Any]] = None
+        self, request: HttpRequest, object_id: str, form_url: str = "", extra_context: dict[str, Any] | None = None
     ) -> HttpResponse:
-        extra_context = dict(show_save=False, show_save_and_continue=False, show_delete=True)
+        extra_context = {"show_save": False, "show_save_and_continue": False, "show_delete": True}
         has_add_permission: Callable = self.has_add_permission
         self.has_add_permission: Callable = lambda __: False
         template_response = super().change_view(request, object_id, form_url, extra_context)
@@ -576,13 +575,13 @@ class CountryCodeMapAdmin(HOPEModelAdminBase):
 class StorageFileAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     list_display = ("file_name", "file", "business_area", "file_size", "created_by", "created_at")
 
-    def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+    def has_change_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return request.user.can_download_storage_files()
 
-    def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+    def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return request.user.can_download_storage_files()
 
-    def has_view_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+    def has_view_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return request.user.can_download_storage_files()
 
     def has_add_permission(self, request: HttpRequest) -> bool:

@@ -113,8 +113,7 @@ class TargetingDetails(BaseComponents):
             sleep(1)
             if status.upper() in self.getLabelStatus().text:
                 return self.wait_for(self.labelStatus)
-        else:
-            raise Exception(f"Status: {status.capitalize()} does not occur.")
+        raise Exception(f"Status: {status.capitalize()} does not occur.")
 
     def getTargetPopulationStatus(self) -> WebElement:
         return self.wait_for(self.targetPopulationStatus)

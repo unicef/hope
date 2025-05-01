@@ -68,9 +68,9 @@ class TestFlexibleHelperMethods(TestCase):
             ],
             None,
         )
-        for arg, expected_value in zip(args, expected_values):
+        for arg, expected_value in zip(args, expected_values, strict=False):
             returned_value = self.importer._get_model_fields(arg)
-            self.assertEqual(returned_value, expected_value)
+            assert returned_value == expected_value
 
     def test_assign_field_values_attribute(self) -> None:
         """
@@ -98,8 +98,8 @@ class TestFlexibleHelperMethods(TestCase):
 
         expected_json_fields = {"label": {"English(EN)": "Milk and dairy products: yoghurt, cheese"}}
 
-        self.assertEqual(self.importer.object_fields_to_create, expected_fields)
-        self.assertEqual(self.importer.json_fields_to_create, expected_json_fields)
+        assert self.importer.object_fields_to_create == expected_fields
+        assert self.importer.json_fields_to_create == expected_json_fields
 
         self.assertRaisesMessage(
             ValidationError,
@@ -153,8 +153,8 @@ class TestFlexibleHelperMethods(TestCase):
 
         expected_json_fields = {"label": {"English(EN)": "Consent"}}
 
-        self.assertEqual(self.importer.object_fields_to_create, expected_fields)
-        self.assertEqual(self.importer.json_fields_to_create, expected_json_fields)
+        assert self.importer.object_fields_to_create == expected_fields
+        assert self.importer.json_fields_to_create == expected_json_fields
 
         self.assertRaisesMessage(
             ValidationError,
@@ -188,8 +188,8 @@ class TestFlexibleHelperMethods(TestCase):
 
         expected_json_fields = {"label": {"English(EN)": "Yes"}}
 
-        self.assertEqual(self.importer.object_fields_to_create, expected_fields)
-        self.assertEqual(self.importer.json_fields_to_create, expected_json_fields)
+        assert self.importer.object_fields_to_create == expected_fields
+        assert self.importer.json_fields_to_create == expected_json_fields
 
         self.assertRaisesMessage(
             ValidationError,
@@ -349,7 +349,7 @@ class TestFlexibleHelperMethods(TestCase):
         for case in cases_to_test:
             self.importer.current_group_tree = [None]
             result = self.importer._can_add_row(case["row"])
-            self.assertEqual(case["expected"], result)
+            assert case["expected"] == result
 
     def test_get_list_of_field_choices(self) -> None:
         result = self.importer._get_list_of_field_choices(self.survey_sheet)
@@ -376,7 +376,7 @@ class TestFlexibleHelperMethods(TestCase):
             "residence_status",
         }
 
-        self.assertEqual(result, expected)
+        assert result == expected
 
     def test_get_field_choice_name(self) -> None:
         cases_to_test: List[Dict[str, Union[List, Optional[str]]]] = [
@@ -414,4 +414,4 @@ class TestFlexibleHelperMethods(TestCase):
 
         for case in cases_to_test:
             result = self.importer._get_field_choice_name(case["row"])
-            self.assertEqual(result, case["expected"])
+            assert result == case["expected"]

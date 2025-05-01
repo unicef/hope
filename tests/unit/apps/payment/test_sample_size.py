@@ -70,7 +70,7 @@ query SampleSize($input: GetCashplanVerificationSampleSizeInput!) {
             variables=manual_sample_query_variables,
             context={"user": self.user},
         )
-        self.assertTrue(manual_response["data"]["sampleSize"]["paymentRecordCount"] == 1)
+        assert manual_response["data"]["sampleSize"]["paymentRecordCount"] == 1
 
         rapid_pro_sample_query_variables = create_query_variables(self.payment_plan, "RAPIDPRO")
         rapid_pro_response = self.graphql_request(
@@ -78,7 +78,7 @@ query SampleSize($input: GetCashplanVerificationSampleSizeInput!) {
             variables=rapid_pro_sample_query_variables,
             context={"user": self.user},
         )
-        self.assertEqual(rapid_pro_response["data"]["sampleSize"]["paymentRecordCount"], 0)
+        assert rapid_pro_response["data"]["sampleSize"]["paymentRecordCount"] == 0
 
     def test_number_of_queries(self) -> None:
         PaymentFactory.create_batch(

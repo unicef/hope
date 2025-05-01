@@ -1,5 +1,5 @@
 {% extends "admin_extra_buttons/action_page.html" %}
-{% load i18n admin_urls static admin_modify mptt_tags engine %}
+{% load admin_modify admin_urls engine i18n mptt_tags static %}
 
 {% block extrahead %}{{ block.super }}
     <script type="text/javascript" src="{% static "admin/js/vendor/jquery/jquery.js" %}"></script>
@@ -18,7 +18,8 @@
             }
         }
     </style>
-{% endblock %}
+{% endblock extrahead %}
+
 {% block action-content %}
     <form method="POST" id="save_permissions" enctype="multipart/form-data">
         {% csrf_token %}
@@ -49,13 +50,13 @@
                                 <td class="field-partner">
                                     {{ form.partner.errors.as_ul }}
                                     <select
-                                            name="program_areas-{{  forloop.counter0 }}-partner" id="id_program_areas-{{ forloop.counter0 }}-partner"
+                                            name="program_areas-{{ forloop.counter0 }}-partner" id="id_program_areas-{{ forloop.counter0 }}-partner"
                                     >
                                     {% if form.partner.value == unicef_partner_id %}
                                         <option value={{ unicef_partner_id }} selected> UNICEF </option>
                                     {% else %}
                                         <option value > --------- </option>
-                                        {%  for partner in partners %}
+                                        {% for partner in partners %}
                                             <option value={{ partner.id }} {% if partner.id == form.partner.value %} selected{% endif %}> {{ partner.name }}</option>
                                         {% endfor %}
                                     {% endif %}
@@ -112,7 +113,8 @@
         </div>
         <input type="submit" value="Save">
     </form>
-{% endblock %}
+{% endblock action-content %}
+
 {% block admin_change_form_document_ready %}{{ block.super }}
     <script>
         $(".add-program_areas-row a").click(function (event) {
@@ -124,7 +126,7 @@
                                 {{ program_area_formset.empty_form.partner.errors.as_ul }}
                                 <select name="program_areas-${numberOfForms}-partner" id="id_program_areas-${numberOfForms}-partner">
                                     <option value > --------- {{ form.partner.value }} </option>
-                                    {%  for partner in partners %}
+                                    {% for partner in partners %}
                                        <option value={{ partner.id }}> {{ partner.name }}</option>
                                     {% endfor %}
                                 </select>
@@ -212,4 +214,4 @@
 
     </script>
 
-{% endblock %}
+{% endblock admin_change_form_document_ready %}

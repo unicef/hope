@@ -1,5 +1,5 @@
 from dataclasses import asdict
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any
 
 from django.db.models import QuerySet
 from django.db.transaction import atomic
@@ -35,12 +35,12 @@ class RDISerializer(serializers.ModelSerializer):
         model = RegistrationDataImport
         fields = ("name", "program")
 
-    def create(self, validated_data: Dict) -> None:
+    def create(self, validated_data: dict) -> None:
         return super().create(validated_data)
 
 
 class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
-    """Api to Create RDI for selected business area"""
+    """Api to Create RDI for selected business area."""
 
     permission = Grant.API_RDI_CREATE
     serializer_class = RDISerializer
@@ -75,7 +75,7 @@ class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
 
 
 class PushToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIView):
-    """Api to link Households with selected RDI"""
+    """Api to link Households with selected RDI."""
 
     permission = Grant.API_RDI_CREATE
 
@@ -101,7 +101,7 @@ class PushToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIView):
 
 
 class PushLaxToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIView):
-    """Api to link Households with selected RDI"""
+    """Api to link Households with selected RDI."""
 
     permission = Grant.API_RDI_CREATE
 
@@ -168,7 +168,7 @@ class PushLaxToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIVie
 
 
 class CompleteRDIView(HOPEAPIBusinessAreaView, UpdateAPIView):
-    """Api to Create RDI for selected business area"""
+    """Api to Create RDI for selected business area."""
 
     permission = Grant.API_RDI_CREATE
     serializer_class = RDISerializer

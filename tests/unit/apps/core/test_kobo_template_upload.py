@@ -117,7 +117,7 @@ class TestKoboTemplateUpload(APITestCase):
                 "Field: bank_branch_name_i_c - Field is missing",
             ]
         }
-        self.assertEqual(form.errors, expected_errors)
+        assert form.errors == expected_errors
 
     @patch(
         "hct_mis_api.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task.run",
@@ -130,11 +130,10 @@ class TestKoboTemplateUpload(APITestCase):
         request._messages = messages
         response = self.admin.add_view(request, form_url="", extra_context=None)
         stored_messages = tuple(get_messages(request))
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(
-            stored_messages[0].message,
-            "Core field validation successful, running KoBo Template upload task..., "
-            "Import status will change after task completion",
+        assert response.status_code == 302
+        assert (
+            stored_messages[0].message == "Core field validation successful, running KoBo Template upload task..., "
+            "Import status will change after task completion"
         )
 
 
@@ -161,10 +160,10 @@ class TestKoboErrorHandling(APITestCase):
                 xlsx_kobo_template_id=empty_template.id,
             )
             empty_template.refresh_from_db()
-            self.assertEqual(empty_template.status, XLSXKoboTemplate.CONNECTION_FAILED)
-            self.assertNotEqual(empty_template.first_connection_failed_time, None)
+            assert empty_template.status == XLSXKoboTemplate.CONNECTION_FAILED
+            assert empty_template.first_connection_failed_time is not None
             one_day_earlier_time = timezone.now() - timedelta(days=1)
-            self.assertTrue(empty_template.first_connection_failed_time > one_day_earlier_time)
+            assert empty_template.first_connection_failed_time > one_day_earlier_time
 
     @patch("hct_mis_api.apps.core.kobo.api.KoboAPI.__init__")
     def test_unsuccessful_when_400(self, mock_parent_init: Any) -> None:
@@ -175,8 +174,8 @@ class TestKoboErrorHandling(APITestCase):
         with patch("hct_mis_api.apps.core.kobo.api.KoboAPI.create_template_from_file", mock_create_template_from_file):
             UploadNewKoboTemplateAndUpdateFlexFieldsTask().execute(xlsx_kobo_template_id=empty_template.id)
             empty_template.refresh_from_db()
-            self.assertEqual(empty_template.status, XLSXKoboTemplate.UNSUCCESSFUL)
-            self.assertEqual(empty_template.first_connection_failed_time, None)
+            assert empty_template.status == XLSXKoboTemplate.UNSUCCESSFUL
+            assert empty_template.first_connection_failed_time is None
 
     @patch("hct_mis_api.apps.core.kobo.api.KoboAPI.__init__")
     def test_connection_retry_when_connection_problem(self, mock_parent_init: Any) -> None:
@@ -190,10 +189,10 @@ class TestKoboErrorHandling(APITestCase):
                 xlsx_kobo_template_id=empty_template.id,
             )
             empty_template.refresh_from_db()
-            self.assertEqual(empty_template.status, XLSXKoboTemplate.CONNECTION_FAILED)
-            self.assertNotEqual(empty_template.first_connection_failed_time, None)
+            assert empty_template.status == XLSXKoboTemplate.CONNECTION_FAILED
+            assert empty_template.first_connection_failed_time is not None
             one_day_earlier_time = timezone.now() - timedelta(days=1)
-            self.assertTrue(empty_template.first_connection_failed_time > one_day_earlier_time)
+            assert empty_template.first_connection_failed_time > one_day_earlier_time
 
     @patch("hct_mis_api.apps.core.kobo.api.KoboAPI.__init__")
     def test_unsuccessful_when_exception(self, mock_parent_init: Any) -> None:
@@ -207,8 +206,8 @@ class TestKoboErrorHandling(APITestCase):
                 xlsx_kobo_template_id=empty_template.id,
             )
             empty_template.refresh_from_db()
-            self.assertEqual(empty_template.status, XLSXKoboTemplate.UNSUCCESSFUL)
-            self.assertEqual(empty_template.first_connection_failed_time, None)
+            assert empty_template.status == XLSXKoboTemplate.UNSUCCESSFUL
+            assert empty_template.first_connection_failed_time is None
 
     @patch("hct_mis_api.apps.core.kobo.api.KoboAPI.__init__")
     def test_unsuccessful_when_error_in_response(self, mock_parent_init: Any) -> None:
@@ -218,5 +217,5 @@ class TestKoboErrorHandling(APITestCase):
         with patch("hct_mis_api.apps.core.kobo.api.KoboAPI.create_template_from_file", mock_create_template_from_file):
             UploadNewKoboTemplateAndUpdateFlexFieldsTask().execute(xlsx_kobo_template_id=empty_template.id)
             empty_template.refresh_from_db()
-            self.assertEqual(empty_template.status, XLSXKoboTemplate.UNSUCCESSFUL)
-            self.assertEqual(empty_template.first_connection_failed_time, None)
+            assert empty_template.status == XLSXKoboTemplate.UNSUCCESSFUL
+            assert empty_template.first_connection_failed_time is None

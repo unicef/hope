@@ -62,7 +62,7 @@ def add_household() -> Household:
 
     household.unicef_id = "HH-00-0000.1380"
     household.save()
-    yield household
+    return household
 
 
 @pytest.mark.usefixtures("login")

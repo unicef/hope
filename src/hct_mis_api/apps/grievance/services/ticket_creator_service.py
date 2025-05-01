@@ -1,5 +1,4 @@
 import abc
-from typing import Dict, List, Optional
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
@@ -39,34 +38,34 @@ from hct_mis_api.apps.program.models import Program
 
 class TicketDetailsCreator(abc.ABC):
     @abc.abstractmethod
-    def create(self, grievance_ticket: GrievanceTicket, extras: Dict) -> List[GrievanceTicket]:
+    def create(self, grievance_ticket: GrievanceTicket, extras: dict) -> list[GrievanceTicket]:
         pass
 
 
 class PaymentVerificationTicketDetailsCreator(TicketDetailsCreator):
-    def create(self, grievance_ticket: GrievanceTicket, extras: Dict) -> List[GrievanceTicket]:
+    def create(self, grievance_ticket: GrievanceTicket, extras: dict) -> list[GrievanceTicket]:
         return update_payment_verification_service(grievance_ticket)
 
 
 class DataChangeTicketDetailsCreator(TicketDetailsCreator):
-    def create(self, grievance_ticket: GrievanceTicket, extras: Dict) -> List[GrievanceTicket]:
+    def create(self, grievance_ticket: GrievanceTicket, extras: dict) -> list[GrievanceTicket]:
         return save_data_change_extras(grievance_ticket, extras)
 
 
 class GrievanceComplaintTicketDetailsCreator(TicketDetailsCreator):
-    def create(self, grievance_ticket: GrievanceTicket, extras: Dict) -> List[GrievanceTicket]:
+    def create(self, grievance_ticket: GrievanceTicket, extras: dict) -> list[GrievanceTicket]:
         details = extras.get("category", {}).get("grievance_complaint_ticket_extras", {})
         return create_tickets_based_on_payment_records_service(grievance_ticket, details, TicketComplaintDetails)
 
 
 class SensitiveGrievanceTicketDetailsCreator(TicketDetailsCreator):
-    def create(self, grievance_ticket: GrievanceTicket, extras: Dict) -> List[GrievanceTicket]:
+    def create(self, grievance_ticket: GrievanceTicket, extras: dict) -> list[GrievanceTicket]:
         details = extras.get("category", {}).get("sensitive_grievance_ticket_extras", {})
         return create_tickets_based_on_payment_records_service(grievance_ticket, details, TicketSensitiveDetails)
 
 
 class ReferralTicketDetailsCreator(TicketDetailsCreator):
-    def create(self, grievance_ticket: GrievanceTicket, extras: Dict) -> List[GrievanceTicket]:
+    def create(self, grievance_ticket: GrievanceTicket, extras: dict) -> list[GrievanceTicket]:
         return save_referral_service(grievance_ticket, extras)
 
 
@@ -76,7 +75,7 @@ class InvalidCategoryError(Exception):
 
 class TicketDetailsCreatorFactory:
     @staticmethod
-    def get_for_category(category: Optional[int]) -> TicketDetailsCreator:
+    def get_for_category(category: int | None) -> TicketDetailsCreator:
         if category == GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION:
             return PaymentVerificationTicketDetailsCreator()
         if category == GrievanceTicket.CATEGORY_DATA_CHANGE:
@@ -94,7 +93,7 @@ class TicketCreatorService:
     def __init__(self, details_creator: TicketDetailsCreator):
         self._details_creator = details_creator
 
-    def create(self, user: AbstractUser, business_area: BusinessArea, input_data: Dict) -> List[GrievanceTicket]:
+    def create(self, user: AbstractUser, business_area: BusinessArea, input_data: dict) -> list[GrievanceTicket]:
         documents = input_data.pop("documentation", None)
         extras = input_data.pop("extras", {})
         linked_tickets = [decode_id_string_required(encoded_id) for encoded_id in input_data.pop("linked_tickets", [])]
@@ -123,16 +122,16 @@ class TicketCreatorService:
             )
         return grievances
 
-    def _create_details(self, extras: Dict, grievance_ticket: GrievanceTicket) -> List[GrievanceTicket]:
+    def _create_details(self, extras: dict, grievance_ticket: GrievanceTicket) -> list[GrievanceTicket]:
         return self._details_creator.create(grievance_ticket, extras)
 
-    def _create_documents(self, documents: List[Dict], grievance_ticket: GrievanceTicket, user: AbstractUser) -> None:
+    def _create_documents(self, documents: list[dict], grievance_ticket: GrievanceTicket, user: AbstractUser) -> None:
         if not documents:
             return
         validate_grievance_documents_size(grievance_ticket.id, documents)
         create_grievance_documents(user, grievance_ticket, documents)
 
-    def _assign_linked_tickets(self, grievance_ticket: GrievanceTicket, linked_tickets: List[str]) -> None:
+    def _assign_linked_tickets(self, grievance_ticket: GrievanceTicket, linked_tickets: list[str]) -> None:
         grievance_ticket.linked_tickets.set(linked_tickets)
 
     def _assign_to_feedback(self, grievance_ticket: GrievanceTicket, linked_feedback_id: str) -> None:
@@ -142,7 +141,7 @@ class TicketCreatorService:
         linked_feedback.linked_grievance = grievance_ticket
         linked_feedback.save()
 
-    def _create_ticket(self, business_area: BusinessArea, input_data: Dict, user: AbstractUser) -> GrievanceTicket:
+    def _create_ticket(self, business_area: BusinessArea, input_data: dict, user: AbstractUser) -> GrievanceTicket:
         partner = decode_and_get_object(input_data.pop("partner", None), Partner, False)
         assigned_to = decode_and_get_object(input_data.pop("assigned_to", None), get_user_model(), False)
         admin = input_data.pop("admin", None)

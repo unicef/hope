@@ -1,6 +1,5 @@
 import logging
 import uuid
-from typing import List
 
 from django.conf import settings
 from django.db import transaction
@@ -98,7 +97,7 @@ class BiometricDeduplicationService:
             raise self.BiometricDeduplicationServiceException(
                 f"Deduplication is already in progress for deduplication set {deduplication_set_id}"
             )
-        elif status == 200:
+        if status == 200:
             rdis.update(deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS)
 
         else:
@@ -157,7 +156,7 @@ class BiometricDeduplicationService:
         program.deduplication_set_id = None
         program.save(update_fields=["deduplication_set_id"])
 
-    def store_similarity_pairs(self, deduplication_set_id: str, similarity_pairs: List[SimilarityPair]) -> None:
+    def store_similarity_pairs(self, deduplication_set_id: str, similarity_pairs: list[SimilarityPair]) -> None:
         DeduplicationEngineSimilarityPair.remove_pairs(deduplication_set_id)
         DeduplicationEngineSimilarityPair.bulk_add_pairs(deduplication_set_id, similarity_pairs)
 

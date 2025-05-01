@@ -54,7 +54,7 @@ def get_program_with_dct_type_and_name(
 ) -> Program:
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
-    program = ProgramFactory(
+    return ProgramFactory(
         name=name,
         programme_code=programme_code,
         start_date=datetime.now() - relativedelta(months=1),
@@ -63,7 +63,6 @@ def get_program_with_dct_type_and_name(
         status=status,
         beneficiary_group=beneficiary_group,
     )
-    return program
 
 
 def create_program(
@@ -90,7 +89,7 @@ def create_program(
 
 @pytest.fixture
 def social_worker_program() -> Program:
-    yield create_program(dct_type=DataCollectingType.Type.SOCIAL, beneficiary_group_name="People")
+    return create_program(dct_type=DataCollectingType.Type.SOCIAL, beneficiary_group_name="People")
 
 
 @pytest.fixture
@@ -103,7 +102,7 @@ def payment_verification_multiple_verification_plans(number_verification_plans: 
         imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
     )
     program = Program.objects.filter(name="Active Program").first()
-    households = list()
+    households = []
     for _ in range(number_verification_plans):
         household, _ = create_household(
             {
@@ -120,7 +119,7 @@ def payment_verification_multiple_verification_plans(number_verification_plans: 
         status=PaymentPlan.Status.FINISHED,
         business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
     )
-    payments = list()
+    payments = []
     for hh in households:
         payments.append(
             PaymentFactory(
@@ -185,12 +184,12 @@ def empty_payment_verification(social_worker_program: Program) -> None:
 
 @pytest.fixture
 def add_payment_verification() -> PV:
-    yield payment_verification_creator()
+    return payment_verification_creator()
 
 
 @pytest.fixture
 def add_payment_verification_xlsx() -> PV:
-    yield payment_verification_creator(channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX)
+    return payment_verification_creator(channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX)
 
 
 def payment_verification_creator(channel: str = PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL) -> PV:
@@ -243,13 +242,11 @@ def payment_verification_creator(channel: str = PaymentVerificationPlan.VERIFICA
         payment_plan=payment_plan,
         verification_channel=channel,
     )
-    pv = PaymentVerificationFactory(
+    return PaymentVerificationFactory(
         payment=payment,
         payment_verification_plan=payment_verification_plan,
         status=PV.STATUS_PENDING,
     )
-
-    return pv
 
 
 @pytest.fixture
@@ -496,7 +493,7 @@ class TestPaymentVerification:
         pagePaymentVerificationDetails.getButtonSubmit().click()
         pagePaymentVerificationDetails.checkAlert("Verification plan has been deleted.")
         for _ in range(50):
-            if 2 == len(pagePaymentVerificationDetails.getVerificationPlanPrefix()):
+            if len(pagePaymentVerificationDetails.getVerificationPlanPrefix()) == 2:
                 break
             sleep(0.1)
         else:
@@ -547,7 +544,7 @@ class TestPaymentVerification:
         pagePaymentVerificationDetails.getButtonActivatePlan().click()
         pagePaymentVerificationDetails.getButtonSubmit().click()
 
-        assert 1 == len(pagePaymentVerificationDetails.getRows())
+        assert len(pagePaymentVerificationDetails.getRows()) == 1
         pagePaymentVerificationDetails.scroll(execute=2)
         pagePaymentVerificationDetails.getRows()[0].find_element(By.TAG_NAME, "a").click()
         quantity = pagePaymentRecord.getLabelDeliveredQuantity().text
@@ -557,7 +554,7 @@ class TestPaymentVerification:
         pagePaymentRecord.getArrowBack().click()
 
         assert pagePaymentRecord.waitForStatusContainer("RECEIVED")
-        assert "RECEIVED" == pagePaymentRecord.getStatusContainer().text
+        assert pagePaymentRecord.getStatusContainer().text == "RECEIVED"
 
     def test_payment_verification_successful_not_received(
         self,
@@ -573,7 +570,7 @@ class TestPaymentVerification:
         pagePaymentVerificationDetails.getButtonActivatePlan().click()
         pagePaymentVerificationDetails.getButtonSubmit().click()
 
-        assert 1 == len(pagePaymentVerificationDetails.getRows())
+        assert len(pagePaymentVerificationDetails.getRows()) == 1
         pagePaymentVerificationDetails.scroll(execute=2)
         pagePaymentVerificationDetails.getRows()[0].find_element(By.TAG_NAME, "a").click()
         pagePaymentRecord.getButtonEdPlan().click()
@@ -600,7 +597,7 @@ class TestPaymentVerification:
         pagePaymentVerificationDetails.getButtonActivatePlan().click()
         pagePaymentVerificationDetails.getButtonSubmit().click()
 
-        assert 1 == len(pagePaymentVerificationDetails.getRows())
+        assert len(pagePaymentVerificationDetails.getRows()) == 1
         pagePaymentVerificationDetails.scroll(execute=2)
         pagePaymentVerificationDetails.getRows()[0].find_element(By.TAG_NAME, "a").click()
         quantity = float(pagePaymentRecord.getLabelDeliveredQuantity().text) - 1
@@ -616,7 +613,7 @@ class TestPaymentVerification:
 
         pageGrievanceTickets.getNavGrievance().click()
         pageGrievanceTickets.getTabSystemGenerated().click()
-        assert 1 == len(pageGrievanceTickets.getTicketListRow())
+        assert len(pageGrievanceTickets.getTicketListRow()) == 1
         pageGrievanceTickets.getTicketListRow()[0].click()
         pageGrievanceDetailsPage.getButtonAssignToMe().click()
         pageGrievanceDetailsPage.getButtonSetInProgress().click()
@@ -636,7 +633,7 @@ class TestPaymentVerification:
         pagePaymentVerification.getCashPlanTableRow().click()
 
         assert pagePaymentRecord.waitForStatusContainer("RECEIVED")
-        assert "RECEIVED" == pagePaymentRecord.getStatusContainer().text
+        assert pagePaymentRecord.getStatusContainer().text == "RECEIVED"
 
         pageGrievanceTickets.scroll(execute=2)
         pageGrievanceTickets.screenshot("0", file_path="./")
@@ -695,7 +692,7 @@ class TestPaymentVerification:
         pagePaymentVerificationDetails.getButtonImportEntitlement().click()
 
         assert pagePaymentRecord.waitForStatusContainer("RECEIVED", timeout=60)
-        assert "RECEIVED" == pagePaymentRecord.getStatusContainer().text
+        assert pagePaymentRecord.getStatusContainer().text == "RECEIVED"
 
     @pytest.mark.xfail(reason="UNSTABLE")
     def test_payment_verification_xlsx_partially_successful(
@@ -715,7 +712,7 @@ class TestPaymentVerification:
         pagePaymentVerificationDetails.getButtonActivatePlan().click()
         pagePaymentVerificationDetails.getButtonSubmit().click()
 
-        assert 1 == len(pagePaymentVerificationDetails.getRows())
+        assert len(pagePaymentVerificationDetails.getRows()) == 1
         pagePaymentVerificationDetails.scroll(execute=2)
         pagePaymentVerificationDetails.getRows()[0].find_element(By.TAG_NAME, "a").click()
         quantity = pagePaymentRecord.getLabelDeliveredQuantity().text

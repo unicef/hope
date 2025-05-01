@@ -84,7 +84,7 @@ class TestPaymentSignature(APITestCase):
         create_payment_plan_snapshot_data(pp)
         payment.refresh_from_db()
         payment.save()
-        self.assertEqual(payment.signature_hash, self.calculate_hash_manually(payment))
+        assert payment.signature_hash == self.calculate_hash_manually(payment)
 
     def test_bulk_update(self) -> None:
         pp: PaymentPlan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN, created_by=self.user)
@@ -93,12 +93,12 @@ class TestPaymentSignature(APITestCase):
         payment.refresh_from_db()
         payment.save()
         old_signature = self.calculate_hash_manually(payment)
-        self.assertEqual(payment.signature_hash, old_signature)
+        assert payment.signature_hash == old_signature
         payment.entitlement_quantity = 21
         Payment.signature_manager.bulk_update_with_signature([payment], ["entitlement_quantity"])
         payment.refresh_from_db()
-        self.assertNotEqual(payment.signature_hash, old_signature)
-        self.assertEqual(payment.signature_hash, self.calculate_hash_manually(payment))
+        assert payment.signature_hash != old_signature
+        assert payment.signature_hash == self.calculate_hash_manually(payment)
 
     def test_bulk_create(self) -> None:
         pp: PaymentPlan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN, created_by=self.user)
@@ -111,7 +111,7 @@ class TestPaymentSignature(APITestCase):
         (payment,) = Payment.signature_manager.bulk_create_with_signature([Payment(**creation_dict)])
         create_payment_plan_snapshot_data(pp)
         payment.refresh_from_db()
-        self.assertEqual(payment.signature_hash, self.calculate_hash_manually(payment))
+        assert payment.signature_hash == self.calculate_hash_manually(payment)
 
     @freeze_time("2020-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
@@ -160,15 +160,15 @@ class TestPaymentSignature(APITestCase):
             ],
         }
 
-        input_data = dict(
-            business_area_slug="afghanistan",
-            name="paymentPlanName",
-            program_cycle_id=program_cycle_id,
-            targeting_criteria=targeting_criteria,
-            excluded_ids="TEST_INVALID_ID_01, TEST_INVALID_ID_02",
-            fsp_id=encode_id_base64(fsp.id, "FinancialServiceProvider"),
-            delivery_mechanism_code=dm_cash.code,
-        )
+        input_data = {
+            "business_area_slug": "afghanistan",
+            "name": "paymentPlanName",
+            "program_cycle_id": program_cycle_id,
+            "targeting_criteria": targeting_criteria,
+            "excluded_ids": "TEST_INVALID_ID_01, TEST_INVALID_ID_02",
+            "fsp_id": encode_id_base64(fsp.id, "FinancialServiceProvider"),
+            "delivery_mechanism_code": dm_cash.code,
+        }
 
         with mock.patch("hct_mis_api.apps.payment.services.payment_plan_services.prepare_payment_plan_task"):
             pp = PaymentPlanService.create(
@@ -176,14 +176,14 @@ class TestPaymentSignature(APITestCase):
             )
 
         pp.refresh_from_db()
-        self.assertEqual(pp.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_PENDING)
+        assert pp.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_PENDING
 
         prepare_payment_plan_task(str(pp.id))
         pp.refresh_from_db()
 
-        self.assertEqual(pp.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_OK)
+        assert pp.build_status == PaymentPlan.BuildStatus.BUILD_STATUS_OK
 
         payment1 = pp.payment_items.all()[0]
         payment2 = pp.payment_items.all()[1]
-        self.assertEqual(payment1.signature_hash, self.calculate_hash_manually(payment1))
-        self.assertEqual(payment2.signature_hash, self.calculate_hash_manually(payment2))
+        assert payment1.signature_hash == self.calculate_hash_manually(payment1)
+        assert payment2.signature_hash == self.calculate_hash_manually(payment2)

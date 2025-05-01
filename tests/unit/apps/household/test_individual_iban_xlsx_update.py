@@ -228,10 +228,10 @@ class TestIndividualXlsxUpdate(TestCase):
 
         bank_account_info_0 = self.individuals[0].bank_account_info.first()
         bank_account_info_1 = self.individuals[1].bank_account_info.first()
-        self.assertEqual(bank_account_info_0.bank_account_number, "1111111111")
-        self.assertEqual(bank_account_info_0.bank_name, "Super Bank")
-        self.assertEqual(bank_account_info_1.bank_account_number, "2222222222")
-        self.assertEqual(bank_account_info_1.bank_name, "Bank")
+        assert bank_account_info_0.bank_account_number == "1111111111"
+        assert bank_account_info_0.bank_name == "Super Bank"
+        assert bank_account_info_1.bank_account_number == "2222222222"
+        assert bank_account_info_1.bank_name == "Bank"
 
     @mock.patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")

@@ -51,7 +51,7 @@ def sql_drop_tables(connection: Any, connection_name: str = "") -> str:
         return ""
     tables_sql = ", ".join(connection.ops.quote_name(table) for table in tables)
     sql = f"DROP TABLE IF EXISTS {tables_sql} CASCADE;"
-    return "\n".join(["BEGIN;", sql, "COMMIT;"])
+    return f"BEGIN;\n{sql}\nCOMMIT;"
 
 
 def drop_databases() -> None:
@@ -59,10 +59,9 @@ def drop_databases() -> None:
         if connection_name == "read_only":
             continue
         connection = connections[connection_name]
-        print(f"dropping tables for {connection_name}")
         with connection.cursor() as cursor:
             sql = sql_drop_tables(connection)
-            print(sql)
             if not sql:
                 continue
             return cursor.execute(sql)
+    return None

@@ -187,7 +187,7 @@ class TestFilterIndividualsByProgram(APITestCase):
             {"full_name": "TEST User", "given_name": "TEST", "family_name": "User", "registration_data_import": rdi},
         )
         individual = individuals[0]
-        self.assertEqual(individual.full_name, "TEST User")
+        assert individual.full_name == "TEST User"
 
         rdi_id_str = encode_id_base64_required(rdi.id, "RegistrationDataImport")
         headers = {
@@ -218,7 +218,7 @@ class TestFilterIndividualsByProgram(APITestCase):
             {"full_name": "TEST User", "given_name": "TEST", "family_name": "User", "registration_data_import": rdi},
         )
         individual = individuals[0]
-        self.assertEqual(individual.full_name, "TEST User")
+        assert individual.full_name == "TEST User"
 
         headers = {
             "Business-Area": self.business_area.slug,

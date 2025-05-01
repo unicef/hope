@@ -1,6 +1,4 @@
-
 Dear HOPE user,
-the {{report_type}} report that you requested on {{created_at}} has been
-generated. Please go to {{report_url}} to
+the {{ report_type }} report that you requested on {{ created_at }} has been
+generated. Please go to {{ report_url }} to
 download it.
-

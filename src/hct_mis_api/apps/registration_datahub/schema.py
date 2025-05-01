@@ -1,5 +1,5 @@
 import json
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import graphene
 from graphene import relay
@@ -26,12 +26,12 @@ class ImportedDocumentNode(DjangoObjectType):
     country = graphene.String(description="Document country")
     photo = graphene.String(description="Photo url")
 
-    def resolve_country(parent, info: Any) -> str:
-        return getattr(parent.country, "name", "")
+    def resolve_country(self, info: Any) -> str:
+        return getattr(self.country, "name", "")
 
-    def resolve_photo(parent, info: Any) -> Optional[str]:
-        if parent.photo:
-            return parent.photo.url
+    def resolve_photo(self, info: Any) -> str | None:
+        if self.photo:
+            return self.photo.url
         return None
 
     class Meta:
@@ -84,7 +84,7 @@ class ImportDataNode(DjangoObjectType):
         interfaces = (relay.Node,)
 
     @staticmethod
-    def resolve_xlsx_validation_errors(parent: ImportData, info: Any) -> List[str]:
+    def resolve_xlsx_validation_errors(parent: ImportData, info: Any) -> list[str]:
         errors = []
         if parent.validation_errors:
             errors.extend(json.loads(parent.validation_errors))
@@ -99,10 +99,10 @@ class KoboImportDataNode(DjangoObjectType):
         filter_fields = []
         interfaces = (relay.Node,)
 
-    def resolve_kobo_validation_errors(parrent, info: Any) -> List[str]:
-        if not parrent.validation_errors:
+    def resolve_kobo_validation_errors(self, info: Any) -> list[str]:
+        if not self.validation_errors:
             return []
-        return json.loads(parrent.validation_errors)
+        return json.loads(self.validation_errors)
 
 
 class ImportedDocumentTypeNode(DjangoObjectType):
@@ -117,8 +117,8 @@ class Query(graphene.ObjectType):
     deduplication_batch_status_choices = graphene.List(ChoiceObject)
     deduplication_golden_record_status_choices = graphene.List(ChoiceObject)
 
-    def resolve_deduplication_batch_status_choices(self, info: Any) -> List[Dict[str, Any]]:
+    def resolve_deduplication_batch_status_choices(self, info: Any) -> list[dict[str, Any]]:
         return to_choice_object(DEDUPLICATION_BATCH_STATUS_CHOICE)
 
-    def resolve_deduplication_golden_record_status_choices(self, info: Any) -> List[Dict[str, Any]]:
+    def resolve_deduplication_golden_record_status_choices(self, info: Any) -> list[dict[str, Any]]:
         return to_choice_object(DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE)

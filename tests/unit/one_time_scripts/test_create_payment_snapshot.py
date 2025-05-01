@@ -66,8 +66,8 @@ class TestMigratePaymentSnapShot(TestCase):
             )
 
     def test_create_payment_snapshot(self) -> None:
-        self.assertEqual(PaymentHouseholdSnapshot.objects.all().count(), 0)
+        assert PaymentHouseholdSnapshot.objects.all().count() == 0
 
         create_payment_snapshot()
 
-        self.assertEqual(PaymentHouseholdSnapshot.objects.all().count(), 2)
+        assert PaymentHouseholdSnapshot.objects.all().count() == 2

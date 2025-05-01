@@ -45,8 +45,8 @@ class RegistrationDataImportViewSetTest(HOPEApiTestCase):
         )
         resp = self.client.post(url, {}, format="json")
 
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(resp.data, {"message": "Deduplication process started"})
+        assert resp.status_code == status.HTTP_200_OK
+        assert resp.data == {"message": "Deduplication process started"}
         mock_deduplication_engine_process.assert_called_once_with(str(self.program.id))
 
 
@@ -68,5 +68,5 @@ class WebhookDeduplicationViewTest(HOPEApiTestCase):
         view = WebhookDeduplicationView.as_view()
         response = view(request, business_area=self.program.business_area.id, program_id=self.program.id)
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         mock_fetch_dedup_results.assert_called_once_with(self.program.deduplication_set_id)

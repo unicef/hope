@@ -45,7 +45,7 @@ class TestCeleryUtils(TestCase):
         }
         formatted_tasks = list(format_tasks(tasks_dict, "queued"))
 
-        self.assertEqual(len(formatted_tasks), 2)
+        assert len(formatted_tasks) == 2
 
         expected_payload = [
             {
@@ -63,4 +63,4 @@ class TestCeleryUtils(TestCase):
                 "status": "queued",
             },
         ]
-        self.assertEqual(formatted_tasks, expected_payload)
+        assert formatted_tasks == expected_payload

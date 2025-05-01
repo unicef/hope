@@ -87,15 +87,15 @@ class TestEnrollHouseholdsToProgramTask(TestCase):
         cls.individual2_repr_in_target_program = individuals2_repr[0]
 
     def test_enroll_households_to_program_task(self) -> None:
-        self.assertEqual(self.program_target.households.count(), 1)
-        self.assertEqual(self.program_target.individuals.count(), 1)
-        self.assertEqual(self.program_source.households.count(), 2)
-        self.assertEqual(self.program_source.individuals.count(), 2)
+        assert self.program_target.households.count() == 1
+        assert self.program_target.individuals.count() == 1
+        assert self.program_source.households.count() == 2
+        assert self.program_source.individuals.count() == 2
 
-        self.assertIsNone(self.household1.household_collection)
+        assert self.household1.household_collection is None
 
-        self.assertEqual(Household.objects.filter(unicef_id=self.household1.unicef_id).count(), 1)
-        self.assertEqual(Household.objects.filter(unicef_id=self.household2.unicef_id).count(), 2)
+        assert Household.objects.filter(unicef_id=self.household1.unicef_id).count() == 1
+        assert Household.objects.filter(unicef_id=self.household2.unicef_id).count() == 2
 
         enroll_households_to_program_task(
             households_ids=[self.household1.id, self.household2.id],
@@ -105,22 +105,22 @@ class TestEnrollHouseholdsToProgramTask(TestCase):
         self.household1.refresh_from_db()
         self.household2.refresh_from_db()
 
-        self.assertEqual(self.program_target.households.count(), 2)
-        self.assertEqual(self.program_target.individuals.count(), 2)
-        self.assertEqual(self.program_source.households.count(), 2)
-        self.assertEqual(self.program_source.individuals.count(), 2)
+        assert self.program_target.households.count() == 2
+        assert self.program_target.individuals.count() == 2
+        assert self.program_source.households.count() == 2
+        assert self.program_source.individuals.count() == 2
 
-        self.assertIsNotNone(self.household1.household_collection)
+        assert self.household1.household_collection is not None
 
-        self.assertEqual(Household.objects.filter(unicef_id=self.household1.unicef_id).count(), 2)
-        self.assertEqual(Household.objects.filter(unicef_id=self.household2.unicef_id).count(), 2)
+        assert Household.objects.filter(unicef_id=self.household1.unicef_id).count() == 2
+        assert Household.objects.filter(unicef_id=self.household2.unicef_id).count() == 2
         enrolled_household = Household.objects.filter(
             program=self.program_target, unicef_id=self.household1.unicef_id
         ).first()
-        self.assertEqual(
-            enrolled_household.individuals_and_roles.filter(role=ROLE_PRIMARY).first().individual.unicef_id,
-            self.individual.unicef_id,
+        assert (
+            enrolled_household.individuals_and_roles.filter(role=ROLE_PRIMARY).first().individual.unicef_id
+            == self.individual.unicef_id
         )
-        self.assertEqual(enrolled_household.individuals.first().documents.count(), 1)
-        self.assertEqual(enrolled_household.individuals.first().identities.count(), 1)
-        self.assertEqual(enrolled_household.individuals.first().bank_account_info.count(), 1)
+        assert enrolled_household.individuals.first().documents.count() == 1
+        assert enrolled_household.individuals.first().identities.count() == 1
+        assert enrolled_household.individuals.first().bank_account_info.count() == 1
