@@ -119,4 +119,4 @@ class TestPaymentPlanModel(TestCase):
         self.assertEqual(TargetingIndividualBlockRuleFilter.objects.first().arguments, [1, 99])
 
         self.assertEqual(TargetingCollectorBlockRuleFilter.objects.first().field_name, "mobile_phone_number__test_data")
-        self.assertEqual(TargetingCollectorBlockRuleFilter.objects.first().arguments, ["Yes"])
+        self.assertEqual(TargetingCollectorBlockRuleFilter.objects.first().arguments, [True])
