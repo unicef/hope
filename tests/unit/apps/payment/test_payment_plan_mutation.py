@@ -308,7 +308,7 @@ class TestPaymentPlanMutation(APITestCase):
             collector_block_filters=col_block,
             comparison_method="EQUALS",
             field_name="delivery_data_field__random_name",
-            arguments=["Yes"],
+            arguments=[True],
         )
 
         payment_plan = PaymentPlanFactory(

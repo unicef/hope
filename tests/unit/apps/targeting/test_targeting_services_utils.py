@@ -69,7 +69,7 @@ class TestPaymentPlanModel(TestCase):
                             "collector_block_filters": [
                                 {
                                     "comparison_method": "EQUALS",
-                                    "arguments": ["Yes"],
+                                    "arguments": [True],
                                     "field_name": "mobile_phone_number__test_data",
                                     "flex_field_classification": "NOT_FLEX_FIELD",
                                 },
