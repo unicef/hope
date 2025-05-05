@@ -112,6 +112,19 @@ class HouseholdSimpleSerializer(serializers.ModelSerializer):
         )
 
 
+class IndividualSimpleSerializer(serializers.ModelSerializer):
+    household = HouseholdSimpleSerializer()
+
+    class Meta:
+        model = Individual
+        fields = (
+            "id",
+            "unicef_id",
+            "full_name",
+            "household",
+        )
+
+
 class IndividualRoleInHouseholdSerializer(serializers.ModelSerializer):
     household = HouseholdSimpleSerializer()
 
