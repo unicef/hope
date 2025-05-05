@@ -134,7 +134,7 @@ class HouseholdGlobalViewSet(
     ListModelMixin,
     BaseViewSet,
 ):
-    queryset = Household.all_merge_status_objects.all()
+    queryset = Household.all_merge_status_objects.exclude(status=Program.DRAFT).all()
     serializer_classes_by_action = {
         "list": HouseholdListSerializer,
         "choices": HouseholdChoicesSerializer,
@@ -206,7 +206,7 @@ class IndividualGlobalViewSet(
     ListModelMixin,
     BaseViewSet,
 ):
-    queryset = Individual.all_merge_status_objects.all()
+    queryset = Individual.all_merge_status_objects.exclude(status=Program.DRAFT).all()
     serializer_classes_by_action = {
         "list": IndividualListSerializer,
         "choices": IndividualChoicesSerializer,
