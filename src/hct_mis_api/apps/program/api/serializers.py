@@ -307,7 +307,7 @@ class ProgramDetailSerializer(AdminUrlSerializerMixin, ProgramListSerializer):
         return PartnerForProgramSerializer(partners_qs, many=True).data
 
 
-class ProgramSimpleSerializer(serializers.ModelSerializer):
+class ProgramSmallSerializer(serializers.ModelSerializer):
     class Meta:
         model = Program
         fields = (
@@ -315,4 +315,14 @@ class ProgramSimpleSerializer(serializers.ModelSerializer):
             "programme_code",
             "slug",
             "name",
+            "status",
+        )
+
+
+class ProgramCycleSmallSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProgramCycle
+        fields = (
+            "id",
+            "title",
         )

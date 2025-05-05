@@ -6,6 +6,7 @@ from time import sleep
 from typing import Any
 
 from django.conf import settings
+from django.core.cache import cache
 
 import pytest
 from _pytest.config import Config
@@ -188,3 +189,8 @@ def _teardown_test_elasticsearch(suffix: str) -> None:
 
     for doc in registry.get_documents():
         doc._index._name = pattern.sub("", doc._index._name)
+
+
+@pytest.fixture(autouse=True)
+def clear_cache_before_each_test() -> None:
+    cache.clear()

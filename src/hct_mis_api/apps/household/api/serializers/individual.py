@@ -1,16 +1,26 @@
-from typing import Dict
+import uuid
+from datetime import date
+from typing import Dict, Optional
 
+from dateutil.parser import parse
+from dateutil.relativedelta import relativedelta
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
-from rest_framework.fields import SerializerMethodField
+from rest_framework.utils.serializer_helpers import ReturnDict
 
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.utils import resolve_flex_fields_choices_to_string
+from hct_mis_api.apps.core.utils import (
+    decode_id_string,
+    resolve_flex_fields_choices_to_string,
+)
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.api.serializers.registration_data_import import (
     RegistrationDataImportSerializer,
 )
 from hct_mis_api.apps.household.models import (
+    DUPLICATE,
+    DUPLICATE_IN_BATCH,
     ROLE_NO_ROLE,
     BankAccountInfo,
     Document,
@@ -54,6 +64,15 @@ class DocumentSerializer(serializers.ModelSerializer):
             "type",
             "country",
             "document_number",
+        )
+
+
+class IndividualSmallSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Individual
+        fields = (
+            "id",
+            "unicef_id",
         )
 
 
@@ -147,19 +166,141 @@ class LinkedGrievanceTicketSerializer(serializers.ModelSerializer):
         )
 
 
+class DeduplicationResultSerializer(serializers.Serializer):
+    unicef_id = serializers.SerializerMethodField()
+    hit_id = serializers.CharField()
+    full_name = serializers.CharField()
+    score = serializers.FloatField()
+    proximity_to_score = serializers.FloatField()
+    location = serializers.SerializerMethodField()
+    age = serializers.SerializerMethodField()
+    duplicate = serializers.SerializerMethodField()
+    distinct = serializers.SerializerMethodField()
+
+    def get_unicef_id(self, obj: dict) -> str:
+        hit_id = obj.get("hit_id")
+        # If hit_id is a valid UUID string, use it directly as the PK
+        try:
+            uuid.UUID(hit_id)
+            pk = hit_id
+        except (ValueError, TypeError):
+            # otherwise decode the opaque ID
+            pk = decode_id_string(hit_id)
+        individual = Individual.all_objects.get(id=pk)
+        return str(individual.unicef_id)
+
+    def get_location(self, obj: dict) -> str:
+        return obj.get("location", "Not provided")
+
+    def get_age(self, obj: dict) -> Optional[int]:
+        dob = obj.get("dob")
+        if not dob:
+            return None
+        birth = parse(dob)
+        return relativedelta(date.today(), birth).years
+
+    def get_duplicate(self, obj: dict) -> bool:
+        return bool(obj.get("duplicate", False))
+
+    def get_distinct(self, obj: dict) -> bool:
+        return bool(obj.get("distinct", False))
+
+
+class DeduplicationEngineSimilarityPairIndividualSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    photo = serializers.SerializerMethodField()
+    full_name = serializers.CharField()
+    unicef_id = serializers.CharField()
+    similarity_score = serializers.FloatField()
+    age = serializers.IntegerField()
+    location = serializers.CharField()
+
+    def get_photo(self, obj: dict) -> str:
+        individual = Individual.all_objects.filter(id=obj.get("id")).first()
+        return individual.photo.url if individual and individual.photo else None
+
+
 class IndividualListSerializer(serializers.ModelSerializer):
     household = HouseholdSimpleSerializer()
-    role = SerializerMethodField()
+    relationship_display = serializers.CharField(source="get_relationship_display")
+    role = serializers.SerializerMethodField()
+    deduplication_batch_status_display = serializers.CharField(source="get_deduplication_batch_status_display")
+    biometric_deduplication_batch_status_display = serializers.CharField(
+        source="get_biometric_deduplication_batch_status_display"
+    )
+
+    deduplication_batch_results = serializers.SerializerMethodField()
+    biometric_deduplication_batch_results = serializers.SerializerMethodField()
+
+    deduplication_golden_record_status_display = serializers.CharField(
+        source="get_deduplication_golden_record_status_display"
+    )
+    biometric_deduplication_golden_record_status_display = serializers.CharField(
+        source="get_biometric_deduplication_golden_record_status_display"
+    )
+
+    deduplication_golden_record_results = serializers.SerializerMethodField()
+    biometric_deduplication_golden_record_results = serializers.SerializerMethodField()
 
     class Meta:
         model = Individual
-        fields = ("id", "unicef_id", "full_name", "household", "status", "relationship", "age", "sex", "role")
+        fields = (
+            "id",
+            "unicef_id",
+            "full_name",
+            "household",
+            "status",
+            "relationship",
+            "age",
+            "sex",
+            "role",
+            "relationship_display",
+            "birth_date",
+            "deduplication_batch_status",
+            "deduplication_batch_status_display",
+            "biometric_deduplication_batch_status",
+            "biometric_deduplication_batch_status_display",
+            "deduplication_batch_results",
+            "biometric_deduplication_batch_results",
+            "deduplication_golden_record_status",
+            "deduplication_golden_record_status_display",
+            "biometric_deduplication_golden_record_status",
+            "biometric_deduplication_golden_record_status_display",
+            "deduplication_golden_record_results",
+            "biometric_deduplication_golden_record_results",
+        )
 
     def get_role(self, obj: Individual) -> str:
         role = obj.households_and_roles(manager="all_objects").filter(household=obj.household).first()
         if role:
             return role.get_role_display()
         return "-"
+
+    @extend_schema_field(DeduplicationResultSerializer(many=True))
+    def get_deduplication_batch_results(self, obj: Individual) -> ReturnDict:
+        key = "duplicates" if obj.deduplication_batch_status == DUPLICATE_IN_BATCH else "possible_duplicates"
+        results = obj.deduplication_batch_results.get(key, {})
+        serializer = DeduplicationResultSerializer(results, many=True, context=self.context)
+        return serializer.data
+
+    @extend_schema_field(DeduplicationEngineSimilarityPairIndividualSerializer(many=True))
+    def get_biometric_deduplication_batch_results(self, obj: Individual) -> ReturnDict:
+        results = obj.biometric_deduplication_batch_results
+        serializer = DeduplicationEngineSimilarityPairIndividualSerializer(results, many=True, context=self.context)
+        return serializer.data
+
+    @extend_schema_field(DeduplicationResultSerializer(many=True))
+    def get_deduplication_golden_record_results(self, obj: Individual) -> ReturnDict:
+        key = "duplicates" if obj.deduplication_golden_record_status == DUPLICATE else "possible_duplicates"
+        results = obj.deduplication_golden_record_results.get(key, {})
+        serializer = DeduplicationResultSerializer(results, many=True, context=self.context)
+        return serializer.data
+
+    @extend_schema_field(DeduplicationEngineSimilarityPairIndividualSerializer(many=True))
+    def get_biometric_deduplication_golden_record_results(self, obj: Individual) -> ReturnDict:
+        results = obj.biometric_deduplication_golden_record_results
+        serializer = DeduplicationEngineSimilarityPairIndividualSerializer(results, many=True, context=self.context)
+        return serializer.data
 
 
 class IndividualDetailSerializer(serializers.ModelSerializer):
@@ -212,7 +353,9 @@ class IndividualDetailSerializer(serializers.ModelSerializer):
             "delivery_mechanisms_data",
             "email",
             "phone_no",
+            "phone_no_valid",
             "phone_no_alternative",
+            "phone_no_alternative_valid",
             "sanction_list_last_check",
             "wallet_name",
             "blockchain_name",

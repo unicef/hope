@@ -242,7 +242,7 @@ class TestRegistrationDataImportViews:
 
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 14
+            assert len(ctx.captured_queries) == 16
 
         # Test that reoccurring requests use cached data
         with CaptureQueriesContext(connection) as ctx:
@@ -264,7 +264,7 @@ class TestRegistrationDataImportViews:
 
             etag_call_after_update = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 8  # less than the first call because of cached permissions
+            assert len(ctx.captured_queries) == 10  # less than the first call because of cached permissions
 
             assert etag_call_after_update != etag
 

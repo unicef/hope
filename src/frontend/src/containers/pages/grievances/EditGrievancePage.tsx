@@ -97,7 +97,7 @@ const BoxWithBottomBorders = styled.div`
 const EditGrievancePage = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { baseUrl, businessArea, isAllPrograms, programId } = useBaseUrl();
+  const { baseUrl, businessAreaSlug, programSlug, isAllPrograms } = useBaseUrl();
   const { selectedProgram, isSocialDctType } = useProgramContext();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
@@ -117,11 +117,11 @@ const EditGrievancePage = (): ReactElement => {
 
   const { data: currentUserData, isLoading: currentUserDataLoading } = useQuery(
     {
-      queryKey: ['profile', businessArea, programId],
+      queryKey: ['profile', businessAreaSlug, programSlug],
       queryFn: () => {
-        return RestService.restUsersProfileRetrieve({
-          businessAreaSlug: businessArea,
-          programSlug: programId === 'all' ? undefined : programId,
+        return RestService.restBusinessAreasUsersProfileRetrieve({
+          businessAreaSlug,
+          program: programSlug === 'all' ? undefined : programSlug,
         });
       },
     },
@@ -145,7 +145,7 @@ const EditGrievancePage = (): ReactElement => {
     useAllProgramsForChoicesQuery({
       variables: {
         first: 100,
-        businessArea,
+        businessArea:businessAreaSlug,
       },
     });
   const individualFieldsDict = useArrayToDict(
@@ -280,7 +280,7 @@ const EditGrievancePage = (): ReactElement => {
       initialValues={initialValues}
       onSubmit={async (values) => {
         try {
-          const { variables } = prepareVariables(businessArea, values, ticket);
+          const { variables } = prepareVariables(businessAreaSlug, values, ticket);
           await mutate({
             variables,
             refetchQueries: () => [

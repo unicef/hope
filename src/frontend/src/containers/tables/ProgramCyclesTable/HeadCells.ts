@@ -27,7 +27,7 @@ export const headCells: HeadCell<ProgramCycle>[] = [
     dataCy: 'head-cell-total-entitled-quantity',
   },
   {
-    id: 'start_date',
+    id: 'startDate',
     numeric: false,
     disablePadding: false,
     label: 'Start Date',

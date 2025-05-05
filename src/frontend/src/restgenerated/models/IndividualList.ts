@@ -2,11 +2,17 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { BiometricDeduplicationBatchStatusEnum } from './BiometricDeduplicationBatchStatusEnum';
+import type { BiometricDeduplicationGoldenRecordStatusEnum } from './BiometricDeduplicationGoldenRecordStatusEnum';
+import type { DeduplicationBatchStatusEnum } from './DeduplicationBatchStatusEnum';
+import type { DeduplicationEngineSimilarityPairIndividual } from './DeduplicationEngineSimilarityPairIndividual';
+import type { DeduplicationGoldenRecordStatusEnum } from './DeduplicationGoldenRecordStatusEnum';
+import type { DeduplicationResult } from './DeduplicationResult';
 import type { HouseholdSimple } from './HouseholdSimple';
 import type { RelationshipEnum } from './RelationshipEnum';
 import type { SexEnum } from './SexEnum';
 export type IndividualList = {
-    id: string;
+    readonly id: string;
     unicefId?: string | null;
     /**
      * Full Name of the Beneficiary
@@ -50,5 +56,56 @@ export type IndividualList = {
      */
     sex: SexEnum;
     readonly role: string;
+    relationshipDisplay: string;
+    /**
+     * Beneficiary date of birth
+     */
+    birthDate: string;
+    /**
+     * Deduplication batch status [sys]
+     *
+     * * `DUPLICATE_IN_BATCH` - Duplicate in batch
+     * * `NOT_PROCESSED` - Not Processed
+     * * `SIMILAR_IN_BATCH` - Similar in batch
+     * * `UNIQUE_IN_BATCH` - Unique in batch
+     */
+    deduplicationBatchStatus?: DeduplicationBatchStatusEnum;
+    deduplicationBatchStatusDisplay: string;
+    /**
+     * Deduplication batch status [sys]
+     *
+     * * `DUPLICATE_IN_BATCH` - Duplicate in batch
+     * * `NOT_PROCESSED` - Not Processed
+     * * `SIMILAR_IN_BATCH` - Similar in batch
+     * * `UNIQUE_IN_BATCH` - Unique in batch
+     */
+    biometricDeduplicationBatchStatus?: BiometricDeduplicationBatchStatusEnum;
+    biometricDeduplicationBatchStatusDisplay: string;
+    readonly deduplicationBatchResults: Array<DeduplicationResult>;
+    readonly biometricDeduplicationBatchResults: Array<DeduplicationEngineSimilarityPairIndividual>;
+    /**
+     * Deduplication golden record status [sys]
+     *
+     * * `DUPLICATE` - Duplicate
+     * * `NEEDS_ADJUDICATION` - Needs Adjudication
+     * * `NOT_PROCESSED` - Not Processed
+     * * `POSTPONE` - Postpone
+     * * `UNIQUE` - Unique
+     */
+    deduplicationGoldenRecordStatus?: DeduplicationGoldenRecordStatusEnum;
+    deduplicationGoldenRecordStatusDisplay: string;
+    /**
+     * Deduplication golden record status [sys]
+     *
+     * * `DUPLICATE` - Duplicate
+     * * `NEEDS_ADJUDICATION` - Needs Adjudication
+     * * `NOT_PROCESSED` - Not Processed
+     * * `POSTPONE` - Postpone
+     * * `UNIQUE` - Unique
+     */
+    biometricDeduplicationGoldenRecordStatus?: BiometricDeduplicationGoldenRecordStatusEnum;
+    biometricDeduplicationGoldenRecordStatusDisplay: string;
+    readonly deduplicationGoldenRecordResults: Array<DeduplicationResult>;
+    readonly biometricDeduplicationGoldenRecordResults: Array<DeduplicationEngineSimilarityPairIndividual>;
 };
 
