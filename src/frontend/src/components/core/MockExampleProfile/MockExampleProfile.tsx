@@ -4,14 +4,14 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const MockExampleProfile = () => {
-  const { businessArea, programId } = useBaseUrl();
+  const { businessAreaSlug, programSlug } = useBaseUrl();
 
   const { data: meData, isLoading: meLoading } = useQuery({
-    queryKey: ['profile', businessArea, programId],
+    queryKey: ['profile', businessAreaSlug, programSlug],
     queryFn: () => {
-      return RestService.restUsersProfileRetrieve({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
+      return RestService.restBusinessAreasUsersProfileRetrieve({
+        businessAreaSlug: businessAreaSlug,
+        program: programSlug,
       });
     },
   });

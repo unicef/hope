@@ -13,7 +13,7 @@ import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { headCells } from './LookUpHouseholdTableHeadCells';
 import { LookUpHouseholdTableRow } from './LookUpHouseholdTableRow';
-import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { PaginatedHouseholdListList } from '@restgenerated/models/PaginatedHouseholdListList';
 
 interface LookUpHouseholdTableProps {
   businessArea: string;
@@ -80,19 +80,29 @@ export function LookUpHouseholdTable({
       withdrawn: matchWithdrawnValue(),
       rdiMergeStatus: HouseholdRdiMergeStatus.Merged,
     };
-  }, [businessArea, programId, filter]);
+  }, [
+    businessArea,
+    programId,
+    filter.householdSizeMin,
+    filter.householdSizeMax,
+    filter.search,
+    filter.documentType,
+    filter.documentNumber,
+    filter.admin1,
+    filter.admin2,
+    filter.residenceStatus,
+    filter.withdrawn,
+  ]);
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
-  useEffect(() => {
-    setQueryVariables(initialQueryVariables);
-  }, [initialQueryVariables]);
+  useEffect(() => {}, [initialQueryVariables]);
 
   const {
     data: dataHouseholdsProgram,
     isLoading: isLoadingHouseholdsProgram,
     error: errorHouseholdsProgram,
-  } = useQuery({
+  } = useQuery<PaginatedHouseholdListList>({
     queryKey: [
       'businessAreasProgramsHouseholdsList',
       queryVariables,
@@ -108,7 +118,7 @@ export function LookUpHouseholdTable({
     data: dataHouseholdsAllPrograms,
     isLoading: isLoadingHouseholdsAllPrograms,
     error: errorHouseholdsAllPrograms,
-  } = useQuery({
+  } = useQuery<PaginatedHouseholdListList>({
     queryKey: [
       'businessAreasHouseholdsList',
       queryVariables,
@@ -202,11 +212,11 @@ export function LookUpHouseholdTable({
 
   const renderTable = (): ReactElement => (
     <UniversalRestTable
-      renderRow={(row) =>
+      renderRow={(row: PaginatedHouseholdListList['results'][number]) =>
         row ? (
           <LookUpHouseholdTableRow
-            key={(row as any).id}
-            household={row as HouseholdDetail}
+            key={row.id}
+            household={row}
             radioChangeHandler={handleRadioChange}
             selectedHousehold={selectedHousehold}
             choicesData={choicesData}

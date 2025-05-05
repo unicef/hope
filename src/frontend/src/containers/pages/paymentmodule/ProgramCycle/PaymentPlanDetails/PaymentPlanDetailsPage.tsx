@@ -11,58 +11,66 @@ import { PermissionDenied } from '@core/PermissionDenied';
 import {
   PaymentPlanBackgroundActionStatus,
   PaymentPlanStatus,
-  usePaymentPlanQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
 import { isPermissionDeniedError } from '@utils/utils';
-import { ReactElement, useEffect } from 'react';
+import { ReactElement } from 'react';
 import { useParams } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import PaymentsTable from '@containers/tables/paymentmodule/PaymentsTable/PaymentsTable';
 import { AcceptanceProcess } from '@components/paymentmodulepeople/PaymentPlanDetails/AcceptanceProcess';
 import { Entitlement } from '@components/paymentmodulepeople/PaymentPlanDetails/Entitlement';
 import ExcludeSection from '@components/paymentmodule/PaymentPlanDetails/ExcludeSection/ExcludeSection';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import FundsCommitmentSection from '@components/paymentmodule/PaymentPlanDetails/FundsCommitment/FundsCommitmentSection';
 
 const PaymentPlanDetailsPage = (): ReactElement => {
   const { paymentPlanId } = useParams();
   const permissions = usePermissions();
-  const { baseUrl, businessArea } = useBaseUrl();
-  const { data, loading, startPolling, stopPolling, error } =
-    usePaymentPlanQuery({
-      variables: {
+  const { baseUrl, businessArea, programId } = useBaseUrl();
+  const {
+    data: paymentPlan,
+    isLoading,
+    error,
+  } = useQuery<PaymentPlanDetail>({
+    queryKey: ['paymentPlan', businessArea, paymentPlanId, programId],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlansRetrieve({
+        businessAreaSlug: businessArea,
         id: paymentPlanId,
-      },
-      fetchPolicy: 'network-only',
-    });
+        programSlug: programId,
+      }),
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      if (
+        data?.status === PaymentPlanStatus.Preparing ||
+        (data?.backgroundActionStatus !== null &&
+          data?.backgroundActionStatus !==
+            PaymentPlanBackgroundActionStatus.ExcludeBeneficiariesError)
+      ) {
+        return 3000;
+      }
 
-  const status = data?.paymentPlan?.status;
-  const backgroundActionStatus = data?.paymentPlan?.backgroundActionStatus;
+      return false;
+    },
+    refetchIntervalInBackground: true,
+  });
 
-  useEffect(() => {
-    if (
-      PaymentPlanStatus.Preparing === status ||
-      (backgroundActionStatus !== null &&
-        backgroundActionStatus !==
-          PaymentPlanBackgroundActionStatus.ExcludeBeneficiariesError)
-    ) {
-      startPolling(3000);
-    } else {
-      stopPolling();
-    }
-    return stopPolling;
-  }, [status, backgroundActionStatus, startPolling, stopPolling]);
-
-  if (loading && !data) return <LoadingComponent />;
-  if (permissions === null || !data) return null;
+  if (isLoading) return <LoadingComponent />;
+  if (permissions === null || !paymentPlan) return null;
 
   if (
     !hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions) ||
     isPermissionDeniedError(error)
   )
     return <PermissionDenied />;
+  if (!paymentPlan) return null;
+
+  const { status } = paymentPlan;
 
   const shouldDisplayEntitlement =
     status !== PaymentPlanStatus.Open && status !== PaymentPlanStatus.Accepted;
@@ -73,9 +81,6 @@ const PaymentPlanDetailsPage = (): ReactElement => {
     status === PaymentPlanStatus.Finished;
 
   const shouldDisplayFundsCommitment = status === PaymentPlanStatus.InReview;
-
-  const { paymentPlan } = data;
-  if (!paymentPlan) return null;
 
   return (
     <Box display="flex" flexDirection="column">

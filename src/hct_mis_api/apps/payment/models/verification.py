@@ -126,6 +126,7 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
 
     @property
     def has_xlsx_payment_verification_plan_file(self) -> bool:
+        # TODO: what if we have two or more files here ?<?>?
         return all(
             [
                 self.verification_channel == self.VERIFICATION_CHANNEL_XLSX,

@@ -1,24 +1,25 @@
-import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
-import styled from 'styled-components';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
-import { IndividualPhotoModal } from '@components/population/IndividualPhotoModal';
-import { RegistrationIndividualBioData } from '@components/rdi/details/individual/RegistrationIndividualBioData/RegistrationIndividualBioData';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RegistrationIndividualAdditionalRegistrationInformation } from '@components/rdi/details/individual/RegistrationIndividualAdditionalRegistrationInformation/RegistrationIndividualAdditionalRegistrationInformation';
-import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { usePermissions } from '@hooks/usePermissions';
-import { isPermissionDeniedError } from '@utils/utils';
+import { RegistrationIndividualBioData } from '@components/rdi/details/individual/RegistrationIndividualBioData/RegistrationIndividualBioData';
 import {
-  IndividualNode,
   useAllIndividualsFlexFieldsAttributesQuery,
   useHouseholdChoiceDataQuery,
-  useIndividualQuery,
 } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { isPermissionDeniedError } from '@utils/utils';
 import { ReactElement } from 'react';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
+import styled from 'styled-components';
+import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 
 const Container = styled.div`
   padding: 20px;
@@ -33,25 +34,33 @@ const PeopleRegistrationDetailsPage = (): ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
+  const { businessArea, programId } = useBaseUrl();
 
-  const { data: flexFieldsData, loading: flexFieldsDataLoading } =
-    useAllIndividualsFlexFieldsAttributesQuery();
-  const { data, loading, error } = useIndividualQuery({
-    variables: {
-      id,
-    },
-    fetchPolicy: 'cache-and-network',
-  });
+  const {
+    data: flexFieldsData,
+    loading: flexFieldsDataLoading,
+    error,
+  } = useAllIndividualsFlexFieldsAttributesQuery();
+  const { data: individual, isLoading: loadingIndividual } =
+    useQuery<IndividualDetail>({
+      queryKey: ['businessAreaProgramIndividual', businessArea, programId, id],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsIndividualsRetrieve({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          id: id,
+        }),
+    });
+
   const { data: choicesData, loading: choicesLoading } =
     useHouseholdChoiceDataQuery();
 
-  if (loading || choicesLoading || flexFieldsDataLoading)
+  if (loadingIndividual || choicesLoading || flexFieldsDataLoading)
     return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
-  if (!data || !choicesData || !flexFieldsData || permissions === null)
+  if (!individual || !choicesData || !flexFieldsData || permissions === null)
     return null;
 
-  const { individual } = data;
   const breadCrumbsItems: BreadCrumbsItem[] = [
     ...(hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions)
       ? [
@@ -73,9 +82,10 @@ const PeopleRegistrationDetailsPage = (): ReactElement => {
         title={`${t('Individual ID')}: ${individual.importId}`}
         breadCrumbs={breadCrumbsItems}
       >
-        {individual.photo ? (
-          <IndividualPhotoModal individual={individual as IndividualNode} />
-        ) : null}
+        {/* //TODO: add individual photo */}
+        {/* {individual.photo ? (
+          <IndividualPhotoModal individual={individual} />
+        ) : null} */}
       </PageHeader>
       <Container>
         <RegistrationIndividualBioData

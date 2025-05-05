@@ -11,13 +11,19 @@ import DeleteProgramCycle from '@containers/tables/ProgramCycle/DeleteProgramCyc
 import EditProgramCycle from '@containers/tables/ProgramCycle/EditProgramCycle';
 import { useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { fetchProgramCycles } from '@api/programCycleApi';
+import {
+  fetchProgramCycles,
+  PaginatedListResponse,
+  ProgramCycle,
+} from '@api/programCycleApi';
 import { BlackLink } from '@core/BlackLink';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { Status791Enum } from '@restgenerated/models/Status791Enum';
 import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
+import { CountResponse } from '@restgenerated/models/CountResponse';
+import { RestService } from '@restgenerated/services/RestService';
 
 interface ProgramCyclesTableProgramDetailsProps {
   program: ProgramDetail;
@@ -26,22 +32,32 @@ interface ProgramCyclesTableProgramDetailsProps {
 export const ProgramCyclesTableProgramDetails = ({
   program,
 }: ProgramCyclesTableProgramDetailsProps) => {
+  const { businessArea, baseUrl, programId } = useBaseUrl();
   const [queryVariables, setQueryVariables] = useState({
     offset: 0,
     limit: 5,
     ordering: 'created_at',
+    businessAreaSlug: businessArea,
+    programSlug: programId,
   });
-  const { businessArea, baseUrl, programId } = useBaseUrl();
   const permissions = usePermissions();
   const canCreateProgramCycle =
     program.status === Status791Enum.ACTIVE &&
     hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_CREATE, permissions);
 
-  const { data, error, isLoading } = useQuery({
+  const { data, error, isLoading } = useQuery<
+    PaginatedListResponse<ProgramCycle>
+  >({
     queryKey: ['programCycles', businessArea, program.id, queryVariables],
     queryFn: async () => {
       return fetchProgramCycles(businessArea, program.id, queryVariables);
     },
+  });
+
+  const { data: dataProgramCyclesCount } = useQuery<CountResponse>({
+    queryKey: ['businessAreasProgramsCyclesCountRetrieve', queryVariables],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsCyclesCountRetrieve(queryVariables),
   });
 
   const canViewDetails = programId !== 'all';
@@ -133,6 +149,7 @@ export const ProgramCyclesTableProgramDetails = ({
       title="Programme Cycles"
       renderRow={renderRow}
       headCells={headCells}
+      itemsCount={dataProgramCyclesCount?.count}
       data={data}
       error={error}
       isLoading={isLoading}

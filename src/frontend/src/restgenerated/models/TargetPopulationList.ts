@@ -11,5 +11,14 @@ export type TargetPopulationList = {
     readonly status: string;
     createdBy?: string;
     readonly createdAt: string;
+    /**
+     * Total Households Count [sys]
+     */
+    totalHouseholdsCount?: number;
+    /**
+     * Total Individuals Count [sys]
+     */
+    totalIndividualsCount?: number;
+    readonly updatedAt: string;
 };
 

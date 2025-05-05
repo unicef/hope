@@ -404,9 +404,7 @@ function CreateFeedbackPage(): ReactElement {
                                 </Grid>
                                 <Grid size={{ xs: 6 }}>
                                   <LabelizedField
-                                    label={t(
-                                      `${beneficiaryGroup?.groupLabel}`,
-                                    )}
+                                    label={t(`${beneficiaryGroup?.groupLabel}`)}
                                   >
                                     {values.selectedHousehold?.unicefId}
                                   </LabelizedField>

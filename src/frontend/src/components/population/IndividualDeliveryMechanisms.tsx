@@ -1,18 +1,18 @@
 import { DividerLine } from '@components/core/DividerLine';
-import { IndividualNode } from '@generated/graphql';
-import { Grid2 as Grid, Paper, Typography } from '@mui/material';
-import { Title } from '@core/Title';
-import { t } from 'i18next';
-import React, { FC } from 'react';
-import styled from 'styled-components';
 import { LabelizedField } from '@components/core/LabelizedField';
-import { renderSomethingOrDash } from '@utils/utils';
+import { Title } from '@core/Title';
 import { usePermissions } from '@hooks/usePermissions';
+import { Grid2 as Grid, Paper, Typography } from '@mui/material';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import { renderSomethingOrDash } from '@utils/utils';
+import { t } from 'i18next';
+import { FC } from 'react';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { useProgramContext } from 'src/programContext';
+import styled from 'styled-components';
 
 interface IndividualDeliveryMechanismsProps {
-  individual: IndividualNode;
+  individual: IndividualDetail;
 }
 
 const Overview = styled(Paper)`

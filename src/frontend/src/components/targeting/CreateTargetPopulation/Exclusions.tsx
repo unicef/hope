@@ -25,7 +25,6 @@ function Exclusions({
   const { isSocialDctType } = useProgramContext();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-
   return (
     <PaperContainer>
       <Box display="flex" justifyContent="space-between">

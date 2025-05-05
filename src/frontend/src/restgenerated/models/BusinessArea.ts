@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type BusinessArea = {
-    id: string;
+    readonly id: string;
     name: string;
     code: string;
     longName: string;

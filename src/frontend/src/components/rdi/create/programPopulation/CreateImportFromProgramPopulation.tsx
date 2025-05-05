@@ -16,6 +16,7 @@ import * as Yup from 'yup';
 import { ScreenBeneficiaryField } from '../ScreenBeneficiaryField';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 
 export const CreateImportFromProgramPopulationForm = ({
   setSubmitForm,
@@ -62,11 +63,11 @@ export const CreateImportFromProgramPopulationForm = ({
     first: 100,
   };
 
-  const { data: programsData, isLoading: programsDataLoading } = useQuery({
-    queryKey: ['businessAreasProgramsList', queryVariables, businessArea],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsList({ ...queryVariables }),
-  });
+  const { data: programsData, isLoading: programsDataLoading } =
+    useQuery<PaginatedProgramListList>({
+      queryKey: ['businessAreasProgramsList', queryVariables],
+      queryFn: () => RestService.restBusinessAreasProgramsList(queryVariables),
+    });
 
   const onSubmit = async (values): Promise<void> => {
     setSubmitDisabled(true);

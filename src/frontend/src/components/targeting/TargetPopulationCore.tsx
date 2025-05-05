@@ -63,7 +63,7 @@ export const TargetPopulationCore = ({
   );
 
   const recordInfo =
-    targetPopulation.buildStatus === PaymentPlanBuildStatus.Ok ? (
+    targetPopulation.backgroundActionStatus === PaymentPlanBuildStatus.Ok ? (
       recordsTable
     ) : (
       <PaperContainer>
@@ -76,6 +76,7 @@ export const TargetPopulationCore = ({
         </Label>
       </PaperContainer>
     );
+  console.log('targetPopulation', targetPopulation);
 
   return (
     <>
