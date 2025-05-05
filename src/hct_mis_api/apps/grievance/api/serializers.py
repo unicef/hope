@@ -14,7 +14,8 @@ from hct_mis_api.apps.household.models import (
     Household,
     Individual,
 )
-from hct_mis_api.apps.program.api.serializers import ProgramSimpleSerializer
+from hct_mis_api.apps.payment.services.payment_gateway import PaymentSerializer
+from hct_mis_api.apps.program.api.serializers import ProgramSmallSerializer
 
 
 class GrievanceTicketSimpleSerializer(serializers.ModelSerializer):
@@ -97,7 +98,7 @@ class GrievanceTicketListSerializer(serializers.ModelSerializer):
         )
 
     def get_programs(self, obj: GrievanceTicket) -> Dict:
-        return ProgramSimpleSerializer(obj.programs.order_by("created_at").all(), many=True).data
+        return ProgramSmallSerializer(obj.programs.order_by("created_at").all(), many=True).data
 
     def get_related_tickets(self, obj: GrievanceTicket) -> Dict:
         return GrievanceTicketSimpleSerializer(obj._related_tickets.order_by("created_at").all(), many=True).data
@@ -106,7 +107,7 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
     partner = PartnerSerializer()
     postpone_deduplication = serializers.BooleanField(source="business_area.postpone_deduplication")
     individual = IndividualSimpleSerializer(source="ticket_details.individual", allow_null=True)
-    payment_record = serializers.SerializerMethodField()  # TODO
+    payment_record = serializers.SerializerMethodField()
     # TODO: all the ticket_detail types
     linked_tickets = serializers.SerializerMethodField()
     existing_tickets = serializers.SerializerMethodField()
@@ -131,6 +132,14 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
             "ticket_notes",
         )
 
+    def get_payment_record(self, obj: GrievanceTicket) -> Dict:
+        payment_verification = getattr(obj.ticket_details, "payment_verification", None)
+        if payment_verification:
+            payment_record = getattr(payment_verification, "payment", None)
+        else:
+            payment_record = getattr(obj.ticket_details, "payment", None)
+        return PaymentSerializer(payment_record).data
+
     def get_linked_tickets(self, obj: GrievanceTicket) -> Dict:
         return GrievanceTicketSimpleSerializer(obj._linked_tickets.order_by("created_at").all(), many=True).data
 
@@ -139,3 +148,4 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
 
     def get_documentation(self, obj: GrievanceTicket) -> Dict:
         return GrievanceDocumentSerializer(obj.support_documents.order_by("created_at").all(), many=True).data
+
