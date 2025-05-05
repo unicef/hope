@@ -124,7 +124,7 @@ class ProgramMixin:
             .get_queryset()
             .filter(
                 **{
-                    f"{self.program_model_field}__slug": self.program_slug,
+                    f"{self.program_model_field}__slug__in": [self.program_slug],
                     f"{self.program_model_field}__business_area__slug": self.business_area_slug,
                 }
             )
@@ -177,12 +177,12 @@ class BusinessAreaVisibilityMixin(BusinessAreaMixin):
         user = self.request.user
         program_ids = user.get_program_ids_for_permissions_in_business_area(
             self.business_area.id,
-            self.PERMISSIONS,
+            self.get_permissions_for_action(),
         )
 
         filter_q = Q()
         for program_id in (
-            Program.objects.filter(id__in=program_ids).exclude(status=Program.DRAFT).values_list("id", flat=True)
+            Program.objects.filter(id__in=program_ids).values_list("id", flat=True)
         ):
             program_q = Q(program_id=program_id)
             areas_null = Q(**{f"{field}__isnull": True for field in self.admin_area_model_fields})
@@ -234,6 +234,14 @@ class CustomSerializerMixin:
 class BaseViewSet(GenericViewSet):
     permission_classes: list = [BaseRestPermission]
     PERMISSIONS: list = []
+
+    def get_permissions_for_action(self) -> Any:
+        if hasattr(self, "permissions_by_action"):
+            if self.action in self.permissions_by_action:
+                return self.permissions_by_action[self.action]
+            elif self.action == "count":
+                return self.permissions_by_action["list"]
+        return self.PERMISSIONS
 
 
 class AdminUrlSerializerMixin:
