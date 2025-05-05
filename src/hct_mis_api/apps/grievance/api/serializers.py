@@ -5,7 +5,8 @@ from rest_framework import serializers
 from hct_mis_api.apps.account.api.serializers import UserSerializer, PartnerSerializer
 from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
 from hct_mis_api.apps.geo.api.serializers import AreaListSerializer
-from hct_mis_api.apps.grievance.models import GrievanceTicket, GrievanceDocument, TicketNote
+from hct_mis_api.apps.grievance.models import GrievanceTicket, GrievanceDocument, TicketNote, \
+    TicketHouseholdDataUpdateDetails, TicketIndividualDataUpdateDetails
 from hct_mis_api.apps.household.api.serializers.individual import (
     HouseholdSimpleSerializer,
     LinkedGrievanceTicketSerializer, IndividualSimpleSerializer,
@@ -74,7 +75,7 @@ class GrievanceTicketListSerializer(serializers.ModelSerializer):
     user_modified = UserSerializer()
     related_tickets = serializers.SerializerMethodField()
     class Meta:
-        model = Household
+        model = GrievanceTicket
         fields = (
             "id",
             "unicef_id",
@@ -102,6 +103,33 @@ class GrievanceTicketListSerializer(serializers.ModelSerializer):
 
     def get_related_tickets(self, obj: GrievanceTicket) -> Dict:
         return GrievanceTicketSimpleSerializer(obj._related_tickets.order_by("created_at").all(), many=True).data
+
+
+class HouseholdDataUpdateTicketDetailSerializer(serializers.ModelSerializer):
+    pass
+
+
+class IndividualDataUpdateTicketDetailSerializer(serializers.ModelSerializer):
+    pass
+
+
+class AddIndividualTicketDetailSerializer(serializers.ModelSerializer):
+    pass
+
+class DeleteIndividualTicketDetailSerializer(serializers.ModelSerializer):
+    pass
+
+class DeleteHouseholdTicketDetailSerializer(serializers.ModelSerializer):
+    pass
+
+class SystemFlaggingTicketDetailSerializer(serializers.ModelSerializer):
+    pass
+
+class PaymentVerificationTicketDetailSerializer(serializers.ModelSerializer):
+    pass
+
+class NeedsAdjudicationTicketDetailSerializer(serializers.ModelSerializer):
+    pass
 
 class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketListSerializer):
     partner = PartnerSerializer()
@@ -148,4 +176,3 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
 
     def get_documentation(self, obj: GrievanceTicket) -> Dict:
         return GrievanceDocumentSerializer(obj.support_documents.order_by("created_at").all(), many=True).data
-
