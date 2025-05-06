@@ -22,7 +22,6 @@ services:
       - POSTGRES_PASS=postgres
       - PGUSER=postgres
       - POSTGRES_HOST_AUTH_METHOD=trust
-      - POSTGRES_SSL_MODE=off
     ports:
       - "5433:5432"
 
